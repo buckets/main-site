@@ -23,3 +23,7 @@ def test_create_user(api):
     assert user['_pin'] is None
     assert user['last_login'] is None
 
+def test_unique_email(api):
+    api.create_user('hal@hal.com', 'hal')
+    with pytest.raises(Exception):
+        api.create_user('hal@hal.com', 'diffname')

@@ -1,6 +1,7 @@
 from flask import Flask, request, session, redirect
 from buckets.model import authProtectedAPI
 
+
 app = Flask(__name__)
 
 
@@ -9,6 +10,7 @@ def configureApp(engine, flask_secret_key, debug=False):
     app.secret_key = flask_secret_key
     app.debug = debug
     app._unbound_api = authProtectedAPI(engine)
+    return app
 
 
 @app.before_request
@@ -22,7 +24,7 @@ def put_user_on_request():
 
 @app.route('/')
 def index():
-    if request.user:
+    if request.user_id:
         return redirect('/app')
     else:
         return redirect('/hi')
