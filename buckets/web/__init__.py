@@ -40,7 +40,7 @@ def index():
         return redirect('/hi')
 
 
-from buckets.web import app, frame, budget
+from buckets.web import app, frame, farm
 f.register_blueprint(frame.blue, url_prefix='/hi')
-f.register_blueprint(budget.blue, url_prefix='/farm/<int:farm_id>')
+f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>')
 f.register_blueprint(app.blue, url_prefix='/app')

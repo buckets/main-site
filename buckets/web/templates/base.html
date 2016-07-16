@@ -1,3 +1,8 @@
+{%- macro navlink(arg) -%}
+{% set href = url_for(arg, **kwargs) %}
+href="{{ href }}" class="{{ 'active' if href == request.path }}"
+{%- endmacro -%}
+
 <!DOCTYPE html>
 <html>
 <head>

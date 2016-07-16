@@ -31,8 +31,11 @@ header .navlinks {
     justify-content: space-between;
 }
 header .navlinks a {
-    padding-right: 1rem;
+    padding: 0.25rem 1rem;
     text-decoration: none;
+}
+header .navlinks a.active {
+    color: rgba(231, 76, 60,1.0);
 }
 header .user {
 

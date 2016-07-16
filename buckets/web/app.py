@@ -12,7 +12,7 @@ def index():
         # in the future, redirect to last used
         return redirect(url_for('.farms'))
     else:
-        return redirect(url_for('budget.index', farm_id=farms[0]['id']))
+        return redirect(url_for('farm.index', farm_id=farms[0]['id']))
 
 @blue.route('/farms', methods=['GET'])
 def farms():

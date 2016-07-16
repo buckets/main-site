@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block navlinks %}
+<a {{ navlink('.summary') }}>Summary</a>
+<a {{ navlink('.accounts') }}>Accounts</a>
+<a {{ navlink('.buckets') }}>Buckets</a>
+<a {{ navlink('.transactions') }}>Transactions</a>
+<a {{ navlink('.reports') }}>Reports</a>
+{% endblock %}
+
+{% block content %}
+Hello?
+{% endblock %}
