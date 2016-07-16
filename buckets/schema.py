@@ -25,7 +25,7 @@ patches['init'] = [
     '''CREATE TABLE user_ (
         id serial primary key,
         created timestamp default current_timestamp,
-        email text,
+        email text unique,
         email_verified boolean default 'f',
         name text,
         last_login timestamp,
