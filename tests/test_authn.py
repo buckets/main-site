@@ -3,12 +3,12 @@ This module tests functions that register and authenticate users.
 """
 
 import pytest
-from buckets.authn import NoAuthUser
+from buckets.authn import UserManagement
 
 
 @pytest.fixture
 def api(engine):
-    return NoAuthUser(engine)
+    return UserManagement(engine)
 
 
 def test_create_user(api):
@@ -32,3 +32,19 @@ def test_unique_lowercase_email(api):
     api.create_user('randall@hal.com', 'hal')
     with pytest.raises(Exception):
         api.create_user('RAnDALL@hal.com', 'diffname')
+
+def test_get_user(api):
+    created = api.create_user('bob@bob.com', 'bob')
+    fetched = api.get_user(created['id'])
+    assert fetched == created
+
+def test_create_farm(api):
+    user = api.create_user('farmer@farm.com', 'farmer')
+    farm = api.create_farm(user['id'], 'name')
+    assert farm['id'] is not None
+    assert farm['created'] is not None
+    assert farm['name'] == 'name'
+    assert farm['creator_id'] == user['id']
+    assert len(farm['users']) == 1
+    assert farm['users'][0]['id'] == user['id']
+    assert farm['users'][0]['name'] == user['name']

@@ -7,6 +7,9 @@ body, html {
     padding: 0;
     margin: 0;
 }
+a {
+    color: rgba(52, 152, 219,1.0);
+}
 .body-wrap {
     display: flex;
     flex-direction: column;
@@ -22,8 +25,17 @@ header {
     border-bottom: 1px solid lightgrey;
     margin-bottom: 0.5rem;
 }
-header > * {
-    flex-grow: 1;
+header .navlinks {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+header .navlinks a {
+    padding-right: 1rem;
+    text-decoration: none;
+}
+header .user {
+
 }
 .flash-messages {
     padding: 0 0.5rem;

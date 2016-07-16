@@ -12,7 +12,7 @@ def index():
 def register():
     name = request.values['name']
     email = request.values['email']
-    user = request.api.anon.create_user(email=email, name=name)
+    user = request.api.user.create_user(email=email, name=name)
     flash('You are registered!')
     
     # sign in

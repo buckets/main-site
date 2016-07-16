@@ -1,8 +1,8 @@
-from buckets.authn import NoAuthUser
+from buckets.authn import UserManagement
 from buckets.authz import BindableMultiAuth
 
 
 def authProtectedAPI(engine):
     api = BindableMultiAuth()
-    api.registerPolicy('anon', NoAuthUser(engine).policy)
+    api.registerPolicy('user', UserManagement(engine).policy)
     return api

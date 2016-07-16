@@ -8,7 +8,12 @@
   <div class="body-wrap">
     {% block header %}
     <header>
+      <div class="navlinks">
+      {% block navlinks %}
       <a href="/">Home</a>
+      {% endblock %}
+      </div>
+      <div class="user">{{ g.user.name }}</div>
     </header>
     {% endblock %}
     <div class="flash-messages">

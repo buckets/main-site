@@ -17,11 +17,24 @@ User = Table('user_', metadata,
     Column('intro_completed', Boolean),
     Column('_pin', String),
 )
+Farm = Table('farm', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('creator_id', Integer),
+    Column('name', String),
+)
+UserFarm = Table('user_farm_join', metadata,
+    Column('user_id', Integer, primary_key=True),
+    Column('farm_id', Integer, primary_key=True),
+)
 
 
 PATCH_TABLE = '_schema_version'
 patches = OrderedDict()
 patches['init'] = [
+    #-------------------------------------
+    # user_
+    #-------------------------------------
     '''CREATE TABLE user_ (
         id serial primary key,
         created timestamp default current_timestamp,
@@ -35,6 +48,21 @@ patches['init'] = [
     )''',
     '''CREATE UNIQUE INDEX user_lower_email_idx
         ON user_(lower(email))''',
+
+    #-------------------------------------
+    # farm
+    #-------------------------------------
+    '''CREATE TABLE farm (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        creator_id integer,
+        name text
+    )''',
+    '''CREATE TABLE user_farm_join (
+        user_id integer,
+        farm_id integer,
+        primary key(user_id, farm_id)
+    )''',
 ]
 
 

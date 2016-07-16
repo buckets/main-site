@@ -1,4 +1,4 @@
-from flask import Flask, request, session, redirect
+from flask import Flask, session, redirect, g
 from buckets.model import authProtectedAPI
 
 
@@ -15,16 +15,20 @@ def configureApp(engine, flask_secret_key, debug=False):
 
 @app.before_request
 def put_user_on_request():
-    request.user_id = session.get('user_id', None)
     auth_context = {}
-    if request.user_id:
-        auth_context['user_id'] = request.user_id
-    request.api = app._unbound_api.bindContext(auth_context)
+    g.user = {}
+
+    user_id = session.get('user_id', None)
+    if user_id:
+        auth_context['user_id'] = user_id
+    g.api = app._unbound_api.bindContext(auth_context)
+    if user_id:
+        g.user = g.api.user.get_user(id=user_id)
 
 
 @app.route('/')
 def index():
-    if request.user_id:
+    if g.user_id:
         return redirect('/app')
     else:
         return redirect('/hi')
