@@ -15,6 +15,7 @@ class NoAuthUser(object):
 
     @policy.allow(anything)
     def create_user(self, email, name):
+        email = email.lower()
         r = self.engine.execute(User.insert()
             .values(email=email, name=name)
             .returning(User))

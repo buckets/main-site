@@ -27,3 +27,8 @@ def test_unique_email(api):
     api.create_user('hal@hal.com', 'hal')
     with pytest.raises(Exception):
         api.create_user('hal@hal.com', 'diffname')
+
+def test_unique_lowercase_email(api):
+    api.create_user('randall@hal.com', 'hal')
+    with pytest.raises(Exception):
+        api.create_user('RAnDALL@hal.com', 'diffname')

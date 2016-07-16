@@ -25,7 +25,7 @@ patches['init'] = [
     '''CREATE TABLE user_ (
         id serial primary key,
         created timestamp default current_timestamp,
-        email text unique,
+        email text,
         email_verified boolean default 'f',
         name text,
         last_login timestamp,
@@ -33,6 +33,8 @@ patches['init'] = [
         intro_completed boolean default 'f',
         _pin text
     )''',
+    '''CREATE UNIQUE INDEX user_lower_email_idx
+        ON user_(lower(email))''',
 ]
 
 
