@@ -2,13 +2,23 @@
 This module tests functions that register and authenticate users.
 """
 
+import uuid
 import pytest
 from buckets.authn import UserManagement
+
+
 
 
 @pytest.fixture
 def api(engine):
     return UserManagement(engine)
+
+@pytest.fixture
+def mkuser(api):
+    def func():
+        return api.create_user('{0}@test.com'.format(uuid.uuid4()),
+            'test')
+    return func
 
 
 def test_create_user(api):
@@ -38,8 +48,8 @@ def test_get_user(api):
     fetched = api.get_user(created['id'])
     assert fetched == created
 
-def test_create_farm(api):
-    user = api.create_user('farmer@farm.com', 'farmer')
+def test_create_farm(api, mkuser):
+    user = mkuser()
     farm = api.create_farm(user['id'], 'name')
     assert farm['id'] is not None
     assert farm['created'] is not None
@@ -48,3 +58,18 @@ def test_create_farm(api):
     assert len(farm['users']) == 1
     assert farm['users'][0]['id'] == user['id']
     assert farm['users'][0]['name'] == user['name']
+
+def test_list_farms(api, mkuser):
+    user = mkuser()
+    farm = api.create_farm(user['id'])
+    farms = api.list_farms(user['id'])
+    assert len(farms) == 1
+    assert farm in farms
+
+def test_create_farm_default_name(api, mkuser):
+    user = mkuser()
+    farm = api.create_farm(user['id'])
+    assert farm['name'] == 'Family'
+
+
+

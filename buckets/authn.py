@@ -31,7 +31,7 @@ class UserManagement(object):
         return dict(row)
 
     @policy.allow(anything)
-    def create_farm(self, creator_id, name):
+    def create_farm(self, creator_id, name='Family'):
         with self.engine.begin() as conn:
             r = conn.execute(Farm.insert()
                 .values(name=name, creator_id=creator_id)
@@ -42,6 +42,7 @@ class UserManagement(object):
                 .values(farm_id=farm_id, user_id=creator_id))
         return self.get_farm(farm_id)
 
+    @policy.allow(anything)
     def get_farm(self, id):
         r = self.engine.execute(
             select([Farm])
@@ -54,3 +55,13 @@ class UserManagement(object):
                 UserFarm.c.farm_id == id)))
         farm['users'] = [dict(x) for x in r.fetchall()]
         return farm
+
+    @policy.allow(anything)
+    def list_farms(self, user_id):
+        r = self.engine.execute(
+            select([Farm.c.id])
+            .where(and_(
+                Farm.c.id == UserFarm.c.farm_id,
+                UserFarm.c.user_id == user_id)))
+        farm_ids = [x[0] for x in r.fetchall()]
+        return [self.get_farm(x) for x in farm_ids]

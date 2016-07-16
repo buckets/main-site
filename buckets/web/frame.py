@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, flash
+from flask import Blueprint, render_template, request, session, flash, g
 from flask import redirect
 
 blue = Blueprint('frame', __name__)
@@ -12,7 +12,8 @@ def index():
 def register():
     name = request.values['name']
     email = request.values['email']
-    user = request.api.user.create_user(email=email, name=name)
+    user = g.api.user.create_user(email=email, name=name)
+    g.api.user.create_farm(creator_id=user['id'])
     flash('You are registered!')
     
     # sign in
