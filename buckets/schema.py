@@ -29,6 +29,16 @@ UserFarm = Table('user_farm_join', metadata,
 )
 
 
+Account = Table('account', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('farm_id', Integer),
+    Column('name', String),
+    Column('balance', Integer),
+    Column('currency', String),
+)
+
+
 PATCH_TABLE = '_schema_version'
 patches = OrderedDict()
 patches['init'] = [
@@ -62,6 +72,18 @@ patches['init'] = [
         user_id integer,
         farm_id integer,
         primary key(user_id, farm_id)
+    )''',
+
+    #-------------------------------------
+    # account
+    #-------------------------------------
+    '''CREATE TABLE account (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        farm_id integer,
+        name text,
+        balance integer default '0',
+        currency varchar(3) default 'USD'
     )''',
 ]
 

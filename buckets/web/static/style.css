@@ -18,12 +18,12 @@ a {
     margin: 0 auto;
 }
 header {
-    padding: 0.5rem;
+    padding: .5rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     border-bottom: 1px solid lightgrey;
-    margin-bottom: 0.5rem;
+    margin-bottom: .5rem;
 }
 header .navlinks {
     display: flex;
@@ -31,27 +31,69 @@ header .navlinks {
     justify-content: space-between;
 }
 header .navlinks a {
-    padding: 0.25rem 1rem;
+    padding: .25rem 1rem;
     text-decoration: none;
+}
+header .navlinks a:first-child {
+    padding-left: 0;
 }
 header .navlinks a.active {
     color: rgba(231, 76, 60,1.0);
 }
 header .user {
-
+    padding: .25rem 0 .25rem 1rem;
 }
 .flash-messages {
-    padding: 0 0.5rem;
+    padding: 0 .5rem;
 }
 .flash-messages .message {
     background-color: rgba(52, 152, 219, 0.2);
     border-radius: 2px;
-    padding: 0.75rem;
+    padding: .75rem;
 }
 .main-content {
     flex-grow: 1;
-    padding: 0 0.5rem;
+    padding: 0 .5rem;
 }
 footer {
-    padding: 0.5rem;
+    padding: .5rem;
+}
+
+
+h1,h2,h3,h4,h5,h6 {
+    font-weight: normal;
+}
+
+
+table {
+    border-collapse: collapse;
+}
+th {
+    text-align: left;
+    vertical-align: bottom;
+    background-color: rgba(52, 152, 219,1.0);
+    color: white;
+    font-weight: bold;
+}
+td {
+    text-align: left;
+    vertical-align: top;
+}
+table.spaced th,
+table.spaced td {
+    padding: .5rem 1rem;
+}
+table.spaced td {
+    border: 1px solid lightgrey;
+    border-width: 0 0 1px 0;
+}
+tr.subtotal th,
+tr.subtotal td {
+    border-top: 3px solid rgba(52, 152, 219,1.0);
+    text-transform: uppercase;
+    color: rgba(52, 152, 219,1.0);
+}
+
+.negative {
+    color: rgba(231, 76, 60,1.0);
 }

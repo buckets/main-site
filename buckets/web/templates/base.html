@@ -15,7 +15,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     <header>
       <div class="navlinks">
       {% block navlinks %}
-      <a href="/">Home</a>
+      <a href="/" class="logo">Home</a>
       {% endblock %}
       </div>
       <div class="user">{{ g.user.name }}</div>
