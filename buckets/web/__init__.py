@@ -11,10 +11,11 @@ def configureApp(engine, flask_secret_key, debug=False):
     f.engine = engine
     f.config.update(
         DEBUG=debug,
-        TEMPLATES_AUTO_RELOAD=debug,
+        #TEMPLATES_AUTO_RELOAD=debug,
         SECRET_KEY=flask_secret_key)
     if debug:
         f.jinja_env.cache_size = 0
+        f.jinja_env.auto_reload = True
     f._unbound_api = authProtectedAPI(engine)
     return f
 

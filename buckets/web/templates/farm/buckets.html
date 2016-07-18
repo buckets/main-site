@@ -3,14 +3,20 @@
 {% block content %}
 
 <script type="text/babel">
+var Number = React.createClass({
+  render: function() {
+    var value = this.props.value;
+    return (<span className="number">{value}</span>)
+  }
+})
 var BucketRow = React.createClass({
   render: function() {
     return (
       <tr>
         <td>{this.props.bucket.name}</td>
-        <td>{this.props.bucket.balance}</td>
-        <td></td>
-        <td>{this.props.bucket.deposit}</td>
+        <td><Number value={this.props.bucket.balance} /></td>
+        <td><input type="text" /></td>
+        <td><Number value={this.props.bucket.deposit} /></td>
         <td></td>
         <td><a href="">Edit</a></td>
       </tr>
@@ -37,6 +43,14 @@ var BucketTable = React.createClass({
         <tbody>
           {bucket_rows}
         </tbody>
+        <tr className="subtotal">
+          <td>Total</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
       </table>
     );
   }
