@@ -43,6 +43,7 @@ def accounts():
 
 @blue.route('/buckets', methods=['GET', 'POST'])
 def buckets():
+    print 'in /buckets'
     if request.method == 'POST':
         name = request.values['name']
         g.farm.create_bucket(name=name)

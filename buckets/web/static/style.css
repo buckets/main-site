@@ -55,7 +55,7 @@ header .user {
 }
 .main-content {
     flex-grow: 1;
-    padding: 0 .5rem;
+    padding: 0;
 }
 footer {
     padding: .5rem;
@@ -81,9 +81,13 @@ table {
 table.ledger th {
     text-align: left;
     vertical-align: bottom;
-    background-color: rgba(52, 152, 219,1.0);
+    /*background-color: rgba(52, 152, 219,1.0);
     color: white;
-    font-weight: bold;
+    font-weight: bold;*/
+
+    border-bottom: 3px solid rgba(52, 152, 219,1.0);
+    color: rgba(52, 152, 219,1.0);
+    font-weight: normal;
 }
 table.ledger td {
     text-align: left;

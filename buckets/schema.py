@@ -53,6 +53,15 @@ Bucket = Table('bucket', metadata,
     Column('deposit', Integer),
     Column('color', String),
 )
+BucketTrans = Table('bucket_transaction', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('posted', DateTime),
+    Column('bucket_id', Integer),
+    Column('amount', Integer),
+    Column('memo', String),
+    Column('account_transaction_id', Integer),
+)
 
 
 PATCH_TABLE = '_schema_version'
@@ -120,7 +129,48 @@ patches['init'] = [
         end_date date,
         deposit integer,
         color text
-    )'''
+    )''',
+    '''CREATE TABLE bucket_transaction (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        posted timestamp default current_timestamp,
+        bucket_id integer,
+        amount integer,
+        memo text,
+        account_transaction_id integer
+    )''',
+    '''CREATE FUNCTION update_bucket_balance() RETURNS trigger AS $update_bucket_balance$
+        BEGIN
+            IF (TG_OP = 'DELETE') THEN
+                UPDATE bucket
+                    SET balance = (balance - OLD.amount)
+                    WHERE id = OLD.bucket_id;
+                RETURN OLD;
+            ELSIF (TG_OP = 'UPDATE') THEN
+                UPDATE bucket
+                    SET balance = (balance - OLD.amount)
+                    WHERE id = OLD.bucket_id;
+                UPDATE bucket
+                    SET balance = (balance + NEW.amount)
+                    WHERE id = NEW.bucket_id;
+                RETURN NEW;
+            ELSIF (TG_OP = 'INSERT') THEN
+                UPDATE bucket
+                    SET balance = (balance + NEW.amount)
+                    WHERE id = NEW.bucket_id;
+                RETURN NEW;
+            END IF;
+            RETURN NULL;
+        END;
+    $update_bucket_balance$ LANGUAGE plpgsql''',
+    '''CREATE TRIGGER update_bucket_balance
+    AFTER
+        INSERT
+        OR UPDATE OF amount, bucket_id
+        OR DELETE
+    ON bucket_transaction
+    FOR EACH ROW EXECUTE PROCEDURE update_bucket_balance();
+    ''',
 ]
 
 

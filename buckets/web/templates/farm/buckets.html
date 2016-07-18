@@ -2,25 +2,76 @@
 
 {% block content %}
 
+<script type="text/babel">
+var BucketRow = React.createClass({
+  render: function() {
+    return (
+      <tr>
+        <td>{this.props.bucket.name}</td>
+        <td>{this.props.bucket.balance}</td>
+        <td></td>
+        <td>{this.props.bucket.deposit}</td>
+        <td></td>
+        <td><a href="">Edit</a></td>
+      </tr>
+    )
+  }
+});
+var BucketTable = React.createClass({
+  render: function() {
+    var bucket_rows = this.props.buckets.map(function(bucket) {
+      return (
+        <BucketRow bucket={bucket}></BucketRow>
+      );
+    })
+    return (
+      <table className="ledger" width="100%">
+        <tr>
+          <th>Bucket</th>
+          <th>Balance</th>
+          <th>Deposit</th>
+          <th>Monthly Deposit</th>
+          <th>Goal</th>
+          <th>Edit</th>
+        </tr>
+        <tbody>
+          {bucket_rows}
+        </tbody>
+      </table>
+    );
+  }
+});
+var buckets = {{ buckets|tojson|safe }};
+renderHere(<BucketTable buckets={buckets}/>);
+</script>
+
 {% if buckets %}
-<table class="ledger">
+<table class="ledger" width="100%">
   <tr>
     <th>Bucket</th>
     <th>Balance</th>
+    <th>Deposit</th>
     <th>Monthly Deposit</th>
+    <th>Goal</th>
+    <th>Edit</th>
   </tr>
   {% for bucket in buckets %}
   <tr>
     <td>{{ bucket.name }}</td>
     <td class="right {{ 'negative' if bucket.balance < 0 }}">{{ bucket.balance|money }}</td>
+    <td><input type="text"></td>
     <td class="right">{{ bucket.deposit|money }}</td>
+    <td></td>
+    <td><a href="">Edit</a></td>
   </tr>
   {% endfor %}
-  {% if accounts %}
-  {% set total = accounts|sum(attribute='balance') %}
+  {% if buckets %}
+  {% set total = buckets|sum(attribute='balance') %}
   <tr class="subtotal">
     <td>Total</td>
     <td class="right {{ 'negative' if total < 0 }}">{{ total|money }}</td>
+    <td></td>
+    <td class="right"></td>
   </tr>
   {% endif %}
 </table>

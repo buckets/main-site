@@ -1,6 +1,6 @@
 from sqlalchemy import select, and_
 
-from buckets.schema import Account, Bucket
+from buckets.schema import Account, Bucket, BucketTrans
 from buckets.authz import AuthPolicy, anything
 
 
@@ -102,4 +102,18 @@ class BudgetManagement(object):
         r = self.engine.execute(select([Bucket])
             .where(Bucket.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
+
+    @policy.allow(anything)
+    def bucket_transact(self, bucket_id, amount, memo='', posted=None):
+        values = {
+            'bucket_id': bucket_id,
+            'amount': amount,
+            'memo': memo,
+        }
+        if posted:
+            values['posted'] = posted
+        r = self.engine.execute(BucketTrans.insert()
+            .values(**values)
+            .returning(BucketTrans))
+        return dict(r.fetchone())
 

@@ -9,8 +9,12 @@ f.jinja_env.filters.update(all_filters)
 
 def configureApp(engine, flask_secret_key, debug=False):
     f.engine = engine
-    f.secret_key = flask_secret_key
-    f.debug = debug
+    f.config.update(
+        DEBUG=debug,
+        TEMPLATES_AUTO_RELOAD=debug,
+        SECRET_KEY=flask_secret_key)
+    if debug:
+        f.jinja_env.cache_size = 0
     f._unbound_api = authProtectedAPI(engine)
     return f
 

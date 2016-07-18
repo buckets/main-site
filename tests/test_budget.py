@@ -4,6 +4,7 @@ authentication or sign up or anything of that.
 """
 
 import uuid
+from datetime import date, datetime
 import pytest
 from buckets.authn import UserManagement
 from buckets.budget import BudgetManagement
@@ -91,3 +92,16 @@ class TestBucket(object):
         again = api.get_bucket(bucket['id'])
         assert again == new_bucket
 
+    def test_transact(self, api):
+        bucket = api.create_bucket('Food')
+        trans = api.bucket_transact(bucket['id'], amount=100,
+            memo='some memo', posted=date(2000, 1, 1))
+        assert trans['bucket_id'] == bucket['id']
+        assert trans['amount'] == 100
+        assert trans['memo'] == 'some memo'
+        assert trans['posted'] == datetime(2000, 1, 1)
+        assert trans['created'] is not None
+        assert trans['id'] is not None
+
+        bucket = api.get_bucket(bucket['id'])
+        assert bucket['balance'] == 100
