@@ -53,3 +53,41 @@ class TestAccount(object):
         assert again == new_account
 
 
+class TestBucket(object):
+
+    def test_create(self, api):
+        bucket = api.create_bucket('Food')
+        assert bucket['id'] is not None
+        assert bucket['created'] is not None
+        assert bucket['name'] == 'Food'
+        assert bucket['balance'] == 0
+        assert bucket['out_to_pasture'] == False
+        assert bucket['group_id'] is None
+        assert bucket['group_rank'] == 0
+        assert bucket['kind'] == ''
+        assert bucket['goal'] == None
+        assert bucket['end_date'] == None
+        assert bucket['deposit'] == None
+
+    def test_list(self, api):
+        bucket = api.create_bucket('Clothing')
+        buckets = api.list_buckets()
+        assert bucket in buckets
+        assert len(buckets) == 1
+
+    def test_update(self, api):
+        bucket = api.create_bucket('Food')
+        new_bucket = api.update_bucket(bucket['id'],
+            {
+                'name': 'Stuff',
+                'out_to_pasture': True,
+                'kind': 'deposit',
+                'deposit': 100,
+            })
+        assert new_bucket['name'] == 'Stuff'
+        assert new_bucket['out_to_pasture'] is True
+        assert new_bucket['kind'] == 'deposit'
+        assert new_bucket['deposit'] == 100
+        again = api.get_bucket(bucket['id'])
+        assert again == new_bucket
+

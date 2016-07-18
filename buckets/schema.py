@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, MetaData
-from sqlalchemy import DateTime, String, Integer, Boolean
+from sqlalchemy import DateTime, String, Integer, Boolean, Date
 
 
 from collections import OrderedDict
@@ -36,6 +36,22 @@ Account = Table('account', metadata,
     Column('name', String),
     Column('balance', Integer),
     Column('currency', String),
+)
+Bucket = Table('bucket', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('farm_id', Integer),
+    Column('name', String),
+    Column('description', String),
+    Column('balance', Integer, default=0),
+    Column('out_to_pasture', Boolean),
+    Column('group_id', Integer),
+    Column('group_rank', String),
+    Column('kind', String, default=u''),
+    Column('goal', Integer),
+    Column('end_date', Date),
+    Column('deposit', Integer),
+    Column('color', String),
 )
 
 
@@ -82,9 +98,29 @@ patches['init'] = [
         created timestamp default current_timestamp,
         farm_id integer,
         name text,
-        balance integer default '0',
+        balance integer default '0' not null,
         currency varchar(3) default 'USD'
     )''',
+
+    #-------------------------------------
+    # bucket
+    #-------------------------------------
+    '''CREATE TABLE bucket (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        farm_id integer,
+        name text,
+        description text,
+        balance integer default '0' not null,
+        out_to_pasture boolean default 'f',
+        group_id integer,
+        group_rank integer default '0',
+        kind text default '',
+        goal integer,
+        end_date date,
+        deposit integer,
+        color text
+    )'''
 ]
 
 

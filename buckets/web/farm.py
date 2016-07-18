@@ -1,6 +1,7 @@
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash
 from buckets.budget import BudgetManagement
+from buckets.web.util import parseMoney
 
 blue = Blueprint('farm', __name__, url_prefix='/farm/<int:farm_id>')
 
@@ -19,6 +20,8 @@ def add_farm_id(endpoint, values):
         values.setdefault('farm_id', g.farm_id)
 
 
+
+
 @blue.route('/')
 def index():
     return redirect(url_for('.summary'))
@@ -31,16 +34,23 @@ def summary():
 def accounts():
     if request.method == 'POST':
         name = request.values['name']
-        balance = int(request.values['balance'] or '0')
+        balance = parseMoney(request.values['balance'] or '0')
         g.farm.create_account(name=name, balance=balance)
         flash('Created account')
     accounts = g.farm.list_accounts()
     return render_template('farm/accounts.html',
         accounts=accounts)
 
-@blue.route('/buckets')
+@blue.route('/buckets', methods=['GET', 'POST'])
 def buckets():
-    return render_template('farm/buckets.html')
+    if request.method == 'POST':
+        name = request.values['name']
+        g.farm.create_bucket(name=name)
+        flash('Created bucket')
+        return redirect(url_for('farm.buckets'))
+    buckets = g.farm.list_buckets()
+    return render_template('farm/buckets.html',
+        buckets=buckets)
 
 @blue.route('/transactions')
 def transactions():

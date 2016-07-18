@@ -1,6 +1,6 @@
 from flask import Flask, session, redirect, g
 from buckets.model import authProtectedAPI
-from buckets.web.jinjafilters import all_filters
+from buckets.web.util import all_filters
 
 
 f = Flask(__name__)

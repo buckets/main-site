@@ -44,4 +44,4 @@ app = configureApp(
     engine=engine,
     flask_secret_key=args.flask_secret_key)
 
-app.run(args.host, args.port)
+app.run(args.host, args.port, debug=args.debug)

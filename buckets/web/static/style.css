@@ -50,6 +50,8 @@ header .user {
     background-color: rgba(52, 152, 219, 0.2);
     border-radius: 2px;
     padding: .75rem;
+    margin-bottom: 1rem;
+    margin-top: .5rem;
 }
 .main-content {
     flex-grow: 1;
@@ -65,35 +67,51 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 
+.negative {
+    color: rgba(231, 76, 60,1.0);
+}
+
+/* ----------------------------------------- */
+/* Table */
+/* ----------------------------------------- */
 table {
     border-collapse: collapse;
 }
-th {
+
+table.ledger th {
     text-align: left;
     vertical-align: bottom;
     background-color: rgba(52, 152, 219,1.0);
     color: white;
     font-weight: bold;
 }
-td {
+table.ledger td {
     text-align: left;
     vertical-align: top;
 }
-table.spaced th,
-table.spaced td {
+table.ledger th,
+table.ledger td {
     padding: .5rem 1rem;
 }
-table.spaced td {
+table.ledger td {
     border: 1px solid lightgrey;
     border-width: 0 0 1px 0;
 }
-tr.subtotal th,
-tr.subtotal td {
+table.ledger tr.subtotal th,
+table.ledger tr.subtotal td {
     border-top: 3px solid rgba(52, 152, 219,1.0);
     text-transform: uppercase;
     color: rgba(52, 152, 219,1.0);
 }
+table.ledger .right {
+    text-align: right;
+}
 
-.negative {
-    color: rgba(231, 76, 60,1.0);
+table.form th {
+    text-align: left;
+    font-weight: normal;
+}
+table.form td,
+table.form th {
+    padding: .25rem .5rem;
 }

@@ -1,5 +1,43 @@
 {% extends 'farm/base.html' %}
 
 {% block content %}
-hello
+
+{% if buckets %}
+<table class="ledger">
+  <tr>
+    <th>Bucket</th>
+    <th>Balance</th>
+    <th>Monthly Deposit</th>
+  </tr>
+  {% for bucket in buckets %}
+  <tr>
+    <td>{{ bucket.name }}</td>
+    <td class="right {{ 'negative' if bucket.balance < 0 }}">{{ bucket.balance|money }}</td>
+    <td class="right">{{ bucket.deposit|money }}</td>
+  </tr>
+  {% endfor %}
+  {% if accounts %}
+  {% set total = accounts|sum(attribute='balance') %}
+  <tr class="subtotal">
+    <td>Total</td>
+    <td class="right {{ 'negative' if total < 0 }}">{{ total|money }}</td>
+  </tr>
+  {% endif %}
+</table>
+{% endif %}
+
+
+<h2>Add bucket</h2>
+<form method="post">
+<table class="form">
+  <tr>
+    <th>Name</th>
+    <td><input type="text" name="name"></td>
+  </tr>
+  <tr>
+    <th></th>
+    <td><button type="submit">Add Bucket</button></td>
+  </tr>
+</table>
+</form>
 {% endblock %}

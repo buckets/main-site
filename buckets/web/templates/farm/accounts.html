@@ -1,9 +1,9 @@
 {% extends 'farm/base.html' %}
 
 {% block content %}
-<h1>Accounts</h1>
 
-<table class="spaced">
+{% if accounts %}
+<table class="ledger">
   <tr>
     <th>Account</th>
     <th>Balance</th>
@@ -11,24 +11,35 @@
   {% for account in accounts %}
   <tr>
     <td>{{ account.name }}</td>
-    <td class="{{ 'negative' if account.balance < 0 }}">{{ account.balance|money }}</td>
+    <td class="right {{ 'negative' if account.balance < 0 }}">{{ account.balance|money }}</td>
   </tr>
   {% endfor %}
   {% if accounts %}
   {% set total = accounts|sum(attribute='balance') %}
   <tr class="subtotal">
     <td>Total</td>
-    <td class="{{ 'negative' if total < 0 }}">{{ total|money }}</td>
+    <td class="right {{ 'negative' if total < 0 }}">{{ total|money }}</td>
   </tr>
   {% endif %}
-  <tbody>
-    <form method="post">
-      <tr>
-        <td><input type="text" name="name"></td>
-        <td><input type="text" name="balance"></td>
-        <td><button type="submit">Add Account</button></td>
-      </tr>
-    </form> 
-  </tbody>
 </table>
+{% endif %}
+
+
+<h2>Add account</h2>
+<form method="post">
+<table class="form">
+  <tr>
+    <th>Name</th>
+    <td><input type="text" name="name"></td>
+  </tr>
+  <tr>
+    <th>Balance</th>
+    <td><input type="text" name="balance"></td>
+  </tr>
+  <tr>
+    <th></th>
+    <td><button type="submit">Add Account</button></td>
+  </tr>
+</table>
+</form>
 {% endblock %}
