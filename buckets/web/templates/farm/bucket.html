@@ -1,0 +1,69 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+<h1>{{ bucket.name }}</h1>
+
+<script type="text/babel">
+var target_el = thisNext();
+
+</script>
+
+<form method="post">
+<table class="form">
+  <tr>
+    <th>Name</th>
+    <td><input type="text" name="name" value="{{ bucket.name }}"></td>
+  </tr>
+  <tr>
+    <th>Balance</th>
+    <td>{{ bucket.balance|money }}</td>
+  </tr>
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <td>
+        This bucket is for <select>
+          <option>holding money</option>
+          <option>a regular expense</option>
+          <option>saving up</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <th>Target amount</th>
+      <td><input type="text" name="goal"></td>
+    </tr>
+    <tr>
+      <th>Target date</th>
+      <td>
+        <select name="month">
+          <option>Jan</option>
+          <option>Feb</option>
+          <option>Mar</option>
+          <option>Apr</option>
+          <option>May</option>
+          <option>Jun</option>
+          <option>Jul</option>
+          <option>Aug</option>
+          <option>Sep</option>
+          <option>Oct</option>
+          <option>Nov</option>
+          <option>Dec</option>
+        </select>
+        <input type="text" name="year" size=4>
+      </td>
+    </tr>
+    <tr>
+      <th>Monthly deposit</th>
+      <td><input type="text" name="deposit"></td>
+    </tr>
+  </tbody>
+  <tr>
+    <th></th>
+    <td><button type="submit">Save Changes</button></td>
+  </tr>
+</table>
+</form>
+
+{% endblock %}

@@ -105,3 +105,9 @@ class TestBucket(object):
 
         bucket = api.get_bucket(bucket['id'])
         assert bucket['balance'] == 100
+
+    def test_transact_stringdate(self, api):
+        bucket = api.create_bucket('Food')
+        trans = api.bucket_transact(bucket['id'], amount=100,
+            posted='2000-01-01')
+        assert trans['posted'] == datetime(2000, 1, 1)

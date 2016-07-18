@@ -1,5 +1,6 @@
 from decimal import Decimal
 import sys
+import json
 
 def fmtMoney(xint):
     sys.stdout.flush()
@@ -19,6 +20,18 @@ def parseMoney(s):
     s = (s or '0').replace(',', '')
     d = Decimal(s)
     return int(d * 100)
+
+
+def _customEncoder(obj):
+    try:
+        return obj.isoformat()
+    except:
+        raise TypeError('%r is not JSON serializeable' % (obj,))
+
+
+def toJson(thing):
+    return json.dumps(thing, default=_customEncoder)
+
 
 
 all_filters = {

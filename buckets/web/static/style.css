@@ -82,8 +82,8 @@ table.ledger th {
     text-align: left;
     vertical-align: bottom;
 
-    border-bottom: 3px solid rgba(52, 152, 219,1.0);
-    color: rgba(52, 152, 219,1.0);
+    border-bottom: 3px solid rgba(44, 62, 80, 0.5);
+    color: rgba(44, 62, 80, 0.5);
     font-weight: normal;
 }
 table.ledger td {
@@ -100,17 +100,19 @@ table.ledger td {
 }
 table.ledger tr.subtotal th,
 table.ledger tr.subtotal td {
-    border-top: 2px solid rgba(52, 152, 219,1.0);
+    border-top: 2px solid rgba(44, 62, 80, 0.5);
     text-transform: uppercase;
-    color: rgba(52, 152, 219,1.0);
+    color: rgba(44, 62, 80, 0.5);
+    border-bottom: 0px;
 }
 table.ledger .right {
     text-align: right;
 }
 
 table.form th {
+    color: rgba(44, 62, 80, 0.5);
     text-align: left;
-    font-weight: normal;
+    font-weight: bold;
 }
 table.form td,
 table.form th {

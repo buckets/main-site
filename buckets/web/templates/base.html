@@ -7,18 +7,23 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
 <head>
   <title>{% block title %}Buckets{% endblock %}</title>
   <link rel="stylesheet" type="text/css" href="/static/style.css">
-  <script src="https://fb.me/react-15.2.1.min.js"></script>
-  <script src="https://fb.me/react-dom-15.2.1.min.js"></script>
+  <script src="/static/js/lodash.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+  <script src="https://fb.me/react-15.2.1.js"></script>
+  <script src="https://fb.me/react-dom-15.2.1.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+
+  <script src="/static/js/money.js"></script>
   <script>
-  function renderHere(torender) {
+  function thisNext() {
     var scriptTags = document.getElementsByTagName('script');
     var scriptTag = scriptTags[scriptTags.length - 1];
     var elem = document.createElement('div');
     scriptTag.parentNode.insertBefore(elem, scriptTag.nextSibling);
-    ReactDOM.render(torender, elem);
+    return elem;
   }
   </script>
+  {% block extrahead %}{% endblock %}
 </head>
 <body>
   <div class="body-wrap">

@@ -8,6 +8,19 @@
 <a {{ navlink('.reports') }}>Reports</a>
 {% endblock %}
 
+{% block extrahead %}
+<script>
+function apiRequest(data, success) {
+  $.ajax({
+    type: 'POST',
+    url: '{{ url_for('farm.api') }}',
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    success: success
+  });
+}
+</script>
+{% endblock %}
+
 {% block content %}
-Hello?
 {% endblock %}

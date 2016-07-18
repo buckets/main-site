@@ -1,7 +1,8 @@
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask import request, flash
+from flask import request, flash, make_response
 from buckets.budget import BudgetManagement
-from buckets.web.util import parseMoney
+from buckets.web.util import parseMoney, toJson
+
 
 blue = Blueprint('farm', __name__, url_prefix='/farm/<int:farm_id>')
 
@@ -43,7 +44,6 @@ def accounts():
 
 @blue.route('/buckets', methods=['GET', 'POST'])
 def buckets():
-    print 'in /buckets'
     if request.method == 'POST':
         name = request.values['name']
         g.farm.create_bucket(name=name)
@@ -53,6 +53,12 @@ def buckets():
     return render_template('farm/buckets.html',
         buckets=buckets)
 
+@blue.route('/buckets/<int:bucket_id>', methods=['GET', 'POST'])
+def bucket(bucket_id):
+    bucket = g.farm.get_bucket(id=bucket_id)
+    return render_template('farm/bucket.html',
+        bucket=bucket)
+
 @blue.route('/transactions')
 def transactions():
     return render_template('farm/transactions.html')
@@ -61,3 +67,28 @@ def transactions():
 def reports():
     return render_template('farm/reports.html')
 
+
+#-----------------------------------------------------------------------
+# api
+#-----------------------------------------------------------------------
+
+@blue.route('/api', methods=['POST'])
+def api():
+    data = request.json
+    multi = True
+    responses = []
+    if not isinstance(data, list):
+        multi = False
+        data = [data]
+    
+    for item in data:
+        method = item['method']
+        kwargs = item.get('kwargs', {})
+        m = getattr(g.farm, method)
+        responses.append(m(**kwargs))
+    
+    if not multi:
+        responses = responses[0]
+    r = make_response(toJson(responses))
+    r.headers['Content-Type'] = 'application/json'
+    return r

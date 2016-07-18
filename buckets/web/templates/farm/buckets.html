@@ -2,95 +2,156 @@
 
 {% block content %}
 
+<h1>Buckets</h1>
+
 <script type="text/babel">
-var Number = React.createClass({
+var target_el = thisNext();
+
+var Store = {};
+Store.buckets = {{ buckets|tojson|safe }};
+Store.rerender = function() {
+  ReactDOM.render(<BucketTable buckets={Store.buckets}/>, target_el);
+}
+Store.updateBucket = function(bucket) {
+  _.each(Store.buckets, function(old_bucket) {
+    if (old_bucket.id === bucket.id) {
+      _.merge(old_bucket, bucket);
+    }
+  });
+  Store.rerender();
+}
+
+
+var Money = React.createClass({
   render: function() {
-    var value = this.props.value;
+    var value = cents2decimal(this.props.value);
     return (<span className="number">{value}</span>)
   }
-})
+});
+
+
 var BucketRow = React.createClass({
+  getInitialState: function() {
+    return {
+      pending_amount: '',
+    }
+  },
+  refreshBucket: function() {
+    this.props.onBucketDirty(this.props.bucket);
+  },
+  pendingKeyUp: function(e) {
+    if (e.keyCode === 13) {
+      this.doTransaction();
+    }
+  },
+  pendingChanged: function(e) {
+    this.setPending(e.target.value);
+  },
+  setPending: function(value) {
+    this.setState({
+      pending_amount: value
+    })
+    this.props.onPendingChange(this.props.bucket,
+      decimal2cents(value));
+  },
+  doTransaction: function() {
+    var amount = decimal2cents(this.state.pending_amount);
+    this.setPending('');
+    apiRequest({
+      method: 'bucket_transact',
+      kwargs: {
+        bucket_id: this.props.bucket.id,
+        amount: amount,
+      }
+    }, function(response) {
+      this.refreshBucket();
+    }.bind(this));
+  },
   render: function() {
     return (
       <tr>
         <td>{this.props.bucket.name}</td>
-        <td><Number value={this.props.bucket.balance} /></td>
-        <td><input type="text" /></td>
-        <td><Number value={this.props.bucket.deposit} /></td>
+        <td className="right"><Money value={this.props.bucket.balance} /></td>
+        <td className="right">
+          <input
+          type="text" 
+          className="right"
+          value={this.state.pending_amount}
+          onKeyUp={this.pendingKeyUp}
+          onChange={this.pendingChanged}/>
+        </td>
+        <td><Money value={this.props.bucket.deposit} /></td>
         <td></td>
-        <td><a href="">Edit</a></td>
+        <td><a href={'buckets/'+this.props.bucket.id}>Edit</a></td>
       </tr>
     )
   }
 });
+
+
+
 var BucketTable = React.createClass({
-  render: function() {
-    var bucket_rows = this.props.buckets.map(function(bucket) {
-      return (
-        <BucketRow bucket={bucket}></BucketRow>
-      );
+  getInitialState: function() {
+    return {
+      pendings: {}
+    }
+  },
+  pendingChanged: function(bucket, pending) {
+    this.state.pendings[bucket.id] = pending;
+    this.setState(this.state);
+  },
+  bucketIsDirty: function(bucket) {
+    apiRequest({
+      method: 'get_bucket',
+      kwargs: {
+        id: bucket.id,
+      }
+    }, function(new_bucket) {
+      Store.updateBucket(new_bucket);
     })
+  },
+  render: function() {
+    var balance_total = 0;
+    var bucket_rows = this.props.buckets.map(function(bucket) {
+      balance_total += bucket.balance;
+      return (
+        <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.pendingChanged} onBucketDirty={this.bucketIsDirty}></BucketRow>
+      );
+    }.bind(this));
+    var pending_total = _.sum(_.values(this.state.pendings));
     return (
       <table className="ledger" width="100%">
-        <tr>
-          <th>Bucket</th>
-          <th>Balance</th>
-          <th>Deposit</th>
-          <th>Monthly Deposit</th>
-          <th>Goal</th>
-          <th>Edit</th>
-        </tr>
+        <thead>
+          <tr>
+            <th>Bucket</th>
+            <th className="right">Balance</th>
+            <th className="right">Deposit</th>
+            <th>Monthly<br/>Deposit</th>
+            <th>Goal</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
         <tbody>
           {bucket_rows}
         </tbody>
-        <tr className="subtotal">
-          <td>Total</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
+        <tbody>
+          <tr className="subtotal">
+            <td>Total</td>
+            <td className="right"><Money value={balance_total} /></td>
+            <td className="right">
+              <Money value={pending_total} />
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
       </table>
     );
   }
 });
-var buckets = {{ buckets|tojson|safe }};
-renderHere(<BucketTable buckets={buckets}/>);
+Store.rerender();
 </script>
-
-{% if buckets %}
-<table class="ledger" width="100%">
-  <tr>
-    <th>Bucket</th>
-    <th>Balance</th>
-    <th>Deposit</th>
-    <th>Monthly Deposit</th>
-    <th>Goal</th>
-    <th>Edit</th>
-  </tr>
-  {% for bucket in buckets %}
-  <tr>
-    <td>{{ bucket.name }}</td>
-    <td class="right {{ 'negative' if bucket.balance < 0 }}">{{ bucket.balance|money }}</td>
-    <td><input type="text"></td>
-    <td class="right">{{ bucket.deposit|money }}</td>
-    <td></td>
-    <td><a href="">Edit</a></td>
-  </tr>
-  {% endfor %}
-  {% if buckets %}
-  {% set total = buckets|sum(attribute='balance') %}
-  <tr class="subtotal">
-    <td>Total</td>
-    <td class="right {{ 'negative' if total < 0 }}">{{ total|money }}</td>
-    <td></td>
-    <td class="right"></td>
-  </tr>
-  {% endif %}
-</table>
-{% endif %}
-
 
 <h2>Add bucket</h2>
 <form method="post">
