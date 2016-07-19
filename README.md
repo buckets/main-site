@@ -11,4 +11,5 @@ To run Python tests:
 To run JavaScript tests:
 
     tests/testjs.sh
+    tests/testjs.sh watch
 
