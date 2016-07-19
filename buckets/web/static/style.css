@@ -109,12 +109,19 @@ table.ledger .right {
     text-align: right;
 }
 
-table.form th {
+div.form {
+}
+div.form div.pair {
+}
+
+div.form div.label {
     color: rgba(44, 62, 80, 0.5);
     text-align: left;
     font-weight: bold;
+    padding: 0.25rem .5rem 0;
+    font-size: 0.8rem;
 }
-table.form td,
-table.form th {
-    padding: .25rem .5rem;
+div.form div.control {
+    padding: 0 .5rem .5rem;
+}
 }

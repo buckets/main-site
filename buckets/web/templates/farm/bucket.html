@@ -5,65 +5,112 @@
 <h1>{{ bucket.name }}</h1>
 
 <script type="text/babel">
-var target_el = thisNext();
+var target_el = document.getElementById('bucket-type-chooser');
+var Store = {};
+Store.bucket = {{ bucket|tojson|safe }};
+Store.render = function() {
+  ReactDOM.render(<BucketTypeChooser bucket={Store.bucket}/>, target_el);
+}
 
+var BucketTypeChooser = React.createClass({
+  getInitialState: function() {
+    var b = this.props.bucket;
+    return {
+      type: b.type,
+      deposit: b.deposit,
+      goal: b.goal,
+      end_date: b.end_data
+    };
+  },
+  bucketTypeChanged: function(e) {
+    console.log('bucketTypeChanged');
+    this.setState({
+      type: e.target.value
+    });
+  },
+  render: function() {
+    var goal_stuff = (
+      <div>
+        <div className="pair">
+          <div className="label">Target amount</div>
+          <div className="control"><input type="text" name="goal" /></div>
+        </div>
+        <div className="pair">
+          <div className="label">Target date</div>
+          <div className="control">
+            <select name="month">
+              <option>Jan</option>
+              <option>Feb</option>
+              <option>Mar</option>
+              <option>Apr</option>
+              <option>May</option>
+              <option>Jun</option>
+              <option>Jul</option>
+              <option>Aug</option>
+              <option>Sep</option>
+              <option>Oct</option>
+              <option>Nov</option>
+              <option>Dec</option>
+            </select>
+            <input type="text" name="year" size="4" />
+          </div>
+        </div>
+        <div className="pair">
+          <div className="label">Monthly deposit</div>
+          <div className="control"><input type="text" name="deposit" /></div>
+        </div>
+      </div>
+    );
+    var deposit_stuff = (
+      <div className="pair">
+        <div className="label">Monthly deposit</div>
+        <div className="control"><input type="text" name="deposit" /></div>
+      </div>
+    );
+    var extra = null;
+    if (this.state.type === 'deposit') {
+      extra = deposit_stuff
+    } else if (this.state.type === 'goal') {
+      extra = goal_stuff
+    }
+
+    return (
+    <div>
+      <div className="pair">
+        <div className="label"></div>
+        <div className="control">
+          This bucket is for <select value={this.state.type} onChange={this.bucketTypeChanged}>
+            <option value="">holding money</option>
+            <option value="deposit">a regular expense</option>
+            <option value="goal">saving up</option>
+          </select>
+        </div>
+        {extra}
+      </div>
+    </div>
+    );
+  }
+})
+
+Store.render();
 </script>
 
 <form method="post">
-<table class="form">
-  <tr>
-    <th>Name</th>
-    <td><input type="text" name="name" value="{{ bucket.name }}"></td>
-  </tr>
-  <tr>
-    <th>Balance</th>
-    <td>{{ bucket.balance|money }}</td>
-  </tr>
-  <tbody>
-    <tr>
-      <th>Type</th>
-      <td>
-        This bucket is for <select>
-          <option>holding money</option>
-          <option>a regular expense</option>
-          <option>saving up</option>
-        </select>
-      </td>
-    </tr>
-    <tr>
-      <th>Target amount</th>
-      <td><input type="text" name="goal"></td>
-    </tr>
-    <tr>
-      <th>Target date</th>
-      <td>
-        <select name="month">
-          <option>Jan</option>
-          <option>Feb</option>
-          <option>Mar</option>
-          <option>Apr</option>
-          <option>May</option>
-          <option>Jun</option>
-          <option>Jul</option>
-          <option>Aug</option>
-          <option>Sep</option>
-          <option>Oct</option>
-          <option>Nov</option>
-          <option>Dec</option>
-        </select>
-        <input type="text" name="year" size=4>
-      </td>
-    </tr>
-    <tr>
-      <th>Monthly deposit</th>
-      <td><input type="text" name="deposit"></td>
-    </tr>
-  </tbody>
-  <tr>
-    <th></th>
-    <td><button type="submit">Save Changes</button></td>
-  </tr>
-</table>
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name" value="{{ bucket.name }}"></div>
+  </div>
+  <div class="pair">
+    <div class="label">Balance</div>
+    <div class="control">{{ bucket.balance|money }}</div>
+  </div>
+  <div id="bucket-type-chooser"></div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control"><button type="submit">Save Changes</button></div>
+  </div>
+</div>
 </form>
 
 {% endblock %}
