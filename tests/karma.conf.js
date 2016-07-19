@@ -15,6 +15,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'buckets/web/static/js/vend/*.js',
       'buckets/web/static/js/*.js',
       'tests/js/*.js'
     ],
@@ -38,6 +39,7 @@ module.exports = function(config) {
 
 
     // web server port
+    host: '0.0.0.0',
     port: 9876,
 
 
