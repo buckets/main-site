@@ -83,7 +83,13 @@ class BudgetManagement(object):
 
     @policy.allow(anything)
     def update_bucket(self, id, data):
-        updatable = ['name', 'out_to_pasture', 'kind', 'deposit']
+        updatable = [
+            'name',
+            'out_to_pasture',
+            'kind',
+            'deposit',
+            'goal',
+            'end_date']
         values = {}
         for key in updatable:
             val = data.get(key)

@@ -110,11 +110,37 @@ table.ledger .right {
 }
 
 
-input[type=text] {
+/*input[type=text] {
     font-size: 1rem;
     padding: .5rem 0.25rem;
     margin: 0;
     height: 1rem;
+}*/
+
+.goalbar {
+    width: 100%;
+    min-width: 8rem;
+    min-height: 6px;
+    position: relative;
+}
+.goalbar .background {
+    background-color: rgba(189, 195, 199, 0.5);
+    border-radius: 1000px;
+    height: 6px;
+    position: relative;
+}
+.goalbar .foreground {
+    background-color: rgba(52, 152, 219,1.0);
+    border-radius: 1000px;
+    height: 6px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: width 0.5s;
+}
+.goalbar .data {
+    font-size: 0.6rem;
+    padding-top: 0.1rem;
 }
 
 div.form {

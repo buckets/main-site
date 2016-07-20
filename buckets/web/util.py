@@ -36,4 +36,5 @@ def toJson(thing):
 
 all_filters = {
     'money': fmtMoney,
+    'json': toJson,
 }

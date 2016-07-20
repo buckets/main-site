@@ -7,7 +7,7 @@
 <script type="text/babel">
 var target_el = document.getElementById('bucket-type-chooser');
 var Store = {};
-Store.bucket = {{ bucket|tojson|safe }};
+Store.bucket = {{ bucket|json|safe }};
 Store.render = function() {
   ReactDOM.render(<BucketTypeChooser bucket={Store.bucket}/>, target_el);
 }
@@ -92,7 +92,7 @@ var BucketTypeChooser = React.createClass({
       kind: b.kind || '',
       deposit: b.deposit || '',
       goal: b.goal || '',
-      end_date: b.end_data || '',
+      end_date: b.end_date || '',
       fixed_attrs: this.initialFixedAttrs(b),
     };
   },
@@ -113,7 +113,6 @@ var BucketTypeChooser = React.createClass({
   },
   setGoalAttr: function(attr, value) {
     var attrs = _.clone(this.state.fixed_attrs);
-    console.log('attrs', attrs);
     _.pull(attrs, attr);
     attrs.push(attr);
     attrs = _.slice(attrs, -2); // keep only the most recent 2
@@ -127,15 +126,7 @@ var BucketTypeChooser = React.createClass({
       fixed_attrs: attrs,
     }
     new_state[attr] = value;
-    var tobenull = _.difference(['goal', 'deposit', 'end_date'], attrs);
-    _.each(tobenull, function(name) {
-      console.log('set', name, 'to null');
-      new_state[name] = null;
-    })
-    console.log('new_state', new_state);
-
     this.setState(new_state);
-    this.computeMissing(new_state);
   },
   endDateChanged: function(newval) {
     this.setGoalAttr('end_date', newval);
@@ -144,75 +135,76 @@ var BucketTypeChooser = React.createClass({
     this.setGoalAttr('goal', newval);
   },
   depositChanged: function(newval) {
-    console.log('deposit changed', newval);
     this.setGoalAttr('deposit', newval);
-  },
-
-  computeMissing: function(state) {
-    console.log('computeMissing', state);
-    var computed = computeBucketDeposit(state);
-    console.log('computed', computed);
-    computed.deposit = computed.deposit || '';
-    computed.goal = computed.goal || '';
-    computed.end_date = computed.end_date || '';
-    this.setState(computed);
   },
   
   bucketKindChanged: function(e) {
-    console.log("bucketKindChanged");
     var newstate = _.merge(this.state, {
       kind: e.target.value,
     });
     newstate = _.merge(newstate, {
       fixed_attrs: this.initialFixedAttrs(newstate),
     });
-    this.computeMissing(newstate);
+    this.setState(newstate);
   },
   
   render: function() {
-    var goal_stuff = (
-      <div>
-        <div className="pair">
-          <div className="label">Target amount</div>
-          <div className="control"><MoneyInput value={this.state.goal} onChange={this.goalChanged}/></div>
-        </div>
-        <div className="pair">
-          <div className="label">Target date</div>
-          <div className="control">
-            <MonthInput value={this.state.end_date} onChange={this.endDateChanged} />
-          </div>
-        </div>
-        <div className="pair">
-          <div className="label">Monthly deposit</div>
-          <div className="control"><MoneyInput value={this.state.deposit} onChange={this.depositChanged}/></div>
-        </div>
-      </div>
-    );
-    var deposit_stuff = (
-      <div className="pair">
-        <div className="label">Monthly deposit</div>
-        <div className="control"><MoneyInput value={this.state.deposit} onChange={this.depositChanged}/></div>
-      </div>
-    );
     var extra = null;
     var goal = '';
     var end_date = '';
     var deposit = '';
 
     if (this.state.kind === 'deposit') {
-      extra = deposit_stuff;
+      extra = (
+        <div className="pair">
+          <div className="label">Monthly deposit</div>
+          <div className="control"><MoneyInput value={this.state.deposit} onChange={this.depositChanged}/></div>
+        </div>
+      );
       deposit = this.state.deposit || '';
     } else if (this.state.kind === 'goal') {
-      extra = goal_stuff;
+      var state = _.clone(this.state);
+      var tobenull = _.difference(
+        ['goal', 'deposit', 'end_date'],
+        state.fixed_attrs);
+      _.each(tobenull, function(name) {
+        state[name] = null;
+      });
+      var computed = computeBucketDeposit(state);
+      computed.deposit = computed.deposit || '';
+      computed.goal = computed.goal || '';
+      computed.end_date = computed.end_date || '';
       if (_.includes(this.state.fixed_attrs, 'goal')) {
-        goal = this.state.goal;
+        goal = computed.goal;
       }
       if (_.includes(this.state.fixed_attrs, 'deposit')) {
-        deposit = this.state.deposit;
+        deposit = computed.deposit;
       }
       if (_.includes(this.state.fixed_attrs, 'end_date')) {
-        end_date = this.state.end_date;
+        end_date = computed.end_date;
       }
+      extra = (
+        <div>
+          <div className="pair">
+            <div className="label">Target amount</div>
+            <div className="control"><MoneyInput value={computed.goal} onChange={this.goalChanged}/></div>
+          </div>
+          <div className="pair">
+            <div className="label"></div>
+            <div className="control"><GoalBar max={computed.goal} value={this.props.bucket.balance} /></div>
+          </div>
+          <div className="pair">
+            <div className="label">Target date</div>
+            <div className="control">
+              <MonthInput value={computed.end_date} onChange={this.endDateChanged} />
+            </div>
+          </div>
+          <div className="pair">
+            <div className="label">Monthly deposit</div>
+            <div className="control"><MoneyInput value={computed.deposit} onChange={this.depositChanged}/></div>
+          </div>
+        </div>
+      );
     }
 
 

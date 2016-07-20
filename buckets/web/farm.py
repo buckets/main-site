@@ -55,6 +55,32 @@ def buckets():
 
 @blue.route('/buckets/<int:bucket_id>', methods=['GET', 'POST'])
 def bucket(bucket_id):
+    if request.method == 'POST':
+        data = {}
+        data['name'] = request.form['name']
+        data['kind'] = request.form['kind']
+        
+        goal = request.form['goal']
+        if goal:
+            data['goal'] = int(goal)
+        else:
+            data['goal'] = None
+
+        deposit = request.form['deposit']
+        if deposit:
+            data['deposit'] = int(deposit)
+        else:
+            data['deposit'] = None
+
+        end_date = request.form['end_date']
+        if end_date:
+            data['end_date'] = end_date
+        else:
+            data['end_date'] = None
+        
+        g.farm.update_bucket(id=bucket_id, data=data)
+        flash('{0} updated'.format(data['name']))
+        return redirect(url_for('.bucket', bucket_id=bucket_id))
     bucket = g.farm.get_bucket(id=bucket_id)
     return render_template('farm/bucket.html',
         bucket=bucket)

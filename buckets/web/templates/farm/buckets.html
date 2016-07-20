@@ -8,7 +8,7 @@
 var target_el = thisNext();
 
 var Store = {};
-Store.buckets = {{ buckets|tojson|safe }};
+Store.buckets = {{ buckets|json|safe }};
 Store.rerender = function() {
   ReactDOM.render(<BucketTable buckets={Store.buckets}/>, target_el);
 }
@@ -20,14 +20,6 @@ Store.updateBucket = function(bucket) {
   });
   Store.rerender();
 }
-
-
-var Money = React.createClass({
-  render: function() {
-    var value = cents2decimal(this.props.value);
-    return (<span className="number">{value}</span>)
-  }
-});
 
 
 var BucketRow = React.createClass({
@@ -44,18 +36,17 @@ var BucketRow = React.createClass({
       this.doTransaction();
     }
   },
-  pendingChanged: function(e) {
-    this.setPending(e.target.value);
+  pendingChanged: function(value) {
+    this.setPending(value);
   },
   setPending: function(value) {
     this.setState({
       pending_amount: value
     })
-    this.props.onPendingChange(this.props.bucket,
-      decimal2cents(value));
+    this.props.onPendingChange(this.props.bucket, value);
   },
   doTransaction: function() {
-    var amount = decimal2cents(this.state.pending_amount);
+    var amount = this.state.pending_amount;
     this.setPending('');
     apiRequest({
       method: 'bucket_transact',
@@ -68,20 +59,23 @@ var BucketRow = React.createClass({
     }.bind(this));
   },
   render: function() {
+    var goal_bar;
+    if (this.props.bucket.kind === 'goal') {
+      goal_bar = (<GoalBar max={this.props.bucket.goal} value={this.props.bucket.balance} />);
+    }
     return (
       <tr>
         <td>{this.props.bucket.name}</td>
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td className="right">
-          <input
-          type="text" 
-          className="right"
-          value={this.state.pending_amount}
-          onKeyUp={this.pendingKeyUp}
-          onChange={this.pendingChanged}/>
+          <MoneyInput className="right"
+            value={this.state.pending_amount}
+            onKeyUp={this.pendingKeyUp}
+            onChange={this.pendingChanged}
+            size="10" />
         </td>
-        <td><Money value={this.props.bucket.deposit} /></td>
-        <td></td>
+        <td className="right"><Money value={this.props.bucket.deposit} /></td>
+        <td>{goal_bar}</td>
         <td><a href={'buckets/'+this.props.bucket.id}>Edit</a></td>
       </tr>
     )
@@ -112,8 +106,15 @@ var BucketTable = React.createClass({
   },
   render: function() {
     var balance_total = 0;
+    var deposit_total = 0;
     var bucket_rows = this.props.buckets.map(function(bucket) {
       balance_total += bucket.balance;
+      var computed = computeBucketDeposit(bucket);
+      bucket.end_date = bucket.end_date || computed.end_date;
+      bucket.goal = bucket.goal || computed.goal;
+      bucket.deposit = bucket.deposit || computed.deposit;
+
+      deposit_total += bucket.deposit;
       return (
         <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.pendingChanged} onBucketDirty={this.bucketIsDirty}></BucketRow>
       );
@@ -126,7 +127,7 @@ var BucketTable = React.createClass({
             <th>Bucket</th>
             <th className="right">Balance</th>
             <th className="right">Deposit</th>
-            <th>Monthly<br/>Deposit</th>
+            <th className="right">Monthly<br/>Deposit</th>
             <th>Goal</th>
             <th>Edit</th>
           </tr>
@@ -141,7 +142,9 @@ var BucketTable = React.createClass({
             <td className="right">
               <Money value={pending_total} />
             </td>
-            <td></td>
+            <td className="right">
+              <Money value={deposit_total} />
+            </td>
             <td></td>
             <td></td>
           </tr>

@@ -25,3 +25,14 @@ window.MoneyInput = React.createClass({
     );
   }
 });
+
+window.Money = React.createClass({
+  render: function() {
+    var value = cents2decimal(this.props.value);
+    var class_name = 'number';
+    if (this.props.value < 0) {
+      class_name += ' negative';
+    }
+    return (<span className={class_name}>{value}</span>)
+  }
+});
