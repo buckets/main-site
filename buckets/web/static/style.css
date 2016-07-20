@@ -109,19 +109,27 @@ table.ledger .right {
     text-align: right;
 }
 
+
+input[type=text] {
+    font-size: 1rem;
+    padding: .5rem 0.25rem;
+    margin: 0;
+    height: 1rem;
+}
+
 div.form {
 }
 div.form div.pair {
+    display: flex;
 }
 
 div.form div.label {
     color: rgba(44, 62, 80, 0.5);
-    text-align: left;
-    font-weight: bold;
-    padding: 0.25rem .5rem 0;
-    font-size: 0.8rem;
+    text-align: right;
+    width: 10rem;
+    padding-right: 1rem;
+    padding-bottom: 0.5rem;
 }
 div.form div.control {
-    padding: 0 .5rem .5rem;
-}
+    padding-bottom: 0.5rem;
 }

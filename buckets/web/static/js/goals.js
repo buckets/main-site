@@ -1,4 +1,4 @@
-function _parseMonth(s) {
+function parseMonth(s) {
   if (s instanceof Date) {
     return s;
   } else if (!s) {
@@ -21,7 +21,7 @@ function _zeropad(x, n) {
   }
   return x;
 }
-function _formatDate(d) {
+function formatDate(d) {
   if (!d) {
     return null;
   }
@@ -45,6 +45,8 @@ function addMonths(start, months) {
   return _months2date(_date2months(start) + months);
 }
 
+
+
 function _computeDeposit(goal, balance, end_date, today) {
   today = today || new Date();
 
@@ -63,7 +65,7 @@ function _computeDeposit(goal, balance, end_date, today) {
 }
 
 function _computeEndDate(goal, balance, deposit, today) {
-  today = _parseMonth(today || new Date());
+  today = parseMonth(today || new Date());
 
   if (goal === null) {
     return null;
@@ -80,6 +82,17 @@ function _computeEndDate(goal, balance, deposit, today) {
     }
   }
 }
+function _computeGoal(balance, deposit, end_date, today) {
+  today = parseMonth(today || new Date());
+  end_date = parseMonth(end_date);
+
+  if (deposit === null || !end_date) {
+    return null;
+  }
+  var months_left = monthsBetween(today, end_date);
+  var amount = Math.ceil(deposit * months_left);
+  return balance + amount;
+}
 
 function computeBucketDeposit(data) {
   var ret = {
@@ -89,29 +102,34 @@ function computeBucketDeposit(data) {
     end_date: null,
   };
 
-  var today = _parseMonth(data.today) || new Date();
+  var today = parseMonth(data.today) || new Date();
 
-  if (data.kind == 'deposit') {
+  if (data.kind === 'deposit') {
     // deposit
     ret.deposit = data.deposit;
-  } else if (data.kind == 'goal') {
+  } else if (data.kind === 'goal') {
     // goal
     ret.goal = data.goal;
-    if (data.goal === 0 || data.goal === null) {
-      ret.goal_percent = null;
-    } else {
-      ret.goal_percent = 100 * data.balance / data.goal;
-      ret.goal_percent = ret.goal_percent > 100 ? 100 : (ret.goal_percent < 0 ? 0 : ret.goal_percent);
-    }
-    ret.end_date = _parseMonth(data.end_date);
-    if (ret.end_date === null || ret.end_date === '') {
+    ret.end_date = parseMonth(data.end_date);
+    ret.deposit = data.deposit;
+
+    if (ret.goal === 0 || ret.goal === null) {
+      ret.goal = _computeGoal(data.balance, data.deposit, data.end_date, today);
+    } else if (ret.end_date === null || ret.end_date === '') {
       ret.deposit = data.deposit;
       ret.end_date = _computeEndDate(data.goal, data.balance, data.deposit, today);
     } else {
       ret.deposit = _computeDeposit(data.goal, data.balance, ret.end_date, today);
     }
+
+    if (ret.goal) {
+      ret.goal_percent = 100 * data.balance / ret.goal;
+      ret.goal_percent = ret.goal_percent > 100 ? 100 : (ret.goal_percent < 0 ? 0 : ret.goal_percent);  
+    } else {
+      ret.goal_percent = null;
+    }
     if (ret.end_date) {
-      ret.end_date = _formatDate(ret.end_date);
+      ret.end_date = formatDate(ret.end_date);
     }
   }
   return ret;

@@ -12,81 +12,227 @@ Store.render = function() {
   ReactDOM.render(<BucketTypeChooser bucket={Store.bucket}/>, target_el);
 }
 
+var MonthInput = React.createClass({
+  getInitialState: function() {
+    var d = parseMonth(this.props.value);
+    var y = d ? d.getFullYear() : '';
+    var m = d ? d.getMonth()+1 : '1';
+    var value = this.getValue(y, m);
+    return {
+      year: y,
+      month: m,
+      value: value,
+    }
+  },
+  componentWillReceiveProps: function(props) {
+    var d = parseMonth(props.value);
+    if (d) {
+      var y = d ? d.getFullYear() : '';
+      var m = d ? d.getMonth()+1 : '1';
+      var value = this.getValue(y, m);
+      this.setState({
+        year: y,
+        month: m,
+        value: value,
+      })
+    }
+  },
+  getValue: function(year, month) {
+    if (!year || !month) {
+      return ''
+    }
+    if (year.length != 4) {
+      return '';
+    }
+    return formatDate(new Date(year, month-1, 1));
+  },
+  monthChanged: function(e) {
+    var newstate = _.merge(this.state, {month: e.target.value});
+    this.doUpdate(newstate);
+  },
+  yearChanged: function(e) {
+    var newstate = _.merge(this.state, {year: e.target.value});
+    this.doUpdate(newstate);
+  },
+  doUpdate: function(newstate) {
+    var newval = this.getValue(newstate.year, newstate.month);
+    newstate.value = newval;
+    this.setState(newstate);
+    this.props.onChange(newval);
+  },
+  render: function() {
+    return (
+      <div className="month-input">
+        <select value={this.state.month} onChange={this.monthChanged}>
+          <option value="1">Jan</option>
+          <option value="2">Feb</option>
+          <option value="3">Mar</option>
+          <option value="4">Apr</option>
+          <option value="5">May</option>
+          <option value="6">Jun</option>
+          <option value="7">Jul</option>
+          <option value="8">Aug</option>
+          <option value="9">Sep</option>
+          <option value="10">Oct</option>
+          <option value="11">Nov</option>
+          <option value="12">Dec</option>
+        </select>
+        <input type="text" value={this.state.year} onChange={this.yearChanged} size="4" />
+        <input type="hidden" value={this.state.value} name={this.props.name} />
+      </div>
+    );
+  }
+})
+
 var BucketTypeChooser = React.createClass({
   getInitialState: function() {
     var b = this.props.bucket;
     return {
-      type: b.type,
-      deposit: b.deposit,
-      goal: b.goal,
-      end_date: b.end_data
+      balance: b.balance,
+      kind: b.kind || '',
+      deposit: b.deposit || '',
+      goal: b.goal || '',
+      end_date: b.end_data || '',
+      fixed_attrs: this.initialFixedAttrs(b),
     };
   },
-  bucketTypeChanged: function(e) {
-    console.log('bucketTypeChanged');
-    this.setState({
-      type: e.target.value
-    });
+  initialFixedAttrs: function(data) {
+    var fixed_attrs = [];
+    if (data.kind === 'goal') {
+      if (data.goal) {
+        fixed_attrs.push('goal');
+      }
+      if (data.deposit) {
+        fixed_attrs.push('deposit');
+      }
+      if (data.end_date) {
+        fixed_attrs.push('end_date');
+      }
+    }
+    return fixed_attrs;
   },
+  setGoalAttr: function(attr, value) {
+    var attrs = _.clone(this.state.fixed_attrs);
+    console.log('attrs', attrs);
+    _.pull(attrs, attr);
+    attrs.push(attr);
+    attrs = _.slice(attrs, -2); // keep only the most recent 2
+
+    var new_state = {
+      kind: this.state.kind,
+      balance: this.state.balance,
+      goal: this.state.goal,
+      end_date: this.state.end_date,
+      deposit: this.state.deposit,
+      fixed_attrs: attrs,
+    }
+    new_state[attr] = value;
+    var tobenull = _.difference(['goal', 'deposit', 'end_date'], attrs);
+    _.each(tobenull, function(name) {
+      console.log('set', name, 'to null');
+      new_state[name] = null;
+    })
+    console.log('new_state', new_state);
+
+    this.setState(new_state);
+    this.computeMissing(new_state);
+  },
+  endDateChanged: function(newval) {
+    this.setGoalAttr('end_date', newval);
+  }, 
+  goalChanged: function(newval) {
+    this.setGoalAttr('goal', newval);
+  },
+  depositChanged: function(newval) {
+    console.log('deposit changed', newval);
+    this.setGoalAttr('deposit', newval);
+  },
+
+  computeMissing: function(state) {
+    console.log('computeMissing', state);
+    var computed = computeBucketDeposit(state);
+    console.log('computed', computed);
+    computed.deposit = computed.deposit || '';
+    computed.goal = computed.goal || '';
+    computed.end_date = computed.end_date || '';
+    this.setState(computed);
+  },
+  
+  bucketKindChanged: function(e) {
+    console.log("bucketKindChanged");
+    var newstate = _.merge(this.state, {
+      kind: e.target.value,
+    });
+    newstate = _.merge(newstate, {
+      fixed_attrs: this.initialFixedAttrs(newstate),
+    });
+    this.computeMissing(newstate);
+  },
+  
   render: function() {
     var goal_stuff = (
       <div>
         <div className="pair">
           <div className="label">Target amount</div>
-          <div className="control"><input type="text" name="goal" /></div>
+          <div className="control"><MoneyInput value={this.state.goal} onChange={this.goalChanged}/></div>
         </div>
         <div className="pair">
           <div className="label">Target date</div>
           <div className="control">
-            <select name="month">
-              <option>Jan</option>
-              <option>Feb</option>
-              <option>Mar</option>
-              <option>Apr</option>
-              <option>May</option>
-              <option>Jun</option>
-              <option>Jul</option>
-              <option>Aug</option>
-              <option>Sep</option>
-              <option>Oct</option>
-              <option>Nov</option>
-              <option>Dec</option>
-            </select>
-            <input type="text" name="year" size="4" />
+            <MonthInput value={this.state.end_date} onChange={this.endDateChanged} />
           </div>
         </div>
         <div className="pair">
           <div className="label">Monthly deposit</div>
-          <div className="control"><input type="text" name="deposit" /></div>
+          <div className="control"><MoneyInput value={this.state.deposit} onChange={this.depositChanged}/></div>
         </div>
       </div>
     );
     var deposit_stuff = (
       <div className="pair">
         <div className="label">Monthly deposit</div>
-        <div className="control"><input type="text" name="deposit" /></div>
+        <div className="control"><MoneyInput value={this.state.deposit} onChange={this.depositChanged}/></div>
       </div>
     );
     var extra = null;
-    if (this.state.type === 'deposit') {
-      extra = deposit_stuff
-    } else if (this.state.type === 'goal') {
-      extra = goal_stuff
+    var goal = '';
+    var end_date = '';
+    var deposit = '';
+
+    if (this.state.kind === 'deposit') {
+      extra = deposit_stuff;
+      deposit = this.state.deposit || '';
+    } else if (this.state.kind === 'goal') {
+      extra = goal_stuff;
+      if (_.includes(this.state.fixed_attrs, 'goal')) {
+        goal = this.state.goal;
+      }
+      if (_.includes(this.state.fixed_attrs, 'deposit')) {
+        deposit = this.state.deposit;
+      }
+      if (_.includes(this.state.fixed_attrs, 'end_date')) {
+        end_date = this.state.end_date;
+      }
     }
+
+
 
     return (
     <div>
       <div className="pair">
         <div className="label"></div>
         <div className="control">
-          This bucket is for <select value={this.state.type} onChange={this.bucketTypeChanged}>
+          This bucket is for <select value={this.state.kind} name="kind" onChange={this.bucketKindChanged}>
             <option value="">holding money</option>
             <option value="deposit">a regular expense</option>
             <option value="goal">saving up</option>
           </select>
+          <input type="hidden" name="goal" value={goal} />
+          <input type="hidden" name="end_date" value={end_date} />
+          <input type="hidden" name="deposit" value={deposit} />
         </div>
-        {extra}
       </div>
+      {extra}
     </div>
     );
   }

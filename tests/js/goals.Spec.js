@@ -9,7 +9,7 @@ describe("computeBucketDeposit", function() {
 
     beforeEach(function() {
       result = compute({
-        kind:"",
+        kind: "",
         deposit: 1200,
         goal: 3000,
         end_date: "2001-04-02",
@@ -158,6 +158,33 @@ describe("computeBucketDeposit", function() {
         expect(res.deposit).toBe(1000);
       });
     });
+
+    describe("when goal is null", function() {
+      beforeEach(function() {
+        input.today = "2001-01-01";
+        input.balance = 0;
+        input.deposit = 100
+        input.goal = null;
+        input.end_date = "2001-03-01";
+      });
+
+      it("should carry the deposit through", function() {
+        expect(compute(input).deposit).toBe(100);
+      });
+
+      it("should carry the end_date through", function() {
+        expect(compute(input).end_date).toBe("2001-03-01");
+      });
+
+      it("should compute the goal", function() {
+        expect(compute(input).goal).toBe(200);
+      });
+
+      it("should handle negatives", function() {
+        input.deposit = -100;
+        expect(compute(input).goal).toBe(-200);
+      });
+    })
 
     describe("when end_date is null", function() {
 
