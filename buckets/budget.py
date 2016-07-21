@@ -71,14 +71,14 @@ class BudgetManagement(object):
     @policy.allow(anything)
     def create_group(self, name):
         r = self.engine.execute(select([
-            func.max(Group.c.rank)])
+            func.max(Group.c.ranking)])
             .where(Group.c.farm_id == self.farm_id))
         maxrank = r.fetchone()[0] or 'a'
         thisrank = rankBetween(maxrank, None)
         r = self.engine.execute(Group.insert()
             .values(
                 farm_id=self.farm_id,
-                rank=thisrank,
+                ranking=thisrank,
                 name=name)
             .returning(Group))
         return dict(r.fetchone())
@@ -87,23 +87,13 @@ class BudgetManagement(object):
     def update_group(self, id, data):
         updatable = [
             'name',
-            'rank',
+            'ranking',
         ]
         values = {}
         for key in updatable:
             val = data.get(key)
             if val is not None:
                 values[key] = val
-
-        # if 'rank' in values:
-        #     r = self.engine.execute(select([Group.c.id])
-        #         .where(and_(
-        #             Group.c.rank == values['rank'],
-        #             Group.c.id != id,
-        #             Group.c.farm_id == self.farm_id,
-        #         )))
-        #     if r.fetchone():
-        #         raise Error("Duplicate rank")
 
         try:
             self.engine.execute(Group.update()
@@ -113,7 +103,7 @@ class BudgetManagement(object):
                     Group.c.farm_id == self.farm_id
                 )))
         except sqlalchemy.exc.IntegrityError:
-            raise Error("Duplicate rank")
+            raise Error("Duplicate ranking")
         return self.get_group(id)
 
     @policy.allow(anything)
@@ -135,8 +125,33 @@ class BudgetManagement(object):
         r = self.engine.execute(
             select([Group])
             .where(Group.c.farm_id == self.farm_id)
-            .order_by(Group.c.rank))
+            .order_by(Group.c.ranking))
         return [dict(x) for x in r.fetchall()]
+
+    @policy.allow(anything)
+    def move_group(self, group_id, after_group):
+        self.get_group(group_id)
+        after = self.get_group(after_group)
+        rank_start = after['ranking']
+        rank_end = None
+
+        r = self.engine.execute(select([
+            Group.c.ranking])
+            .where(and_(
+                Group.c.farm_id == self.farm_id,
+                Group.c.ranking > after['ranking'],
+            ))
+            .order_by(Group.c.ranking)
+            .limit(1))
+        row = r.fetchone()
+        if row:
+            rank_end = row[0]
+
+        new_rank = rankBetween(rank_start, rank_end)
+        return self.update_group(group_id, {
+            'ranking': new_rank,
+        })
+
 
     @policy.allow(anything)
     def move_bucket(self, bucket_id, after_bucket=None, group_id=None):
@@ -148,17 +163,17 @@ class BudgetManagement(object):
         if after_bucket:
             # move after bucket
             after = self.get_bucket(after_bucket)
-            rank_start = after['rank']
+            rank_start = after['ranking']
             rank_end = None
 
             r = self.engine.execute(select([
-                Bucket.c.rank])
+                Bucket.c.ranking])
                 .where(and_(
                     Bucket.c.group_id == after['group_id'],
                     Bucket.c.farm_id == self.farm_id,
-                    Bucket.c.rank > after['rank'],
+                    Bucket.c.ranking > after['ranking'],
                 ))
-                .order_by(Bucket.c.rank)
+                .order_by(Bucket.c.ranking)
                 .limit(1))
             row = r.fetchone()
             if row:
@@ -166,29 +181,27 @@ class BudgetManagement(object):
 
             new_rank = rankBetween(rank_start, rank_end)
             return self.update_bucket(bucket_id, {
-                'rank': new_rank,
+                'ranking': new_rank,
                 'group_id': after['group_id'],
             })
 
         elif group_id:
-            # move to end of group
+            # move to beginning of group
             self.get_group(group_id)
 
-            r = self.engine.execute(select([func.max(Bucket.c.rank)])
+            r = self.engine.execute(select([func.min(Bucket.c.ranking)])
                 .where(and_(
                     Bucket.c.group_id == group_id,
                     Bucket.c.farm_id == self.farm_id)))
-            maxrank = r.fetchone()[0]
-            new_rank = rankBetween(maxrank, None)
+            minrank = r.fetchone()[0]
+            new_rank = rankBetween(None, minrank)
             return self.update_bucket(bucket_id, {
-                'rank': new_rank,
+                'ranking': new_rank,
                 'group_id': group_id,
             })
 
-
         return self.get_bucket(bucket_id)
             
-
 
     #----------------------------------------------------------
     # Bucket
@@ -224,7 +237,7 @@ class BudgetManagement(object):
             'deposit',
             'goal',
             'end_date',
-            'rank',
+            'ranking',
             'group_id',
         ]
         values = {}

@@ -21,6 +21,14 @@ Store.updateBucket = function(bucket) {
   });
   Store.rerender();
 }
+Store.updateGroup = function(group) {
+  _.each(Store.groups, function(old_group) {
+    if (old_group.id === group.id) {
+      _.merge(old_group, group);
+    }
+  });
+  Store.rerender();
+}
 
 
 var GroupRow = React.createClass({
@@ -31,9 +39,6 @@ var GroupRow = React.createClass({
     }
   },
   pendingChanged: function() {
-    // XXX
-  },
-  bucketIsDirty: function() {
     // XXX
   },
 
@@ -78,16 +83,32 @@ var GroupRow = React.createClass({
       _.includes(ev.dataTransfer.types, 'group');
   },
   acceptDrop_group: function(group_id) {
-    console.log('accepting group', group_id);
+    apiRequest({
+      method: 'move_group',
+      kwargs: {
+        group_id: group_id,
+        after_group: this.props.group.id,
+      }
+    }, function(response) {
+      this.props.onGroupChanged(group_id);
+    }.bind(this));
   },
   acceptDrop_bucket: function(bucket_id) {
-    console.log('accepting bucket', bucket_id);
+    apiRequest({
+      method: 'move_bucket',
+      kwargs: {
+        bucket_id: bucket_id,
+        group_id: this.props.group.id,
+      }
+    }, function(response) {
+      this.props.onBucketChanged(bucket_id);
+    }.bind(this));
   },
 
   render: function() {
     var bucket_rows = this.props.buckets.map(function(bucket) {
       return (
-        <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.pendingChanged} onBucketDirty={this.bucketIsDirty}></BucketRow>
+        <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.props.onPendingChanged} onBucketChanged={this.props.onBucketChanged}></BucketRow>
       );
     }.bind(this));
     var class_name = 'group';
@@ -104,8 +125,11 @@ var GroupRow = React.createClass({
     return (
       <tbody>
         <tr className="group" className={class_name} draggable={draggable} onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
-          <td colSpan="2000">
+          <td colSpan="5">
             {this.props.group.name}
+          </td>
+          <td>
+            <a href={'groups/'+this.props.group.id}>Edit</a> 
           </td>
         </tr>
         {bucket_rows}
@@ -123,7 +147,7 @@ var BucketRow = React.createClass({
     }
   },
   refreshBucket: function() {
-    this.props.onBucketDirty(this.props.bucket);
+    this.props.onBucketChanged(this.props.bucket);
   },
   pendingKeyUp: function(e) {
     if (e.keyCode === 13) {
@@ -190,7 +214,15 @@ var BucketRow = React.createClass({
     return _.includes(ev.dataTransfer.types, 'bucket');
   },
   acceptDrop_bucket: function(bucket_id) {
-    console.log('accepting bucket', bucket_id);
+    apiRequest({
+      method: 'move_bucket',
+      kwargs: {
+        bucket_id: bucket_id,
+        after_bucket: this.props.bucket.id,
+      }
+    }, function(response) {
+      this.props.onBucketChanged(bucket_id);
+    }.bind(this));
   },
 
 
@@ -237,11 +269,27 @@ var BucketTable = React.createClass({
     this.state.pendings[bucket.id] = pending;
     this.setState(this.state);
   },
-  bucketIsDirty: function(bucket) {
+  groupChanged: function(group_id) {
+    if (_.isObject(group_id)) {
+      group_id = group_id.id;
+    }
+    apiRequest({
+      method: 'get_group',
+      kwargs: {
+        id: group_id,
+      }
+    }, function(new_group) {
+      Store.updateGroup(new_group);
+    })
+  },
+  bucketChanged: function(bucket_id) {
+    if (_.isObject(bucket_id)) {
+      bucket_id = bucket_id.id;
+    }
     apiRequest({
       method: 'get_bucket',
       kwargs: {
-        id: bucket.id,
+        id: bucket_id,
       }
     }, function(new_bucket) {
       Store.updateBucket(new_bucket);
@@ -250,48 +298,41 @@ var BucketTable = React.createClass({
   render: function() {
     var group_buckets = {};
     var groups = [];
-    _.each(this.props.buckets, function(bucket) {
+    var deposit_total = 0;
+    var balance_total = 0;
+
+    _.each(_.sortBy(this.props.buckets, ['ranking']), function(bucket) {
       var group_id = bucket.group_id || 'NOGROUP';
       if (!group_buckets[group_id]) {
         group_buckets[group_id] = [];
       }
       group_buckets[group_id].push(bucket);
+      _.merge(bucket, computeBucketDeposit(bucket));
+      balance_total += bucket.balance;
+      deposit_total += bucket.deposit;
     })
-    _.each(this.props.groups, function(group) {
+    _.each(_.sortBy(this.props.groups, ['ranking']), function(group) {
       var buckets = group_buckets[group.id] || [];
-      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} />);
-    });
+      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} onBucketChanged={this.bucketChanged} onGroupChanged={this.groupChanged} onPendingChanged={this.pendingChanged} />);
+    }.bind(this));
     if (group_buckets['NOGROUP']) {
       var buckets = group_buckets['NOGROUP'];
       var group = {
         'id': 'NOGROUP',
-        'name': 'Floaters',
+        'name': 'Everything else',
         'rank': 'z',
       }
-      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} />);
+      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} onBucketChanged={this.bucketChanged} onPendingChanged={this.pendingChanged} />);
     }
-    /* var bucket_rows = this.props.buckets.map(function(bucket) {
-      balance_total += bucket.balance;
-      var computed = computeBucketDeposit(bucket);
-      bucket.end_date = bucket.end_date || computed.end_date;
-      bucket.goal = bucket.goal || computed.goal;
-      bucket.deposit = bucket.deposit || computed.deposit;
-
-      deposit_total += bucket.deposit;
-      return (
-        <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.pendingChanged} onBucketDirty={this.bucketIsDirty}></BucketRow>
-      );
-    }.bind(this)); */
     var pending_total = _.sum(_.values(this.state.pendings));
-    var deposit_total = 0;
-    var balance_total = 0;
+    
     return (
       <table className="ledger" width="100%">
         <thead>
           <tr>
             <th>Bucket</th>
             <th className="right">Balance</th>
-            <th className="right">Deposit</th>
+            <th className="right">Deposit/<br/>Withdraw</th>
             <th className="right">Monthly<br/>Deposit</th>
             <th>Goal</th>
             <th>Edit</th>

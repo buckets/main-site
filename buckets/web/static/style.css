@@ -109,17 +109,17 @@ table.ledger .right {
     text-align: right;
 }
 table.ledger tr.underdrag td {
-    border-bottom: 4px solid #f1c40f !important;
+    border-bottom: 4px solid rgba(231, 76, 60,1.0) !important;
 }
 table.ledger .dragging {
     opacity: 0.2;
 }
 
 table.ledger tr.group td:first-child {
-    border-left: 12px solid rgba(155, 89, 182,1.0);
+    border-left: 6px solid rgba(22, 160, 133,1.0);
 }
 table.ledger tr.group td {
-    color: rgba(155, 89, 182,1.0);
+    color: rgba(22, 160, 133,1.0);
 }
 
 

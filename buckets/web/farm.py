@@ -82,7 +82,7 @@ def bucket(bucket_id):
         
         g.farm.update_bucket(id=bucket_id, data=data)
         flash('{0} updated'.format(data['name']))
-        return redirect(url_for('.bucket', bucket_id=bucket_id))
+        return redirect(url_for('.buckets'))
     bucket = g.farm.get_bucket(id=bucket_id)
     return render_template('farm/bucket.html',
         bucket=bucket)
@@ -93,6 +93,19 @@ def groups():
     g.farm.create_group(name=name)
     flash('Group created')
     return redirect(url_for('.buckets'))
+
+@blue.route('/groups/<int:group_id>', methods=['GET', 'POST'])
+def group(group_id):
+    if request.method == 'POST':
+        data = {}
+        data['name'] = request.form['name']
+        
+        g.farm.update_group(id=group_id, data=data)
+        flash('{0} updated'.format(data['name']))
+        return redirect(url_for('.buckets'))
+    group = g.farm.get_group(id=group_id)
+    return render_template('farm/group.html',
+        group=group)
 
 @blue.route('/transactions')
 def transactions():

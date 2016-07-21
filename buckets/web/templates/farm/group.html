@@ -1,0 +1,20 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+<h1>{{ group.name }}</h1>
+
+<form method="post">
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name" value="{{ group.name }}" autofocus></div>
+  </div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control"><button type="submit">Save Changes</button></div>
+  </div>
+</div>
+</form>
+
+{% endblock %}
