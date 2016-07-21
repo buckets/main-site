@@ -8,6 +8,7 @@ from datetime import date, datetime
 import pytest
 from buckets.authn import UserManagement
 from buckets.budget import BudgetManagement
+from buckets.error import Error
 
 @pytest.fixture
 def user_api(engine):
@@ -54,17 +55,59 @@ class TestAccount(object):
         assert again == new_account
 
 
+class TestGroup(object):
+
+    def test_create(self, api):
+        group = api.create_group('Something')
+        assert group['id'] is not None
+        assert group['created'] is not None
+        assert group['farm_id'] == api.farm_id
+        assert group['name'] == 'Something'
+        assert group['rank'] is not None
+
+    def test_create_rank(self, api):
+        group1 = api.create_group('First')
+        group2 = api.create_group('Second')
+        group3 = api.create_group('Third')
+        assert group1['rank'] < group2['rank']
+        assert group2['rank'] < group3['rank']
+
+    def test_update(self, api):
+        group = api.create_group('Hello')
+        new = api.update_group(group['id'], {
+            'name': 'Something',
+            'rank': 'h',
+        })
+        assert new['id'] == group['id']
+        assert new['name'] == 'Something'
+        assert new['rank'] == 'h'
+        again = api.get_group(group['id'])
+        assert new == again
+
+    def test_update_samerank(self, api):
+        """
+        It's an error to have groups with the same rank.
+        """
+        group1 = api.create_group('a')
+        group2 = api.create_group('b')
+        with pytest.raises(Error):
+            api.update_group(group1['id'], {
+                'rank': group2['rank'],
+            })
+
+
 class TestBucket(object):
 
     def test_create(self, api):
         bucket = api.create_bucket('Food')
         assert bucket['id'] is not None
         assert bucket['created'] is not None
+        assert bucket['farm_id'] == api.farm_id
         assert bucket['name'] == 'Food'
         assert bucket['balance'] == 0
         assert bucket['out_to_pasture'] == False
         assert bucket['group_id'] is None
-        assert bucket['group_rank'] == 0
+        assert bucket['group_rank'] is not None
         assert bucket['kind'] == ''
         assert bucket['goal'] == None
         assert bucket['end_date'] == None

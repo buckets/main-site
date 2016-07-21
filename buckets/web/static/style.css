@@ -108,6 +108,12 @@ table.ledger tr.subtotal td {
 table.ledger .right {
     text-align: right;
 }
+table.ledger tr.underdrag td {
+    border-top: 4px solid #f1c40f !important;
+}
+table.ledger .dragging {
+    opacity: 0.2;
+}
 
 
 /*input[type=text] {

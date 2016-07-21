@@ -46,9 +46,9 @@ def accounts():
 def buckets():
     if request.method == 'POST':
         name = request.values['name']
-        g.farm.create_bucket(name=name)
+        bucket = g.farm.create_bucket(name=name)
         flash('Created bucket')
-        return redirect(url_for('farm.buckets'))
+        return redirect(url_for('farm.bucket', bucket_id=bucket['id']))
     buckets = g.farm.list_buckets()
     return render_template('farm/buckets.html',
         buckets=buckets)
@@ -84,6 +84,11 @@ def bucket(bucket_id):
     bucket = g.farm.get_bucket(id=bucket_id)
     return render_template('farm/bucket.html',
         bucket=bucket)
+
+@blue.route('/groups', methods=['POST'])
+def groups():
+    flash('Group created')
+    return redirect(url_for('.buckets'))
 
 @blue.route('/transactions')
 def transactions():

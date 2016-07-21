@@ -33,6 +33,9 @@ window.Money = React.createClass({
     if (this.props.value < 0) {
       class_name += ' negative';
     }
+    if (this.props.hidezero && this.props.value === 0) {
+      value = '';
+    }
     return (<span className={class_name}>{value}</span>)
   }
 });

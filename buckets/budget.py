@@ -1,7 +1,9 @@
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 
-from buckets.schema import Account, Bucket, BucketTrans
+from buckets.schema import Account, Bucket, BucketTrans, Group
 from buckets.authz import AuthPolicy, anything
+from buckets.rank import rankBetween
+from buckets.error import Error
 
 
 class BudgetManagement(object):
@@ -57,6 +59,66 @@ class BudgetManagement(object):
         r = self.engine.execute(select([Account])
             .where(Account.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
+
+
+    #----------------------------------------------------------
+    # Group
+
+    @policy.allow(anything)
+    def create_group(self, name):
+        r = self.engine.execute(select([
+            func.max(Group.c.rank)])
+            .where(Group.c.farm_id == self.farm_id))
+        maxrank = r.fetchone()[0] or 'a'
+        thisrank = rankBetween(maxrank, None)
+        r = self.engine.execute(Group.insert()
+            .values(
+                farm_id=self.farm_id,
+                rank=thisrank,
+                name=name)
+            .returning(Group))
+        return dict(r.fetchone())
+
+    @policy.allow(anything)
+    def update_group(self, id, data):
+        updatable = [
+            'name',
+            'rank',
+        ]
+        values = {}
+        for key in updatable:
+            val = data.get(key)
+            if val is not None:
+                values[key] = val
+
+        if 'rank' in values:
+            r = self.engine.execute(select([Group.c.id])
+                .where(and_(
+                    Group.c.rank == values['rank'],
+                    Group.c.id != id,
+                    Group.c.farm_id == self.farm_id,
+                )))
+            if r.fetchone():
+                raise Error("Duplicate rank")
+
+        self.engine.execute(Group.update()
+            .values(**values)
+            .where(and_(
+                Group.c.id == id,
+                Group.c.farm_id == self.farm_id
+            )))
+        return self.get_group(id)
+
+    @policy.allow(anything)
+    def get_group(self, id):
+        r = self.engine.execute(
+            select([Group])
+            .where(
+                and_(
+                    Group.c.id == id,
+                    Group.c.farm_id == self.farm_id
+                )))
+        return dict(r.fetchone())
 
 
     #----------------------------------------------------------

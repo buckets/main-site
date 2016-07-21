@@ -37,6 +37,13 @@ Account = Table('account', metadata,
     Column('balance', Integer),
     Column('currency', String),
 )
+Group = Table('bucket_group', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('farm_id', Integer),
+    Column('name', String),
+    Column('rank', String, nullable=False),
+)
 Bucket = Table('bucket', metadata,
     Column('id', Integer, primary_key=True),
     Column('created', DateTime),
@@ -109,6 +116,17 @@ patches['init'] = [
         name text,
         balance integer default '0' not null,
         currency varchar(3) default 'USD'
+    )''',
+
+    #-------------------------------------
+    # group
+    #-------------------------------------
+    '''CREATE TABLE bucket_group (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        farm_id integer,
+        name text,
+        rank text not null
     )''',
 
     #-------------------------------------

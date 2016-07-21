@@ -26,6 +26,8 @@ var BucketRow = React.createClass({
   getInitialState: function() {
     return {
       pending_amount: '',
+      underDrag: false,
+      isDragging: false,
     }
   },
   refreshBucket: function() {
@@ -58,13 +60,52 @@ var BucketRow = React.createClass({
       this.refreshBucket();
     }.bind(this));
   },
+  dragStart: function(ev) {
+    if (handle.contains(this.state.target)) {
+      console.log('contains');
+    }
+    ev.dataTransfer.setData('bucket', this.props.bucket.id)
+    this.setState({isDragging: true});
+  },
+  dragEnd: function(ev) {
+    this.setState({isDragging: false});
+  },
+  drop: function(ev) {
+    this.setState({underDrag: false});
+    ev.preventDefault();
+    console.log('drop', this.props.bucket.name, ev);
+    var data = ev.dataTransfer.getData('bucket');
+    console.log('drop data', data);
+  },
+  dragOver: function(ev) {
+    console.log('dragOver', this.props.bucket.name);
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData('bucket');
+    this.setState({underDrag: true});
+  },
+  dragLeave: function(ev) {
+    console.log('leave', this.props.bucket.name);
+    ev.preventDefault();
+    this.setState({underDrag: false});
+  },
+  onHandleMouseDown: function(ev) {
+    console.log('mousedown', ev.target);
+  },
   render: function() {
     var goal_bar;
+    var class_name = '';
+    if (this.state.isDragging) {
+      class_name += ' dragging';
+    }
+    if (this.state.underDrag) {
+      class_name += ' underdrag';
+    }
     if (this.props.bucket.kind === 'goal') {
       goal_bar = (<GoalBar max={this.props.bucket.goal} value={this.props.bucket.balance} />);
     }
     return (
-      <tr>
+      <tr className={class_name} draggable="true" onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
+        <td className="handle" onMouseDown={this.onHandleMouseDown}>H</td>
         <td>{this.props.bucket.name}</td>
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td className="right">
@@ -124,6 +165,7 @@ var BucketTable = React.createClass({
       <table className="ledger" width="100%">
         <thead>
           <tr>
+            <th></th>
             <th>Bucket</th>
             <th className="right">Balance</th>
             <th className="right">Deposit</th>
@@ -137,6 +179,7 @@ var BucketTable = React.createClass({
         </tbody>
         <tbody>
           <tr className="subtotal">
+            <td></td>
             <td>Total</td>
             <td className="right"><Money value={balance_total} /></td>
             <td className="right">
@@ -156,7 +199,7 @@ var BucketTable = React.createClass({
 Store.rerender();
 </script>
 
-<h2>Add bucket</h2>
+<h2>Create bucket</h2>
 <form method="post">
 <div class="form">
   <div class="pair">
@@ -165,7 +208,21 @@ Store.rerender();
   </div>
   <div class="pair">
     <div class="label"></div>
-    <div class="control"><button type="submit">Add Bucket</button></div>
+    <div class="control"><button type="submit">Create Bucket</button></div>
+  </div>
+</div>
+</form>
+
+<h2>Create group</h2>
+<form method="post" action="{{ url_for('.groups') }}">
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name"></div>
+  </div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control"><button type="submit">Create Group</button></div>
   </div>
 </div>
 </form>
