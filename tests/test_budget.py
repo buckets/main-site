@@ -79,6 +79,28 @@ class TestAccount(object):
         assert trans['posted'] == datetime(2000, 1, 1)
 
 
+class TestTransaction(object):
+
+    def test_categorize(self, api):
+        account = api.create_account('Checking')
+        b1 = api.create_bucket('Bucket1')
+        b2 = api.create_bucket('Bucket2')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+
+        new_trans = api.categorize(trans['id'], buckets=[
+            {'bucket_id': b1['id'], 'amount': 400},
+            {'bucket_id': b2['id']},
+        ])
+        assert new_trans['cat_likely'] == True
+        assert len(new_trans['buckets']) == 2
+        assert {'bucket_id': b1['id'], 'amount': 400} in new_trans['buckets']
+        assert {'bucket_id': b2['id'], 'amount': 100} in new_trans['buckets']
+
+        transactions = api.list_account_trans()
+        assert new_trans in transactions
+
+
 class TestGroup(object):
 
     def test_create(self, api):

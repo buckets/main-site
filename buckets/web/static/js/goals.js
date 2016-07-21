@@ -15,6 +15,24 @@ function parseMonth(s) {
   }
   return new Date(year, m, 1);
 }
+function parseDate(s) {
+  if (s instanceof Date) {
+    return s;
+  } else if (!s) {
+    return null;
+  }
+  var parts = s.split('-');
+  if (parts.length > 3 || parts.length < 2) {
+    return null;
+  }
+  var year = parseInt(parts[0]);
+  var m = parseInt(parts[1]) - 1;
+  if (m < 0 || m > 11) {
+    return null;
+  }
+  var d = parseInt(parts[2]);
+  return new Date(year, m, d);
+}
 function _zeropad(x, n) {
   while (x.length < n) {
     x = '0' + x;

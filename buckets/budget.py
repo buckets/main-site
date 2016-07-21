@@ -77,10 +77,66 @@ class BudgetManagement(object):
             values['posted'] = posted
         r = self.engine.execute(AccountTrans.insert()
             .values(**values)
-            .returning(AccountTrans))
-        trans = dict(r.fetchone())
-        trans['buckets'] = []
-        return trans
+            .returning(AccountTrans.c.id))
+        trans_id = r.fetchone()[0]
+        return self.get_account_trans(trans_id)
+
+    @policy.allow(anything)
+    def list_account_trans(self):
+        return list(self._list_account_trans())
+
+    def _list_account_trans(self, wheres=None):
+        wheres = wheres or ()
+        r = self.engine.execute(select([
+                AccountTrans,
+                func.array_agg(
+                    func.json_build_object(
+                        'bucket_id', BucketTrans.c.id,
+                        'amount', BucketTrans.c.amount
+                    )
+                ).label('buckets'),
+            ]).select_from(
+                AccountTrans.outerjoin(
+                    BucketTrans,
+                    BucketTrans.c.account_transaction_id == AccountTrans.c.id)
+            )
+            .where(and_(
+                AccountTrans.c.account_id == Account.c.id,
+                Account.c.farm_id == self.farm_id,
+                *wheres
+            ))
+            .group_by(AccountTrans.c.id)
+            .order_by(AccountTrans.c.posted))
+        for row in r.fetchall():
+            trans = dict(row)
+            trans['buckets'] = [x for x in trans['buckets'] if x['bucket_id']]    
+            yield trans
+
+    @policy.allow(anything)
+    def get_account_trans(self, id):
+        trans = list(self._list_account_trans((AccountTrans.c.id == id,)))
+        if not trans:
+            raise NotFound()
+        else:
+            return trans[0]
+
+    @policy.allow(anything)
+    def categorize(self, trans_id, buckets):
+        trans = self.get_account_trans(trans_id)
+        left = trans['amount']
+        for bucket in buckets:
+            if bucket.get('amount', None) is None:
+                bucket['amount'] = left
+            left -= bucket['amount']
+            if bucket['amount']:
+                self.bucket_transact(bucket['bucket_id'],
+                    amount=bucket['amount'],
+                    posted=trans['posted'],
+                    _account_transaction_id=trans_id)
+        self.engine.execute(AccountTrans.update()
+            .values(cat_likely=True)
+            .where(AccountTrans.c.id == trans_id))
+        return self.get_account_trans(trans_id)
 
 
     #----------------------------------------------------------
@@ -282,11 +338,13 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.allow(anything)
-    def bucket_transact(self, bucket_id, amount, memo='', posted=None):
+    def bucket_transact(self, bucket_id, amount, memo='', posted=None,
+            _account_transaction_id=None):
         values = {
             'bucket_id': bucket_id,
             'amount': amount,
             'memo': memo,
+            'account_transaction_id': _account_transaction_id,
         }
         if posted:
             values['posted'] = posted
