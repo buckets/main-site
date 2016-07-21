@@ -1,9 +1,10 @@
+import sqlalchemy
 from sqlalchemy import select, and_, func
 
 from buckets.schema import Account, Bucket, BucketTrans, Group
 from buckets.authz import AuthPolicy, anything
 from buckets.rank import rankBetween
-from buckets.error import Error
+from buckets.error import Error, NotFound
 
 
 class BudgetManagement(object):
@@ -36,7 +37,10 @@ class BudgetManagement(object):
                     Account.c.id == id,
                     Account.c.farm_id == self.farm_id
                 )))
-        return dict(r.fetchone())
+        row = r.fetchone()
+        if not row:
+            raise NotFound()
+        return dict(row)
 
     @policy.allow(anything)
     def update_account(self, id, data):
@@ -91,22 +95,25 @@ class BudgetManagement(object):
             if val is not None:
                 values[key] = val
 
-        if 'rank' in values:
-            r = self.engine.execute(select([Group.c.id])
-                .where(and_(
-                    Group.c.rank == values['rank'],
-                    Group.c.id != id,
-                    Group.c.farm_id == self.farm_id,
-                )))
-            if r.fetchone():
-                raise Error("Duplicate rank")
+        # if 'rank' in values:
+        #     r = self.engine.execute(select([Group.c.id])
+        #         .where(and_(
+        #             Group.c.rank == values['rank'],
+        #             Group.c.id != id,
+        #             Group.c.farm_id == self.farm_id,
+        #         )))
+        #     if r.fetchone():
+        #         raise Error("Duplicate rank")
 
-        self.engine.execute(Group.update()
-            .values(**values)
-            .where(and_(
-                Group.c.id == id,
-                Group.c.farm_id == self.farm_id
-            )))
+        try:
+            self.engine.execute(Group.update()
+                .values(**values)
+                .where(and_(
+                    Group.c.id == id,
+                    Group.c.farm_id == self.farm_id
+                )))
+        except sqlalchemy.exc.IntegrityError:
+            raise Error("Duplicate rank")
         return self.get_group(id)
 
     @policy.allow(anything)
@@ -118,7 +125,69 @@ class BudgetManagement(object):
                     Group.c.id == id,
                     Group.c.farm_id == self.farm_id
                 )))
-        return dict(r.fetchone())
+        row = r.fetchone()
+        if not row:
+            raise NotFound()
+        return dict(row)
+
+    @policy.allow(anything)
+    def list_groups(self):
+        r = self.engine.execute(
+            select([Group])
+            .where(Group.c.farm_id == self.farm_id)
+            .order_by(Group.c.rank))
+        return [dict(x) for x in r.fetchall()]
+
+    @policy.allow(anything)
+    def move_bucket(self, bucket_id, after_bucket=None, group_id=None):
+        if group_id and after_bucket:
+            raise Error("Either supply after_bucket or group_id; not both")
+
+        self.get_bucket(bucket_id)
+
+        if after_bucket:
+            # move after bucket
+            after = self.get_bucket(after_bucket)
+            rank_start = after['rank']
+            rank_end = None
+
+            r = self.engine.execute(select([
+                Bucket.c.rank])
+                .where(and_(
+                    Bucket.c.group_id == after['group_id'],
+                    Bucket.c.farm_id == self.farm_id,
+                    Bucket.c.rank > after['rank'],
+                ))
+                .order_by(Bucket.c.rank)
+                .limit(1))
+            row = r.fetchone()
+            if row:
+                rank_end = row[0]
+
+            new_rank = rankBetween(rank_start, rank_end)
+            return self.update_bucket(bucket_id, {
+                'rank': new_rank,
+                'group_id': after['group_id'],
+            })
+
+        elif group_id:
+            # move to end of group
+            self.get_group(group_id)
+
+            r = self.engine.execute(select([func.max(Bucket.c.rank)])
+                .where(and_(
+                    Bucket.c.group_id == group_id,
+                    Bucket.c.farm_id == self.farm_id)))
+            maxrank = r.fetchone()[0]
+            new_rank = rankBetween(maxrank, None)
+            return self.update_bucket(bucket_id, {
+                'rank': new_rank,
+                'group_id': group_id,
+            })
+
+
+        return self.get_bucket(bucket_id)
+            
 
 
     #----------------------------------------------------------
@@ -141,7 +210,10 @@ class BudgetManagement(object):
                     Bucket.c.id == id,
                     Bucket.c.farm_id == self.farm_id
                 )))
-        return dict(r.fetchone())
+        row = r.fetchone()
+        if not row:
+            raise NotFound()
+        return dict(row)
 
     @policy.allow(anything)
     def update_bucket(self, id, data):
@@ -151,12 +223,19 @@ class BudgetManagement(object):
             'kind',
             'deposit',
             'goal',
-            'end_date']
+            'end_date',
+            'rank',
+            'group_id',
+        ]
         values = {}
         for key in updatable:
             val = data.get(key)
             if val is not None:
                 values[key] = val
+
+        if 'group_id' in values:
+            self.get_group(values['group_id'])
+
         self.engine.execute(Bucket.update()
             .values(**values)
             .where(and_(

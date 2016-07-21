@@ -8,9 +8,10 @@
 var target_el = thisNext();
 
 var Store = {};
+Store.groups = {{ groups|json|safe }};
 Store.buckets = {{ buckets|json|safe }};
 Store.rerender = function() {
-  ReactDOM.render(<BucketTable buckets={Store.buckets}/>, target_el);
+  ReactDOM.render(<BucketTable buckets={Store.buckets} groups={Store.groups}/>, target_el);
 }
 Store.updateBucket = function(bucket) {
   _.each(Store.buckets, function(old_bucket) {
@@ -21,6 +22,97 @@ Store.updateBucket = function(bucket) {
   Store.rerender();
 }
 
+
+var GroupRow = React.createClass({
+  getInitialState: function() {
+    return {
+      underDrag: false,
+      isDragging: false,
+    }
+  },
+  pendingChanged: function() {
+    // XXX
+  },
+  bucketIsDirty: function() {
+    // XXX
+  },
+
+  // Dragging
+  dragStart: function(ev) {
+    ev.dataTransfer.setData('group', this.props.group.id);
+    this.setState({isDragging: true});
+  },
+  dragEnd: function(ev) {
+    this.setState({isDragging: false});
+  },
+
+  // Dropping
+  drop: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      this.setState({underDrag: false});
+      ev.preventDefault();
+      _.each(ev.dataTransfer.items, function(item) {
+        var data = ev.dataTransfer.getData(item.type);
+        var method = 'acceptDrop_' + item.type;
+        this[method](data);
+      }.bind(this))
+    }
+  },
+  dragOver: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: true});
+    }
+  },
+  dragLeave: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: false});
+    }
+  },
+  canAcceptDrop: function(ev) {
+    if (this.props.group.id === 'NOGROUP') {
+      return false;
+    }
+    return _.includes(ev.dataTransfer.types, 'bucket') ||
+      _.includes(ev.dataTransfer.types, 'group');
+  },
+  acceptDrop_group: function(group_id) {
+    console.log('accepting group', group_id);
+  },
+  acceptDrop_bucket: function(bucket_id) {
+    console.log('accepting bucket', bucket_id);
+  },
+
+  render: function() {
+    var bucket_rows = this.props.buckets.map(function(bucket) {
+      return (
+        <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.pendingChanged} onBucketDirty={this.bucketIsDirty}></BucketRow>
+      );
+    }.bind(this));
+    var class_name = 'group';
+    if (this.state.isDragging) {
+      class_name += ' dragging';
+    }
+    if (this.state.underDrag) {
+      class_name += ' underdrag';
+    }
+    var draggable = true;
+    if (this.props.group.id == 'NOGROUP') {
+      draggable = false;
+    }
+    return (
+      <tbody>
+        <tr className="group" className={class_name} draggable={draggable} onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
+          <td colSpan="2000">
+            {this.props.group.name}
+          </td>
+        </tr>
+        {bucket_rows}
+      </tbody>
+    );
+  }
+})
 
 var BucketRow = React.createClass({
   getInitialState: function() {
@@ -60,37 +152,48 @@ var BucketRow = React.createClass({
       this.refreshBucket();
     }.bind(this));
   },
+
+  // Dragging
   dragStart: function(ev) {
-    if (handle.contains(this.state.target)) {
-      console.log('contains');
-    }
-    ev.dataTransfer.setData('bucket', this.props.bucket.id)
+    ev.dataTransfer.setData('bucket', this.props.bucket.id);
     this.setState({isDragging: true});
   },
   dragEnd: function(ev) {
     this.setState({isDragging: false});
   },
+
+  // Dropping
   drop: function(ev) {
-    this.setState({underDrag: false});
-    ev.preventDefault();
-    console.log('drop', this.props.bucket.name, ev);
-    var data = ev.dataTransfer.getData('bucket');
-    console.log('drop data', data);
+    if (this.canAcceptDrop(ev)) {
+      this.setState({underDrag: false});
+      ev.preventDefault();
+      _.each(ev.dataTransfer.items, function(item) {
+        var data = ev.dataTransfer.getData(item.type);
+        var method = 'acceptDrop_' + item.type;
+        this[method](data);
+      }.bind(this))
+    }
   },
   dragOver: function(ev) {
-    console.log('dragOver', this.props.bucket.name);
-    ev.preventDefault();
-    var data = ev.dataTransfer.getData('bucket');
-    this.setState({underDrag: true});
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: true});
+    }
   },
   dragLeave: function(ev) {
-    console.log('leave', this.props.bucket.name);
-    ev.preventDefault();
-    this.setState({underDrag: false});
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: false});
+    }
   },
-  onHandleMouseDown: function(ev) {
-    console.log('mousedown', ev.target);
+  canAcceptDrop: function(ev) {
+    return _.includes(ev.dataTransfer.types, 'bucket');
   },
+  acceptDrop_bucket: function(bucket_id) {
+    console.log('accepting bucket', bucket_id);
+  },
+
+
   render: function() {
     var goal_bar;
     var class_name = '';
@@ -105,7 +208,6 @@ var BucketRow = React.createClass({
     }
     return (
       <tr className={class_name} draggable="true" onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
-        <td className="handle" onMouseDown={this.onHandleMouseDown}>H</td>
         <td>{this.props.bucket.name}</td>
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td className="right">
@@ -146,9 +248,29 @@ var BucketTable = React.createClass({
     })
   },
   render: function() {
-    var balance_total = 0;
-    var deposit_total = 0;
-    var bucket_rows = this.props.buckets.map(function(bucket) {
+    var group_buckets = {};
+    var groups = [];
+    _.each(this.props.buckets, function(bucket) {
+      var group_id = bucket.group_id || 'NOGROUP';
+      if (!group_buckets[group_id]) {
+        group_buckets[group_id] = [];
+      }
+      group_buckets[group_id].push(bucket);
+    })
+    _.each(this.props.groups, function(group) {
+      var buckets = group_buckets[group.id] || [];
+      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} />);
+    });
+    if (group_buckets['NOGROUP']) {
+      var buckets = group_buckets['NOGROUP'];
+      var group = {
+        'id': 'NOGROUP',
+        'name': 'Floaters',
+        'rank': 'z',
+      }
+      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} />);
+    }
+    /* var bucket_rows = this.props.buckets.map(function(bucket) {
       balance_total += bucket.balance;
       var computed = computeBucketDeposit(bucket);
       bucket.end_date = bucket.end_date || computed.end_date;
@@ -159,13 +281,14 @@ var BucketTable = React.createClass({
       return (
         <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.pendingChanged} onBucketDirty={this.bucketIsDirty}></BucketRow>
       );
-    }.bind(this));
+    }.bind(this)); */
     var pending_total = _.sum(_.values(this.state.pendings));
+    var deposit_total = 0;
+    var balance_total = 0;
     return (
       <table className="ledger" width="100%">
         <thead>
           <tr>
-            <th></th>
             <th>Bucket</th>
             <th className="right">Balance</th>
             <th className="right">Deposit</th>
@@ -174,12 +297,9 @@ var BucketTable = React.createClass({
             <th>Edit</th>
           </tr>
         </thead>
-        <tbody>
-          {bucket_rows}
-        </tbody>
+        {groups}
         <tbody>
           <tr className="subtotal">
-            <td></td>
             <td>Total</td>
             <td className="right"><Money value={balance_total} /></td>
             <td className="right">

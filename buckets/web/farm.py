@@ -49,8 +49,10 @@ def buckets():
         bucket = g.farm.create_bucket(name=name)
         flash('Created bucket')
         return redirect(url_for('farm.bucket', bucket_id=bucket['id']))
+    groups = g.farm.list_groups()
     buckets = g.farm.list_buckets()
     return render_template('farm/buckets.html',
+        groups=groups,
         buckets=buckets)
 
 @blue.route('/buckets/<int:bucket_id>', methods=['GET', 'POST'])
@@ -87,6 +89,8 @@ def bucket(bucket_id):
 
 @blue.route('/groups', methods=['POST'])
 def groups():
+    name = request.form['name']
+    g.farm.create_group(name=name)
     flash('Group created')
     return redirect(url_for('.buckets'))
 
@@ -115,6 +119,10 @@ def api():
     for item in data:
         method = item['method']
         kwargs = item.get('kwargs', {})
+        for key in kwargs:
+            # remove private vars
+            if key.startswith('_'):
+                kwargs.pop(key)
         m = getattr(g.farm, method)
         responses.append(m(**kwargs))
     

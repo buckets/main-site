@@ -95,6 +95,12 @@ class TestGroup(object):
                 'rank': group2['rank'],
             })
 
+    def test_list_groups(self, api):
+        group = api.create_group('a')
+        groups = api.list_groups()
+        assert group in groups
+        assert len(groups) == 1
+
 
 class TestBucket(object):
 
@@ -107,7 +113,7 @@ class TestBucket(object):
         assert bucket['balance'] == 0
         assert bucket['out_to_pasture'] == False
         assert bucket['group_id'] is None
-        assert bucket['group_rank'] is not None
+        assert bucket['rank'] is not None
         assert bucket['kind'] == ''
         assert bucket['goal'] == None
         assert bucket['end_date'] == None
@@ -134,6 +140,52 @@ class TestBucket(object):
         assert new_bucket['deposit'] == 100
         again = api.get_bucket(bucket['id'])
         assert again == new_bucket
+
+    def test_move_bucket_after(self, api):
+        b1 = api.create_bucket('b1')
+        b2 = api.create_bucket('b2')
+        b1 = api.move_bucket(b1['id'], after_bucket=b2['id'])
+        assert b1['rank'] > b2['rank']
+
+    def test_move_bucket_after_another_group(self, api):
+        g = api.create_group('Group')
+        b1 = api.create_bucket('b1')
+        b2 = api.create_bucket('b2')
+
+        b1 = api.move_bucket(b1['id'], group_id=g['id'])
+        b2 = api.move_bucket(b2['id'], after_bucket=b1['id'])
+        assert b2['group_id'] == g['id'], "Should update group"
+        assert b2['rank'] > b1['rank']
+
+    def test_move_bucket_after_between(self, api):
+        g = api.create_group('Group')
+        b1 = api.create_bucket('b1')
+        b2 = api.create_bucket('b2')
+        b3 = api.create_bucket('b3')
+
+        for b in [b1,b2,b3]:
+            api.move_bucket(b['id'], group_id=g['id'])
+
+        b1 = api.move_bucket(b1['id'], after_bucket=b2['id'])
+        b2 = api.get_bucket(b2['id'])
+        b3 = api.get_bucket(b3['id'])
+        assert b1['rank'] > b2['rank']
+        assert b1['rank'] < b3['rank']
+
+    def test_move_bucket_to_group(self, api):
+        group = api.create_group('a')
+        bucket = api.create_bucket('bucket1')
+        new_bucket = api.move_bucket(bucket['id'], group_id=group['id'])
+        assert new_bucket['group_id'] == group['id']
+        assert new_bucket['rank'] is not None
+
+    def test_move_bucket_to_group_end(self, api):
+        group = api.create_group('a')
+        b1 = api.create_bucket('bucket1')
+        b2 = api.create_bucket('bucket2')
+        b2 = api.move_bucket(b2['id'], group_id=group['id'])
+        b1 = api.move_bucket(b1['id'], group_id=group['id'])
+        assert b1['rank'] > b2['rank']
 
     def test_transact(self, api):
         bucket = api.create_bucket('Food')

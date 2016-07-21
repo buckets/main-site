@@ -53,7 +53,7 @@ Bucket = Table('bucket', metadata,
     Column('balance', Integer, default=0),
     Column('out_to_pasture', Boolean),
     Column('group_id', Integer),
-    Column('group_rank', String),
+    Column('rank', String),
     Column('kind', String, default=u''),
     Column('goal', Integer),
     Column('end_date', Date),
@@ -128,6 +128,8 @@ patches['init'] = [
         name text,
         rank text not null
     )''',
+    '''CREATE UNIQUE INDEX bucket_group_farm_rank_udx
+        ON bucket_group(farm_id, rank)''',
 
     #-------------------------------------
     # bucket
@@ -141,7 +143,7 @@ patches['init'] = [
         balance integer default '0' not null,
         out_to_pasture boolean default 'f',
         group_id integer,
-        group_rank integer default '0',
+        rank text default 'm',
         kind text default '',
         goal integer,
         end_date date,
