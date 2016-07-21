@@ -54,6 +54,30 @@ class TestAccount(object):
         again = api.get_account(account['id'])
         assert again == new_account
 
+    def test_transact(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=100,
+            memo='some memo', posted=date(2000, 1, 1))
+        assert trans['account_id'] == account['id']
+        assert trans['amount'] == 100
+        assert trans['memo'] == 'some memo'
+        assert trans['posted'] == datetime(2000, 1, 1)
+        assert trans['created'] is not None
+        assert trans['id'] is not None
+        assert trans['fi_id'] is None
+        assert trans['cat_likely'] == False
+        assert trans['skip_cat'] == False
+        assert trans['buckets'] == []
+
+        account = api.get_account(account['id'])
+        assert account['balance'] == 100
+
+    def test_transact_stringdate(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=100,
+            posted='2000-01-01')
+        assert trans['posted'] == datetime(2000, 1, 1)
+
 
 class TestGroup(object):
 

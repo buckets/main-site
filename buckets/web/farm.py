@@ -109,7 +109,11 @@ def group(group_id):
 
 @blue.route('/transactions')
 def transactions():
-    return render_template('farm/transactions.html')
+    buckets = g.farm.list_buckets()
+    accounts = g.farm.list_accounts()
+    return render_template('farm/transactions.html',
+        buckets=buckets,
+        accounts=accounts)
 
 @blue.route('/reports')
 def reports():

@@ -37,6 +37,17 @@ Account = Table('account', metadata,
     Column('balance', Integer),
     Column('currency', String),
 )
+AccountTrans = Table('account_transaction', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('posted', DateTime),
+    Column('account_id', Integer),
+    Column('amount', Integer, default=0),
+    Column('memo', String),
+    Column('fi_id', String),
+    Column('skip_cat', Boolean, default=False),
+    Column('cat_likely', Boolean, default=False),
+)
 Group = Table('bucket_group', metadata,
     Column('id', Integer, primary_key=True),
     Column('created', DateTime),
@@ -117,6 +128,49 @@ patches['init'] = [
         balance integer default '0' not null,
         currency varchar(3) default 'USD'
     )''',
+    '''CREATE TABLE account_transaction (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        posted timestamp default current_timestamp,
+        account_id integer,
+        amount integer default 0,
+        memo text,
+        fi_id text,
+        skip_cat boolean default 'f',
+        cat_likely boolean default 'f'
+    )''',
+    '''CREATE FUNCTION update_account_balance() RETURNS trigger AS $update_account_balance$
+        BEGIN
+            IF (TG_OP = 'DELETE') THEN
+                UPDATE account
+                    SET balance = (balance - OLD.amount)
+                    WHERE id = OLD.account_id;
+                RETURN OLD;
+            ELSIF (TG_OP = 'UPDATE') THEN
+                UPDATE account
+                    SET balance = (balance - OLD.amount)
+                    WHERE id = OLD.account_id;
+                UPDATE account
+                    SET balance = (balance + NEW.amount)
+                    WHERE id = NEW.account_id;
+                RETURN NEW;
+            ELSIF (TG_OP = 'INSERT') THEN
+                UPDATE account
+                    SET balance = (balance + NEW.amount)
+                    WHERE id = NEW.account_id;
+                RETURN NEW;
+            END IF;
+            RETURN NULL;
+        END;
+    $update_account_balance$ LANGUAGE plpgsql''',
+    '''CREATE TRIGGER update_account_balance
+    AFTER
+        INSERT
+        OR UPDATE OF amount, account_id
+        OR DELETE
+    ON account_transaction
+    FOR EACH ROW EXECUTE PROCEDURE update_account_balance();
+    ''',
 
     #-------------------------------------
     # group

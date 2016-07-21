@@ -1,5 +1,103 @@
 {% extends 'farm/base.html' %}
 
 {% block content %}
-hello
+
+<h1>Transactions</h1>
+
+<script type="text/babel">
+var target_el = thisNext();
+
+var Store = {};
+Store.transactions = [];
+Store.buckets = {{ buckets|json|safe }};
+Store.accounts = {{ accounts|json|safe }};
+Store.rerender = function() {
+  ReactDOM.render(<TransTable buckets={Store.buckets} transactions={Store.transactions} accounts={Store.accounts} />, target_el);
+}
+
+var TransRow = React.createClass({
+  render: function() {
+    return (
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    )
+  }
+})
+
+var TransTable = React.createClass({
+  getInitialState: function() {
+    return {
+      amount: '',
+      posted: '',
+      description: '',
+      account_id: '',
+    }
+  },
+  createTransaction: function() {
+    this.setState({
+      amount: '',
+      description: '',
+    });
+    this._descriptionInput.focus();
+  },
+  propLink: function(attr) {
+    return {
+      value: this.state[attr],
+      onChange: this.valueChangeHandler(attr),
+    }
+  },
+  valueChangeHandler: function(attr) {
+    return function(ev) {
+      var newstate = {};
+      newstate[attr] = ev.target.value;
+      this.setState(newstate);
+    }.bind(this);
+  },
+  amountChanged: function(amount) {
+    this.setState({amount: amount});
+  },
+  descriptionRef: function(input) {
+    this._descriptionInput = input;
+  },
+  render: function() {
+    var transaction_rows = [];
+    transaction_rows.push(<TransRow key="1" />);
+    var add_label = this.state.amount < 0 ? 'Record expense' : 'Record deposit';
+    return (
+    <table className="ledger" width="100%">
+      <thead>
+        <tr>
+          <th><input type="checkbox" /></th>
+          <th>Date</th>
+          <th>Account</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Buckets</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td><input type="date" {...this.propLink('posted')} /></td>
+          <td><select {...this.propLink('account_id')}></select></td>
+          <td><input ref={this.descriptionRef} type="text" {...this.propLink('description')} /></td>
+          <td><MoneyInput value={this.state.amount} onChange={this.amountChanged} /></td>
+          <td><button onClick={this.createTransaction}>{add_label}</button></td>
+        </tr>
+        {transaction_rows}
+      </tbody>
+    </table>
+    )  
+  }
+});
+Store.rerender();
+</script>
+
+
 {% endblock %}

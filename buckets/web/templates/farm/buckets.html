@@ -319,7 +319,7 @@ var BucketTable = React.createClass({
       var buckets = group_buckets['NOGROUP'];
       var group = {
         'id': 'NOGROUP',
-        'name': 'Everything else',
+        'name': 'Misc.',
         'rank': 'z',
       }
       groups.push(<GroupRow key={group.id} group={group} buckets={buckets} onBucketChanged={this.bucketChanged} onPendingChanged={this.pendingChanged} />);

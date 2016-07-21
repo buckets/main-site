@@ -1,7 +1,8 @@
 import sqlalchemy
 from sqlalchemy import select, and_, func
 
-from buckets.schema import Account, Bucket, BucketTrans, Group
+from buckets.schema import Bucket, BucketTrans, Group
+from buckets.schema import Account, AccountTrans
 from buckets.authz import AuthPolicy, anything
 from buckets.rank import rankBetween
 from buckets.error import Error, NotFound
@@ -63,6 +64,23 @@ class BudgetManagement(object):
         r = self.engine.execute(select([Account])
             .where(Account.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
+
+    @policy.allow(anything)
+    def account_transact(self, account_id, amount, memo=None,
+            posted=None):
+        values = {
+            'account_id': account_id,
+            'amount': amount,
+            'memo': memo,
+        }
+        if posted:
+            values['posted'] = posted
+        r = self.engine.execute(AccountTrans.insert()
+            .values(**values)
+            .returning(AccountTrans))
+        trans = dict(r.fetchone())
+        trans['buckets'] = []
+        return trans
 
 
     #----------------------------------------------------------
