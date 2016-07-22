@@ -1,5 +1,5 @@
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask import request, flash, make_response
+from flask import request, flash, make_response, abort
 from buckets.budget import BudgetManagement
 from buckets.web.util import parseMoney, toJson
 
@@ -12,6 +12,13 @@ def pull_farm_id(endpoint, values):
 
 @blue.before_request
 def before_request():
+    # authorized for this farm?
+    farm = g.api.user.get_farm(g.farm_id)
+    if not farm:
+        abort(404)
+    if g.user['id'] not in [x['id'] for x in farm['users']]:
+        abort(404)
+
     g.db_conn = g.engine.connect()
     g.db_transaction = g.db_conn.begin()
     api = BudgetManagement(g.db_conn, g.farm_id)
