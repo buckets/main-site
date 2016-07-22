@@ -21,7 +21,7 @@ Store.addTransaction = function(trans) {
 Store.updateTrans = function(trans) {
   _.each(Store.transactions, function(old_trans) {
     if (old_trans.id === trans.id) {
-      _.merge(old_trans, trans);
+      _.assign(old_trans, trans);
     }
   });
   Store.rerender();
@@ -36,9 +36,15 @@ var Categorizer = React.createClass({
     }
   },
   skip: function(ev) {
-    this.props.changeCategorization({
-      skip: true,
-    });
+    apiRequest({
+      method: 'skip_categorizing',
+      kwargs: {
+        trans_id: this.props.transaction.id,
+      }
+    }, function(transaction) {
+      Store.updateTrans(transaction);
+      this.props.onChange(transaction);
+    }.bind(this));
   },
   ok: function(ev) {
     apiRequest({
@@ -49,6 +55,7 @@ var Categorizer = React.createClass({
       }
     }, function(transaction) {
       Store.updateTrans(transaction);
+      this.props.onChange(transaction);
     }.bind(this));
   },
   categoryChangedHandler: function(cat) {
@@ -113,8 +120,8 @@ var Categorizer = React.createClass({
     }.bind(this));
     return (<div className="categorizer">
       {categories}
-      <button onClick={this.skip}>Skip</button>
       <button onClick={this.ok}>Ok</button>
+      <button onClick={this.skip}>Skip</button>
     </div>);
   }
 })
@@ -130,7 +137,7 @@ var TransRow = React.createClass({
     return false;
   },
   transChanged: function(towhat) {
-    console.log('trans changed', towhat);
+    this.setState({categorizing: false});
   },
   render: function() {
     var account = _.find(this.props.accounts, function(account) {
@@ -138,7 +145,6 @@ var TransRow = React.createClass({
     }.bind(this));
     var categories_section;
     if (this.state.categorizing) {
-      console.log('categorizing');
       categories_section = (<Categorizer
         transaction={this.props.transaction}
         buckets={this.props.buckets}
@@ -149,14 +155,21 @@ var TransRow = React.createClass({
         // Existing categories
         var i = -1;
         var labels = this.props.transaction.buckets.map(function(cat) {
-          console.log('cat', cat);
           i += 1;
-          return (<span key={i}>{ cat.bucket_id } {cat.amount} </span>);
-        })
+          var amount_part = null;
+          if (this.props.transaction.buckets.length >= 2) {
+            amount_part = (<div className="category-amount"><Money value={cat.amount} /></div>);
+          }
+          var bucket = _.find(this.props.buckets, function(bucket) {
+            return bucket.id === cat.bucket_id;
+          })
+          var name = bucket.name;
+          return (<div key={i} tabIndex="0" onClick={this.startCategorizing} className="category-tag"><div className="category-name">{name}</div>{amount_part}</div>);
+        }.bind(this))
         categories_section = (<div>{labels}</div>);
       } else if (this.props.transaction.skip_cat) {
         // Skip
-        console.log('skip_cat');
+        categories_section = (<a href="#" onClick={this.startCategorizing}>Skipped</a>);
       } else {
         // No categorization
         categories_section = (<a href="#" onClick={this.startCategorizing}>Categorize</a>);

@@ -188,3 +188,23 @@ div.form div.control {
     flex-basis: 30%;
     text-align: right;
 }
+
+.category-tag {
+    display: inline-flex;
+    background-color: rgba(41, 128, 185,1.0);
+    color: white;
+    margin-right: .2rem;
+    border-radius: 2px;
+    font-size: .75rem;
+    cursor: pointer;
+}
+.category-tag .category-name {
+    padding: .1rem .3rem .2rem;
+}
+.category-tag .negative {
+    color: white;
+}
+.category-tag .category-amount {
+    padding: .1rem .3rem;
+    background-color: rgba(255,255,255, 0.3);
+}

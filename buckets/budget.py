@@ -145,7 +145,17 @@ class BudgetManagement(object):
                     posted=trans['posted'],
                     _account_transaction_id=trans_id)
         self.engine.execute(AccountTrans.update()
-            .values(cat_likely=True)
+            .values(cat_likely=True, skip_cat=False)
+            .where(AccountTrans.c.id == trans_id))
+        return self.get_account_trans(trans_id)
+
+    @policy.allow(anything)
+    def skip_categorizing(self, trans_id):
+        self.get_account_trans(trans_id)
+        self.engine.execute(BucketTrans.delete()
+            .where(BucketTrans.c.account_transaction_id==trans_id))
+        self.engine.execute(AccountTrans.update()
+            .values(cat_likely=True, skip_cat=True)
             .where(AccountTrans.c.id == trans_id))
         return self.get_account_trans(trans_id)
 

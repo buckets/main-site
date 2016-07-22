@@ -160,6 +160,40 @@ class TestTransaction(object):
         trans = api.get_account_trans(trans['id'])
         assert trans['buckets'] == []
 
+    def test_skip(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+        new_trans = api.skip_categorizing(trans['id'])
+        assert new_trans['id'] == trans['id']
+        assert new_trans['skip_cat'] is True
+        assert new_trans['cat_likely'] is True
+
+    def test_skip_after_cat(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+        b1 = api.create_bucket('Bucket1')
+        api.categorize(trans['id'], buckets=[
+            {'bucket_id': b1['id']},
+        ])
+        new_trans = api.skip_categorizing(trans['id'])
+        assert new_trans['skip_cat'] is True
+        assert new_trans['buckets'] == [], "Should have removed categories"
+        assert new_trans['cat_likely'] is True
+
+    def test_cat_after_skip(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+        api.skip_categorizing(trans['id'])
+        b1 = api.create_bucket('Bucket1')
+        new_trans = api.categorize(trans['id'], buckets=[
+            {'bucket_id': b1['id']},
+        ])
+        assert new_trans['skip_cat'] is False
+        assert new_trans['cat_likely'] is True
+
 
 class TestGroup(object):
 
