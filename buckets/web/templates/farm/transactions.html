@@ -147,9 +147,11 @@ var TransRow = React.createClass({
       // Not categorizing
       if (this.props.transaction.buckets.length) {
         // Existing categories
+        var i = -1;
         var labels = this.props.transaction.buckets.map(function(cat) {
           console.log('cat', cat);
-          return (<span key={cat.bucket_id}>{ cat.bucket_id } {cat.amount} </span>);
+          i += 1;
+          return (<span key={i}>{ cat.bucket_id } {cat.amount} </span>);
         })
         categories_section = (<div>{labels}</div>);
       } else if (this.props.transaction.skip_cat) {
