@@ -83,6 +83,8 @@ class TestTransaction(object):
 
     def test_categorize(self, api):
         account = api.create_account('Checking')
+        for i in range(10):
+            api.create_bucket('throwaway')
         b1 = api.create_bucket('Bucket1')
         b2 = api.create_bucket('Bucket2')
         trans = api.account_transact(account['id'], amount=500,
@@ -99,6 +101,44 @@ class TestTransaction(object):
 
         transactions = api.list_account_trans()
         assert new_trans in transactions
+
+    def test_re_categorize(self, api):
+        account = api.create_account('Checking')
+        b1 = api.create_bucket('Bucket1')
+
+        b2 = api.create_bucket('Bucket2')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+        new_trans = api.categorize(trans['id'], buckets=[
+            {'bucket_id': b1['id']},
+        ])
+        new_trans = api.categorize(trans['id'], buckets=[
+            {'bucket_id': b2['id']},
+        ])
+        assert new_trans['cat_likely'] == True
+        assert len(new_trans['buckets']) == 1
+        assert {'bucket_id': b2['id'], 'amount': 500} in new_trans['buckets']
+
+        b1 = api.get_bucket(b1['id'])
+        assert b1['balance'] == 0, "Should restore bucket1 balance"
+        b2 = api.get_bucket(b2['id'])
+        assert b2['balance'] == 500, "Should change b2 balance"
+
+    def test_signs_positive_okay(self, api):
+        account = api.create_account('Checking')
+        b1 = api.create_bucket('Bucket1')
+        b2 = api.create_bucket('Bucket2')
+        trans = api.account_transact(account['id'], amount=-500,
+            memo='fizzballs')
+
+        new_trans = api.categorize(trans['id'], buckets=[
+            {'bucket_id': b1['id'], 'amount': 400},
+            {'bucket_id': b2['id']},
+        ])
+        assert new_trans['cat_likely'] == True
+        assert len(new_trans['buckets']) == 2
+        assert {'bucket_id': b1['id'], 'amount': -400} in new_trans['buckets']
+        assert {'bucket_id': b2['id'], 'amount': -100} in new_trans['buckets']
 
 
 class TestGroup(object):

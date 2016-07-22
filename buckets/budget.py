@@ -91,7 +91,7 @@ class BudgetManagement(object):
                 AccountTrans,
                 func.array_agg(
                     func.json_build_object(
-                        'bucket_id', BucketTrans.c.id,
+                        'bucket_id', BucketTrans.c.bucket_id,
                         'amount', BucketTrans.c.amount
                     )
                 ).label('buckets'),
@@ -123,14 +123,19 @@ class BudgetManagement(object):
     @policy.allow(anything)
     def categorize(self, trans_id, buckets):
         trans = self.get_account_trans(trans_id)
+        self.engine.execute(BucketTrans.delete()
+            .where(BucketTrans.c.account_transaction_id==trans_id))
         left = trans['amount']
+        sign = 1
+        if trans['amount'] < 0:
+            sign = -1
         for bucket in buckets:
             if bucket.get('amount', None) is None:
                 bucket['amount'] = left
-            left -= bucket['amount']
+            left -= abs(bucket['amount']) * sign
             if bucket['amount']:
                 self.bucket_transact(bucket['bucket_id'],
-                    amount=bucket['amount'],
+                    amount=abs(bucket['amount']) * sign,
                     posted=trans['posted'],
                     _account_transaction_id=trans_id)
         self.engine.execute(AccountTrans.update()

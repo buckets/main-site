@@ -172,3 +172,19 @@ div.form div.label {
 div.form div.control {
     padding-bottom: 0.5rem;
 }
+
+
+
+.categorizer {
+
+}
+.categorizer .category {
+    display: flex;
+}
+.categorizer .bucket {
+    flex-basis: 60%;
+}
+.categorizer .amount {
+    flex-basis: 30%;
+    text-align: right;
+}
