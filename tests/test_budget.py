@@ -6,13 +6,21 @@ authentication or sign up or anything of that.
 import uuid
 from datetime import date, datetime
 import pytest
+import requests
+
+from mock import create_autospec, MagicMock
+
 from buckets.authn import UserManagement
-from buckets.budget import BudgetManagement
+from buckets.budget import BudgetManagement, hashStrings
 from buckets.error import Error
 
 @pytest.fixture
 def user_api(engine):
     return UserManagement(engine)
+
+@pytest.fixture
+def fake_requests():
+    return create_autospec(requests)
 
 @pytest.fixture
 def user(user_api):
@@ -24,8 +32,9 @@ def farm(user, user_api):
     return user_api.create_farm(user['id'])
 
 @pytest.fixture
-def api(farm, engine):
-    return BudgetManagement(engine, farm['id'])
+def api(farm, engine, fake_requests):
+    return BudgetManagement(engine, farm['id'],
+        _requests=fake_requests)
 
 
 class TestAccount(object):
@@ -361,3 +370,91 @@ class TestBucket(object):
         trans = api.bucket_transact(bucket['id'], amount=100,
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
+
+
+class TestSimpleFIN(object):
+
+    def test_claim(self, api, fake_requests):
+        """
+        You can claim a simplefin setup token.
+        """
+        fake_requests.post.return_value = MagicMock(
+            text='https://foo:bar@example.com')
+        connection = api.simplefin_claim(
+            'https://example.com/abcdefg'.encode('base64'))
+        fake_requests.post.assert_called_once_with('https://example.com/abcdefg')
+        assert connection['id'] is not None
+        assert connection['farm_id'] == api.farm_id
+        assert connection['access_token'] == 'https://foo:bar@example.com'
+        assert connection['created'] is not None
+        assert connection['last_used'] is None
+
+    def test_fetch_andMatch(self, api, fake_requests):
+        """
+        You can use an already-claimed simplefin token to get some data.
+        """
+        fake_requests.post.return_value = MagicMock(
+            text='https://foo:bar@example.com')
+        api.simplefin_claim(
+            'https://example.com/abcdefg'.encode('base64'))
+
+        fake_requests.get.return_value = MagicMock(json=lambda:{
+            'accounts': [
+                {
+                  "org": {
+                    "name": "My Bank",
+                    "domain": "mybank.com",
+                    "sfin-url": "https://sfin.mybank.com"
+                  },
+                  "id": "2930002",
+                  "name": "Savings",
+                  "currency": "USD",
+                  "balance": "100.23",
+                  "available-balance": "75.23",
+                  "balance-date": 978366153,
+                  "transactions": [
+                    {
+                        "id": "123456",
+                        "amount": "-25.00",
+                        "posted": 793090572,
+                        "description": "Somewhere",
+                    }
+                  ]
+                }
+            ]
+        })
+        result = api.simplefin_fetch()
+        args, kwargs = fake_requests.get.call_args
+        assert args[0] == 'https://example.com/accounts'
+        assert len(result['unknown_accounts']) == 1
+
+        acct = result['unknown_accounts'][0]
+        assert acct['id'] == '2930002'
+        assert acct['name'] == 'Savings'
+        assert acct['organization'] == 'My Bank'
+        assert acct['hash'] == hashStrings(
+            [acct['organization'], acct['id']])
+
+        conns = api.simplefin_list_connections()
+        assert len(conns) == 1
+        assert conns[0]['last_used'] is not None
+
+        # now match it up
+        account = api.create_account('Savings')
+        api.add_account_hash(account['id'], acct['hash'])
+
+        # run fetch again to get the transactions
+        result = api.simplefin_fetch()
+        assert len(result['unknown_accounts']) == 0
+        assert len(result['accounts']) == 1
+        ret = result['accounts'][0]
+        assert ret['id'] == account['id']
+        trans = ret['transactions'][0]
+        assert trans['account_id'] == account['id']
+        assert trans['amount'] == -2500
+        assert trans['memo'] == 'Somewhere'
+        assert trans['fi_id'] == '123456'
+
+        # check account balance
+        account = api.get_account(account['id'])
+        assert account['balance'] == 10023

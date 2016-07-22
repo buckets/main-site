@@ -26,7 +26,6 @@
 </table>
 {% endif %}
 
-
 <h2>Add account</h2>
 <form method="post">
 <div class="form">
@@ -40,8 +39,12 @@
   </div>
   <div class="pair">
     <div class="label"></div>
-    <div class="control"><button type="submit">Add Account</button></div>
+    <div class="control">
+      <div class="helptext">Instead of managing this by hand, you may also <a href="{{ url_for('.connections') }}">connect automatically to your bank</a>.</div>
+      <button type="submit">Add Account</button>
+    </div>
   </div>
 </div>
 </form>
+
 {% endblock %}

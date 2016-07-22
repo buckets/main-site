@@ -169,10 +169,10 @@ var TransRow = React.createClass({
         categories_section = (<div>{labels}</div>);
       } else if (this.props.transaction.skip_cat) {
         // Skip
-        categories_section = (<a href="#" onClick={this.startCategorizing}>Skipped</a>);
+        categories_section = (<a onClick={this.startCategorizing}>Skipped</a>);
       } else {
         // No categorization
-        categories_section = (<a href="#" onClick={this.startCategorizing}>Categorize</a>);
+        categories_section = (<a onClick={this.startCategorizing}>Categorize</a>);
       }
     }
     return (
@@ -249,7 +249,9 @@ var TransTable = React.createClass({
   },
   render: function() {
     var transaction_rows = [];
-    transaction_rows = _.sortBy(this.props.transactions, ['posted', 'id'])
+    transaction_rows = _.reverse(_.sortBy(this.props.transactions, function(trans) {
+      return [trans.posted, trans.account_id, trans.id];
+    }))
       .map(function(trans) {
         return (<TransRow
           key={trans.id}
@@ -265,7 +267,7 @@ var TransTable = React.createClass({
     <table className="ledger" width="100%">
       <thead>
         <tr>
-          <th><input type="checkbox" /></th>
+          <th><input type="checkbox" name="transaction[]" /></th>
           <th>Date</th>
           <th>Account</th>
           <th>Description</th>

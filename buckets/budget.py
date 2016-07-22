@@ -1,11 +1,29 @@
+from hashlib import sha1
+from datetime import date, datetime, timedelta
+import time
+from decimal import Decimal
+
 import sqlalchemy
 from sqlalchemy import select, and_, func
+import requests
 
 from buckets.schema import Bucket, BucketTrans, Group
-from buckets.schema import Account, AccountTrans
+from buckets.schema import Account, AccountTrans, Connection
+from buckets.schema import AccountMapping
 from buckets.authz import AuthPolicy, anything
 from buckets.rank import rankBetween
 from buckets.error import Error, NotFound, AmountsDontMatch
+
+
+DEFAULT_SALT = '@\x95\xcd\xb0\xff\xa1\xe0\xdc\xfe^\x95g0\xa8\xe9+\x0bZ\xf1\xb3U\xb9\x03\xdeN\x97\xd1\x18\xbe)\x85\xde\xe4h\xe9?>\x9e\x12\x08]\xfb\xc5\x8a\x81\xddv\xa1cM\x8e\x06\xacAh\xba#\x14\x08\xbe\x1f\xec\x11\xf4\xb5)a\xaa\xb4\x1d\x9b\xa8M\xddZx\x05\\\xe0\xa3+\xf4,\xfd\xacYV\x93i\xe2\xb8H0*~\xc2X\x914\x96\x11\xc8\x82\xbd\xaa.0\xbd\x02XB\x07\xbe\xc5\xcb\xcf*\xe0\x1cg\xdd\x10\xbb\x16\xf6\x9d\x9bq'
+
+def moneystrtoint(x):
+    return int(Decimal(x).quantize(Decimal('0.01'))*100)
+
+def hashStrings(strings, salt=DEFAULT_SALT):
+    hashes = [sha1(x).digest() for x in strings] + [salt]
+    return sha1(''.join(hashes)).hexdigest()
+
 
 
 class BudgetManagement(object):
@@ -15,9 +33,10 @@ class BudgetManagement(object):
 
     policy = AuthPolicy()
 
-    def __init__(self, engine, farm_id):
+    def __init__(self, engine, farm_id, _requests=requests):
         self.engine = engine
         self.farm_id = farm_id
+        self.requests = _requests
 
     #----------------------------------------------------------
     # Account
@@ -67,7 +86,7 @@ class BudgetManagement(object):
 
     @policy.allow(anything)
     def account_transact(self, account_id, amount, memo=None,
-            posted=None):
+            posted=None, fi_id=None):
         values = {
             'account_id': account_id,
             'amount': amount,
@@ -75,6 +94,8 @@ class BudgetManagement(object):
         }
         if posted:
             values['posted'] = posted
+        if fi_id:
+            values['fi_id'] = fi_id
         r = self.engine.execute(AccountTrans.insert()
             .values(**values)
             .returning(AccountTrans.c.id))
@@ -83,7 +104,10 @@ class BudgetManagement(object):
 
     @policy.allow(anything)
     def list_account_trans(self):
-        return list(self._list_account_trans())
+        # get 100 days by default
+        timeago = date.today() - timedelta(days=100)
+        wheres = (AccountTrans.c.posted >= timeago,)
+        return list(self._list_account_trans(wheres))
 
     def _list_account_trans(self, wheres=None):
         wheres = wheres or ()
@@ -373,4 +397,122 @@ class BudgetManagement(object):
             .values(**values)
             .returning(BucketTrans))
         return dict(r.fetchone())
+
+    #----------------------------------------------------------
+    # SimpleFIN
+
+    @policy.allow(anything)
+    def simplefin_claim(self, token):
+        """
+        Claim a simplefin token
+        """
+        r = self.requests.post(token.decode('base64'))
+        access_token = r.text
+        r = self.engine.execute(Connection.insert()
+            .values(farm_id=self.farm_id, access_token=access_token)
+            .returning(Connection))
+        return dict(r.fetchone())
+
+    @policy.allow(anything)
+    def add_account_hash(self, account_id, account_hash):
+        """
+        Associate an account with a hash (as returned by simplefin_fetch)
+        """
+        self.engine.execute(AccountMapping.insert()
+            .values(
+                farm_id=self.farm_id,
+                account_id=account_id,
+                account_hash=account_hash))
+        return None
+
+    @policy.allow(anything)
+    def simplefin_list_connections(self):
+        r = self.engine.execute(select([Connection])
+            .where(Connection.c.farm_id == self.farm_id)
+            .order_by(Connection.c.id))
+        return [dict(x) for x in r.fetchall()]
+
+    @policy.allow(anything)
+    def simplefin_fetch(self):
+        """
+        Fetch account+transaction data for all simplefin tokens
+        associated with this farm.
+        """
+        days = 45
+        r = self.engine.execute(select([Connection])
+            .where(Connection.c.farm_id == self.farm_id)
+            .order_by(Connection.c.id))
+        conns = [dict(x) for x in r.fetchall()]
+
+        ret = {
+            'unknown_accounts': [],
+            'accounts': [],
+            'errors': [],
+        }
+        start_date = long(time.time() - 60 * 60 * 24 * days)
+        sfin_accounts = []
+        for conn in conns:
+            access_token = conn['access_token']
+            scheme, rest = access_token.split('//', 1)
+            auth, rest = rest.split('@', 1)
+            url = scheme + '//' + rest + '/accounts'
+            username, password = auth.split(':', 1)
+
+            response = self.requests.get(
+                url,
+                params={'start-date': start_date},
+                auth=(username, password))
+            data = response.json()
+            for user_error in data.get('errors', []):
+                if user_error not in ret['errors']:
+                    ret['errors'].append(user_error)
+            for account in data.get('accounts', []):
+                sfin_accounts.append(account)
+
+            self.engine.execute(Connection.update()
+                .values(last_used=func.now())
+                .where(Connection.c.id == conn['id']))
+
+        for account in sfin_accounts:
+            org = account['org'].get('name', account['org']['domain'])
+            sfin_account_id = account['id']
+            h = hashStrings([org, sfin_account_id])
+            result = self.engine.execute(
+                select([AccountMapping.c.account_id])
+                .where(and_(
+                    AccountMapping.c.farm_id == self.farm_id,
+                    AccountMapping.c.account_hash == h,
+                )))
+            first = result.fetchone()
+            if first:
+                # found a match
+                account_id = first[0]
+                this_ret = {
+                    'id': account_id,
+                    'transactions': [],
+                }
+                ret['accounts'].append(this_ret)
+                transactions = []
+                for trans in account['transactions']:
+                    transactions.append(self.account_transact(
+                        account_id=account_id,
+                        memo=trans['description'],
+                        amount=moneystrtoint(trans['amount']),
+                        posted=datetime.fromtimestamp(trans['posted']),
+                        fi_id=trans['id']))
+                this_ret['transactions'] = transactions
+
+                # update account balance
+                self.update_account(account_id, {
+                    'balance': moneystrtoint(account['balance']),
+                })
+            else:
+                # no match
+                ret['unknown_accounts'].append({
+                    'id': sfin_account_id,
+                    'name': account['name'],
+                    'organization': org,
+                    'hash': h,
+                })
+        return ret
 

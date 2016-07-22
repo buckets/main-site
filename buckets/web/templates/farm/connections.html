@@ -1,0 +1,196 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+
+<h1>Connections</h1>
+
+{% if connections %}
+
+<script type="text/babel">
+var target_el = thisNext();
+
+var Store = {};
+Store.accounts = [];
+Store.errors = [];
+Store.unknown = [];
+Store.rerender = function() {
+  ReactDOM.render(<MappingTable accounts={Store.accounts} errors={Store.errors} unknown={Store.unknown} />, target_el);
+}
+
+var AccountMapper = React.createClass({
+  getInitialState: function() {
+    return {
+      new_name: this.props.unknown.name,
+      existing: '',
+    };
+  },
+  existingChanged: function(ev) {
+    console.log('existingChanged', ev.target.value);
+    this.setState({
+      existing: ev.target.value
+    })
+  },
+  useExisting: function() {
+    console.log('use Existing', this.state.existing);
+    if (!this.state.existing) {
+      return;
+    }
+    apiRequest({
+      method: 'add_account_hash',
+      kwargs: {
+        account_id: this.state.existing,
+        account_hash: this.props.unknown.hash,
+      }
+    }, function(response) {
+      _.pull(Store.unknown, this.props.unknown);
+      Store.rerender();
+    }.bind(this))
+  },
+  newNameChanged: function(ev) {
+    this.setState({
+      new_name: ev.target.value,
+    })
+  },
+  createNew: function() {
+    apiRequest({
+      method: 'create_account',
+      kwargs: {
+        name: this.state.new_name,
+        balance: 0
+      }
+    }, function(new_account) {
+      Store.accounts.push(new_account);
+      this.setState({
+        existing: new_account.id
+      }, function() {
+        this.useExisting();
+      }.bind(this));
+    }.bind(this));
+  },
+  render: function() {
+    var unknown = this.props.unknown;
+    var account_options = this.props.accounts.map(function(account) {
+      return (<option key={account.id} value={account.id}>{account.name}</option>);
+    });
+    var name_length = this.state.new_name.length - 1;
+    name_length = name_length < 3 ? 3 : name_length;
+    return (<tr>
+        <td>{unknown.organization}</td>
+        <td>{unknown.name}</td>
+        <td>
+          <select value={this.state.existing} onChange={this.existingChanged}><option></option>{account_options}</select>
+          <button onClick={this.useExisting}>Use existing</button>
+        </td>
+        <td>
+          <input type="text" value={this.state.new_name} onChange={this.newNameChanged} size={name_length}/>
+          <button onClick={this.createNew}>Create new</button>
+        </td>
+      </tr>);
+  }
+})
+
+var MappingTable = React.createClass({
+  componentDidMount: function() {
+    apiRequest({
+      method: 'list_accounts',
+    }, function(response) {
+      Store.accounts = response;
+      Store.rerender();
+    }.bind(this));
+    {% if fetch %}
+    this.doSync();
+    {% endif %}
+  },
+  doSync: function() {
+    apiRequest({
+      method: 'simplefin_fetch',
+    }, function(response) {
+      Store.errors = response.errors;
+      Store.unknown = response.unknown_accounts;
+      Store.rerender();
+    }.bind(this));
+  },
+  render: function() {
+    var errors = this.props.errors.map(function(err) {
+      return (<div key={err} className="error">{err}</div>);
+    });
+    var unknown_rows = this.props.unknown.map(function(unknown) {
+      console.log('unknown', unknown);
+      return (<AccountMapper key={unknown.id} unknown={unknown} accounts={this.props.accounts} />);
+    }.bind(this));
+    var unknown_table;
+    if (unknown_rows.length) {
+      unknown_table = (
+        <div>
+          <p>Please select the matching account for each of these:</p>
+        <table className="ledger">
+          <thead>
+            <tr>
+              <th>Organization</th>
+              <th>Name</th>
+              <th>Existing Account</th>
+              <th>New Account</th>
+            </tr>
+          </thead>
+          <tbody>
+            {unknown_rows}
+          </tbody>
+        </table>
+        </div>
+      );
+    }
+    return (
+      <div>
+        <button onClick={this.doSync}>Sync</button>
+        {errors}
+        {unknown_table}
+      </div>
+    );
+  }
+})
+
+Store.rerender();
+</script>
+
+<table class="ledger">
+  <tr>
+    <th>Connection</th>
+    <th>Last Used</th>
+  </tr>
+  {% for connection in connections %}
+  <tr>
+    <td>{{ connection.id }}</td>
+    <td>{{ connection.last_used or '' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+
+
+
+<h2>Add connection</h2>
+
+<form method="post" action="{{ url_for('.connections') }}">
+
+<p>
+  Buckets can connect to your bank using SimpleFIN.  To connect:
+  <ol>
+    <li>
+      Get a SimpleFIN Token by clicking <a href="https://bridge.simplefin.org" target="_blank">here to visit the SimpleFIN Bridge.</a>
+    </li>
+    <li>
+      Paste your SimpleFIN Token here:
+      <div>
+        <textarea name="token" spellcheck="false" style="width: 20rem; height: 5rem; padding: 0.5rem; border: 3px solid tan; border-radius: 2px; margin-top: 1rem; margin-bottom: 1rem; font-family: monospace; font-size: 1rem; resize: none;"></textarea>
+      </div>
+    </li>
+    <li>Click <button type="submit">Connect</button></li>
+  </ol>
+</p>
+
+</form>
+
+
+{% endblock %}

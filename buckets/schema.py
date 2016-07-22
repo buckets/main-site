@@ -81,6 +81,21 @@ BucketTrans = Table('bucket_transaction', metadata,
     Column('account_transaction_id', Integer),
 )
 
+Connection = Table('simplefin_connection', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('farm_id', Integer),
+    Column('access_token', String),
+    Column('last_used', DateTime),
+)
+AccountMapping = Table('account_mapping', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('farm_id', Integer),
+    Column('account_id', Integer),
+    Column('account_hash', String),
+)
+
 
 PATCH_TABLE = '_schema_version'
 patches = OrderedDict()
@@ -245,6 +260,24 @@ patches['init'] = [
     ON bucket_transaction
     FOR EACH ROW EXECUTE PROCEDURE update_bucket_balance();
     ''',
+
+    #-------------------------------------
+    # simplefin
+    #-------------------------------------
+    '''CREATE TABLE simplefin_connection (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        farm_id integer,
+        access_token text,
+        last_used timestamp
+    )''',
+    '''CREATE TABLE account_mapping (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        farm_id integer,
+        account_id integer,
+        account_hash text
+    )'''
 ]
 
 

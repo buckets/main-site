@@ -9,6 +9,7 @@ body, html {
 }
 a {
     color: rgba(52, 152, 219,1.0);
+    cursor: pointer;
 }
 .body-wrap {
     display: flex;
@@ -172,8 +173,23 @@ div.form div.label {
 div.form div.control {
     padding-bottom: 0.5rem;
 }
+div.form .helptext {
+    max-width: 20rem;
+    font-size: .8rem;
+    line-height: 1rem;
+    font-style: italic;
+    color: rgba(44, 62, 80, 0.5);
+}
 
-
+p {
+    max-width: 40rem;
+}
+ol {
+    max-width: 40rem;
+}
+ol li {
+    margin-bottom: 1rem;
+}
 
 .categorizer {
 

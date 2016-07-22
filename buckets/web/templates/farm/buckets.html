@@ -129,7 +129,7 @@ var GroupRow = React.createClass({
             {this.props.group.name}
           </td>
           <td>
-            <a href={'groups/'+this.props.group.id}>Edit</a> 
+            <a href={'groups/'+this.props.group.id}>Details</a> 
           </td>
         </tr>
         {bucket_rows}
@@ -251,7 +251,7 @@ var BucketRow = React.createClass({
         </td>
         <td className="right"><Money value={this.props.bucket.deposit} /></td>
         <td>{goal_bar}</td>
-        <td><a href={'buckets/'+this.props.bucket.id}>Edit</a></td>
+        <td><a href={'buckets/'+this.props.bucket.id}>Details</a></td>
       </tr>
     )
   }

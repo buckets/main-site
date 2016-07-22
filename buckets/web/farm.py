@@ -115,6 +115,20 @@ def transactions():
         buckets=buckets,
         accounts=accounts)
 
+@blue.route('/connections', methods=['GET', 'POST'])
+def connections():
+    if request.method == 'POST':
+        token = request.form['token']
+        g.farm.simplefin_claim(token=token)
+        flash("Connected")
+        return redirect(url_for('.connections', fetch='yes'))
+    else:
+        connections = g.farm.simplefin_list_connections()
+        do_fetch = request.values.get('fetch', '')
+        return render_template('farm/connections.html',
+            fetch=do_fetch,
+            connections=connections)
+
 @blue.route('/reports')
 def reports():
     return render_template('farm/reports.html')
