@@ -140,6 +140,26 @@ class TestTransaction(object):
         assert {'bucket_id': b1['id'], 'amount': -400} in new_trans['buckets']
         assert {'bucket_id': b2['id'], 'amount': -100} in new_trans['buckets']
 
+    def test_categorize_too_much(self, api):
+        account = api.create_account('Checking')
+        b1 = api.create_bucket('Bucket1')
+        b2 = api.create_bucket('Bucket2')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+
+        with pytest.raises(Error):
+            api.categorize(trans['id'], buckets=[
+                {'bucket_id': b1['id'], 'amount': 600},
+                {'bucket_id': b2['id']},
+            ])
+
+        b1 = api.get_bucket(b1['id'])
+        assert b1['balance'] == 0, "Should not have made the trans"
+        b2 = api.get_bucket(b2['id'])
+        assert b2['balance'] == 0, "Should not have made the trans"
+        trans = api.get_account_trans(trans['id'])
+        assert trans['buckets'] == []
+
 
 class TestGroup(object):
 

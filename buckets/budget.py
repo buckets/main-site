@@ -5,7 +5,7 @@ from buckets.schema import Bucket, BucketTrans, Group
 from buckets.schema import Account, AccountTrans
 from buckets.authz import AuthPolicy, anything
 from buckets.rank import rankBetween
-from buckets.error import Error, NotFound
+from buckets.error import Error, NotFound, AmountsDontMatch
 
 
 class BudgetManagement(object):
@@ -40,7 +40,7 @@ class BudgetManagement(object):
                 )))
         row = r.fetchone()
         if not row:
-            raise NotFound()
+            raise NotFound("No such account")
         return dict(row)
 
     @policy.allow(anything)
@@ -116,7 +116,7 @@ class BudgetManagement(object):
     def get_account_trans(self, id):
         trans = list(self._list_account_trans((AccountTrans.c.id == id,)))
         if not trans:
-            raise NotFound()
+            raise NotFound("No such transaction")
         else:
             return trans[0]
 
@@ -126,6 +126,12 @@ class BudgetManagement(object):
         self.engine.execute(BucketTrans.delete()
             .where(BucketTrans.c.account_transaction_id==trans_id))
         left = trans['amount']
+
+        # make sure we don't invent money
+        total = sum([abs(x.get('amount', 0)) for x in buckets])
+        if total > abs(left):
+            raise AmountsDontMatch("Category totals don't match transaction amount.")
+
         sign = 1
         if trans['amount'] < 0:
             sign = -1
@@ -196,7 +202,7 @@ class BudgetManagement(object):
                 )))
         row = r.fetchone()
         if not row:
-            raise NotFound()
+            raise NotFound("No such group")
         return dict(row)
 
     @policy.allow(anything)
@@ -304,7 +310,7 @@ class BudgetManagement(object):
                 )))
         row = r.fetchone()
         if not row:
-            raise NotFound()
+            raise NotFound("No such bucket")
         return dict(row)
 
     @policy.allow(anything)
