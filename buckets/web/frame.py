@@ -25,3 +25,8 @@ def register():
 def signin():
     return render_template('frame/index.html')
 
+@blue.route('/signout', methods=['GET'])
+def signout():
+    session.pop('user_id')
+    flash('You have been signed out')
+    return redirect('/')

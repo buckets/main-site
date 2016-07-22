@@ -12,8 +12,11 @@ def pull_farm_id(endpoint, values):
 
 @blue.before_request
 def before_request():
+    g.db_transaction = None
+    g.db_conn = None
+    
     # authorized for this farm?
-    farm = g.api.user.get_farm(g.farm_id)
+    farm = g.api.user.get_farm(id=g.farm_id)
     if not farm:
         abort(404)
     if g.user['id'] not in [x['id'] for x in farm['users']]:
@@ -26,11 +29,12 @@ def before_request():
 
 @blue.after_request
 def after_request(r):
-    try:
-        g.db_transaction.commit()
-    except:
-        g.db_transaction.rollback()
-        raise
+    if g.db_transaction:
+        try:
+            g.db_transaction.commit()
+        except:
+            g.db_transaction.rollback()
+            raise
     return r
 
 @blue.url_defaults
