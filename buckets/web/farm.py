@@ -12,8 +12,19 @@ def pull_farm_id(endpoint, values):
 
 @blue.before_request
 def before_request():
-    api = BudgetManagement(g.engine, g.farm_id)
+    g.db_conn = g.engine.connect()
+    g.db_transaction = g.db_conn.begin()
+    api = BudgetManagement(g.db_conn, g.farm_id)
     g.farm = api.policy.bindContext(g.auth_context)
+
+@blue.after_request
+def after_request(r):
+    try:
+        g.db_transaction.commit()
+    except:
+        g.db_transaction.rollback()
+        raise
+    return r
 
 @blue.url_defaults
 def add_farm_id(endpoint, values):
