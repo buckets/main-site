@@ -61,8 +61,8 @@ class Expector(object):
 
 def test_UserManagement(engine):
     api = UserManagement(engine)
-    bob = api.create_user('bob@bob.com', 'bob')
-    sam = api.create_user('sam@sam.com', 'sam')
+    bob = api.create_user('bob2@bob.com', 'bob')
+    sam = api.create_user('sam2@sam.com', 'sam')
 
     bobs_farm = api.create_farm(creator_id=bob['id'])
 
@@ -89,8 +89,18 @@ def test_BudgetManagement(engine):
     bob = user.create_user('bob@bob.com', 'bob')
     sam = user.create_user('sam@sam.com', 'sam')
     bobs_farm = user.create_farm(creator_id=bob['id'])
+    sams_farm = user.create_farm(creator_id=sam['id'])
+
 
     api = BudgetManagement(engine, bobs_farm['id'])
+    bobs_account = api.create_account('Checking')
+    bobs_trans = api.account_transact(bobs_account['id'], 100)
+    bobs_bucket = api.create_bucket('Bucket')
+    bobs_group = api.create_group('Group')
+
+    sam_api = BudgetManagement(engine, sams_farm['id'])
+    sams_bucket = sam_api.create_bucket('Sam Bucket')
+    sams_group = sam_api.create_group('Sam Group')
 
     contexts = {
         'bob': {'user_id': bob['id']},
@@ -101,4 +111,85 @@ def test_BudgetManagement(engine):
     with World(api.policy, contexts) as world:
         world.forcall('create_account', name='something')\
             .expect('bob')
+        world.forcall('get_account', id=bobs_account['id'])\
+            .expect('bob')
+        world.forcall('update_account', id=bobs_account['id'], data={'name': 'hey'})\
+            .expect('bob')
+        world.forcall('list_accounts').expect('bob')
+        world.forcall('account_transact', account_id=bobs_account['id'], amount=10)\
+            .expect('bob')
+        world.forcall('list_account_trans').expect('bob')
+        world.forcall('get_account_trans', id=bobs_trans['id'])\
+            .expect('bob')
+        world.forcall('categorize', trans_id=bobs_trans['id'], buckets=[
+            {'bucket_id': bobs_bucket['id']}])\
+            .expect('bob')
+        world.forcall('categorize', trans_id=bobs_trans['id'], buckets=[
+            {'bucket_id': sams_bucket['id']}])\
+            .expect()
+        world.forcall('skip_categorizing', trans_id=bobs_trans['id'])\
+            .expect('bob')
+        world.forcall('create_group', name='a')\
+            .expect('bob')
+        world.forcall('update_group', id=bobs_group['id'], data={})\
+            .expect('bob')
+        world.forcall('get_group', id=bobs_group['id'])\
+            .expect('bob')
+        world.forcall('list_groups').expect('bob')
 
+        world.forcall('move_group', group_id=bobs_group['id'], after_group=bobs_group['id'])\
+            .expect('bob')
+        world.forcall('move_group', group_id=sams_group['id'], after_group=bobs_group['id'])\
+            .expect()
+        world.forcall('move_group', group_id=bobs_group['id'], after_group=sams_group['id'])\
+            .expect()
+        
+        world.forcall('move_bucket',
+            bucket_id=bobs_bucket['id'],
+            after_bucket=bobs_bucket['id']).expect('bob')
+        world.forcall('move_bucket',
+            bucket_id=bobs_bucket['id'],
+            after_bucket=sams_bucket['id']).expect()
+        world.forcall('move_bucket',
+            bucket_id=sams_bucket['id'],
+            after_bucket=bobs_bucket['id']).expect()
+
+        world.forcall('move_bucket',
+            bucket_id=bobs_bucket['id'],
+            group_id=bobs_group['id']).expect('bob')
+        world.forcall('move_bucket',
+            bucket_id=bobs_bucket['id'],
+            group_id=sams_group['id']).expect()
+        world.forcall('move_bucket',
+            bucket_id=sams_bucket['id'],
+            group_id=bobs_group['id']).expect()
+
+        world.forcall('create_bucket', name='a').expect('bob')
+        world.forcall('get_bucket', id=bobs_bucket['id']).expect('bob')
+        
+        world.forcall('update_bucket', id=bobs_bucket['id'], data={}).expect('bob')
+        world.forcall('update_bucket', id=bobs_bucket['id'],
+            data={'group_id': bobs_group['id']}).expect('bob')
+        world.forcall('update_bucket', id=bobs_bucket['id'],
+            data={'group_id': sams_group['id']}).expect()
+
+        world.forcall('list_buckets').expect('bob')
+        world.forcall('bucket_transact', bucket_id=bobs_bucket['id'], amount=10)\
+            .expect('bob')
+
+        world.forcall('bucket_transact',
+            bucket_id=bobs_bucket['id'],
+            amount=10,
+            _account_transaction_id=bobs_trans['id'])\
+            .expect('bob')
+        world.forcall('bucket_transact',
+            bucket_id=sams_bucket['id'],
+            amount=10,
+            _account_transaction_id=bobs_trans['id'])\
+            .expect()
+
+        world.forcall('simplefin_claim', token='foo').expect('bob')
+        world.forcall('add_account_hash', account_id=bobs_account['id'])\
+            .expect('bob')
+        world.forcall('simplefin_list_connections').expect('bob')
+        world.forcall('simplefin_fetch').expect('bob')
