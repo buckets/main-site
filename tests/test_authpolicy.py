@@ -1,9 +1,5 @@
-import pytest
 from buckets.authn import UserManagement
-
-@pytest.fixture
-def user(engine):
-    return UserManagement(engine)
+from buckets.budget import BudgetManagement
 
 
 class World(object):
@@ -63,11 +59,12 @@ class Expector(object):
         self.world.functions_covered.add(self.method)
 
 
-def test_UserManagement(user):
-    bob = user.create_user('bob@bob.com', 'bob')
-    sam = user.create_user('sam@sam.com', 'sam')
+def test_UserManagement(engine):
+    api = UserManagement(engine)
+    bob = api.create_user('bob@bob.com', 'bob')
+    sam = api.create_user('sam@sam.com', 'sam')
 
-    bobs_farm = user.create_farm(creator_id=bob['id'])
+    bobs_farm = api.create_farm(creator_id=bob['id'])
 
     contexts = {
         'bob': {'user_id': bob['id']},
@@ -75,7 +72,7 @@ def test_UserManagement(user):
         'anon': {},
     }
 
-    with World(user.policy, contexts) as world:
+    with World(api.policy, contexts) as world:
         world.forcall('create_user', email='a@a.com', name='a')\
             .expect('bob', 'sam', 'anon')
         world.forcall('get_user', id=bob['id'])\
@@ -86,3 +83,22 @@ def test_UserManagement(user):
             .expect('bob')
         world.forcall('list_farms', user_id=bob['id'])\
             .expect('bob')
+
+def test_BudgetManagement(engine):
+    user = UserManagement(engine)
+    bob = user.create_user('bob@bob.com', 'bob')
+    sam = user.create_user('sam@sam.com', 'sam')
+    bobs_farm = user.create_farm(creator_id=bob['id'])
+
+    api = BudgetManagement(engine, bobs_farm['id'])
+
+    contexts = {
+        'bob': {'user_id': bob['id']},
+        'sam': {'user_id': sam['id']},
+        'anon': {},
+    }
+
+    with World(api.policy, contexts) as world:
+        world.forcall('create_account', name='something')\
+            .expect('bob')
+
