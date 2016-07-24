@@ -1,20 +1,27 @@
+from collections import defaultdict
+
 
 class AuthPolicy(object):
 
     def __init__(self):
-        self._auth_functions = {}
+        self._auth_functions = defaultdict(list)
+        self._common_auth = []
 
     def __get__(self, obj, cls=None):
         return _BoundAuthPolicy(obj, self)
 
+    def common(self, func):
+        self._common_auth.append(func)
+        return func
+
     def allow(self, *func):
-        if len(func) == 1:
-            func = func[0]
-        else:
-            func = allOf(*func)
+        # if len(func) == 1:
+        #     func = func[0]
+        # else:
+        #     func = allOf(*func)
         def deco(f):
             func_name = f.__name__
-            self._auth_functions[func_name] = func
+            self._auth_functions[func_name].extend(func)
             return f
         return deco
 
@@ -41,9 +48,16 @@ class _BoundAuthPolicy(object):
         if args:
             raise TypeError('Currently, positional arguments are not'
                             ' supported by AuthPolicy instances.')
-        auth_func = self._policy._auth_functions[func_name]
-        if not auth_func(self._instance, auth_context, func_name, kwargs):
-            raise NotAuthorized(self._instance, auth_context, func_name, kwargs)
+        
+        # common authorization
+        for func in self._policy._common_auth:
+            if not func(self._instance, auth_context, func_name, kwargs):
+                raise NotAuthorized(self._instance, auth_context, func_name, kwargs)
+
+        # specific authorization
+        for auth_func in self._policy._auth_functions[func_name]:
+            if not auth_func(self._instance, auth_context, func_name, kwargs):
+                raise NotAuthorized(self._instance, auth_context, func_name, kwargs)
 
     def is_authorized(self, auth_context, func_name, *args, **kwargs):
         try:

@@ -14,6 +14,26 @@ class UserManagement(object):
     def __init__(self, engine):
         self.engine = engine
 
+    def userOnly(getter):
+        def authorizer(self, auth_context, method, kwargs):
+            return auth_context.get('user_id') == getter(kwargs)
+        return authorizer
+
+    def farmHandOnly(farm_id_getter):
+        def authorizer(self, auth_context, method, kwargs):
+            farm_id = farm_id_getter(kwargs)
+            user_id = auth_context.get('user_id')
+            r = self.engine.execute(select([UserFarm.c.farm_id])
+                .where(and_(
+                    UserFarm.c.farm_id == farm_id,
+                    UserFarm.c.user_id == user_id,
+                )))
+            if r.fetchone():
+                return True
+            return False
+        return authorizer
+
+
     @policy.allow(anything)
     def create_user(self, email, name):
         email = email.lower()
@@ -23,14 +43,14 @@ class UserManagement(object):
         row = r.fetchone()
         return dict(row)
 
-    @policy.allow(anything)
+    @policy.allow(userOnly(lambda x:x['id']))
     def get_user(self, id):
         r = self.engine.execute(select([User])
             .where(User.c.id == id))
         row = r.fetchone()
         return dict(row)
 
-    @policy.allow(anything)
+    @policy.allow(userOnly(lambda x:x['creator_id']))
     def create_farm(self, creator_id, name='Family'):
         with self.engine.begin() as conn:
             r = conn.execute(Farm.insert()
@@ -42,7 +62,7 @@ class UserManagement(object):
                 .values(farm_id=farm_id, user_id=creator_id))
         return self.get_farm(farm_id)
 
-    @policy.allow(anything)
+    @policy.allow(farmHandOnly(lambda x:x['id']))
     def get_farm(self, id):
         r = self.engine.execute(
             select([Farm])
@@ -56,7 +76,7 @@ class UserManagement(object):
         farm['users'] = [dict(x) for x in r.fetchall()]
         return farm
 
-    @policy.allow(anything)
+    @policy.allow(userOnly(lambda x:x['user_id']))
     def list_farms(self, user_id):
         r = self.engine.execute(
             select([Farm.c.id])
@@ -65,3 +85,4 @@ class UserManagement(object):
                 UserFarm.c.user_id == user_id)))
         farm_ids = [x[0] for x in r.fetchall()]
         return [self.get_farm(x) for x in farm_ids]
+

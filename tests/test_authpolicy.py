@@ -1,6 +1,11 @@
 from buckets.authn import UserManagement
 from buckets.budget import BudgetManagement
 
+import uuid
+
+def random(prefix='', suffix=''):
+    return '{0}{1}{2}'.format(prefix, uuid.uuid4(), suffix)
+
 
 class World(object):
 
@@ -61,8 +66,8 @@ class Expector(object):
 
 def test_UserManagement(engine):
     api = UserManagement(engine)
-    bob = api.create_user('bob2@bob.com', 'bob')
-    sam = api.create_user('sam2@sam.com', 'sam')
+    bob = api.create_user(random('bob', '@bob.com'), 'bob')
+    sam = api.create_user(random('sam', '@sam.com'), 'sam')
 
     bobs_farm = api.create_farm(creator_id=bob['id'])
 
@@ -86,8 +91,8 @@ def test_UserManagement(engine):
 
 def test_BudgetManagement(engine):
     user = UserManagement(engine)
-    bob = user.create_user('bob@bob.com', 'bob')
-    sam = user.create_user('sam@sam.com', 'sam')
+    bob = user.create_user(random('bob', '@bob.com'), 'bob')
+    sam = user.create_user(random('sam', '@sam.com'), 'sam')
     bobs_farm = user.create_farm(creator_id=bob['id'])
     sams_farm = user.create_farm(creator_id=sam['id'])
 

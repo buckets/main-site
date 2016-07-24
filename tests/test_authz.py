@@ -6,6 +6,25 @@ from buckets.authz import BindableMultiAuth
 
 class TestAuthPolicyTest(object):
 
+    def test_common(self):
+        """
+        You can specify a common policy for functions
+        """
+        class Foo(object):
+            auth = AuthPolicy()
+            @auth.common
+            def lessthan4(self, context, func, *args, **kwargs):
+                return context['value'] < 4
+            @auth.allow(anything)
+            def exclaim(self, arg):
+                return arg + '!'
+
+        foo = Foo()
+        auth = foo.auth
+        result = auth.call({'value': 2}, 'exclaim', arg='hey')
+        assert result == 'hey!'
+        with pytest.raises(NotAuthorized):
+            auth.call({'value': 5}, 'exclaim', arg='hey')
 
     def test_anything(self):
         """
@@ -80,6 +99,31 @@ class TestAuthPolicyTest(object):
             sam.exclaim(arg='foo')
         assert False is auth.bindAuthOnly('sam').exclaim(args='foo')
 
+    def test_stackable(self):
+        """
+        You can have multiple allows.
+        """
+        class Foo(object):
+            auth = AuthPolicy()
+
+            def if_b(self, context, *args, **kwargs):
+                return context.startswith('b')
+            def if_long(self, context, *args, **kwargs):
+                return len(context) >= 3
+            
+            @auth.allow(if_b)
+            @auth.allow(if_long)
+            def exclaim(self, arg):
+                return arg + '!'
+
+        foo = Foo()
+        auth = foo.auth
+
+        with pytest.raises(NotAuthorized):
+            auth.call('jim', 'exclaim', arg='something')
+        with pytest.raises(NotAuthorized):
+            auth.call('bo', 'exclaim', arg='something')
+        assert auth.call('bob', 'exclaim', arg='something') == 'something!'
 
     def test_and(self):
         """
@@ -133,7 +177,7 @@ class Bar(object):
         return 'bar action2'
 
 
-def test_basic():
+def test_multiauth():
     thing = BindableMultiAuth()
     thing.registerPolicy('foo', Foo().policy)
     thing.registerPolicy('bar', Bar().policy)

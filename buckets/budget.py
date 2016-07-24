@@ -7,6 +7,7 @@ import sqlalchemy
 from sqlalchemy import select, and_, func
 import requests
 
+from buckets.schema import UserFarm
 from buckets.schema import Bucket, BucketTrans, Group
 from buckets.schema import Account, AccountTrans, Connection
 from buckets.schema import AccountMapping
@@ -37,6 +38,67 @@ class BudgetManagement(object):
         self.engine = engine
         self.farm_id = farm_id
         self.requests = _requests
+
+
+    @policy.common
+    def _only_people_in_farm(self, auth_context, method, kwargs):
+        """
+        Only people in the farm are allowed to call methods on this.
+        """
+        user_id = auth_context.get('user_id', None)
+        if user_id is None:
+            return False
+
+        r = self.engine.execute(select([UserFarm.c.farm_id])
+            .where(and_(
+                UserFarm.c.farm_id == self.farm_id,
+                UserFarm.c.user_id == user_id)))
+        if r.fetchone():
+            return True
+        return False
+
+    def bucket_in_farm(self, bucket_id):
+        if bucket_id is None:
+            return True
+        r = self.engine.execute(select([Bucket.c.id])
+            .where(and_(
+                Bucket.c.id == bucket_id,
+                Bucket.c.farm_id == self.farm_id,
+            )))
+        if r.fetchone():
+            return True
+        return False
+
+    def group_in_farm(self, group_id):
+        if group_id is None:
+            return True
+        r = self.engine.execute(select([Group.c.id])
+            .where(and_(
+                Group.c.id == group_id,
+                Group.c.farm_id == self.farm_id,
+            )))
+        if r.fetchone():
+            return True
+        return False
+
+    def trans_in_farm(self, trans_id):
+        if trans_id is None:
+            return True
+        r = self.engine.execute(select([AccountTrans.c.id])
+            .where(and_(
+                AccountTrans.c.id == trans_id,
+                AccountTrans.c.account_id == Account.c.id,
+                Account.c.farm_id == self.farm_id,
+            )))
+        if r.fetchone():
+            return True
+        return False
+
+    def inFarm(getter, checker):
+        def verifier(self, auth_context, method, kwargs):
+            value = getter(kwargs)
+            return checker(self, value)
+        return verifier
 
     #----------------------------------------------------------
     # Account
@@ -144,7 +206,13 @@ class BudgetManagement(object):
         else:
             return trans[0]
 
-    @policy.allow(anything)
+    def _authorizeBuckets(self, auth_context, method, kwargs):
+        for bucket in kwargs.get('buckets', []):
+            if not self.bucket_in_farm(bucket['bucket_id']):
+                return False
+        return True
+
+    @policy.allow(_authorizeBuckets)
     def categorize(self, trans_id, buckets):
         trans = self.get_account_trans(trans_id)
         self.engine.execute(BucketTrans.delete()
@@ -247,7 +315,8 @@ class BudgetManagement(object):
             .order_by(Group.c.ranking))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(anything)
+    @policy.allow(inFarm(lambda x:x['group_id'], group_in_farm))
+    @policy.allow(inFarm(lambda x:x['after_group'], group_in_farm))
     def move_group(self, group_id, after_group):
         self.get_group(group_id)
         after = self.get_group(after_group)
@@ -271,8 +340,9 @@ class BudgetManagement(object):
             'ranking': new_rank,
         })
 
-
-    @policy.allow(anything)
+    @policy.allow(inFarm(lambda x:x['bucket_id'], bucket_in_farm))
+    @policy.allow(inFarm(lambda x:x.get('after_bucket'), bucket_in_farm))
+    @policy.allow(inFarm(lambda x:x.get('group_id'), group_in_farm))
     def move_bucket(self, bucket_id, after_bucket=None, group_id=None):
         if group_id and after_bucket:
             raise Error("Either supply after_bucket or group_id; not both")
@@ -347,7 +417,7 @@ class BudgetManagement(object):
             raise NotFound("No such bucket")
         return dict(row)
 
-    @policy.allow(anything)
+    @policy.allow(inFarm(lambda x:x['data'].get('group_id'), group_in_farm))
     def update_bucket(self, id, data):
         updatable = [
             'name',
@@ -382,7 +452,8 @@ class BudgetManagement(object):
             .where(Bucket.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(anything)
+    @policy.allow(inFarm(lambda x:x['bucket_id'], bucket_in_farm))
+    @policy.allow(inFarm(lambda x:x.get('_account_transaction_id'), trans_in_farm))
     def bucket_transact(self, bucket_id, amount, memo='', posted=None,
             _account_transaction_id=None):
         values = {
