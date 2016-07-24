@@ -47,7 +47,8 @@ def add_farm_id(endpoint, values):
 
 @blue.route('/')
 def index():
-    return redirect(url_for('.summary'))
+    # XXX for now, redirect to accounts
+    return redirect(url_for('.accounts'))
 
 @blue.route('/summary')
 def summary():

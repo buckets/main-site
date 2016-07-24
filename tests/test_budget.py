@@ -283,6 +283,11 @@ class TestBucket(object):
         assert bucket['end_date'] == None
         assert bucket['deposit'] == None
 
+    def test_has(self, api):
+        assert api.count_buckets() == 0
+        api.create_bucket('Clothing')
+        assert api.count_buckets() == 1
+
     def test_list(self, api):
         bucket = api.create_bucket('Clothing')
         buckets = api.list_buckets()

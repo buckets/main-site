@@ -13,7 +13,6 @@ def register():
     name = request.values['name']
     email = request.values['email']
     user = g.api.user.create_user(email=email, name=name)
-    g.api.user.create_farm(creator_id=user['id'])
     flash('You are registered!')
     
     # sign in

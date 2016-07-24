@@ -7,8 +7,10 @@ blue = Blueprint('app', __name__)
 def index():
     farms = g.api.user.list_farms(user_id=g.user['id'])
     if not farms:
-        return redirect(url_for('.farms'))
-    elif len(farms) > 1:
+        farm = g.api.user.create_farm(creator_id=g.user['id'])
+        farms = [farm]
+    
+    if len(farms) > 1:
         # in the future, redirect to last used
         return redirect(url_for('.farms'))
     else:
