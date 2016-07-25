@@ -157,21 +157,23 @@ table.ledger tr.group td {
     padding-top: 0.1rem;
 }
 
+
+/* ------------------------------------------------------
+Form
+------------------------------------------------------ */
 div.form {
+    max-width: 20rem;
 }
 div.form div.pair {
-    display: flex;
 }
 
 div.form div.label {
-    color: rgba(44, 62, 80, 0.5);
-    text-align: right;
-    width: 10rem;
-    padding-right: 1rem;
-    padding-bottom: 0.5rem;
+    scolor: rgba(44, 62, 80, 0.5);
+    font-size: .8rem;
+    color: rgba(127, 140, 141,1.0)
 }
 div.form div.control {
-    padding-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
 }
 div.form .helptext {
     max-width: 20rem;
@@ -179,7 +181,11 @@ div.form .helptext {
     line-height: 1rem;
     font-style: italic;
     color: rgba(44, 62, 80, 0.5);
+    margin-bottom: .5rem;
 }
+
+
+
 
 p {
     max-width: 40rem;

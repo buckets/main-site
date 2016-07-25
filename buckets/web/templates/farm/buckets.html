@@ -13,13 +13,17 @@ Store.buckets = {{ buckets|json|safe }};
 Store.rerender = function() {
   ReactDOM.render(<BucketTable buckets={Store.buckets} groups={Store.groups}/>, target_el);
 }
-Store.updateBucket = function(bucket) {
+Store.updateBucket = function(bucket, norender) {
   _.each(Store.buckets, function(old_bucket) {
     if (old_bucket.id === bucket.id) {
       _.merge(old_bucket, bucket);
     }
   });
-  Store.rerender();
+  if (norender) {
+
+  } else {
+    Store.rerender();
+  }
 }
 Store.updateGroup = function(group) {
   _.each(Store.groups, function(old_group) {
@@ -37,9 +41,6 @@ var GroupRow = React.createClass({
       underDrag: false,
       isDragging: false,
     }
-  },
-  pendingChanged: function() {
-    // XXX
   },
 
   // Dragging
@@ -107,8 +108,14 @@ var GroupRow = React.createClass({
 
   render: function() {
     var bucket_rows = this.props.buckets.map(function(bucket) {
+      var pending = this.props.pendings[bucket.id];
       return (
-        <BucketRow key={bucket.id} bucket={bucket} onPendingChange={this.props.onPendingChanged} onBucketChanged={this.props.onBucketChanged}></BucketRow>
+        <BucketRow
+          key={bucket.id}
+          bucket={bucket}
+          pending={pending}
+          onPendingChanged={this.props.onPendingChanged} 
+          onBucketChanged={this.props.onBucketChanged}></BucketRow>
       );
     }.bind(this));
     var class_name = 'group';
@@ -141,7 +148,6 @@ var GroupRow = React.createClass({
 var BucketRow = React.createClass({
   getInitialState: function() {
     return {
-      pending_amount: '',
       underDrag: false,
       isDragging: false,
     }
@@ -158,13 +164,10 @@ var BucketRow = React.createClass({
     this.setPending(value);
   },
   setPending: function(value) {
-    this.setState({
-      pending_amount: value
-    })
-    this.props.onPendingChange(this.props.bucket, value);
+    this.props.onPendingChanged(this.props.bucket, value);
   },
   doTransaction: function() {
-    var amount = this.state.pending_amount;
+    var amount = this.props.pending;
     this.setPending('');
     apiRequest({
       method: 'bucket_transact',
@@ -244,7 +247,7 @@ var BucketRow = React.createClass({
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td className="right">
           <MoneyInput className="right"
-            value={this.state.pending_amount}
+            value={this.props.pending}
             onKeyUp={this.pendingKeyUp}
             onChange={this.pendingChanged}
             size="10" />
@@ -265,8 +268,53 @@ var BucketTable = React.createClass({
       pendings: {}
     }
   },
+  performAllPending: function() {
+    var post_actions = [];
+    var actions = [];
+    _.each(this.state.pendings, function(amount, bucket_id) {
+      actions.push({
+        method: 'bucket_transact',
+        kwargs: {
+          bucket_id: bucket_id,
+          amount: amount,
+        }
+      });
+      post_actions.push({
+        method: 'get_bucket',
+        kwargs: {
+          id: bucket_id,
+        }
+      });
+    });
+    this.setState({pendings: {}});
+    apiRequest(actions, function(response) {
+      apiRequest(post_actions, function(buckets) {
+        _.each(buckets, function(bucket) {
+          Store.updateBucket(bucket, false);
+        });
+        Store.rerender();
+      });
+    });
+    
+    /*var amount = this.state.pending;
+    this.setPending('');
+    apiRequest({
+      method: 'bucket_transact',
+      kwargs: {
+        bucket_id: this.props.bucket.id,
+        amount: amount,
+      }
+    }, function(response) {
+      this.refreshBucket();
+    }.bind(this));
+    */
+  },
   pendingChanged: function(bucket, pending) {
-    this.state.pendings[bucket.id] = pending;
+    if (pending === '0') {
+      delete this.state.pendings[bucket.id];
+    } else {
+      this.state.pendings[bucket.id] = pending;
+    }
     this.setState(this.state);
   },
   groupChanged: function(group_id) {
@@ -313,7 +361,14 @@ var BucketTable = React.createClass({
     })
     _.each(_.sortBy(this.props.groups, ['ranking']), function(group) {
       var buckets = group_buckets[group.id] || [];
-      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} onBucketChanged={this.bucketChanged} onGroupChanged={this.groupChanged} onPendingChanged={this.pendingChanged} />);
+      groups.push(<GroupRow
+        key={group.id}
+        group={group}
+        buckets={buckets}
+        pendings={this.state.pendings}
+        onBucketChanged={this.bucketChanged}
+        onGroupChanged={this.groupChanged}
+        onPendingChanged={this.pendingChanged} />);
     }.bind(this));
     if (group_buckets['NOGROUP']) {
       var buckets = group_buckets['NOGROUP'];
@@ -322,9 +377,22 @@ var BucketTable = React.createClass({
         'name': 'Misc.',
         'rank': 'z',
       }
-      groups.push(<GroupRow key={group.id} group={group} buckets={buckets} onBucketChanged={this.bucketChanged} onPendingChanged={this.pendingChanged} />);
+      groups.push(<GroupRow
+        key={group.id}
+        group={group}
+        buckets={buckets}
+        pendings={this.state.pendings}
+        onBucketChanged={this.bucketChanged}
+        onPendingChanged={this.pendingChanged} />);
     }
     var pending_total = _.sum(_.values(this.state.pendings));
+
+    var commit_button;
+    if (_.size(_.filter(this.state.pendings))) {
+      commit_button = (<div>
+        <button onClick={this.performAllPending}>Make it so</button>
+      </div>);
+    }
     
     return (
       <table className="ledger" width="100%">
@@ -345,6 +413,7 @@ var BucketTable = React.createClass({
             <td className="right"><Money value={balance_total} /></td>
             <td className="right">
               <Money value={pending_total} />
+              {commit_button}
             </td>
             <td className="right">
               <Money value={deposit_total} />

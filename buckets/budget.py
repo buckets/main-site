@@ -141,6 +141,15 @@ class BudgetManagement(object):
         return self.get_account(id)
 
     @policy.allow(anything)
+    def has_accounts(self):
+        r = self.engine.execute(select([Account.c.id])
+            .where(Account.c.farm_id == self.farm_id)
+            .limit(1))
+        if r.fetchone():
+            return True
+        return False
+
+    @policy.allow(anything)
     def list_accounts(self):
         r = self.engine.execute(select([Account])
             .where(Account.c.farm_id == self.farm_id))
@@ -205,6 +214,17 @@ class BudgetManagement(object):
             raise NotFound("No such transaction")
         else:
             return trans[0]
+
+    @policy.allow(anything)
+    def has_transactions(self):
+        r = self.engine.execute(select([AccountTrans.c.id])
+            .where(and_(
+                AccountTrans.c.account_id == Account.c.id,
+                Account.c.farm_id == self.farm_id))
+            .limit(1))
+        if r.fetchone():
+            return True
+        return False
 
     def _authorizeBuckets(self, auth_context, method, kwargs):
         for bucket in kwargs.get('buckets', []):
@@ -404,6 +424,15 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.allow(anything)
+    def has_buckets(self):
+        r = self.engine.execute(select([Bucket.c.id])
+            .where(Bucket.c.farm_id == self.farm_id)
+            .limit(1))
+        if r.fetchone():
+            return True
+        return False
+
+    @policy.allow(anything)
     def get_bucket(self, id):
         r = self.engine.execute(
             select([Bucket])
@@ -471,6 +500,15 @@ class BudgetManagement(object):
 
     #----------------------------------------------------------
     # SimpleFIN
+
+    @policy.allow(anything)
+    def has_connections(self):
+        r = self.engine.execute(select([Connection.c.id])
+            .where(Connection.c.farm_id == self.farm_id)
+            .limit(1))
+        if r.fetchone():
+            return True
+        return False
 
     @policy.allow(anything)
     def simplefin_claim(self, token):

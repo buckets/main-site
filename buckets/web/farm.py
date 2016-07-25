@@ -44,6 +44,25 @@ def add_farm_id(endpoint, values):
 
 
 
+@blue.before_request
+def what_should_show():
+    g.show = {
+        'connections': g.farm.has_connections(),
+        'transactions': False,
+        'summary': False,
+        'reports': False,
+    }
+    if g.farm.has_transactions():
+        g.show.update({
+            'transactions': True,
+            'summary': True,
+            'reports': True,
+        })
+    elif g.farm.has_accounts():
+        g.show.update({
+            'transactions': True,
+        })
+
 
 @blue.route('/')
 def index():
@@ -52,6 +71,7 @@ def index():
 
 @blue.route('/summary')
 def summary():
+    g.show['summary'] = True
     return render_template('farm/summary.html')
 
 @blue.route('/accounts', methods=['GET', 'POST'])
@@ -61,6 +81,7 @@ def accounts():
         balance = parseMoney(request.values['balance'] or '0')
         g.farm.create_account(name=name, balance=balance)
         flash('Created account')
+        return redirect(url_for('farm.accounts'))
     accounts = g.farm.list_accounts()
     return render_template('farm/accounts.html',
         accounts=accounts)
@@ -132,6 +153,7 @@ def group(group_id):
 
 @blue.route('/transactions')
 def transactions():
+    g.show['transactions'] = True
     buckets = g.farm.list_buckets()
     accounts = g.farm.list_accounts()
     return render_template('farm/transactions.html',
@@ -140,6 +162,7 @@ def transactions():
 
 @blue.route('/connections', methods=['GET', 'POST'])
 def connections():
+    g.show['connections'] = True
     if request.method == 'POST':
         token = request.form['token']
         g.farm.simplefin_claim(token=token)
@@ -154,6 +177,7 @@ def connections():
 
 @blue.route('/reports')
 def reports():
+    g.show['reports'] = True
     return render_template('farm/reports.html')
 
 
@@ -161,8 +185,10 @@ def reports():
 # api
 #-----------------------------------------------------------------------
 
-@blue.route('/api', methods=['POST'])
-def api():
+@blue.route('/api-', defaults={'label': ''}, methods=['POST'])
+@blue.route('/api', defaults={'label': ''}, methods=['POST'])
+@blue.route('/api-<string:label>', methods=['POST'])
+def api(label):
     data = request.json
     multi = True
     responses = []

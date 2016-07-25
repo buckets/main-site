@@ -143,6 +143,7 @@ patches['init'] = [
         balance integer default '0' not null,
         currency varchar(3) default 'USD'
     )''',
+    '''CREATE INDEX account_farm_id_idx ON account(farm_id)''',
     '''CREATE TABLE account_transaction (
         id serial primary key,
         created timestamp default current_timestamp,
@@ -154,6 +155,8 @@ patches['init'] = [
         skip_cat boolean default 'f',
         cat_likely boolean default 'f'
     )''',
+    '''CREATE INDEX account_transaction_account_id_idx
+        ON account_transaction(account_id)''',
     '''CREATE FUNCTION update_account_balance() RETURNS trigger AS $update_account_balance$
         BEGIN
             IF (TG_OP = 'DELETE') THEN
@@ -219,6 +222,8 @@ patches['init'] = [
         deposit integer,
         color text
     )''',
+    '''CREATE INDEX bucket_farm_id_idx
+        ON bucket(farm_id)''',
     '''CREATE TABLE bucket_transaction (
         id serial primary key,
         created timestamp default current_timestamp,
@@ -228,6 +233,8 @@ patches['init'] = [
         memo text,
         account_transaction_id integer
     )''',
+    '''CREATE INDEX bucket_transaction_bucket_id_idx
+        ON bucket_transaction(bucket_id)''',
     '''CREATE FUNCTION update_bucket_balance() RETURNS trigger AS $update_bucket_balance$
         BEGIN
             IF (TG_OP = 'DELETE') THEN
@@ -271,13 +278,17 @@ patches['init'] = [
         access_token text,
         last_used timestamp
     )''',
+    '''CREATE INDEX simplefin_connection_farm_id_idx
+        ON simplefin_connection(farm_id)''',
     '''CREATE TABLE account_mapping (
         id serial primary key,
         created timestamp default current_timestamp,
         farm_id integer,
         account_id integer,
         account_hash text
-    )'''
+    )''',
+    '''CREATE INDEX account_mapping_farm_id_idx
+        ON account_mapping(farm_id)''',
 ]
 
 

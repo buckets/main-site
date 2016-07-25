@@ -178,8 +178,8 @@ var TransRow = React.createClass({
     return (
       <tr>
         <td><input type="checkbox" /></td>
-        <td>{this.props.transaction.posted.split('T')[0]}</td>
         <td>{account.name}</td>
+        <td>{this.props.transaction.posted.split('T')[0]}</td>
         <td>{this.props.transaction.memo}</td>
         <td><Money value={this.props.transaction.amount} /></td>
         <td>{categories_section}</td>
@@ -226,7 +226,7 @@ var TransTable = React.createClass({
       amount: '',
       memo: '',
     });
-    this._descriptionInput.focus();
+    this._postedInput.focus();
   },
   propLink: function(attr) {
     return {
@@ -244,8 +244,8 @@ var TransTable = React.createClass({
   amountChanged: function(amount) {
     this.setState({amount: amount});
   },
-  descriptionRef: function(input) {
-    this._descriptionInput = input;
+  postedRef: function(input) {
+    this._postedInput = input;
   },
   render: function() {
     var transaction_rows = [];
@@ -268,8 +268,8 @@ var TransTable = React.createClass({
       <thead>
         <tr>
           <th><input type="checkbox" name="transaction[]" /></th>
-          <th>Date</th>
           <th>Account</th>
+          <th>Date</th>
           <th>Description</th>
           <th>Amount</th>
           <th>Categories</th>
@@ -278,10 +278,10 @@ var TransTable = React.createClass({
       <tbody>
         <tr>
           <td></td>
-          <td><input type="date" {...this.propLink('posted')} /></td>
           <td><select {...this.propLink('account_id')}>
             <option value=""></option>{account_options}</select></td>
-          <td><input ref={this.descriptionRef} type="text" {...this.propLink('memo')} /></td>
+          <td><input ref={this.postedRef} type="date" {...this.propLink('posted')} /></td>
+          <td><input type="text" {...this.propLink('memo')} /></td>
           <td><MoneyInput value={this.state.amount} onChange={this.amountChanged} /></td>
           <td><button onClick={this.createTransaction}>{add_label}</button></td>
         </tr>

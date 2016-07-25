@@ -47,6 +47,11 @@ class TestAccount(object):
         assert account['balance'] == 0
         assert account['currency'] == 'USD'
 
+    def test_has(self, api):
+        assert api.has_accounts() is False
+        api.create_account('Clothing')
+        assert api.has_accounts() is True
+
     def test_list(self, api):
         account = api.create_account('Savings')
         accounts = api.list_accounts()
@@ -65,6 +70,8 @@ class TestAccount(object):
 
     def test_transact(self, api):
         account = api.create_account('Checking')
+
+        assert api.has_transactions() is False
         trans = api.account_transact(account['id'], amount=100,
             memo='some memo', posted=date(2000, 1, 1))
         assert trans['account_id'] == account['id']
@@ -77,6 +84,7 @@ class TestAccount(object):
         assert trans['cat_likely'] == False
         assert trans['skip_cat'] == False
         assert trans['buckets'] == []
+        assert api.has_transactions() is True
 
         account = api.get_account(account['id'])
         assert account['balance'] == 100
@@ -284,9 +292,9 @@ class TestBucket(object):
         assert bucket['deposit'] == None
 
     def test_has(self, api):
-        assert api.count_buckets() == 0
+        assert api.has_buckets() == 0
         api.create_bucket('Clothing')
-        assert api.count_buckets() == 1
+        assert api.has_buckets() is True
 
     def test_list(self, api):
         bucket = api.create_bucket('Clothing')
@@ -383,6 +391,8 @@ class TestSimpleFIN(object):
         """
         You can claim a simplefin setup token.
         """
+        assert api.has_connections() is False
+
         fake_requests.post.return_value = MagicMock(
             text='https://foo:bar@example.com')
         connection = api.simplefin_claim(
@@ -393,6 +403,8 @@ class TestSimpleFIN(object):
         assert connection['access_token'] == 'https://foo:bar@example.com'
         assert connection['created'] is not None
         assert connection['last_used'] is None
+
+        assert api.has_connections() is True
 
     def test_fetch_andMatch(self, api, fake_requests):
         """
