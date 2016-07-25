@@ -110,6 +110,7 @@ def bucket(bucket_id):
         data = {}
         data['name'] = request.form['name']
         data['kind'] = request.form['kind']
+        data['color'] = request.form['color']
         
         goal = request.form['goal']
         if goal:

@@ -457,6 +457,7 @@ class BudgetManagement(object):
             'end_date',
             'ranking',
             'group_id',
+            'color',
         ]
         values = {}
         for key in updatable:

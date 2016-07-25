@@ -6,11 +6,55 @@
 
 <script type="text/babel">
 var target_el = document.getElementById('bucket-type-chooser');
+var colorpicker_el = document.getElementById('color-picker');
 var Store = {};
 Store.bucket = {{ bucket|json|safe }};
 Store.render = function() {
   ReactDOM.render(<BucketTypeChooser bucket={Store.bucket}/>, target_el);
+  ReactDOM.render(<ColorInput value={Store.bucket.color} name="color" />,
+  colorpicker_el);
 }
+
+var ColorInput = React.createClass({
+  getInitialState: function() {
+    return {
+      value: this.props.value || '',
+      color_options: [
+        '#1abc9c',
+        '#2ecc71',
+        '#3498db',
+        '#9b59b6',
+        '#f1c40f',
+        '#e67e22',
+        '#e74c3c',
+        '#95a5a6',
+        '#34495e',
+      ],
+    };
+  },
+  changeColorHandler: function(color) {
+    return function() {
+      this.setState({value: color});
+      if (this.props.onChange) {
+        this.props.onChange(color);
+      }
+    }.bind(this);
+  },
+  render: function() {
+    var options = this.state.color_options.map(function(color) {
+      var classes = "color-option";
+      if (this.state.value === color) {
+        classes += ' selected';
+      }
+      var style = {'backgroundColor': color};
+      return (<div key={color} className={classes} style={style} onClick={this.changeColorHandler(color)} tabIndex="0"></div>);
+    }.bind(this));
+    return (<div className="colorpicker">
+      {options}
+      <input type="hidden" value={this.state.value} name={this.props.name} />
+    </div>)
+  }
+})
 
 var MonthInput = React.createClass({
   getInitialState: function() {
@@ -242,6 +286,10 @@ Store.render();
   <div class="pair">
     <div class="label">Balance</div>
     <div class="control">{{ bucket.balance|money }}</div>
+  </div>
+  <div class="pair">
+    <div class="label">Color</div>
+    <div class="control" id="color-picker"></div>
   </div>
   <div id="bucket-type-chooser"></div>
   <div class="pair">

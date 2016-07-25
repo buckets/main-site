@@ -310,11 +310,13 @@ class TestBucket(object):
                 'out_to_pasture': True,
                 'kind': 'deposit',
                 'deposit': 100,
+                'color': '#ffffff',
             })
         assert new_bucket['name'] == 'Stuff'
         assert new_bucket['out_to_pasture'] is True
         assert new_bucket['kind'] == 'deposit'
         assert new_bucket['deposit'] == 100
+        assert new_bucket['color'] == '#ffffff'
         again = api.get_bucket(bucket['id'])
         assert again == new_bucket
 
