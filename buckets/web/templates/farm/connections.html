@@ -44,7 +44,7 @@ var AccountMapper = React.createClass({
       }
     }, function(response) {
       _.pull(Store.unknown, this.props.unknown);
-      Store.rerender();
+      this.props.doSync();
     }.bind(this))
   },
   newNameChanged: function(ev) {
@@ -117,7 +117,11 @@ var MappingTable = React.createClass({
     });
     var unknown_rows = this.props.unknown.map(function(unknown) {
       console.log('unknown', unknown);
-      return (<AccountMapper key={unknown.id} unknown={unknown} accounts={this.props.accounts} />);
+      return (<AccountMapper
+        key={unknown.id}
+        unknown={unknown}
+        accounts={this.props.accounts}
+        doSync={this.doSync} />);
     }.bind(this));
     var unknown_table;
     if (unknown_rows.length) {
@@ -142,7 +146,9 @@ var MappingTable = React.createClass({
     }
     return (
       <div>
-        <button onClick={this.doSync}>Sync</button>
+        <div className="toolbar">
+          <button onClick={this.doSync}>Sync</button>
+        </div>
         {errors}
         {unknown_table}
       </div>

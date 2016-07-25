@@ -50,6 +50,7 @@ def what_should_show():
         'connections': g.farm.has_connections(),
         'transactions': False,
         'summary': False,
+        'buckets': False,
         'reports': False,
     }
     if g.farm.has_transactions():
@@ -57,10 +58,12 @@ def what_should_show():
             'transactions': True,
             'summary': True,
             'reports': True,
+            'buckets': True,
         })
     elif g.farm.has_accounts():
         g.show.update({
             'transactions': True,
+            'buckets': True,
         })
 
 
@@ -88,6 +91,7 @@ def accounts():
 
 @blue.route('/buckets', methods=['GET', 'POST'])
 def buckets():
+    g.show['buckets'] = True
     if request.method == 'POST':
         name = request.values['name']
         bucket = g.farm.create_bucket(name=name)
@@ -101,6 +105,7 @@ def buckets():
 
 @blue.route('/buckets/<int:bucket_id>', methods=['GET', 'POST'])
 def bucket(bucket_id):
+    g.show['buckets'] = True
     if request.method == 'POST':
         data = {}
         data['name'] = request.form['name']
@@ -133,6 +138,7 @@ def bucket(bucket_id):
 
 @blue.route('/groups', methods=['POST'])
 def groups():
+    g.show['buckets'] = True
     name = request.form['name']
     g.farm.create_group(name=name)
     flash('Group created')
@@ -140,6 +146,7 @@ def groups():
 
 @blue.route('/groups/<int:group_id>', methods=['GET', 'POST'])
 def group(group_id):
+    g.show['buckets'] = True
     if request.method == 'POST':
         data = {}
         data['name'] = request.form['name']
