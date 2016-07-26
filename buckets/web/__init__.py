@@ -25,6 +25,7 @@ def put_user_on_request():
     g.auth_context = {}
     g.user = {}
     g.engine = f.engine
+    g.debug = f.config['DEBUG']
 
     user_id = session.get('user_id', None)
     if user_id:

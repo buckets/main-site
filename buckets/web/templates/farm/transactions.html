@@ -11,7 +11,6 @@ var Store = {};
 Store.transactions = [];
 Store.buckets = {{ buckets|json|safe }};
 Store.accounts = {{ accounts|json|safe }};
-Store.selected = {};
 Store.rerender = function() {
   ReactDOM.render(<TransTable buckets={Store.buckets} transactions={Store.transactions} accounts={Store.accounts} />, target_el);
 }
@@ -27,15 +26,6 @@ Store.updateTrans = function(trans) {
   });
   Store.rerender();
 }
-Store.updateSelection = function(trans_id, checked) {
-  if (checked) {
-    Store.selected[trans_id] = true;
-  } else {
-    delete Store.selected[trans_id];
-  }
-  Store.rerender();
-}
-
 
 var Categorizer = React.createClass({
   getInitialState: function() {
@@ -136,12 +126,18 @@ var Categorizer = React.createClass({
 })
 
 var TransRow = React.createClass({
+  propTypes: {
+    transaction: React.PropTypes.object.isRequired,
+    accounts: React.PropTypes.array.isRequired,
+    buckets: React.PropTypes.array.isRequired,
+    onSelected: React.PropTypes.func.isRequired,
+  },
   getInitialState: function() {
     return {
       categorizing: false,
-      checked: false,
     }
   },
+
   startCategorizing: function() {
     this.setState({categorizing: true});
     return false;
@@ -150,8 +146,7 @@ var TransRow = React.createClass({
     this.setState({categorizing: false});
   },
   checkboxToggled: function(ev) {
-    this.setState({checked: ev.target.checked});
-    Store.updateSelection(this.props.transaction.id, ev.target.checked);
+    this.props.onSelected(this.props.transaction.id, ev.target.checked);
   },
   render: function() {
     var account = _.find(this.props.accounts, function(account) {
@@ -191,7 +186,7 @@ var TransRow = React.createClass({
     }
     return (
       <tr>
-        <td><input type="checkbox" checked={this.state.checked} onChange={this.checkboxToggled} /></td>
+        <td><input type="checkbox" checked={this.props.checked} onChange={this.checkboxToggled} /></td>
         <td>{account.name}</td>
         <td>{this.props.transaction.posted.split('T')[0]}</td>
         <td>{this.props.transaction.memo}</td>
@@ -262,6 +257,16 @@ var TransTable = React.createClass({
   postedRef: function(input) {
     this._postedInput = input;
   },
+  transSelected: function(trans_id, selected) {
+    if (selected) {
+      this.state.selected[trans_id] = selected;
+    } else {
+      delete this.state.selected[trans_id];
+    }
+    this.setState({
+      selected: this.state.selected,
+    })
+  },
   render: function() {
     var transaction_rows = [];
     transaction_rows = _.reverse(_.sortBy(this.props.transactions, function(trans) {
@@ -277,6 +282,7 @@ var TransTable = React.createClass({
           transaction={trans}
           accounts={this.props.accounts}
           buckets={this.props.buckets}
+          onSelected={this.transSelected}
           />);
     }.bind(this));
     var add_label = this.state.amount < 0 ? 'Record expense' : 'Record deposit';
@@ -284,16 +290,16 @@ var TransTable = React.createClass({
       return (<option key={account.id} value={account.id}>{account.name}</option>);
     })
 
-    var delete_button_disabled = true;
-    console.log('delete_button_disabled');
-    if (_.size(Store.selected)) {
-      delete_button_disabled = false;
-    }
+    var num_selected = _.size(this.state.selected);
+    var delete_button_disabled = !num_selected;
+    var display_num_selected = num_selected ? num_selected : '';
 
     return (
     <div>
       <div className="toolbar">
-        <button className="danger" disabled={delete_button_disabled}>Delete</button>
+        <button className="danger" disabled={delete_button_disabled}>Delete {display_num_selected}</button>
+        <button>Hello</button>
+        <button>Hi</button>
       </div>
       <table className="ledger" width="100%">
         <thead>

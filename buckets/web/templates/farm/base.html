@@ -12,8 +12,13 @@
 {% block extrahead %}
 <script src="/static/js/vend/lodash.min.js"></script>
 <script src="/static/js/vend/jquery-3.1.0.min.js"></script>
+{% if g.debug %}
 <script src="/static/js/vend/react-15.2.1.js"></script>
 <script src="/static/js/vend/react-dom-15.2.1.js"></script>
+{% else %}
+<script src="/static/js/vend/react-15.2.1.min.js"></script>
+<script src="/static/js/vend/react-dom-15.2.1.min.js"></script>
+{% endif %}
 <script src="/static/js/vend/ReactDnD.min.js"></script>
 <script src="/static/js/vend/ReactDnDHTML5Backend.min.js"></script>
 <script src="/static/js/vend/browser.min.js"></script>

@@ -2,6 +2,7 @@ import pytest
 
 from buckets.authz import AuthPolicy, anything, nothing, NotAuthorized
 from buckets.authz import BindableMultiAuth
+from buckets.authz import pluck
 
 
 class TestAuthPolicyTest(object):
@@ -99,6 +100,33 @@ class TestAuthPolicyTest(object):
             sam.exclaim(arg='foo')
         assert False is auth.bindAuthOnly('sam').exclaim(args='foo')
 
+    def test_raiseNotAuthorized(self):
+        class Foo(object):
+            auth = AuthPolicy()
+
+            def if_bob(self, context, *args, **kwargs):
+                raise NotAuthorized('hello')
+            
+            @auth.allow(if_bob)
+            def exclaim(self, arg):
+                return arg + '!'
+
+        foo = Foo()
+        auth = foo.auth
+        with pytest.raises(NotAuthorized):
+            auth.call('jim', 'exclaim', arg='something')
+
+        bob = auth.bindContext('bob')
+        with pytest.raises(NotAuthorized):
+            bob.exclaim(arg='foo')
+        
+        assert False is auth.bindAuthOnly('bob').exclaim(args='foo')
+        sam = auth.bindContext('sam')
+        with pytest.raises(NotAuthorized):
+            sam.exclaim(arg='foo')
+        assert False is auth.bindAuthOnly('sam').exclaim(args='foo')        
+        assert False is auth.is_authorized({}, 'exclaim', args='foo')
+
     def test_stackable(self):
         """
         You can have multiple allows.
@@ -149,6 +177,73 @@ class TestAuthPolicyTest(object):
         with pytest.raises(NotAuthorized):
             auth.call('bo', 'exclaim', arg='something')
         assert auth.call('bob', 'exclaim', arg='something') == 'something!'
+
+    def test_obj(self):
+        """
+        You can mark arguments as object types
+        """
+        class Foo(object):
+            policy = AuthPolicy()
+
+            @policy.obj('id', 'person')
+            def find_person(self, id):
+                return 'found {0}'.format(id)
+
+        foo = Foo()
+        objects = foo.policy.get_objects('find_person', id='samwise')
+        assert objects == [('person', 'samwise')]
+
+    def test_obj_multiple(self):
+        class Foo(object):
+            policy = AuthPolicy()
+
+            @policy.obj('id', 'person')
+            @policy.obj('friend', 'friend')
+            def make_friend(self, id, friend):
+                pass
+
+        foo = Foo()
+        objects = foo.policy.get_objects('make_friend',
+            id='bob',
+            friend='alice')
+        assert set(objects) == set([
+            ('person', 'bob'),
+            ('friend', 'alice'),
+        ])
+
+    def test_obj_func(self):
+        class Foo(object):
+            policy = AuthPolicy()
+
+            @policy.obj(lambda kw:[x['friend_id'] for x in kw.get('friends', [])],
+                'friend')
+            def make_friends(self, friends):
+                pass
+
+        foo = Foo()
+        objects = foo.policy.get_objects('make_friends',
+            friends=[{'friend_id': 10}, {'friend_id': 11}])
+        assert objects == [('friend', 10), ('friend', 11)]
+
+    def test_obj_pluck(self):
+        class Foo(object):
+            policy = AuthPolicy()
+
+            @policy.obj(pluck('friends', 'friend_id'), 'friend')
+            def make_friends(self, friends):
+                pass
+
+        foo = Foo()
+        objects = foo.policy.get_objects('make_friends',
+            friends=[{'friend_id': 10}, {'friend_id': 11}])
+        assert objects == [('friend', 10), ('friend', 11)]        
+        objects = foo.policy.get_objects('make_friends',
+            friends=None)
+        assert objects == []
+        objects = foo.policy.get_objects('make_friends',
+            friends={'friend_id': 10})
+        assert objects == [('friend', 10)]
+
 
 
 class Foo(object):

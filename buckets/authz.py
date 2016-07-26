@@ -6,6 +6,7 @@ class AuthPolicy(object):
     def __init__(self):
         self._auth_functions = defaultdict(list)
         self._common_auth = []
+        self._objects = defaultdict(dict)
 
     def __get__(self, obj, cls=None):
         return _BoundAuthPolicy(obj, self)
@@ -15,13 +16,28 @@ class AuthPolicy(object):
         return func
 
     def allow(self, *func):
-        # if len(func) == 1:
-        #     func = func[0]
-        # else:
-        #     func = allOf(*func)
         def deco(f):
             func_name = f.__name__
             self._auth_functions[func_name].extend(func)
+            return f
+        return deco
+
+    def obj(self, getter, obj_type):
+        """
+        @param getter: Either a string identifying the variable
+            or else a function that will be called with the kwargs
+            of the method call, from which a list of values should
+            be returned.
+        @param obj_type: Identifying object type -- can be a custom
+            string or whatever you want.
+        """
+        arg_getter = getter
+        if isinstance(getter, str):
+            arg_getter = single_getter(getter)
+
+        def deco(f):
+            func_name = f.__name__
+            self._objects[func_name][arg_getter] = obj_type
             return f
         return deco
 
@@ -71,6 +87,13 @@ class _BoundAuthPolicy(object):
         List known functions.
         """
         return self._policy._auth_functions.keys()
+
+    def get_objects(self, method, **kwargs):
+        ret = []
+        for getter, obj_type in self._policy._objects[method].items():
+            for value in getter(kwargs):
+                ret.append((obj_type, value))
+        return ret
 
     def bindContext(self, context):
         return _ContextBoundAuthPolicy(self, context)
@@ -168,5 +191,29 @@ def anyOf(*funcs):
             if f(*args, **kwargs):
                 return True
         return False
+    return func
+
+
+def single_getter(key):
+    """
+    For use in an @obj decorator to get a single value from an argument.
+    This is the getter used if a string is passed to @obj()
+    """
+    def func(kwargs):
+        return [kwargs.get(key, None)]
+    return func
+
+
+def pluck(outerkey, innerkey):
+    """
+    For use in an @obj decorator to pluck elements from lists of dicts.
+    """
+    def func(kwargs):
+        got = kwargs.get(outerkey, None) or []
+        if isinstance(got, (list, tuple)):
+            ret = [item.get(innerkey, None) for item in got]
+        elif isinstance(got, dict):
+            ret = [got.get(innerkey, None)]
+        return ret
     return func
 

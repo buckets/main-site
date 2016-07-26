@@ -157,6 +157,8 @@ patches['init'] = [
     )''',
     '''CREATE INDEX account_transaction_account_id_idx
         ON account_transaction(account_id)''',
+    '''CREATE INDEX account_transaction_fi_id_idx
+        ON account_transaction(fi_id)''',
     '''CREATE FUNCTION update_account_balance() RETURNS trigger AS $update_account_balance$
         BEGIN
             IF (TG_OP = 'DELETE') THEN

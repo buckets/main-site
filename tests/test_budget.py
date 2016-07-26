@@ -95,6 +95,39 @@ class TestAccount(object):
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
 
+    def test_transact_fi_id(self, api):
+        """
+        The fi_id should be used as a unique key to identify
+        a transaction (and either update or insert).
+        """
+        account = api.create_account('Checking')
+        trans1 = api.account_transact(account['id'], amount=100,
+            memo='some memo', fi_id='id1')
+        trans2 = api.account_transact(account['id'], amount=200,
+            memo='some memo', fi_id='id1')
+
+        assert trans1['id'] == trans2['id']
+        assert trans2['amount'] == 200
+
+        account = api.get_account(account['id'])
+        assert account['balance'] == 200
+
+        assert len(api.list_account_trans()) == 1
+
+    def test_transact_fi_id_None(self, api):
+        account = api.create_account('Checking')
+        trans1 = api.account_transact(account['id'], amount=100,
+            memo='some memo')
+        trans2 = api.account_transact(account['id'], amount=200,
+            memo='some memo')
+
+        assert trans1['id'] != trans2['id']
+
+        account = api.get_account(account['id'])
+        assert account['balance'] == 300
+
+        assert len(api.list_account_trans()) == 2
+
 
 class TestTransaction(object):
 

@@ -211,6 +211,8 @@ button {
     
     line-height: normal;
     padding: 0.25rem 1rem;
+
+    transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
 }
 button.danger {
     background-color: rgba(231, 76, 60,1.0);
@@ -219,11 +221,20 @@ button.danger {
 button:hover {
 
 }
+button:active {
+    border-bottom-width: 0;
+    transform: translateY(3px);
+    margin-bottom: 3px;
+}
+button:focus {
+    outline: none;
+    sborder-color: rgba(241, 196, 15,1.0);
+    stransform: scale(1.1);
+}
 button[disabled] {
     cursor: default;
-    opacity: 0.5;
-    sbackground-color: rgba(189, 195, 199,1.0);
-    sborder-color: rgba(127, 140, 141,1.0);
+    background-color: rgba(189, 195, 199,1.0);
+    border-color: rgba(127, 140, 141,1.0);
 }
 button + button {
     margin-left: 0.25rem;

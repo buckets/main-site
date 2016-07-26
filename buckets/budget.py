@@ -11,7 +11,7 @@ from buckets.schema import UserFarm
 from buckets.schema import Bucket, BucketTrans, Group
 from buckets.schema import Account, AccountTrans, Connection
 from buckets.schema import AccountMapping
-from buckets.authz import AuthPolicy, anything
+from buckets.authz import AuthPolicy, anything, pluck, NotAuthorized
 from buckets.rank import rankBetween
 from buckets.error import Error, NotFound, AmountsDontMatch
 
@@ -41,21 +41,42 @@ class BudgetManagement(object):
 
 
     @policy.common
-    def _only_people_in_farm(self, auth_context, method, kwargs):
+    def _commonAuthorization(self, auth_context, method, kwargs):
         """
         Only people in the farm are allowed to call methods on this.
+        And only allow objects within the farm.
         """
         user_id = auth_context.get('user_id', None)
         if user_id is None:
+            # forbid anonymous
             return False
 
         r = self.engine.execute(select([UserFarm.c.farm_id])
             .where(and_(
                 UserFarm.c.farm_id == self.farm_id,
                 UserFarm.c.user_id == user_id)))
-        if r.fetchone():
-            return True
-        return False
+        if not r.fetchone():
+            # forbid users not allowed in farm
+            return False
+
+        objects = self.policy.get_objects(method, **kwargs)
+        for obj_type, value in objects:
+            if obj_type == 'bucket':
+                if not self.bucket_in_farm(value):
+                    return False
+            elif obj_type == 'group':
+                if not self.group_in_farm(value):
+                    return False
+            elif obj_type == 'account_trans':
+                if not self.trans_in_farm(value):
+                    return False
+            elif obj_type == 'account':
+                if not self.account_in_farm(value):
+                    return False
+            else:
+                raise NotAuthorized('Unknown object type: {0}'.format(obj_type))
+
+        return True
 
     def bucket_in_farm(self, bucket_id):
         if bucket_id is None:
@@ -81,6 +102,18 @@ class BudgetManagement(object):
             return True
         return False
 
+    def account_in_farm(self, account_id):
+        if account_id is None:
+            return True
+        r = self.engine.execute(select([Account.c.id])
+            .where(and_(
+                Account.c.id == account_id,
+                Account.c.farm_id == self.farm_id,
+            )))
+        if r.fetchone():
+            return True
+        return False
+
     def trans_in_farm(self, trans_id):
         if trans_id is None:
             return True
@@ -94,12 +127,6 @@ class BudgetManagement(object):
             return True
         return False
 
-    def inFarm(getter, checker):
-        def verifier(self, auth_context, method, kwargs):
-            value = getter(kwargs)
-            return checker(self, value)
-        return verifier
-
     #----------------------------------------------------------
     # Account
 
@@ -111,6 +138,7 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.allow(anything)
+    @policy.obj('id', 'account')
     def get_account(self, id):
         r = self.engine.execute(
             select([Account])
@@ -125,6 +153,7 @@ class BudgetManagement(object):
         return dict(row)
 
     @policy.allow(anything)
+    @policy.obj('id', 'account')
     def update_account(self, id, data):
         updatable = ['name', 'balance', 'currency']
         values = {}
@@ -156,6 +185,7 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.allow(anything)
+    @policy.obj('account_id', 'account')
     def account_transact(self, account_id, amount, memo=None,
             posted=None, fi_id=None):
         values = {
@@ -167,10 +197,29 @@ class BudgetManagement(object):
             values['posted'] = posted
         if fi_id:
             values['fi_id'] = fi_id
-        r = self.engine.execute(AccountTrans.insert()
-            .values(**values)
-            .returning(AccountTrans.c.id))
-        trans_id = r.fetchone()[0]
+
+        trans_id = None
+        if fi_id:
+            # update if it's already there
+            r = self.engine.execute(AccountTrans.update()
+                .values(**values)
+                .where(and_(
+                    AccountTrans.c.fi_id == fi_id,
+                    AccountTrans.c.account_id == Account.c.id,
+                    Account.c.id == account_id,
+                    Account.c.farm_id == self.farm_id))
+                .returning(AccountTrans.c.id))
+            row = r.fetchone()
+            if row:
+                trans_id = row[0]
+
+        if not trans_id:
+            # insert since it's not there
+            r = self.engine.execute(AccountTrans.insert()
+                .values(**values)
+                .returning(AccountTrans.c.id))
+            trans_id = r.fetchone()[0]
+
         return self.get_account_trans(trans_id)
 
     @policy.allow(anything)
@@ -208,6 +257,7 @@ class BudgetManagement(object):
             yield trans
 
     @policy.allow(anything)
+    @policy.obj('id', 'account_trans')
     def get_account_trans(self, id):
         trans = list(self._list_account_trans((AccountTrans.c.id == id,)))
         if not trans:
@@ -233,6 +283,8 @@ class BudgetManagement(object):
         return True
 
     @policy.allow(_authorizeBuckets)
+    @policy.obj('trans_id', 'account_trans')
+    @policy.obj(pluck('buckets', 'bucket_id'), 'bucket')
     def categorize(self, trans_id, buckets):
         trans = self.get_account_trans(trans_id)
         self.engine.execute(BucketTrans.delete()
@@ -262,6 +314,7 @@ class BudgetManagement(object):
         return self.get_account_trans(trans_id)
 
     @policy.allow(anything)
+    @policy.obj('trans_id', 'account_trans')
     def skip_categorizing(self, trans_id):
         self.get_account_trans(trans_id)
         self.engine.execute(BucketTrans.delete()
@@ -291,6 +344,7 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.allow(anything)
+    @policy.obj('id', 'group')
     def update_group(self, id, data):
         updatable = [
             'name',
@@ -314,6 +368,7 @@ class BudgetManagement(object):
         return self.get_group(id)
 
     @policy.allow(anything)
+    @policy.obj('id', 'group')
     def get_group(self, id):
         r = self.engine.execute(
             select([Group])
@@ -335,8 +390,9 @@ class BudgetManagement(object):
             .order_by(Group.c.ranking))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(inFarm(lambda x:x['group_id'], group_in_farm))
-    @policy.allow(inFarm(lambda x:x['after_group'], group_in_farm))
+    @policy.allow(anything)
+    @policy.obj('group_id', 'group')
+    @policy.obj('after_group', 'group')
     def move_group(self, group_id, after_group):
         self.get_group(group_id)
         after = self.get_group(after_group)
@@ -360,9 +416,9 @@ class BudgetManagement(object):
             'ranking': new_rank,
         })
 
-    @policy.allow(inFarm(lambda x:x['bucket_id'], bucket_in_farm))
-    @policy.allow(inFarm(lambda x:x.get('after_bucket'), bucket_in_farm))
-    @policy.allow(inFarm(lambda x:x.get('group_id'), group_in_farm))
+    @policy.obj('bucket_id', 'bucket')
+    @policy.obj('after_bucket', 'bucket')
+    @policy.obj('group_id', 'group')
     def move_bucket(self, bucket_id, after_bucket=None, group_id=None):
         if group_id and after_bucket:
             raise Error("Either supply after_bucket or group_id; not both")
@@ -433,6 +489,7 @@ class BudgetManagement(object):
         return False
 
     @policy.allow(anything)
+    @policy.obj('id', 'bucket')
     def get_bucket(self, id):
         r = self.engine.execute(
             select([Bucket])
@@ -446,7 +503,9 @@ class BudgetManagement(object):
             raise NotFound("No such bucket")
         return dict(row)
 
-    @policy.allow(inFarm(lambda x:x['data'].get('group_id'), group_in_farm))
+    @policy.allow(anything)
+    @policy.obj('id', 'bucket')
+    @policy.obj(pluck('data', 'group_id'), 'group')
     def update_bucket(self, id, data):
         updatable = [
             'name',
@@ -482,8 +541,9 @@ class BudgetManagement(object):
             .where(Bucket.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(inFarm(lambda x:x['bucket_id'], bucket_in_farm))
-    @policy.allow(inFarm(lambda x:x.get('_account_transaction_id'), trans_in_farm))
+    @policy.allow(anything)
+    @policy.obj('bucket_id', 'bucket')
+    @policy.obj('_account_transaction_id', 'account_trans')
     def bucket_transact(self, bucket_id, amount, memo='', posted=None,
             _account_transaction_id=None):
         values = {
@@ -524,6 +584,7 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.allow(anything)
+    @policy.obj('account_id', 'account')
     def add_account_hash(self, account_id, account_hash):
         """
         Associate an account with a hash (as returned by simplefin_fetch)
