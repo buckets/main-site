@@ -26,6 +26,11 @@ Store.updateTrans = function(trans) {
   });
   Store.rerender();
 }
+Store.rmTransaction = function(trans_id) {
+  _.remove(Store.transactions, function(trans) {
+    return ('' + trans.id) === ('' + trans_id);
+  });
+}
 
 var Categorizer = React.createClass({
   getInitialState: function() {
@@ -271,19 +276,20 @@ var TransTable = React.createClass({
     var num = _.size(this.state.selected);
     if (num <= 1 || confirm(`Are you sure you want to delete these ${num} transactions?`)) {
       var requests = _.keys(this.state.selected).map(function(trans_id) {
-        console.log('trans_id', trans_id);
+        return {
+          method: 'delete_account_trans',
+          kwargs: {
+            id: trans_id
+          }
+        };
       })
-      /* apiRequest({
-        method: 'account_transact',
-        kwargs: {
-          account_id: this.state.account_id,
-          posted: this.state.posted,
-          memo: this.state.memo,
-          amount: this.state.amount,
-        }
-      }, function(response) {
-        Store.addTransaction(response);
-      }.bind(this)); */
+      apiRequest(requests, function(responses) {
+        _.each(requests, function(request) {
+          delete this.state.selected[request.kwargs.id];
+          Store.rmTransaction(request.kwargs.id);
+        }.bind(this));
+        this.setState({selected: this.state.selected});
+      }.bind(this));
     }
   },
   render: function() {
