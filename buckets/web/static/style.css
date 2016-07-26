@@ -201,6 +201,7 @@ div.form .helptext {
 }
 
 button {
+    position: relative;
     cursor: pointer;
     border-radius: 4px;
     border: 0;
@@ -228,8 +229,19 @@ button:active {
 }
 button:focus {
     outline: none;
-    sborder-color: rgba(241, 196, 15,1.0);
-    stransform: scale(1.1);
+}
+button:focus:before {
+    content: '\25cf';
+    color: rgba(241, 196, 15,1.0);
+    stext-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    position: absolute;
+    font-size: 1.5rem;
+    top: -1rem;
+    left: -0.3rem;
 }
 button[disabled] {
     cursor: default;
