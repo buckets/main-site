@@ -27,6 +27,37 @@ class TestAuthPolicyTest(object):
         with pytest.raises(NotAuthorized):
             auth.call({'value': 5}, 'exclaim', arg='hey')
 
+    def test_use_common(self):
+        """
+        You can rely on common
+        """
+        class Foo(object):
+            auth = AuthPolicy()
+            @auth.common
+            def lessthan4(self, context, func, *args, **kwargs):
+                return context['value'] < 4
+            @auth.use_common
+            def exclaim(self, arg):
+                return arg + '!'
+
+        foo = Foo()
+        auth = foo.auth
+        result = auth.call({'value': 2}, 'exclaim', arg='hey')
+        assert result == 'hey!'
+        with pytest.raises(NotAuthorized):
+            auth.call({'value': 5}, 'exclaim', arg='hey')
+
+    def test_use_common_no_common(self):
+        """
+        Relying on common when it's not defined is a problem.
+        """
+        with pytest.raises(ValueError):
+            class Foo(object):
+                auth = AuthPolicy()
+                @auth.use_common
+                def exclaim(self, arg):
+                    return arg + '!'
+
     def test_anything(self):
         """
         You can allow anything as a policy

@@ -15,6 +15,15 @@ class AuthPolicy(object):
         self._common_auth.append(func)
         return func
 
+    def use_common(self, func):
+        """
+        Rely on the common authorization function.
+        """
+        if not self._common_auth:
+            raise ValueError('A definition of common must precede'
+                             ' use of @AuthPolicy.use_common')
+        return self.allow(anything)(func)
+
     def allow(self, *func):
         def deco(f):
             func_name = f.__name__

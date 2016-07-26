@@ -11,7 +11,7 @@ from buckets.schema import UserFarm
 from buckets.schema import Bucket, BucketTrans, Group
 from buckets.schema import Account, AccountTrans, Connection
 from buckets.schema import AccountMapping
-from buckets.authz import AuthPolicy, anything, pluck, NotAuthorized
+from buckets.authz import AuthPolicy, pluck, NotAuthorized
 from buckets.rank import rankBetween
 from buckets.error import Error, NotFound, AmountsDontMatch
 
@@ -130,14 +130,14 @@ class BudgetManagement(object):
     #----------------------------------------------------------
     # Account
 
-    @policy.allow(anything)
+    @policy.use_common
     def create_account(self, name, balance=0):
         r = self.engine.execute(Account.insert()
             .values(farm_id=self.farm_id, name=name, balance=balance)
             .returning(Account))
         return dict(r.fetchone())
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'account')
     def get_account(self, id):
         r = self.engine.execute(
@@ -152,7 +152,7 @@ class BudgetManagement(object):
             raise NotFound("No such account")
         return dict(row)
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'account')
     def update_account(self, id, data):
         updatable = ['name', 'balance', 'currency']
@@ -169,7 +169,7 @@ class BudgetManagement(object):
             )))
         return self.get_account(id)
 
-    @policy.allow(anything)
+    @policy.use_common
     def has_accounts(self):
         r = self.engine.execute(select([Account.c.id])
             .where(Account.c.farm_id == self.farm_id)
@@ -178,13 +178,13 @@ class BudgetManagement(object):
             return True
         return False
 
-    @policy.allow(anything)
+    @policy.use_common
     def list_accounts(self):
         r = self.engine.execute(select([Account])
             .where(Account.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('account_id', 'account')
     def account_transact(self, account_id, amount, memo=None,
             posted=None, fi_id=None):
@@ -222,7 +222,7 @@ class BudgetManagement(object):
 
         return self.get_account_trans(trans_id)
 
-    @policy.allow(anything)
+    @policy.use_common
     def list_account_trans(self):
         # get 100 days by default
         timeago = date.today() - timedelta(days=100)
@@ -256,7 +256,7 @@ class BudgetManagement(object):
             trans['buckets'] = [x for x in trans['buckets'] if x['bucket_id']]    
             yield trans
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'account_trans')
     def get_account_trans(self, id):
         trans = list(self._list_account_trans((AccountTrans.c.id == id,)))
@@ -265,7 +265,7 @@ class BudgetManagement(object):
         else:
             return trans[0]
 
-    @policy.allow(anything)
+    @policy.use_common
     def has_transactions(self):
         r = self.engine.execute(select([AccountTrans.c.id])
             .where(and_(
@@ -313,7 +313,7 @@ class BudgetManagement(object):
             .where(AccountTrans.c.id == trans_id))
         return self.get_account_trans(trans_id)
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('trans_id', 'account_trans')
     def skip_categorizing(self, trans_id):
         self.get_account_trans(trans_id)
@@ -328,7 +328,7 @@ class BudgetManagement(object):
     #----------------------------------------------------------
     # Group
 
-    @policy.allow(anything)
+    @policy.use_common
     def create_group(self, name):
         r = self.engine.execute(select([
             func.max(Group.c.ranking)])
@@ -343,7 +343,7 @@ class BudgetManagement(object):
             .returning(Group))
         return dict(r.fetchone())
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'group')
     def update_group(self, id, data):
         updatable = [
@@ -367,7 +367,7 @@ class BudgetManagement(object):
             raise Error("Duplicate ranking")
         return self.get_group(id)
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'group')
     def get_group(self, id):
         r = self.engine.execute(
@@ -382,7 +382,7 @@ class BudgetManagement(object):
             raise NotFound("No such group")
         return dict(row)
 
-    @policy.allow(anything)
+    @policy.use_common
     def list_groups(self):
         r = self.engine.execute(
             select([Group])
@@ -390,7 +390,7 @@ class BudgetManagement(object):
             .order_by(Group.c.ranking))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('group_id', 'group')
     @policy.obj('after_group', 'group')
     def move_group(self, group_id, after_group):
@@ -471,7 +471,7 @@ class BudgetManagement(object):
     #----------------------------------------------------------
     # Bucket
 
-    @policy.allow(anything)
+    @policy.use_common
     def create_bucket(self, name):
         r = self.engine.execute(Bucket.insert()
             .values(farm_id=self.farm_id,
@@ -479,7 +479,7 @@ class BudgetManagement(object):
             .returning(Bucket))
         return dict(r.fetchone())
 
-    @policy.allow(anything)
+    @policy.use_common
     def has_buckets(self):
         r = self.engine.execute(select([Bucket.c.id])
             .where(Bucket.c.farm_id == self.farm_id)
@@ -488,7 +488,7 @@ class BudgetManagement(object):
             return True
         return False
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'bucket')
     def get_bucket(self, id):
         r = self.engine.execute(
@@ -503,7 +503,7 @@ class BudgetManagement(object):
             raise NotFound("No such bucket")
         return dict(row)
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('id', 'bucket')
     @policy.obj(pluck('data', 'group_id'), 'group')
     def update_bucket(self, id, data):
@@ -535,13 +535,13 @@ class BudgetManagement(object):
             )))
         return self.get_bucket(id)
 
-    @policy.allow(anything)
+    @policy.use_common
     def list_buckets(self):
         r = self.engine.execute(select([Bucket])
             .where(Bucket.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('bucket_id', 'bucket')
     @policy.obj('_account_transaction_id', 'account_trans')
     def bucket_transact(self, bucket_id, amount, memo='', posted=None,
@@ -562,7 +562,7 @@ class BudgetManagement(object):
     #----------------------------------------------------------
     # SimpleFIN
 
-    @policy.allow(anything)
+    @policy.use_common
     def has_connections(self):
         r = self.engine.execute(select([Connection.c.id])
             .where(Connection.c.farm_id == self.farm_id)
@@ -571,7 +571,7 @@ class BudgetManagement(object):
             return True
         return False
 
-    @policy.allow(anything)
+    @policy.use_common
     def simplefin_claim(self, token):
         """
         Claim a simplefin token
@@ -583,7 +583,7 @@ class BudgetManagement(object):
             .returning(Connection))
         return dict(r.fetchone())
 
-    @policy.allow(anything)
+    @policy.use_common
     @policy.obj('account_id', 'account')
     def add_account_hash(self, account_id, account_hash):
         """
@@ -596,14 +596,14 @@ class BudgetManagement(object):
                 account_hash=account_hash))
         return None
 
-    @policy.allow(anything)
+    @policy.use_common
     def simplefin_list_connections(self):
         r = self.engine.execute(select([Connection])
             .where(Connection.c.farm_id == self.farm_id)
             .order_by(Connection.c.id))
         return [dict(x) for x in r.fetchall()]
 
-    @policy.allow(anything)
+    @policy.use_common
     def simplefin_fetch(self):
         """
         Fetch account+transaction data for all simplefin tokens
