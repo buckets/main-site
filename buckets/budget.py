@@ -223,6 +223,15 @@ class BudgetManagement(object):
         return self.get_account_trans(trans_id)
 
     @policy.use_common
+    @policy.obj('id', 'account_trans')
+    def delete_account_trans(self, id):
+        trans = self.get_account_trans(id)
+        if trans:
+            self.engine.execute(AccountTrans.delete()
+                .where(AccountTrans.c.id == id))
+        return None
+
+    @policy.use_common
     def list_account_trans(self):
         # get 100 days by default
         timeago = date.today() - timedelta(days=100)

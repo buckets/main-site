@@ -267,6 +267,25 @@ var TransTable = React.createClass({
       selected: this.state.selected,
     })
   },
+  deleteSelected: function() {
+    var num = _.size(this.state.selected);
+    if (num <= 1 || confirm(`Are you sure you want to delete these ${num} transactions?`)) {
+      var requests = _.keys(this.state.selected).map(function(trans_id) {
+        console.log('trans_id', trans_id);
+      })
+      /* apiRequest({
+        method: 'account_transact',
+        kwargs: {
+          account_id: this.state.account_id,
+          posted: this.state.posted,
+          memo: this.state.memo,
+          amount: this.state.amount,
+        }
+      }, function(response) {
+        Store.addTransaction(response);
+      }.bind(this)); */
+    }
+  },
   render: function() {
     var transaction_rows = [];
     transaction_rows = _.reverse(_.sortBy(this.props.transactions, function(trans) {
@@ -297,7 +316,7 @@ var TransTable = React.createClass({
     return (
     <div>
       <div className="toolbar">
-        <button className="danger" disabled={delete_button_disabled}>Delete {display_num_selected}</button>
+        <button className="danger" disabled={delete_button_disabled} onClick={this.deleteSelected}>Delete {display_num_selected}</button>
         <button>Do nothing</button>
       </div>
       <table className="ledger" width="100%">

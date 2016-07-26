@@ -127,8 +127,8 @@ patches['init'] = [
         name text
     )''',
     '''CREATE TABLE user_farm_join (
-        user_id integer,
-        farm_id integer,
+        user_id integer REFERENCES user_ ON DELETE RESTRICT,
+        farm_id integer REFERENCES farm ON DELETE RESTRICT,
         primary key(user_id, farm_id)
     )''',
 
@@ -138,7 +138,7 @@ patches['init'] = [
     '''CREATE TABLE account (
         id serial primary key,
         created timestamp default current_timestamp,
-        farm_id integer,
+        farm_id integer REFERENCES farm ON DELETE RESTRICT,
         name text,
         balance integer default '0' not null,
         currency varchar(3) default 'USD'
@@ -148,7 +148,7 @@ patches['init'] = [
         id serial primary key,
         created timestamp default current_timestamp,
         posted timestamp default current_timestamp,
-        account_id integer,
+        account_id integer REFERENCES account ON DELETE RESTRICT,
         amount integer default 0,
         memo text,
         fi_id text,
@@ -198,7 +198,7 @@ patches['init'] = [
     '''CREATE TABLE bucket_group (
         id serial primary key,
         created timestamp default current_timestamp,
-        farm_id integer,
+        farm_id integer REFERENCES farm ON DELETE RESTRICT,
         name text,
         ranking text not null
     )''',
@@ -211,7 +211,7 @@ patches['init'] = [
     '''CREATE TABLE bucket (
         id serial primary key,
         created timestamp default current_timestamp,
-        farm_id integer,
+        farm_id integer REFERENCES farm ON DELETE RESTRICT,
         name text,
         description text,
         balance integer default '0' not null,
@@ -230,10 +230,11 @@ patches['init'] = [
         id serial primary key,
         created timestamp default current_timestamp,
         posted timestamp default current_timestamp,
-        bucket_id integer,
+        bucket_id integer REFERENCES bucket ON DELETE RESTRICT,
         amount integer,
         memo text,
         account_transaction_id integer
+            REFERENCES account_transaction ON DELETE CASCADE
     )''',
     '''CREATE INDEX bucket_transaction_bucket_id_idx
         ON bucket_transaction(bucket_id)''',
@@ -276,7 +277,7 @@ patches['init'] = [
     '''CREATE TABLE simplefin_connection (
         id serial primary key,
         created timestamp default current_timestamp,
-        farm_id integer,
+        farm_id integer REFERENCES farm ON DELETE RESTRICT,
         access_token text,
         last_used timestamp
     )''',
@@ -285,8 +286,8 @@ patches['init'] = [
     '''CREATE TABLE account_mapping (
         id serial primary key,
         created timestamp default current_timestamp,
-        farm_id integer,
-        account_id integer,
+        farm_id integer REFERENCES farm ON DELETE RESTRICT,
+        account_id integer REFERENCES account ON DELETE RESTRICT,
         account_hash text
     )''',
     '''CREATE INDEX account_mapping_farm_id_idx

@@ -200,6 +200,10 @@ div.form .helptext {
     margin-bottom: .5rem;
 }
 
+@keyframes pulse {
+    from {transform: scale(0.9);}
+    to {transform: scale(1.1);}
+}
 button {
     position: relative;
     cursor: pointer;
@@ -231,13 +235,10 @@ button:focus {
     outline: none;
 }
 button:focus:before {
+    animation: pulse 0.4s ease-in-out infinite alternate;
     content: '\25cf';
     color: rgba(241, 196, 15,1.0);
-    stext-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
+    text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
     position: absolute;
     font-size: 1.5rem;
     top: -1rem;

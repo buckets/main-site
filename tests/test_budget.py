@@ -131,6 +131,31 @@ class TestAccount(object):
 
 class TestTransaction(object):
 
+    def test_delete(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='hello')
+        api.delete_account_trans(trans['id'])
+        account = api.get_account(account['id'])
+        assert account['balance'] == 0, "Should undo balance change"
+        assert len(api.list_account_trans()) == 0
+
+    def test_delete_categories(self, api):
+        account = api.create_account('Checking')
+        bucket = api.create_bucket('Food')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='hello')
+        api.categorize(trans['id'], buckets=[{
+            'bucket_id': bucket['id']
+        }])
+
+        api.delete_account_trans(trans['id'])
+        account = api.get_account(account['id'])
+        assert account['balance'] == 0, "Should undo balance change"
+        assert len(api.list_account_trans()) == 0
+        bucket = api.get_bucket(bucket['id'])
+        assert bucket['balance'] == 0, "Should undo bucket balance change"
+
     def test_categorize(self, api):
         account = api.create_account('Checking')
         for i in range(10):
