@@ -2,7 +2,7 @@ from decimal import Decimal
 import sys
 import json
 
-def fmtMoney(xint):
+def fmtMoney(xint, show_decimal=False):
     sys.stdout.flush()
     xint = xint or 0
     d = Decimal('{0}'.format(xint)) / 100
@@ -12,8 +12,15 @@ def fmtMoney(xint):
     fore, aft = ret.split('.', 1)
     if len(aft) != 2:
         ret = '{0}.{1}'.format(fore, (aft + '00')[:2])
-    sys.stdout.flush()
+    if ret.endswith('.00') and not show_decimal:
+        ret = ret.split('.')[0]
     return ret
+
+def fmtDate(d):
+    r = d.isoformat()
+    if 'T' in r:
+        r = r.split('T')[0]
+    return r
 
 
 def parseMoney(s):
@@ -37,4 +44,5 @@ def toJson(thing):
 all_filters = {
     'money': fmtMoney,
     'json': toJson,
+    'date': fmtDate,
 }

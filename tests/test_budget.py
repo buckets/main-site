@@ -444,6 +444,15 @@ class TestBucket(object):
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
 
+    def test_list_transactions(self, api):
+        bucket = api.create_bucket('Food')
+        trans = api.bucket_transact(bucket['id'], amount=100,
+            memo='some memo', posted=date(2000, 1, 1))
+
+        transactions = api.list_bucket_trans(bucket['id'])
+        assert len(transactions) == 1
+        assert trans in transactions
+
 
 class TestSimpleFIN(object):
 

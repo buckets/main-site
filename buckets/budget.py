@@ -425,6 +425,7 @@ class BudgetManagement(object):
             'ranking': new_rank,
         })
 
+    @policy.use_common
     @policy.obj('bucket_id', 'bucket')
     @policy.obj('after_bucket', 'bucket')
     @policy.obj('group_id', 'group')
@@ -567,6 +568,16 @@ class BudgetManagement(object):
             .values(**values)
             .returning(BucketTrans))
         return dict(r.fetchone())
+
+    @policy.use_common
+    @policy.obj('bucket_id', 'bucket')
+    def list_bucket_trans(self, bucket_id):
+        r = self.engine.execute(select([BucketTrans])
+            .where(and_(
+                BucketTrans.c.bucket_id == bucket_id
+            ))
+            .order_by(BucketTrans.c.posted.desc()))
+        return [dict(x) for x in r.fetchall()]
 
     #----------------------------------------------------------
     # SimpleFIN

@@ -124,11 +124,17 @@ table.ledger .dragging {
     opacity: 0.2;
 }
 
+
+/* Buckets and Groups */
+.bucket .handle {
+    font-size: 1.5rem;
+    line-height: 1rem;
+}
 table.ledger tr.group td:first-child {
-    border-left: 6px solid rgba(22, 160, 133,1.0);
+    border-left: 6px solid rgba(44, 62, 80, 0.5);
 }
 table.ledger tr.group td {
-    color: rgba(22, 160, 133,1.0);
+    color: rgba(44, 62, 80, 0.5);
 }
 
 
@@ -191,12 +197,14 @@ div.form div.label {
 div.form div.control {
     margin-bottom: 0.6rem;
 }
-div.form .helptext {
+.helptext {
     max-width: 20rem;
     font-size: .8rem;
-    line-height: 1rem;
     font-style: italic;
     color: rgba(44, 62, 80, 0.5);
+}
+div.form .helptext {
+    line-height: 1rem;
     margin-bottom: .5rem;
 }
 
@@ -315,5 +323,5 @@ ol li {
 }
 .category-tag .category-amount {
     padding: .1rem .3rem;
-    background-color: rgba(255,255,255, 0.3);
+    border-left: 1px solid white;
 }

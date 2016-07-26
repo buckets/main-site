@@ -305,6 +305,11 @@ def test_BudgetManagement(engine):
             'bucket_transact', bucket_id=bobs_bucket, amount=10
             ).expect('bob')
 
+        world.forcall('list_bucket_trans', bucket_id=bobs_bucket
+        ).expect('bob')
+        world.forcall('list_bucket_trans', bucket_id=sams_bucket
+        ).expect()
+
         world.forcall(
             'bucket_transact',
             bucket_id=bobs_bucket,

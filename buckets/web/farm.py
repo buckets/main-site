@@ -129,8 +129,10 @@ def bucket(bucket_id):
         flash('{0} updated'.format(data['name']))
         return redirect(url_for('.buckets'))
     bucket = g.farm.get_bucket(id=bucket_id)
+    transactions = g.farm.list_bucket_trans(bucket_id=bucket_id)
     return render_template('farm/bucket.html',
-        bucket=bucket)
+        bucket=bucket,
+        transactions=transactions)
 
 @blue.route('/groups', methods=['POST'])
 def groups():

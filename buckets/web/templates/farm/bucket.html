@@ -299,4 +299,26 @@ Store.render();
 </div>
 </form>
 
+<h2>History</h2>
+
+<table class="ledger">
+  <tr>
+    <th>Date</th>
+    <th>Description</th>
+    <th class="right">Amount</th>
+    <th class="right">Balance</th>
+  </tr>
+  {% set balance = bucket.balance %}
+  {% for trans in transactions %}
+  <tr>
+    <td>{{ trans.posted|date }}</td>
+    <td>{{ trans.memo }}</td>
+    <td class="right {{ 'negative' if trans.amount < 0 }}">{{ trans.amount|money }}</td>
+    <td class="right {{ 'negative' if balance < 0 }}">{{ balance|money }}</td>
+  </tr>
+  {% set balance = balance - trans.amount %}
+  {% endfor %}
+</table>
+
+
 {% endblock %}

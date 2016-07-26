@@ -231,7 +231,7 @@ var BucketRow = React.createClass({
 
   render: function() {
     var goal_bar;
-    var class_name = '';
+    var class_name = 'bucket';
     if (this.state.isDragging) {
       class_name += ' dragging';
     }
@@ -241,9 +241,12 @@ var BucketRow = React.createClass({
     if (this.props.bucket.kind === 'goal') {
       goal_bar = (<GoalBar max={this.props.bucket.goal} value={this.props.bucket.balance} />);
     }
+    var style = {
+      color: this.props.bucket.color
+    }
     return (
       <tr className={class_name} draggable="true" onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
-        <td>{this.props.bucket.name}</td>
+        <td><span className="handle" style={style}>&#x25CF;</span> {this.props.bucket.name}</td>
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td className="right">
           <MoneyInput className="right"
