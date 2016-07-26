@@ -11,6 +11,7 @@ var Store = {};
 Store.transactions = [];
 Store.buckets = {{ buckets|json|safe }};
 Store.accounts = {{ accounts|json|safe }};
+Store.selected = {};
 Store.rerender = function() {
   ReactDOM.render(<TransTable buckets={Store.buckets} transactions={Store.transactions} accounts={Store.accounts} />, target_el);
 }
@@ -24,6 +25,14 @@ Store.updateTrans = function(trans) {
       _.assign(old_trans, trans);
     }
   });
+  Store.rerender();
+}
+Store.updateSelection = function(trans_id, checked) {
+  if (checked) {
+    Store.selected[trans_id] = true;
+  } else {
+    delete Store.selected[trans_id];
+  }
   Store.rerender();
 }
 
@@ -130,6 +139,7 @@ var TransRow = React.createClass({
   getInitialState: function() {
     return {
       categorizing: false,
+      checked: false,
     }
   },
   startCategorizing: function() {
@@ -138,6 +148,10 @@ var TransRow = React.createClass({
   },
   transChanged: function(towhat) {
     this.setState({categorizing: false});
+  },
+  checkboxToggled: function(ev) {
+    this.setState({checked: ev.target.checked});
+    Store.updateSelection(this.props.transaction.id, ev.target.checked);
   },
   render: function() {
     var account = _.find(this.props.accounts, function(account) {
@@ -177,7 +191,7 @@ var TransRow = React.createClass({
     }
     return (
       <tr>
-        <td><input type="checkbox" /></td>
+        <td><input type="checkbox" checked={this.state.checked} onChange={this.checkboxToggled} /></td>
         <td>{account.name}</td>
         <td>{this.props.transaction.posted.split('T')[0]}</td>
         <td>{this.props.transaction.memo}</td>
@@ -196,6 +210,7 @@ var TransTable = React.createClass({
       posted: today,
       memo: '',
       account_id: '',
+      selected: {},
     }
   },
   componentDidMount: function() {
@@ -253,41 +268,58 @@ var TransTable = React.createClass({
       return [trans.posted, trans.account_id, trans.id];
     }))
       .map(function(trans) {
+        var selected = false;
+        if (this.state.selected[trans.id]) {
+          selected = true;
+        }
         return (<TransRow
           key={trans.id}
           transaction={trans}
           accounts={this.props.accounts}
-          buckets={this.props.buckets} />);
+          buckets={this.props.buckets}
+          />);
     }.bind(this));
     var add_label = this.state.amount < 0 ? 'Record expense' : 'Record deposit';
     var account_options = this.props.accounts.map(function(account) {
       return (<option key={account.id} value={account.id}>{account.name}</option>);
     })
+
+    var delete_button_disabled = true;
+    console.log('delete_button_disabled');
+    if (_.size(Store.selected)) {
+      delete_button_disabled = false;
+    }
+
     return (
-    <table className="ledger" width="100%">
-      <thead>
-        <tr>
-          <th><input type="checkbox" name="transaction[]" /></th>
-          <th>Account</th>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Categories</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td></td>
-          <td><select {...this.propLink('account_id')}>
-            <option value=""></option>{account_options}</select></td>
-          <td><input ref={this.postedRef} type="date" {...this.propLink('posted')} /></td>
-          <td><input type="text" {...this.propLink('memo')} /></td>
-          <td><MoneyInput value={this.state.amount} onChange={this.amountChanged} /></td>
-          <td><button onClick={this.createTransaction}>{add_label}</button></td>
-        </tr>
-        {transaction_rows}
-      </tbody>
-    </table>
+    <div>
+      <div className="toolbar">
+        <button className="danger" disabled={delete_button_disabled}>Delete</button>
+      </div>
+      <table className="ledger" width="100%">
+        <thead>
+          <tr>
+            <th><input type="checkbox" name="transaction[]" /></th>
+            <th>Account</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Categories</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td><select {...this.propLink('account_id')}>
+              <option value=""></option>{account_options}</select></td>
+            <td><input ref={this.postedRef} type="date" {...this.propLink('posted')} /></td>
+            <td><input type="text" {...this.propLink('memo')} /></td>
+            <td><MoneyInput value={this.state.amount} onChange={this.amountChanged} /></td>
+            <td><button onClick={this.createTransaction}>{add_label}</button></td>
+          </tr>
+          {transaction_rows}
+        </tbody>
+      </table>
+    </div>
     )  
   }
 });

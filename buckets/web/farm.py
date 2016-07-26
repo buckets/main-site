@@ -49,14 +49,12 @@ def what_should_show():
     g.show = {
         'connections': g.farm.has_connections(),
         'transactions': False,
-        'summary': False,
         'buckets': False,
         'reports': False,
     }
     if g.farm.has_transactions():
         g.show.update({
             'transactions': True,
-            'summary': True,
             'reports': True,
             'buckets': True,
         })
@@ -69,13 +67,10 @@ def what_should_show():
 
 @blue.route('/')
 def index():
-    # XXX for now, redirect to accounts
-    return redirect(url_for('.accounts'))
-
-@blue.route('/summary')
-def summary():
-    g.show['summary'] = True
-    return render_template('farm/summary.html')
+    if g.show['transactions']:
+        return redirect(url_for('.transactions'))
+    else:
+        return redirect(url_for('.accounts'))
 
 @blue.route('/accounts', methods=['GET', 'POST'])
 def accounts():
