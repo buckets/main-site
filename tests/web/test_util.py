@@ -3,12 +3,14 @@ from buckets.web.util import fmtMoney, parseMoney
 
 def test_fmtMoney():
     assert fmtMoney(5678) == '56.78'
-    assert fmtMoney(-100) == '-1.00'
+    assert fmtMoney(-100) == '-1'
+    assert fmtMoney(-100, True) == '-1.00'
     assert fmtMoney(123456789) == '1,234,567.89'
-    assert fmtMoney(6500000) == '65,000.00'
+    assert fmtMoney(6500000) == '65,000'
     assert fmtMoney(1) == '0.01'
     assert fmtMoney(20) == '0.20'
-    assert fmtMoney(None) == '0.00'
+    assert fmtMoney(None) == '0'
+    assert fmtMoney(None, True) == '0.00'
 
 
 def test_parseMoney():

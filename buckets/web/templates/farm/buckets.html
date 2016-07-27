@@ -11,7 +11,9 @@ var Store = {};
 Store.groups = {{ groups|json|safe }};
 Store.buckets = {{ buckets|json|safe }};
 Store.rerender = function() {
-  ReactDOM.render(<BucketTable buckets={Store.buckets} groups={Store.groups}/>, target_el);
+  ReactDOM.render(<BucketTable
+    buckets={Store.buckets}
+    groups={Store.groups} />, target_el);
 }
 Store.updateBucket = function(bucket, norender) {
   _.each(Store.buckets, function(old_bucket) {
@@ -114,6 +116,7 @@ var GroupRow = React.createClass({
           key={bucket.id}
           bucket={bucket}
           pending={pending}
+          posting_date={this.props.posting_date}
           onPendingChanged={this.props.onPendingChanged} 
           onBucketChanged={this.props.onBucketChanged}></BucketRow>
       );
@@ -129,14 +132,15 @@ var GroupRow = React.createClass({
     if (this.props.group.id == 'NOGROUP') {
       draggable = false;
     }
+    var name = this.props.group.name;
+    if (this.props.detailsLink) {
+      name = (<a href={'groups/'+this.props.group.id}>{this.props.group.name}</a>);
+    }
     return (
       <tbody>
         <tr className="group" className={class_name} draggable={draggable} onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
           <td colSpan="5">
-            {this.props.group.name}
-          </td>
-          <td>
-            <a href={'groups/'+this.props.group.id}>Details</a> 
+            {name}
           </td>
         </tr>
         {bucket_rows}
@@ -174,6 +178,7 @@ var BucketRow = React.createClass({
       kwargs: {
         bucket_id: this.props.bucket.id,
         amount: amount,
+        posted: this.props.posting_date,
       }
     }, function(response) {
       this.refreshBucket();
@@ -246,7 +251,7 @@ var BucketRow = React.createClass({
     }
     return (
       <tr className={class_name} draggable="true" onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
-        <td><span className="handle" style={style}>&#x25CF;</span> {this.props.bucket.name}</td>
+        <td><span className="handle" style={style}>&#x25CF;</span> <a href={'buckets/'+this.props.bucket.id}>{this.props.bucket.name}</a></td>
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td className="right">
           <MoneyInput className="right"
@@ -257,7 +262,6 @@ var BucketRow = React.createClass({
         </td>
         <td className="right"><Money value={this.props.bucket.deposit} /></td>
         <td>{goal_bar}</td>
-        <td><a href={'buckets/'+this.props.bucket.id}>Details</a></td>
       </tr>
     )
   }
@@ -268,7 +272,8 @@ var BucketRow = React.createClass({
 var BucketTable = React.createClass({
   getInitialState: function() {
     return {
-      pendings: {}
+      pendings: {},
+      posting_date: formatDate(this.props.posting_date || new Date()),
     }
   },
   performAllPending: function() {
@@ -280,6 +285,7 @@ var BucketTable = React.createClass({
         kwargs: {
           bucket_id: bucket_id,
           amount: amount,
+          posted: this.state.posting_date,
         }
       });
       post_actions.push({
@@ -288,7 +294,7 @@ var BucketTable = React.createClass({
           id: bucket_id,
         }
       });
-    });
+    }.bind(this));
     this.setState({pendings: {}});
     apiRequest(actions, function(response) {
       apiRequest(post_actions, function(buckets) {
@@ -298,19 +304,6 @@ var BucketTable = React.createClass({
         Store.rerender();
       });
     });
-    
-    /*var amount = this.state.pending;
-    this.setPending('');
-    apiRequest({
-      method: 'bucket_transact',
-      kwargs: {
-        bucket_id: this.props.bucket.id,
-        amount: amount,
-      }
-    }, function(response) {
-      this.refreshBucket();
-    }.bind(this));
-    */
   },
   pendingChanged: function(bucket, pending) {
     if (pending === '0') {
@@ -319,6 +312,9 @@ var BucketTable = React.createClass({
       this.state.pendings[bucket.id] = pending;
     }
     this.setState(this.state);
+  },
+  postingDateChanged: function(ev) {
+    this.setState({posting_date: ev.target.value});
   },
   groupChanged: function(group_id) {
     if (_.isObject(group_id)) {
@@ -365,10 +361,12 @@ var BucketTable = React.createClass({
     _.each(_.sortBy(this.props.groups, ['ranking']), function(group) {
       var buckets = group_buckets[group.id] || [];
       groups.push(<GroupRow
+        detailsLink
         key={group.id}
         group={group}
         buckets={buckets}
         pendings={this.state.pendings}
+        posting_date={this.state.posting_date}
         onBucketChanged={this.bucketChanged}
         onGroupChanged={this.groupChanged}
         onPendingChanged={this.pendingChanged} />);
@@ -377,7 +375,7 @@ var BucketTable = React.createClass({
       var buckets = group_buckets['NOGROUP'];
       var group = {
         'id': 'NOGROUP',
-        'name': 'Misc.',
+        'name': 'Misc',
         'rank': 'z',
       }
       groups.push(<GroupRow
@@ -385,47 +383,67 @@ var BucketTable = React.createClass({
         group={group}
         buckets={buckets}
         pendings={this.state.pendings}
+        posting_date={this.state.posting_date}
         onBucketChanged={this.bucketChanged}
         onPendingChanged={this.pendingChanged} />);
     }
     var pending_total = _.sum(_.values(this.state.pendings));
 
-    var commit_button;
+    var commit_button_disabled = true;
     if (_.size(_.filter(this.state.pendings))) {
-      commit_button = (<div>
-        <button onClick={this.performAllPending}>Make it so</button>
-      </div>);
+      commit_button_disabled = false;
+    }
+
+    var posting_date_note = "Today";
+    var posting_date_note_class = "note";
+    if (this.state.posting_date !== formatDate(new Date())) {
+      var posting_date_note = "Not today";
+      posting_date_note_class += " warning";
     }
     
     return (
-      <table className="ledger" width="100%">
-        <thead>
-          <tr>
-            <th>Bucket</th>
-            <th className="right">Balance</th>
-            <th className="right">Deposit/<br/>Withdraw</th>
-            <th className="right">Monthly<br/>Deposit</th>
-            <th>Goal</th>
-            <th>Edit</th>
-          </tr>
-        </thead>
-        {groups}
-        <tbody>
-          <tr className="subtotal">
-            <td>Total</td>
-            <td className="right"><Money value={balance_total} /></td>
-            <td className="right">
-              <Money value={pending_total} />
-              {commit_button}
-            </td>
-            <td className="right">
-              <Money value={deposit_total} />
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
+      <div>
+        <div className="toolbar">
+          <div className="pair">
+            <div className="label">Posting Date
+              <div className={posting_date_note_class}>{posting_date_note}</div></div>
+            <div className="control">
+              <input
+                type="date"
+                value={this.state.posting_date}
+                onChange={this.postingDateChanged} />
+            </div>
+          </div>
+        </div>
+        <table className="ledger" width="100%">
+          <thead>
+            <tr>
+              <th>Bucket</th>
+              <th className="right">Balance</th>
+              <th className="right">Deposit/<br/>Withdraw</th>
+              <th className="right">Monthly<br/>Deposit</th>
+              <th>Goal</th>
+            </tr>
+          </thead>
+          {groups}
+          <tbody>
+            <tr className="subtotal">
+              <td>TOTAL</td>
+              <td className="right"><Money value={balance_total} /></td>
+              <td className="right">
+                <Money value={pending_total} />
+                <div>
+                  <button onClick={this.performAllPending} disabled={commit_button_disabled}>Make it so</button>
+                </div>
+              </td>
+              <td className="right">
+                <Money value={deposit_total} />
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     );
   }
 });

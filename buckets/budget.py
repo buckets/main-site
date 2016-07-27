@@ -1,6 +1,7 @@
 from hashlib import sha1
 from datetime import date, datetime, timedelta
 import time
+import random
 from decimal import Decimal
 
 import sqlalchemy
@@ -61,17 +62,20 @@ class BudgetManagement(object):
 
         objects = self.policy.get_objects(method, **kwargs)
         for obj_type, value in objects:
-            if obj_type == 'bucket':
+            if obj_type == Bucket:
                 if not self.bucket_in_farm(value):
                     return False
-            elif obj_type == 'group':
+            elif obj_type == Group:
                 if not self.group_in_farm(value):
                     return False
-            elif obj_type == 'account_trans':
+            elif obj_type == AccountTrans:
                 if not self.trans_in_farm(value):
                     return False
-            elif obj_type == 'account':
+            elif obj_type == Account:
                 if not self.account_in_farm(value):
+                    return False
+            elif obj_type == BucketTrans:
+                if not self.bucket_trans_in_farm(value):
                     return False
             else:
                 raise NotAuthorized('Unknown object type: {0}'.format(obj_type))
@@ -127,6 +131,19 @@ class BudgetManagement(object):
             return True
         return False
 
+    def bucket_trans_in_farm(self, trans_id):
+        if trans_id is None:
+            return True
+        r = self.engine.execute(select([BucketTrans.c.id])
+            .where(and_(
+                BucketTrans.c.id == trans_id,
+                BucketTrans.c.bucket_id == Bucket.c.id,
+                Bucket.c.farm_id == self.farm_id,
+            )))
+        if r.fetchone():
+            return True
+        return False
+
     #----------------------------------------------------------
     # Account
 
@@ -138,7 +155,7 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.use_common
-    @policy.obj('id', 'account')
+    @policy.obj('id', Account)
     def get_account(self, id):
         r = self.engine.execute(
             select([Account])
@@ -153,7 +170,7 @@ class BudgetManagement(object):
         return dict(row)
 
     @policy.use_common
-    @policy.obj('id', 'account')
+    @policy.obj('id', Account)
     def update_account(self, id, data):
         updatable = ['name', 'balance', 'currency']
         values = {}
@@ -185,7 +202,7 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.use_common
-    @policy.obj('account_id', 'account')
+    @policy.obj('account_id', Account)
     def account_transact(self, account_id, amount, memo=None,
             posted=None, fi_id=None):
         values = {
@@ -223,7 +240,7 @@ class BudgetManagement(object):
         return self.get_account_trans(trans_id)
 
     @policy.use_common
-    @policy.obj('id', 'account_trans')
+    @policy.obj('id', AccountTrans)
     def delete_account_trans(self, id):
         trans = self.get_account_trans(id)
         if trans:
@@ -266,7 +283,7 @@ class BudgetManagement(object):
             yield trans
 
     @policy.use_common
-    @policy.obj('id', 'account_trans')
+    @policy.obj('id', AccountTrans)
     def get_account_trans(self, id):
         trans = list(self._list_account_trans((AccountTrans.c.id == id,)))
         if not trans:
@@ -292,8 +309,8 @@ class BudgetManagement(object):
         return True
 
     @policy.allow(_authorizeBuckets)
-    @policy.obj('trans_id', 'account_trans')
-    @policy.obj(pluck('buckets', 'bucket_id'), 'bucket')
+    @policy.obj('trans_id', AccountTrans)
+    @policy.obj(pluck('buckets', 'bucket_id'), Bucket)
     def categorize(self, trans_id, buckets):
         trans = self.get_account_trans(trans_id)
         self.engine.execute(BucketTrans.delete()
@@ -323,7 +340,7 @@ class BudgetManagement(object):
         return self.get_account_trans(trans_id)
 
     @policy.use_common
-    @policy.obj('trans_id', 'account_trans')
+    @policy.obj('trans_id', AccountTrans)
     def skip_categorizing(self, trans_id):
         self.get_account_trans(trans_id)
         self.engine.execute(BucketTrans.delete()
@@ -353,7 +370,7 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.use_common
-    @policy.obj('id', 'group')
+    @policy.obj('id', Group)
     def update_group(self, id, data):
         updatable = [
             'name',
@@ -377,7 +394,7 @@ class BudgetManagement(object):
         return self.get_group(id)
 
     @policy.use_common
-    @policy.obj('id', 'group')
+    @policy.obj('id', Group)
     def get_group(self, id):
         r = self.engine.execute(
             select([Group])
@@ -400,8 +417,8 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.use_common
-    @policy.obj('group_id', 'group')
-    @policy.obj('after_group', 'group')
+    @policy.obj('group_id', Group)
+    @policy.obj('after_group', Group)
     def move_group(self, group_id, after_group):
         self.get_group(group_id)
         after = self.get_group(after_group)
@@ -426,9 +443,9 @@ class BudgetManagement(object):
         })
 
     @policy.use_common
-    @policy.obj('bucket_id', 'bucket')
-    @policy.obj('after_bucket', 'bucket')
-    @policy.obj('group_id', 'group')
+    @policy.obj('bucket_id', Bucket)
+    @policy.obj('after_bucket', Bucket)
+    @policy.obj('group_id', Group)
     def move_bucket(self, bucket_id, after_bucket=None, group_id=None):
         if group_id and after_bucket:
             raise Error("Either supply after_bucket or group_id; not both")
@@ -483,9 +500,22 @@ class BudgetManagement(object):
 
     @policy.use_common
     def create_bucket(self, name):
+        color = random.choice([
+            '#1abc9c',
+            '#2ecc71',
+            '#3498db',
+            '#9b59b6',
+            '#f1c40f',
+            '#e67e22',
+            '#e74c3c',
+            '#95a5a6',
+            '#34495e',
+        ])
         r = self.engine.execute(Bucket.insert()
-            .values(farm_id=self.farm_id,
-                name=name)
+            .values(
+                farm_id=self.farm_id,
+                name=name,
+                color=color)
             .returning(Bucket))
         return dict(r.fetchone())
 
@@ -499,7 +529,7 @@ class BudgetManagement(object):
         return False
 
     @policy.use_common
-    @policy.obj('id', 'bucket')
+    @policy.obj('id', Bucket)
     def get_bucket(self, id):
         r = self.engine.execute(
             select([Bucket])
@@ -514,8 +544,8 @@ class BudgetManagement(object):
         return dict(row)
 
     @policy.use_common
-    @policy.obj('id', 'bucket')
-    @policy.obj(pluck('data', 'group_id'), 'group')
+    @policy.obj('id', Bucket)
+    @policy.obj(pluck('data', 'group_id'), Group)
     def update_bucket(self, id, data):
         updatable = [
             'name',
@@ -552,8 +582,8 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.use_common
-    @policy.obj('bucket_id', 'bucket')
-    @policy.obj('_account_transaction_id', 'account_trans')
+    @policy.obj('bucket_id', Bucket)
+    @policy.obj('_account_transaction_id', AccountTrans)
     def bucket_transact(self, bucket_id, amount, memo='', posted=None,
             _account_transaction_id=None):
         values = {
@@ -566,18 +596,55 @@ class BudgetManagement(object):
             values['posted'] = posted
         r = self.engine.execute(BucketTrans.insert()
             .values(**values)
-            .returning(BucketTrans))
-        return dict(r.fetchone())
+            .returning(BucketTrans.c.id))
+        trans_id = r.fetchone()[0]
+        return self.get_bucket_trans(trans_id)
 
     @policy.use_common
-    @policy.obj('bucket_id', 'bucket')
+    @policy.obj('id', BucketTrans)
+    def get_bucket_trans(self, id):
+        wheres = (BucketTrans.c.id == id,)
+        many = list(self._list_bucket_trans(wheres))
+        return many[0]
+
+    @policy.use_common
+    @policy.obj('bucket_id', Bucket)
     def list_bucket_trans(self, bucket_id):
-        r = self.engine.execute(select([BucketTrans])
+        wheres = (BucketTrans.c.bucket_id == bucket_id,)
+        return list(self._list_bucket_trans(wheres))
+        # r = self.engine.execute(select([BucketTrans])
+        #     .where(and_(
+        #         BucketTrans.c.bucket_id == bucket_id
+        #     ))
+        #     .order_by(BucketTrans.c.posted.desc()))
+        # return [dict(x) for x in r.fetchall()]
+
+
+    def _list_bucket_trans(self, wheres=None):
+        wheres = wheres or ()
+        r = self.engine.execute(select([
+                BucketTrans,
+                func.json_build_object(
+                    'id', AccountTrans.c.id,
+                    'memo', AccountTrans.c.memo,
+                    'account_id', AccountTrans.c.account_id,
+                ).label('account_transaction'),
+            ]).select_from(
+                BucketTrans.outerjoin(
+                    AccountTrans,
+                    BucketTrans.c.account_transaction_id == AccountTrans.c.id)
+            )
             .where(and_(
-                BucketTrans.c.bucket_id == bucket_id
+                BucketTrans.c.bucket_id == Bucket.c.id,
+                Bucket.c.farm_id == self.farm_id,
+                *wheres
             ))
             .order_by(BucketTrans.c.posted.desc()))
-        return [dict(x) for x in r.fetchall()]
+        for row in r.fetchall():
+            trans = dict(row)
+            if trans['account_transaction']['id'] is None:
+                trans['account_transaction'] = None
+            yield trans
 
     #----------------------------------------------------------
     # SimpleFIN
@@ -604,7 +671,7 @@ class BudgetManagement(object):
         return dict(r.fetchone())
 
     @policy.use_common
-    @policy.obj('account_id', 'account')
+    @policy.obj('account_id', Account)
     def add_account_hash(self, account_id, account_hash):
         """
         Associate an account with a hash (as returned by simplefin_fetch)

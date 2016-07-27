@@ -348,6 +348,8 @@ class TestBucket(object):
         assert bucket['goal'] == None
         assert bucket['end_date'] == None
         assert bucket['deposit'] == None
+        assert bucket['color'] is not None
+        assert bucket['color'] != ''
 
     def test_has(self, api):
         assert api.has_buckets() == 0
@@ -434,6 +436,7 @@ class TestBucket(object):
         assert trans['posted'] == datetime(2000, 1, 1)
         assert trans['created'] is not None
         assert trans['id'] is not None
+        assert trans['account_transaction'] is None
 
         bucket = api.get_bucket(bucket['id'])
         assert bucket['balance'] == 100
@@ -452,6 +455,23 @@ class TestBucket(object):
         transactions = api.list_bucket_trans(bucket['id'])
         assert len(transactions) == 1
         assert trans in transactions
+        assert trans['account_transaction'] is None
+
+    def test_list_trans_categorized(self, api):
+        bucket = api.create_bucket('Food')
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=100,
+            memo='something', posted=date(2000, 1, 1))
+        api.categorize(trans['id'], [
+            {'bucket_id': bucket['id']},
+        ])
+        transactions = api.list_bucket_trans(bucket['id'])
+        assert len(transactions) == 1
+        btrans = transactions[0]
+        assert btrans['bucket_id'] == bucket['id']
+        assert btrans['account_transaction']['id'] == trans['id']
+        assert btrans['account_transaction']['memo'] == 'something'
+        assert btrans['account_transaction']['account_id'] == account['id']
 
 
 class TestSimpleFIN(object):

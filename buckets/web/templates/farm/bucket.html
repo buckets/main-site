@@ -41,7 +41,11 @@ var ColorInput = React.createClass({
     }.bind(this);
   },
   render: function() {
-    var options = this.state.color_options.map(function(color) {
+    var color_options = _.clone(this.state.color_options);
+    if (this.state.value && !_.includes(color_options, this.state.value)) {
+      color_options.push(this.state.value);
+    }
+    var options = color_options.map(function(color) {
       var classes = "color-option";
       if (this.state.value === color) {
         classes += ' selected';
@@ -301,6 +305,9 @@ Store.render();
 
 <h2>History</h2>
 
+{% if not transactions %}
+No transaction history yet.
+{% else %}
 <table class="ledger">
   <tr>
     <th>Date</th>
@@ -312,13 +319,20 @@ Store.render();
   {% for trans in transactions %}
   <tr>
     <td>{{ trans.posted|date }}</td>
-    <td>{{ trans.memo }}</td>
+    <td>
+      {%- if trans.memo -%}
+        {{ trans.memo }}
+      {%- elif trans.account_transaction -%}
+        {{ trans.account_transaction.memo }}
+      {%- endif -%}
+    </td>
     <td class="right {{ 'negative' if trans.amount < 0 }}">{{ trans.amount|money }}</td>
     <td class="right {{ 'negative' if balance < 0 }}">{{ balance|money }}</td>
   </tr>
   {% set balance = balance - trans.amount %}
   {% endfor %}
 </table>
+{% endif %}
 
 
 {% endblock %}

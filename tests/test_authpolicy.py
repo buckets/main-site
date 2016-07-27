@@ -132,10 +132,12 @@ def test_BudgetManagement(engine):
     bobs_account = api.create_account('Checking')
     bobs_trans = api.account_transact(bobs_account['id'], 100)
     bobs_bucket = api.create_bucket('Bucket')
+    bobs_btrans = api.bucket_transact(bobs_bucket['id'], 100)
     bobs_group = api.create_group('Group')
 
     sam_api = BudgetManagement(engine, sams_farm['id'])
     sams_bucket = sam_api.create_bucket('Sam Bucket')
+    sams_btrans = sam_api.bucket_transact(sams_bucket['id'], 100)
     sams_group = sam_api.create_group('Sam Group')
     sams_account = sam_api.create_account('Sam Checking')
     sams_trans = sam_api.account_transact(sams_account['id'], 100)
@@ -151,21 +153,25 @@ def test_BudgetManagement(engine):
         'bobs_trans': bobs_trans['id'],
         'bobs_bucket': bobs_bucket['id'],
         'bobs_group': bobs_group['id'],
+        'bobs_btrans': bobs_btrans['id'],
 
         'sams_account': sams_account['id'],
         'sams_trans': sams_trans['id'],
         'sams_bucket': sams_bucket['id'],
         'sams_group': sams_group['id'],
+        'sams_btrans': sams_btrans['id'],
     }
 
     bobs_account = Var('bobs_account')
     bobs_trans = Var('bobs_trans')
     bobs_bucket = Var('bobs_bucket')
     bobs_group = Var('bobs_group')
+    bobs_btrans = Var('bobs_btrans')
     sams_account = Var('sams_account')
     sams_trans = Var('sams_trans')
     sams_bucket = Var('sams_bucket')
     sams_group = Var('sams_group')
+    sams_btrans = Var('sams_btrans')
 
     with World(api.policy, contexts, variables) as world:
         world.forcall(
@@ -301,6 +307,7 @@ def test_BudgetManagement(engine):
 
         world.forcall(
             'list_buckets').expect('bob')
+
         world.forcall(
             'bucket_transact', bucket_id=bobs_bucket, amount=10
             ).expect('bob')
@@ -308,6 +315,11 @@ def test_BudgetManagement(engine):
         world.forcall('list_bucket_trans', bucket_id=bobs_bucket
         ).expect('bob')
         world.forcall('list_bucket_trans', bucket_id=sams_bucket
+        ).expect()
+
+        world.forcall('get_bucket_trans', id=bobs_btrans
+        ).expect('bob')
+        world.forcall('get_bucket_trans', id=sams_btrans
         ).expect()
 
         world.forcall(
