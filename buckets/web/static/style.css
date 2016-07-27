@@ -127,6 +127,18 @@ table.ledger .dragging {
 }
 
 
+.future-value {
+    display: inline-block;
+    margin-right: 1rem;
+    font-size: .8rem;
+}
+.future-value:before {
+    content: '\2192';
+    color: rgba(44, 62, 80, 0.5);
+    scolor: rgba(52, 152, 219,1.0);
+    margin-right: 0.5rem;
+}
+
 /* Buckets and Groups */
 .bucket .handle {
     font-size: 1.5rem;

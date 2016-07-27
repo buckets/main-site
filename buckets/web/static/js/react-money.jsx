@@ -28,14 +28,18 @@ window.MoneyInput = React.createClass({
 
 window.Money = React.createClass({
   render: function() {
-    var value = cents2decimal(this.props.value);
+    var { value, className, ...other } = this.props;
+    var decimal = cents2decimal(value);
     var class_name = 'number';
-    if (this.props.value < 0) {
+    if (value < 0) {
       class_name += ' negative';
     }
-    if (this.props.hidezero && this.props.value === 0) {
+    if (className) {
+      class_name += ' ' + className;  
+    }
+    if (this.props.hidezero && value === 0) {
       value = '';
     }
-    return (<span className={class_name}>{value}</span>)
+    return (<span className={class_name}>{decimal}</span>)
   }
 });

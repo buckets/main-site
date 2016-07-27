@@ -139,7 +139,7 @@ var GroupRow = React.createClass({
     return (
       <tbody>
         <tr className="group" className={class_name} draggable={draggable} onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
-          <td colSpan="5">
+          <td colSpan="6">
             {name}
           </td>
         </tr>
@@ -249,10 +249,23 @@ var BucketRow = React.createClass({
     var style = {
       color: this.props.bucket.color
     }
+    var new_balance;
+    if (this.props.pending) {
+      var future_balance = this.props.pending + this.props.bucket.balance;
+      var classes = 'future-value';
+      if (future_balance < 0) {
+        classes += ' negative';
+      }
+      new_balance = (<div className={classes}>
+        <Money value={future_balance} />
+      </div>);
+    }
+
     return (
       <tr className={class_name} draggable="true" onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
         <td><span className="handle" style={style}>&#x25CF;</span> <a href={'buckets/'+this.props.bucket.id}>{this.props.bucket.name}</a></td>
         <td className="right"><Money value={this.props.bucket.balance} /></td>
+        <td>{new_balance}</td>
         <td className="right">
           <MoneyInput className="right"
             value={this.props.pending}
@@ -347,6 +360,7 @@ var BucketTable = React.createClass({
     var groups = [];
     var deposit_total = 0;
     var balance_total = 0;
+    var future_balance_total = 0;
 
     _.each(_.sortBy(this.props.buckets, ['ranking']), function(bucket) {
       var group_id = bucket.group_id || 'NOGROUP';
@@ -388,10 +402,20 @@ var BucketTable = React.createClass({
         onPendingChanged={this.pendingChanged} />);
     }
     var pending_total = _.sum(_.values(this.state.pendings));
+    future_balance_total = balance_total + pending_total;
+    
 
+    var future_balance;
     var commit_button_disabled = true;
     if (_.size(_.filter(this.state.pendings))) {
       commit_button_disabled = false;
+      if (future_balance_total !== balance_total) {
+        future_balance = (<div className="future-value">
+          <Money value={future_balance_total} />
+        </div>);
+      } else {
+        future_balance = (<div className="future-value">same</div>);
+      }
     }
 
     var posting_date_note = "Today";
@@ -420,6 +444,7 @@ var BucketTable = React.createClass({
             <tr>
               <th>Bucket</th>
               <th className="right">Balance</th>
+              <th></th>
               <th className="right">Deposit/<br/>Withdraw</th>
               <th className="right">Monthly<br/>Deposit</th>
               <th>Goal</th>
@@ -430,6 +455,7 @@ var BucketTable = React.createClass({
             <tr className="subtotal">
               <td>TOTAL</td>
               <td className="right"><Money value={balance_total} /></td>
+              <td>{future_balance}</td>
               <td className="right">
                 <Money value={pending_total} />
                 <div>
