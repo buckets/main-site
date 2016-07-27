@@ -1,5 +1,6 @@
 @import 'https://fonts.googleapis.com/css?family=Lato';
-* {
+*,
+input {
     box-sizing: border-box;
     font-family: 'Lato', sans-serif;
 }
@@ -135,7 +136,6 @@ table.ledger .dragging {
 .future-value:before {
     content: '\2192';
     color: rgba(44, 62, 80, 0.5);
-    scolor: rgba(52, 152, 219,1.0);
     margin-right: 0.5rem;
 }
 
@@ -372,4 +372,32 @@ ol li {
 .category-tag .category-amount {
     padding: .1rem .3rem;
     border-left: 1px solid white;
+}
+
+
+.money-input {
+    position: relative;
+    display: inline-block;
+}
+.money-input input {
+    font-size: .8rem;
+}
+.money-input input.with-computed {
+}
+.money-input .computed-value {
+    position: absolute;
+    top: -.2rem;
+    right: -2px;
+    color: rgba(52, 152, 219,1.0);
+    background-color: rgba(255, 255, 255, 1.0);
+    padding: 1px 2px;
+    font-size: .6rem;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+.money-input .computed-value:hover {
+    opacity: 0;
+}
+.money-input .computed-value.negative {
+    color: rgba(231, 76, 60,1.0);
 }

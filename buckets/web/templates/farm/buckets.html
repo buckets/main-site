@@ -267,11 +267,10 @@ var BucketRow = React.createClass({
         <td className="right"><Money value={this.props.bucket.balance} /></td>
         <td>{new_balance}</td>
         <td className="right">
-          <MoneyInput className="right"
+          <MoneyInput
             value={this.props.pending}
             onKeyUp={this.pendingKeyUp}
-            onChange={this.pendingChanged}
-            size="10" />
+            onChange={this.pendingChanged} />
         </td>
         <td className="right"><Money value={this.props.bucket.deposit} /></td>
         <td>{goal_bar}</td>
