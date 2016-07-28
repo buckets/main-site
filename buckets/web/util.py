@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime
 import sys
 import json
 
@@ -21,6 +22,16 @@ def fmtDate(d):
     if 'T' in r:
         r = r.split('T')[0]
     return r
+
+def fmtMonth(d):
+    if not d:
+        return ''
+    if isinstance(d, str):
+        d = datetime.strptime(d, '%Y-%m-%d')
+    try:
+        return d.strftime('%b %Y')
+    except:
+        return None
 
 
 def parseMoney(s):
@@ -45,4 +56,5 @@ all_filters = {
     'money': fmtMoney,
     'json': toJson,
     'date': fmtDate,
+    'month': fmtMonth,
 }

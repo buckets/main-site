@@ -90,6 +90,9 @@ table {
     border-collapse: collapse;
 }
 
+table.ledger + table.ledger {
+    margin-top: 3rem;
+}
 table.ledger th {
     text-align: left;
     vertical-align: bottom;
@@ -119,6 +122,9 @@ table.ledger tr.subtotal td {
 }
 table.ledger .right {
     text-align: right;
+}
+table.ledger .center {
+    text-align: center;
 }
 table.ledger tr.underdrag td {
     border-bottom: 4px solid rgba(231, 76, 60,1.0) !important;

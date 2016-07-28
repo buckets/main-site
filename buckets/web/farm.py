@@ -3,6 +3,8 @@ from flask import request, flash, make_response, abort
 from buckets.budget import BudgetManagement
 from buckets.web.util import parseMoney, toJson
 
+from datetime import date, timedelta
+
 
 blue = Blueprint('farm', __name__, url_prefix='/farm/<int:farm_id>')
 
@@ -183,9 +185,12 @@ def connections():
 @blue.route('/reports')
 def reports():
     g.show['reports'] = True
-    account_summary = g.farm.monthly_account_summary()
+    starting = date.today() - timedelta(weeks=48)
+    account_summary = g.farm.monthly_account_summary(starting=starting)
+    bucket_summary = g.farm.monthly_bucket_summary(starting=starting)
     return render_template('farm/reports.html',
-        account_summary=account_summary)
+        account_summary=account_summary,
+        bucket_summary=bucket_summary)
 
 
 #-----------------------------------------------------------------------

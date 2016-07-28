@@ -4,7 +4,7 @@ authentication or sign up or anything of that.
 """
 
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import pytest
 import requests
 
@@ -142,48 +142,114 @@ class TestAccount(object):
         summary = api.monthly_account_summary(ending="2010-03-01")
         assert len(summary) == 2, "Because there's two accounts"
         checking_summary = summary[0]
-        assert len(checking_summary) == 3, "Three months"
+        assert len(checking_summary['months']) == 3, "Three months"
         
-        assert checking_summary[0]['account_id'] == checking['id']
-        assert checking_summary[0]['name'] == checking['name']
-        assert checking_summary[0]['month'] == date(2010, 3, 1)
-        assert checking_summary[0]['income'] == 0
-        assert checking_summary[0]['expenses'] == 0
-        assert checking_summary[0]['endbalance'] == 1100
+        assert checking_summary['account_id'] == checking['id']
+        assert checking_summary['name'] == checking['name']
 
-        assert checking_summary[1]['month'] == date(2010, 2, 1)
-        assert checking_summary[1]['income'] == 0
-        assert checking_summary[1]['expenses'] == -200
-        assert checking_summary[1]['endbalance'] == 1100
+        months = checking_summary['months']
+        assert months[0]['month'] == date(2010, 3, 1)
+        assert months[0]['income'] == 0
+        assert months[0]['expenses'] == 0
+        assert months[0]['endbalance'] == 1100
 
-        assert checking_summary[2]['month'] == date(2010, 1, 1)
-        assert checking_summary[2]['income'] == 1300
-        assert checking_summary[2]['expenses'] == 0
-        assert checking_summary[2]['endbalance'] == 1300
+        assert months[1]['month'] == date(2010, 2, 1)
+        assert months[1]['income'] == 0
+        assert months[1]['expenses'] == -200
+        assert months[1]['endbalance'] == 1100
+
+        assert months[2]['month'] == date(2010, 1, 1)
+        assert months[2]['income'] == 1300
+        assert months[2]['expenses'] == 0
+        assert months[2]['endbalance'] == 1300
 
         savings_summary = summary[1]
-        assert len(savings_summary) == 3, "Three months"
+        assert len(savings_summary['months']) == 3, "Three months"
 
-        assert savings_summary[0]['account_id'] == savings['id']
-        assert savings_summary[0]['name'] == savings['name']
-        assert savings_summary[0]['month'] == date(2010, 3, 1)
-        assert savings_summary[0]['income'] == 0
-        assert savings_summary[0]['expenses'] == -300
-        assert savings_summary[0]['endbalance'] == 1400
+        assert savings_summary['account_id'] == savings['id']
+        assert savings_summary['name'] == savings['name']
 
-        assert savings_summary[1]['month'] == date(2010, 2, 1)
-        assert savings_summary[1]['income'] == 0
-        assert savings_summary[1]['expenses'] == 0
-        assert savings_summary[1]['endbalance'] == 1700
+        months = savings_summary['months']
+        assert months[0]['month'] == date(2010, 3, 1)
+        assert months[0]['income'] == 0
+        assert months[0]['expenses'] == -300
+        assert months[0]['endbalance'] == 1400
 
-        assert savings_summary[2]['month'] == date(2010, 1, 1)
-        assert savings_summary[2]['income'] == 1700
-        assert savings_summary[2]['expenses'] == 0
-        assert savings_summary[2]['endbalance'] == 1700
+        assert months[1]['month'] == date(2010, 2, 1)
+        assert months[1]['income'] == 0
+        assert months[1]['expenses'] == 0
+        assert months[1]['endbalance'] == 1700
+
+        assert months[2]['month'] == date(2010, 1, 1)
+        assert months[2]['income'] == 1700
+        assert months[2]['expenses'] == 0
+        assert months[2]['endbalance'] == 1700
 
         summary = api.monthly_account_summary(starting="2010-02-01", ending="2010-03-01")
-        assert len(summary[0]) == 2, "Two months"
-        assert len(summary[1]) == 2, "Two months"
+        assert len(summary[0]['months']) == 2, "Two months"
+        assert len(summary[1]['months']) == 2, "Two months"
+
+    def test_monthly_summary_default_args(self, api):
+        today = date.today()
+        thismonth = today.replace(day=1)
+        lastmonth = (thismonth - timedelta(days=1)).replace(day=1)
+        twomonths = (lastmonth - timedelta(days=1)).replace(day=1)
+        
+        checking = api.create_account('Checking')
+        api.account_transact(checking['id'], amount=1000, posted=thismonth + timedelta(days=1))
+        api.account_transact(checking['id'], amount=300, posted=lastmonth + timedelta(days=10))
+        api.account_transact(checking['id'], amount=-200, posted=twomonths + timedelta(days=2))
+        
+        savings = api.create_account('Savings')
+        api.account_transact(savings['id'], amount=1200, posted=twomonths)
+        api.account_transact(savings['id'], amount=500, posted=twomonths)
+        api.account_transact(savings['id'], amount=-300, posted=twomonths)
+
+        summary = api.monthly_account_summary()
+        assert len(summary) == 2, "Two accounts"
+        checking_summary = summary[0]
+        assert len(checking_summary['months']) == 3, "Three months"
+        
+        assert checking_summary['account_id'] == checking['id']
+        assert checking_summary['name'] == checking['name']
+
+        months = checking_summary['months']
+        assert months[0]['month'] == thismonth
+        assert months[0]['income'] == 1000
+        assert months[0]['expenses'] == 0
+        assert months[0]['endbalance'] == 1100
+
+        assert months[1]['month'] == lastmonth
+        assert months[1]['income'] == 300
+        assert months[1]['expenses'] == 0
+        assert months[1]['endbalance'] == 100
+
+        assert months[2]['month'] == twomonths
+        assert months[2]['income'] == 0
+        assert months[2]['expenses'] == -200
+        assert months[2]['endbalance'] == -200
+
+        savings_summary = summary[1]
+        assert len(savings_summary['months']) == 3, "Three months"
+
+        assert savings_summary['account_id'] == savings['id']
+        assert savings_summary['name'] == savings['name']
+
+        months = savings_summary['months']
+        assert months[0]['month'] == thismonth
+        assert months[0]['income'] == 0
+        assert months[0]['expenses'] == 0
+        assert months[0]['endbalance'] == 1400
+
+        assert months[1]['month'] == lastmonth
+        assert months[1]['income'] == 0
+        assert months[1]['expenses'] == 0
+        assert months[1]['endbalance'] == 1400
+
+        assert months[2]['month'] == twomonths
+        assert months[2]['income'] == 1700
+        assert months[2]['expenses'] == -300
+        assert months[2]['endbalance'] == 1400
 
 
 class TestTransaction(object):
@@ -529,6 +595,67 @@ class TestBucket(object):
         assert btrans['account_transaction']['id'] == trans['id']
         assert btrans['account_transaction']['memo'] == 'something'
         assert btrans['account_transaction']['account_id'] == account['id']
+
+    def test_monthly_summary(self, api):
+        food = api.create_bucket('Food')
+        api.bucket_transact(food['id'], amount=1000, posted='2010-01-01')
+        api.bucket_transact(food['id'], amount=300, posted='2010-01-05')
+        api.bucket_transact(food['id'], amount=-200, posted='2010-02-14')
+        
+        shelter = api.create_bucket('Shelter')
+        api.bucket_transact(shelter['id'], amount=1200, posted='2010-01-01')
+        api.bucket_transact(shelter['id'], amount=500, posted='2010-01-05')
+        api.bucket_transact(shelter['id'], amount=-300, posted='2010-03-15')
+
+        summary = api.monthly_bucket_summary(ending="2010-03-01")
+        assert len(summary) == 2, "Two buckets"
+        food_summary = summary[0]
+        assert len(food_summary['months']) == 3, "Three months"
+        
+        assert food_summary['bucket_id'] == food['id']
+        assert food_summary['name'] == food['name']
+
+        months = food_summary['months']
+        assert months[0]['month'] == date(2010, 3, 1)
+        assert months[0]['income'] == 0
+        assert months[0]['expenses'] == 0
+        assert months[0]['endbalance'] == 1100
+
+        assert months[1]['month'] == date(2010, 2, 1)
+        assert months[1]['income'] == 0
+        assert months[1]['expenses'] == -200
+        assert months[1]['endbalance'] == 1100
+
+        assert months[2]['month'] == date(2010, 1, 1)
+        assert months[2]['income'] == 1300
+        assert months[2]['expenses'] == 0
+        assert months[2]['endbalance'] == 1300
+
+        shelter_summary = summary[1]
+        assert len(shelter_summary['months']) == 3, "Three months"
+
+        assert shelter_summary['bucket_id'] == shelter['id']
+        assert shelter_summary['name'] == shelter['name']
+
+        months = shelter_summary['months']
+        assert months[0]['month'] == date(2010, 3, 1)
+        assert months[0]['income'] == 0
+        assert months[0]['expenses'] == -300
+        assert months[0]['endbalance'] == 1400
+
+        assert months[1]['month'] == date(2010, 2, 1)
+        assert months[1]['income'] == 0
+        assert months[1]['expenses'] == 0
+        assert months[1]['endbalance'] == 1700
+
+        assert months[2]['month'] == date(2010, 1, 1)
+        assert months[2]['income'] == 1700
+        assert months[2]['expenses'] == 0
+        assert months[2]['endbalance'] == 1700
+
+        summary = api.monthly_bucket_summary(starting="2010-02-01", ending="2010-03-01")
+        assert len(summary[0]['months']) == 2, "Two months"
+        assert len(summary[1]['months']) == 2, "Two months"
 
 
 class TestSimpleFIN(object):

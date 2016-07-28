@@ -240,6 +240,8 @@ patches['init'] = [
     )''',
     '''CREATE INDEX bucket_transaction_bucket_id_idx
         ON bucket_transaction(bucket_id)''',
+    '''CREATE INDEX bucket_transaction_posted_idx
+        ON bucket_transaction(posted)''',
     '''CREATE FUNCTION update_bucket_balance() RETURNS trigger AS $update_bucket_balance$
         BEGIN
             IF (TG_OP = 'DELETE') THEN

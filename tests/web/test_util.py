@@ -1,4 +1,5 @@
-from buckets.web.util import fmtMoney, parseMoney
+from buckets.web.util import fmtMoney, parseMoney, fmtMonth
+from datetime import date
 
 
 def test_fmtMoney():
@@ -27,3 +28,10 @@ def test_parseMoney():
     assert parseMoney(' -45') == -4500
     assert parseMoney('') == 0
     assert parseMoney(None) == 0
+
+
+def test_fmtMonth():
+    assert fmtMonth('2010-01-01') == 'Jan 2010'
+    assert fmtMonth(date(2010, 1, 1)) == 'Jan 2010'
+    assert fmtMonth(None) == ''
+    assert fmtMonth('') == ''

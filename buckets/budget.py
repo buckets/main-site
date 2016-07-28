@@ -3,7 +3,6 @@ from datetime import date, datetime, timedelta
 import time
 import random
 from decimal import Decimal
-from collections import defaultdict
 
 import sqlalchemy
 from sqlalchemy import select, and_, func, text
@@ -203,71 +202,99 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.use_common
-    def monthly_account_summary(self, starting=None, ending=func.now()):
+    def monthly_account_summary(self, starting=None, ending=None):
         """
         Return a month-by-month summary of income and expenses
         per account.
 
         @param starting: The first day of the first month to report. (e.g. "2010-03-01")
+            Defaults to the month of the earliest transaction for the entire farm.
         @param ending: The first day of the last month to report. (e.g. "2010-06-01")
+            Defaults to the current month.
         """
-        starting_clause = '(:starting)::date'
+        return self._monthly_summary(
+            account='account',
+            trans='account_transaction',
+            starting=starting,
+            ending=ending)
+
+
+    def _monthly_summary(self,
+            account='account',
+            trans='account_transaction',
+            starting=None,
+            ending=None):
+        starting_clause = "date_trunc('month', (:starting)::date)"
         if starting is None:
             starting_clause = '''
                 (SELECT
-                    min(at.posted) as mindate
+                    date_trunc('month', min(at.posted)) as mindate
                 FROM
-                    account_transaction as at,
-                    account as a
+                    {trans} as at,
+                    {account} as a
                 WHERE
-                    at.account_id = a.id
+                    at.{account}_id = a.id
                     AND a.farm_id = :farm_id)
-            '''
-        r = self.engine.execute(text('''
+            '''.format(**locals())
+        sql = '''
             SELECT
                 s as month,
-                a.id as account_id,
+                a.id,
                 a.name,
-                a.balance,
+                coalesce(a.balance, 0) as balance,
                 coalesce(at.income, 0) as income,
                 coalesce(at.expenses, 0) as expenses
             FROM
                 generate_series(
                     {starting_clause},
-                    (:ending)::date,
+                    date_trunc('month',
+                        coalesce(:ending, current_timestamp)),
                     '1 month'
                 ) as s
-                left join account as a
+                left join {account} as a
                     on a.farm_id = :farm_id
                 left join
                     (SELECT
                         date_trunc('month', posted) as month,
-                        account_id,
+                        {account}_id,
                         sum(case when amount > 0 then amount else 0 end) as income,
                         sum(case when amount < 0 then amount else 0 end) as expenses
                     FROM
-                        account_transaction
+                        {trans}
                     GROUP BY
                         1,2
                 ) as at
-                    ON at.account_id = a.id AND at.month = s
+                    ON at.{account}_id = a.id AND at.month = s
             ORDER BY
                 a.id,
                 month desc
-            '''.format(starting_clause=starting_clause)),
+            '''.format(**locals())
+        print sql
+        r = self.engine.execute(text(sql),
                 starting=starting,
                 ending=ending,
                 farm_id=self.farm_id)
-        accounts = defaultdict(list)
+        accounts = {}
         balances = {}
+        account_id_str = '{account}_id'.format(**locals())
         for row in r.fetchall():
             row = dict(row)
             row['month'] = row['month'].date()
-            account_id = row['account_id']
+            print 'row', row
+            import sys
+            sys.stdout.flush()
+            account_id = row['id']
             if account_id not in balances:
                 balances[account_id] = row['balance']
             row['endbalance'] = balances[account_id]
-            accounts[row['account_id']].append(row)
+
+            if account_id not in accounts:
+                accounts[account_id] = {
+                    account_id_str: account_id,
+                    'name': row['name'],
+                    'months': [],
+                }
+            accounts[account_id]['months'].append(row)
             balances[account_id] -= row['income'] + row['expenses']
         return [accounts[k] for k in sorted(accounts)]
 
@@ -650,6 +677,23 @@ class BudgetManagement(object):
         r = self.engine.execute(select([Bucket])
             .where(Bucket.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
+
+    @policy.use_common
+    def monthly_bucket_summary(self, starting=None, ending=None):
+        """
+        Return a month-by-month summary of income and expenses
+        per bucket.
+
+        @param starting: The first day of the first month to report. (e.g. "2010-03-01")
+            Defaults to the month of the earliest transaction for the entire farm.
+        @param ending: The first day of the last month to report. (e.g. "2010-06-01")
+            Defaults to the current month.
+        """
+        return self._monthly_summary(
+            account='bucket',
+            trans='bucket_transaction',
+            starting=starting,
+            ending=ending)
 
     @policy.use_common
     @policy.obj('bucket_id', Bucket)

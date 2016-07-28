@@ -1,5 +1,82 @@
 {% extends 'farm/base.html' %}
 
 {% block content %}
-hello
+
+<h2>Accounts</h2>
+
+<table class="ledger">
+  {% for account in account_summary %}
+    {% if loop.first %}
+    <tr>
+      <th>Account</th>
+      <th></th>
+      {% for month in account.months|reverse %}
+      <th class="center">{{ month.month|month }}</th>
+      {% endfor %}
+      <th>Total</th>
+    </tr>
+    {% endif %}
+
+    <tr>
+      <td>{{ account.name }}</td>
+      <td>
+        <div>Income</div>
+        <div>Expenses</div>
+        <div>Balance</div>
+      </td>
+      {% for month in account.months|reverse %}
+      <td class="right">
+        <div class="right">{{ month.income|money if month.income else '&nbsp;'|safe }}</div>
+        <div class="negative right">{{ month.expenses|money if month.expenses else '&nbsp;'|safe }}</div>
+        <div class="right {{'negative' if month.endbalance < 0 }}">{{ month.endbalance|money }}</div>
+      </td>
+      {% endfor %}
+      <td class="right">
+        <div class="right">{{ account.months|map(attribute='income')|sum|money }}</div>
+        <div class="negative right">{{ account.months|map(attribute='expenses')|sum|money }}</div>
+        <div></div>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+
+<h2>Buckets</h2>
+
+<table class="ledger">
+  {% for account in bucket_summary %}
+    {% if loop.first %}
+    <tr>
+      <th>Bucket</th>
+      <th></th>
+      {% for month in account.months|reverse %}
+      <th class="center">{{ month.month|month }}</th>
+      {% endfor %}
+      <th>Total</th>
+    </tr>
+    {% endif %}
+
+    <tr>
+      <td>{{ account.name }}</td>
+      <td>
+        <div>Income</div>
+        <div>Expenses</div>
+        <div>Balance</div>
+      </td>
+      {% for month in account.months|reverse %}
+      <td class="right">
+        <div class="right">{{ month.income|money if month.income else '&nbsp;'|safe }}</div>
+        <div class="negative right">{{ month.expenses|money if month.expenses else '&nbsp;'|safe }}</div>
+        <div class="right {{'negative' if month.endbalance < 0 }}">{{ month.endbalance|money }}</div>
+      </td>
+      {% endfor %}
+      <td class="right">
+        <div class="right">{{ account.months|map(attribute='income')|sum|money }}</div>
+        <div class="negative right">{{ account.months|map(attribute='expenses')|sum|money }}</div>
+        <div></div>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
 {% endblock %}
