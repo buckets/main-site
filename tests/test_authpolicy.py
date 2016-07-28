@@ -203,6 +203,8 @@ def test_BudgetManagement(engine):
             'account_transact', account_id=sams_account, amount=10
         ).expect()
 
+        world.forcall('monthly_account_summary').expect('bob')
+
         world.forcall('delete_account_trans', id=bobs_trans
             ).expect('bob')
         world.forcall('delete_account_trans', id=sams_trans
