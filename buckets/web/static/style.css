@@ -337,6 +337,37 @@ button + button {
     border-color: black;
 }
 
+.floating-footer-padder {
+    height: 4rem;
+}
+footer.floating {
+    padding: 0.2rem 0;
+    border-top: 1px solid lightgrey;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background-color: rgba(255, 255, 255, 1.0);
+}
+
+.status-bar {
+    display: flex;
+    justify-content: center;
+    align-items: space-between;
+}
+.status-bar .item {
+    display: flex;
+    flex-direction: column;
+    padding: 0 1rem;
+}
+.status-bar .item .label {
+    font-size: .8rem;
+    color: rgba(127, 140, 141,1.0);
+}
+.status-bar .item .value {
+
+}
+
 
 
 p {

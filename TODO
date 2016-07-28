@@ -1,13 +1,13 @@
 Now:
-  ☐ Make it not do 2 transactions when you press enter in buckets.html
-  ☐ Month summary(ies)
+  ✔ Make it not do 2 transactions when you press enter in buckets.html @done (16-07-28 16:50)
   ☐ Totals summary bar at bottom (or elsewhere)
   ☐ Show as of Last month/this month/now
   ☐ Make it rain
   ☐ OFX import
     ☐ https://github.com/euforic/banking.js/
   ☐ cron simplefin fetching
-  ☐ Bucket charts
+  ☐ bucket.html charts
+  ☐ bucket.html month-by-month table
   ☐ Update account balance/names
   ☐ PIN
   ☐ Sign out

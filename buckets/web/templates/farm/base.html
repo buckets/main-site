@@ -22,15 +22,23 @@
 <script src="/static/js/vend/browser.min.js"></script>
 <script src="/static/js/vend/math.min.js"></script>
 
+<script src="/static/js/farm.js"></script>
 <script src="/static/js/money.js"></script>
 <script src="/static/js/react-money.jsx" type="text/babel"></script>
 <script src="/static/js/goals.js"></script>
 <script src="/static/js/react-goals.jsx" type="text/babel"></script>
 <script>
+var _api_request_hooks = [];
+function registerApiRequestHook(func) {
+  _api_request_hooks.push(func);
+}
+
 function apiRequest(data, success) {
   var label = '';
+  var multi = false;
   if (_.isArray(data)) {
     label = _.uniq(_.map(data, 'method')).join(',')
+    multi = true;
   } else {
     label = data.method;
   }
@@ -39,11 +47,47 @@ function apiRequest(data, success) {
     url: '{{ url_for('farm.api') }}-' + label,
     data: JSON.stringify(data),
     contentType: 'application/json',
-    success: success
+    success: function(response) {
+      // call given success handler
+      success(response);
+
+      // call hooks
+      var calls = [[data, response]];
+      if (multi) {
+        calls = _.zip(data, response);
+      }
+      calls.map(function(args) {
+        _api_request_hooks.map(function(func) {
+          func(args[0], args[1]);  
+        })
+      })
+    }
   });
 }
 </script>
 {% endblock %}
 
 {% block content %}
+{% endblock %}
+
+{% block footer %}
+<script>
+registerApiRequestHook(function(request, response) {
+  console.log('request', request);
+  console.log('response', response);
+});
+</script>
+<div class="floating-footer-padder"></div>
+<footer class="floating">
+  <div class="status-bar">
+    <div class="item">
+      <div class="label">Accounts</div>
+      <div class="value">0</div>
+    </div>
+    <div class="item">
+      <div class="label">Buckets</div>
+      <div class="value">0</div>
+    </div>
+  </div>
+</footer>
 {% endblock %}

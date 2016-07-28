@@ -4,8 +4,8 @@
 
 <h1>Buckets</h1>
 
-<script type="text/babel">
-var target_el = thisNext();
+<script type="text/babel" id="el1">
+var target_el = afterEl(document.getElementById('el1'));
 
 var Store = {};
 Store.groups = {{ groups|json|safe }};

@@ -7,8 +7,8 @@
 
 {% if connections %}
 
-<script type="text/babel">
-var target_el = thisNext();
+<script type="text/babel" id="el1">
+var target_el = afterEl(document.getElementById('el1'));
 
 var Store = {};
 Store.accounts = [];
@@ -128,19 +128,19 @@ var MappingTable = React.createClass({
       unknown_table = (
         <div>
           <p>Please select the matching account for each of these:</p>
-        <table className="ledger">
-          <thead>
-            <tr>
-              <th>Organization</th>
-              <th>Name</th>
-              <th>Existing Account</th>
-              <th>New Account</th>
-            </tr>
-          </thead>
-          <tbody>
-            {unknown_rows}
-          </tbody>
-        </table>
+          <table className="ledger">
+            <thead>
+              <tr>
+                <th>Organization</th>
+                <th>Name</th>
+                <th>Existing Account</th>
+                <th>New Account</th>
+              </tr>
+            </thead>
+            <tbody>
+              {unknown_rows}
+            </tbody>
+          </table>
         </div>
       );
     }

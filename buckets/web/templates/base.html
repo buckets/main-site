@@ -9,11 +9,9 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <script>
-  function thisNext() {
-    var scriptTags = document.getElementsByTagName('script');
-    var scriptTag = scriptTags[scriptTags.length - 1];
+  function afterEl(anchor) {
     var elem = document.createElement('div');
-    scriptTag.parentNode.insertBefore(elem, scriptTag.nextSibling);
+    anchor.parentNode.insertBefore(elem, anchor.nextSibling);
     return elem;
   }
   </script>
@@ -43,8 +41,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     {% endwith %}
     </div>
     <div class="main-content">{% block content %}{% endblock %}</div>
-    {% block footer %}
-    <footer></footer>{% endblock %}
+    {% block footer %}<footer></footer>{% endblock %}
   </div>
 </body>
 </html>
