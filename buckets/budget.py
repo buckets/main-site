@@ -3,9 +3,10 @@ from datetime import date, datetime, timedelta
 import time
 import random
 from decimal import Decimal
+from collections import defaultdict
 
 import sqlalchemy
-from sqlalchemy import select, and_, func
+from sqlalchemy import select, and_, func, text
 import requests
 
 from buckets.schema import UserFarm
@@ -200,6 +201,63 @@ class BudgetManagement(object):
         r = self.engine.execute(select([Account])
             .where(Account.c.farm_id == self.farm_id))
         return [dict(x) for x in r.fetchall()]
+
+    @policy.use_common
+    def monthly_account_summary(self):
+        """
+        Return a month-by-month summary of income and expenses
+        per account.
+        """
+        r = self.engine.execute(text('''
+            SELECT
+                at.account_id,
+                a.name,
+                a.balance,
+                date_trunc('month', at.posted) as month,
+                sum(case when at.amount > 0 then at.amount else 0 end) as income,
+                sum(case when at.amount < 0 then at.amount else 0 end) as expenses
+            FROM
+                account_transaction as at,
+                account as a,
+            WHERE
+                at.account_id = a.id
+                AND a.farm_id = :farm_id
+            GROUP BY
+                1,2,3,4
+            ORDER BY
+                1 asc, 4 desc
+            '''), farm_id=self.farm_id)
+        accounts = defaultdict(dict)
+        balances = {}
+        min_month = None
+        max_month = None
+        for row in r.fetchall():
+            month = row.month.date()
+            min_month = min([month, min_month or month])
+            max_month = max([month, max_month or month])
+            accounts[row.account_id][month] = row
+            balances[row.account_id] = row.balance
+        ret = []
+        for account_id in sorted(accounts):
+            endbalance = balances[account_id]
+            account_ret = []
+            ret.append(account_ret)
+
+            month = max_month
+            while month >= min_month:
+                row = accounts[account_id].pop(month, None)
+                if row is None:
+                    latest_data = max(accounts[account_id])
+                    row = {
+                        'month': month,
+                        'income': 0,
+                        'expenses': 0,
+                        'endbalance': latest_data['']
+                    }
+                print 'account_id', account_id, month
+                month -= timedelta(days=1)
+                month = month.replace(day=1)
+        return ret
 
     @policy.use_common
     @policy.obj('account_id', Account)

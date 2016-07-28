@@ -183,7 +183,9 @@ def connections():
 @blue.route('/reports')
 def reports():
     g.show['reports'] = True
-    return render_template('farm/reports.html')
+    account_summary = g.farm.monthly_account_summary()
+    return render_template('farm/reports.html',
+        account_summary=account_summary)
 
 
 #-----------------------------------------------------------------------

@@ -128,6 +128,59 @@ class TestAccount(object):
 
         assert len(api.list_account_trans()) == 2
 
+    def test_monthly_summary(self, api):
+        checking = api.create_account('Checking')
+        api.account_transact(checking['id'], amount=1000, posted='2010-01-01')
+        api.account_transact(checking['id'], amount=300, posted='2010-01-05')
+        api.account_transact(checking['id'], amount=-200, posted='2010-02-14')
+        
+        savings = api.create_account('Savings')
+        api.account_transact(savings['id'], amount=1200, posted='2010-01-01')
+        api.account_transact(savings['id'], amount=500, posted='2010-01-05')
+        api.account_transact(savings['id'], amount=-300, posted='2010-03-15')
+
+        summary = api.monthly_account_summary()
+        assert len(summary) == 2, "Because there's two accounts"
+        checking_summary = summary[0]
+        assert len(checking_summary) == 3, "Three months"
+        
+        assert checking_summary[0]['account_id'] == checking['id']
+        assert checking_summary[0]['name'] == checking['name']
+        assert checking_summary[0]['month'] == '2010-03-01'
+        assert checking_summary[0]['income'] == 0
+        assert checking_summary[0]['expenses'] == 0
+        assert checking_summary[0]['endbalance'] == 1100
+
+        assert checking_summary[1]['month'] == '2010-02-01'
+        assert checking_summary[1]['income'] == 0
+        assert checking_summary[1]['expenses'] == -200
+        assert checking_summary[1]['endbalance'] == 1100
+
+        assert checking_summary[2]['month'] == '2010-01-01'
+        assert checking_summary[2]['income'] == 1300
+        assert checking_summary[2]['expenses'] == 0
+        assert checking_summary[2]['endbalance'] == 1300
+
+        savings_summary = summary[1]
+        assert len(savings_summary) == 3, "Three months"
+
+        assert savings_summary[0]['account_id'] == savings['id']
+        assert savings_summary[0]['name'] == savings['name']
+        assert savings_summary[0]['month'] == '2010-03-01'
+        assert savings_summary[0]['income'] == 0
+        assert savings_summary[0]['expenses'] == -300
+        assert savings_summary[0]['endbalance'] == 1400
+
+        assert savings_summary[1]['month'] == '2010-02-01'
+        assert savings_summary[1]['income'] == 0
+        assert savings_summary[1]['expenses'] == 0
+        assert savings_summary[1]['endbalance'] == 1700
+
+        assert savings_summary[2]['month'] == '2010-01-01'
+        assert savings_summary[2]['income'] == 1700
+        assert savings_summary[2]['expenses'] == 0
+        assert savings_summary[2]['endbalance'] == 1700
+
 
 class TestTransaction(object):
 
