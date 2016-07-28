@@ -203,61 +203,73 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.use_common
-    def monthly_account_summary(self):
+    def monthly_account_summary(self, starting=None, ending=func.now()):
         """
         Return a month-by-month summary of income and expenses
         per account.
+
+        @param starting: The first day of the first month to report. (e.g. "2010-03-01")
+        @param ending: The first day of the last month to report. (e.g. "2010-06-01")
         """
+        starting_clause = '(:starting)::date'
+        if starting is None:
+            starting_clause = '''
+                (SELECT
+                    min(at.posted) as mindate
+                FROM
+                    account_transaction as at,
+                    account as a
+                WHERE
+                    at.account_id = a.id
+                    AND a.farm_id = :farm_id)
+            '''
         r = self.engine.execute(text('''
             SELECT
-                at.account_id,
+                s as month,
+                a.id as account_id,
                 a.name,
                 a.balance,
-                date_trunc('month', at.posted) as month,
-                sum(case when at.amount > 0 then at.amount else 0 end) as income,
-                sum(case when at.amount < 0 then at.amount else 0 end) as expenses
+                coalesce(at.income, 0) as income,
+                coalesce(at.expenses, 0) as expenses
             FROM
-                account_transaction as at,
-                account as a,
-            WHERE
-                at.account_id = a.id
-                AND a.farm_id = :farm_id
-            GROUP BY
-                1,2,3,4
+                generate_series(
+                    {starting_clause},
+                    (:ending)::date,
+                    '1 month'
+                ) as s
+                left join account as a
+                    on a.farm_id = :farm_id
+                left join
+                    (SELECT
+                        date_trunc('month', posted) as month,
+                        account_id,
+                        sum(case when amount > 0 then amount else 0 end) as income,
+                        sum(case when amount < 0 then amount else 0 end) as expenses
+                    FROM
+                        account_transaction
+                    GROUP BY
+                        1,2
+                ) as at
+                    ON at.account_id = a.id AND at.month = s
             ORDER BY
-                1 asc, 4 desc
-            '''), farm_id=self.farm_id)
-        accounts = defaultdict(dict)
+                a.id,
+                month desc
+            '''.format(starting_clause=starting_clause)),
+                starting=starting,
+                ending=ending,
+                farm_id=self.farm_id)
+        accounts = defaultdict(list)
         balances = {}
-        min_month = None
-        max_month = None
         for row in r.fetchall():
-            month = row.month.date()
-            min_month = min([month, min_month or month])
-            max_month = max([month, max_month or month])
-            accounts[row.account_id][month] = row
-            balances[row.account_id] = row.balance
-        ret = []
-        for account_id in sorted(accounts):
-            endbalance = balances[account_id]
-            account_ret = []
-            ret.append(account_ret)
-
-            month = max_month
-            while month >= min_month:
-                row = accounts[account_id].pop(month, None)
-                if row is None:
-                    latest_data = max(accounts[account_id])
-                    row = {
-                        'month': month,
-                        'income': 0,
-                        'expenses': 0,
-                        'endbalance': latest_data['']
-                    }
-                print 'account_id', account_id, month
-                month -= timedelta(days=1)
-                month = month.replace(day=1)
-        return ret
+            row = dict(row)
+            row['month'] = row['month'].date()
+            account_id = row['account_id']
+            if account_id not in balances:
+                balances[account_id] = row['balance']
+            row['endbalance'] = balances[account_id]
+            accounts[row['account_id']].append(row)
+            balances[account_id] -= row['income'] + row['expenses']
+        return [accounts[k] for k in sorted(accounts)]
 
     @policy.use_common
     @policy.obj('account_id', Account)
