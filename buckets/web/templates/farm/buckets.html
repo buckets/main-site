@@ -318,10 +318,10 @@ var BucketTable = React.createClass({
     });
   },
   pendingChanged: function(bucket, pending) {
-    if (pending === '0') {
+    if (pending === '0' || pending === '') {
       delete this.state.pendings[bucket.id];
     } else {
-      this.state.pendings[bucket.id] = pending;
+      this.state.pendings[bucket.id] = parseInt(pending);
     }
     this.setState(this.state);
   },
@@ -402,7 +402,6 @@ var BucketTable = React.createClass({
     }
     var pending_total = _.sum(_.values(this.state.pendings));
     future_balance_total = balance_total + pending_total;
-    
 
     var future_balance;
     var commit_button_disabled = true;

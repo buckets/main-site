@@ -120,6 +120,9 @@ table.ledger tr.subtotal td {
     color: rgba(44, 62, 80, 0.5);
     border-bottom: 0px;
 }
+table.ledger .barleft {
+    border-left: 1px solid lightgrey;
+}
 table.ledger .right {
     text-align: right;
 }

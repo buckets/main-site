@@ -3,7 +3,7 @@ from datetime import datetime
 import sys
 import json
 
-def fmtMoney(xint, show_decimal=False):
+def fmtMoney(xint, show_decimal=False, truncate=False):
     sys.stdout.flush()
     xint = xint or 0
     d = Decimal('{0}'.format(xint)) / 100
@@ -13,7 +13,7 @@ def fmtMoney(xint, show_decimal=False):
     fore, aft = ret.split('.', 1)
     if len(aft) != 2:
         ret = '{0}.{1}'.format(fore, (aft + '00')[:2])
-    if ret.endswith('.00') and not show_decimal:
+    if (ret.endswith('.00') and not show_decimal) or truncate:
         ret = ret.split('.')[0]
     return ret
 

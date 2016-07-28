@@ -12,6 +12,8 @@ def test_fmtMoney():
     assert fmtMoney(20) == '0.20'
     assert fmtMoney(None) == '0'
     assert fmtMoney(None, True) == '0.00'
+    assert fmtMoney(5678, truncate=True) == '56'
+    assert fmtMoney(100, truncate=True) == '1'
 
 
 def test_parseMoney():

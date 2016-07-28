@@ -36,7 +36,6 @@ window.MoneyInput = React.createClass({
   },
   render: function() {
     var { value, onChange, className, ...other } = this.props;
-    console.log('classNAme', className);
     var computed_value_elem;
     var computed_value = this.display2Cents(this.state.display);
     var all_classes = (className || '') + ' money-input';
@@ -52,7 +51,7 @@ window.MoneyInput = React.createClass({
     }
 
     return (
-      <div {...other} className={all_classes} >
+      <div className={all_classes} >
         <input type="text" value={this.state.display} onChange={this.onDisplayChanged} {...other} className={input_classes} />&nbsp;
         {computed_value_elem}
       </div>
