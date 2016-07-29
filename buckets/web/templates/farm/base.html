@@ -121,7 +121,10 @@ var FooterStatus = React.createClass({
       } else if (surplus === 0) {
         surplus_class += ' golden';
       } else {
-        note = "Put this surplus into your buckets.";
+        note = "Put this surplus into your buckets.<br/>Make it rain!";
+      }
+      if (note) {
+        note = {__html: note};
       }
       footer = (
         <footer className="floating">
@@ -146,7 +149,7 @@ var FooterStatus = React.createClass({
                 <Money value={surplus} />
               </div>
             </div>
-            <div className="note">{note}</div>
+            <div className="note" dangerouslySetInnerHTML={note}></div>
           </div>
         </footer>
       );

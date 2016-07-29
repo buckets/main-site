@@ -1,6 +1,7 @@
 Now:
   ✔ Make it not do 2 transactions when you press enter in buckets.html @done (16-07-28 16:50)
-  ☐ Totals summary bar at bottom (or elsewhere)
+  ✔ Totals summary bar at bottom (or elsewhere) @done (16-07-28 22:53)
+  ☐ Why doesn't setting target amount and date put deposit amount.
   ☐ Show as of Last month/this month/now
   ☐ Make it rain
   ☐ OFX import
