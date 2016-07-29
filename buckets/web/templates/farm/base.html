@@ -73,9 +73,15 @@ function apiRequest(data, success) {
 {% block footer %}
 <script>
 registerApiRequestHook(function(request, response) {
-  console.log('request', request);
-  console.log('response', response);
+  if (request.method !== 'get_summary') {
+    console.log('queuing update');
+    debouncedUpdateFooter();
+  }
 });
+function updateFooter() {
+  console.log('updating footer');
+}
+var debouncedUpdateFooter = _.debounce(updateFooter, 1000);
 </script>
 <div class="floating-footer-padder"></div>
 <footer class="floating">

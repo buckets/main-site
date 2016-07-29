@@ -13,6 +13,7 @@ Now:
   ☐ Sign out
   ☐ Auto categorize
   ☐ Admin tools
+  ☐ Add tests that run in a dirty database to make sure there's no horizontal priv access.
   ☐ Nitty gritty usability (pressing enter/tab, autofocus, etc...)
 
 Later:

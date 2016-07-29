@@ -310,6 +310,8 @@ def test_BudgetManagement(engine):
         world.forcall(
             'list_buckets').expect('bob')
 
+        world.forcall('monthly_bucket_summary').expect('bob')
+
         world.forcall(
             'bucket_transact', bucket_id=bobs_bucket, amount=10
             ).expect('bob')
@@ -348,3 +350,5 @@ def test_BudgetManagement(engine):
             'simplefin_list_connections').expect('bob')
         world.forcall(
             'simplefin_fetch').expect('bob')
+
+        world.forcall('get_summary').expect('bob')

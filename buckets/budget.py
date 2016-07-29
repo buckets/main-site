@@ -145,6 +145,63 @@ class BudgetManagement(object):
         return False
 
     #----------------------------------------------------------
+    # General
+
+    @policy.use_common
+    def get_summary(self, as_of=None):
+        """
+        Get summary data as of a certain date
+        (or now if none is given)
+        """
+        # XXX optimize this later
+
+        r = self.engine.execute(select([
+                func.sum(Account.c.balance),
+            ])
+            .where(Account.c.farm_id == self.farm_id))
+        accounts_balance = r.fetchone()[0] or 0
+
+        r = self.engine.execute(select([
+                func.sum(Bucket.c.balance),
+            ])
+            .where(Bucket.c.farm_id == self.farm_id))
+        buckets_balance = r.fetchone()[0] or 0
+
+        if as_of:
+            r = self.engine.execute(select([
+                    func.sum(AccountTrans.c.amount)
+                ])
+                .where(and_(
+                    AccountTrans.c.account_id == Account.c.id,
+                    Account.c.farm_id == self.farm_id,
+                    AccountTrans.c.posted > as_of,
+                )))
+            trans_since = r.fetchone()[0] or 0
+            accounts_balance -= trans_since
+
+            r = self.engine.execute(select([
+                    func.sum(BucketTrans.c.amount)
+                ])
+                .where(and_(
+                    BucketTrans.c.bucket_id == Bucket.c.id,
+                    Bucket.c.farm_id == self.farm_id,
+                    BucketTrans.c.posted > as_of,
+                )))
+            trans_since = r.fetchone()[0] or 0
+            buckets_balance -= trans_since
+
+
+        return {
+            'accounts': {
+                'balance': accounts_balance,
+            },
+            'buckets': {
+                'balance': buckets_balance,
+            }
+        }
+
+
+    #----------------------------------------------------------
     # Account
 
     @policy.use_common
@@ -269,7 +326,6 @@ class BudgetManagement(object):
                 a.id,
                 month desc
             '''.format(**locals())
-        print sql
         r = self.engine.execute(text(sql),
                 starting=starting,
                 ending=ending,
@@ -280,9 +336,6 @@ class BudgetManagement(object):
         for row in r.fetchall():
             row = dict(row)
             row['month'] = row['month'].date()
-            print 'row', row
-            import sys
-            sys.stdout.flush()
             account_id = row['id']
             if account_id not in balances:
                 balances[account_id] = row['balance']

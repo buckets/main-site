@@ -37,6 +37,50 @@ def api(farm, engine, fake_requests):
         _requests=fake_requests)
 
 
+class TestGeneral(object):
+
+    def test_summary(self, api):
+        summary = api.get_summary()
+        assert summary['accounts']['balance'] == 0
+        assert summary['buckets']['balance'] == 0
+
+        account = api.create_account('Checking')
+        api.account_transact(account['id'], amount=400)
+        bucket = api.create_bucket('Food')
+        api.bucket_transact(bucket['id'], amount=600)
+        bucket2 = api.create_bucket('Diapers')
+        api.bucket_transact(bucket2['id'], amount=800)
+
+        summary = api.get_summary()
+        assert summary['accounts']['balance'] == 400
+        assert summary['buckets']['balance'] == (600 + 800)
+
+    def test_summary_on_date(self, api):
+        account = api.create_account('Checking')
+        api.account_transact(account['id'], amount=400,
+            posted='2010-01-01')
+        api.account_transact(account['id'], amount=600,
+            posted='2011-01-01')
+        bucket = api.create_bucket('Food')
+        api.bucket_transact(bucket['id'], amount=600,
+            posted='2010-01-01')
+        bucket2 = api.create_bucket('Diapers')
+        api.bucket_transact(bucket2['id'], amount=800,
+            posted='2012-01-01')
+
+        summary = api.get_summary(as_of='2010-01-02')
+        assert summary['accounts']['balance'] == 400
+        assert summary['buckets']['balance'] == 600
+
+        summary = api.get_summary(as_of='2011-01-02')
+        assert summary['accounts']['balance'] == (400 + 600)
+        assert summary['buckets']['balance'] == 600
+
+        summary = api.get_summary(as_of='2012-01-02')
+        assert summary['accounts']['balance'] == (400 + 600)
+        assert summary['buckets']['balance'] == (600 + 800)
+
+
 class TestAccount(object):
 
     def test_create(self, api):
