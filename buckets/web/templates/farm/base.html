@@ -71,29 +71,98 @@ function apiRequest(data, success) {
 {% endblock %}
 
 {% block footer %}
-<script>
+<script id="footer-status" type="text/babel">
+var target_el = afterEl(document.getElementById('footer-status'));
+
+var FooterStore = {};
+
+FooterStore.summary = {};
+var session_summary = sessionStorage.getItem('summary');
+if (session_summary) {
+  try {
+    FooterStore.summary = JSON.parse(session_summary);
+  } catch(err) {
+    FooterStore.summary = {};
+  }
+}
+
+FooterStore.rerender = function() {
+  ReactDOM.render(<FooterStatus
+    summary={FooterStore.summary} />, target_el);
+}
+
+function updateFooter() {
+  apiRequest({
+    method: 'get_summary',
+    kwargs: {},
+  }, function(response) {
+    FooterStore.summary = response;
+    FooterStore.rerender();
+    sessionStorage['summary'] = JSON.stringify(FooterStore.summary);
+  })
+}
+var debouncedUpdateFooter = _.debounce(updateFooter, 500);
+debouncedUpdateFooter();
+
+
+var FooterStatus = React.createClass({
+  render: function() {
+    var footer;
+    if (this.props.summary.accounts) {
+      var note;
+
+      var surplus_label = 'Surplus';
+      var surplus = this.props.summary.accounts.balance - this.props.summary.buckets.balance;
+      var surplus_class = 'item';
+      if (surplus < 0) {
+        surplus_label = 'Over budgeted';
+        surplus_class += ' over';
+        note = "Take this much out of your buckets to get your accounts and buckets to match.";
+      } else if (surplus === 0) {
+        surplus_class += ' golden';
+      } else {
+        note = "Put this surplus into your buckets.";
+      }
+      footer = (
+        <footer className="floating">
+          <div className="status-bar">
+            <div className="item">
+              <div className="label">Accounts</div>
+              <div className="value">
+                <Money value={this.props.summary.accounts.balance} />
+              </div>
+            </div>
+            <div className="operator">-</div>
+            <div className="item">
+              <div className="label">Buckets</div>
+              <div className="value">
+                <Money value={this.props.summary.buckets.balance} />
+              </div>
+            </div>
+            <div className="operator">=</div>
+            <div className={surplus_class}>
+              <div className="label">{surplus_label}</div>
+              <div className="value">
+                <Money value={surplus} />
+              </div>
+            </div>
+            <div className="note">{note}</div>
+          </div>
+        </footer>
+      );
+    }
+    return (<div>
+      <div className="floating-footer-padder"></div>
+      {footer}
+    </div>);
+  }
+});
+
 registerApiRequestHook(function(request, response) {
   if (request.method !== 'get_summary') {
-    console.log('queuing update');
     debouncedUpdateFooter();
   }
 });
-function updateFooter() {
-  console.log('updating footer');
-}
-var debouncedUpdateFooter = _.debounce(updateFooter, 1000);
+FooterStore.rerender();
 </script>
-<div class="floating-footer-padder"></div>
-<footer class="floating">
-  <div class="status-bar">
-    <div class="item">
-      <div class="label">Accounts</div>
-      <div class="value">0</div>
-    </div>
-    <div class="item">
-      <div class="label">Buckets</div>
-      <div class="value">0</div>
-    </div>
-  </div>
-</footer>
 {% endblock %}

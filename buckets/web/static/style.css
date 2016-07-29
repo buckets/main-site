@@ -341,24 +341,36 @@ button + button {
     height: 4rem;
 }
 footer.floating {
-    padding: 0.2rem 0;
+    padding: 0rem 0;
     border-top: 1px solid lightgrey;
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100vw;
-    background-color: rgba(255, 255, 255, 1.0);
+    background-color: rgba(44, 62, 80,1.0);
+    color: white;
+}
+
+
+@keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+.fadein {
+    animation: fadein .3s;
 }
 
 .status-bar {
+    padding: 0.5rem 0 0.6rem;
     display: flex;
     justify-content: center;
-    align-items: space-between;
+    align-items: center;;
 }
 .status-bar .item {
     display: flex;
     flex-direction: column;
     padding: 0 1rem;
+    text-align: center;
 }
 .status-bar .item .label {
     font-size: .8rem;
@@ -366,6 +378,22 @@ footer.floating {
 }
 .status-bar .item .value {
 
+}
+.status-bar .operator {
+    font-size: 2rem;
+}
+.status-bar .over,
+.status-bar .item.over .label {
+    color: rgba(231, 76, 60,1.0);
+}
+.status-bar .golden,
+.status-bar .item.golden .label {
+    color: rgba(26, 188, 156,1.0);
+}
+.status-bar .note {
+    font-size: .8rem;
+    font-style: italic;
+    max-width: 15rem;
 }
 
 
