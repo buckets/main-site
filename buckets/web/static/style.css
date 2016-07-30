@@ -390,6 +390,10 @@ footer.floating {
 .status-bar .item.golden .label {
     color: rgba(26, 188, 156,1.0);
 }
+.status-bar .extra,
+.status-bar .item.extra .label {
+    color: rgba(241, 196, 15,1.0);
+}
 .status-bar .note {
     font-size: .8rem;
     font-style: italic;

@@ -14,7 +14,7 @@ window.MoneyInput = React.createClass({
   },
   componentWillReceiveProps: function(props) {
     var current = this.display2Cents(this.state.display);
-    if (current && current !== props.value) {
+    if ((current && current !== props.value) || (!current && props.value)) {
       // effectively different
       this.setState({display: cents2decimal(props.value) || ''})
     }

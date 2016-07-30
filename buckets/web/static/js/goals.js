@@ -66,20 +66,25 @@ function addMonths(start, months) {
 
 
 function _computeDeposit(goal, balance, end_date, today) {
+  console.log('deposit-->', goal, balance, end_date, today);
   today = today || new Date();
 
   // compute deposit
   var amount_left = goal - balance;
   if (amount_left <= 0) {
+    console.log('  ->', 0);
     return 0;
   }
 
   var months_left = monthsBetween(today, end_date);
   if (months_left <= 0) {
+    console.log('  ->', amount_left);
     return amount_left;
   }
 
-  return Math.ceil(amount_left / months_left);
+  var ret = Math.ceil(amount_left / months_left);
+  console.log('  ->', ret);
+  return ret;
 }
 
 function _computeEndDate(goal, balance, deposit, today) {

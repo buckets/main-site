@@ -1,23 +1,29 @@
 Now:
   ✔ Make it not do 2 transactions when you press enter in buckets.html @done (16-07-28 16:50)
   ✔ Totals summary bar at bottom (or elsewhere) @done (16-07-28 22:53)
-  ☐ Why doesn't setting target amount and date put deposit amount.
-  ☐ Show as of Last month/this month/now
-  ☐ Make it rain
-  ☐ OFX import
-    ☐ https://github.com/euforic/banking.js/
+  ✔ Why doesn't setting target amount and date put deposit amount. @done (16-07-29 20:36)
+  ✔ You can't delete 0s in MoneyInputs @done (16-07-29 21:08)
+  ✔ Sometimes the deposit changes for goal accounts after you do "Make it Rain"  Target amount: 20,000 Date: Jan 2025, Deposit changes from 180 to 179.67 @done (16-07-29 21:15)
+  ✔ Make it rain @done (16-07-29 21:03)
   ☐ cron simplefin fetching
-  ☐ bucket.html charts
-  ☐ bucket.html month-by-month table
+  ☐ Add tests that run in a dirty database to make sure there's no horizontal priv access.
+  ☐ migration sql
+
+Less critical:
   ☐ Update account balance/names
   ☐ PIN
   ☐ Sign out
+  ☐ bucket.html charts
+  ☐ bucket.html month-by-month table
   ☐ Auto categorize
   ☐ Admin tools
-  ☐ Add tests that run in a dirty database to make sure there's no horizontal priv access.
+  ☐ Kick buckets
   ☐ Nitty gritty usability (pressing enter/tab, autofocus, etc...)
 
 Later:
+  ☐ OFX import
+    ☐ https://github.com/euforic/banking.js/
+  ☐ Show as of Last month/this month/now
   ☐ Explain types of buckets
   ☐ Movie showing
     ☐ How I did it in College

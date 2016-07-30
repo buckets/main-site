@@ -7,9 +7,9 @@
 <script type="text/babel" id="el1">
 var target_el = afterEl(document.getElementById('el1'));
 
-var Store = {};
 Store.groups = {{ groups|json|safe }};
 Store.buckets = {{ buckets|json|safe }};
+
 Store.rerender = function() {
   ReactDOM.render(<BucketTable
     buckets={Store.buckets}
@@ -354,42 +354,76 @@ var BucketTable = React.createClass({
       Store.updateBucket(new_bucket);
     })
   },
-  render: function() {
+  makeItRain: function() {
+    // Is it bad to reach out like this?  Probably.
+    var surplus = Store.summary.accounts.balance - Store.summary.buckets.balance;
+
+    var pendings = {};
+
+    var groups_and_buckets = this.getGroupsAndBuckets();
+    _.each(groups_and_buckets, function(group) {
+      _.each(group.buckets, function(bucket) {
+        var computed = computeBucketDeposit(bucket);
+        var amount = computed.deposit > surplus ? surplus : computed.deposit;
+        surplus -= amount;
+        pendings[bucket.id] = amount;
+      })
+    });
+    this.setState({pendings: pendings});
+  },
+  getGroupsAndBuckets: function() {
     var group_buckets = {};
     var groups = [];
-    var deposit_total = 0;
-    var balance_total = 0;
-    var future_balance_total = 0;
-
     _.each(_.sortBy(this.props.buckets, ['ranking']), function(bucket) {
       var group_id = bucket.group_id || 'NOGROUP';
       if (!group_buckets[group_id]) {
         group_buckets[group_id] = [];
       }
       group_buckets[group_id].push(bucket);
-      _.merge(bucket, computeBucketDeposit(bucket));
-      balance_total += bucket.balance;
-      deposit_total += bucket.deposit;
     })
     _.each(_.sortBy(this.props.groups, ['ranking']), function(group) {
       var buckets = group_buckets[group.id] || [];
-      groups.push(<GroupRow
-        detailsLink
-        key={group.id}
-        group={group}
-        buckets={buckets}
-        pendings={this.state.pendings}
-        posting_date={this.state.posting_date}
-        onBucketChanged={this.bucketChanged}
-        onGroupChanged={this.groupChanged}
-        onPendingChanged={this.pendingChanged} />);
-    }.bind(this));
+      groups.push({
+        group: group,
+        buckets: group_buckets[group.id],
+      });
+    });
     if (group_buckets['NOGROUP']) {
-      var buckets = group_buckets['NOGROUP'];
       var group = {
         'id': 'NOGROUP',
         'name': 'Misc',
         'rank': 'z',
+      }
+      groups.push({
+        group: group,
+        buckets: group_buckets['NOGROUP'],
+      });
+    }
+    return groups;
+  },
+  render: function() {
+    var groups_and_buckets = this.getGroupsAndBuckets();
+    var groups = []
+    var deposit_total = 0;
+    var balance_total = 0;
+    var future_balance_total = 0;
+
+    _.each(groups_and_buckets, function(g_and_b) {
+      var buckets = _.map(g_and_b.buckets, function(bucket) {
+        bucket = _.merge({}, bucket, computeBucketDeposit(bucket));
+        balance_total += bucket.balance;
+        deposit_total += bucket.deposit;
+        return bucket;
+      }.bind(this));
+      var optional_props = {};
+      var group = g_and_b.group;
+      if (group.id === 'NOGROUP') {
+
+      } else {
+        optional_props = {
+          detailsLink: true,
+          onGroupChanged: this.groupChanged,
+        }
       }
       groups.push(<GroupRow
         key={group.id}
@@ -398,8 +432,10 @@ var BucketTable = React.createClass({
         pendings={this.state.pendings}
         posting_date={this.state.posting_date}
         onBucketChanged={this.bucketChanged}
-        onPendingChanged={this.pendingChanged} />);
-    }
+        onPendingChanged={this.pendingChanged}
+        {...optional_props} />);
+    }.bind(this));
+    
     var pending_total = _.sum(_.values(this.state.pendings));
     future_balance_total = balance_total + pending_total;
 
@@ -436,7 +472,7 @@ var BucketTable = React.createClass({
                 onChange={this.postingDateChanged} />
             </div>
           </div>
-          <button>Make it rain!</button>
+          <button onClick={this.makeItRain}>Make it rain!</button>
         </div>
         <table className="ledger" width="100%">
           <thead>

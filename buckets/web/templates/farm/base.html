@@ -28,6 +28,16 @@
 <script src="/static/js/goals.js"></script>
 <script src="/static/js/react-goals.jsx" type="text/babel"></script>
 <script>
+var Store = {
+  summary: {},
+  buckets: [],
+  accounts: [],
+  transactions: [],
+  groups: [],
+};
+
+
+
 var _api_request_hooks = [];
 function registerApiRequestHook(func) {
   _api_request_hooks.push(func);
@@ -74,21 +84,20 @@ function apiRequest(data, success) {
 <script id="footer-status" type="text/babel">
 var target_el = afterEl(document.getElementById('footer-status'));
 
-var FooterStore = {};
+var FooterControl = {};
 
-FooterStore.summary = {};
 var session_summary = sessionStorage.getItem('summary');
 if (session_summary) {
   try {
-    FooterStore.summary = JSON.parse(session_summary);
+    Store.summary = JSON.parse(session_summary);
   } catch(err) {
-    FooterStore.summary = {};
+    Store.summary = {};
   }
 }
 
-FooterStore.rerender = function() {
+FooterControl.rerender = function() {
   ReactDOM.render(<FooterStatus
-    summary={FooterStore.summary} />, target_el);
+    summary={Store.summary} />, target_el);
 }
 
 function updateFooter() {
@@ -96,9 +105,9 @@ function updateFooter() {
     method: 'get_summary',
     kwargs: {},
   }, function(response) {
-    FooterStore.summary = response;
-    FooterStore.rerender();
-    sessionStorage['summary'] = JSON.stringify(FooterStore.summary);
+    Store.summary = response;
+    FooterControl.rerender();
+    sessionStorage['summary'] = JSON.stringify(Store.summary);
   })
 }
 var debouncedUpdateFooter = _.debounce(updateFooter, 500);
@@ -122,6 +131,7 @@ var FooterStatus = React.createClass({
         surplus_class += ' golden';
       } else {
         note = "Put this surplus into your buckets.<br/>Make it rain!";
+        surplus_class += ' extra';
       }
       if (note) {
         note = {__html: note};
@@ -166,6 +176,6 @@ registerApiRequestHook(function(request, response) {
     debouncedUpdateFooter();
   }
 });
-FooterStore.rerender();
+FooterControl.rerender();
 </script>
 {% endblock %}
