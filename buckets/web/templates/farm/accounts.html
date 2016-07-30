@@ -1,0 +1,50 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+<h1>Accounts</h1>
+
+{% if accounts %}
+<table class="ledger">
+  <tr>
+    <th>Account</th>
+    <th>Balance</th>
+  </tr>
+  {% for account in accounts %}
+  <tr>
+    <td>{{ account.name }}</td>
+    <td class="right {{ 'negative' if account.balance < 0 }}">{{ account.balance|money }}</td>
+  </tr>
+  {% endfor %}
+  {% if accounts %}
+  {% set total = accounts|sum(attribute='balance') %}
+  <tr class="subtotal">
+    <td>Total</td>
+    <td class="right {{ 'negative' if total < 0 }}">{{ total|money }}</td>
+  </tr>
+  {% endif %}
+</table>
+{% endif %}
+
+<h2>Add account</h2>
+<form method="post">
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name"></div>
+  </div>
+  <div class="pair">
+    <div class="label">Balance</div>
+    <div class="control"><input type="text" name="balance"></div>
+  </div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control">
+      <div class="helptext">Instead of managing this by hand, you may also <a href="{{ url_for('.connections') }}">connect automatically to your bank</a>.</div>
+      <button type="submit">Add Account</button>
+    </div>
+  </div>
+</div>
+</form>
+
+{% endblock %}

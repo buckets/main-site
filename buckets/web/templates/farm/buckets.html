@@ -1,0 +1,541 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+<h1>Buckets</h1>
+
+<script type="text/babel" id="el1">
+var target_el = afterEl(document.getElementById('el1'));
+
+Store.groups = {{ groups|json|safe }};
+Store.buckets = {{ buckets|json|safe }};
+
+Store.rerender = function() {
+  ReactDOM.render(<BucketTable
+    buckets={Store.buckets}
+    groups={Store.groups} />, target_el);
+}
+Store.updateBucket = function(bucket, norender) {
+  _.each(Store.buckets, function(old_bucket) {
+    if (old_bucket.id === bucket.id) {
+      _.merge(old_bucket, bucket);
+    }
+  });
+  if (norender) {
+
+  } else {
+    Store.rerender();
+  }
+}
+Store.updateGroup = function(group) {
+  _.each(Store.groups, function(old_group) {
+    if (old_group.id === group.id) {
+      _.merge(old_group, group);
+    }
+  });
+  Store.rerender();
+}
+
+
+var GroupRow = React.createClass({
+  getInitialState: function() {
+    return {
+      underDrag: false,
+      isDragging: false,
+    }
+  },
+
+  // Dragging
+  dragStart: function(ev) {
+    ev.dataTransfer.setData('group', this.props.group.id);
+    this.setState({isDragging: true});
+  },
+  dragEnd: function(ev) {
+    this.setState({isDragging: false});
+  },
+
+  // Dropping
+  drop: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      this.setState({underDrag: false});
+      ev.preventDefault();
+      _.each(ev.dataTransfer.items, function(item) {
+        var data = ev.dataTransfer.getData(item.type);
+        var method = 'acceptDrop_' + item.type;
+        this[method](data);
+      }.bind(this))
+    }
+  },
+  dragOver: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: true});
+    }
+  },
+  dragLeave: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: false});
+    }
+  },
+  canAcceptDrop: function(ev) {
+    if (this.props.group.id === 'NOGROUP') {
+      return false;
+    }
+    return _.includes(ev.dataTransfer.types, 'bucket') ||
+      _.includes(ev.dataTransfer.types, 'group');
+  },
+  acceptDrop_group: function(group_id) {
+    apiRequest({
+      method: 'move_group',
+      kwargs: {
+        group_id: group_id,
+        after_group: this.props.group.id,
+      }
+    }, function(response) {
+      this.props.onGroupChanged(group_id);
+    }.bind(this));
+  },
+  acceptDrop_bucket: function(bucket_id) {
+    apiRequest({
+      method: 'move_bucket',
+      kwargs: {
+        bucket_id: bucket_id,
+        group_id: this.props.group.id,
+      }
+    }, function(response) {
+      this.props.onBucketChanged(bucket_id);
+    }.bind(this));
+  },
+
+  render: function() {
+    var bucket_rows = this.props.buckets.map(function(bucket) {
+      var pending = this.props.pendings[bucket.id];
+      return (
+        <BucketRow
+          key={bucket.id}
+          bucket={bucket}
+          pending={pending}
+          posting_date={this.props.posting_date}
+          onPendingChanged={this.props.onPendingChanged} 
+          onBucketChanged={this.props.onBucketChanged}></BucketRow>
+      );
+    }.bind(this));
+    var class_name = 'group';
+    if (this.state.isDragging) {
+      class_name += ' dragging';
+    }
+    if (this.state.underDrag) {
+      class_name += ' underdrag';
+    }
+    var draggable = true;
+    if (this.props.group.id == 'NOGROUP') {
+      draggable = false;
+    }
+    var name = this.props.group.name;
+    if (this.props.detailsLink) {
+      name = (<a href={'groups/'+this.props.group.id}>{this.props.group.name}</a>);
+    }
+    return (
+      <tbody>
+        <tr className="group" className={class_name} draggable={draggable} onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
+          <td colSpan="6">
+            {name}
+          </td>
+        </tr>
+        {bucket_rows}
+      </tbody>
+    );
+  }
+})
+
+var BucketRow = React.createClass({
+  getInitialState: function() {
+    return {
+      underDrag: false,
+      isDragging: false,
+    }
+  },
+  refreshBucket: function() {
+    this.props.onBucketChanged(this.props.bucket);
+  },
+  pendingKeyUp: function(e) {
+    if (e.keyCode === 13) {
+      this.doTransaction();
+    }
+  },
+  pendingChanged: function(value) {
+    this.setPending(value);
+  },
+  setPending: function(value) {
+    this.props.onPendingChanged(this.props.bucket, value);
+  },
+  doTransaction: function() {
+    var amount = this.props.pending;
+    this.setPending('');
+    apiRequest({
+      method: 'bucket_transact',
+      kwargs: {
+        bucket_id: this.props.bucket.id,
+        amount: amount,
+        posted: this.props.posting_date,
+      }
+    }, function(response) {
+      this.refreshBucket();
+    }.bind(this));
+  },
+
+  // Dragging
+  dragStart: function(ev) {
+    ev.dataTransfer.setData('bucket', this.props.bucket.id);
+    this.setState({isDragging: true});
+  },
+  dragEnd: function(ev) {
+    this.setState({isDragging: false});
+  },
+
+  // Dropping
+  drop: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      this.setState({underDrag: false});
+      ev.preventDefault();
+      _.each(ev.dataTransfer.items, function(item) {
+        var data = ev.dataTransfer.getData(item.type);
+        var method = 'acceptDrop_' + item.type;
+        this[method](data);
+      }.bind(this))
+    }
+  },
+  dragOver: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: true});
+    }
+  },
+  dragLeave: function(ev) {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: false});
+    }
+  },
+  canAcceptDrop: function(ev) {
+    return _.includes(ev.dataTransfer.types, 'bucket');
+  },
+  acceptDrop_bucket: function(bucket_id) {
+    apiRequest({
+      method: 'move_bucket',
+      kwargs: {
+        bucket_id: bucket_id,
+        after_bucket: this.props.bucket.id,
+      }
+    }, function(response) {
+      this.props.onBucketChanged(bucket_id);
+    }.bind(this));
+  },
+
+
+  render: function() {
+    var goal_bar;
+    var class_name = 'bucket';
+    if (this.state.isDragging) {
+      class_name += ' dragging';
+    }
+    if (this.state.underDrag) {
+      class_name += ' underdrag';
+    }
+    if (this.props.bucket.kind === 'goal') {
+      goal_bar = (<GoalBar max={this.props.bucket.goal} value={this.props.bucket.balance} />);
+    }
+    var style = {
+      color: this.props.bucket.color
+    }
+    var new_balance;
+    if (this.props.pending) {
+      var future_balance = this.props.pending + this.props.bucket.balance;
+      var classes = 'future-value';
+      if (future_balance < 0) {
+        classes += ' negative';
+      }
+      new_balance = (<div className={classes}>
+        <Money value={future_balance} />
+      </div>);
+    }
+
+    return (
+      <tr className={class_name} draggable="true" onDragStart={this.dragStart} onDragEnd={this.dragEnd} onDragOver={this.dragOver} onDrop={this.drop} onDragLeave={this.dragLeave}>
+        <td><span className="handle" style={style}>&#x25CF;</span> <a href={'buckets/'+this.props.bucket.id}>{this.props.bucket.name}</a></td>
+        <td className="right"><Money value={this.props.bucket.balance} /></td>
+        <td>{new_balance}</td>
+        <td className="right">
+          <MoneyInput
+            value={this.props.pending}
+            onKeyUp={this.pendingKeyUp}
+            onChange={this.pendingChanged} />
+        </td>
+        <td className="right"><Money value={this.props.bucket.deposit} /></td>
+        <td>{goal_bar}</td>
+      </tr>
+    )
+  }
+});
+
+
+
+var BucketTable = React.createClass({
+  getInitialState: function() {
+    return {
+      pendings: {},
+      posting_date: formatDate(this.props.posting_date || new Date()),
+    }
+  },
+  performAllPending: function() {
+    var post_actions = [];
+    var actions = [];
+    _.each(this.state.pendings, function(amount, bucket_id) {
+      actions.push({
+        method: 'bucket_transact',
+        kwargs: {
+          bucket_id: bucket_id,
+          amount: amount,
+          posted: this.state.posting_date,
+        }
+      });
+      post_actions.push({
+        method: 'get_bucket',
+        kwargs: {
+          id: bucket_id,
+        }
+      });
+    }.bind(this));
+    this.setState({pendings: {}});
+    apiRequest(actions, function(response) {
+      apiRequest(post_actions, function(buckets) {
+        _.each(buckets, function(bucket) {
+          Store.updateBucket(bucket, false);
+        });
+        Store.rerender();
+      });
+    });
+  },
+  pendingChanged: function(bucket, pending) {
+    if (pending === '0' || pending === '') {
+      delete this.state.pendings[bucket.id];
+    } else {
+      this.state.pendings[bucket.id] = parseInt(pending);
+    }
+    this.setState(this.state);
+  },
+  postingDateChanged: function(ev) {
+    this.setState({posting_date: ev.target.value});
+  },
+  groupChanged: function(group_id) {
+    if (_.isObject(group_id)) {
+      group_id = group_id.id;
+    }
+    apiRequest({
+      method: 'get_group',
+      kwargs: {
+        id: group_id,
+      }
+    }, function(new_group) {
+      Store.updateGroup(new_group);
+    })
+  },
+  bucketChanged: function(bucket_id) {
+    if (_.isObject(bucket_id)) {
+      bucket_id = bucket_id.id;
+    }
+    apiRequest({
+      method: 'get_bucket',
+      kwargs: {
+        id: bucket_id,
+      }
+    }, function(new_bucket) {
+      Store.updateBucket(new_bucket);
+    })
+  },
+  makeItRain: function() {
+    // Is it bad to reach out like this?  Probably.
+    var surplus = Store.summary.accounts.balance - Store.summary.buckets.balance;
+
+    var pendings = {};
+
+    var groups_and_buckets = this.getGroupsAndBuckets();
+    _.each(groups_and_buckets, function(group) {
+      _.each(group.buckets, function(bucket) {
+        var computed = computeBucketDeposit(bucket);
+        var amount = computed.deposit > surplus ? surplus : computed.deposit;
+        surplus -= amount;
+        pendings[bucket.id] = amount;
+      })
+    });
+    this.setState({pendings: pendings});
+  },
+  getGroupsAndBuckets: function() {
+    var group_buckets = {};
+    var groups = [];
+    _.each(_.sortBy(this.props.buckets, ['ranking']), function(bucket) {
+      var group_id = bucket.group_id || 'NOGROUP';
+      if (!group_buckets[group_id]) {
+        group_buckets[group_id] = [];
+      }
+      group_buckets[group_id].push(bucket);
+    })
+    _.each(_.sortBy(this.props.groups, ['ranking']), function(group) {
+      var buckets = group_buckets[group.id] || [];
+      groups.push({
+        group: group,
+        buckets: group_buckets[group.id],
+      });
+    });
+    if (group_buckets['NOGROUP']) {
+      var group = {
+        'id': 'NOGROUP',
+        'name': 'Misc',
+        'rank': 'z',
+      }
+      groups.push({
+        group: group,
+        buckets: group_buckets['NOGROUP'],
+      });
+    }
+    return groups;
+  },
+  render: function() {
+    var groups_and_buckets = this.getGroupsAndBuckets();
+    var groups = []
+    var deposit_total = 0;
+    var balance_total = 0;
+    var future_balance_total = 0;
+
+    _.each(groups_and_buckets, function(g_and_b) {
+      var buckets = _.map(g_and_b.buckets, function(bucket) {
+        bucket = _.merge({}, bucket, computeBucketDeposit(bucket));
+        balance_total += bucket.balance;
+        deposit_total += bucket.deposit;
+        return bucket;
+      }.bind(this));
+      var optional_props = {};
+      var group = g_and_b.group;
+      if (group.id === 'NOGROUP') {
+
+      } else {
+        optional_props = {
+          detailsLink: true,
+          onGroupChanged: this.groupChanged,
+        }
+      }
+      groups.push(<GroupRow
+        key={group.id}
+        group={group}
+        buckets={buckets}
+        pendings={this.state.pendings}
+        posting_date={this.state.posting_date}
+        onBucketChanged={this.bucketChanged}
+        onPendingChanged={this.pendingChanged}
+        {...optional_props} />);
+    }.bind(this));
+    
+    var pending_total = _.sum(_.values(this.state.pendings));
+    future_balance_total = balance_total + pending_total;
+
+    var future_balance;
+    var commit_button_disabled = true;
+    if (_.size(_.filter(this.state.pendings))) {
+      commit_button_disabled = false;
+      if (future_balance_total !== balance_total) {
+        future_balance = (<div className="future-value">
+          <Money value={future_balance_total} />
+        </div>);
+      } else {
+        future_balance = (<div className="future-value">same</div>);
+      }
+    }
+
+    var posting_date_note = "Today";
+    var posting_date_note_class = "note";
+    if (this.state.posting_date !== formatDate(new Date())) {
+      var posting_date_note = "Not today";
+      posting_date_note_class += " warning";
+    }
+    
+    return (
+      <div>
+        <div className="toolbar">
+          <div className="pair">
+            <div className="label">Posting Date
+              <div className={posting_date_note_class}>{posting_date_note}</div></div>
+            <div className="control">
+              <input
+                type="date"
+                value={this.state.posting_date}
+                onChange={this.postingDateChanged} />
+            </div>
+          </div>
+          <button onClick={this.makeItRain}>Make it rain!</button>
+        </div>
+        <table className="ledger" width="100%">
+          <thead>
+            <tr>
+              <th>Bucket</th>
+              <th className="right">Balance</th>
+              <th></th>
+              <th className="right">Deposit/<br/>Withdraw</th>
+              <th className="right">Monthly<br/>Deposit</th>
+              <th>Goal</th>
+            </tr>
+          </thead>
+          {groups}
+          <tbody>
+            <tr className="subtotal">
+              <td>TOTAL</td>
+              <td className="right"><Money value={balance_total} /></td>
+              <td>{future_balance}</td>
+              <td className="right">
+                <Money value={pending_total} />
+                <div>
+                  <button onClick={this.performAllPending} disabled={commit_button_disabled}>Make it so</button>
+                </div>
+              </td>
+              <td className="right">
+                <Money value={deposit_total} />
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+});
+Store.rerender();
+</script>
+
+<h2>Create bucket</h2>
+<form method="post">
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name"></div>
+  </div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control"><button type="submit">Create Bucket</button></div>
+  </div>
+</div>
+</form>
+
+<h2>Create group</h2>
+<form method="post" action="{{ url_for('.groups') }}">
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name"></div>
+  </div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control"><button type="submit">Create Group</button></div>
+  </div>
+</div>
+</form>
+{% endblock %}

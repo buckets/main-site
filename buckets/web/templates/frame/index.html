@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome to Buckets</h1>
+
+<div style="display: flex; justify-content: space-around; width: 100%;">
+
+  <div>
+    <h2>Sign in</h2>
+    <form method="post" action="{{ url_for('.signin') }}">
+      <div class="form">
+        <div class="pair">
+          <div class="label">Email address</div>
+          <div class="control"><input type="text" name="email" autofocus></div>
+        </div>
+        <div class="pair">
+          <div class="label"></div>
+          <div class="control"><button type="submit">Sign in</button></div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+
+  <div>
+    <h2>Register</h2>
+    <form method="post" action="{{ url_for('.register') }}">
+      <div class="form">
+        <div class="pair">
+          <div class="label">Name</div>
+          <div class="control">
+            <input type="text" name="name">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="label">Email address</div>
+          <div class="control">
+            <input type="text" name="email">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="label"></div>
+          <div class="control"><button type="submit">Register</button></div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

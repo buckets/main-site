@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block navlinks %}
+{% if g.show.summary %}<a {{ navlink('.summary') }}>Summary</a>{% endif %}
+{% if g.show.transactions %}<a {{ navlink('.transactions') }}>Transactions</a>{% endif %}
+{% if g.show.buckets %}<a {{ navlink('.buckets') }}>Buckets</a>{% endif %}
+<a {{ navlink('.accounts') }}>Accounts</a>
+{% if g.show.connections %}<a {{ navlink('.connections') }}>Connections</a>{% endif %}
+{% if g.show.reports %}<a {{ navlink('.reports') }}>Reports</a>{% endif %}
+{% endblock %}
+
+{% block extrahead %}
+<script src="/static/js/vend/lodash.min.js"></script>
+<script src="/static/js/vend/jquery-3.1.0.min.js"></script>
+{% if g.debug %}
+<script src="/static/js/vend/react-15.2.1.js"></script>
+<script src="/static/js/vend/react-dom-15.2.1.js"></script>
+{% else %}
+<script src="/static/js/vend/react-15.2.1.min.js"></script>
+<script src="/static/js/vend/react-dom-15.2.1.min.js"></script>
+{% endif %}
+<script src="/static/js/vend/browser.min.js"></script>
+<script src="/static/js/vend/math.min.js"></script>
+
+<script src="/static/js/farm.js"></script>
+<script src="/static/js/money.js"></script>
+<script src="/static/js/react-money.jsx" type="text/babel"></script>
+<script src="/static/js/goals.js"></script>
+<script src="/static/js/react-goals.jsx" type="text/babel"></script>
+<script>
+var Store = {
+  summary: {},
+  buckets: [],
+  accounts: [],
+  transactions: [],
+  groups: [],
+};
+
+
+
+var _api_request_hooks = [];
+function registerApiRequestHook(func) {
+  _api_request_hooks.push(func);
+}
+
+function apiRequest(data, success) {
+  var label = '';
+  var multi = false;
+  if (_.isArray(data)) {
+    label = _.uniq(_.map(data, 'method')).join(',')
+    multi = true;
+  } else {
+    label = data.method;
+  }
+  $.ajax({
+    type: 'POST',
+    url: '{{ url_for('farm.api') }}-' + label,
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    success: function(response) {
+      // call given success handler
+      success(response);
+
+      // call hooks
+      var calls = [[data, response]];
+      if (multi) {
+        calls = _.zip(data, response);
+      }
+      calls.map(function(args) {
+        _api_request_hooks.map(function(func) {
+          func(args[0], args[1]);  
+        })
+      })
+    }
+  });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block footer %}
+<script id="footer-status" type="text/babel">
+var target_el = afterEl(document.getElementById('footer-status'));
+
+var FooterControl = {};
+
+var session_summary = sessionStorage.getItem('summary');
+if (session_summary) {
+  try {
+    Store.summary = JSON.parse(session_summary);
+  } catch(err) {
+    Store.summary = {};
+  }
+}
+
+FooterControl.rerender = function() {
+  ReactDOM.render(<FooterStatus
+    summary={Store.summary} />, target_el);
+}
+
+function updateFooter() {
+  apiRequest({
+    method: 'get_summary',
+    kwargs: {},
+  }, function(response) {
+    Store.summary = response;
+    FooterControl.rerender();
+    sessionStorage['summary'] = JSON.stringify(Store.summary);
+  })
+}
+var debouncedUpdateFooter = _.debounce(updateFooter, 500);
+debouncedUpdateFooter();
+
+
+var FooterStatus = React.createClass({
+  render: function() {
+    var footer;
+    if (this.props.summary.accounts) {
+      var note;
+
+      var surplus_label = 'Surplus';
+      var surplus = this.props.summary.accounts.balance - this.props.summary.buckets.balance;
+      var surplus_class = 'item';
+      if (surplus < 0) {
+        surplus_label = 'Over budgeted';
+        surplus_class += ' over';
+        note = "Take this much out of your buckets to get your accounts and buckets to match.";
+      } else if (surplus === 0) {
+        surplus_class += ' golden';
+      } else {
+        note = "Put this surplus into your buckets.<br/>Make it rain!";
+        surplus_class += ' extra';
+      }
+      if (note) {
+        note = {__html: note};
+      }
+      footer = (
+        <footer className="floating">
+          <div className="status-bar">
+            <div className="item">
+              <div className="label">Accounts</div>
+              <div className="value">
+                <Money value={this.props.summary.accounts.balance} />
+              </div>
+            </div>
+            <div className="operator">-</div>
+            <div className="item">
+              <div className="label">Buckets</div>
+              <div className="value">
+                <Money value={this.props.summary.buckets.balance} />
+              </div>
+            </div>
+            <div className="operator">=</div>
+            <div className={surplus_class}>
+              <div className="label">{surplus_label}</div>
+              <div className="value">
+                <Money value={surplus} />
+              </div>
+            </div>
+            <div className="note" dangerouslySetInnerHTML={note}></div>
+          </div>
+        </footer>
+      );
+    }
+    return (<div>
+      <div className="floating-footer-padder"></div>
+      {footer}
+    </div>);
+  }
+});
+
+registerApiRequestHook(function(request, response) {
+  if (request.method !== 'get_summary') {
+    debouncedUpdateFooter();
+  }
+});
+FooterControl.rerender();
+</script>
+{% endblock %}

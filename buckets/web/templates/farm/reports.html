@@ -1,0 +1,64 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+<h2>Accounts</h2>
+
+<table class="ledger">
+  <tr>
+    <td></td>
+    {% for account in account_summary %}
+    <th colspan="3" class="center">{{ account.name }}</th>
+    {% endfor %}
+  </tr>
+  <tr>
+    <th>Month</th>
+    {% for account in account_summary %}
+    <td class="barleft right">Income</td>
+    <td class="right">Expenses</td>
+    <td class="right">Balance</td>
+    {% endfor %}
+  </tr>
+  {% for month in account_summary[0].months %}
+  <tr>
+    <td>{{ month.month|month }}</td>
+    {% set i = loop.index0 %}
+    {% for account in account_summary %}
+      {% set item = account.months[i] %}
+      <td class="right barleft">{{ item.income|money(truncate=True) }}</td>
+      <td class="negative right">{{ item.expenses|money(truncate=True) }}</td>
+      <td class="right">{{ item.endbalance|money(truncate=True) }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+
+<h2>Bucket Expenses</h2>
+
+<table class="ledger">
+  {% for account in bucket_summary %}
+    {% if loop.first %}
+    <tr>
+      <th>Bucket</th>
+      {% for month in account.months|reverse %}
+      <th class="center">{{ month.month|month }}</th>
+      {% endfor %}
+      <th>Total</th>
+    </tr>
+    {% endif %}
+
+    <tr>
+      <td>{{ account.name }}</td>
+      {% for month in account.months|reverse %}
+      <td class="negative right">
+        {{ month.expenses|money(truncate=True) if month.expenses }}
+      </td>
+      {% endfor %}
+      <td class="negative right">
+        {{ account.months|map(attribute='expenses')|sum|money(truncate=True) }}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,7 @@
+.tox
+.coverage
+*.pyc
+.cache
+.coverage.*
+htmlcov
+node_modules/
