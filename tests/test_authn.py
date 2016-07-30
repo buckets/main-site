@@ -7,8 +7,6 @@ import pytest
 from buckets.authn import UserManagement
 
 
-
-
 @pytest.fixture
 def api(engine):
     return UserManagement(engine)
@@ -16,15 +14,19 @@ def api(engine):
 @pytest.fixture
 def mkuser(api):
     def func():
-        return api.create_user('{0}@test.com'.format(uuid.uuid4()),
-            'test')
+        return api.create_user(random('', '@test.com'), 'test')
     return func
 
 
+def random(prefix='', suffix=''):
+    return '{0}{1}{2}'.format(prefix, uuid.uuid4(), suffix)
+
+
 def test_create_user(api):
-    user = api.create_user('jim@jim.com', 'jim')
+    email = random('jim','@jim.com')
+    user = api.create_user(email, 'jim')
     assert user['id'] is not None
-    assert user['email'] == 'jim@jim.com'
+    assert user['email'] == email
     assert user['email_verified'] is False
     assert user['name'] == 'jim'
     assert user['created'] is not None
@@ -34,17 +36,19 @@ def test_create_user(api):
     assert user['last_login'] is None
 
 def test_unique_email(api):
-    api.create_user('hal@hal.com', 'hal')
+    email = random('hal', '@hal.com')
+    api.create_user(email, 'hal')
     with pytest.raises(Exception):
-        api.create_user('hal@hal.com', 'diffname')
+        api.create_user(email, 'diffname')
 
 def test_unique_lowercase_email(api):
-    api.create_user('randall@hal.com', 'hal')
+    email = random('randall', '@hal.com')
+    api.create_user(email, 'hal')
     with pytest.raises(Exception):
-        api.create_user('RAnDALL@hal.com', 'diffname')
+        api.create_user(email.upper(), 'diffname')
 
 def test_get_user(api):
-    created = api.create_user('bob@bob.com', 'bob')
+    created = api.create_user(random('bob', '@bob.com'), 'bob')
     fetched = api.get_user(created['id'])
     assert fetched == created
 
