@@ -13,10 +13,13 @@ from mock import create_autospec, MagicMock
 from buckets.authn import UserManagement
 from buckets.budget import BudgetManagement, hashStrings
 from buckets.error import Error
+from buckets.mailing import DebugMailer
 
 @pytest.fixture
 def user_api(engine):
-    return UserManagement(engine)
+    return UserManagement(engine,
+        mailer=DebugMailer,
+        public_url='http://www.example.com')
 
 @pytest.fixture
 def fake_requests():

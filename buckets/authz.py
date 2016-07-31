@@ -74,6 +74,11 @@ class _BoundAuthPolicy(object):
             raise TypeError('Currently, positional arguments are not'
                             ' supported by AuthPolicy instances.')
         
+        # no private kwargs
+        for key in kwargs:
+            if key.startswith('_'):
+                raise NotAuthorized(self._instance, auth_context, func_name, kwargs)
+
         # common authorization
         for func in self._policy._common_auth:
             if not func(self._instance, auth_context, func_name, kwargs):

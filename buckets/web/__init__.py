@@ -1,22 +1,34 @@
 from flask import Flask, session, redirect, g
 from buckets.model import authProtectedAPI
 from buckets.web.util import all_filters
+from buckets.mailing import PostmarkMailer, NoMailer
 
 
 f = Flask(__name__)
 f.jinja_env.filters.update(all_filters)
 
 
-def configureApp(engine, flask_secret_key, debug=False):
+def configureApp(engine, flask_secret_key, postmark_key=None, debug=False):
     f.engine = engine
     f.config.update(
         DEBUG=debug,
-        #TEMPLATES_AUTO_RELOAD=debug,
         SECRET_KEY=flask_secret_key)
     if debug:
+        f.logger.info('Running in DEBUG MODE')
         f.jinja_env.cache_size = 0
         f.jinja_env.auto_reload = True
-    f._unbound_api = authProtectedAPI(engine)
+    
+    # mailing
+    mailer = None
+    if not postmark_key and not debug:
+        raise Exception('Production mode with no email token.')
+    elif postmark_key:
+        mailer = PostmarkMailer(postmark_key)
+    else:
+        f.logger.warning('No email token -- using debug mailer')
+        mailer = NoMailer()
+
+    f._unbound_api = authProtectedAPI(engine, mailer)
     return f
 
 

@@ -17,6 +17,14 @@ User = Table('user_', metadata,
     Column('intro_completed', Boolean),
     Column('_pin', String),
 )
+AuthToken = Table('user_auth_token', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('created', DateTime),
+    Column('expires', DateTime),
+    Column('user_id', Integer),
+    Column('token', String),
+)
+
 Farm = Table('farm', metadata,
     Column('id', Integer, primary_key=True),
     Column('created', DateTime),
@@ -116,6 +124,32 @@ patches['init'] = [
     )''',
     '''CREATE UNIQUE INDEX user_lower_email_idx
         ON user_(lower(email))''',
+
+    #-------------------------------------
+    # user_auth_token
+    #-------------------------------------
+    '''CREATE TABLE user_auth_token (
+        id serial primary key,
+        created timestamp default current_timestamp,
+        expires timestamp not null,
+        user_id integer REFERENCES user_ ON DELETE CASCADE,
+        token text unique
+    )''',
+    '''CREATE FUNCTION delete_expired_auth_tokens() RETURNS trigger AS $delete_expired_auth_tokens$
+        BEGIN
+            DELETE FROM user_auth_token
+            WHERE expires <= current_timestamp;
+            RETURN NULL;
+        END;
+    $delete_expired_auth_tokens$ LANGUAGE plpgsql''',
+    '''CREATE TRIGGER delete_expired_auth_tokens
+    AFTER
+        INSERT
+        OR UPDATE
+    ON
+        user_auth_token
+    EXECUTE PROCEDURE delete_expired_auth_tokens()
+    ''',
 
     #-------------------------------------
     # farm

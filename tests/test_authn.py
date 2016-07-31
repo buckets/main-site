@@ -4,12 +4,26 @@ This module tests functions that register and authenticate users.
 
 import uuid
 import pytest
+from buckets.error import NotFound
 from buckets.authn import UserManagement
+from buckets.mailing import DebugMailer
+
+from datetime import timedelta
+from urlparse import urlparse, parse_qs
+
+from sqlalchemy import func
 
 
 @pytest.fixture
-def api(engine):
-    return UserManagement(engine)
+def mailer():
+    return DebugMailer()
+
+@pytest.fixture
+def api(engine, mailer):
+    return UserManagement(
+        engine=engine,
+        mailer=mailer,
+        public_url='https://buckets.example.com')
 
 @pytest.fixture
 def mkuser(api):
@@ -75,5 +89,49 @@ def test_create_farm_default_name(api, mkuser):
     farm = api.create_farm(user['id'])
     assert farm['name'] == 'Family'
 
+def test_signin(api, mailer, mkuser):
+    user = mkuser()
+    api.send_signin_email(user['email'])
+    assert len(mailer.calls) == 1, "Should have sent an email"
+    method, args, kwargs = mailer.calls[0]
+    assert method == 'sendTemplate'
+    assert kwargs['template_name'] == 'login'
+    assert kwargs['to_email'] == user['email']
+    
+    data = kwargs['data']
+    assert 'signin_url' in data
 
+    assert data['signin_url'].startswith('https://buckets.example.com')
+
+    parsed = urlparse(data['signin_url'])
+    qs = parse_qs(parsed.query)
+    token = qs['token'][0]
+
+    found = api.user_id_from_signin_token(token)
+    assert found == user['id']
+
+def test_signin_no_such_email(api, mailer):
+    api.send_signin_email('nosuchemail@email.com')
+    assert len(mailer.calls) == 0, "No email sent"
+
+def test_user_id_from_signin_token_bad_token(api, mkuser):
+    with pytest.raises(NotFound):
+        api.user_id_from_signin_token('garbage')
+
+def test_user_id_from_signin_token(api, mkuser):
+    user = mkuser()
+    token = api.generate_signin_token(user['id'])
+    user_id = api.user_id_from_signin_token(token)
+    assert user_id == user['id']
+
+def test_signin_tokens_expire(api, mkuser):
+    user = mkuser()
+    token = api.generate_signin_token(user['id'], _lifespan=1)
+    with pytest.raises(NotFound):
+        api.user_id_from_signin_token(token,
+            _now=func.now()+timedelta(seconds=2))
+
+def test_signin_token_no_such_email(api):
+    with pytest.raises(NotFound):
+        api.generate_signin_token(-1)
 

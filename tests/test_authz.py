@@ -78,6 +78,18 @@ class TestAuthPolicyTest(object):
         assert True is auth.bindAuthOnly({}).exclaim(arg='something')
 
 
+    def test_private_vars_not_allowed(self):
+        class Foo(object):
+            auth = AuthPolicy()
+            @auth.allow(anything)
+            def exlaim(self, arg, _symbol='!'):
+                return arg + _symbol
+
+        foo = Foo()
+        auth = foo.auth
+        assert False is auth.is_authorized({}, 'exclaim',
+            arg='a', _symbol='something')
+
     def test_nothing(self):
         """
         You can forbid everything as a policy.

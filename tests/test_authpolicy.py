@@ -1,5 +1,6 @@
 from buckets.authn import UserManagement
 from buckets.budget import BudgetManagement
+from buckets.mailing import DebugMailer
 
 import uuid
 
@@ -91,7 +92,8 @@ class Expector(object):
 
 
 def test_UserManagement(engine):
-    api = UserManagement(engine)
+    api = UserManagement(engine, mailer=DebugMailer(),
+        public_url='http://www.example.com')
     bob = api.create_user(random('bob', '@bob.com'), 'bob')
     sam = api.create_user(random('sam', '@sam.com'), 'sam')
 
@@ -121,7 +123,8 @@ def test_UserManagement(engine):
         ).expect('bob')
 
 def test_BudgetManagement(engine):
-    user = UserManagement(engine)
+    user = UserManagement(engine, mailer=DebugMailer(),
+        public_url='http://www.example.com')
     bob = user.create_user(random('bob', '@bob.com'), 'bob')
     sam = user.create_user(random('sam', '@sam.com'), 'sam')
     bobs_farm = user.create_farm(creator_id=bob['id'])
@@ -331,7 +334,7 @@ def test_BudgetManagement(engine):
             bucket_id=bobs_bucket,
             amount=10,
             _account_transaction_id=bobs_trans
-            ).expect('bob')
+            ).expect()
         world.forcall(
             'bucket_transact',
             bucket_id=sams_bucket,
