@@ -8,7 +8,8 @@ f = Flask(__name__)
 f.jinja_env.filters.update(all_filters)
 
 
-def configureApp(engine, flask_secret_key, postmark_key=None, debug=False):
+def configureApp(engine, flask_secret_key, public_url,
+        postmark_key=None, debug=False):
     f.engine = engine
     f.config.update(
         DEBUG=debug,
@@ -28,7 +29,7 @@ def configureApp(engine, flask_secret_key, postmark_key=None, debug=False):
         f.logger.warning('No email token -- using debug mailer')
         mailer = NoMailer()
 
-    f._unbound_api = authProtectedAPI(engine, mailer)
+    f._unbound_api = authProtectedAPI(engine, mailer, public_url)
     return f
 
 
@@ -61,7 +62,7 @@ def index():
         return redirect('/hi')
 
 
-from buckets.web import app, frame, farm
-f.register_blueprint(frame.blue, url_prefix='/hi')
+from buckets.web import app, anon, farm
+f.register_blueprint(anon.blue, url_prefix='/hi')
 f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>')
 f.register_blueprint(app.blue, url_prefix='/app')

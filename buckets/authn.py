@@ -58,6 +58,7 @@ class UserManagement(object):
         row = r.fetchone()
         return dict(row)
 
+    @policy.allow(anything)
     def send_signin_email(self, email):
         """
         Send a sign-in email to the given email address
@@ -97,6 +98,7 @@ class UserManagement(object):
             raise NotFound()
         return token
 
+    @policy.allow(anything)
     def user_id_from_signin_token(self, token, _now=func.now()):
         """
         Get the user_id associated with the given signin token.

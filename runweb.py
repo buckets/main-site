@@ -42,6 +42,8 @@ upgrade_schema(engine)
 app = configureApp(
     debug=args.debug,
     engine=engine,
-    flask_secret_key=args.flask_secret_key)
+    flask_secret_key=args.flask_secret_key,
+    postmark_key=None,
+    public_url='http://{args.host}:{args.port}'.format(**locals()))
 
 app.run(args.host, args.port, debug=args.debug)

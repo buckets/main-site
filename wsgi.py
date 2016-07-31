@@ -19,6 +19,7 @@ from buckets.web import configureApp
 
 DATABASE_URL = os.environ['OPENSHIFT_POSTGRESQL_DB_URL']
 FLASK_SECRET_KEY = os.environ['FLASK_SECRET_KEY']
+POSTMARK_KEY = os.environ['POSTMARK_KEY']
 
 engine = create_engine(DATABASE_URL)
 while True:
@@ -33,4 +34,6 @@ upgrade_schema(engine)
 application = configureApp(
     engine=engine,
     flask_secret_key=FLASK_SECRET_KEY,
-    debug=False)
+    debug=False,
+    postmark_key=POSTMARK_KEY,
+    public_url='https://beta.bucketsisbetter.com')

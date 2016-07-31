@@ -5,10 +5,11 @@ Now:
   ✔ You can't delete 0s in MoneyInputs @done (16-07-29 21:08)
   ✔ Sometimes the deposit changes for goal accounts after you do "Make it Rain"  Target amount: 20,000 Date: Jan 2025, Deposit changes from 180 to 179.67 @done (16-07-29 21:15)
   ✔ Make it rain @done (16-07-29 21:03)
+  ☐ Sign in -- XXX you're on the web part of this
   ☐ cron simplefin fetching
   ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
   ☐ migration sql
-  ☐ Sign in
+  
 
 Less critical:
   ☐ Update account balance/names
