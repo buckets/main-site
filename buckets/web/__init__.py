@@ -65,4 +65,5 @@ def index():
 from buckets.web import app, anon, farm
 f.register_blueprint(anon.blue, url_prefix='/hi')
 f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>')
+f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>/<string:as_of>')
 f.register_blueprint(app.blue, url_prefix='/app')

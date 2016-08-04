@@ -54,7 +54,7 @@ function apiRequest(data, success) {
   }
   $.ajax({
     type: 'POST',
-    url: '{{ url_for('farm.api') }}-' + label,
+    url: '{{ url_for('.api') }}-' + label,
     data: JSON.stringify(data),
     contentType: 'application/json',
     success: function(response) {
