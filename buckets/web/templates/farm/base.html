@@ -27,9 +27,11 @@
 <script src="/static/js/react-money.jsx" type="text/babel"></script>
 <script src="/static/js/goals.js"></script>
 <script src="/static/js/react-goals.jsx" type="text/babel"></script>
+<script src="/static/js/react-inputs.jsx" type="text/babel"></script>
 <script>
 var Store = {
   summary: {},
+  month: "{{ g.month.isoformat() }}",
   buckets: [],
   accounts: [],
   transactions: [],
@@ -77,96 +79,45 @@ function apiRequest(data, success) {
 </script>
 {% endblock %}
 
-{% block content %}
-{% endblock %}
 
-{% block footer %}
-<script id="footer-status" type="text/babel">
-var target_el = afterEl(document.getElementById('footer-status'));
+{% block subheader %}
+<div id="month-bar"></div>
 
-var FooterControl = {};
+<script type="text/babel">
+var target_el = document.getElementById('month-bar');
 
-var session_summary = sessionStorage.getItem('summary');
-if (session_summary) {
-  try {
-    Store.summary = JSON.parse(session_summary);
-  } catch(err) {
-    Store.summary = {};
-  }
+var MonthBarData = {};
+
+MonthBarData.rerender = function() {
+  ReactDOM.render(<MonthBar
+    month={Store.month} data={MonthBarData} />, target_el);
 }
 
-FooterControl.rerender = function() {
-  ReactDOM.render(<FooterStatus
-    summary={Store.summary} />, target_el);
-}
-
-function updateFooter() {
-  apiRequest({
-    method: 'get_summary',
-    kwargs: {},
-  }, function(response) {
-    Store.summary = response;
-    FooterControl.rerender();
-    sessionStorage['summary'] = JSON.stringify(Store.summary);
-  })
-}
-var debouncedUpdateFooter = _.debounce(updateFooter, 500);
-debouncedUpdateFooter();
-
-
-var FooterStatus = React.createClass({
+var MonthBar = React.createClass({
+  monthChanged: function(newmonth) {
+    console.log('new month', newmonth);
+  },
   render: function() {
-    var footer;
-    if (this.props.summary.accounts) {
-      var note;
-
-      var surplus_label = 'Surplus';
-      var surplus = this.props.summary.accounts.balance - this.props.summary.buckets.balance;
-      var surplus_class = 'item';
-      if (surplus < 0) {
-        surplus_label = 'Over budgeted';
-        surplus_class += ' over';
-        note = "Take this much out of your buckets to get your accounts and buckets to match.";
-      } else if (surplus === 0) {
-        surplus_class += ' golden';
-      } else {
-        note = "Put this surplus into your buckets.<br/>Make it rain!";
-        surplus_class += ' extra';
-      }
-      if (note) {
-        note = {__html: note};
-      }
-      footer = (
-        <footer className="floating">
-          <div className="status-bar">
-            <div className="item">
-              <div className="label">Accounts</div>
-              <div className="value">
-                <Money value={this.props.summary.accounts.balance} />
-              </div>
-            </div>
-            <div className="operator">-</div>
-            <div className="item">
-              <div className="label">Buckets</div>
-              <div className="value">
-                <Money value={this.props.summary.buckets.balance} />
-              </div>
-            </div>
-            <div className="operator">=</div>
-            <div className={surplus_class}>
-              <div className="label">{surplus_label}</div>
-              <div className="value">
-                <Money value={surplus} />
-              </div>
-            </div>
-            <div className="note" dangerouslySetInnerHTML={note}></div>
-          </div>
-        </footer>
-      );
-    }
-    return (<div>
-      <div className="floating-footer-padder"></div>
-      {footer}
+    return (<div className="subheader">
+      <div>
+        <MonthInput name="themonth" value={this.props.month} onChange={this.monthChanged} />
+      </div>
+      <div className="item">
+        <div className="label">Balance</div>
+        <div className="value">8,456.22</div>
+      </div>
+      <div className="item">
+        <div className="label">Income</div>
+        <div className="value">2,256</div>
+      </div>
+      <div className="item">
+        <div className="label">Expenses</div>
+        <div className="value">1,456.34</div>
+      </div>
+      <div className="item">
+        <div className="label">Unallocated</div>
+        <div className="value">560</div>
+      </div>
     </div>);
   }
 });
@@ -176,6 +127,12 @@ registerApiRequestHook(function(request, response) {
     debouncedUpdateFooter();
   }
 });
-FooterControl.rerender();
+MonthBarData.rerender();
 </script>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block footer %}
 {% endblock %}

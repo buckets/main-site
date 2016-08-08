@@ -7,6 +7,7 @@ Now:
   ✔ Make it rain @done (16-07-29 21:03)
   ☐ Sign in -- XXX you're on the web part of this
   ☐ cron simplefin fetching
+  ☐ Don't update account balances blindly
   ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
   ☐ migration sql
   

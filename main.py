@@ -46,4 +46,5 @@ app = configureApp(
     postmark_key=None,
     public_url='http://{args.host}:{args.port}'.format(**locals()))
 
-app.run(args.host, args.port, debug=args.debug)
+#if __name__ == '__main__':
+app.run(args.host, args.port)

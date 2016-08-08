@@ -63,6 +63,9 @@ class UserManagement(object):
         """
         Send a sign-in email to the given email address
         if a corresponding user exists.
+
+        @raise NotFound: If the no such email is known to our
+            system.
         """
         r = self.engine.execute(select([User.c.id])
             .where(User.c.email == email))

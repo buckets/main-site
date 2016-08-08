@@ -1,11 +1,13 @@
+import structlog
+logger = structlog.get_logger()
+
 from flask import Blueprint, render_template, request, session, flash, g
 from flask import redirect, url_for
 from buckets.error import NotFound
 
 blue = Blueprint('anon', __name__)
 
-
-@blue.route('/')
+@blue.route('/home')
 def index():
     return render_template('anon/index.html')
 
@@ -14,6 +16,7 @@ def register():
     name = request.values['name']
     email = request.values['email']
     user = g.api.user.create_user(email=email, name=name)
+    logger.info('User registered', email=email)
     flash('You are registered!')
     
     # sign in
@@ -24,8 +27,12 @@ def register():
 @blue.route('/signin', methods=['POST'])
 def signin():
     email = request.form['email']
-    g.api.user.send_signin_email(email=email)
-    return render_template('anon/emailsent.html')
+    try:
+        g.api.user.send_signin_email(email=email)
+    except NotFound:
+        logger.warning('Attempted login for non-existent email', email=email)
+    return render_template('anon/emailsent.html',
+        email=email)
 
 @blue.route('/auth', methods=['GET'])
 def auth():
@@ -45,3 +52,4 @@ def signout():
     session.pop('user_id')
     flash('You have been signed out')
     return redirect('/')
+

@@ -1,6 +1,8 @@
 import json
 import requests
-import logging
+
+import structlog
+logger = structlog.get_logger()
 
 
 class PostmarkMailer(object):
@@ -73,7 +75,7 @@ class PostmarkMailer(object):
             templates = self.listTemplates()
             for template in templates:
                 if template['Active']:
-                    logging.info('Found Postmark template {0}'.format(template['Name']),
+                    logger.info('Found Postmark template {0}'.format(template['Name']),
                         system='PostmarkMailer')
                     self._template_name2id[template['Name']] = template['TemplateId']
         return self._template_name2id.get(name)
@@ -82,14 +84,14 @@ class PostmarkMailer(object):
 class NoMailer(object):
 
     def sendPlain(self, *args, **kwargs):
-        logging.debug('sendPlain: %r %r' % (args, kwargs), system='fake-email')
+        logger.info('sendPlain: %r %r' % (args, kwargs), system='fake-email')
         return 'No mail'
 
     def sendTemplate(self, template_name, to_email, data):
         """
         Pretend to send an email template.
         """
-        logging.debug('sendTemplate(%r, %r, %r)' % (template_name, to_email, data),
+        logger.info('sendTemplate(%r, %r, %r)' % (template_name, to_email, data),
             system='fake-email')
         return 'Pretended to send mail'
 

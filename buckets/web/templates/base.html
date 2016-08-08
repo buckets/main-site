@@ -26,9 +26,13 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
       <a href="/" class="logo">Home</a>
       {% endblock %}
       </div>
-      <div class="user">{{ g.user.name }}</div>
+      <div class="navlinks">
+        <div class="user">{{ g.user.name }}</div>
+        <a href="{{ url_for('anon.signout') }}">Sign out</a>
+      </div>
     </header>
     {% endblock %}
+    {%- block subheader -%}{%- endblock -%}
     <div class="flash-messages">
     {% with messages = get_flashed_messages(with_categories=True) %}
       {% if messages %}
@@ -40,7 +44,10 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
       {% endif %}
     {% endwith %}
     </div>
-    <div class="main-content">{% block content %}{% endblock %}</div>
+
+    <div class="main-content">
+      {%- block content -%}{%- endblock -%}
+    </div>
     {% block footer %}<footer></footer>{% endblock %}
   </div>
 </body>

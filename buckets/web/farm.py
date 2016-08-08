@@ -1,8 +1,10 @@
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash, make_response, abort
-from flask import current_app as app
 from buckets.budget import BudgetManagement
 from buckets.web.util import parseMoney, toJson
+
+import structlog
+logger = structlog.get_logger()
 
 from datetime import date, timedelta
 
@@ -12,26 +14,31 @@ blue = Blueprint('farm', __name__, url_prefix='/farm/<int:farm_id>')
 @blue.url_value_preprocessor
 def pull_values(endpoint, values):
     g.farm_id = values.pop('farm_id')
-    g.as_of = values.pop('as_of', None)
-    g.as_of_before = None
-    if g.as_of is not None:
-        try:
-            year, month = map(int, g.as_of.split('-', 1))
-            g.as_of_before = (date(year, month, 1) + timedelta(days=35)).replace(day=1)
-        except Exception as e:
-            app.logger.exception(e)
+    
+    year = values.pop('year', None)
+    month = values.pop('month', None)
+
+    try:
+        year = int(year)
+        month = int(month)
+        if month < 1 or month > 12:
+            raise ValueError('Invalid month')
+    except Exception:
+        today = date.today()
+        year = today.year
+        month = today.month
+
+    g.month = date(year, month, 1)
 
 @blue.url_defaults
 def add_defaults(endpoint, values):
     if 'farm_id' in g:
         values.setdefault('farm_id', g.farm_id)
-    if g.get('as_of', None):
-        values.setdefault('as_of', g.as_of)
+    values.setdefault('year', g.month.year)
+    values.setdefault('month', g.month.month)
 
 @blue.before_request
 def before_request():
-    if g.as_of and not g.as_of_before:
-        return redirect(url_for('.index', as_of=None))
     g.db_transaction = None
     g.db_conn = None
     
