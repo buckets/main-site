@@ -93,7 +93,7 @@ class Expector(object):
 
 def test_UserManagement(engine):
     api = UserManagement(engine, mailer=DebugMailer(),
-        public_url='http://www.example.com')
+        signin_urlmaker=None)
     bob = api.create_user(random('bob', '@bob.com'), 'bob')
     sam = api.create_user(random('sam', '@sam.com'), 'sam')
 
@@ -121,10 +121,15 @@ def test_UserManagement(engine):
         world.forcall(
             'list_farms', user_id=bob['id']
         ).expect('bob')
+        world.forcall('user_id_from_signin_token').expect(
+            'bob', 'sam', 'anon')
+        world.forcall('send_signin_email').expect(
+            'bob', 'sam', 'anon')
+
 
 def test_BudgetManagement(engine):
     user = UserManagement(engine, mailer=DebugMailer(),
-        public_url='http://www.example.com')
+        signin_urlmaker=None)
     bob = user.create_user(random('bob', '@bob.com'), 'bob')
     sam = user.create_user(random('sam', '@sam.com'), 'sam')
     bobs_farm = user.create_farm(creator_id=bob['id'])
@@ -355,3 +360,4 @@ def test_BudgetManagement(engine):
             'simplefin_fetch').expect('bob')
 
         world.forcall('get_summary').expect('bob')
+        world.forcall('get_month_summary').expect('bob')

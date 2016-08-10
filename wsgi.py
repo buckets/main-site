@@ -35,5 +35,4 @@ application = configureApp(
     engine=engine,
     flask_secret_key=FLASK_SECRET_KEY,
     debug=False,
-    postmark_key=POSTMARK_KEY,
-    public_url='https://beta.bucketsisbetter.com')
+    postmark_key=POSTMARK_KEY)

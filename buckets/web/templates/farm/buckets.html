@@ -13,7 +13,9 @@ Store.buckets = {{ buckets|json|safe }};
 Store.rerender = function() {
   ReactDOM.render(<BucketTable
     buckets={Store.buckets}
-    groups={Store.groups} />, target_el);
+    groups={Store.groups}
+    month={Store.month}
+    posting_date={Store.month_last_day} />, target_el);
 }
 Store.updateBucket = function(bucket, norender) {
   _.each(Store.buckets, function(old_bucket) {
@@ -452,10 +454,12 @@ var BucketTable = React.createClass({
       }
     }
 
-    var posting_date_note = "Today";
+    var posting_date_note = "OK";
     var posting_date_note_class = "note";
-    if (this.state.posting_date !== formatDate(new Date())) {
-      var posting_date_note = "Not today";
+    if (this.state.posting_date !== formatDate(this.props.posting_date)) {
+      console.log('state posting_date', this.state.posting_date);
+      console.log('props posting_date', this.props.posting_date);
+      var posting_date_note = "Is this right?";
       posting_date_note_class += " warning";
     }
     

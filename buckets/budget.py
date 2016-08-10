@@ -148,6 +148,103 @@ class BudgetManagement(object):
     # General
 
     @policy.use_common
+    def get_month_summary(self, month=None):
+        """
+        Get summary data for a particular month.
+        (or the current month if none is given)
+        """
+        month = month or date.today()
+        if not isinstance(month, date):
+            month = datetime.strptime(month, '%Y-%m-%d').date()
+        start = month.replace(day=1)
+        end = (month + timedelta(days=45)).replace(day=1)
+
+        # XXX optimize this later
+
+        # current balance
+        r = self.engine.execute(select([
+                func.sum(Account.c.balance),
+            ])
+            .where(Account.c.farm_id == self.farm_id))
+        accounts_balance = r.fetchone()[0] or 0
+        r = self.engine.execute(select([
+                func.sum(Bucket.c.balance),
+            ])
+            .where(Bucket.c.farm_id == self.farm_id))
+        buckets_balance = r.fetchone()[0] or 0
+
+
+        # end of month balance
+        r = self.engine.execute(select([
+                func.sum(AccountTrans.c.amount)
+            ])
+            .where(and_(
+                AccountTrans.c.account_id == Account.c.id,
+                Account.c.farm_id == self.farm_id,
+                AccountTrans.c.posted >= end,
+            )))
+        trans_since = r.fetchone()[0] or 0
+        accounts_balance -= trans_since
+
+        r = self.engine.execute(select([
+                func.sum(BucketTrans.c.amount)
+            ])
+            .where(and_(
+                BucketTrans.c.bucket_id == Bucket.c.id,
+                Bucket.c.farm_id == self.farm_id,
+                BucketTrans.c.posted >= end,
+            )))
+        trans_since = r.fetchone()[0] or 0
+        buckets_balance -= trans_since
+
+
+        # income, expenses, transfers
+        r = self.engine.execute(select([
+                text("coalesce(sum(case when amount > 0 then amount else 0 end), 0) as income"),
+                text("coalesce(sum(case when amount < 0 then amount else 0 end), 0) as expenses"),
+            ])
+            .where(and_(
+                AccountTrans.c.account_id == Account.c.id,
+                Account.c.farm_id == self.farm_id,
+                AccountTrans.c.posted >= start,
+                AccountTrans.c.posted < end,
+            )))
+        account_totals = r.fetchone()
+        r = self.engine.execute(select([
+                text("coalesce(sum(case when amount > 0 then amount else 0 end), 0) as income"),
+                text("coalesce(sum(case when amount < 0 then amount else 0 end), 0) as expenses"),
+            ])
+            .where(and_(
+                BucketTrans.c.bucket_id == Bucket.c.id,
+                Bucket.c.farm_id == self.farm_id,
+                BucketTrans.c.posted >= start,
+                BucketTrans.c.posted < end,
+            )))
+        bucket_totals = r.fetchone()
+
+        rain = (
+            (account_totals.income - bucket_totals.income)
+            +
+            (account_totals.expenses - bucket_totals.expenses)
+        )
+        return {
+            'month': start,
+            'accounts': {
+                'balance': accounts_balance,
+                'income': account_totals.income,
+                'expenses': account_totals.expenses,
+                'transfers': 0,
+            },
+            'buckets': {
+                'balance': buckets_balance,
+                'income': bucket_totals.income,
+                'expenses': bucket_totals.expenses,
+                'transfers': 0,
+                'rain': rain,
+            },
+        }
+
+    @policy.use_common
     def get_summary(self, as_of=None):
         """
         Get summary data as of a certain date

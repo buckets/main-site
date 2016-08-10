@@ -25,6 +25,7 @@ window.MonthInput = React.createClass({
   },
   getValue: function(year, month) {
     month = parseInt(month);
+    year = parseInt(year);
     if (!year || !month) {
       return '';
     }

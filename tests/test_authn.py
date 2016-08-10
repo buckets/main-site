@@ -9,7 +9,6 @@ from buckets.authn import UserManagement
 from buckets.mailing import DebugMailer
 
 from datetime import timedelta
-from urlparse import urlparse, parse_qs
 
 from sqlalchemy import func
 
@@ -23,7 +22,7 @@ def api(engine, mailer):
     return UserManagement(
         engine=engine,
         mailer=mailer,
-        public_url='https://buckets.example.com')
+        signin_urlmaker=lambda x:'HEY{0}'.format(x))
 
 @pytest.fixture
 def mkuser(api):
@@ -101,11 +100,8 @@ def test_signin(api, mailer, mkuser):
     data = kwargs['data']
     assert 'signin_url' in data
 
-    assert data['signin_url'].startswith('https://buckets.example.com')
-
-    parsed = urlparse(data['signin_url'])
-    qs = parse_qs(parsed.query)
-    token = qs['token'][0]
+    assert data['signin_url'].startswith('HEY')
+    token = data['signin_url'][len('HEY'):]
 
     found = api.user_id_from_signin_token(token)
     assert found == user['id']

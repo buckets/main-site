@@ -34,9 +34,8 @@ def signin():
     return render_template('anon/emailsent.html',
         email=email)
 
-@blue.route('/auth', methods=['GET'])
-def auth():
-    token = request.values['token']
+@blue.route('/auth/<string:token>', methods=['GET'])
+def auth(token):
     try:
         user_id = g.api.user.user_id_from_signin_token(token=token)
         session['user_id'] = user_id

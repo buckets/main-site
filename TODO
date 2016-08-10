@@ -6,10 +6,12 @@ Now:
   ✔ Sometimes the deposit changes for goal accounts after you do "Make it Rain"  Target amount: 20,000 Date: Jan 2025, Deposit changes from 180 to 179.67 @done (16-07-29 21:15)
   ✔ Make it rain @done (16-07-29 21:03)
   ☐ Sign in -- XXX you're on the web part of this
+  ☐ Show as of Last month/this month/now
   ☐ cron simplefin fetching
   ☐ Don't update account balances blindly
   ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
   ☐ migration sql
+
   
 
 Less critical:
@@ -26,7 +28,6 @@ Less critical:
 Later:
   ☐ OFX import
     ☐ https://github.com/euforic/banking.js/
-  ☐ Show as of Last month/this month/now
   ☐ Explain types of buckets
   ☐ Movie showing
     ☐ How I did it in College

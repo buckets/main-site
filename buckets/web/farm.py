@@ -17,6 +17,7 @@ def pull_values(endpoint, values):
     
     year = values.pop('year', None)
     month = values.pop('month', None)
+    today = date.today()
 
     try:
         year = int(year)
@@ -24,16 +25,26 @@ def pull_values(endpoint, values):
         if month < 1 or month > 12:
             raise ValueError('Invalid month')
     except Exception:
-        today = date.today()
         year = today.year
         month = today.month
 
     g.month = date(year, month, 1)
+    g.month_last_day = (
+            (g.month + timedelta(days=45)).replace(day=1)
+            - timedelta(days=1)
+        )
+    if g.month.year == today.year and g.month.month == today.month:
+        g.month_last_day = min([g.month_last_day, today])
+    elif g.month.year > today.year or (g.month.year == today.year and g.month.month > today.month):
+        g.month_last_day = g.month
 
 @blue.url_defaults
 def add_defaults(endpoint, values):
     if 'farm_id' in g:
         values.setdefault('farm_id', g.farm_id)
+    if 'month' not in g:
+        today = date.today()
+        g.month = date(today.year, today.month, 1)
     values.setdefault('year', g.month.year)
     values.setdefault('month', g.month.month)
 
@@ -215,6 +226,17 @@ def reports():
 #-----------------------------------------------------------------------
 # api
 #-----------------------------------------------------------------------
+
+@blue.route('/url_for', methods=['POST'])
+def urlfor():
+    data = request.json
+    endpoint = '.{0}'.format(data['endpoint'].lstrip('.'))
+    kwargs = data.get('kwargs', {})
+    for key in list(kwargs.keys()):
+        if key.startswith('_'):
+            kwargs.pop(key)
+    return url_for(endpoint, **kwargs)
+
 
 @blue.route('/api-', defaults={'label': ''}, methods=['POST'])
 @blue.route('/api', defaults={'label': ''}, methods=['POST'])

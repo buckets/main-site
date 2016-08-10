@@ -24,21 +24,20 @@
 
 <script src="/static/js/farm.js"></script>
 <script src="/static/js/money.js"></script>
-<script src="/static/js/react-money.jsx" type="text/babel"></script>
 <script src="/static/js/goals.js"></script>
+<script src="/static/js/react-money.jsx" type="text/babel"></script>
 <script src="/static/js/react-goals.jsx" type="text/babel"></script>
 <script src="/static/js/react-inputs.jsx" type="text/babel"></script>
 <script>
 var Store = {
-  summary: {},
-  month: "{{ g.month.isoformat() }}",
+  summary: null,
+  month: parseMonth("{{ g.month.isoformat() }}"),
+  month_last_day: parseDate("{{ g.month_last_day.isoformat() }}"),
   buckets: [],
   accounts: [],
   transactions: [],
   groups: [],
 };
-
-
 
 var _api_request_hooks = [];
 function registerApiRequestHook(func) {
@@ -76,6 +75,27 @@ function apiRequest(data, success) {
     }
   });
 }
+
+function url_for(endpoint, kwargs) {
+  var data = {
+    endpoint: endpoint,
+  };
+  if (kwargs) {
+    data.kwargs = kwargs;
+  }
+  var d = $.Deferred();
+  $.ajax({
+    type: 'POST',
+    url: '{{ url_for('.urlfor') }}',
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    success: function(response) {
+      d.resolve(response);
+    }
+  })
+  return d;
+}
+
 </script>
 {% endblock %}
 
@@ -86,45 +106,104 @@ function apiRequest(data, success) {
 <script type="text/babel">
 var target_el = document.getElementById('month-bar');
 
+var session_summary_key = 'summary-' + formatDate(Store.month);
+var session_summary = sessionStorage.getItem(session_summary_key);
+if (session_summary) {
+  try {
+    Store.summary = JSON.parse(session_summary);
+  } catch(err) {
+    Store.summary = null;
+  }
+}
+if (!Store.summary) {
+  Store.summary = {
+    accounts: {
+      balance: 0,
+      income: 0,
+      expenses: 0,
+      transfers: 0,
+    },
+    buckets: {
+      balance: 0,
+      income: 0,
+      expenses: 0,
+      transfers: 0,
+      rain: 0,
+    }
+  };
+}
+
+function updateSummary() {
+  apiRequest({
+    method: 'get_month_summary',
+    kwargs: {
+      'month': formatDate(Store.month),
+    },
+  }, function(response) {
+    Store.summary = response;
+    sessionStorage[session_summary_key] = JSON.stringify(Store.summary);
+    MonthBarData.rerender();
+  })
+}
+var debounced_updateSummary = _.debounce(updateSummary, 500);
+debounced_updateSummary();
+
 var MonthBarData = {};
 
 MonthBarData.rerender = function() {
   ReactDOM.render(<MonthBar
-    month={Store.month} data={MonthBarData} />, target_el);
+    month={Store.month} data={Store.summary} />, target_el);
 }
 
 var MonthBar = React.createClass({
+  getInitialState: function() {
+    return {
+      month: this.props.month,
+    }
+  },
   monthChanged: function(newmonth) {
-    console.log('new month', newmonth);
+    this.setState({month: newmonth});
+  },
+  monthChosen: function() {
+    var parsed = parseMonth(this.state.month);
+    var year = parsed.getFullYear();
+    var month = parsed.getMonth() + 1;
+    url_for('.{{ request.endpoint.split('.')[-1] }}', {
+      year: year,
+      month: month,
+    })
+    .then(function(url) {
+      window.location.href = url;
+    })
   },
   render: function() {
     return (<div className="subheader">
       <div>
-        <MonthInput name="themonth" value={this.props.month} onChange={this.monthChanged} />
+        <MonthInput name="themonth" value={this.state.month} onChange={this.monthChanged} /><button onClick={this.monthChosen}>Go</button>
       </div>
       <div className="item">
         <div className="label">Balance</div>
-        <div className="value">8,456.22</div>
+        <div className="value"><Money value={this.props.data.accounts.balance} /></div>
       </div>
       <div className="item">
         <div className="label">Income</div>
-        <div className="value">2,256</div>
+        <div className="value"><Money value={this.props.data.accounts.income} /></div>
       </div>
       <div className="item">
         <div className="label">Expenses</div>
-        <div className="value">1,456.34</div>
+        <div className="value"><Money value={this.props.data.accounts.expenses} /></div>
       </div>
       <div className="item">
-        <div className="label">Unallocated</div>
-        <div className="value">560</div>
+        <div className="label">Rain</div>
+        <div className="value"><Money value={this.props.data.buckets.rain} /></div>
       </div>
     </div>);
   }
 });
 
 registerApiRequestHook(function(request, response) {
-  if (request.method !== 'get_summary') {
-    debouncedUpdateFooter();
+  if (request.method !== 'get_month_summary') {
+    debounced_updateSummary();
   }
 });
 MonthBarData.rerender();

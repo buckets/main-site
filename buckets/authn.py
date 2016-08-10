@@ -1,13 +1,13 @@
 import sqlalchemy
 from sqlalchemy import select, and_, func
 
+from humancrypto import y2016
+
 from datetime import timedelta
 
 from buckets.error import NotFound
 from buckets.schema import User, Farm, UserFarm, AuthToken
 from buckets.authz import AuthPolicy, anything
-
-from uuid import uuid4
 
 
 class UserManagement(object):
@@ -17,10 +17,15 @@ class UserManagement(object):
 
     policy = AuthPolicy()
 
-    def __init__(self, engine, mailer, public_url):
+    def __init__(self, engine, mailer, signin_urlmaker):
+        """
+        @param signin_urlmaker: A function that will be called with
+            one argument (a token) and which should return the url
+            a user can visit to sign in.
+        """
         self.engine = engine
         self.mailer = mailer
-        self.public_url = public_url
+        self.signin_urlmaker = signin_urlmaker
 
     def userOnly(getter):
         def authorizer(self, auth_context, method, kwargs):
@@ -64,6 +69,8 @@ class UserManagement(object):
         Send a sign-in email to the given email address
         if a corresponding user exists.
 
+        @param email: Email address to send to.
+
         @raise NotFound: If the no such email is known to our
             system.
         """
@@ -74,9 +81,7 @@ class UserManagement(object):
             return
         user_id = row[0]
         token = self.generate_signin_token(user_id)
-        signin_url = '{0}/hi/auth?token={1}'.format(
-            self.public_url,
-            token)
+        signin_url = self.signin_urlmaker(token)
         self.mailer.sendTemplate(
             template_name='login',
             to_email=email,
@@ -88,8 +93,7 @@ class UserManagement(object):
         """
         Generate a token that can be exchanged for a user_id.
         """
-        token = '{0}{1}'.format(uuid4(), uuid4())
-        token = token.replace('-','')
+        token = y2016.random_urlsafe_token()
         expires = func.now() + timedelta(seconds=_lifespan)
         try:
             self.engine.execute(AuthToken.insert()

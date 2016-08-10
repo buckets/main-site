@@ -19,7 +19,7 @@ from buckets.mailing import DebugMailer
 def user_api(engine):
     return UserManagement(engine,
         mailer=DebugMailer,
-        public_url='http://www.example.com')
+        signin_urlmaker=None)
 
 @pytest.fixture
 def fake_requests():
@@ -82,6 +82,101 @@ class TestGeneral(object):
         summary = api.get_summary(as_of='2012-01-02')
         assert summary['accounts']['balance'] == (400 + 600)
         assert summary['buckets']['balance'] == (600 + 800)
+
+    def test_month_summary(self, api):
+        summary = api.get_month_summary()
+        accounts = summary['accounts']
+        assert accounts['balance'] == 0
+        assert accounts['income'] == 0
+        assert accounts['expenses'] == 0
+        assert accounts['transfers'] == 0
+
+        buckets = summary['buckets']
+        assert buckets['balance'] == 0
+        assert buckets['income'] == 0
+        assert buckets['expenses'] == 0
+        assert buckets['transfers'] == 0
+        assert buckets['rain'] == 0
+
+        account = api.create_account('Checking')
+        api.account_transact(account['id'], amount=400)
+        bucket = api.create_bucket('Food')
+        api.bucket_transact(bucket['id'], amount=-300)
+        bucket2 = api.create_bucket('Diapers')
+        api.bucket_transact(bucket2['id'], amount=800)
+
+        summary = api.get_month_summary()
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400
+        assert accounts['income'] == 400
+        assert accounts['expenses'] == 0
+        assert accounts['transfers'] == 0
+
+        buckets = summary['buckets']
+        assert buckets['balance'] == 800 - 300
+        assert buckets['income'] == 800
+        assert buckets['expenses'] == -300
+        assert buckets['transfers'] == 0
+        assert buckets['rain'] == 400 - (800 - 300)
+
+    def test_month_summary_specific_month(self, api):
+        
+        account = api.create_account('Checking')
+        api.account_transact(account['id'], amount=400,
+            posted='2010-01-01')
+        api.account_transact(account['id'], amount=-200,
+            posted='2011-01-01')
+        
+        bucket = api.create_bucket('Food')
+        api.bucket_transact(bucket['id'], amount=200,
+            posted='2010-01-01')
+        
+        bucket2 = api.create_bucket('Diapers')
+        api.bucket_transact(bucket2['id'], amount=100,
+            posted='2012-01-01')
+
+        summary = api.get_month_summary('2010-01-01')
+        assert summary['month'] == date(2010, 1, 1)
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400
+        assert accounts['income'] == 400
+        assert accounts['expenses'] == 0
+        assert accounts['transfers'] == 0
+
+        buckets = summary['buckets']
+        assert buckets['balance'] == 200
+        assert buckets['income'] == 200
+        assert buckets['expenses'] == 0
+        assert buckets['transfers'] == 0
+        assert buckets['rain'] == 400 - 200
+
+        summary = api.get_month_summary('2011-01-01')
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400 - 200
+        assert accounts['income'] == 0
+        assert accounts['expenses'] == -200
+        assert accounts['transfers'] == 0
+
+        buckets = summary['buckets']
+        assert buckets['balance'] == 200
+        assert buckets['income'] == 0
+        assert buckets['expenses'] == 0
+        assert buckets['transfers'] == 0
+        assert buckets['rain'] == -200
+
+        summary = api.get_month_summary('2012-01-01')
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400 - 200
+        assert accounts['income'] == 0
+        assert accounts['expenses'] == 0
+        assert accounts['transfers'] == 0
+
+        buckets = summary['buckets']
+        assert buckets['balance'] == 200 + 100
+        assert buckets['income'] == 100
+        assert buckets['expenses'] == 0
+        assert buckets['transfers'] == 0
+        assert buckets['rain'] == -100
 
 
 class TestAccount(object):

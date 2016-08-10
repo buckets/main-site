@@ -13,7 +13,7 @@ f = Flask(__name__)
 f.jinja_env.filters.update(all_filters)
 
 
-def configureApp(engine, flask_secret_key, public_url,
+def configureApp(engine, flask_secret_key,
         postmark_key=None, debug=False):
     f.engine = engine
     f.config.update(
@@ -34,7 +34,7 @@ def configureApp(engine, flask_secret_key, public_url,
         logger.warning('No email token -- using debug mailer')
         mailer = NoMailer()
 
-    f._unbound_api = authProtectedAPI(engine, mailer, public_url)
+    f._unbound_api = authProtectedAPI(engine, mailer)
 
     structlog.configure(
         processors=[
@@ -59,7 +59,6 @@ def put_user_on_request():
     g.debug = f.config['DEBUG']
 
     user_id = session.get('user_id', None)
-    logger.info(user_id=user_id)
     if user_id:
         g.auth_context['user_id'] = user_id
     g.api = f._unbound_api.bindContext(g.auth_context)

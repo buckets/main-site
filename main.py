@@ -43,8 +43,7 @@ app = configureApp(
     debug=args.debug,
     engine=engine,
     flask_secret_key=args.flask_secret_key,
-    postmark_key=None,
-    public_url='http://{args.host}:{args.port}'.format(**locals()))
+    postmark_key=None)
 
 #if __name__ == '__main__':
 app.run(args.host, args.port)
