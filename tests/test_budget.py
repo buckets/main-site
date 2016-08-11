@@ -201,7 +201,18 @@ class TestAccount(object):
         assert len(accounts) == 1
 
     def test_list_month(self, api):
-        assert False, "Write me"
+        checking = api.create_account('checking')
+        api.account_transact(checking['id'], amount=200,
+            posted='2010-05-01')
+        account = api.get_account(checking['id'])
+        assert account['balance'] == 200
+        accounts = api.list_accounts()
+        assert account in accounts
+
+        account = api.get_account(checking['id'], month='2010-04-01')
+        assert account['balance'] == 0
+        accounts = api.list_accounts(month='2010-04-01')
+        assert account in accounts
 
     def test_update(self, api):
         account = api.create_account('Checking')
@@ -249,9 +260,6 @@ class TestAccount(object):
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
 
-    def test_transact_month(self, api):
-        assert False, "Write me"
-
     def test_transact_fi_id(self, api):
         """
         The fi_id should be used as a unique key to identify
@@ -284,6 +292,21 @@ class TestAccount(object):
         assert account['balance'] == 300
 
         assert len(api.list_account_trans()) == 2
+
+    def test_list_account_trans_month(self, api):
+        account = api.create_account('Checking')
+        trans1 = api.account_transact(account['id'], amount=100,
+            memo='some memo', posted='2000-01-15')
+        trans2 = api.account_transact(account['id'], amount=200,
+            memo='some memo', posted='2000-02-20')
+
+        translist = api.list_account_trans(month='2000-01-01')
+        assert trans1 in translist
+        assert trans2 not in translist, "Wrong month"
+
+        translist = api.list_account_trans(month='2000-02-01')
+        assert trans1 not in translist, "Wrong month"
+        assert trans2 in translist
 
     def test_monthly_summary(self, api):
         checking = api.create_account('Checking')
@@ -750,9 +773,6 @@ class TestBucket(object):
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
 
-    def test_transact_month(self, api):
-        assert False, "Write me"
-
     def test_list_transactions(self, api):
         bucket = api.create_bucket('Food')
         trans = api.bucket_transact(bucket['id'], amount=100,
@@ -762,6 +782,21 @@ class TestBucket(object):
         assert len(transactions) == 1
         assert trans in transactions
         assert trans['account_transaction'] is None
+
+    def test_list_transactions_month(self, api):
+        bucket = api.create_bucket('Food')
+        api.bucket_transact(bucket['id'], amount=100,
+            memo='some memo', posted=date(2000, 1, 1))
+
+        transactions = api.list_bucket_trans(bucket['id'],
+            month='1999-12-01')
+        assert len(transactions) == 0
+        transactions = api.list_bucket_trans(bucket['id'],
+            month='2000-01-01')
+        assert len(transactions) == 1
+        transactions = api.list_bucket_trans(bucket['id'],
+            month='2000-02-01')
+        assert len(transactions) == 0, "Should only choose current month"
 
     def test_list_trans_categorized(self, api):
         bucket = api.create_bucket('Food')

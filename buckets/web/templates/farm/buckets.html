@@ -351,6 +351,7 @@ var BucketTable = React.createClass({
       method: 'get_bucket',
       kwargs: {
         id: bucket_id,
+        month: formatDate(this.props.month),
       }
     }, function(new_bucket) {
       Store.updateBucket(new_bucket);

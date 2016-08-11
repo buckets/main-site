@@ -11,7 +11,11 @@ Store.transactions = [];
 Store.buckets = {{ buckets|json|safe }};
 Store.accounts = {{ accounts|json|safe }};
 Store.rerender = function() {
-  ReactDOM.render(<TransTable buckets={Store.buckets} transactions={Store.transactions} accounts={Store.accounts} />, target_el);
+  ReactDOM.render(<TransTable
+    buckets={Store.buckets}
+    transactions={Store.transactions}
+    accounts={Store.accounts}
+    month={Store.month} />, target_el);
 }
 Store.addTransaction = function(trans) {
   Store.transactions.push(trans);
@@ -219,6 +223,9 @@ var TransTable = React.createClass({
   componentDidMount: function() {
     apiRequest({
       method: 'list_account_trans',
+      kwargs: {
+        month: formatDate(this.props.month),
+      }
     }, function(response) {
       Store.transactions = response;
       Store.rerender();

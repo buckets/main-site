@@ -1,7 +1,7 @@
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash, make_response, abort
 from buckets.budget import BudgetManagement
-from buckets.web.util import parseMoney, toJson
+from buckets.web.util import toJson
 
 import structlog
 logger = structlog.get_logger()
@@ -108,11 +108,10 @@ def index():
 def accounts():
     if request.method == 'POST':
         name = request.values['name']
-        balance = parseMoney(request.values['balance'] or '0')
-        g.farm.create_account(name=name, balance=balance)
+        g.farm.create_account(name=name)
         flash('Created account')
         return redirect(url_for('farm.accounts'))
-    accounts = g.farm.list_accounts()
+    accounts = g.farm.list_accounts(month=g.month)
     return render_template('farm/accounts.html',
         accounts=accounts)
 
@@ -125,7 +124,7 @@ def buckets():
         flash('Created bucket')
         return redirect(url_for('farm.bucket', bucket_id=bucket['id']))
     groups = g.farm.list_groups()
-    buckets = g.farm.list_buckets()
+    buckets = g.farm.list_buckets(month=g.month)
     return render_template('farm/buckets.html',
         groups=groups,
         buckets=buckets)
@@ -160,8 +159,9 @@ def bucket(bucket_id):
         g.farm.update_bucket(id=bucket_id, data=data)
         flash('{0} updated'.format(data['name']))
         return redirect(url_for('.buckets'))
-    bucket = g.farm.get_bucket(id=bucket_id)
-    transactions = g.farm.list_bucket_trans(bucket_id=bucket_id)
+    bucket = g.farm.get_bucket(id=bucket_id, month=g.month)
+    transactions = g.farm.list_bucket_trans(bucket_id=bucket_id,
+        month=g.month)
     return render_template('farm/bucket.html',
         bucket=bucket,
         transactions=transactions)
@@ -191,8 +191,8 @@ def group(group_id):
 @blue.route('/transactions')
 def transactions():
     g.show['transactions'] = True
-    buckets = g.farm.list_buckets()
-    accounts = g.farm.list_accounts()
+    buckets = g.farm.list_buckets(month=g.month)
+    accounts = g.farm.list_accounts(month=g.month)
     return render_template('farm/transactions.html',
         buckets=buckets,
         accounts=accounts)

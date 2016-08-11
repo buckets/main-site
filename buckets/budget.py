@@ -312,26 +312,13 @@ class BudgetManagement(object):
     # Account
 
     @policy.use_common
-    def create_account(self, name, balance=0):
+    def create_account(self, name):
         r = self.engine.execute(Account.insert()
-            .values(farm_id=self.farm_id, name=name, balance=balance)
+            .values(farm_id=self.farm_id, name=name)
             .returning(Account))
-        return dict(r.fetchone())
-
-    @policy.use_common
-    @policy.obj('id', Account)
-    def get_account(self, id):
-        r = self.engine.execute(
-            select([Account])
-            .where(
-                and_(
-                    Account.c.id == id,
-                    Account.c.farm_id == self.farm_id
-                )))
-        row = r.fetchone()
-        if not row:
-            raise NotFound("No such account")
-        return dict(row)
+        account = dict(r.fetchone())
+        account['future_gain'] = 0
+        return account
 
     @policy.use_common
     @policy.obj('id', Account)
@@ -360,10 +347,45 @@ class BudgetManagement(object):
         return False
 
     @policy.use_common
-    def list_accounts(self):
-        r = self.engine.execute(select([Account])
-            .where(Account.c.farm_id == self.farm_id))
-        return [dict(x) for x in r.fetchall()]
+    @policy.obj('id', Account)
+    def get_account(self, id, month=None):
+        accounts = self.list_accounts(month=month, _account_id=id)
+        if not accounts:
+            raise NotFound("No such account")
+        return accounts[0]
+
+    @policy.use_common
+    def list_accounts(self, month=None, _account_id=None):
+        where = ()
+        if _account_id:
+            where = (Account.c.id == _account_id,)
+
+        start, end = monthBounds(month)
+        r = self.engine.execute(select([
+                Account,
+                func.coalesce(func.sum(AccountTrans.c.amount), 0).label('future_gain'),
+            ])
+            .select_from(
+                Account.outerjoin(
+                    AccountTrans,
+                    and_(
+                        AccountTrans.c.account_id == Account.c.id,
+                        AccountTrans.c.posted >= end,
+                    )
+                )
+            )
+            .where(and_(
+                Account.c.farm_id == self.farm_id,
+                *where
+            ))
+            .group_by(Account.c.id)
+        )
+        ret = []
+        for row in r.fetchall():
+            account = dict(row)
+            account['balance'] -= account['future_gain']
+            ret.append(account)
+        return ret
 
     @policy.use_common
     def monthly_account_summary(self, starting=None, ending=None):
@@ -508,10 +530,14 @@ class BudgetManagement(object):
         return None
 
     @policy.use_common
-    def list_account_trans(self):
-        # get 100 days by default
-        timeago = date.today() - timedelta(days=100)
-        wheres = (AccountTrans.c.posted >= timeago,)
+    def list_account_trans(self, month=None):
+        wheres = []
+        if month is not None:
+            start, end = monthBounds(month)
+            wheres.extend([
+                AccountTrans.c.posted >= start,
+                AccountTrans.c.posted < end,
+            ])
         return list(self._list_account_trans(wheres))
 
     def _list_account_trans(self, wheres=None):
@@ -910,16 +936,15 @@ class BudgetManagement(object):
 
     @policy.use_common
     @policy.obj('bucket_id', Bucket)
-    def list_bucket_trans(self, bucket_id):
-        wheres = (BucketTrans.c.bucket_id == bucket_id,)
+    def list_bucket_trans(self, bucket_id, month=None):
+        wheres = [BucketTrans.c.bucket_id == bucket_id]
+        if month is not None:
+            start, end = monthBounds(month)
+            wheres.extend([
+                BucketTrans.c.posted >= start,
+                BucketTrans.c.posted < end,
+            ])
         return list(self._list_bucket_trans(wheres))
-        # r = self.engine.execute(select([BucketTrans])
-        #     .where(and_(
-        #         BucketTrans.c.bucket_id == bucket_id
-        #     ))
-        #     .order_by(BucketTrans.c.posted.desc()))
-        # return [dict(x) for x in r.fetchall()]
-
 
     def _list_bucket_trans(self, wheres=None):
         wheres = wheres or ()

@@ -7,12 +7,14 @@ Now:
   ✔ Make it rain @done (16-07-29 21:03)
   ✔ Sign in @done (16-08-10 21:30)
   ☐ Show as of Last month/this month/now
+    ☐ urlfor doesn't work in single-bucket view
   ☐ cron simplefin fetching
   ☐ Don't update account balances blindly
   ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
   ☐ migration sql
   ☐ You can't directly set account balance -- there must be a transaction
-  ☐ Transfers and Income
+    ☐ check update_account
+  ☐ Transfers and Income (instead of just Skip)
 
   
 
