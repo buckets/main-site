@@ -200,6 +200,9 @@ class TestAccount(object):
         assert account in accounts
         assert len(accounts) == 1
 
+    def test_list_month(self, api):
+        assert False, "Write me"
+
     def test_update(self, api):
         account = api.create_account('Checking')
         new_account = api.update_account(account['id'],
@@ -231,11 +234,23 @@ class TestAccount(object):
         account = api.get_account(account['id'])
         assert account['balance'] == 100
 
+    def test_transact_noamount(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=None,
+            posted='2000-01-01')
+        assert trans is None
+        trans = api.account_transact(account['id'], amount=0,
+            posted='2000-01-01')
+        assert trans is None
+
     def test_transact_stringdate(self, api):
         account = api.create_account('Checking')
         trans = api.account_transact(account['id'], amount=100,
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
+
+    def test_transact_month(self, api):
+        assert False, "Write me"
 
     def test_transact_fi_id(self, api):
         """
@@ -627,6 +642,20 @@ class TestBucket(object):
         assert bucket in buckets
         assert len(buckets) == 1
 
+    def test_list_month(self, api):
+        clothing = api.create_bucket('Clothing')
+        api.bucket_transact(clothing['id'], amount=200,
+            posted='2010-05-01')
+        bucket = api.get_bucket(clothing['id'])
+        assert bucket['balance'] == 200
+        buckets = api.list_buckets()
+        assert bucket in buckets
+
+        bucket = api.get_bucket(clothing['id'], month='2010-04-01')
+        assert bucket['balance'] == 0
+        buckets = api.list_buckets(month='2010-04-01')
+        assert bucket in buckets
+
     def test_update(self, api):
         bucket = api.create_bucket('Food')
         new_bucket = api.update_bucket(bucket['id'],
@@ -706,11 +735,23 @@ class TestBucket(object):
         bucket = api.get_bucket(bucket['id'])
         assert bucket['balance'] == 100
 
+    def test_transact_noamount(self, api):
+        bucket = api.create_bucket('Checking')
+        trans = api.bucket_transact(bucket['id'], amount=None,
+            posted='2000-01-01')
+        assert trans is None
+        trans = api.bucket_transact(bucket['id'], amount=0,
+            posted='2000-01-01')
+        assert trans is None
+
     def test_transact_stringdate(self, api):
         bucket = api.create_bucket('Food')
         trans = api.bucket_transact(bucket['id'], amount=100,
             posted='2000-01-01')
         assert trans['posted'] == datetime(2000, 1, 1)
+
+    def test_transact_month(self, api):
+        assert False, "Write me"
 
     def test_list_transactions(self, api):
         bucket = api.create_bucket('Food')

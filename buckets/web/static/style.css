@@ -199,7 +199,7 @@ table.ledger .dragging {
     line-height: 1rem;
 }
 table.ledger tr.group td:first-child {
-    border-left: 6px solid rgba(44, 62, 80, 0.5);
+    /*border-left: 6px solid rgba(44, 62, 80, 0.5);*/
 }
 table.ledger tr.group td {
     color: rgba(44, 62, 80, 0.5);

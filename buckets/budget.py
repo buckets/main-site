@@ -19,13 +19,27 @@ from buckets.error import Error, NotFound, AmountsDontMatch
 
 DEFAULT_SALT = '@\x95\xcd\xb0\xff\xa1\xe0\xdc\xfe^\x95g0\xa8\xe9+\x0bZ\xf1\xb3U\xb9\x03\xdeN\x97\xd1\x18\xbe)\x85\xde\xe4h\xe9?>\x9e\x12\x08]\xfb\xc5\x8a\x81\xddv\xa1cM\x8e\x06\xacAh\xba#\x14\x08\xbe\x1f\xec\x11\xf4\xb5)a\xaa\xb4\x1d\x9b\xa8M\xddZx\x05\\\xe0\xa3+\xf4,\xfd\xacYV\x93i\xe2\xb8H0*~\xc2X\x914\x96\x11\xc8\x82\xbd\xaa.0\xbd\x02XB\x07\xbe\xc5\xcb\xcf*\xe0\x1cg\xdd\x10\xbb\x16\xf6\x9d\x9bq'
 
+
 def moneystrtoint(x):
     return int(Decimal(x).quantize(Decimal('0.01'))*100)
+
 
 def hashStrings(strings, salt=DEFAULT_SALT):
     hashes = [sha1(x).digest() for x in strings] + [salt]
     return sha1(''.join(hashes)).hexdigest()
 
+
+def monthBounds(d):
+    """
+    Given a single date, return the first date of the month
+    that date is in and the first day of the next month.
+    """
+    month = d or date.today()
+    if not isinstance(month, date):
+        month = datetime.strptime(month, '%Y-%m-%d').date()
+    start = month.replace(day=1)
+    end = (month + timedelta(days=45)).replace(day=1)
+    return start, end
 
 
 class BudgetManagement(object):
@@ -153,11 +167,7 @@ class BudgetManagement(object):
         Get summary data for a particular month.
         (or the current month if none is given)
         """
-        month = month or date.today()
-        if not isinstance(month, date):
-            month = datetime.strptime(month, '%Y-%m-%d').date()
-        start = month.replace(day=1)
-        end = (month + timedelta(days=45)).replace(day=1)
+        start, end = monthBounds(month)
 
         # XXX optimize this later
 
@@ -452,6 +462,8 @@ class BudgetManagement(object):
     @policy.obj('account_id', Account)
     def account_transact(self, account_id, amount, memo=None,
             posted=None, fi_id=None):
+        if not amount:
+            return None
         values = {
             'account_id': account_id,
             'amount': amount,
@@ -764,7 +776,10 @@ class BudgetManagement(object):
                 name=name,
                 color=color)
             .returning(Bucket))
-        return dict(r.fetchone())
+        bucket = dict(r.fetchone())
+        # because it was just created, it can't have a future gain
+        bucket['future_gain'] = 0
+        return bucket
 
     @policy.use_common
     def has_buckets(self):
@@ -774,21 +789,6 @@ class BudgetManagement(object):
         if r.fetchone():
             return True
         return False
-
-    @policy.use_common
-    @policy.obj('id', Bucket)
-    def get_bucket(self, id):
-        r = self.engine.execute(
-            select([Bucket])
-            .where(
-                and_(
-                    Bucket.c.id == id,
-                    Bucket.c.farm_id == self.farm_id
-                )))
-        row = r.fetchone()
-        if not row:
-            raise NotFound("No such bucket")
-        return dict(row)
 
     @policy.use_common
     @policy.obj('id', Bucket)
@@ -823,10 +823,45 @@ class BudgetManagement(object):
         return self.get_bucket(id)
 
     @policy.use_common
-    def list_buckets(self):
-        r = self.engine.execute(select([Bucket])
-            .where(Bucket.c.farm_id == self.farm_id))
-        return [dict(x) for x in r.fetchall()]
+    @policy.obj('id', Bucket)
+    def get_bucket(self, id, month=None):
+        buckets = self.list_buckets(month=month, _bucket_id=id)
+        if not buckets:
+            raise NotFound("No such bucket")
+        return buckets[0]
+
+    @policy.use_common
+    def list_buckets(self, month=None, _bucket_id=None):
+        where = ()
+        if _bucket_id:
+            where = (Bucket.c.id == _bucket_id,)
+
+        start, end = monthBounds(month)
+        r = self.engine.execute(select([
+                Bucket,
+                func.coalesce(func.sum(BucketTrans.c.amount), 0).label('future_gain'),
+            ])
+            .select_from(
+                Bucket.outerjoin(
+                    BucketTrans,
+                    and_(
+                        BucketTrans.c.bucket_id == Bucket.c.id,
+                        BucketTrans.c.posted >= end,
+                    )
+                )
+            )
+            .where(and_(
+                Bucket.c.farm_id == self.farm_id,
+                *where
+            ))
+            .group_by(Bucket.c.id)
+        )
+        ret = []
+        for row in r.fetchall():
+            bucket = dict(row)
+            bucket['balance'] -= bucket['future_gain']
+            ret.append(bucket)
+        return ret
 
     @policy.use_common
     def monthly_bucket_summary(self, starting=None, ending=None):
@@ -850,6 +885,8 @@ class BudgetManagement(object):
     @policy.obj('_account_transaction_id', AccountTrans)
     def bucket_transact(self, bucket_id, amount, memo='', posted=None,
             _account_transaction_id=None):
+        if not amount:
+            return None
         values = {
             'bucket_id': bucket_id,
             'amount': amount,
