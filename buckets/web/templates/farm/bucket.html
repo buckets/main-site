@@ -231,10 +231,10 @@ Store.render();
 </div>
 </form>
 
-<h2>History</h2>
+<h2>Transactions</h2>
 
 {% if not transactions %}
-No transaction history yet.
+There are no transactions for {{ g.month.strftime('%b %Y') }}.
 {% else %}
 <table class="ledger">
   <tr>

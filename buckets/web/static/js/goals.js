@@ -48,6 +48,13 @@ function formatDate(d) {
   var d = '' + (d.getDate());
   return y + '-' + _zeropad(m, 2) + '-' + _zeropad(d, 2);
 }
+function formatMonth(d) {
+  if (!d) {
+    return null;
+  }
+  return d.toLocaleDateString(navigator.language,
+    {month: 'short', year: 'numeric'})
+}
 function _date2months(d) {
   return d.getFullYear() * 12 + d.getMonth()
 }

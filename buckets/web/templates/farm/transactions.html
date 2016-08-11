@@ -327,6 +327,14 @@ var TransTable = React.createClass({
           onSelected={this.transSelected}
           />);
     }.bind(this));
+
+    if (!transaction_rows.length) {
+      var nice_month = formatMonth(this.props.month);
+      transaction_rows = (<tr>
+        <td colSpan="100" className="center">There are no transactions for {nice_month}.</td>
+      </tr>);
+    }
+
     var add_label = this.state.amount < 0 ? 'Record expense' : 'Record deposit';
     var account_options = this.props.accounts.map(function(account) {
       return (<option key={account.id} value={account.id}>{account.name}</option>);

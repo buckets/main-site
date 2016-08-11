@@ -80,9 +80,7 @@ function url_for(endpoint, kwargs) {
   var data = {
     endpoint: endpoint,
   };
-  if (kwargs) {
-    data.kwargs = kwargs;
-  }
+  data.kwargs = _.merge(kwargs || {}, {{ request.view_args|json|safe }});
   var d = $.Deferred();
   $.ajax({
     type: 'POST',
