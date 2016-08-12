@@ -17,7 +17,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   </script>
   {% block extrahead %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
   <div class="body-wrap">
     {% block header %}
     <header>
@@ -47,9 +47,11 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     {% endwith %}
     </div>
 
-    <div class="main-content">
+    {% block pre_content %}{% endblock %}
+    <div class="main-content {% block content_class %}{% endblock %}">
       {%- block content -%}{%- endblock -%}
     </div>
+    {% block post_content %}{% endblock %}
     {% block footer %}<footer></footer>{% endblock %}
   </div>
 </body>

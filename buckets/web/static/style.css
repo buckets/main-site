@@ -8,6 +8,28 @@ body, html {
     padding: 0;
     margin: 0;
 }
+.hide-until-react {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.hide-until-react.react-loaded {
+    opacity: 1;
+}
+.show-until-react {
+    opacity: 1;
+}
+.show-until-react.react-loaded {
+    opacity: 0;
+}
+
+.loading-screen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 10rem;
+    margin: 0 auto;
+}
+
 a {
     color: rgba(41, 128, 185,1.0);
     cursor: pointer;
@@ -168,17 +190,18 @@ table.ledger tr.subtotal td {
 table.ledger .barleft {
     border-left: 1px solid lightgrey;
 }
-table.ledger .right {
-    text-align: right;
-}
-table.ledger .center {
-    text-align: center;
-}
 table.ledger tr.underdrag td {
     border-bottom: 4px solid rgba(231, 76, 60,1.0) !important;
 }
 table.ledger .dragging {
     opacity: 0.2;
+}
+
+.right {
+    text-align: right;
+}
+.center {
+    text-align: center;
 }
 
 
@@ -282,6 +305,22 @@ div.toolbar {
     background-color: rgba(155, 89, 182,1.0);
 }
 
+.tag {
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    color: black;
+    margin-left: .25rem;
+    padding: .1rem .25rem .15rem;
+    font-size: .6rem;
+    border-radius: 2px;
+    background-color: rgba(22, 160, 133,1.0);
+    color: white;
+}
+.tag.warning {
+    background-color: rgba(155, 89, 182,1.0);
+}
+
 /* ------------------------------------------------------
 Form
 ------------------------------------------------------ */
@@ -317,6 +356,10 @@ div.form .helptext {
 }
 
 
+a.text-button {
+    padding-left: .5rem;
+    padding-right: .5rem;
+}
 @keyframes pulse {
     from {transform: scale(0.9);}
     to {transform: scale(1.1);}
@@ -402,56 +445,6 @@ footer.floating {
     background-color: rgba(44, 62, 80,1.0);
     color: white;
 }
-
-
-@keyframes fadein {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-.fadein {
-    animation: fadein .3s;
-}
-
-.status-bar {
-    padding: 0.5rem 0 0.6rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;;
-}
-.status-bar .item {
-    display: flex;
-    flex-direction: column;
-    padding: 0 1rem;
-    text-align: center;
-}
-.status-bar .item .label {
-    font-size: .8rem;
-    color: rgba(127, 140, 141,1.0);
-}
-.status-bar .item .value {
-
-}
-.status-bar .operator {
-    font-size: 2rem;
-}
-.status-bar .over,
-.status-bar .item.over .label {
-    color: rgba(231, 76, 60,1.0);
-}
-.status-bar .golden,
-.status-bar .item.golden .label {
-    color: rgba(26, 188, 156,1.0);
-}
-.status-bar .extra,
-.status-bar .item.extra .label {
-    color: rgba(241, 196, 15,1.0);
-}
-.status-bar .note {
-    font-size: .8rem;
-    font-style: italic;
-    max-width: 15rem;
-}
-
 
 
 p {

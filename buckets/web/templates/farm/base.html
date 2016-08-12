@@ -9,6 +9,8 @@
 {% if g.show.reports %}<a {{ navlink('.reports') }}>Reports</a>{% endif %}
 {% endblock %}
 
+{% block content_class %}hide-until-react{% endblock %}
+
 {% block extrahead %}
 <script src="/static/js/vend/lodash.min.js"></script>
 <script src="/static/js/vend/jquery-3.1.0.min.js"></script>
@@ -31,6 +33,7 @@
 <script>
 var Store = {
   summary: null,
+  real_current_month: parseMonth("{{ real_current_month }}"),
   month: parseMonth("{{ g.month.isoformat() }}"),
   month_last_day: parseDate("{{ g.month_last_day.isoformat() }}"),
   buckets: [],
@@ -98,8 +101,12 @@ function url_for(endpoint, kwargs) {
 {% endblock %}
 
 
+{% block pre_content %}<div class="loading-screen show-until-react">
+Loading...
+</div>{% endblock %}
+
 {% block subheader %}
-<div id="month-bar"></div>
+<div id="month-bar" class="hide-until-react"></div>
 
 <script type="text/babel">
 var target_el = document.getElementById('month-bar');
@@ -150,7 +157,12 @@ var MonthBarData = {};
 
 MonthBarData.rerender = function() {
   ReactDOM.render(<MonthBar
-    month={Store.month} data={Store.summary} />, target_el);
+    month={Store.month}
+    data={Store.summary}
+    real_current_month={Store.real_current_month} />, target_el, function() {
+      $('.hide-until-react').addClass('react-loaded');
+      $('.show-until-react').addClass('react-loaded');
+    });
 }
 
 var MonthBar = React.createClass({
@@ -162,10 +174,18 @@ var MonthBar = React.createClass({
   monthChanged: function(newmonth) {
     this.setState({month: newmonth});
   },
-  monthChosen: function() {
-    var parsed = parseMonth(this.state.month);
-    var year = parsed.getFullYear();
-    var month = parsed.getMonth() + 1;
+  goBackOneMonth: function() {
+    console.log('hey');
+    this.changeMonth(-1);
+  },
+  goForwardOneMonth: function() {
+    console.log('hey');
+    this.changeMonth(1);
+  },
+  changeMonth: function(amount) {
+    var newmonth = addMonths(this.props.month, amount);
+    var year = newmonth.getFullYear();
+    var month = newmonth.getMonth() + 1;
     url_for('.{{ request.endpoint.split('.')[-1] }}', {
       year: year,
       month: month,
@@ -175,9 +195,23 @@ var MonthBar = React.createClass({
     })
   },
   render: function() {
+    var month_warning = null;
+    console.log('month', this.props.month);
+    console.log('curre', this.props.real_current_month);
+
+    if (formatDate(this.props.month) !== formatDate(this.props.real_current_month)) {
+      var text = this.props.month < this.props.real_current_month ? "In the past" : "Future";
+      month_warning = (<span className="tag warning">{text}</span>);
+    }
+    var current_month = (<span>{formatMonth(this.props.month)}</span>);
     return (<div className="subheader">
-      <div>
-        <MonthInput name="themonth" value={this.state.month} onChange={this.monthChanged} /><button onClick={this.monthChosen}>Go</button>
+      <div className="item">
+        <div className="label center">{month_warning}</div>
+        <div className="value">
+          <a onClick={this.goBackOneMonth} className="text-button">&lt;</a>
+          {current_month}
+          <a onClick={this.goForwardOneMonth} className="text-button">&gt;</a>
+        </div>
       </div>
       <div className="item">
         <div className="label">Balance</div>

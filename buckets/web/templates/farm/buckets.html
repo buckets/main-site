@@ -455,21 +455,17 @@ var BucketTable = React.createClass({
       }
     }
 
-    var posting_date_note = "OK";
-    var posting_date_note_class = "note";
+    var posting_date_note = null;
     if (this.state.posting_date !== formatDate(this.props.posting_date)) {
-      console.log('state posting_date', this.state.posting_date);
-      console.log('props posting_date', this.props.posting_date);
-      var posting_date_note = "Is this right?";
-      posting_date_note_class += " warning";
+      var posting_date_note = "Not Today";
+      posting_date_note = (<div className="note warning">{posting_date_note}</div>);
     }
     
     return (
       <div>
         <div className="toolbar">
           <div className="pair">
-            <div className="label">Posting Date
-              <div className={posting_date_note_class}>{posting_date_note}</div></div>
+            <div className="label">Posting Date{posting_date_note}</div>
             <div className="control">
               <input
                 type="date"

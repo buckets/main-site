@@ -1,12 +1,13 @@
+from datetime import datetime, date, timedelta
+
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash, make_response, abort
+
 from buckets.budget import BudgetManagement
 from buckets.web.util import toJson
 
 import structlog
 logger = structlog.get_logger()
-
-from datetime import date, timedelta
 
 
 blue = Blueprint('farm', __name__, url_prefix='/farm/<int:farm_id>')
@@ -95,6 +96,14 @@ def what_should_show():
             'transactions': True,
             'buckets': True,
         })
+
+@blue.context_processor
+def inject_now():
+    real_current_month = date.today().replace(day=1)
+    return dict(
+        now=datetime.utcnow(),
+        real_current_month=real_current_month)
+
 
 
 @blue.route('/')
