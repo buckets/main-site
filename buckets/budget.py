@@ -164,7 +164,7 @@ class BudgetManagement(object):
     @policy.use_common
     def get_month_summary(self, month=None):
         """
-        Get summary data for a particular month.
+        Get summary data for a particular month for both accounts and buckets.
         (or the current month if none is given)
         """
         start, end = monthBounds(month)
@@ -210,8 +210,34 @@ class BudgetManagement(object):
 
         # income, expenses, transfers
         r = self.engine.execute(select([
-                text("coalesce(sum(case when amount > 0 then amount else 0 end), 0) as income"),
-                text("coalesce(sum(case when amount < 0 then amount else 0 end), 0) as expenses"),
+                text("""
+                    coalesce(
+                        sum(case when
+                            amount > 0
+                            and coalesce(general_cat, '') <> 'transfer'
+                        then amount else 0 end)
+                    , 0) as income"""),
+                text("""
+                    coalesce(
+                        sum(case when
+                            amount < 0
+                            and coalesce(general_cat, '') <> 'transfer'
+                        then amount else 0 end)
+                    , 0) as expenses"""),
+                text("""
+                    coalesce(
+                        sum(case when
+                            amount > 0
+                            and coalesce(general_cat, '') = 'transfer'
+                        then amount else 0 end)
+                    , 0) as transfers_in"""),
+                text("""
+                    coalesce(
+                        sum(case when
+                            amount < 0
+                            and coalesce(general_cat, '') = 'transfer'
+                        then amount else 0 end)
+                    , 0) as transfers_out"""),
             ])
             .where(and_(
                 AccountTrans.c.account_id == Account.c.id,
@@ -243,70 +269,16 @@ class BudgetManagement(object):
                 'balance': accounts_balance,
                 'income': account_totals.income,
                 'expenses': account_totals.expenses,
-                'transfers': 0,
+                'transfers_in': account_totals.transfers_in,
+                'transfers_out': account_totals.transfers_out,
             },
             'buckets': {
                 'balance': buckets_balance,
                 'income': bucket_totals.income,
                 'expenses': bucket_totals.expenses,
-                'transfers': 0,
                 'rain': rain,
             },
         }
-
-    @policy.use_common
-    def get_summary(self, as_of=None):
-        """
-        Get summary data as of a certain date
-        (or now if none is given)
-        """
-        # XXX optimize this later
-
-        r = self.engine.execute(select([
-                func.sum(Account.c.balance),
-            ])
-            .where(Account.c.farm_id == self.farm_id))
-        accounts_balance = r.fetchone()[0] or 0
-
-        r = self.engine.execute(select([
-                func.sum(Bucket.c.balance),
-            ])
-            .where(Bucket.c.farm_id == self.farm_id))
-        buckets_balance = r.fetchone()[0] or 0
-
-        if as_of:
-            r = self.engine.execute(select([
-                    func.sum(AccountTrans.c.amount)
-                ])
-                .where(and_(
-                    AccountTrans.c.account_id == Account.c.id,
-                    Account.c.farm_id == self.farm_id,
-                    AccountTrans.c.posted > as_of,
-                )))
-            trans_since = r.fetchone()[0] or 0
-            accounts_balance -= trans_since
-
-            r = self.engine.execute(select([
-                    func.sum(BucketTrans.c.amount)
-                ])
-                .where(and_(
-                    BucketTrans.c.bucket_id == Bucket.c.id,
-                    Bucket.c.farm_id == self.farm_id,
-                    BucketTrans.c.posted > as_of,
-                )))
-            trans_since = r.fetchone()[0] or 0
-            buckets_balance -= trans_since
-
-
-        return {
-            'accounts': {
-                'balance': accounts_balance,
-            },
-            'buckets': {
-                'balance': buckets_balance,
-            }
-        }
-
 
     #----------------------------------------------------------
     # Account
@@ -601,45 +573,55 @@ class BudgetManagement(object):
     @policy.allow(_authorizeBuckets)
     @policy.obj('trans_id', AccountTrans)
     @policy.obj(pluck('buckets', 'bucket_id'), Bucket)
-    def categorize(self, trans_id, buckets):
-        trans = self.get_account_trans(trans_id)
-        self.engine.execute(BucketTrans.delete()
-            .where(BucketTrans.c.account_transaction_id==trans_id))
-        left = trans['amount']
+    def categorize(self, trans_id, buckets=None, category=None):
+        if category is not None:
+            # general categorization
+            self.get_account_trans(trans_id)
+            self.engine.execute(BucketTrans.delete()
+                .where(BucketTrans.c.account_transaction_id==trans_id))
+            self.engine.execute(AccountTrans.update()
+                .values(cat_likely=True, general_cat=category)
+                .where(AccountTrans.c.id == trans_id))
+            return self.get_account_trans(trans_id)
 
-        # make sure we don't invent money
-        total = sum([abs(x.get('amount', 0)) for x in buckets])
-        if total > abs(left):
-            raise AmountsDontMatch("Category totals don't match transaction amount.")
+        elif buckets is not None:
+            # bucket categorization
+            trans = self.get_account_trans(trans_id)
+            self.engine.execute(BucketTrans.delete()
+                .where(BucketTrans.c.account_transaction_id==trans_id))
+            left = trans['amount']
 
-        sign = 1
-        if trans['amount'] < 0:
-            sign = -1
-        for bucket in buckets:
-            if bucket.get('amount', None) is None:
-                bucket['amount'] = left
-            left -= abs(bucket['amount']) * sign
-            if bucket['amount']:
-                self.bucket_transact(bucket['bucket_id'],
-                    amount=abs(bucket['amount']) * sign,
-                    posted=trans['posted'],
-                    _account_transaction_id=trans_id)
-        self.engine.execute(AccountTrans.update()
-            .values(cat_likely=True, skip_cat=False)
-            .where(AccountTrans.c.id == trans_id))
-        return self.get_account_trans(trans_id)
+            # make sure we don't invent money
+            total = sum([abs(x.get('amount', 0)) for x in buckets])
+            if total > abs(left):
+                raise AmountsDontMatch("Category totals don't match transaction amount.")
 
-    @policy.use_common
-    @policy.obj('trans_id', AccountTrans)
-    def skip_categorizing(self, trans_id):
-        self.get_account_trans(trans_id)
-        self.engine.execute(BucketTrans.delete()
-            .where(BucketTrans.c.account_transaction_id==trans_id))
-        self.engine.execute(AccountTrans.update()
-            .values(cat_likely=True, skip_cat=True)
-            .where(AccountTrans.c.id == trans_id))
-        return self.get_account_trans(trans_id)
+            sign = 1
+            if trans['amount'] < 0:
+                sign = -1
+            for bucket in buckets:
+                if bucket.get('amount', None) is None:
+                    bucket['amount'] = left
+                left -= abs(bucket['amount']) * sign
+                if bucket['amount']:
+                    self.bucket_transact(bucket['bucket_id'],
+                        amount=abs(bucket['amount']) * sign,
+                        posted=trans['posted'],
+                        _account_transaction_id=trans_id)
+            self.engine.execute(AccountTrans.update()
+                .values(cat_likely=True, general_cat=None)
+                .where(AccountTrans.c.id == trans_id))
+            return self.get_account_trans(trans_id)
 
+        else:
+            # remove categorization
+            self.get_account_trans(trans_id)
+            self.engine.execute(BucketTrans.delete()
+                .where(BucketTrans.c.account_transaction_id==trans_id))
+            self.engine.execute(AccountTrans.update()
+                .values(cat_likely=False, general_cat=None)
+                .where(AccountTrans.c.id == trans_id))
+            return self.get_account_trans(trans_id)
 
     #----------------------------------------------------------
     # Group

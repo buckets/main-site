@@ -15,7 +15,8 @@ Store.rerender = function() {
     buckets={Store.buckets}
     transactions={Store.transactions}
     accounts={Store.accounts}
-    month={Store.month} />, target_el);
+    month={Store.month}
+    posting_date={Store.month_last_day} />, target_el);
 }
 Store.addTransaction = function(trans) {
   Store.transactions.push(trans);
@@ -42,16 +43,19 @@ var Categorizer = React.createClass({
       buckets: _.clone(this.props.transaction.buckets),
     }
   },
-  skip: function(ev) {
-    apiRequest({
-      method: 'skip_categorizing',
-      kwargs: {
-        trans_id: this.props.transaction.id,
-      }
-    }, function(transaction) {
-      Store.updateTrans(transaction);
-      this.props.onChange(transaction);
-    }.bind(this));
+  generalCatHandler: function(category) {
+    return function(ev) {
+      apiRequest({
+        method: 'categorize',
+        kwargs: {
+          trans_id: this.props.transaction.id,
+          category: category,
+        }
+      }, function(transaction) {
+        Store.updateTrans(transaction);
+        this.props.onChange(transaction);
+      }.bind(this));
+    }.bind(this);
   },
   ok: function(ev) {
     apiRequest({
@@ -122,13 +126,14 @@ var Categorizer = React.createClass({
           className="amount"
           value={cat.amount}
           onChange={this.amountChangedHandler(cat)} />
-        <button onClick={this.deleteCategoryHandler(cat)}>X</button>
+        <a className="text-button" onClick={this.deleteCategoryHandler(cat)}>X</a>
       </div>)
     }.bind(this));
     return (<div className="categorizer">
       {categories}
       <button onClick={this.ok}>Ok</button>
-      <button onClick={this.skip}>Skip</button>
+      <button onClick={this.generalCatHandler('income')}>Income</button>
+      <button onClick={this.generalCatHandler('transfer')}>Transfer</button>
     </div>);
   }
 })
@@ -187,12 +192,13 @@ var TransRow = React.createClass({
           return (<div key={i} tabIndex="0" onClick={this.startCategorizing} className="category-tag" style={style}><div className="category-name">{name}</div>{amount_part}</div>);
         }.bind(this))
         categories_section = (<div>{labels}</div>);
-      } else if (this.props.transaction.skip_cat) {
-        // Skip
-        categories_section = (<a onClick={this.startCategorizing}>Skipped</a>);
+      } else if (this.props.transaction.general_cat) {
+        // General
+        var display = this.props.transaction.general_cat == 'income' ? 'Income' : 'Transfer';
+        categories_section = (<a tabIndex="0" onClick={this.startCategorizing}>{display}</a>);
       } else {
         // No categorization
-        categories_section = (<a onClick={this.startCategorizing}>Categorize</a>);
+        categories_section = (<a tabIndex="0" onClick={this.startCategorizing}>Categorize</a>);
       }
     }
     return (
@@ -210,10 +216,9 @@ var TransRow = React.createClass({
 
 var TransTable = React.createClass({
   getInitialState: function() {
-    var today = (new Date()).toISOString().split('T')[0];
     return {
       amount: '',
-      posted: today,
+      posted: formatDate(this.props.posting_date || new Date()),
       memo: '',
       account_id: '',
       selected: {},

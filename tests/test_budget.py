@@ -42,60 +42,19 @@ def api(farm, engine, fake_requests):
 
 class TestGeneral(object):
 
-    def test_summary(self, api):
-        summary = api.get_summary()
-        assert summary['accounts']['balance'] == 0
-        assert summary['buckets']['balance'] == 0
-
-        account = api.create_account('Checking')
-        api.account_transact(account['id'], amount=400)
-        bucket = api.create_bucket('Food')
-        api.bucket_transact(bucket['id'], amount=600)
-        bucket2 = api.create_bucket('Diapers')
-        api.bucket_transact(bucket2['id'], amount=800)
-
-        summary = api.get_summary()
-        assert summary['accounts']['balance'] == 400
-        assert summary['buckets']['balance'] == (600 + 800)
-
-    def test_summary_on_date(self, api):
-        account = api.create_account('Checking')
-        api.account_transact(account['id'], amount=400,
-            posted='2010-01-01')
-        api.account_transact(account['id'], amount=600,
-            posted='2011-01-01')
-        bucket = api.create_bucket('Food')
-        api.bucket_transact(bucket['id'], amount=600,
-            posted='2010-01-01')
-        bucket2 = api.create_bucket('Diapers')
-        api.bucket_transact(bucket2['id'], amount=800,
-            posted='2012-01-01')
-
-        summary = api.get_summary(as_of='2010-01-02')
-        assert summary['accounts']['balance'] == 400
-        assert summary['buckets']['balance'] == 600
-
-        summary = api.get_summary(as_of='2011-01-02')
-        assert summary['accounts']['balance'] == (400 + 600)
-        assert summary['buckets']['balance'] == 600
-
-        summary = api.get_summary(as_of='2012-01-02')
-        assert summary['accounts']['balance'] == (400 + 600)
-        assert summary['buckets']['balance'] == (600 + 800)
-
     def test_month_summary(self, api):
         summary = api.get_month_summary()
         accounts = summary['accounts']
         assert accounts['balance'] == 0
         assert accounts['income'] == 0
         assert accounts['expenses'] == 0
-        assert accounts['transfers'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == 0
 
         buckets = summary['buckets']
         assert buckets['balance'] == 0
         assert buckets['income'] == 0
         assert buckets['expenses'] == 0
-        assert buckets['transfers'] == 0
         assert buckets['rain'] == 0
 
         account = api.create_account('Checking')
@@ -110,13 +69,13 @@ class TestGeneral(object):
         assert accounts['balance'] == 400
         assert accounts['income'] == 400
         assert accounts['expenses'] == 0
-        assert accounts['transfers'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == 0
 
         buckets = summary['buckets']
         assert buckets['balance'] == 800 - 300
         assert buckets['income'] == 800
         assert buckets['expenses'] == -300
-        assert buckets['transfers'] == 0
         assert buckets['rain'] == 400 - (800 - 300)
 
     def test_month_summary_specific_month(self, api):
@@ -141,13 +100,13 @@ class TestGeneral(object):
         assert accounts['balance'] == 400
         assert accounts['income'] == 400
         assert accounts['expenses'] == 0
-        assert accounts['transfers'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == 0
 
         buckets = summary['buckets']
         assert buckets['balance'] == 200
         assert buckets['income'] == 200
         assert buckets['expenses'] == 0
-        assert buckets['transfers'] == 0
         assert buckets['rain'] == 400 - 200
 
         summary = api.get_month_summary('2011-01-01')
@@ -155,13 +114,13 @@ class TestGeneral(object):
         assert accounts['balance'] == 400 - 200
         assert accounts['income'] == 0
         assert accounts['expenses'] == -200
-        assert accounts['transfers'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == 0
 
         buckets = summary['buckets']
         assert buckets['balance'] == 200
         assert buckets['income'] == 0
         assert buckets['expenses'] == 0
-        assert buckets['transfers'] == 0
         assert buckets['rain'] == -200
 
         summary = api.get_month_summary('2012-01-01')
@@ -169,14 +128,49 @@ class TestGeneral(object):
         assert accounts['balance'] == 400 - 200
         assert accounts['income'] == 0
         assert accounts['expenses'] == 0
-        assert accounts['transfers'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == 0
 
         buckets = summary['buckets']
         assert buckets['balance'] == 200 + 100
         assert buckets['income'] == 100
         assert buckets['expenses'] == 0
-        assert buckets['transfers'] == 0
         assert buckets['rain'] == -100
+
+    def test_month_summary_transfers(self, api):
+        account = api.create_account('Checking')
+        t1 = api.account_transact(account['id'], amount=400,
+            posted='2010-01-01')
+        t2 = api.account_transact(account['id'], amount=-200,
+            posted='2011-01-01')
+
+        api.categorize(t1['id'], category='transfer')
+        api.categorize(t2['id'], category='transfer')
+
+        summary = api.get_month_summary('2010-01-01')
+        assert summary['month'] == date(2010, 1, 1)
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400
+        assert accounts['income'] == 0
+        assert accounts['expenses'] == 0
+        assert accounts['transfers_in'] == 400
+        assert accounts['transfers_out'] == 0
+
+        summary = api.get_month_summary('2011-01-01')
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400 - 200
+        assert accounts['income'] == 0
+        assert accounts['expenses'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == -200
+
+        summary = api.get_month_summary('2012-01-01')
+        accounts = summary['accounts']
+        assert accounts['balance'] == 400 - 200
+        assert accounts['income'] == 0
+        assert accounts['expenses'] == 0
+        assert accounts['transfers_in'] == 0
+        assert accounts['transfers_out'] == 0
 
 
 class TestAccount(object):
@@ -238,7 +232,7 @@ class TestAccount(object):
         assert trans['id'] is not None
         assert trans['fi_id'] is None
         assert trans['cat_likely'] == False
-        assert trans['skip_cat'] == False
+        assert trans['general_cat'] is None
         assert trans['buckets'] == []
         assert api.has_transactions() is True
 
@@ -431,6 +425,45 @@ class TestAccount(object):
         assert months[2]['expenses'] == -300
         assert months[2]['endbalance'] == 1400
 
+    def test_monthly_summary_transfers(self, api):
+        checking = api.create_account('Checking')
+        t1 = api.account_transact(checking['id'], amount=1000, posted='2010-01-01')
+        t2 = api.account_transact(checking['id'], amount=300, posted='2010-01-05')
+        t3 = api.account_transact(checking['id'], amount=-200, posted='2010-02-14')
+
+        api.categorize(t1['id'], category='transfer')
+        api.categorize(t2['id'], category='income')
+        api.categorize(t3['id'], category='transfer')
+
+        summary = api.monthly_account_summary(ending="2010-03-01")
+        checking_summary = summary[0]
+        assert len(checking_summary['months']) == 3, "Three months"
+        
+        assert checking_summary['account_id'] == checking['id']
+        assert checking_summary['name'] == checking['name']
+
+        months = checking_summary['months']
+        assert months[0]['month'] == date(2010, 3, 1)
+        assert months[0]['income'] == 0
+        assert months[0]['expenses'] == 0
+        assert months[0]['transfers_in'] == 0
+        assert months[0]['transfers_out'] == 0
+        assert months[0]['endbalance'] == 1100
+
+        assert months[1]['month'] == date(2010, 2, 1)
+        assert months[1]['income'] == 0
+        assert months[1]['expenses'] == 0
+        assert months[1]['transfers_in'] == 0
+        assert months[1]['transfers_out'] == -200
+        assert months[1]['endbalance'] == 1100
+
+        assert months[2]['month'] == date(2010, 1, 1)
+        assert months[2]['income'] == 300
+        assert months[2]['expenses'] == 0
+        assert months[2]['transfers_in'] == 1000
+        assert months[2]['transfers_out'] == 0
+        assert months[2]['endbalance'] == 1300
+
 
 class TestTransaction(object):
 
@@ -538,16 +571,25 @@ class TestTransaction(object):
         trans = api.get_account_trans(trans['id'])
         assert trans['buckets'] == []
 
-    def test_skip(self, api):
+    def test_categorize_income(self, api):
         account = api.create_account('Checking')
         trans = api.account_transact(account['id'], amount=500,
             memo='fizzballs')
-        new_trans = api.skip_categorizing(trans['id'])
+        new_trans = api.categorize(trans['id'], category='income')
         assert new_trans['id'] == trans['id']
-        assert new_trans['skip_cat'] is True
+        assert new_trans['general_cat'] == 'income'
         assert new_trans['cat_likely'] is True
 
-    def test_skip_after_cat(self, api):
+    def test_categorize_transfer(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+        new_trans = api.categorize(trans['id'], category='transfer')
+        assert new_trans['id'] == trans['id']
+        assert new_trans['general_cat'] == 'transfer'
+        assert new_trans['cat_likely'] is True
+
+    def test_income_after_cat(self, api):
         account = api.create_account('Checking')
         trans = api.account_transact(account['id'], amount=500,
             memo='fizzballs')
@@ -555,22 +597,41 @@ class TestTransaction(object):
         api.categorize(trans['id'], buckets=[
             {'bucket_id': b1['id']},
         ])
-        new_trans = api.skip_categorizing(trans['id'])
-        assert new_trans['skip_cat'] is True
+        new_trans = api.categorize(trans['id'], category='income')
+        assert new_trans['general_cat'] == 'income'
         assert new_trans['buckets'] == [], "Should have removed categories"
         assert new_trans['cat_likely'] is True
 
-    def test_cat_after_skip(self, api):
+    def test_cat_after_income(self, api):
         account = api.create_account('Checking')
         trans = api.account_transact(account['id'], amount=500,
             memo='fizzballs')
-        api.skip_categorizing(trans['id'])
+        api.categorize(trans['id'], category='transfer')
         b1 = api.create_bucket('Bucket1')
         new_trans = api.categorize(trans['id'], buckets=[
             {'bucket_id': b1['id']},
         ])
-        assert new_trans['skip_cat'] is False
+        assert new_trans['general_cat'] is None
         assert new_trans['cat_likely'] is True
+
+    def test_categorize_reset(self, api):
+        account = api.create_account('Checking')
+        trans = api.account_transact(account['id'], amount=500,
+            memo='fizzballs')
+        api.categorize(trans['id'], category='transfer')
+        t = api.categorize(trans['id'])
+        assert t['general_cat'] is None
+        assert t['cat_likely'] is False
+        assert t['buckets'] == []
+
+        b1 = api.create_bucket('Bucket1')
+        t = api.categorize(trans['id'], buckets=[
+            {'bucket_id': b1['id']},
+        ])
+        t = api.categorize(trans['id'])
+        assert t['general_cat'] is None
+        assert t['cat_likely'] is False
+        assert t['buckets'] == []
 
 
 class TestGroup(object):

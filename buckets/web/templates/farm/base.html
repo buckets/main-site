@@ -14,7 +14,7 @@
 {% block extrahead %}
 <script src="/static/js/vend/lodash.min.js"></script>
 <script src="/static/js/vend/jquery-3.1.0.min.js"></script>
-{% if g.debug %}
+{% if g.debug or request.args.production %}
 <script src="/static/js/vend/react-15.2.1.js"></script>
 <script src="/static/js/vend/react-dom-15.2.1.js"></script>
 {% else %}
@@ -204,6 +204,17 @@ var MonthBar = React.createClass({
       month_warning = (<span className="tag warning">{text}</span>);
     }
     var current_month = (<span>{formatMonth(this.props.month)}</span>);
+
+    var transfer_delta = null;
+    var transfers_in = this.props.data.accounts.transfers_in;
+    var transfers_out = this.props.data.accounts.transfers_out;
+    var transfers_net = transfers_in + transfers_out;
+    if (transfers_net) {
+      transfer_delta = (<div className="item">
+        <div className="label">Transfers</div>
+        <div className="value"><Money value={transfers_net} /></div>
+      </div>);
+    }
     return (<div className="subheader">
       <div className="item">
         <div className="label center">{month_warning}</div>
@@ -225,6 +236,7 @@ var MonthBar = React.createClass({
         <div className="label">Expenses</div>
         <div className="value"><Money value={this.props.data.accounts.expenses} /></div>
       </div>
+      {transfer_delta}
       <div className="item">
         <div className="label">Rain</div>
         <div className="value"><Money value={this.props.data.buckets.rain} /></div>

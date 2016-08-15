@@ -53,7 +53,7 @@ AccountTrans = Table('account_transaction', metadata,
     Column('amount', Integer, default=0),
     Column('memo', String),
     Column('fi_id', String),
-    Column('skip_cat', Boolean, default=False),
+    Column('general_cat', String, default=None),
     Column('cat_likely', Boolean, default=False),
 )
 Group = Table('bucket_group', metadata,
@@ -186,7 +186,7 @@ patches['init'] = [
         amount integer default 0,
         memo text,
         fi_id text,
-        skip_cat boolean default 'f',
+        general_cat text default null,
         cat_likely boolean default 'f'
     )''',
     '''CREATE INDEX account_transaction_account_id_idx

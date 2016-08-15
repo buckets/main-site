@@ -6,9 +6,10 @@ Now:
   ✔ Sometimes the deposit changes for goal accounts after you do "Make it Rain"  Target amount: 20,000 Date: Jan 2025, Deposit changes from 180 to 179.67 @done (16-07-29 21:15)
   ✔ Make it rain @done (16-07-29 21:03)
   ✔ Sign in @done (16-08-10 21:30)
-  ☐ Show as of Last month/this month/now
+  ✔ Show as of Last month/this month/now @done (16-08-15 10:39)
     ✔ urlfor doesn't work in single-bucket view @done (16-08-11 09:02)
-  ☐ Transfers and Income (instead of just Skip)
+  ✔ Transfers and Income (instead of just Skip) @done (16-08-15 10:39)
+  ☐ You shouldn't be able to mark a negative amount as income.
   ☐ cron simplefin fetching
   ✔ Don't update account balances blindly @done (16-08-15 09:19)
   ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
