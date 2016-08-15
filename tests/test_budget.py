@@ -965,4 +965,54 @@ class TestSimpleFIN(object):
 
         # check account balance
         account = api.get_account(account['id'])
-        assert account['balance'] == 10023
+        assert account['balance'] == 10023, \
+            "Should update account balance since it's the first transaction"
+
+    def test_fetch_dont_update_balance(self, api, fake_requests):
+        """
+        If there are already transactions in the account, don't change the account balance
+        """
+        fake_requests.post.return_value = MagicMock(
+            text='https://foo:bar@example.com')
+        api.simplefin_claim(
+            'https://example.com/abcdefg'.encode('base64'))
+
+        fake_requests.get.return_value = MagicMock(json=lambda:{
+            'accounts': [
+                {
+                  "org": {
+                    "name": "My Bank",
+                    "domain": "mybank.com",
+                    "sfin-url": "https://sfin.mybank.com"
+                  },
+                  "id": "2930002",
+                  "name": "Savings",
+                  "currency": "USD",
+                  "balance": "100.23",
+                  "available-balance": "75.23",
+                  "balance-date": 978366153,
+                  "transactions": [
+                    {
+                        "id": "123456",
+                        "amount": "-25.00",
+                        "posted": 793090572,
+                        "description": "Somewhere",
+                    }
+                  ]
+                }
+            ]
+        })
+        result = api.simplefin_fetch()
+        acct = result['unknown_accounts'][0]
+        # match it up
+        account = api.create_account('Savings')
+        api.add_account_hash(account['id'], acct['hash'])
+        api.account_transact(account['id'], amount=7500)
+
+        # run fetch again to get the transactions
+        result = api.simplefin_fetch()
+
+        # check account balance
+        account = api.get_account(account['id'])
+        assert account['balance'] == 5000, "Should not update account balance"
+

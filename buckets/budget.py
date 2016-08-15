@@ -577,11 +577,16 @@ class BudgetManagement(object):
             return trans[0]
 
     @policy.use_common
-    def has_transactions(self):
+    def has_transactions(self, _account_id=None):
+        wheres = []
+        if _account_id is not None:
+            wheres.append(Account.c.id == _account_id)
         r = self.engine.execute(select([AccountTrans.c.id])
             .where(and_(
                 AccountTrans.c.account_id == Account.c.id,
-                Account.c.farm_id == self.farm_id))
+                Account.c.farm_id == self.farm_id,
+                *wheres
+            ))
             .limit(1))
         if r.fetchone():
             return True
@@ -1075,6 +1080,7 @@ class BudgetManagement(object):
                     'id': account_id,
                     'transactions': [],
                 }
+                has_transactions = self.has_transactions(_account_id=account_id)
                 ret['accounts'].append(this_ret)
                 transactions = []
                 for trans in account['transactions']:
@@ -1086,10 +1092,11 @@ class BudgetManagement(object):
                         fi_id=trans['id']))
                 this_ret['transactions'] = transactions
 
-                # update account balance
-                self.update_account(account_id, {
-                    'balance': moneystrtoint(account['balance']),
-                })
+                if not has_transactions:
+                    # update account balance on the first update
+                    self.update_account(account_id, {
+                        'balance': moneystrtoint(account['balance']),
+                    })
             else:
                 # no match
                 ret['unknown_accounts'].append({
