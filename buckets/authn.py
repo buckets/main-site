@@ -2,12 +2,14 @@ import sqlalchemy
 from sqlalchemy import select, and_, func
 
 from humancrypto import y2016
+from humancrypto.error import PasswordMatchesWrongYear
+from humancrypto.error import VerifyMismatchError
 
 from datetime import timedelta
 
-from buckets.error import NotFound
+from buckets.error import NotFound, VerificationError, Forbidden
 from buckets.schema import User, Farm, UserFarm, AuthToken
-from buckets.authz import AuthPolicy, anything
+from buckets.authz import AuthPolicy, anything, nothing
 
 
 class UserManagement(object):
@@ -126,6 +128,40 @@ class UserManagement(object):
             conn.execute(AuthToken.delete()
                 .where(AuthToken.c.id == token_id))
             return user_id
+
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    def set_pin(self, user_id, pin):
+        r = self.engine.execute(select([User.c._pin])
+            .where(User.c.id == user_id))
+        _pin = r.fetchone()[0]
+        if _pin:
+            raise Forbidden('PIN already set')
+        hashed = y2016.store_password(pin)
+        self.engine.execute(User.update()
+            .values(_pin=hashed)
+            .where(User.c.id == user_id))
+
+    @policy.allow(nothing)
+    def reset_pin(self, user_id):
+        self.engine.execute(User.update()
+            .values(_pin=None)
+            .where(User.c.id == user_id))
+
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    def verify_pin(self, user_id, pin):
+        r = self.engine.execute(select([User.c._pin])
+            .where(User.c.id == user_id))
+        _pin = r.fetchone()[0]
+        try:
+            y2016.verify_password(_pin, pin)
+        except PasswordMatchesWrongYear:
+            # re-hash it to improve security
+            new_pin = y2016.store_password(pin)
+            self.engine.execute(User.update()
+                .values(_pin=new_pin)
+                .where(User.c.id == user_id))
+        except VerifyMismatchError:
+            raise VerificationError('Incorrect PIN')
 
     @policy.allow(userOnly(lambda x:x['creator_id']))
     def create_farm(self, creator_id, name='Family'):

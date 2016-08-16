@@ -29,7 +29,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
       <div class="navlinks">
         {% if g.user %}
         <div class="user">{{ g.user.name }}</div>
-        <a href="{{ url_for('anon.signout') }}">Sign out</a>
+        {% block signoutlink %}<a href="{{ url_for('anon.signout') }}">Sign out</a>{% endblock %}
         {% endif %}
       </div>
     </header>

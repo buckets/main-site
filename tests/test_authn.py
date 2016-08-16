@@ -4,7 +4,7 @@ This module tests functions that register and authenticate users.
 
 import uuid
 import pytest
-from buckets.error import NotFound
+from buckets.error import NotFound, VerificationError, Forbidden
 from buckets.authn import UserManagement
 from buckets.mailing import DebugMailer
 
@@ -131,3 +131,28 @@ def test_signin_token_no_such_email(api):
     with pytest.raises(NotFound):
         api.generate_signin_token(-1)
 
+def test_set_pin(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '19405')
+    api.verify_pin(user['id'], '19405')
+
+def test_verify_pin_wrong(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '19405')
+    with pytest.raises(VerificationError):
+        api.verify_pin(user['id'], '20000')
+
+def test_set_pin_no_overwrite(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '19405')
+    with pytest.raises(Forbidden):
+        api.set_pin(user['id'], '29999')
+
+def test_reset_pin(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '2384')
+    api.reset_pin(user['id'])
+    api.set_pin(user['id'], '9999')
+    api.verify_pin(user['id'], '9999')
+    with pytest.raises(VerificationError):
+        api.verify_pin(user['id'], '2384')

@@ -9,6 +9,8 @@
 {% if g.show.reports %}<a {{ navlink('.reports') }}>Reports</a>{% endif %}
 {% endblock %}
 
+{% block signoutlink %}<a href="{{ url_for('app.maybe_signout') }}">Sign out</a>{% endblock %}
+
 {% block content_class %}hide-until-react{% endblock %}
 
 {% block extrahead %}

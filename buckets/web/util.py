@@ -1,7 +1,36 @@
+from flask import session
 from decimal import Decimal
 from datetime import datetime
 import sys
 import json
+import time
+
+import structlog
+logger = structlog.get_logger()
+
+PIN_LIFETIME = 30 * 60
+
+def bump_pin_expiration():
+    """
+    This assumes that you have already verified that the user has correctly
+    entered their PIN.
+
+    Bump the pin expiration so that they have more time.
+    """
+    logger.info('bump_pin_expiration')
+    session['pin_expiration'] = int(time.time()) + PIN_LIFETIME
+
+def clear_pin_expiration():
+    logger.info('clear_pin_expiration')
+    session.pop('pin_expiration', 0)
+
+def is_pin_expired():
+    """
+    Return True if the PIN entry has expired.
+    """
+    logger.info('is_pin_expired', exp=session.get('pin_expiration', 0))
+    return session.get('pin_expiration', 0) < time.time()
+
 
 def fmtMoney(xint, show_decimal=False, truncate=False):
     sys.stdout.flush()
