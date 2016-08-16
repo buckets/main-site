@@ -61,13 +61,15 @@ def before_request():
     if g.user['id'] not in [x['id'] for x in farm['users']]:
         abort(404)
 
+    logger.debug('farm.checkauth', is_pin_expired=is_pin_expired())
     if is_pin_expired():
-        redirect(url_for('app.pin'))
+        return redirect(url_for('app.pin'))
 
     g.db_conn = g.engine.connect()
     g.db_transaction = g.db_conn.begin()
     api = BudgetManagement(g.db_conn, g.farm_id)
     g.farm = api.policy.bindContext(g.auth_context)
+
 
 @blue.after_request
 def after_request(r):

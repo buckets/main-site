@@ -133,7 +133,9 @@ def test_signin_token_no_such_email(api):
 
 def test_set_pin(api, mkuser):
     user = mkuser()
+    assert api.has_pin(user['id']) == False
     api.set_pin(user['id'], '19405')
+    assert api.has_pin(user['id']) == True
     api.verify_pin(user['id'], '19405')
 
 def test_verify_pin_wrong(api, mkuser):
@@ -152,7 +154,9 @@ def test_reset_pin(api, mkuser):
     user = mkuser()
     api.set_pin(user['id'], '2384')
     api.reset_pin(user['id'])
+    assert api.has_pin(user['id']) == False
     api.set_pin(user['id'], '9999')
+    assert api.has_pin(user['id']) == True
     api.verify_pin(user['id'], '9999')
     with pytest.raises(VerificationError):
         api.verify_pin(user['id'], '2384')

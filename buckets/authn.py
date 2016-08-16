@@ -131,15 +131,21 @@ class UserManagement(object):
 
     @policy.allow(userOnly(lambda x:x['user_id']))
     def set_pin(self, user_id, pin):
-        r = self.engine.execute(select([User.c._pin])
-            .where(User.c.id == user_id))
-        _pin = r.fetchone()[0]
-        if _pin:
+        if self.has_pin(user_id):
             raise Forbidden('PIN already set')
         hashed = y2016.store_password(pin)
         self.engine.execute(User.update()
             .values(_pin=hashed)
             .where(User.c.id == user_id))
+
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    def has_pin(self, user_id):
+        r = self.engine.execute(select([User.c._pin])
+            .where(User.c.id == user_id))
+        if r.fetchone()[0]:
+            return True
+        else:
+            return False
 
     @policy.allow(nothing)
     def reset_pin(self, user_id):

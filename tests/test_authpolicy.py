@@ -127,6 +127,8 @@ def test_UserManagement(engine):
             'bob', 'sam', 'anon')
         world.forcall('set_pin', user_id=bob['id'], pin='foo').expect(
             'bob')
+        world.forcall('has_pin', user_id=bob['id']).expect(
+            'bob')
         world.forcall('verify_pin', user_id=bob['id'], pin='foo').expect(
             'bob')
         world.forcall('reset_pin', user_id=bob['id']).expect()
