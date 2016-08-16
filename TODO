@@ -16,13 +16,12 @@ Now:
   ☐ You can't directly set account balance -- there must be a transaction
     ☐ check update_account
   ☐ Handle 500 Internal Server Errors
-
-
+  ☐ PIN
+    ☐ Lock after many failed attempts
   
 
 Less critical:
   ☐ Update account balance/names
-  ☐ PIN
   ☐ Sign out
   ☐ bucket.html charts
   ☐ bucket.html month-by-month table

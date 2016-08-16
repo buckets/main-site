@@ -45,8 +45,6 @@ def auth(token):
 
         # sign in
         session['user_id'] = user_id
-
-        flash('You are signed in!')
     except NotFound:
         flash('Invalid or expired sign in link.', 'error')
         return redirect(url_for('.index'))

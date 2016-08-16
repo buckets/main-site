@@ -4,7 +4,8 @@ from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash, make_response, abort
 
 from buckets.budget import BudgetManagement
-from buckets.web.util import toJson, is_pin_expired
+from buckets.web.util import toJson, is_pin_expired, bump_pin_expiration
+from buckets.web.util import ask_for_pin
 
 import structlog
 logger = structlog.get_logger()
@@ -61,9 +62,12 @@ def before_request():
     if g.user['id'] not in [x['id'] for x in farm['users']]:
         abort(404)
 
-    logger.debug('farm.checkauth', is_pin_expired=is_pin_expired())
     if is_pin_expired():
-        return redirect(url_for('app.pin'))
+        if request.endpoint.split('.')[-1] in ['api', 'urlfor']:
+            abort(403)
+        return ask_for_pin()
+    else:
+        bump_pin_expiration()
 
     g.db_conn = g.engine.connect()
     g.db_transaction = g.db_conn.begin()

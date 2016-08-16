@@ -1,7 +1,9 @@
 from flask import Blueprint, g, url_for, abort, request
-from flask import redirect, render_template
+from flask import redirect, render_template, flash, session
 
+from buckets.error import VerificationError
 from buckets.web.util import is_pin_expired, clear_pin_expiration
+from buckets.web.util import bump_pin_expiration, ask_for_pin
 
 import structlog
 logger = structlog.get_logger()
@@ -20,8 +22,13 @@ def checkauth():
     if not g.user:
         return redirect('/')
     endpoint = request.endpoint.split('.')[-1]
-    if endpoint not in _no_pin_required and is_pin_expired():
-        return redirect(url_for('.pin'))
+    if endpoint in _no_pin_required:
+        pass
+    else:
+        if is_pin_expired():
+            return ask_for_pin()
+        else:
+            bump_pin_expiration()
 
 
 @blue.route('/')
@@ -43,9 +50,48 @@ def farms():
 
 
 @dont_require_pin
-@blue.route('/pin', methods=['GET'])
+@blue.route('/pin', methods=['GET', 'POST'])
 def pin():
-    return render_template('app/pin_entry.html')
+    if g.api.user.has_pin(user_id=g.user['id']):
+        if request.method == 'POST':
+            pin = request.form.get('pin', '')
+            try:
+                g.api.user.verify_pin(user_id=g.user['id'], pin=pin)
+                bump_pin_expiration()
+                flash('You are signed in.')
+                url = session.get('url_after_pin', '/')
+                return redirect(url)
+            except VerificationError:
+                flash('Wrong PIN.', 'error')
+                # XXX count wrong pin entries
+        return render_template('app/pin_entry.html')
+    else:
+        return redirect(url_for('.set_pin'))
+
+@dont_require_pin
+@blue.route('/pin/set', methods=['GET', 'POST'])
+def set_pin():
+    previous_pin = request.form.get('previous_pin', '')
+    if request.method == 'POST':
+        given = request.form.get('pin', '')
+        if len(given) != 4:
+            flash('Your PIN must be 4 digits', 'error')
+            previous_pin = None
+        else:
+            if previous_pin:
+                if previous_pin == given:
+                    # success set pin
+                    g.api.user.set_pin(user_id=g.user['id'], pin=given)
+                    flash('Your PIN is set.')
+                    return redirect(url_for('.pin'))
+                else:
+                    flash("The PINs didn't match.", 'error')
+                    previous_pin = None
+            else:
+                # entered first pin
+                previous_pin = given
+    return render_template('app/pin_create.html',
+        previous_pin=previous_pin)
 
 @dont_require_pin
 @blue.route('/maybe-signout', methods=['GET'])

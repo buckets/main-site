@@ -4,6 +4,7 @@ This module tests functions that register and authenticate users.
 
 import uuid
 import pytest
+import six
 from buckets.error import NotFound, VerificationError, Forbidden
 from buckets.authn import UserManagement
 from buckets.mailing import DebugMailer
@@ -137,6 +138,13 @@ def test_set_pin(api, mkuser):
     api.set_pin(user['id'], '19405')
     assert api.has_pin(user['id']) == True
     api.verify_pin(user['id'], '19405')
+
+def test_set_pin_unicode(api, mkuser):
+    user = mkuser()
+    assert api.has_pin(user['id']) == False
+    api.set_pin(user['id'], six.u('19405'))
+    assert api.has_pin(user['id']) == True
+    api.verify_pin(user['id'], six.u('19405'))
 
 def test_verify_pin_wrong(api, mkuser):
     user = mkuser()

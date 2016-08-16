@@ -1,6 +1,8 @@
 import sqlalchemy
 from sqlalchemy import select, and_, func
 
+import six
+
 from humancrypto import y2016
 from humancrypto.error import PasswordMatchesWrongYear
 from humancrypto.error import VerifyMismatchError
@@ -133,6 +135,8 @@ class UserManagement(object):
     def set_pin(self, user_id, pin):
         if self.has_pin(user_id):
             raise Forbidden('PIN already set')
+        if isinstance(pin, six.text_type):
+            pin = pin.encode()
         hashed = y2016.store_password(pin)
         self.engine.execute(User.update()
             .values(_pin=hashed)
@@ -155,6 +159,8 @@ class UserManagement(object):
 
     @policy.allow(userOnly(lambda x:x['user_id']))
     def verify_pin(self, user_id, pin):
+        if isinstance(pin, six.text_type):
+            pin = pin.encode()
         r = self.engine.execute(select([User.c._pin])
             .where(User.c.id == user_id))
         _pin = r.fetchone()[0]

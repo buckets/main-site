@@ -1,4 +1,4 @@
-from flask import session
+from flask import session, request, redirect, url_for
 from decimal import Decimal
 from datetime import datetime
 import sys
@@ -17,19 +17,25 @@ def bump_pin_expiration():
 
     Bump the pin expiration so that they have more time.
     """
-    logger.info('bump_pin_expiration')
     session['pin_expiration'] = int(time.time()) + PIN_LIFETIME
 
 def clear_pin_expiration():
-    logger.info('clear_pin_expiration')
     session.pop('pin_expiration', 0)
 
 def is_pin_expired():
     """
     Return True if the PIN entry has expired.
     """
-    logger.info('is_pin_expired', exp=session.get('pin_expiration', 0))
     return session.get('pin_expiration', 0) < time.time()
+
+def ask_for_pin():
+    """
+    Redirect to ask for pin and then come back.
+    """
+    if request.method == 'GET':
+        session['url_after_pin'] = request.url
+    return redirect(url_for('app.pin'))
+
 
 
 def fmtMoney(xint, show_decimal=False, truncate=False):

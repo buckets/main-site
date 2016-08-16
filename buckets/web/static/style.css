@@ -524,3 +524,30 @@ ol li {
 .money-input .computed-value.negative {
     color: rgba(231, 76, 60,1.0);
 }
+
+.numberpad {
+    width: 20rem;
+}
+.numberpad table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.numberpad input[type=password] {
+    font-size: 2rem;
+    width: 100%;
+    text-align: center;
+}
+.numberpad button {
+    font-size: 1.5rem;
+    width: 100%;
+}
+.numberpad td {
+    width: 33%;
+    border: 1px solid lightgrey;
+    font-size: 2rem;
+    padding: 1rem;
+    vertical-align: middle;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+}

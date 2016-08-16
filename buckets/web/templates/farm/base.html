@@ -77,6 +77,11 @@ function apiRequest(data, success) {
           func(args[0], args[1]);  
         })
       })
+    },
+    error: function(r, status, err) {
+      if (err === 'FORBIDDEN') {
+        location.reload();
+      }
     }
   });
 }
@@ -94,6 +99,11 @@ function url_for(endpoint, kwargs) {
     contentType: 'application/json',
     success: function(response) {
       d.resolve(response);
+    },
+    error: function(r, status, err) {
+      if (err === 'FORBIDDEN') {
+        location.reload();
+      }
     }
   })
   return d;
@@ -177,11 +187,9 @@ var MonthBar = React.createClass({
     this.setState({month: newmonth});
   },
   goBackOneMonth: function() {
-    console.log('hey');
     this.changeMonth(-1);
   },
   goForwardOneMonth: function() {
-    console.log('hey');
     this.changeMonth(1);
   },
   changeMonth: function(amount) {
@@ -198,8 +206,6 @@ var MonthBar = React.createClass({
   },
   render: function() {
     var month_warning = null;
-    console.log('month', this.props.month);
-    console.log('curre', this.props.real_current_month);
 
     if (formatDate(this.props.month) !== formatDate(this.props.real_current_month)) {
       var text = this.props.month < this.props.real_current_month ? "In the past" : "Future";
