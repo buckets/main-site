@@ -29,12 +29,19 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
       <div class="navlinks">
         {% if g.user %}
         <div class="user">{{ g.user.name }}</div>
-        {% block signoutlink %}<a href="{{ url_for('anon.signout') }}">Sign out</a>{% endblock %}
+        {% block signoutlink %}
+        {% if g.pin_valid %}
+          <a href="{{ url_for('app.maybe_signout') }}">Lock
+          <span class="subnote">0:09</span>
+          </a>
+        {% else %}
+          <a href="{{ url_for('anon.signout') }}">Sign out</a>
+        {% endif %}
+        {% endblock %}
         {% endif %}
       </div>
     </header>
     {% endblock %}
-    {%- block subheader -%}{%- endblock -%}
     <div class="flash-messages">
     {% with messages = get_flashed_messages(with_categories=True) %}
       {% if messages %}
@@ -46,6 +53,8 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
       {% endif %}
     {% endwith %}
     </div>
+
+    {%- block subheader -%}{%- endblock -%}
 
     {% block pre_content %}{% endblock %}
     <div class="main-content {% block content_class %}{% endblock %}">

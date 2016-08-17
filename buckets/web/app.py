@@ -1,7 +1,7 @@
 from flask import Blueprint, g, url_for, abort, request
 from flask import redirect, render_template, flash, session
 
-from buckets.error import VerificationError
+from buckets.error import VerificationError, AccountLocked
 from buckets.web.util import is_pin_expired, clear_pin_expiration
 from buckets.web.util import bump_pin_expiration, ask_for_pin
 
@@ -63,7 +63,8 @@ def pin():
                 return redirect(url)
             except VerificationError:
                 flash('Wrong PIN.', 'error')
-                # XXX count wrong pin entries
+            except AccountLocked:
+                return render_template('app/pin_locked.html')
         return render_template('app/pin_entry.html')
     else:
         return redirect(url_for('.set_pin'))

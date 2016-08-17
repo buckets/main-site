@@ -16,6 +16,7 @@ User = Table('user_', metadata,
     Column('want_newsletter', Boolean),
     Column('intro_completed', Boolean),
     Column('_pin', String),
+    Column('_pin_failures', Integer),
 )
 AuthToken = Table('user_auth_token', metadata,
     Column('id', Integer, primary_key=True),
@@ -120,7 +121,8 @@ patches['init'] = [
         last_login timestamp,
         want_newsletter boolean default 'f',
         intro_completed boolean default 'f',
-        _pin text
+        _pin text,
+        _pin_failures integer default 0
     )''',
     '''CREATE UNIQUE INDEX user_lower_email_idx
         ON user_(lower(email))''',

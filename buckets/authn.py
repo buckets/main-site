@@ -9,7 +9,8 @@ from humancrypto.error import VerifyMismatchError
 
 from datetime import timedelta
 
-from buckets.error import NotFound, VerificationError, Forbidden
+from buckets.error import NotFound, VerificationError, Forbidden, AccountLocked
+from buckets.error import DuplicateRegistration
 from buckets.schema import User, Farm, UserFarm, AuthToken
 from buckets.authz import AuthPolicy, anything, nothing
 
@@ -50,13 +51,15 @@ class UserManagement(object):
             return False
         return authorizer
 
-
     @policy.allow(anything)
     def create_user(self, email, name):
         email = email.lower()
-        r = self.engine.execute(User.insert()
-            .values(email=email, name=name)
-            .returning(User))
+        try:
+            r = self.engine.execute(User.insert()
+                .values(email=email, name=name)
+                .returning(User))
+        except sqlalchemy.exc.IntegrityError:
+            raise DuplicateRegistration()
         row = r.fetchone()
         return dict(row)
 
@@ -161,11 +164,19 @@ class UserManagement(object):
     def verify_pin(self, user_id, pin):
         if isinstance(pin, six.text_type):
             pin = pin.encode()
-        r = self.engine.execute(select([User.c._pin])
+        r = self.engine.execute(select([
+                User.c._pin,
+                User.c._pin_failures,
+            ])
             .where(User.c.id == user_id))
-        _pin = r.fetchone()[0]
+        _pin, _pin_failures = r.fetchone()
+        if _pin_failures >= 5:
+            raise AccountLocked()
         try:
             y2016.verify_password(_pin, pin)
+            self.engine.execute(User.update()
+                .values(_pin_failures=0)
+                .where(User.c.id == user_id))
         except PasswordMatchesWrongYear:
             # re-hash it to improve security
             new_pin = y2016.store_password(pin)
@@ -173,6 +184,9 @@ class UserManagement(object):
                 .values(_pin=new_pin)
                 .where(User.c.id == user_id))
         except VerifyMismatchError:
+            self.engine.execute(User.update()
+                .values(_pin_failures=User.c._pin_failures+1)
+                .where(User.c.id == user_id))
             raise VerificationError('Incorrect PIN')
 
     @policy.allow(userOnly(lambda x:x['creator_id']))

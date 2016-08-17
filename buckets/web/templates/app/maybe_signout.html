@@ -1,5 +1,7 @@
 {% extends 'app/base.html' %}
 
+{% block signoutlink %}<a href="{{ url_for('anon.signout') }}">Sign out</a>{% endblock %}
+
 {% block content %}
 <h1>You are (mostly) signed out.</h1>
 
@@ -8,6 +10,6 @@
 </p>
 
 <p>
-    Otherwise, if this is a personal computer, close this window and you'll only have to enter your PIN when you come back.
+    Otherwise, if this is a personal computer, close this window and you'll only have to enter your PIN when you <a href="/">come back.</a>
 </p>
 {% endblock %}

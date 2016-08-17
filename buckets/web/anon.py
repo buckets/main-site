@@ -1,9 +1,12 @@
 import structlog
+import time
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, session, flash, g
 from flask import redirect, url_for
-from buckets.error import NotFound
+from flask import current_app
+
+from buckets.error import NotFound, DuplicateRegistration
 from buckets.web.util import bump_pin_expiration, clear_pin_expiration
 
 blue = Blueprint('anon', __name__)
@@ -16,7 +19,13 @@ def index():
 def register():
     name = request.values['name']
     email = request.values['email']
-    user = g.api.user.create_user(email=email, name=name)
+    time.sleep(current_app.config.get('REGISTRATION_DELAY', 3))
+    try:
+        user = g.api.user.create_user(email=email, name=name)
+    except DuplicateRegistration:
+        flash('Account already registered', 'error')
+        return redirect('/')
+        
     logger.info('User registered', email=email)
     flash('You are registered!')
     

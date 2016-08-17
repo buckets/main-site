@@ -55,16 +55,31 @@ header .navlinks {
     justify-content: space-between;
 }
 header .navlinks a {
+    position: relative;
     margin: .25rem 1rem;
     padding: .5rem;
     text-decoration: none;
     color: rgba(127, 140, 141,1.0);
+    border-bottom: 3px solid transparent;
 }
 header .navlinks a:first-child {
+    margin-left: 0rem;
+}
+header .navlinks a:last-child {
+    margin-right: 0rem;
+}
+header .navlinks a:hover {
+    border-bottom-color: lightgrey;
 }
 header .navlinks a.active {
     color: rgba(41, 128, 185,1.0);
-    border-bottom: 3px solid rgba(41, 128, 185,1.0);
+    border-bottom-color: rgba(41, 128, 185,1.0);
+}
+header .navlinks .subnote {
+    position: absolute;
+    top: 1.6rem;
+    font-size: .6rem;
+    width: 150%;
 }
 header .navlinks div {
     margin: .25rem 1rem;

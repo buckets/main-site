@@ -20,6 +20,10 @@ ap.add_argument('-D', '--database',
     help='Database URL.  (env: DATABASE_URL)')
 ap.add_argument('-k', '--flask-secret-key',
     default=os.environ.get('FLASK_SECRET_KEY', str(uuid4())))
+ap.add_argument('--reg-delay',
+    type=int,
+    default=3,
+    help='Time registration takes (to prevent brute force attempts)')
 ap.add_argument('-H', '--host',
     default='127.0.0.1')
 ap.add_argument('-p', '--port',
@@ -43,7 +47,8 @@ app = configureApp(
     debug=args.debug,
     engine=engine,
     flask_secret_key=args.flask_secret_key,
-    postmark_key=None)
+    postmark_key=None,
+    registration_delay=args.reg_delay)
 
 #if __name__ == '__main__':
 app.run(args.host, args.port)

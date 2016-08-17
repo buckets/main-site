@@ -16,8 +16,10 @@ Now:
   ☐ You can't directly set account balance -- there must be a transaction
     ☐ check update_account
   ☐ Handle 500 Internal Server Errors
+  ☐ Handle 404
   ☐ PIN
     ☐ Lock after many failed attempts
+  ☐ Handle duplicate registration
   
 
 Less critical:

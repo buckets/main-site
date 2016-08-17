@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash, make_response, abort
 
+from buckets.authz import NotAuthorized
 from buckets.budget import BudgetManagement
 from buckets.web.util import toJson, is_pin_expired, bump_pin_expiration
 from buckets.web.util import ask_for_pin
@@ -56,7 +57,10 @@ def before_request():
     g.db_conn = None
     
     # authorized for this farm?
-    farm = g.api.user.get_farm(id=g.farm_id)
+    try:
+        farm = g.api.user.get_farm(id=g.farm_id)
+    except NotAuthorized:
+        abort(404)
     if not farm:
         abort(404)
     if g.user['id'] not in [x['id'] for x in farm['users']]:
