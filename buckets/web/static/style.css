@@ -139,13 +139,16 @@ header .navlinks div {
 .flash-messages .message .close {
     float: right;
 }
-.error {
+.message.error {
     background-color: rgba(231, 76, 60, 0.2);
     border-radius: 2px;
     color: rgba(231, 76, 60,1.0);
     margin-bottom: 1rem;
     margin-top: .5rem;
     padding: .75rem;
+}
+.message.error .close {
+    color: rgba(231, 76, 60,1.0);
 }
 .main-content {
     flex-grow: 1;

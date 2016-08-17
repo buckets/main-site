@@ -16,9 +16,10 @@ Now:
   ☐ You can't directly set account balance -- there must be a transaction
     ☐ check update_account
   ☐ Handle 500 Internal Server Errors
-  ☐ Handle 404
-  ☐ PIN
-    ☐ Lock after many failed attempts
+  ✔ Handle 404 @done (16-08-17 06:43)
+  ✔ PIN @done (16-08-17 06:43)
+    ✔ Lock after many failed attempts @done (16-08-17 06:43)
+    ☐ Timer showing log out (or at least warn)
   ☐ Handle duplicate registration
   
 
