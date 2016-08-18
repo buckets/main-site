@@ -98,4 +98,5 @@ def set_pin():
 @blue.route('/maybe-signout', methods=['GET'])
 def maybe_signout():
     clear_pin_expiration()
+    g.pin_valid = not is_pin_expired()
     return render_template('app/maybe_signout.html')
