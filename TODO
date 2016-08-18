@@ -16,7 +16,7 @@ Now:
   ☐ migration sql
   ☐ You can't directly set account balance -- there must be a transaction
     ☐ check update_account
-  ☐ Handle 500 Internal Server Errors
+  ☐ Email 500 Internal Server Errors to me.
   ✔ Handle 404 @done (16-08-17 06:43)
   ✔ PIN @done (16-08-17 06:43)
     ✔ Lock after many failed attempts @done (16-08-17 06:43)
