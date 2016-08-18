@@ -1,0 +1,50 @@
+{% macro pin_input(name='pin', id='pin-input') %}
+<div class="numberpad" id="{{ id }}">
+  <input type="password" name="{{ name }}" autofocus placeholder="PIN" maxlength="4" size="5">
+  <table>
+      <tr>
+          <td class="number" tabindex="0">7</td>
+          <td class="number" tabindex="0">8</td>
+          <td class="number" tabindex="0">9</td>
+      </tr>
+      <tr>
+          <td class="number" tabindex="0">4</td>
+          <td class="number" tabindex="0">5</td>
+          <td class="number" tabindex="0">6</td>
+      </tr>
+      <tr>
+          <td class="number" tabindex="0">1</td>
+          <td class="number" tabindex="0">2</td>
+          <td class="number" tabindex="0">3</td>
+      </tr>
+      <tr>
+          <td></td>
+          <td class="number" tabindex="0">0</td>
+          <td class="backspace" tabindex="0">&#x232b;</td>
+      </tr>
+  </table>
+  <button type="submit">Submit</button>
+  <script>
+  $(function() {
+    var pin_input = $('#{{ id }} input');
+    function bindUse(elem, func) {
+      elem.click(func);
+      elem.keypress(function(ev) {
+        if (ev.which === 13 || ev.which === 32 || ev.which === 0) {
+          func(ev);
+        }
+      })
+    }
+    bindUse($('#{{ id }} .number'), function(ev) {
+      var target = $(ev.target);
+      var value = $(ev.target).text();
+      pin_input.val((pin_input.val() + value).substr(0, 4));
+    });
+    bindUse($('#{{ id }} .backspace'), function(ev) {
+      var current = pin_input.val();
+      pin_input.val(current.substr(0, current.length-1));
+    });
+  });
+  </script>
+</div>
+{% endmacro %}

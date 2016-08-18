@@ -1,13 +1,18 @@
 import sqlalchemy
 from sqlalchemy import select, and_, func
 
+import six
+
 from humancrypto import y2016
+from humancrypto.error import PasswordMatchesWrongYear
+from humancrypto.error import VerifyMismatchError
 
 from datetime import timedelta
 
-from buckets.error import NotFound
+from buckets.error import NotFound, VerificationError, Forbidden, AccountLocked
+from buckets.error import DuplicateRegistration
 from buckets.schema import User, Farm, UserFarm, AuthToken
-from buckets.authz import AuthPolicy, anything
+from buckets.authz import AuthPolicy, anything, nothing
 
 
 class UserManagement(object):
@@ -46,13 +51,15 @@ class UserManagement(object):
             return False
         return authorizer
 
-
     @policy.allow(anything)
     def create_user(self, email, name):
         email = email.lower()
-        r = self.engine.execute(User.insert()
-            .values(email=email, name=name)
-            .returning(User))
+        try:
+            r = self.engine.execute(User.insert()
+                .values(email=email, name=name)
+                .returning(User))
+        except sqlalchemy.exc.IntegrityError:
+            raise DuplicateRegistration()
         row = r.fetchone()
         return dict(row)
 
@@ -126,6 +133,61 @@ class UserManagement(object):
             conn.execute(AuthToken.delete()
                 .where(AuthToken.c.id == token_id))
             return user_id
+
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    def set_pin(self, user_id, pin):
+        if self.has_pin(user_id):
+            raise Forbidden('PIN already set')
+        if isinstance(pin, six.text_type):
+            pin = pin.encode()
+        hashed = y2016.store_password(pin)
+        self.engine.execute(User.update()
+            .values(_pin=hashed)
+            .where(User.c.id == user_id))
+
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    def has_pin(self, user_id):
+        r = self.engine.execute(select([User.c._pin])
+            .where(User.c.id == user_id))
+        if r.fetchone()[0]:
+            return True
+        else:
+            return False
+
+    @policy.allow(nothing)
+    def reset_pin(self, user_id):
+        self.engine.execute(User.update()
+            .values(_pin=None)
+            .where(User.c.id == user_id))
+
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    def verify_pin(self, user_id, pin):
+        if isinstance(pin, six.text_type):
+            pin = pin.encode()
+        r = self.engine.execute(select([
+                User.c._pin,
+                User.c._pin_failures,
+            ])
+            .where(User.c.id == user_id))
+        _pin, _pin_failures = r.fetchone()
+        if _pin_failures >= 5:
+            raise AccountLocked()
+        try:
+            y2016.verify_password(_pin, pin)
+            self.engine.execute(User.update()
+                .values(_pin_failures=0)
+                .where(User.c.id == user_id))
+        except PasswordMatchesWrongYear:
+            # re-hash it to improve security
+            new_pin = y2016.store_password(pin)
+            self.engine.execute(User.update()
+                .values(_pin=new_pin)
+                .where(User.c.id == user_id))
+        except VerifyMismatchError:
+            self.engine.execute(User.update()
+                .values(_pin_failures=User.c._pin_failures+1)
+                .where(User.c.id == user_id))
+            raise VerificationError('Incorrect PIN')
 
     @policy.allow(userOnly(lambda x:x['creator_id']))
     def create_farm(self, creator_id, name='Family'):

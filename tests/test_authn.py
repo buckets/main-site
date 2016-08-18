@@ -4,7 +4,9 @@ This module tests functions that register and authenticate users.
 
 import uuid
 import pytest
-from buckets.error import NotFound
+import six
+from buckets.error import NotFound, VerificationError, Forbidden
+from buckets.error import AccountLocked, DuplicateRegistration
 from buckets.authn import UserManagement
 from buckets.mailing import DebugMailer
 
@@ -51,13 +53,13 @@ def test_create_user(api):
 def test_unique_email(api):
     email = random('hal', '@hal.com')
     api.create_user(email, 'hal')
-    with pytest.raises(Exception):
+    with pytest.raises(DuplicateRegistration):
         api.create_user(email, 'diffname')
 
 def test_unique_lowercase_email(api):
     email = random('randall', '@hal.com')
     api.create_user(email, 'hal')
-    with pytest.raises(Exception):
+    with pytest.raises(DuplicateRegistration):
         api.create_user(email.upper(), 'diffname')
 
 def test_get_user(api):
@@ -131,3 +133,69 @@ def test_signin_token_no_such_email(api):
     with pytest.raises(NotFound):
         api.generate_signin_token(-1)
 
+def test_set_pin(api, mkuser):
+    user = mkuser()
+    assert api.has_pin(user['id']) == False
+    api.set_pin(user['id'], '19405')
+    assert api.has_pin(user['id']) == True
+    api.verify_pin(user['id'], '19405')
+
+def test_set_pin_unicode(api, mkuser):
+    user = mkuser()
+    assert api.has_pin(user['id']) == False
+    api.set_pin(user['id'], six.u('19405'))
+    assert api.has_pin(user['id']) == True
+    api.verify_pin(user['id'], six.u('19405'))
+
+def test_verify_pin_wrong(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '19405')
+    with pytest.raises(VerificationError):
+        api.verify_pin(user['id'], '20000')
+
+def test_set_pin_no_overwrite(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '19405')
+    with pytest.raises(Forbidden):
+        api.set_pin(user['id'], '29999')
+
+def test_reset_pin(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '2384')
+    api.reset_pin(user['id'])
+    assert api.has_pin(user['id']) == False
+    api.set_pin(user['id'], '9999')
+    assert api.has_pin(user['id']) == True
+    api.verify_pin(user['id'], '9999')
+    with pytest.raises(VerificationError):
+        api.verify_pin(user['id'], '2384')
+
+def test_verify_pin_too_many_attempts(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '1234')
+    for i in range(5):
+        with pytest.raises(VerificationError):
+            api.verify_pin(user['id'], '6666')
+    
+    # additional attempts fail
+    with pytest.raises(AccountLocked):
+        api.verify_pin(user['id'], '5555')
+
+    # even the right one fails now
+    with pytest.raises(AccountLocked):
+        api.verify_pin(user['id'], '1234')
+
+def test_verify_pin_attempts_reset_on_success(api, mkuser):
+    user = mkuser()
+    api.set_pin(user['id'], '1234')
+    for i in range(4):
+        with pytest.raises(VerificationError):
+            api.verify_pin(user['id'], '6666')
+    
+    api.verify_pin(user['id'], '1234')
+
+    # should reset the count
+    with pytest.raises(VerificationError):
+        api.verify_pin(user['id'], '5555')
+    with pytest.raises(VerificationError):
+        api.verify_pin(user['id'], '5555')

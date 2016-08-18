@@ -55,16 +55,31 @@ header .navlinks {
     justify-content: space-between;
 }
 header .navlinks a {
+    position: relative;
     margin: .25rem 1rem;
     padding: .5rem;
     text-decoration: none;
     color: rgba(127, 140, 141,1.0);
+    border-bottom: 3px solid transparent;
 }
 header .navlinks a:first-child {
+    margin-left: 0rem;
+}
+header .navlinks a:last-child {
+    margin-right: 0rem;
+}
+header .navlinks a:hover {
+    border-bottom-color: lightgrey;
 }
 header .navlinks a.active {
     color: rgba(41, 128, 185,1.0);
-    border-bottom: 3px solid rgba(41, 128, 185,1.0);
+    border-bottom-color: rgba(41, 128, 185,1.0);
+}
+header .navlinks .subnote {
+    position: absolute;
+    top: 1.6rem;
+    font-size: .6rem;
+    width: 150%;
 }
 header .navlinks div {
     margin: .25rem 1rem;
@@ -124,13 +139,16 @@ header .navlinks div {
 .flash-messages .message .close {
     float: right;
 }
-.error {
+.message.error {
     background-color: rgba(231, 76, 60, 0.2);
     border-radius: 2px;
     color: rgba(231, 76, 60,1.0);
     margin-bottom: 1rem;
     margin-top: .5rem;
     padding: .75rem;
+}
+.message.error .close {
+    color: rgba(231, 76, 60,1.0);
 }
 .main-content {
     flex-grow: 1;
@@ -523,4 +541,31 @@ ol li {
 }
 .money-input .computed-value.negative {
     color: rgba(231, 76, 60,1.0);
+}
+
+.numberpad {
+    width: 20rem;
+}
+.numberpad table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.numberpad input[type=password] {
+    font-size: 2rem;
+    width: 100%;
+    text-align: center;
+}
+.numberpad button {
+    font-size: 1.5rem;
+    width: 100%;
+}
+.numberpad td {
+    width: 33%;
+    border: 1px solid lightgrey;
+    font-size: 2rem;
+    padding: 1rem;
+    vertical-align: middle;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
 }

@@ -4,9 +4,10 @@ import structlog
 logger = structlog.get_logger()
 
 from flask import Flask, session, g, request, redirect, url_for
+from flask import render_template
 
 from buckets.model import authProtectedAPI
-from buckets.web.util import all_filters
+from buckets.web.util import all_filters, is_pin_expired
 from buckets.mailing import PostmarkMailer, NoMailer
 
 f = Flask(__name__)
@@ -14,11 +15,13 @@ f.jinja_env.filters.update(all_filters)
 
 
 def configureApp(engine, flask_secret_key,
-        postmark_key=None, debug=False):
+        postmark_key=None, debug=False,
+        registration_delay=3):
     f.engine = engine
     f.config.update(
         DEBUG=debug,
-        SECRET_KEY=flask_secret_key)
+        SECRET_KEY=flask_secret_key,
+        REGISTRATION_DELAY=registration_delay)
     if debug:
         logger.info('Running in DEBUG MODE')
         f.jinja_env.cache_size = 0
@@ -47,6 +50,10 @@ def configureApp(engine, flask_secret_key,
     )
     return f
 
+@f.errorhandler(404)
+def handle_404(err):
+    return render_template('err404.html')
+
 
 @f.before_request
 def put_user_on_request():
@@ -57,6 +64,7 @@ def put_user_on_request():
     g.user = {}
     g.engine = f.engine
     g.debug = f.config['DEBUG']
+    g.pin_valid = not is_pin_expired()
 
     user_id = session.get('user_id', None)
     if user_id:

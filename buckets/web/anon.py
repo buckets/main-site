@@ -1,9 +1,13 @@
 import structlog
+import time
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, session, flash, g
 from flask import redirect, url_for
-from buckets.error import NotFound
+from flask import current_app
+
+from buckets.error import NotFound, DuplicateRegistration
+from buckets.web.util import bump_pin_expiration, clear_pin_expiration
 
 blue = Blueprint('anon', __name__)
 
@@ -15,12 +19,21 @@ def index():
 def register():
     name = request.values['name']
     email = request.values['email']
-    user = g.api.user.create_user(email=email, name=name)
+    time.sleep(current_app.config.get('REGISTRATION_DELAY', 3))
+    try:
+        user = g.api.user.create_user(email=email, name=name)
+    except DuplicateRegistration:
+        flash('Account already registered', 'error')
+        return redirect('/')
+        
     logger.info('User registered', email=email)
     flash('You are registered!')
     
     # sign in
     session['user_id'] = user['id']
+
+    # pretend they set their pin, too
+    bump_pin_expiration()
 
     return redirect('/')
 
@@ -38,8 +51,9 @@ def signin():
 def auth(token):
     try:
         user_id = g.api.user.user_id_from_signin_token(token=token)
+
+        # sign in
         session['user_id'] = user_id
-        flash('You are signed in!')
     except NotFound:
         flash('Invalid or expired sign in link.', 'error')
         return redirect(url_for('.index'))
@@ -49,6 +63,7 @@ def auth(token):
 @blue.route('/signout', methods=['GET'])
 def signout():
     session.pop('user_id')
+    clear_pin_expiration()
     flash('You have been signed out')
     return redirect('/')
 

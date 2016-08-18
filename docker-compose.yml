@@ -12,7 +12,7 @@ services:
     build:
       context: .
       dockerfile: dev/web.Dockerfile
-    command: /code/main.py --host 0.0.0.0 --port 5000
+    command: /code/main.py --host 0.0.0.0 --port 5000 --reg-delay 0
     volumes:
     - .:/code
     working_dir: /code

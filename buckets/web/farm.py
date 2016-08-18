@@ -3,8 +3,10 @@ from datetime import datetime, date, timedelta
 from flask import Blueprint, g, render_template, url_for, redirect
 from flask import request, flash, make_response, abort
 
+from buckets.authz import NotAuthorized
 from buckets.budget import BudgetManagement
-from buckets.web.util import toJson
+from buckets.web.util import toJson, is_pin_expired, bump_pin_expiration
+from buckets.web.util import ask_for_pin
 
 import structlog
 logger = structlog.get_logger()
@@ -55,16 +57,27 @@ def before_request():
     g.db_conn = None
     
     # authorized for this farm?
-    farm = g.api.user.get_farm(id=g.farm_id)
+    try:
+        farm = g.api.user.get_farm(id=g.farm_id)
+    except NotAuthorized:
+        abort(404)
     if not farm:
         abort(404)
     if g.user['id'] not in [x['id'] for x in farm['users']]:
         abort(404)
 
+    if is_pin_expired():
+        if request.endpoint.split('.')[-1] in ['api', 'urlfor']:
+            abort(403)
+        return ask_for_pin()
+    else:
+        bump_pin_expiration()
+
     g.db_conn = g.engine.connect()
     g.db_transaction = g.db_conn.begin()
     api = BudgetManagement(g.db_conn, g.farm_id)
     g.farm = api.policy.bindContext(g.auth_context)
+
 
 @blue.after_request
 def after_request(r):
