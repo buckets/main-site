@@ -104,10 +104,18 @@ UPDATE bucket as b
 
 -- fix bucket_transaction.posted
 DO $$
+DECLARE
+    r bucket_transaction%rowtype;
 BEGIN
+    FOR r IN
+        (SELECT *
+        FROM bucket_transaction
+        WHERE posted is NULL
+        ORDER BY created)
     LOOP
-        perform 'hey';
-        EXIT;
+        -- can do some processing here
+        RAISE NOTICE 'hey';
+        --NEXT r;
     END LOOP;
     RETURN;
 END;
