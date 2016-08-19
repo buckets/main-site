@@ -125,6 +125,7 @@ var Categorizer = React.createClass({
         <MoneyInput
           className="amount"
           value={cat.amount}
+          size="7"
           onChange={this.amountChangedHandler(cat)} />
         <a className="text-button" onClick={this.deleteCategoryHandler(cat)}>X</a>
       </div>)
@@ -374,7 +375,7 @@ var TransTable = React.createClass({
               <option value=""></option>{account_options}</select></td>
             <td><input ref={this.postedRef} type="date" {...this.propLink('posted')} /></td>
             <td><input type="text" {...this.propLink('memo')} /></td>
-            <td><MoneyInput value={this.state.amount} onChange={this.amountChanged} /></td>
+            <td><MoneyInput value={this.state.amount} onChange={this.amountChanged} size="7" /></td>
             <td><button onClick={this.createTransaction}>{add_label}</button></td>
           </tr>
           {transaction_rows}

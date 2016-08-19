@@ -1,0 +1,31 @@
+{% extends 'app/base.html' %}
+
+{% block extrahead %}
+{{ super() }}
+<style>
+.farm {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.farm .name {
+  padding: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block title %}Farms{% endblock %}
+
+{% block content %}
+<h1>Farms</h1>
+
+{% for farm in farms %}
+<div class="farm">
+  <a href="{{ url_for('farm.index', farm_id=farm.id) }}"><img src="/static/img/farms/small-farm.{{ farm.id % 6 }}.jpg" class="farm-logo"></a>
+  <a class="name" href="{{ url_for('farm.index', farm_id=farm.id) }}">{{ farm.name }}</a>
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -9,9 +9,14 @@
 {% if g.show.reports %}<a {{ navlink('.reports') }}>Reports</a>{% endif %}
 {% endblock %}
 
+{% block afteruserlinks %}
+<!-- <img src="/static/img/farms/small-farm.{{ g.farm.id % 6 }}.jpg" class="farm-logo small"> -->
+{% endblock %}
+
 {% block content_class %}hide-until-react{% endblock %}
 
 {% block extrahead %}
+{{ super() }}
 <script src="/static/js/vend/lodash.min.js"></script>
 <script src="/static/js/vend/jquery-3.1.0.min.js"></script>
 {% if g.debug or request.args.production %}

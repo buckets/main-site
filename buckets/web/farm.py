@@ -58,7 +58,7 @@ def before_request():
     
     # authorized for this farm?
     try:
-        farm = g.api.user.get_farm(id=g.farm_id)
+        g.farm = farm = g.api.user.get_farm(id=g.farm_id)
     except NotAuthorized:
         abort(404)
     if not farm:
@@ -76,7 +76,7 @@ def before_request():
     g.db_conn = g.engine.connect()
     g.db_transaction = g.db_conn.begin()
     api = BudgetManagement(g.db_conn, g.farm_id)
-    g.farm = api.policy.bindContext(g.auth_context)
+    g.farmapi = api.policy.bindContext(g.auth_context)
 
 
 @blue.after_request
@@ -93,18 +93,18 @@ def after_request(r):
 @blue.before_request
 def what_should_show():
     g.show = {
-        'connections': g.farm.has_connections(),
+        'connections': g.farmapi.has_connections(),
         'transactions': False,
         'buckets': False,
         'reports': False,
     }
-    if g.farm.has_transactions():
+    if g.farmapi.has_transactions():
         g.show.update({
             'transactions': True,
             'reports': True,
             'buckets': True,
         })
-    elif g.farm.has_accounts():
+    elif g.farmapi.has_accounts():
         g.show.update({
             'transactions': True,
             'buckets': True,
@@ -130,10 +130,10 @@ def index():
 def accounts():
     if request.method == 'POST':
         name = request.values['name']
-        g.farm.create_account(name=name)
+        g.farmapi.create_account(name=name)
         flash('Created account')
         return redirect(url_for('farm.accounts'))
-    accounts = g.farm.list_accounts(month=g.month)
+    accounts = g.farmapi.list_accounts(month=g.month)
     return render_template('farm/accounts.html',
         accounts=accounts)
 
@@ -142,11 +142,11 @@ def buckets():
     g.show['buckets'] = True
     if request.method == 'POST':
         name = request.values['name']
-        bucket = g.farm.create_bucket(name=name)
+        bucket = g.farmapi.create_bucket(name=name)
         flash('Created bucket')
         return redirect(url_for('farm.bucket', bucket_id=bucket['id']))
-    groups = g.farm.list_groups()
-    buckets = g.farm.list_buckets(month=g.month)
+    groups = g.farmapi.list_groups()
+    buckets = g.farmapi.list_buckets(month=g.month)
     return render_template('farm/buckets.html',
         groups=groups,
         buckets=buckets)
@@ -178,11 +178,11 @@ def bucket(bucket_id):
         else:
             data['end_date'] = None
         
-        g.farm.update_bucket(id=bucket_id, data=data)
+        g.farmapi.update_bucket(id=bucket_id, data=data)
         flash('{0} updated'.format(data['name']))
         return redirect(url_for('.buckets'))
-    bucket = g.farm.get_bucket(id=bucket_id, month=g.month)
-    transactions = g.farm.list_bucket_trans(bucket_id=bucket_id,
+    bucket = g.farmapi.get_bucket(id=bucket_id, month=g.month)
+    transactions = g.farmapi.list_bucket_trans(bucket_id=bucket_id,
         month=g.month)
     return render_template('farm/bucket.html',
         bucket=bucket,
@@ -192,7 +192,7 @@ def bucket(bucket_id):
 def groups():
     g.show['buckets'] = True
     name = request.form['name']
-    g.farm.create_group(name=name)
+    g.farmapi.create_group(name=name)
     flash('Group created')
     return redirect(url_for('.buckets'))
 
@@ -203,18 +203,18 @@ def group(group_id):
         data = {}
         data['name'] = request.form['name']
         
-        g.farm.update_group(id=group_id, data=data)
+        g.farmapi.update_group(id=group_id, data=data)
         flash('{0} updated'.format(data['name']))
         return redirect(url_for('.buckets'))
-    group = g.farm.get_group(id=group_id)
+    group = g.farmapi.get_group(id=group_id)
     return render_template('farm/group.html',
         group=group)
 
 @blue.route('/transactions')
 def transactions():
     g.show['transactions'] = True
-    buckets = g.farm.list_buckets(month=g.month)
-    accounts = g.farm.list_accounts(month=g.month)
+    buckets = g.farmapi.list_buckets(month=g.month)
+    accounts = g.farmapi.list_accounts(month=g.month)
     return render_template('farm/transactions.html',
         buckets=buckets,
         accounts=accounts)
@@ -224,11 +224,11 @@ def connections():
     g.show['connections'] = True
     if request.method == 'POST':
         token = request.form['token']
-        g.farm.simplefin_claim(token=token)
+        g.farmapi.simplefin_claim(token=token)
         flash("Connected")
         return redirect(url_for('.connections', fetch='yes'))
     else:
-        connections = g.farm.simplefin_list_connections()
+        connections = g.farmapi.simplefin_list_connections()
         do_fetch = request.values.get('fetch', '')
         return render_template('farm/connections.html',
             fetch=do_fetch,
@@ -238,8 +238,8 @@ def connections():
 def reports():
     g.show['reports'] = True
     starting = date.today() - timedelta(weeks=48)
-    account_summary = g.farm.monthly_account_summary(starting=starting)
-    bucket_summary = g.farm.monthly_bucket_summary(starting=starting)
+    account_summary = g.farmapi.monthly_account_summary(starting=starting)
+    bucket_summary = g.farmapi.monthly_bucket_summary(starting=starting)
     return render_template('farm/reports.html',
         account_summary=account_summary,
         bucket_summary=bucket_summary)
@@ -278,7 +278,7 @@ def api(label):
             # remove private vars
             if key.startswith('_'):
                 kwargs.pop(key)
-        m = getattr(g.farm, method)
+        m = getattr(g.farmapi, method)
         responses.append(m(**kwargs))
     
     if not multi:

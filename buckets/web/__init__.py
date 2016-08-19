@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+import traceback
 import structlog
 logger = structlog.get_logger()
 
@@ -54,6 +55,10 @@ def configureApp(engine, flask_secret_key,
 def handle_404(err):
     return render_template('err404.html')
 
+@f.errorhandler(500)
+def handle_500(err):
+    traceback.print_exc()
+    return err
 
 @f.before_request
 def put_user_on_request():

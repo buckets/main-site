@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 
 {% block extrahead %}
+{{ super() }}
 <script src="/static/js/vend/lodash.min.js"></script>
 <script src="/static/js/vend/jquery-3.1.0.min.js"></script>
 {% endblock %}
 
 {% block navlinks %}
+<a {{ navlink('.farms') }}>Farms</a>
 {% endblock %}
 
 {% block content %}

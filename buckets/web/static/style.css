@@ -53,6 +53,7 @@ header .navlinks {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
 }
 header .navlinks a {
     position: relative;
@@ -503,6 +504,7 @@ ol li {
     border-radius: 2px;
     font-size: .75rem;
     cursor: pointer;
+    margin-bottom: .1rem;
 }
 .category-tag .category-name {
     padding: .1rem .3rem .2rem;
@@ -512,7 +514,8 @@ ol li {
 }
 .category-tag .category-amount {
     padding: .1rem .3rem;
-    border-left: 1px solid white;
+    vertical-align: middle;
+    background-color: rgba(255,255,255,0.2);
 }
 
 
@@ -568,4 +571,15 @@ ol li {
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
+}
+
+img.farm-logo {
+    border-radius: 1000px;
+    height: 80px;
+    width: 80px;
+}
+img.farm-logo.small {
+    height: 32px;
+    width: 32px;
+    border: 3px solid rgba(52, 152, 219,1.0);
 }

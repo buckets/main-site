@@ -1,4 +1,4 @@
-from flask import Blueprint, g, url_for, abort, request
+from flask import Blueprint, g, url_for, request
 from flask import redirect, render_template, flash, session
 
 from buckets.error import VerificationError, AccountLocked
@@ -46,7 +46,9 @@ def index():
 
 @blue.route('/farms', methods=['GET'])
 def farms():
-    abort(500)
+    farms = g.api.user.list_farms(user_id=g.user['id'])
+    return render_template('app/farms.html',
+        farms=farms)
 
 
 @dont_require_pin
