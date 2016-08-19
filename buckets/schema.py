@@ -14,7 +14,6 @@ User = Table('user_', metadata,
     Column('name', String),
     Column('last_login', DateTime),
     Column('want_newsletter', Boolean),
-    Column('intro_completed', Boolean),
     Column('_pin', String),
     Column('_pin_failures', Integer),
 )
@@ -120,7 +119,6 @@ patches['init'] = [
         name text,
         last_login timestamp,
         want_newsletter boolean default 'f',
-        intro_completed boolean default 'f',
         _pin text,
         _pin_failures integer default 0
     )''',

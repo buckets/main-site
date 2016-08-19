@@ -1,0 +1,20 @@
+
+Set up connection:
+    
+    export DATABASE_URL="postgres://postgres:postgres@192.168.99.100:5432/postgres"
+
+Get the live dump:
+
+    ./getdump.sh
+
+Put it into the database
+
+    ./putdump.sh $DATABASE_URL
+
+Optionall wipe existing data
+
+    ./wipe.sh $DATABASE_URL
+
+Copy from old schema to new schema
+
+    ./convert.sh $DATABASE_URL
