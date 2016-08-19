@@ -95,6 +95,9 @@ UPDATE bucket_transaction as bt
     SET posted=at.posted
     FROM account_transaction as at
     WHERE bt.account_transaction_id = at.id;
+UPDATE bucket_transaction
+    SET posted=created
+    WHERE posted is null;
 
 -- bucket balance
 UPDATE bucket as b
@@ -103,24 +106,24 @@ UPDATE bucket as b
     WHERE b.id = oldb.id;
 
 -- fix bucket_transaction.posted
-DO $$
-DECLARE
-    r bucket_transaction%rowtype;
-BEGIN
-    FOR r IN
-        (SELECT *
-        FROM bucket_transaction
-        WHERE posted is NULL
-        ORDER BY created)
-    LOOP
-        -- can do some processing here
-        RAISE NOTICE 'hey';
-        --NEXT r;
-    END LOOP;
-    RETURN;
-END;
-$$
-LANGUAGE 'plpgsql';
+-- DO $$
+-- DECLARE
+--     r bucket_transaction%rowtype;
+-- BEGIN
+--     FOR r IN
+--         (SELECT *
+--         FROM bucket_transaction
+--         WHERE posted is NULL
+--         ORDER BY created)
+--     LOOP
+--         -- can do some processing here
+--         RAISE NOTICE 'hey';
+--         --NEXT r;
+--     END LOOP;
+--     RETURN;
+-- END;
+-- $$
+-- LANGUAGE 'plpgsql';
 
 -- simplefin_connection
 INSERT INTO simplefin_connection

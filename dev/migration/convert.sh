@@ -14,3 +14,5 @@ fi
 set -xe
 cat conversion.sql \
     | psql -v ON_ERROR_STOP=1 --echo-queries "$DATABASE_URL"
+
+
