@@ -21,7 +21,7 @@ Now:
   ✔ Handle 404 @done (16-08-17 06:43)
   ✔ PIN @done (16-08-17 06:43)
     ✔ Lock after many failed attempts @done (16-08-17 06:43)
-    ☐ Timer showing log out (or at least warn)
+    ✔ Timer showing log out (or at least warn) @done (16-08-19 23:09)
   ☐ Handle duplicate registration
   ☐ Tabbing through to categorize should work
   

@@ -64,6 +64,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     {% block footer %}<footer></footer>{% endblock %}
   </div>
 
+  {% if g.pin_valid %}
   <script>
   localStorage.setItem('pin_expiration', '{{ g.pin_expiration }}');
   window.addEventListener('storage', function(ev) {
@@ -73,24 +74,30 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     localStorage.setItem('pin_expiration', '' + newval);
     update_pin_expiration_notice();
   }
+  var expiration_check_interval = 20 * 1000;
   function update_pin_expiration_notice() {
     var pin_expiration = parseInt(localStorage.getItem('pin_expiration', '0'));
     var threshold = 5 * 60;
     var now = Date.now() / 1000.0;
-    if (now >= pin_expiration) {
+    var time_left = pin_expiration - now;
+    if (time_left <= 0) {
       // expired
       window.location.reload();
-    } else if ((now + threshold) >= pin_expiration) {
+    } else if (time_left <= threshold) {
       // about to expire
       document.getElementById('about-to-expire').setAttribute('class', 'showing');
+      if ((time_left * 1000) < expiration_check_interval) {
+        setTimeout(update_pin_expiration_notice, (time_left * 1000) + 2000);
+      }
     } else {
       document.getElementById('about-to-expire').setAttribute('class', '');
     }
   }
   setInterval(function() {
     update_pin_expiration_notice();
-  }, 20 * 1000);
+  }, expiration_check_interval);
   update_pin_expiration_notice();
   </script>
+  {% endif %}
 </body>
 </html>

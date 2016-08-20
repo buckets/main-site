@@ -64,6 +64,6 @@ def auth(token):
 def signout():
     session.pop('user_id')
     clear_pin_expiration()
-    flash('You have been signed out')
+    flash('You have been completely signed out')
     return redirect('/')
 
