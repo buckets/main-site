@@ -41,6 +41,19 @@ a {
     width: 960px;
     margin: 0 auto;
 }
+#about-to-expire {
+    visibility: hidden;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(241, 196, 15,1.0);
+    padding: .2rem 1rem;
+    font-size: 1rem;
+    text-align: center;
+}
+#about-to-expire.showing {
+    visibility: visible;
+}
 header {
     padding: .5rem 0;
     display: flex;

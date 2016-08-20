@@ -18,6 +18,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   {% block extrahead %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+  <div id="about-to-expire">This window has been sitting idle for a while. To protect your information, you will soon be signed out.</div>
   <div class="body-wrap">
     {% block header %}
     <header>
@@ -62,5 +63,34 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     {% block post_content %}{% endblock %}
     {% block footer %}<footer></footer>{% endblock %}
   </div>
+
+  <script>
+  localStorage.setItem('pin_expiration', '{{ g.pin_expiration }}');
+  window.addEventListener('storage', function(ev) {
+    update_pin_expiration_notice();
+  }, false);
+  window.update_pin_expiration = function(newval) {
+    localStorage.setItem('pin_expiration', '' + newval);
+    update_pin_expiration_notice();
+  }
+  function update_pin_expiration_notice() {
+    var pin_expiration = parseInt(localStorage.getItem('pin_expiration', '0'));
+    var threshold = 5 * 60;
+    var now = Date.now() / 1000.0;
+    if (now >= pin_expiration) {
+      // expired
+      window.location.reload();
+    } else if ((now + threshold) >= pin_expiration) {
+      // about to expire
+      document.getElementById('about-to-expire').setAttribute('class', 'showing');
+    } else {
+      document.getElementById('about-to-expire').setAttribute('class', '');
+    }
+  }
+  setInterval(function() {
+    update_pin_expiration_notice();
+  }, 20 * 1000);
+  update_pin_expiration_notice();
+  </script>
 </body>
 </html>

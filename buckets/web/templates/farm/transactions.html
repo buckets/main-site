@@ -93,6 +93,14 @@ var Categorizer = React.createClass({
       })
     }.bind(this)
   },
+  focusOnFirst: function(select) {
+    if (this._firstselect) {
+      return;
+    } else {
+      this._firstselect = select;
+      select.focus();
+    }
+  },
   render: function() {
     var bucket_options = this.props.buckets.map(function(bucket) {
       return (<option key={bucket.id} value={bucket.id}>{bucket.name}</option>);
@@ -116,6 +124,7 @@ var Categorizer = React.createClass({
       i += 1;
       return (<div key={i} className="category">
         <select
+          ref={this.focusOnFirst}
           className="bucket"
           value={cat.bucket_id}
           onChange={this.categoryChangedHandler(cat)}>
@@ -190,7 +199,12 @@ var TransRow = React.createClass({
           var style = {
             backgroundColor: bucket.color
           }
-          return (<div key={i} tabIndex="0" onClick={this.startCategorizing} className="category-tag" style={style}><div className="category-name">{name}</div>{amount_part}</div>);
+          return (<div
+            key={i}
+            tabIndex="0"
+            onClick={this.startCategorizing}
+            className="category-tag"
+            style={style}><div className="category-name">{name}</div>{amount_part}</div>);
         }.bind(this))
         categories_section = (<div>{labels}</div>);
       } else if (this.props.transaction.general_cat) {
@@ -199,7 +213,7 @@ var TransRow = React.createClass({
         categories_section = (<a tabIndex="0" onClick={this.startCategorizing}>{display}</a>);
       } else {
         // No categorization
-        categories_section = (<a tabIndex="0" onClick={this.startCategorizing}>Categorize</a>);
+        categories_section = (<a tabIndex="0" onClick={this.startCategorizing} onFocus={this.startCategorizing}>Categorize</a>);
       }
     }
     return (

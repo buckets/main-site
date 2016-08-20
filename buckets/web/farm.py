@@ -6,7 +6,7 @@ from flask import request, flash, make_response, abort
 from buckets.authz import NotAuthorized
 from buckets.budget import BudgetManagement
 from buckets.web.util import toJson, is_pin_expired, bump_pin_expiration
-from buckets.web.util import ask_for_pin
+from buckets.web.util import ask_for_pin, get_pin_expiration
 
 import structlog
 logger = structlog.get_logger()
@@ -285,4 +285,5 @@ def api(label):
         responses = responses[0]
     r = make_response(toJson(responses))
     r.headers['Content-Type'] = 'application/json'
+    r.headers['PIN-Expiration'] = get_pin_expiration()
     return r

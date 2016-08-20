@@ -8,7 +8,7 @@ from flask import Flask, session, g, request, redirect, url_for
 from flask import render_template
 
 from buckets.model import authProtectedAPI
-from buckets.web.util import all_filters, is_pin_expired
+from buckets.web.util import all_filters, is_pin_expired, get_pin_expiration
 from buckets.mailing import PostmarkMailer, NoMailer
 
 f = Flask(__name__)
@@ -70,6 +70,7 @@ def put_user_on_request():
     g.engine = f.engine
     g.debug = f.config['DEBUG']
     g.pin_valid = not is_pin_expired()
+    g.pin_expiration = get_pin_expiration()
 
     user_id = session.get('user_id', None)
     if user_id:

@@ -66,7 +66,11 @@ function apiRequest(data, success) {
     url: '{{ url_for('.api') }}-' + label,
     data: JSON.stringify(data),
     contentType: 'application/json',
-    success: function(response) {
+    success: function(response, status, request) {
+      // get expiration
+      var _pin_expiration = request.getResponseHeader('PIN-Expiration', 0);
+      window.pin_expiration = _pin_expiration;
+
       // call given success handler
       success(response);
 

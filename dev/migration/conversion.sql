@@ -139,23 +139,15 @@ INSERT INTO account_mapping
 
 
 -- fix sequences
-SELECT 'SELECT SETVAL(' ||
-       quote_literal(quote_ident(PGT.schemaname) || '.' || quote_ident(S.relname)) ||
-       ', COALESCE(MAX(' ||quote_ident(C.attname)|| '), 1) ) FROM ' ||
-       quote_ident(PGT.schemaname)|| '.'||quote_ident(T.relname)|| ';'
-FROM pg_class AS S,
-     pg_depend AS D,
-     pg_class AS T,
-     pg_attribute AS C,
-     pg_tables AS PGT
-WHERE S.relkind = 'S'
-    AND S.oid = D.objid
-    AND D.refobjid = T.oid
-    AND D.refobjid = C.attrelid
-    AND D.refobjsubid = C.attnum
-    AND T.relname = PGT.tablename
-ORDER BY S.relname;
-
+SELECT SETVAL('user__id_seq', COALESCE(MAX(id), 1)) FROM user_;
+SELECT SETVAL('farm_id_seq', COALESCE(MAX(id), 1)) FROM farm;
+SELECT SETVAL('account_id_seq', COALESCE(MAX(id), 1)) FROM account;
+SELECT SETVAL('account_transaction_id_seq', COALESCE(MAX(id), 1)) FROM account_transaction;
+SELECT SETVAL('bucket_group_id_seq', COALESCE(MAX(id), 1)) FROM bucket_group;
+SELECT SETVAL('bucket_id_seq', COALESCE(MAX(id), 1)) FROM bucket;
+SELECT SETVAL('bucket_transaction_id_seq', COALESCE(MAX(id), 1)) FROM bucket_transaction;
+SELECT SETVAL('simplefin_connection_id_seq', COALESCE(MAX(id), 1)) FROM simplefin_connection;
+SELECT SETVAL('account_mapping_id_seq', COALESCE(MAX(id), 1)) FROM account_mapping;
 
 -- stats
 select count(*), coalesce(general_cat, 'nothing') from account_transaction group by 2;

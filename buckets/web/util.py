@@ -22,6 +22,9 @@ def bump_pin_expiration():
 def clear_pin_expiration():
     session.pop('pin_expiration', 0)
 
+def get_pin_expiration():
+    return session.get('pin_expiration', 0)
+
 def is_pin_expired():
     """
     Return True if the PIN entry has expired.
