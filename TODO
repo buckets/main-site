@@ -15,15 +15,16 @@ Now:
   ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
   ✔ migration sql @done (16-08-19 22:14)
     ✔ Make sure sequences are correct @done (16-08-19 22:14)
-  ☐ You can't directly set account balance -- there must be a transaction
+  ☐ Make sure you can't directly set account balance -- there must be a transaction
     ☐ check update_account
   ☐ Email 500 Internal Server Errors to me.
+  ☐ Subscriptions
   ✔ Handle 404 @done (16-08-17 06:43)
   ✔ PIN @done (16-08-17 06:43)
     ✔ Lock after many failed attempts @done (16-08-17 06:43)
     ✔ Timer showing log out (or at least warn) @done (16-08-19 23:09)
-  ☐ Handle duplicate registration
-  ☐ Tabbing through to categorize should work
+  ✔ Handle duplicate registration @done (16-08-20 07:59)
+  ✔ Tabbing through to categorize should work @done (16-08-20 07:58)
   
 
 Less critical:

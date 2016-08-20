@@ -1,50 +1,201 @@
 {% extends 'base.html' %}
 
+{% block navlinks %}{% endblock %}
+
 {% block content %}
-<h1>Welcome to Buckets</h1>
-
-<div style="display: flex; justify-content: space-around; width: 100%;">
-
-  <div>
-    <h2>Sign in</h2>
-    <form method="post" action="{{ url_for('.signin') }}">
-      <div class="form">
-        <div class="pair">
-          <div class="label">Email address</div>
-          <div class="control"><input type="text" name="email" autofocus></div>
-        </div>
-        <div class="pair">
-          <div class="label"></div>
-          <div class="control"><button type="submit">Sign in</button></div>
-        </div>
-      </div>
-    </form>
+<style>
+.first-page {
+  min-height: 85vh;
+}
+.intro {
+  text-align: center;
+}
+.intro h1 {
+  font-size: 3rem;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.subtitle {
+  font-size: 1.5rem;
+}
+.tryitfree,
+.slogan-thingie {
+  border: 1px solid lightgrey;
+  border-width: 1px 0;
+  margin: 2rem;
+  padding: 1rem;
+}
+.signup {
+  display: flex;
+  justify-content: center;
+}
+.signup .item {
+  flex-basis: 1;
+  padding: 2rem;
+  margin: 1rem;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+  background-color: white;
+  box-shadow: -2px 2px 11px 0px rgba(0,0,0,0.2);
+  transition: transform .5s;
+}
+.signup .item h2 {
+  margin-top: 0;
+}
+.signup .item:first-child {
+  transform: rotateZ(-6deg) translateY(-70px);
+}
+.signup .item:last-child {
+  transform: rotateZ(7deg) translateX(5px) translateY(10px);
+}
+.signup .item.no-skew {
+  transform: none;
+}
+.pricing {
+  text-align: center;
+}
+.pricing .options {
+  display: flex;
+  justify-content: center;
+  margin: 1rem;
+}
+.pricing .option {
+  flex-basis: 1;
+  padding: 2rem;
+  margin: 0rem;
+  color: rgba(52, 152, 219,1.0);
+  border-radius: 3px;
+  border: 1px solid lightgrey;
+  border-width: 0 0 0 1px;
+}
+.pricing .option:first-child {
+  border-width: 0;
+}
+.pricing .title {
+  color: black;
+  margin-bottom: 1rem;
+  margin-top: -.5rem;
+}
+.pricing .amount {
+  font-size: 2rem;
+  display: inline;
+}
+.pricing .unit:before {
+  content: '/';
+}
+.pricing .unit {
+  display: inline-block;
+}
+.about {
+  text-align: center;
+  margin-top: 5rem;
+}
+.about p,
+.pricing p {
+  margin: 0 auto 2rem;
+  max-width: 25rem;
+  text-align: left;
+}
+</style>
+<div class="first-page">
+  <div class="intro">
+    <h1>Buckets</h1>
+    <div class="subtitle">Better family budgeting.</div>
+    <div class="slogan-thingie">You'll probably look forward to doing your budget now :)</div>
+    <div class="logo-image" style="position: relative;">
+      <img src="/static/img/bucket1.png" style="width: 180px;">
+    </div>
   </div>
 
+  <div class="signup">
 
-  <div>
-    <h2>Register</h2>
-    <form method="post" action="{{ url_for('.register') }}">
-      <div class="form">
-        <div class="pair">
-          <div class="label">Name</div>
-          <div class="control">
-            <input type="text" name="name">
+    <div class="item">
+      <h2>Sign in</h2>
+      <form method="post" action="{{ url_for('.signin') }}">
+        <div class="form">
+          <div class="pair">
+            <div class="label">Email address</div>
+            <div class="control"><input type="text" name="email" autofocus></div>
+          </div>
+          <div class="pair">
+            <div class="label"></div>
+            <div class="control"><button type="submit">Sign in</button></div>
           </div>
         </div>
-        <div class="pair">
-          <div class="label">Email address</div>
-          <div class="control">
-            <input type="text" name="email">
+      </form>
+    </div>
+
+    <div class="item">
+      <h2>Register</h2>
+      <form method="post" action="{{ url_for('.register') }}">
+        <div class="form">
+          <div class="pair">
+            <div class="label">Name</div>
+            <div class="control">
+              <input type="text" name="name">
+            </div>
+          </div>
+          <div class="pair">
+            <div class="label">Email address</div>
+            <div class="control">
+              <input type="text" name="email">
+            </div>
+          </div>
+          <div class="pair">
+            <div class="label"></div>
+            <div class="control"><button type="submit">Register</button></div>
           </div>
         </div>
-        <div class="pair">
-          <div class="label"></div>
-          <div class="control"><button type="submit">Register</button></div>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
+
   </div>
 
 </div>
+
+<div class="pricing">
+  <h2>Pricing</h2>
+
+  <div class="tryitfree">Try it free for 90 days.</div>
+
+  <div class="options">
+    <div class="option">
+      <div class="title">Monthly</div>
+      <div class="amount">$1.88</div>
+      <div class="unit">month</div>
+    </div>
+    <div class="option">
+      <div class="title">Yearly</div>
+      <div class="amount">$10.24</div>
+      <div class="unit">year</div>
+    </div>
+  </div>
+
+  <p>
+  You can switch from monthly to yearly at any time and cancel whenever you'd like&mdash;though you probably won't want to once you try it.
+  </p>
+</div>
+
+<div class="about">
+  <h2>About Buckets</h2>
+
+  <p>
+    Buckets is a budgeting app made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a> for his family.  We have used Buckets for years and love how it helps us manage our money.  What used to take hours now only takes a few minutes each month.
+  </p>
+
+  <p>
+    It's simple.  It's inexpensive.  It's kind of fun :)
+  </p>
+
+  <p>
+    Buckets is more secure than most other budgeting apps because
+    you are not required to enter your bank account credentials.
+  </p>
+
+  <p>
+    &copy; 2016 Buckets (a One Part Rain company)
+  </p>
+</div>
+
+<div class="intentionally-left-blank" style="margin-bottom: 3in;"></div>
 {% endblock %}
