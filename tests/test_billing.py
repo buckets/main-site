@@ -62,7 +62,7 @@ def test_set_credit_card(api, mkuser):
     assert api.has_current_payment_method(user['id']) is False
     api.set_credit_card(user['id'], creditcard())
     assert api.has_current_payment_method(user['id']) is True
-    cc_details = api.billing_details(user['id'])
+    cc_details = api.stripe_customer(user['id'])
     assert cc_details['last4'] == '4242'
     assert cc_details['exp_year'] == 2020
     assert cc_details['exp_month'] == 12
@@ -70,11 +70,11 @@ def test_set_credit_card(api, mkuser):
 def test_set_credit_card_update():
     user = mkuser()
     api.set_credit_card(user['id'], creditcard())
-    c1 = api._stripe_customer(user['id'])
+    c1 = api.stripe_customer(user['id'])
     api.set_credit_card(user['id'], creditcard('4111111111111111'))
-    c2 = api._stripe_customer(user['id'])
+    c2 = api.stripe_customer(user['id'])
     assert c1.id == c2.id, "Should reuse the customer"
-    cc_details = api.billing_details(user['id'])
+    cc_details = api.stripe_customer(user['id'])
     assert cc_details['last4'] == '1111'
     assert cc_details['exp_year'] == 2020
     assert cc_details['exp_month'] == 12
