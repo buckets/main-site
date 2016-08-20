@@ -33,14 +33,22 @@
   flex-basis: 1;
   padding: 2rem;
   margin: 1rem;
-  border: 1px solid lightgrey;
+  border: 0px solid lightgrey;
   border-radius: 3px;
   background-color: white;
   box-shadow: -2px 2px 11px 0px rgba(0,0,0,0.2);
   transition: transform .5s;
+  overflow: hidden;
 }
 .signup .item h2 {
-  margin-top: 0;
+  background-color: rgba(52, 152, 219,1.0);
+  color: white;
+  margin: -2rem -2rem 1rem;
+  padding: 1rem;
+  text-align: center;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 1rem;
 }
 .signup .item:first-child {
   transform: rotateZ(-6deg) translateY(-70px);
@@ -102,8 +110,8 @@
     <h1>Buckets</h1>
     <div class="subtitle">Better family budgeting.</div>
     <div class="slogan-thingie">You'll probably look forward to doing your budget now :)</div>
-    <div class="logo-image" style="position: relative;">
-      <img src="/static/img/bucket1.png" style="width: 180px;">
+    <div class="logo-image" style="position: relative; margin-top: -3rem;">
+      <img src="/static/img/bucketongrass-med.png" style="width: 600px;">
     </div>
   </div>
 
@@ -161,12 +169,12 @@
   <div class="options">
     <div class="option">
       <div class="title">Monthly</div>
-      <div class="amount">$1.88</div>
+      <div class="amount">$1.26</div>
       <div class="unit">month</div>
     </div>
     <div class="option">
       <div class="title">Yearly</div>
-      <div class="amount">$10.24</div>
+      <div class="amount">$10.14</div>
       <div class="unit">year</div>
     </div>
   </div>
