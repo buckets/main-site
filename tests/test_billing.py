@@ -7,7 +7,9 @@ import os
 import uuid
 import pytest
 import stripe as _stripelib
-from buckets.billing import BillingManagement
+
+from buckets.error import NotFound
+from buckets.billing import BillingManagement, unix2date
 from buckets.authn import UserManagement
 
 @pytest.fixture(scope='module')
@@ -24,6 +26,7 @@ def stripe():
 
 @pytest.yield_fixture(autouse=True, scope='module')
 def cleanup_stripe(stripe):
+    BillingManagement(None, stripe=stripe).sync_plans_with_stripe()
     yield
     try:
         customers = list(stripe.Customer.list())
@@ -37,18 +40,21 @@ def api(engine, stripe):
     return BillingManagement(engine=engine, stripe=stripe)
 
 @pytest.fixture
-def mkuser(engine):
-    user_api = UserManagement(engine, None, None)
+def user_api(engine):
+    return UserManagement(engine, None, None)
+
+@pytest.fixture
+def mkuser(user_api):
     def func():
         return user_api.create_user(random('', '@test.com'), 'test')
     return func
 
-def creditcard(self, number='4242424242424242'):
+def creditcard(number='4242424242424242', exp_month=12, exp_year=2020):
     return _stripelib.Token.create(
       card={
         "number": number,
-        "exp_month": 12,
-        "exp_year": 2020,
+        "exp_month": exp_month,
+        "exp_year": exp_year,
         "cvc": '123'
       },
     ).id
@@ -59,40 +65,138 @@ def random(prefix='', suffix=''):
 
 def test_set_credit_card(api, mkuser):
     user = mkuser()
-    assert api.has_current_payment_method(user['id']) is False
+    assert api.current_payment_method(user['id']) is None
     api.set_credit_card(user['id'], creditcard())
-    assert api.has_current_payment_method(user['id']) is True
-    cc_details = api.stripe_customer(user['id'])
-    assert cc_details['last4'] == '4242'
-    assert cc_details['exp_year'] == 2020
-    assert cc_details['exp_month'] == 12
+    card = api.current_payment_method(user['id'])
+    assert card['last4'] == '4242'
+    assert card['exp_year'] == 2020
+    assert card['exp_month'] == 12
 
-def test_set_credit_card_update():
+def test_set_credit_card_update(api, mkuser):
+    # set it once
     user = mkuser()
     api.set_credit_card(user['id'], creditcard())
     c1 = api.stripe_customer(user['id'])
-    api.set_credit_card(user['id'], creditcard('4111111111111111'))
+    
+    # set it again
+    api.set_credit_card(user['id'], creditcard('4111111111111111',
+        exp_month=8, exp_year=2021))
     c2 = api.stripe_customer(user['id'])
     assert c1.id == c2.id, "Should reuse the customer"
-    cc_details = api.stripe_customer(user['id'])
-    assert cc_details['last4'] == '1111'
-    assert cc_details['exp_year'] == 2020
-    assert cc_details['exp_month'] == 12
+    card = api.current_payment_method(user['id'])
+    assert card['last4'] == '1111'
+    assert card['exp_year'] == 2021
+    assert card['exp_month'] == 8
 
-def test_has_current_payment_method():
-    assert False, "write me"
+def test_set_subscription(api, mkuser, user_api):
+    user = mkuser()
+    farm = user_api.create_farm(user['id'])
+    api.set_credit_card(user['id'], creditcard())
+    api.set_subscription(user['id'], farm['id'], 'monthly')
+    cu = api.stripe_customer(user['id'])
+    assert cu.subscriptions.total_count == 1, "Should have a subscription"
+    sub = list(cu.subscriptions)[0]
+    assert sub.plan.id == api.PLANS['monthly']['id']
+    assert sub.quantity == 1
 
-def test_set_subscription():
-    assert False, "write me"
+    farm = user_api.get_farm(farm['id'])
+    assert farm['payer_id'] == user['id']
+    assert farm['service_expiration'] == unix2date(sub['current_period_end']).date()
+    assert farm['_stripe_sub_id'] == sub['id']
 
-def test_set_subscription_change():
-    assert False, "write me"
+def test_set_subscription_change_plan(api, mkuser, user_api):
+    user = mkuser()
+    farm = user_api.create_farm(user['id'])
+    api.set_credit_card(user['id'], creditcard())
+    api.set_subscription(user['id'], farm['id'], 'monthly')
+    api.set_subscription(user['id'], farm['id'], 'yearly')
 
-def test_cancel_subscription():
-    assert False, "write me"
+    cu = api.stripe_customer(user['id'])
+    assert cu.subscriptions.total_count == 1, "Should have 1 subscription"
+    sub = list(cu.subscriptions)[0]
+    assert sub.plan.id == api.PLANS['yearly']['id']
+    assert sub.quantity == 1
 
-def test_is_paid_for():
-    assert False, "write me"
+    farm = user_api.get_farm(farm['id'])
+    assert farm['payer_id'] == user['id']
+    assert farm['service_expiration'] == unix2date(sub['current_period_end']).date()
+    assert farm['_stripe_sub_id'] == sub['id']
 
-def test_get_billing_status():
-    assert False, "write me for a farm"
+def test_set_subscription_change_user(api, mkuser, user_api):
+    user1 = mkuser()
+    user2 = mkuser()
+    farm = user_api.create_farm(user1['id'])
+    user_api.add_user_to_farm(farm['id'], user2['id'])
+
+    api.set_credit_card(user1['id'], creditcard())
+    api.set_credit_card(user2['id'], creditcard())
+
+    api.set_subscription(user1['id'], farm['id'], 'monthly')
+    api.set_subscription(user2['id'], farm['id'], 'monthly')
+
+    cu1 = api.stripe_customer(user1['id'])
+    assert cu1.subscriptions.total_count == 0, "Should have canceled the subscription"
+
+    cu2 = api.stripe_customer(user2['id'])
+    sub = list(cu2.subscriptions)[0]
+    assert sub.plan.id == api.PLANS['monthly']['id']
+    assert sub.quantity == 1
+
+    farm = user_api.get_farm(farm['id'])
+    assert farm['payer_id'] == user2['id']
+    assert farm['service_expiration'] == unix2date(sub['current_period_end']).date()
+    assert farm['_stripe_sub_id'] == sub['id']
+
+def test_set_subscription_user_with_access_only(api, mkuser, user_api):
+    """
+    Only users with access to a farm can pay for it.  When you
+    figure out gift cards/payments, you can change this.
+    """
+    user1 = mkuser()
+    user2 = mkuser()
+    farm = user_api.create_farm(user1['id'])
+
+    api.set_credit_card(user1['id'], creditcard())
+    api.set_credit_card(user2['id'], creditcard())
+
+    api.set_subscription(user1['id'], farm['id'], 'monthly')
+    with pytest.raises(NotFound):
+        api.set_subscription(user2['id'], farm['id'], 'monthly')
+
+    cu1 = api.stripe_customer(user1['id'])
+    assert cu1.subscriptions.total_count == 1, "Should keep the subscription"
+
+def test_cancel_subscription(mkuser, api, user_api):
+    user = mkuser()
+    farm = user_api.create_farm(user['id'])
+    api.set_credit_card(user['id'], creditcard())
+    api.set_subscription(user['id'], farm['id'], 'monthly')
+    sub = api.cancel_subscription(farm['id'])
+
+    cu = api.stripe_customer(user['id'])
+    assert cu.subscriptions.total_count == 0, "Should have canceled the sub"
+    
+    farm = user_api.get_farm(farm['id'])
+    assert farm['payer_id'] == user['id']
+    assert farm['service_expiration'] == unix2date(sub['current_period_end']).date()
+    assert farm['_stripe_sub_id'] == sub['id']
+
+def test_sync_service_expiration(mkuser, api, user_api, engine):
+    user = mkuser()
+    farm = user_api.create_farm(user['id'])
+    api.set_credit_card(user['id'], creditcard())
+    api.set_subscription(user['id'], farm['id'], 'monthly')
+    sub = api.cancel_subscription(farm['id'])
+
+    cu = api.stripe_customer(user['id'])
+    assert cu.subscriptions.total_count == 0, "Should have canceled the sub"
+    
+    engine.execute('UPDATE farm set service_expiration = null where id=%s',
+        (farm['id'],))
+
+    api.sync_service_expiration(farm['id'])
+
+    farm = user_api.get_farm(farm['id'])
+    assert farm['payer_id'] == user['id']
+    assert farm['service_expiration'] == unix2date(sub['current_period_end']).date()
+    assert farm['_stripe_sub_id'] == sub['id']

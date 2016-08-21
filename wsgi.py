@@ -20,6 +20,8 @@ from buckets.web import configureApp
 DATABASE_URL = os.environ['OPENSHIFT_POSTGRESQL_DB_URL']
 FLASK_SECRET_KEY = os.environ['FLASK_SECRET_KEY']
 POSTMARK_KEY = os.environ['POSTMARK_KEY']
+STRIPE_API_KEY = os.environ['STRIPE_API_KEY']
+STRIPE_PUBLIC_KEY = os.environ['STRIPE_PUBLIC_KEY']
 
 engine = create_engine(DATABASE_URL)
 while True:
@@ -35,4 +37,6 @@ application = configureApp(
     engine=engine,
     flask_secret_key=FLASK_SECRET_KEY,
     debug=False,
-    postmark_key=POSTMARK_KEY)
+    postmark_key=POSTMARK_KEY,
+    stripe_api_key=STRIPE_API_KEY,
+    stripe_public_key=STRIPE_PUBLIC_KEY)

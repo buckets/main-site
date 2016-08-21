@@ -1,6 +1,7 @@
 from buckets.authn import UserManagement
 from buckets.budget import BudgetManagement
 from buckets.mailing import DebugMailer
+from buckets.billing import BillingManagement
 
 import uuid
 
@@ -132,6 +133,27 @@ def test_UserManagement(engine):
         world.forcall('verify_pin', user_id=bob['id'], pin='foo').expect(
             'bob')
         world.forcall('reset_pin', user_id=bob['id']).expect()
+
+
+
+def test_BillingManagement(engine):
+    user = UserManagement(engine, mailer=DebugMailer(),
+        signin_urlmaker=None)
+    bob = user.create_user(random('bob', '@bob.com'), 'bob')
+    sam = user.create_user(random('sam', '@sam.com'), 'sam')
+
+    bobs_farm = user.create_farm(creator_id=bob['id'])
+
+    contexts = {
+        'bob': {'user_id': bob['id']},
+        'sam': {'user_id': sam['id']},
+        'anon': {},
+    }
+
+    api = BillingManagement(engine, stripe=None)
+    with World(api.policy, contexts) as world:
+        bobs_farm
+        world
 
 
 def test_BudgetManagement(engine):

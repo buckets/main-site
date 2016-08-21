@@ -1,6 +1,7 @@
 from flask import Blueprint, g, url_for, request
 from flask import redirect, render_template, flash, session
 
+from buckets.billing import BillingManagement
 from buckets.error import VerificationError, AccountLocked
 from buckets.web.util import is_pin_expired, clear_pin_expiration
 from buckets.web.util import bump_pin_expiration, ask_for_pin
@@ -44,12 +45,42 @@ def index():
     else:
         return redirect(url_for('farm.index', farm_id=farms[0]['id']))
 
+@blue.route('/billing', methods=['GET'])
+def billing():
+    return render_template('app/billing.html',
+        payment_method=g.api.billing.current_payment_method(
+            user_id=g.user['id']))
+
+@blue.route('/cc', methods=['POST'])
+def set_credit_card():
+    token = request.form['stripeToken']
+    g.api.billing.set_credit_card(
+        user_id=g.user['id'],
+        token=token)
+    flash('Credit card securely saved.')
+    url = session.pop('after_card', url_for('.billing'))
+    return redirect(url)
+
 @blue.route('/farms', methods=['GET'])
 def farms():
     farms = g.api.user.list_farms(user_id=g.user['id'])
     return render_template('app/farms.html',
-        farms=farms)
+        farms=farms,
+        plans=BillingManagement.PLANS)
 
+@blue.route('/farms/<int:farm_id>/subscription', methods=['POST'])
+def farm_subscription(farm_id):
+    cc = g.api.billing.current_payment_method(user_id=g.user['id'])
+    if not cc:
+        session['after_card'] = url_for('.farms')
+        return redirect(url_for('.billing'))
+    else:
+        g.api.billing.set_subscription(
+            user_id=g.user['id'],
+            farm_id=farm_id,
+            plan=request.form['plan'])
+        flash("Subscription updated!")
+        return redirect(url_for('.farms'))
 
 @dont_require_pin
 @blue.route('/pin', methods=['GET', 'POST'])

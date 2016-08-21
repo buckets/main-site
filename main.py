@@ -20,6 +20,10 @@ ap.add_argument('-D', '--database',
     help='Database URL.  (env: DATABASE_URL)')
 ap.add_argument('-k', '--flask-secret-key',
     default=os.environ.get('FLASK_SECRET_KEY', str(uuid4())))
+ap.add_argument('--stripe-api-key',
+    default=os.environ.get('STRIPE_API_KEY', ''))
+ap.add_argument('--stripe-public-key',
+    default=os.environ.get('STRIPE_PUBLIC_KEY', ''))
 ap.add_argument('--reg-delay',
     type=int,
     default=3,
@@ -48,7 +52,9 @@ app = configureApp(
     engine=engine,
     flask_secret_key=args.flask_secret_key,
     postmark_key=None,
-    registration_delay=args.reg_delay)
+    registration_delay=args.reg_delay,
+    stripe_api_key=args.stripe_api_key,
+    stripe_public_key=args.stripe_public_key)
 
-#if __name__ == '__main__':
-app.run(args.host, args.port)
+if __name__ == '__main__':
+    app.run(args.host, args.port)

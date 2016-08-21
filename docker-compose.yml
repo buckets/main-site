@@ -24,3 +24,5 @@ services:
       DEBUG:
       FLASK_SECRET_KEY:
       DATABASE_URL: postgres://postgres:postgres@postgres/postgres
+      STRIPE_API_KEY:
+      STRIPE_PUBLIC_KEY:

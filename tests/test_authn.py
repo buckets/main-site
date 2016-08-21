@@ -10,7 +10,7 @@ from buckets.error import AccountLocked, DuplicateRegistration
 from buckets.authn import UserManagement
 from buckets.mailing import DebugMailer
 
-from datetime import timedelta
+from datetime import timedelta, date
 
 from sqlalchemy import func
 
@@ -46,7 +46,6 @@ def test_create_user(api):
     assert user['name'] == 'jim'
     assert user['created'] is not None
     assert user['want_newsletter'] == False
-    assert user['intro_completed'] == False
     assert user['_pin'] is None
     assert user['last_login'] is None
 
@@ -74,9 +73,24 @@ def test_create_farm(api, mkuser):
     assert farm['created'] is not None
     assert farm['name'] == 'name'
     assert farm['creator_id'] == user['id']
+    assert farm['payer_id'] is None
+    assert farm['service_expiration'] == date.today() + timedelta(days=90)
     assert len(farm['users']) == 1
     assert farm['users'][0]['id'] == user['id']
     assert farm['users'][0]['name'] == user['name']
+
+def test_add_user_to_farm(api, mkuser):
+    user1 = mkuser()
+    user2 = mkuser()
+    farm = api.create_farm(user1['id'], 'name')
+    assert len(api.list_farms(user2['id'])) == 0
+    api.add_user_to_farm(farm['id'], user2['id'])
+    assert len(api.list_farms(user2['id'])) == 1
+    api.remove_user_from_farm(farm['id'], user2['id'])
+    assert len(api.list_farms(user2['id'])) == 0
+
+def test_add_user_to_farm_twice(api, mkuser):
+    assert False, "Write me"
 
 def test_list_farms(api, mkuser):
     user = mkuser()
@@ -89,6 +103,14 @@ def test_create_farm_default_name(api, mkuser):
     user = mkuser()
     farm = api.create_farm(user['id'])
     assert farm['name'] == 'Family'
+
+def test_is_paid_for(api, mkuser, engine):
+    user = mkuser()
+    farm = api.create_farm(user['id'])
+    assert api.is_paid_for(farm['id']) is True
+    engine.execute("UPDATE farm set service_expiration='2001-01-01' where id=%s;",
+        (farm['id'],))
+    assert api.is_paid_for(farm['id']) is False
 
 def test_signin(api, mailer, mkuser):
     user = mkuser()

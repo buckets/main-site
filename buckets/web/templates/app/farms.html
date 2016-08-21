@@ -7,11 +7,13 @@
   display: flex;
   width: 100%;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
 }
+.farm > * {
+  margin: 1rem;
+}
 .farm .name {
-  padding: 1rem;
 }
 </style>
 {% endblock %}
@@ -23,8 +25,36 @@
 
 {% for farm in farms %}
 <div class="farm">
-  <a href="{{ url_for('farm.index', farm_id=farm.id) }}"><img src="/static/img/farms/small-farm.{{ farm.id % 6 }}.jpg" class="farm-logo"></a>
   <a class="name" href="{{ url_for('farm.index', farm_id=farm.id) }}">{{ farm.name }}</a>
+  <div class="pair">
+    <div class="label">Expiration</div>
+    <div class="value">{{ farm.service_expiration }}</div>
+  </div>
+  <div class="pair">
+    <div class="label">Subscription</div>
+    <div class="value">
+    {% if farm.payer_id == g.user.id or not farm.payer_id %}
+      <form method="post" action="{{ url_for('.farm_subscription', farm_id=farm.id) }}">
+        HEY MATT XXX, you need to display the actual subscription information here:
+        <input type="radio" name="plan" value="monthly" checked> ${{ plans.monthly.amount|money }}/month
+        <br/>
+        <input type="radio" name="plan" value="yearly"> ${{ plans.yearly.amount|money }}/year
+        <br/>
+        <button type="submit">
+          {%- if not farm.payer_id -%}
+            Start paying
+          {%- else -%}
+            Update
+          {%- endif -%}
+        </button>
+      </form>
+    {% elif farm.payer_id %}
+      Someone else is paying
+    {% else %}
+      
+    {% endif %}
+    </div>
+  </div>
 </div>
 {% endfor %}
 

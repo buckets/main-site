@@ -312,16 +312,16 @@ div.toolbar {
 .toolbar > *:first-child {
     margin-left: 0;
 }
-.toolbar .pair {
+.pair {
     display: flex;
     flex-direction: column;
 }
-.toolbar .pair .label {
+.pair .label {
     font-size: .8rem;
     color: rgba(127, 140, 141,1.0);
     position: relative;
 }
-.toolbar .pair .note {
+.pair .note {
     display: inline-block;
     position: relative;
     top: -1px;
@@ -333,7 +333,7 @@ div.toolbar {
     background-color: rgba(22, 160, 133,1.0);
     color: white;
 }
-.toolbar .pair .note.warning {
+.pair .note.warning {
     background-color: rgba(155, 89, 182,1.0);
 }
 

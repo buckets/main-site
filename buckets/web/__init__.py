@@ -2,6 +2,7 @@ from uuid import uuid4
 
 import traceback
 import structlog
+import stripe
 logger = structlog.get_logger()
 
 from flask import Flask, session, g, request, redirect, url_for
@@ -16,13 +17,17 @@ f.jinja_env.filters.update(all_filters)
 
 
 def configureApp(engine, flask_secret_key,
-        postmark_key=None, debug=False,
+        postmark_key,
+        stripe_api_key,
+        stripe_public_key,
+        debug=False,
         registration_delay=3):
     f.engine = engine
     f.config.update(
         DEBUG=debug,
         SECRET_KEY=flask_secret_key,
-        REGISTRATION_DELAY=registration_delay)
+        REGISTRATION_DELAY=registration_delay,
+        STRIPE_PUBLIC_KEY=stripe_public_key)
     if debug:
         logger.info('Running in DEBUG MODE')
         f.jinja_env.cache_size = 0
@@ -38,7 +43,16 @@ def configureApp(engine, flask_secret_key,
         logger.warning('No email token -- using debug mailer')
         mailer = NoMailer()
 
-    f._unbound_api = authProtectedAPI(engine, mailer)
+    # stripe
+    if debug and 'test' not in stripe_api_key:
+        raise Exception('Test Stripe key must be used in debug mode')
+    elif not debug and 'test' in stripe_api_key:
+        logger.warning('Using test Stripe key in production mode')
+    if 'test' in stripe_api_key:
+        logger.warning('Using test Stripe key')
+    stripe.api_key = stripe_api_key
+
+    f._unbound_api = authProtectedAPI(engine, mailer, stripe=stripe)
 
     structlog.configure(
         processors=[

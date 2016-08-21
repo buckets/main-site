@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, session, flash, g
 from flask import redirect, url_for
 from flask import current_app
 
+from buckets.billing import BillingManagement
 from buckets.error import NotFound, DuplicateRegistration
 from buckets.web.util import bump_pin_expiration, clear_pin_expiration
 
@@ -13,7 +14,8 @@ blue = Blueprint('anon', __name__)
 
 @blue.route('/home')
 def index():
-    return render_template('anon/index.html')
+    return render_template('anon/index.html',
+        plans=BillingManagement.PLANS)
 
 @blue.route('/register', methods=['POST'])
 def register():

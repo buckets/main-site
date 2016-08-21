@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import DateTime, String, Integer, Boolean, Date
 
+from datetime import date, timedelta
 
 from collections import OrderedDict
 
@@ -31,6 +32,9 @@ Farm = Table('farm', metadata,
     Column('created', DateTime),
     Column('creator_id', Integer),
     Column('name', String),
+    Column('payer_id', Integer),
+    Column('service_expiration', Date, default=lambda:date.today()+timedelta(days=60)),
+    Column('_stripe_sub_id', String),
 )
 UserFarm = Table('user_farm_join', metadata,
     Column('user_id', Integer, primary_key=True),
@@ -160,7 +164,10 @@ patches['init'] = [
         id serial primary key,
         created timestamp default current_timestamp,
         creator_id integer,
-        name text
+        name text,
+        payer_id integer,
+        service_expiration date,
+        _stripe_sub_id text
     )''',
     '''CREATE TABLE user_farm_join (
         user_id integer REFERENCES user_ ON DELETE RESTRICT,

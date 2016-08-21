@@ -201,6 +201,16 @@ class UserManagement(object):
                 .values(farm_id=farm_id, user_id=creator_id))
         return self.get_farm(farm_id)
 
+    def add_user_to_farm(self, farm_id, user_id):
+        self.engine.execute(UserFarm.insert()
+            .values(user_id=user_id, farm_id=farm_id))
+
+    def remove_user_from_farm(self, farm_id, user_id):
+        self.engine.execute(UserFarm.delete()
+            .where(and_(
+                UserFarm.c.user_id == user_id,
+                UserFarm.c.farm_id == farm_id)))
+
     @policy.allow(farmHandOnly(lambda x:x['id']))
     def get_farm(self, id):
         r = self.engine.execute(
@@ -224,4 +234,9 @@ class UserManagement(object):
                 UserFarm.c.user_id == user_id)))
         farm_ids = [x[0] for x in r.fetchall()]
         return [self.get_farm(x) for x in farm_ids]
+
+    def is_paid_for(self, farm_id):
+        return self.engine.execute(
+            select([Farm.c.service_expiration >= func.now()])
+            .where(Farm.c.id == farm_id)).fetchone()[0] == True
 
