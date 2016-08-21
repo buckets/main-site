@@ -19,6 +19,9 @@ Now:
     ☐ check update_account
   ☐ Email 500 Internal Server Errors to me.
   ☐ Subscriptions
+    ☐ Show current subscription
+    ☐ Lock people out for non-payment (with some leeway)
+    ☐ 
   ✔ Handle 404 @done (16-08-17 06:43)
   ✔ PIN @done (16-08-17 06:43)
     ✔ Lock after many failed attempts @done (16-08-17 06:43)
