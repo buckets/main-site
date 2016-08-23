@@ -2,24 +2,27 @@
 
 -- user_
 INSERT INTO user_
-    (id, created, email, email_verified, name, last_login, want_newsletter)
-    (SELECT id, created, email, email_verified, name, last_login, want_newsletter
+    (id, created, email, email_verified, name, last_login, want_newsletter, _stripe_customer_id)
+    (SELECT id, created, email, email_verified, name, last_login, want_newsletter, stripe_customer_id
     FROM oldschema.user_account);
 
 -- user_auth_token - NOTHING TO DO
 
 -- farm
 INSERT INTO farm
-    (id, created, creator_id, name)
+    (id, created, creator_id, name, service_expiration)
     (SELECT
         f.id,
         f.created,
         u.id,
-        f.name
+        f.name,
+        s.expiration_date
     FROM
         oldschema.farm as f
         left join oldschema.user_account as u
-            on f.primary_email = u.email);
+            on f.primary_email = u.email
+        left join oldschema.farm_subscription as s
+            on f.subscription_id = s.id);
 
 -- user_farm_join
 INSERT INTO user_farm_join

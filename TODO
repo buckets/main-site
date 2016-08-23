@@ -19,9 +19,9 @@ Now:
     ☐ check update_account
   ☐ Email 500 Internal Server Errors to me.
   ☐ Subscriptions
-    ☐ Show current subscription
+    ✔ Show current subscription @done (16-08-23 12:52)
     ☐ Lock people out for non-payment (with some leeway)
-    ☐ 
+    ☐ Make sure expiration date stays in sync (either with webhooks or a cron job)
   ✔ Handle 404 @done (16-08-17 06:43)
   ✔ PIN @done (16-08-17 06:43)
     ✔ Lock after many failed attempts @done (16-08-17 06:43)

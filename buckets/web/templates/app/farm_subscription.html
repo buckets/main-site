@@ -17,22 +17,39 @@ label.option {
 {% block content %}
 <h1>{{ farm.name }} Subscription</h1>
 
-{% if subscription %}
-{{ subscription }}
-{% endif %}
+<div>
+  <b>Expiration:</b> {{ farm.service_expiration }} {{ g.today }}
+</div>
 
 <p>
+  {% if subscription %}
+  Update your plan:
+  {% else %}
   Choose your plan:
+  {% endif %}
 </p>
+
+{%- macro ischecked(plan) -%}
+  {%- if subscription -%}
+    {%- if plans[plan].id == subscription.plan.id -%}
+      checked
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro -%}
 
 <form id="subform" method="post">
   <label class="option">
-    <input type="radio" name="plan" value="monthly"> ${{ plans.monthly.amount|money }}/month
+    <input type="radio" name="plan" value="monthly" {{ ischecked('monthly') }}> ${{ plans.monthly.amount|money }}/month
   </label>
   <label class="option">
-    <input type="radio" name="plan" value="yearly">
+    <input type="radio" name="plan" value="yearly" {{ ischecked('yearly') }}>
     ${{ plans.yearly.amount|money }}/year
   </label>
+  {% if is_custom_plan %}
+  <label class="option">
+    <input type="radio" name="plan" value="custom" checked> ${{ (subscription.plan.amount * subscription.quantity)|money }}/{{ subscription.plan.interval }} &mdash; <em>This is a custom plan.  Feel special :)  But if you change from this plan, you will not be able to change back.</em>
+  </label>
+  {% endif %}
   <div>
     {% if not has_cc %}
       <script src="https://checkout.stripe.com/checkout.js"></script>

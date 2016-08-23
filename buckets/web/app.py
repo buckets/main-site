@@ -86,9 +86,17 @@ def farm_subscription(farm_id):
         flash("Subscription updated.")
     farm = g.api.user.get_farm(farm_id=farm_id)
     subscription = g.api.billing.get_subscription(farm_id=farm_id)
+    is_custom_plan = False
+    if subscription:
+        is_custom_plan = True
+        for key,plan in BillingManagement.PLANS.items():
+            if plan['id'] == subscription.plan.id:
+                is_custom_plan = False
+
     return render_template('app/farm_subscription.html',
         farm=farm,
         subscription=subscription,
+        is_custom_plan=is_custom_plan,
         has_cc=payment_method,
         plans=BillingManagement.PLANS,
         plans_by_id={x['id']:x for x in BillingManagement.PLANS.values()})
