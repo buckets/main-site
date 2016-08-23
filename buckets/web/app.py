@@ -51,36 +51,47 @@ def billing():
         payment_method=g.api.billing.current_payment_method(
             user_id=g.user['id']))
 
-@blue.route('/cc', methods=['POST'])
+@blue.route('/cc', methods=['GET', 'POST'])
 def set_credit_card():
     token = request.form['stripeToken']
     g.api.billing.set_credit_card(
         user_id=g.user['id'],
         token=token)
     flash('Credit card securely saved.')
-    url = session.pop('after_card', url_for('.billing'))
-    return redirect(url)
+    return redirect(url_for('.billing'))
 
 @blue.route('/farms', methods=['GET'])
 def farms():
     farms = g.api.user.list_farms(user_id=g.user['id'])
     return render_template('app/farms.html',
-        farms=farms,
-        plans=BillingManagement.PLANS)
+        farms=farms)
 
-@blue.route('/farms/<int:farm_id>/subscription', methods=['POST'])
+@blue.route('/farms/<int:farm_id>/subscription', methods=['GET', 'POST'])
 def farm_subscription(farm_id):
-    cc = g.api.billing.current_payment_method(user_id=g.user['id'])
-    if not cc:
-        session['after_card'] = url_for('.farms')
-        return redirect(url_for('.billing'))
-    else:
+    payment_method = g.api.billing.current_payment_method(user_id=g.user['id'])
+    if request.method == 'POST':
+        new_plan = request.form['plan']
+        if not payment_method:
+            # no current payment method
+            token = request.form['stripeToken']
+            g.api.billing.set_credit_card(
+                user_id=g.user['id'],
+                token=token)
+            flash('Credit card securely saved.')
+
         g.api.billing.set_subscription(
             user_id=g.user['id'],
             farm_id=farm_id,
-            plan=request.form['plan'])
-        flash("Subscription updated!")
-        return redirect(url_for('.farms'))
+            plan=new_plan)
+        flash("Subscription updated.")
+    farm = g.api.user.get_farm(farm_id=farm_id)
+    subscription = g.api.billing.get_subscription(farm_id=farm_id)
+    return render_template('app/farm_subscription.html',
+        farm=farm,
+        subscription=subscription,
+        has_cc=payment_method,
+        plans=BillingManagement.PLANS,
+        plans_by_id={x['id']:x for x in BillingManagement.PLANS.values()})
 
 @dont_require_pin
 @blue.route('/pin', methods=['GET', 'POST'])

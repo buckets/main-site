@@ -28,7 +28,7 @@ class BillingManagement(object):
     PLANS = {
         'monthly': {
             'id': 'buckets-monthly-v2',
-            'amount': 134,
+            'amount': 202,
             'name': 'Buckets Monthly',
             'interval': 'month',
             'interval_count': 1,
@@ -143,8 +143,6 @@ class BillingManagement(object):
             cu = self.stripe_customer(user_id)
             return cu.subscriptions.create(plan=self.PLANS[plan]['id'])
         if farm._stripe_sub_id:
-            logger.info(subscription=farm._stripe_sub_id)
-            logger.info(stripe_api_version=self.stripe.api_version)
             # changing an existing subscription
             sub = self.stripe.Subscription.retrieve(farm._stripe_sub_id)
             if user_id != farm.payer_id:
@@ -172,6 +170,7 @@ class BillingManagement(object):
                 _stripe_sub_id=sub.id,
             )
             .where(Farm.c.id == farm_id))
+        return sub
 
     @policy.allow(anything)
     def cancel_subscription(self, farm_id):
@@ -187,3 +186,18 @@ class BillingManagement(object):
         sub = self.stripe.Subscription.retrieve(farm._stripe_sub_id)
         sub.delete()
         return sub
+
+    @policy.allow(anything)
+    def get_subscription(self, farm_id):
+        """
+        Return a farm's subscription
+        """
+        farm = self.engine.execute(
+            select([
+                Farm.c._stripe_sub_id,
+                Farm.c.payer_id,
+            ])
+            .where(Farm.c.id == farm_id)).fetchone()
+        if farm._stripe_sub_id:
+            return self.stripe.Subscription.retrieve(farm._stripe_sub_id)
+        return None

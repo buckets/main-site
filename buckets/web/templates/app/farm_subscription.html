@@ -1,0 +1,99 @@
+{% extends 'app/base.html' %}
+
+{% block extrahead %}
+{{ super() }}
+<style>
+label.option {
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid lightgrey;
+  display: block;
+}
+</style>
+{% endblock %}
+
+{% block title %}{{ farm.name }} Subscription{% endblock %}
+
+{% block content %}
+<h1>{{ farm.name }} Subscription</h1>
+
+{% if subscription %}
+{{ subscription }}
+{% endif %}
+
+<p>
+  Choose your plan:
+</p>
+
+<form id="subform" method="post">
+  <label class="option">
+    <input type="radio" name="plan" value="monthly"> ${{ plans.monthly.amount|money }}/month
+  </label>
+  <label class="option">
+    <input type="radio" name="plan" value="yearly">
+    ${{ plans.yearly.amount|money }}/year
+  </label>
+  <div>
+    {% if not has_cc %}
+      <script src="https://checkout.stripe.com/checkout.js"></script>
+      <button type="button" id="submit-button">Pay</button>
+      <input type="hidden" id="stripeToken" name="stripeToken">
+      <script>
+      var handler = StripeCheckout.configure({
+        key: '{{ config.STRIPE_PUBLIC_KEY }}',
+        email: '{{ g.user.email }}',
+        amount: 0,
+        locale: 'auto',
+        name: 'Buckets',
+        description: 'Buckets subscription',
+        panelLabel: "Pay",
+        token: function(token) {
+          $('#stripeToken').val(token.id);
+          $('#subform').submit();
+        }
+      });
+      $('#submit-button').click(function(ev) {
+        ev.preventDefault();
+        var form = $('#subform');
+        console.log('form', form);
+        var plan = null;
+        _.each(form.serializeArray(), function(item) {
+          if (item.name === 'plan') {
+            plan = item.value;
+          }
+        });
+        if (!plan) {
+          alert('You must choose a plan');
+          return false;
+        }
+
+        var description, panelLabel;
+        if (plan === 'yearly') {
+          description = 'Buckets ${{ plans.yearly.amount|money }}/year subscription';
+          panelLabel = 'Pay ${{ plans.yearly.amount|money }} per year';
+        } else if (plan === 'monthly') {
+          description = 'Buckets ${{ plans.monthly.amount|money }}/mo subscription';
+          panelLabel = 'Pay ${{ plans.monthly.amount|money }} per month';
+        } else {
+          description = 'Buckets subscription';
+          panelLabel = 'Pay';
+        }
+
+        handler.open({
+          description: description,
+          panelLabel: panelLabel,
+        });
+        return false;
+      });
+      </script>
+    {% else %}
+      <button type="submit">{% if subscription %}Update subscription{% else %}Start paying{% endif %}</button>
+    {% endif %}
+  </div>
+</form>
+
+{% if subscription %}
+{% else %}
+{% endif %}
+
+{% endblock %}

@@ -190,7 +190,7 @@ class UserManagement(object):
             raise VerificationError('Incorrect PIN')
 
     @policy.allow(userOnly(lambda x:x['creator_id']))
-    def create_farm(self, creator_id, name='Family'):
+    def create_farm(self, creator_id, name='Family Budget'):
         with self.engine.begin() as conn:
             r = conn.execute(Farm.insert()
                 .values(name=name, creator_id=creator_id)
@@ -211,17 +211,17 @@ class UserManagement(object):
                 UserFarm.c.user_id == user_id,
                 UserFarm.c.farm_id == farm_id)))
 
-    @policy.allow(farmHandOnly(lambda x:x['id']))
-    def get_farm(self, id):
+    @policy.allow(farmHandOnly(lambda x:x['farm_id']))
+    def get_farm(self, farm_id):
         r = self.engine.execute(
             select([Farm])
-            .where(Farm.c.id == id))
+            .where(Farm.c.id == farm_id))
         farm = dict(r.fetchone())
         r = self.engine.execute(
             select([User.c.id, User.c.name])
             .where(and_(
                 User.c.id == UserFarm.c.user_id,
-                UserFarm.c.farm_id == id)))
+                UserFarm.c.farm_id == farm_id)))
         farm['users'] = [dict(x) for x in r.fetchall()]
         return farm
 

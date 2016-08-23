@@ -92,10 +92,12 @@ def test_set_subscription(api, mkuser, user_api):
     user = mkuser()
     farm = user_api.create_farm(user['id'])
     api.set_credit_card(user['id'], creditcard())
-    api.set_subscription(user['id'], farm['id'], 'monthly')
+    returned_sub = api.set_subscription(user['id'], farm['id'], 'monthly')
     cu = api.stripe_customer(user['id'])
     assert cu.subscriptions.total_count == 1, "Should have a subscription"
     sub = list(cu.subscriptions)[0]
+    assert returned_sub.id == sub.id
+    assert returned_sub.id == api.get_subscription(farm['id']).id
     assert sub.plan.id == api.PLANS['monthly']['id']
     assert sub.quantity == 1
 

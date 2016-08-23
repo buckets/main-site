@@ -58,7 +58,7 @@ def before_request():
     
     # authorized for this farm?
     try:
-        g.farm = farm = g.api.user.get_farm(id=g.farm_id)
+        g.farm = farm = g.api.user.get_farm(farm_id=g.farm_id)
     except NotAuthorized:
         abort(404)
     if not farm:
