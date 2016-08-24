@@ -24,6 +24,8 @@ ap.add_argument('--stripe-api-key',
     default=os.environ.get('STRIPE_API_KEY', ''))
 ap.add_argument('--stripe-public-key',
     default=os.environ.get('STRIPE_PUBLIC_KEY', ''))
+ap.add_argument('--sentry-dsn',
+    default=os.environ.get('SENTRY_DSN', ''))
 ap.add_argument('--reg-delay',
     type=int,
     default=3,
@@ -54,7 +56,8 @@ app = configureApp(
     postmark_key=None,
     registration_delay=args.reg_delay,
     stripe_api_key=args.stripe_api_key,
-    stripe_public_key=args.stripe_public_key)
+    stripe_public_key=args.stripe_public_key,
+    sentry_dsn=args.sentry_dsn)
 
 if __name__ == '__main__':
     app.run(args.host, args.port)

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Error{% endblock %}
+
+{% block content %}
+<h1>Oops</h1>
+
+<p>
+  Something broke.  Internal server error.
+</p>
+
+<p>
+  I, Matt, have probably been notified about this error, but if this keeps happening and I don't email/call you, please email me at hello@bucketsisbetter.com.
+</p>
+
+<p>
+  If you do email me, include this chunk of information in your email:
+  <pre style="font-family: monospace; white-space: pre-wrap;">{{ request_debug_data() }}</pre>
+</p>
+
+<!-- Sentry JS SDK 2.1.+ required -->
+<script src="https://cdn.ravenjs.com/2.3.0/raven.min.js"></script>
+
+{% if sentry_event_id %}
+  <script>
+  Raven.showReportDialog({
+    eventId: '{{ sentry_event_id }}',
+    dsn: '{{ sentry_public_dsn }}'
+  });
+  </script>
+{% endif %}
+{% endblock %}

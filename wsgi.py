@@ -22,6 +22,7 @@ FLASK_SECRET_KEY = os.environ['FLASK_SECRET_KEY']
 POSTMARK_KEY = os.environ['POSTMARK_KEY']
 STRIPE_API_KEY = os.environ['STRIPE_API_KEY']
 STRIPE_PUBLIC_KEY = os.environ['STRIPE_PUBLIC_KEY']
+SENTRY_DSN = os.environ['SENTRY_DSN']
 
 engine = create_engine(DATABASE_URL)
 while True:
@@ -39,4 +40,5 @@ application = configureApp(
     debug=False,
     postmark_key=POSTMARK_KEY,
     stripe_api_key=STRIPE_API_KEY,
-    stripe_public_key=STRIPE_PUBLIC_KEY)
+    stripe_public_key=STRIPE_PUBLIC_KEY,
+    sentry_dsn=SENTRY_DSN)

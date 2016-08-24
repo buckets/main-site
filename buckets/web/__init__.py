@@ -3,12 +3,13 @@ from uuid import uuid4
 import traceback
 import structlog
 import stripe
+import logging
 logger = structlog.get_logger()
 
 from flask import Flask, session, g, request, redirect, url_for
 from flask import render_template
 
-from raven import Client
+from raven.contrib.flask import Sentry
 
 from buckets.model import authProtectedAPI
 from buckets.web.util import all_filters, is_pin_expired, get_pin_expiration
@@ -18,26 +19,17 @@ from buckets.dbutil import transaction_per_request
 f = Flask(__name__)
 f.jinja_env.filters.update(all_filters)
 
+sentry = Sentry()
+
 def configureApp(engine, flask_secret_key,
         postmark_key,
         stripe_api_key,
         stripe_public_key,
+        sentry_dsn,
         debug=False,
         registration_delay=3):
-    raven_client = Client('https://ee23edb34569427bbb5d57b7128f3519:13c77b9bf0ea44d2b6558e14c59ede01@app.getsentry.com/93959')
-    raven_client.captureMessage('Starting up')
-    raven_client.capture('raven.events.Message', message='foo', data={
-        'request': {
-            'url': '...',
-            'data': {},
-            'query_string': '...',
-            'method': 'POST',
-        },
-        'logger': 'logger.name',
-    }, extra={
-        'key': 'value',
-        'my': 'stuff',
-    })
+    sentry.init_app(f, dsn=sentry_dsn)
+
     f._engine = engine
     f.config.update(
         DEBUG=debug,
@@ -52,7 +44,7 @@ def configureApp(engine, flask_secret_key,
     # mailing
     mailer = None
     if not postmark_key and not debug:
-        raise Exception('Production mode with no email token.')
+        logger.warning('Production mode with no email token.')
     elif postmark_key:
         mailer = PostmarkMailer(postmark_key)
     else:
@@ -78,16 +70,33 @@ def configureApp(engine, flask_secret_key,
         context_class=structlog.threadlocal.wrap_dict(dict),
         #logger_factory=structlog.stdlib.LoggerFactory(),
     )
+    sentry_errors_log = logging.getLogger("sentry.errors")
+    sentry_errors_log.addHandler(logging.StreamHandler())
     return f
 
 @f.errorhandler(404)
 def handle_404(err):
     return render_template('err404.html')
 
+@f.template_global()
+def request_debug_data():
+    try:
+        import json
+        return json.dumps({
+            'url': request.url,
+            'method': request.method,
+        }, indent=2)
+    except:
+        return 'ERROR-PACKING-DATA'
+
 @f.errorhandler(500)
 def handle_500(err):
     traceback.print_exc()
-    return err
+    sentry.captureException()
+    return render_template('err500.html',
+        sentry_event_id=g.sentry_event_id,
+        sentry_public_dsn=sentry.client.get_public_dsn('https'),
+    ), 500
 
 transaction_per_request(f)
 
@@ -109,8 +118,19 @@ def put_user_on_request():
     unbound_api = authProtectedAPI(g.conn, f.mailer, stripe=stripe)
     g.api = unbound_api.bindContext(g.auth_context)
     if user_id:
+        sentry.client.context.merge({
+            'user': {
+                'id': user_id,
+            }
+        })
         try:
             g.user = g.api.user.get_user(id=user_id)
+            sentry.client.context.merge({
+                'user': {
+                    'id': user_id,
+                    'email': g.user['email'],
+                }
+            })
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)
@@ -126,6 +146,9 @@ def root():
     else:
         return redirect(url_for('anon.index'))
 
+@f.route('/error')
+def err():
+    raise Exception('The exception')
 
 from buckets.web import app, anon, farm
 f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>')

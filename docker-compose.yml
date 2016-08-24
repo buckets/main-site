@@ -26,3 +26,4 @@ services:
       DATABASE_URL: postgres://postgres:postgres@postgres/postgres
       STRIPE_API_KEY:
       STRIPE_PUBLIC_KEY:
+      SENTRY_DSN:
