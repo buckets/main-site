@@ -117,7 +117,7 @@ def test_UserManagement(engine):
             'create_farm', creator_id=bob['id']
         ).expect('bob')
         world.forcall(
-            'get_farm', id=bobs_farm['id']
+            'get_farm', farm_id=bobs_farm['id']
         ).expect('bob')
         world.forcall(
             'list_farms', user_id=bob['id']
@@ -153,7 +153,24 @@ def test_BillingManagement(engine):
     api = BillingManagement(engine, stripe=None)
     with World(api.policy, contexts) as world:
         bobs_farm
-        world
+        world.forcall(
+            'current_payment_method', user_id=bob['id']
+        ).expect('bob')
+        world.forcall(
+            'set_credit_card', user_id=bob['id'], token='foo'
+        ).expect('bob')
+        world.forcall(
+            'set_subscription', user_id=bob['id'], farm_id=bobs_farm['id'], plan='monthly'
+        ).expect('bob')
+        world.forcall(
+            'set_subscription', user_id=sam['id'], farm_id=bobs_farm['id'], plan='monthly'
+        ).expect()
+        world.forcall(
+            'cancel_subscription', farm_id=bobs_farm['id']
+        ).expect('bob')
+        world.forcall(
+            'get_subscription', farm_id=bobs_farm['id']
+        ).expect('bob')
 
 
 def test_BudgetManagement(engine):

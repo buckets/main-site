@@ -74,7 +74,7 @@ def test_create_farm(api, mkuser):
     assert farm['name'] == 'name'
     assert farm['creator_id'] == user['id']
     assert farm['payer_id'] is None
-    assert farm['service_expiration'] == date.today() + timedelta(days=90)
+    assert farm['service_expiration'] == date.today() + timedelta(days=60)
     assert len(farm['users']) == 1
     assert farm['users'][0]['id'] == user['id']
     assert farm['users'][0]['name'] == user['name']
@@ -90,7 +90,18 @@ def test_add_user_to_farm(api, mkuser):
     assert len(api.list_farms(user2['id'])) == 0
 
 def test_add_user_to_farm_twice(api, mkuser):
-    assert False, "Write me"
+    user1 = mkuser()
+    user2 = mkuser()
+    farm = api.create_farm(user1['id'], 'name')
+    assert len(api.list_farms(user2['id'])) == 0
+    api.add_user_to_farm(farm['id'], user2['id'])
+    api.add_user_to_farm(farm['id'], user2['id'])
+    assert len(api.list_farms(user2['id'])) == 1
+    farm = api.get_farm(farm['id'])
+    assert len(farm['users']) == 2
+
+    api.remove_user_from_farm(farm['id'], user2['id'])
+    assert len(api.list_farms(user2['id'])) == 0
 
 def test_list_farms(api, mkuser):
     user = mkuser()
@@ -102,7 +113,7 @@ def test_list_farms(api, mkuser):
 def test_create_farm_default_name(api, mkuser):
     user = mkuser()
     farm = api.create_farm(user['id'])
-    assert farm['name'] == 'Family'
+    assert farm['name'] == 'Family Budget'
 
 def test_is_paid_for(api, mkuser, engine):
     user = mkuser()

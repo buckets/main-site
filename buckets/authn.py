@@ -16,6 +16,26 @@ from buckets.authz import AuthPolicy, anything, nothing
 from buckets.dbutil import begin
 
 
+def userOnly(getter):
+    def authorizer(self, auth_context, method, kwargs):
+        return auth_context.get('user_id') == getter(kwargs)
+    return authorizer
+
+def farmHandOnly(farm_id_getter):
+    def authorizer(self, auth_context, method, kwargs):
+        farm_id = farm_id_getter(kwargs)
+        user_id = auth_context.get('user_id')
+        r = self.engine.execute(select([UserFarm.c.farm_id])
+            .where(and_(
+                UserFarm.c.farm_id == farm_id,
+                UserFarm.c.user_id == user_id,
+            )))
+        if r.fetchone():
+            return True
+        return False
+    return authorizer
+
+
 class UserManagement(object):
     """
     This contains functions for user management
@@ -32,25 +52,6 @@ class UserManagement(object):
         self.engine = engine
         self.mailer = mailer
         self.signin_urlmaker = signin_urlmaker
-
-    def userOnly(getter):
-        def authorizer(self, auth_context, method, kwargs):
-            return auth_context.get('user_id') == getter(kwargs)
-        return authorizer
-
-    def farmHandOnly(farm_id_getter):
-        def authorizer(self, auth_context, method, kwargs):
-            farm_id = farm_id_getter(kwargs)
-            user_id = auth_context.get('user_id')
-            r = self.engine.execute(select([UserFarm.c.farm_id])
-                .where(and_(
-                    UserFarm.c.farm_id == farm_id,
-                    UserFarm.c.user_id == user_id,
-                )))
-            if r.fetchone():
-                return True
-            return False
-        return authorizer
 
     @policy.allow(anything)
     def create_user(self, email, name):
@@ -203,8 +204,11 @@ class UserManagement(object):
         return self.get_farm(farm_id)
 
     def add_user_to_farm(self, farm_id, user_id):
-        self.engine.execute(UserFarm.insert()
-            .values(user_id=user_id, farm_id=farm_id))
+        try:
+            self.engine.execute(UserFarm.insert()
+                .values(user_id=user_id, farm_id=farm_id))
+        except sqlalchemy.exc.IntegrityError:
+            pass
 
     def remove_user_from_farm(self, farm_id, user_id):
         self.engine.execute(UserFarm.delete()

@@ -6,7 +6,8 @@ from datetime import date, timedelta, datetime
 
 from buckets.error import NotFound
 from buckets.schema import User, Farm, UserFarm
-from buckets.authz import AuthPolicy, anything
+from buckets.authz import AuthPolicy
+from buckets.authn import userOnly, farmHandOnly
 
 import structlog
 logger = structlog.get_logger()
@@ -48,7 +49,8 @@ class BillingManagement(object):
     def __init__(self, engine, stripe):
         self.engine = engine
         self.stripe = stripe
-        stripe.api_version = '2016-07-06'
+        if stripe:
+            stripe.api_version = '2016-07-06'
 
     def sync_plans_with_stripe(self):
         """
@@ -65,7 +67,7 @@ class BillingManagement(object):
             p.name = plan['name']
             p.save()
 
-    @policy.allow(anything)
+    @policy.allow(userOnly(lambda x:x['user_id']))
     def current_payment_method(self, user_id):
         cu = self.stripe_customer(user_id)
         if not cu:
@@ -96,7 +98,7 @@ class BillingManagement(object):
             # no associated stripe customer
             return None
 
-    @policy.allow(anything)
+    @policy.allow(userOnly(lambda x:x['user_id']))
     def set_credit_card(self, user_id, token):
         r = self.engine.execute(
             select([
@@ -120,7 +122,8 @@ class BillingManagement(object):
             cu.source = token
             cu.save()
 
-    @policy.allow(anything)
+    @policy.allow(userOnly(lambda x:x['user_id']))
+    @policy.allow(farmHandOnly(lambda x:x['farm_id']))
     def set_subscription(self, user_id, farm_id, plan):
         """
         Start paying for a farm or change the plan terms.
@@ -172,7 +175,7 @@ class BillingManagement(object):
             .where(Farm.c.id == farm_id))
         return sub
 
-    @policy.allow(anything)
+    @policy.allow(farmHandOnly(lambda x:x['farm_id']))
     def cancel_subscription(self, farm_id):
         """
         Cancel a farm subscription
@@ -187,7 +190,7 @@ class BillingManagement(object):
         sub.delete()
         return sub
 
-    @policy.allow(anything)
+    @policy.allow(farmHandOnly(lambda x:x['farm_id']))
     def get_subscription(self, farm_id):
         """
         Return a farm's subscription
@@ -202,7 +205,6 @@ class BillingManagement(object):
             return self.stripe.Subscription.retrieve(farm._stripe_sub_id)
         return None
 
-    @policy.allow(anything)
     def sync_service_expiration(self, subscription_id):
         """
         Update all farms for this subscription to match the Stripe-stored
