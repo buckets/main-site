@@ -12,12 +12,15 @@ from flask import render_template
 from raven.contrib.flask import Sentry
 
 from buckets.model import authProtectedAPI
-from buckets.web.util import all_filters, is_pin_expired, get_pin_expiration
+from buckets.web.util import all_filters, all_globals
+from buckets.web.util import is_pin_expired, get_pin_expiration
+from buckets.web.util import GLOBAL_CSRF
 from buckets.mailing import PostmarkMailer, NoMailer
 from buckets.dbutil import transaction_per_request
 
 f = Flask(__name__)
 f.jinja_env.filters.update(all_filters)
+f.jinja_env.globals.update(all_globals)
 
 sentry = Sentry()
 
@@ -36,6 +39,9 @@ def configureApp(engine, flask_secret_key,
         SECRET_KEY=flask_secret_key,
         REGISTRATION_DELAY=registration_delay,
         STRIPE_PUBLIC_KEY=stripe_public_key)
+
+    GLOBAL_CSRF.secret = flask_secret_key
+
     if debug:
         logger.info('Running in DEBUG MODE')
         f.jinja_env.cache_size = 0
@@ -108,6 +114,7 @@ def put_user_on_request():
 
     g.auth_context = {}
     g.user = {}
+    g.user_id = None
     g.debug = f.config['DEBUG']
     g.pin_valid = not is_pin_expired()
     g.pin_expiration = get_pin_expiration()
@@ -125,6 +132,7 @@ def put_user_on_request():
         })
         try:
             g.user = g.api.user.get_user(id=user_id)
+            g.user_id = user_id
             sentry.client.context.merge({
                 'user': {
                     'id': user_id,

@@ -7,6 +7,7 @@ from buckets.authz import NotAuthorized
 from buckets.budget import BudgetManagement
 from buckets.web.util import toJson, is_pin_expired, bump_pin_expiration
 from buckets.web.util import ask_for_pin, get_pin_expiration
+from buckets.web.util import require_csrf
 
 import structlog
 logger = structlog.get_logger()
@@ -124,6 +125,7 @@ def index():
         return redirect(url_for('.accounts'))
 
 @blue.route('/accounts', methods=['GET', 'POST'])
+@require_csrf
 def accounts():
     if request.method == 'POST':
         name = request.values['name']
@@ -135,6 +137,7 @@ def accounts():
         accounts=accounts)
 
 @blue.route('/buckets', methods=['GET', 'POST'])
+@require_csrf
 def buckets():
     g.show['buckets'] = True
     if request.method == 'POST':
@@ -149,6 +152,7 @@ def buckets():
         buckets=buckets)
 
 @blue.route('/buckets/<int:bucket_id>', methods=['GET', 'POST'])
+@require_csrf
 def bucket(bucket_id):
     g.show['buckets'] = True
     if request.method == 'POST':
@@ -186,6 +190,7 @@ def bucket(bucket_id):
         transactions=transactions)
 
 @blue.route('/groups', methods=['POST'])
+@require_csrf
 def groups():
     g.show['buckets'] = True
     name = request.form['name']
@@ -194,6 +199,7 @@ def groups():
     return redirect(url_for('.buckets'))
 
 @blue.route('/groups/<int:group_id>', methods=['GET', 'POST'])
+@require_csrf
 def group(group_id):
     g.show['buckets'] = True
     if request.method == 'POST':
@@ -217,6 +223,7 @@ def transactions():
         accounts=accounts)
 
 @blue.route('/connections', methods=['GET', 'POST'])
+@require_csrf
 def connections():
     g.show['connections'] = True
     if request.method == 'POST':
@@ -247,6 +254,7 @@ def reports():
 #-----------------------------------------------------------------------
 
 @blue.route('/url_for', methods=['POST'])
+@require_csrf
 def urlfor():
     data = request.json
     endpoint = '.{0}'.format(data['endpoint'].lstrip('.'))
@@ -260,6 +268,7 @@ def urlfor():
 @blue.route('/api-', defaults={'label': ''}, methods=['POST'])
 @blue.route('/api', defaults={'label': ''}, methods=['POST'])
 @blue.route('/api-<string:label>', methods=['POST'])
+@require_csrf
 def api(label):
     data = request.json
     multi = True

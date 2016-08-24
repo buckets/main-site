@@ -181,7 +181,7 @@ Store.rerender();
 <h2>Add connection</h2>
 
 <form method="post" action="{{ url_for('.connections') }}">
-
+{{ csrf_input() }}
 <p>
   Buckets can connect to your bank using SimpleFIN.  To connect:
   <ol>

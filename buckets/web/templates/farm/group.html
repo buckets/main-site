@@ -5,6 +5,7 @@
 <h1>{{ group.name }}</h1>
 
 <form method="post">
+{{ csrf_input() }}
 <div class="form">
   <div class="pair">
     <div class="label">Name</div>

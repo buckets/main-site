@@ -5,6 +5,7 @@ from buckets.billing import BillingManagement
 from buckets.error import VerificationError, AccountLocked
 from buckets.web.util import is_pin_expired, clear_pin_expiration
 from buckets.web.util import bump_pin_expiration, ask_for_pin
+from buckets.web.util import require_csrf
 
 import structlog
 logger = structlog.get_logger()
@@ -52,6 +53,7 @@ def billing():
             user_id=g.user['id']))
 
 @blue.route('/cc', methods=['GET', 'POST'])
+@require_csrf
 def set_credit_card():
     token = request.form['stripeToken']
     g.api.billing.set_credit_card(
@@ -67,6 +69,7 @@ def farms():
         farms=farms)
 
 @blue.route('/farms/<int:farm_id>/subscription', methods=['GET', 'POST'])
+@require_csrf
 def farm_subscription(farm_id):
     payment_method = g.api.billing.current_payment_method(user_id=g.user['id'])
     if request.method == 'POST':
@@ -103,6 +106,7 @@ def farm_subscription(farm_id):
 
 @dont_require_pin
 @blue.route('/pin', methods=['GET', 'POST'])
+@require_csrf
 def pin():
     if g.api.user.has_pin(user_id=g.user['id']):
         if request.method == 'POST':
@@ -123,6 +127,7 @@ def pin():
 
 @dont_require_pin
 @blue.route('/pin/set', methods=['GET', 'POST'])
+@require_csrf
 def set_pin():
     previous_pin = request.form.get('previous_pin', '')
     if request.method == 'POST':

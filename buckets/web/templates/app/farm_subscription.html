@@ -38,6 +38,7 @@ label.option {
 {%- endmacro -%}
 
 <form id="subform" method="post">
+  {{ csrf_input() }}
   <label class="option">
     <input type="radio" name="plan" value="monthly" {{ ischecked('monthly') }}> ${{ plans.monthly.amount|money }}/month
   </label>
@@ -72,7 +73,6 @@ label.option {
       $('#submit-button').click(function(ev) {
         ev.preventDefault();
         var form = $('#subform');
-        console.log('form', form);
         var plan = null;
         _.each(form.serializeArray(), function(item) {
           if (item.name === 'plan') {

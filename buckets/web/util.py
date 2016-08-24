@@ -4,9 +4,14 @@ from datetime import datetime
 import sys
 import json
 import time
+from functools import wraps
+
+from jose import jwt
 
 import structlog
 logger = structlog.get_logger()
+
+from buckets.error import Forbidden
 
 PIN_LIFETIME = 30 * 60
 
@@ -40,6 +45,66 @@ def ask_for_pin():
     return redirect(url_for('app.pin'))
 
 
+
+class CSRF(object):
+
+    def __init__(self, secret=None, lifespan=30*60):
+        """
+        @param secret: The secret used to sign the jwt.
+        @param lifespan: Seconds the tokens will last.
+        """
+        self.secret = secret
+        self.lifespan = lifespan
+
+    def create_csrf(self, user_id):
+        if self.secret is None:
+            raise Exception('CSRF secret not configured')
+        iat = int(time.time())
+        exp = iat + self.lifespan
+        return jwt.encode({
+            'user_id': user_id,
+            'iat': iat,
+            'nbf': iat-60,
+            'exp': exp,
+        }, self.secret, algorithm='HS256')
+
+    def verify_csrf(self, user_id, token):
+        if self.secret is None:
+            raise Exception('CSRF secret not configured')
+        data = jwt.decode(token, self.secret,
+            algorithms=['HS256'])
+        if data.get('user_id') != user_id:
+            raise Forbidden("Invalid CSRF Token")
+
+    def csrf_input(self):
+        from flask import g, current_app
+        return current_app.jinja_env.filters['safe']('<input type="hidden" name="_csrf" value="{0}">'.format(
+            self.create_csrf(g.user_id)))
+
+    def require_csrf(self, func):
+        """
+        Decorator for flask endpoint that enforces CSRF for non-GET/HEAD/OPTIONS
+        """
+        from flask import g, request
+        @wraps(func)
+        def deco(*args, **kwargs):
+            if request.method not in ['GET', 'OPTIONS', 'HEAD']:
+                try:
+                    token = request.headers.get('CSRF', request.values.get('_csrf', None))
+                except Exception:
+                    raise Forbidden('No CSRF token supplied')
+                try:
+                    self.verify_csrf(g.user_id, token)
+                except Exception:
+                    logger.error('Error verifying csrf')
+                    raise
+                except Forbidden:
+                    raise
+            return func(*args, **kwargs)
+        return deco
+
+GLOBAL_CSRF = CSRF()
+require_csrf = GLOBAL_CSRF.require_csrf
 
 def fmtMoney(xint, show_decimal=False, truncate=False):
     sys.stdout.flush()
@@ -95,4 +160,8 @@ all_filters = {
     'json': toJson,
     'date': fmtDate,
     'month': fmtMonth,
+}
+all_globals = {
+    'create_csrf': GLOBAL_CSRF.create_csrf,
+    'csrf_input': GLOBAL_CSRF.csrf_input,
 }

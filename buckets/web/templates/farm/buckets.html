@@ -514,6 +514,7 @@ Store.rerender();
 
 <h2>Create bucket</h2>
 <form method="post">
+{{ csrf_input() }}
 <div class="form">
   <div class="pair">
     <div class="label">Name</div>
@@ -528,6 +529,7 @@ Store.rerender();
 
 <h2>Create group</h2>
 <form method="post" action="{{ url_for('.groups') }}">
+{{ csrf_input() }}
 <div class="form">
   <div class="pair">
     <div class="label">Name</div>

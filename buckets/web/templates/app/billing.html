@@ -25,6 +25,7 @@
 {% endif %}
 
 <form action="{{ url_for('.set_credit_card') }}" method="POST">
+  {{ csrf_input() }}
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
     data-key="{{ config.STRIPE_PUBLIC_KEY }}"

@@ -73,11 +73,18 @@ function apiRequest(data, success) {
     type: 'POST',
     url: '{{ url_for('.api') }}-' + label,
     data: JSON.stringify(data),
+    headers: {'CSRF': window.csrf_token},
     contentType: 'application/json',
     success: function(response, status, request) {
       // get expiration
       var _pin_expiration = request.getResponseHeader('PIN-Expiration', 0);
       window.pin_expiration = _pin_expiration;
+
+      // CSRF
+      var new_csrf_token = request.getResponseHeader('CSRF', '');
+      if (new_csrf_token) {
+        window.csrf_token = new_csrf_token;
+      }
 
       // call given success handler
       success(response);
@@ -111,6 +118,7 @@ function url_for(endpoint, kwargs) {
     type: 'POST',
     url: '{{ url_for('.urlfor') }}',
     data: JSON.stringify(data),
+    headers: {'CSRF': window.csrf_token},
     contentType: 'application/json',
     success: function(response) {
       d.resolve(response);

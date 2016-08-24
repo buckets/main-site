@@ -65,6 +65,12 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     {% block footer %}<footer></footer>{% endblock %}
   </div>
 
+  {% if g.user_id %}
+  <script>
+  window.csrf_token = '{{ create_csrf(g.user_id) }}';
+  </script>
+  {% endif %}
+
   {% if g.pin_valid %}
   <script>
   localStorage.setItem('pin_expiration', '{{ g.pin_expiration }}');

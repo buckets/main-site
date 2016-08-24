@@ -12,6 +12,7 @@
 </p>
 
 <form method="post">
+{{ csrf_input() }}
 {{ pin_input('pin') }}
 </form>
 {% endblock %}

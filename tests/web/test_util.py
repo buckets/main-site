@@ -1,5 +1,11 @@
+import pytest
+
 from buckets.web.util import fmtMoney, parseMoney, fmtMonth
+from buckets.web.util import CSRF
+from buckets.error import Forbidden
 from datetime import date
+
+from jose import JWTError
 
 
 def test_fmtMoney():
@@ -37,3 +43,18 @@ def test_fmtMonth():
     assert fmtMonth(date(2010, 1, 1)) == 'Jan 2010'
     assert fmtMonth(None) == ''
     assert fmtMonth('') == ''
+
+
+def test_csrf():
+    csrf = CSRF('SOME SECRET')
+    token1 = csrf.create_csrf(15)
+    csrf.verify_csrf(15, token1)
+    with pytest.raises(Forbidden):
+        csrf.verify_csrf(10, token1)
+
+def test_signature():
+    csrf1 = CSRF('SOME SECRET')
+    csrf2 = CSRF('hello my guy')
+    token1 = csrf1.create_csrf(15)
+    with pytest.raises(JWTError):
+        csrf2.verify_csrf(10, token1)

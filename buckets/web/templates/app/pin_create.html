@@ -16,6 +16,7 @@
 {% endif %}
 
 <form method="post">
+{{ csrf_input() }}
 <input type="hidden" name="previous_pin" value="{{ previous_pin }}">
 {{ pin_input('pin') }}
 </form>
