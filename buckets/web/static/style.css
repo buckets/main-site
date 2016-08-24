@@ -46,13 +46,19 @@ a {
     position: fixed;
     top: 0;
     width: 100%;
-    background-color: rgba(241, 196, 15,1.0);
+    background-color: rgba(241, 196, 15, 1.0);
     padding: .2rem 1rem;
     font-size: 1rem;
     text-align: center;
 }
 #about-to-expire.showing {
     visibility: visible;
+}
+#service-expired-notice {
+    background-color: rgba(241, 196, 15, 0.5);
+    padding: 1rem 1rem;
+    font-size: 1rem;
+    text-align: center;
 }
 header {
     padding: .5rem 0;

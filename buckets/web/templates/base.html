@@ -19,6 +19,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <div id="about-to-expire">This window has been sitting idle for a while. To protect your information, you will soon be signed out.</div>
+  {% block preheader %}{% endblock %}
   <div class="body-wrap">
     {% block header %}
     <header>

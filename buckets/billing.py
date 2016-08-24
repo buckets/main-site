@@ -201,3 +201,16 @@ class BillingManagement(object):
         if farm._stripe_sub_id:
             return self.stripe.Subscription.retrieve(farm._stripe_sub_id)
         return None
+
+    @policy.allow(anything)
+    def sync_service_expiration(self, subscription_id):
+        """
+        Update all farms for this subscription to match the Stripe-stored
+        expiration date.
+        """
+        sub = self.stripe.Subscription.retrieve(subscription_id)
+        exp_date = unix2date(sub.current_period_end).date()
+        self.engine.execute(
+            Farm.update()
+            .values(service_expiration=exp_date)
+            .where(Farm.c._stripe_sub_id == subscription_id))

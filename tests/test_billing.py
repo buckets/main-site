@@ -196,7 +196,7 @@ def test_sync_service_expiration(mkuser, api, user_api, engine):
     engine.execute('UPDATE farm set service_expiration = null where id=%s',
         (farm['id'],))
 
-    api.sync_service_expiration(farm['id'])
+    api.sync_service_expiration(subscription_id=sub['id'])
 
     farm = user_api.get_farm(farm['id'])
     assert farm['payer_id'] == user['id']

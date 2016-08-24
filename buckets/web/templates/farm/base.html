@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
 
+{% block preheader %}
+{% if g.service_expired %}
+<div id="service-expired-notice">
+  Your subscription has expired.  To continue using this budget, <a href="{{ url_for('app.farm_subscription', farm_id=g.farm_id) }}">update your billing information.</a>
+</div>
+{% endif %}
+{% endblock %}
+
 {% block navlinks %}
 {% if g.show.summary %}<a {{ navlink('.summary') }}>Summary</a>{% endif %}
 {% if g.show.transactions %}<a {{ navlink('.transactions') }}>Transactions</a>{% endif %}

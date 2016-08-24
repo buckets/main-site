@@ -53,9 +53,6 @@ def add_defaults(endpoint, values):
 
 @blue.before_request
 def before_request():
-    g.db_transaction = None
-    g.db_conn = None
-    
     # authorized for this farm?
     try:
         g.farm = farm = g.api.user.get_farm(farm_id=g.farm_id)
@@ -66,6 +63,7 @@ def before_request():
     if g.user['id'] not in [x['id'] for x in farm['users']]:
         abort(404)
 
+    # have they entered their PIN recently?
     if is_pin_expired():
         if request.endpoint.split('.')[-1] in ['api', 'urlfor']:
             abort(403)
@@ -73,21 +71,20 @@ def before_request():
     else:
         bump_pin_expiration()
 
-    g.db_conn = g.engine.connect()
-    g.db_transaction = g.db_conn.begin()
-    api = BudgetManagement(g.db_conn, g.farm_id)
+    # have they paid?
+    today = date.today()
+    exp = farm['service_expiration'] or date(1999, 1, 1)
+    days_over = (today - exp)
+    logger.info('days_over', days_over=days_over, today=today, exp=exp)
+    if days_over > timedelta(days=7):
+        flash("Your service has expired.  Please pay to continue"
+              " using Buckets.", "error")
+        return redirect(url_for('app.farm_subscription', farm_id=g.farm_id))
+    elif days_over > timedelta(days=0):
+        g.service_expired = True
+
+    api = BudgetManagement(g.conn, g.farm_id)
     g.farmapi = api.policy.bindContext(g.auth_context)
-
-
-@blue.after_request
-def after_request(r):
-    if g.get('db_transaction', None):
-        try:
-            g.db_transaction.commit()
-        except:
-            g.db_transaction.rollback()
-            raise
-    return r
 
 
 @blue.before_request

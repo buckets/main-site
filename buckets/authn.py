@@ -13,6 +13,7 @@ from buckets.error import NotFound, VerificationError, Forbidden, AccountLocked
 from buckets.error import DuplicateRegistration
 from buckets.schema import User, Farm, UserFarm, AuthToken
 from buckets.authz import AuthPolicy, anything, nothing
+from buckets.dbutil import begin
 
 
 class UserManagement(object):
@@ -117,7 +118,7 @@ class UserManagement(object):
         """
         Get the user_id associated with the given signin token.
         """
-        with self.engine.begin() as conn:
+        with begin(self.engine) as conn:
             r = conn.execute(
                 select([AuthToken.c.id, AuthToken.c.user_id])
                 .where(and_(
@@ -191,7 +192,7 @@ class UserManagement(object):
 
     @policy.allow(userOnly(lambda x:x['creator_id']))
     def create_farm(self, creator_id, name='Family Budget'):
-        with self.engine.begin() as conn:
+        with begin(self.engine) as conn:
             r = conn.execute(Farm.insert()
                 .values(name=name, creator_id=creator_id)
                 .returning(Farm.c.id))
