@@ -1,6 +1,5 @@
 from uuid import uuid4
 
-import traceback
 import structlog
 import stripe
 import logging
@@ -23,6 +22,11 @@ f.jinja_env.filters.update(all_filters)
 f.jinja_env.globals.update(all_globals)
 
 sentry = Sentry()
+
+# monkey patch for https://github.com/getsentry/raven-python/issues/842
+_real = sentry.get_user_info
+sentry.get_user_info = lambda *a,**kw: (_real(*a,**kw) or {})
+
 
 def configureApp(engine, flask_secret_key,
         postmark_key,
@@ -82,6 +86,7 @@ def configureApp(engine, flask_secret_key,
 
 @f.errorhandler(404)
 def handle_404(err):
+    sentry.client.captureMessage('404')
     return render_template('err404.html')
 
 @f.template_global()
@@ -97,20 +102,10 @@ def request_debug_data():
 
 @f.errorhandler(500)
 def handle_500(err):
-    traceback.print_exc()
-    user_data = {
-        'id': g.user_id,
-        'ip_address': g.remote_addr,
-    }
-    if g.user and 'email' in g.user:
-        if g.user['email_verified']:
-            user_data['email'] = g.user['email']
-        else:
-            user_data['username'] = g.user['email']
-    sentry.client.user_context(user_data)
-    sentry.client.captureException(user=user_data, extra=user_data)
+    logger.exception(exc_info=err)
+    logger.info(g=g, last_event_id=sentry.last_event_id)
     return render_template('err500.html',
-        sentry_event_id=g.sentry_event_id,
+        sentry_event_id=sentry.last_event_id,
         sentry_public_dsn=sentry.client.get_public_dsn('https'),
     ), 500
 
@@ -125,7 +120,10 @@ def put_user_on_request():
         or request.headers.get('X-Client-Ip') \
         or request.remote_addr
     log.bind(ip=g.remote_addr)
-    sentry.client.user_context({
+    sentry.user_context({
+        'ip_address': g.remote_addr,
+    })
+    sentry.extra_context({
         'ip_address': g.remote_addr,
     })
 
@@ -139,9 +137,8 @@ def put_user_on_request():
     user_id = session.get('user_id', None)
     if user_id:
         g.auth_context['user_id'] = user_id
-        sentry.client.extra_context({
+        sentry.client.user_context({
             'user_id': user_id,
-            'ip_address': g.remote_addr,
         })
     unbound_api = authProtectedAPI(g.conn, f.mailer, stripe=stripe)
     g.api = unbound_api.bindContext(g.auth_context)
@@ -159,7 +156,6 @@ def put_user_on_request():
                     'username': g.user['email'],
                 })
             sentry.client.user_context(user_data)
-            sentry.client.extra_context(user_data)
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)

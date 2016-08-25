@@ -16,6 +16,9 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   }
   </script>
   {% block extrahead %}{% endblock %}
+  {% block vendorscripts %}{% endblock %}
+  <script src="/static/js/vend/raven-2.3.0.min.js"></script>
+  {% block myscripts %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <div id="about-to-expire">This window has been sitting idle for a while. To protect your information, you will soon be signed out.</div>

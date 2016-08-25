@@ -6,27 +6,37 @@
 <h1>Oops</h1>
 
 <p>
-  Something broke.  Internal server error.
+  Something broke.  Internal server error.  Aaahhhh...
 </p>
 
 <p>
-  I, Matt, have probably been notified about this error, but if this keeps happening and I don't email/call you, please email me at hello@bucketsisbetter.com.
+  Matt has probably been notified about this error.  If he doesn't contact you about it and it keeps happening, please contact him.
 </p>
-
-<p>
-  If you do email me, include this chunk of information in your email:
-  <pre style="font-family: monospace; white-space: pre-wrap;">{{ request_debug_data() }}</pre>
-</p>
-
-<!-- Sentry JS SDK 2.1.+ required -->
-<script src="https://cdn.ravenjs.com/2.3.0/raven.min.js"></script>
 
 {% if sentry_event_id %}
+<p>
+  You can <a href="#" id="start-feedback">submit a bug-report</a> pretty easily.
   <script>
-  Raven.showReportDialog({
-    eventId: '{{ sentry_event_id }}',
-    dsn: '{{ sentry_public_dsn }}'
-  });
+  document.getElementById('start-feedback').addEventListener('click', function() {
+    Raven.showReportDialog({
+      eventId: '{{ sentry_event_id }}',
+      dsn: '{{ sentry_public_dsn }}',
+      {% if g.user %}
+      user: {
+        {% if g.user.name %}name: '{{ g.user.name }}',{% endif %}
+        {% if g.user.email %}email: '{{ g.user.email }}',{% endif %}
+      },
+      {% endif %}
+    });
+  }, false);
   </script>
+{% else %}
+<p>
+  If you do email Matt (hello@bucketsisbetter.com), include this chunk of information in your email:
+  <pre style="font-family: monospace; white-space: pre-wrap;">{{ request_debug_data() }}</pre>
+</p>
 {% endif %}
+
+
+
 {% endblock %}
