@@ -1,6 +1,7 @@
 #!/bin/sh
 
-env | grep GIT
+env
+echo "pwd: $(pwd)"
 
 VERSION="$(cd $GIT_DIR && git log -1 --pretty="%h %f %ci" | head -n1)"
 echo ""
