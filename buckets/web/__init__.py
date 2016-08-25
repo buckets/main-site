@@ -107,6 +107,7 @@ def handle_500(err):
             user_data['email'] = g.user['email']
         else:
             user_data['username'] = g.user['email']
+    logger.info('sentry context just before capturing', context=sentry.client.context)
     sentry.captureException(user=user_data, extra=user_data)
     return render_template('err500.html',
         sentry_event_id=g.sentry_event_id,
@@ -124,10 +125,8 @@ def put_user_on_request():
         or request.headers.get('X-Client-Ip') \
         or request.remote_addr
     log.bind(ip=g.remote_addr)
-    sentry.client.context.merge({
-        'user': {
-            'ip_address': g.remote_addr,
-        }
+    sentry.client.user_context({
+        'ip_address': g.remote_addr,
     })
 
     g.auth_context = {}
@@ -140,10 +139,9 @@ def put_user_on_request():
     user_id = session.get('user_id', None)
     if user_id:
         g.auth_context['user_id'] = user_id
-        sentry.client.context.merge({
-            'extra': {
-                'user_id': user_id,
-            }
+        sentry.client.extra_context({
+            'user_id': user_id,
+            'ip_address': g.remote_addr,
         })
     unbound_api = authProtectedAPI(g.conn, f.mailer, stripe=stripe)
     g.api = unbound_api.bindContext(g.auth_context)
@@ -164,20 +162,16 @@ def put_user_on_request():
             #         'email': g.user['email'],
             #     }
             # })
-            # if g.user['email_verified']:
-            #     sentry.client.context.merge({
-            #         'user': {
-            #             'id': user_id,
-            #             'email': g.user['email'],
-            #         }
-            #     })
-            # else:
-            #     sentry.client.context.merge({
-            #         'user': {
-            #             'id': user_id,
-            #             'username': g.user['email'],
-            #         }
-            #     })
+            if g.user['email_verified']:
+                sentry.client.user_context({
+                    'id': user_id,
+                    'email': g.user['email'],
+                })
+            else:
+                sentry.client.user_context({
+                    'id': user_id,
+                    'username': g.user['email'],
+                })
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)
