@@ -107,6 +107,7 @@ def handle_500(err):
             user_data['email'] = g.user['email']
         else:
             user_data['username'] = g.user['email']
+    sentry.client.user_context(user_data)
     logger.info('sentry context just before capturing', context=sentry.client.context)
     sentry.captureException(user=user_data, extra=user_data)
     return render_template('err500.html',
