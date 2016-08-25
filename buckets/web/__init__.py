@@ -100,7 +100,7 @@ def handle_500(err):
     traceback.print_exc()
     user_data = {
         'id': g.user_id,
-        'ip_address': g.remote_addr,
+        'ip_address': '1.2.3.4',
     }
     if g.user and 'email' in g.user:
         if g.user['email_verified']:
