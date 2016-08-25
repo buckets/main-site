@@ -1,5 +1,6 @@
 #!/bin/sh
 
+env | grep GIT
 
 VERSION="$(cd $GIT_DIR && git log -1 --pretty="%h %f %ci" | head -n1)"
 echo ""
