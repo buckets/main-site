@@ -30,6 +30,7 @@ Now:
   
 
 Less critical:
+  ☐ Use unprivileged db user
   ☐ Update account balance/names
   ☐ You shouldn't be able to mark a negative amount as income.
   ☐ Make sure you can't directly set account balance -- there must be a transaction
