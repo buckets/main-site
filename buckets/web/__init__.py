@@ -122,6 +122,11 @@ def put_user_on_request():
     user_id = session.get('user_id', None)
     if user_id:
         g.auth_context['user_id'] = user_id
+        sentry.client.context.merge({
+            'extra': {
+                'user_id': user_id,
+            }
+        })
     unbound_api = authProtectedAPI(g.conn, f.mailer, stripe=stripe)
     g.api = unbound_api.bindContext(g.auth_context)
     if user_id:
@@ -135,6 +140,12 @@ def put_user_on_request():
             g.user = g.api.user.get_user(id=user_id)
             g.user_id = user_id
             logger.info('Setting sentry client', user_id=user_id, email=g.user['email'])
+            sentry.client.context.merge({
+                'extra': {
+                    'user_id': user_id,
+                    'email': g.user['email'],
+                }
+            })
             if g.user['email_verified']:
                 sentry.client.context.merge({
                     'user': {
