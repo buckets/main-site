@@ -98,7 +98,16 @@ def request_debug_data():
 @f.errorhandler(500)
 def handle_500(err):
     traceback.print_exc()
-    sentry.captureException()
+    user_data = {
+        'id': g.user_id,
+        'ip_address': g.remote_addr,
+    }
+    if g.user and 'email' in g.user:
+        if g.user['email_verified']:
+            user_data['email'] = g.user['email']
+        else:
+            user_data['username'] = g.user['email']
+    sentry.captureException(user=user_data)
     return render_template('err500.html',
         sentry_event_id=g.sentry_event_id,
         sentry_public_dsn=sentry.client.get_public_dsn('https'),
@@ -140,35 +149,35 @@ def put_user_on_request():
     g.api = unbound_api.bindContext(g.auth_context)
     if user_id:
         logger.info('Setting sentry client', user_id=user_id)
-        sentry.client.context.merge({
-            'user': {
-                'id': user_id,
-            }
-        })
+        # sentry.client.context.merge({
+        #     'user': {
+        #         'id': user_id,
+        #     }
+        # })
         try:
             g.user = g.api.user.get_user(id=user_id)
             g.user_id = user_id
             logger.info('Setting sentry client', user_id=user_id, email=g.user['email'])
-            sentry.client.context.merge({
-                'extra': {
-                    'user_id': user_id,
-                    'email': g.user['email'],
-                }
-            })
-            if g.user['email_verified']:
-                sentry.client.context.merge({
-                    'user': {
-                        'id': user_id,
-                        'email': g.user['email'],
-                    }
-                })
-            else:
-                sentry.client.context.merge({
-                    'user': {
-                        'id': user_id,
-                        'username': g.user['email'],
-                    }
-                })
+            # sentry.client.context.merge({
+            #     'extra': {
+            #         'user_id': user_id,
+            #         'email': g.user['email'],
+            #     }
+            # })
+            # if g.user['email_verified']:
+            #     sentry.client.context.merge({
+            #         'user': {
+            #             'id': user_id,
+            #             'email': g.user['email'],
+            #         }
+            #     })
+            # else:
+            #     sentry.client.context.merge({
+            #         'user': {
+            #             'id': user_id,
+            #             'username': g.user['email'],
+            #         }
+            #     })
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)
