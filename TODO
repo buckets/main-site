@@ -1,35 +1,5 @@
 Now:
-  ✔ Make it not do 2 transactions when you press enter in buckets.html @done (16-07-28 16:50)
-  ✔ Totals summary bar at bottom (or elsewhere) @done (16-07-28 22:53)
-  ✔ Why doesn't setting target amount and date put deposit amount. @done (16-07-29 20:36)
-  ✔ You can't delete 0s in MoneyInputs @done (16-07-29 21:08)
-  ✔ Sometimes the deposit changes for goal accounts after you do "Make it Rain"  Target amount: 20,000 Date: Jan 2025, Deposit changes from 180 to 179.67 @done (16-07-29 21:15)
-  ✔ Make it rain @done (16-07-29 21:03)
-  ✔ Sign in @done (16-08-10 21:30)
-  ✔ Show as of Last month/this month/now @done (16-08-15 10:39)
-    ✔ urlfor doesn't work in single-bucket view @done (16-08-11 09:02)
-  ✔ Transfers and Income (instead of just Skip) @done (16-08-15 10:39)
-  ☐ cron simplefin fetching
-  ✔ Don't update account balances blindly @done (16-08-15 09:19)
-  ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
-  ✔ migration sql @done (16-08-19 22:14)
-    ✔ Make sure sequences are correct @done (16-08-19 22:14)
-  ✔ Email 500 Internal Server Errors to me. @done (16-08-24 14:34)
-  ✔ Subscriptions @done (16-08-23 22:47)
-    ✔ Show current subscription @done (16-08-23 12:52)
-    ✔ Lock people out for non-payment (with some leeway) @done (16-08-23 22:47)
-    ✔ Make sure expiration date stays in sync (either with webhooks or a cron job) @done (16-08-23 21:47)
-  ✔ CSRF @done (16-08-24 14:34)
-  ✔ Transaction per request from root @done (16-08-23 22:17)
-  ✔ Handle 404 @done (16-08-17 06:43)
-  ✔ PIN @done (16-08-17 06:43)
-    ✔ Lock after many failed attempts @done (16-08-17 06:43)
-    ✔ Timer showing log out (or at least warn) @done (16-08-19 23:09)
-  ✔ Handle duplicate registration @done (16-08-20 07:59)
-  ✔ Tabbing through to categorize should work @done (16-08-20 07:58)
-  ✔ Works on Postgres 9.2 :( @done (16-08-24 21:26)
-  ☐ Log error with user_id, eh?
-  
+  ☐ cron simplefin fetching  
 
 Less critical:
   ☐ Use unprivileged db user
@@ -64,3 +34,34 @@ Later:
   ☐ JSON downloads
 
 
+Done:
+  ✔ Make it not do 2 transactions when you press enter in buckets.html @done (16-07-28 16:50)
+  ✔ Totals summary bar at bottom (or elsewhere) @done (16-07-28 22:53)
+  ✔ Why doesn't setting target amount and date put deposit amount. @done (16-07-29 20:36)
+  ✔ You can't delete 0s in MoneyInputs @done (16-07-29 21:08)
+  ✔ Sometimes the deposit changes for goal accounts after you do "Make it Rain"  Target amount: 20,000 Date: Jan 2025, Deposit changes from 180 to 179.67 @done (16-07-29 21:15)
+  ✔ Make it rain @done (16-07-29 21:03)
+  ✔ Sign in @done (16-08-10 21:30)
+  ✔ Show as of Last month/this month/now @done (16-08-15 10:39)
+    ✔ urlfor doesn't work in single-bucket view @done (16-08-11 09:02)
+  ✔ Transfers and Income (instead of just Skip) @done (16-08-15 10:39)
+  
+  ✔ Don't update account balances blindly @done (16-08-15 09:19)
+  ✔ Add tests that run in a dirty database to make sure there's no horizontal priv access. @done (16-07-29 22:19)
+  ✔ migration sql @done (16-08-19 22:14)
+    ✔ Make sure sequences are correct @done (16-08-19 22:14)
+  ✔ Email 500 Internal Server Errors to me. @done (16-08-24 14:34)
+  ✔ Subscriptions @done (16-08-23 22:47)
+    ✔ Show current subscription @done (16-08-23 12:52)
+    ✔ Lock people out for non-payment (with some leeway) @done (16-08-23 22:47)
+    ✔ Make sure expiration date stays in sync (either with webhooks or a cron job) @done (16-08-23 21:47)
+  ✔ CSRF @done (16-08-24 14:34)
+  ✔ Transaction per request from root @done (16-08-23 22:17)
+  ✔ Handle 404 @done (16-08-17 06:43)
+  ✔ PIN @done (16-08-17 06:43)
+    ✔ Lock after many failed attempts @done (16-08-17 06:43)
+    ✔ Timer showing log out (or at least warn) @done (16-08-19 23:09)
+  ✔ Handle duplicate registration @done (16-08-20 07:59)
+  ✔ Tabbing through to categorize should work @done (16-08-20 07:58)
+  ✔ Works on Postgres 9.2 :( @done (16-08-24 21:26)
+  ✔ Log error with user_id, eh? @done (16-08-24 21:32)
