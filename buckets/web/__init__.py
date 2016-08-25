@@ -100,7 +100,7 @@ def handle_500(err):
     traceback.print_exc()
     user_data = {
         'id': g.user_id,
-        'ip_address': '1.2.3.4',
+        'ip_address': g.remote_addr,
     }
     if g.user and 'email' in g.user:
         if g.user['email_verified']:
@@ -108,8 +108,7 @@ def handle_500(err):
         else:
             user_data['username'] = g.user['email']
     sentry.client.user_context(user_data)
-    logger.info('sentry context just before capturing', context=sentry.client.context)
-    sentry.captureException(user=user_data, extra=user_data)
+    sentry.client.captureException(user=user_data, extra=user_data)
     return render_template('err500.html',
         sentry_event_id=g.sentry_event_id,
         sentry_public_dsn=sentry.client.get_public_dsn('https'),
@@ -147,35 +146,24 @@ def put_user_on_request():
     unbound_api = authProtectedAPI(g.conn, f.mailer, stripe=stripe)
     g.api = unbound_api.bindContext(g.auth_context)
     if user_id:
-        logger.info('Setting sentry client', user_id=user_id)
-        # sentry.client.context.merge({
-        #     'user': {
-        #         'id': user_id,
-        #     }
-        # })
         try:
             g.user = g.api.user.get_user(id=user_id)
             g.user_id = user_id
-            logger.info('Setting sentry client', user_id=user_id, email=g.user['email'])
-            # sentry.client.context.merge({
-            #     'extra': {
-            #         'user_id': user_id,
-            #         'email': g.user['email'],
-            #     }
-            # })
+            user_data = {'id': user_id}
             if g.user['email_verified']:
-                sentry.client.user_context({
-                    'id': user_id,
+                user_data.update({
                     'email': g.user['email'],
                 })
             else:
-                sentry.client.user_context({
-                    'id': user_id,
+                user_data.update({
                     'username': g.user['email'],
                 })
+            sentry.client.user_context(user_data)
+            sentry.client.extra_context(user_data)
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)
+            sentry.client.captureException('invalid user id')
             session.pop('user_id', None)
             g.user = {}
             g.auth_context = {}
