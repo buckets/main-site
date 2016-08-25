@@ -516,12 +516,8 @@ class BudgetManagement(object):
         wheres = wheres or ()
         r = self.engine.execute(select([
                 AccountTrans,
-                func.array_agg(
-                    func.json_build_object(
-                        'bucket_id', BucketTrans.c.bucket_id,
-                        'amount', BucketTrans.c.amount
-                    )
-                ).label('buckets'),
+                func.array_agg(BucketTrans.c.bucket_id).label('bucket_ids'),
+                func.array_agg(BucketTrans.c.amount).label('bucket_amounts'),
             ]).select_from(
                 AccountTrans.outerjoin(
                     BucketTrans,
@@ -536,7 +532,9 @@ class BudgetManagement(object):
             .order_by(AccountTrans.c.posted))
         for row in r.fetchall():
             trans = dict(row)
-            trans['buckets'] = [x for x in trans['buckets'] if x['bucket_id']]    
+            buckets = zip(trans.pop('bucket_ids', []), trans.pop('bucket_amounts', []))
+            trans['buckets'] = [{'bucket_id':x[0], 'amount':x[1]}
+                for x in buckets if x[0]]
             yield trans
 
     @policy.use_common
@@ -937,11 +935,9 @@ class BudgetManagement(object):
         wheres = wheres or ()
         r = self.engine.execute(select([
                 BucketTrans,
-                func.json_build_object(
-                    'id', AccountTrans.c.id,
-                    'memo', AccountTrans.c.memo,
-                    'account_id', AccountTrans.c.account_id,
-                ).label('account_transaction'),
+                AccountTrans.c.id.label('_at_id'),
+                AccountTrans.c.memo.label('_at_memo'),
+                AccountTrans.c.account_id.label('_at_account_id'),
             ]).select_from(
                 BucketTrans.outerjoin(
                     AccountTrans,
@@ -955,8 +951,17 @@ class BudgetManagement(object):
             .order_by(BucketTrans.c.posted.desc()))
         for row in r.fetchall():
             trans = dict(row)
-            if trans['account_transaction']['id'] is None:
+            _at_id = trans.pop('_at_id', None)
+            _at_memo = trans.pop('_at_memo', None)
+            _at_account_id = trans.pop('_at_account_id', None)
+            if _at_id is None:
                 trans['account_transaction'] = None
+            else:
+                trans['account_transaction'] = {
+                    'id': _at_id,
+                    'memo': _at_memo,
+                    'account_id': _at_account_id,
+                }
             yield trans
 
     #----------------------------------------------------------

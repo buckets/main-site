@@ -3,7 +3,7 @@
 # fresh postgres database.
 
 set -e
-CONTAINER_ID="$(docker run -e POSTGRES_PASSWORD=postgres -p 5432 -d postgres:9.5.3)"
+CONTAINER_ID="$(docker run -e POSTGRES_PASSWORD=postgres -p 5432 -d postgres:9.2.18)"
 finish() {
     echo "Destroying database at ${TEST_DATABASE_URL}"
     docker kill $CONTAINER_ID > /dev/null

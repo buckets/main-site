@@ -27,10 +27,13 @@ Now:
     ✔ Timer showing log out (or at least warn) @done (16-08-19 23:09)
   ✔ Handle duplicate registration @done (16-08-20 07:59)
   ✔ Tabbing through to categorize should work @done (16-08-20 07:58)
+  ☐ Works on Postgres 9.2 :(
+  ☐ Log error with user_id, eh?
   
 
 Less critical:
   ☐ Use unprivileged db user
+  ☐ Post deploys to sentry
   ☐ Update account balance/names
   ☐ You shouldn't be able to mark a negative amount as income.
   ☐ Make sure you can't directly set account balance -- there must be a transaction
