@@ -140,6 +140,8 @@ def test_signin(api, mailer, mkuser):
 
     found = api.user_id_from_signin_token(token)
     assert found == user['id']
+    user = api.get_user(user['id'])
+    assert user['email_verified'] is True
 
 def test_signin_no_such_email(api, mailer):
     api.send_signin_email('nosuchemail@email.com')

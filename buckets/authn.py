@@ -134,6 +134,9 @@ class UserManagement(object):
             token_id, user_id = row
             conn.execute(AuthToken.delete()
                 .where(AuthToken.c.id == token_id))
+            conn.execute(User.update()
+                .values(email_verified=True)
+                .where(User.c.id == user_id))
             return user_id
 
     @policy.allow(userOnly(lambda x:x['user_id']))

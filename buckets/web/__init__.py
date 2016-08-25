@@ -135,12 +135,20 @@ def put_user_on_request():
             g.user = g.api.user.get_user(id=user_id)
             g.user_id = user_id
             logger.info('Setting sentry client', user_id=user_id, email=g.user['email'])
-            sentry.client.context.merge({
-                'user': {
-                    'id': user_id,
-                    'email': g.user['email'],
-                }
-            })
+            if g.user['email_verified']:
+                sentry.client.context.merge({
+                    'user': {
+                        'id': user_id,
+                        'email': g.user['email'],
+                    }
+                })
+            else:
+                sentry.client.context.merge({
+                    'user': {
+                        'id': user_id,
+                        'username': g.user['email'],
+                    }
+                })
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)

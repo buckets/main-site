@@ -27,7 +27,7 @@ Now:
     ✔ Timer showing log out (or at least warn) @done (16-08-19 23:09)
   ✔ Handle duplicate registration @done (16-08-20 07:59)
   ✔ Tabbing through to categorize should work @done (16-08-20 07:58)
-  ☐ Works on Postgres 9.2 :(
+  ✔ Works on Postgres 9.2 :( @done (16-08-24 21:26)
   ☐ Log error with user_id, eh?
   
 
