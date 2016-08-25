@@ -111,6 +111,15 @@ transaction_per_request(f)
 def put_user_on_request():
     log = logger.new(reqid=str(uuid4()))
     log.bind(path=request.path)
+    g.remote_addr = request.headers.get('Cf-Connecting-Ip') \
+        or request.headers.get('X-Client-Ip') \
+        or request.remote_addr
+    log.bind(ip=g.remote_addr)
+    sentry.client.context.merge({
+        'user': {
+            'ip_address': g.remote_addr,
+        }
+    })
 
     g.auth_context = {}
     g.user = {}
