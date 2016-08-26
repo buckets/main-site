@@ -1009,12 +1009,11 @@ class BudgetManagement(object):
         return [dict(x) for x in r.fetchall()]
 
     @policy.use_common
-    def simplefin_fetch(self):
+    def simplefin_fetch(self, days=45):
         """
         Fetch account+transaction data for all simplefin tokens
         associated with this farm.
         """
-        days = 45
         r = self.engine.execute(select([Connection])
             .where(Connection.c.farm_id == self.farm_id)
             .order_by(Connection.c.id))
