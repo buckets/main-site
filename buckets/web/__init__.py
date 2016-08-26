@@ -159,7 +159,7 @@ def put_user_on_request():
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)
-            sentry.client.captureException('invalid user id')
+            sentry.client.captureMessage('invalid user id')
             session.pop('user_id', None)
             g.user = {}
             g.auth_context = {}

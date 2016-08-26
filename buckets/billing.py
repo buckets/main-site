@@ -29,7 +29,7 @@ class BillingManagement(object):
     PLANS = {
         'monthly': {
             'id': 'buckets-monthly-v2',
-            'amount': 202,
+            'amount': 160,
             'name': 'Buckets Monthly',
             'interval': 'month',
             'interval_count': 1,
@@ -37,7 +37,7 @@ class BillingManagement(object):
         },
         'yearly': {
             'id': 'buckets-yearly-v2',
-            'amount': 1064,
+            'amount': 1600,
             'name': 'Buckets Yearly',
             'interval': 'year',
             'interval_count': 1,
