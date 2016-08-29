@@ -29,6 +29,15 @@ def register():
         return redirect('/')
         
     logger.info('User registered', email=email)
+    try:
+        current_app.mailer.sendPlain(
+            'hello@bucketsisbetter.com',
+            ('Buckets', 'hello@bucketsisbetter.com'),
+            'New user: %s' % (email,),
+            'Email: %s\n' % (email,))
+    except Exception as e:
+        logger.exception(e)
+        pass
     flash('You are registered!')
     
     # sign in
