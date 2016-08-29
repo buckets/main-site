@@ -40,7 +40,7 @@ def main(engine, days=7):
 
 p = argparse.ArgumentParser()
 p.add_argument('-D', '--database',
-    default=os.getenve('DATABASE_UR:', ''))
+    default=os.getenve('DATABASE_URL', ''))
 p.add_argument('-d', '--days',
     type=int,
     default=7,

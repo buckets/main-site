@@ -135,7 +135,9 @@ class UserManagement(object):
             conn.execute(AuthToken.delete()
                 .where(AuthToken.c.id == token_id))
             conn.execute(User.update()
-                .values(email_verified=True)
+                .values(
+                    email_verified=True,
+                    last_login=func.now())
                 .where(User.c.id == user_id))
             return user_id
 
