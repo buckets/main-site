@@ -1,4 +1,4 @@
-from flask import session, request, redirect, url_for
+from flask import session, request, redirect, url_for, g
 from decimal import Decimal
 from datetime import datetime
 import sys
@@ -45,6 +45,45 @@ def ask_for_pin():
     return redirect(url_for('app.pin'))
 
 
+#----------------------------------------------------------------------
+# Post-response processing
+#----------------------------------------------------------------------
+
+def enable_after_response(app):
+    """
+    Enable the use of after_response(...) on an app.
+    """
+    from crochet import wait_for, run_in_reactor, setup
+    setup()
+
+    @app.after_request
+    def after_request():
+        try:
+            for func,args,kwargs in g.get('_after_response_funcs', []):
+                
+                try:
+                    func(*args, **kwargs)
+                except Exception as e:
+                    logger.error('Error running after_response func')
+                    logger.exception(e)
+        except Exception as e:
+            logger.error('Error in after_response')
+            logger.exception(e)
+
+
+def after_response(func, *args, **kwargs):
+    """
+    Register a function to be run after the response is sent
+    to a client.
+    """
+    if '_after_response_funcs' not in g:
+        g._after_response_funcs = []
+    g._after_response_funcs.append((func, args, kwargs))
+
+
+#----------------------------------------------------------------------
+# CSRF
+#----------------------------------------------------------------------
 
 class CSRF(object):
 

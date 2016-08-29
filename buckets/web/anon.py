@@ -9,11 +9,19 @@ from flask import current_app
 from buckets.billing import BillingManagement
 from buckets.error import NotFound, DuplicateRegistration
 from buckets.web.util import bump_pin_expiration, clear_pin_expiration
+from buckets.web.util import after_response
 
 blue = Blueprint('anon', __name__)
 
 @blue.route('/home')
 def index():
+    def sleeper():
+        logger.info('Before sleep')
+        time.sleep(5)
+        logger.info('Between sleep')
+        time.sleep(5)
+        logger.info('After sleep')
+    after_response(sleeper)
     return render_template('anon/index.html',
         plans=BillingManagement.PLANS)
 
@@ -29,6 +37,7 @@ def register():
         return redirect('/')
         
     logger.info('User registered', email=email)
+
     flash('You are registered!')
     
     # sign in
