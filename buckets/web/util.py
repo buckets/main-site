@@ -1,4 +1,4 @@
-from flask import session, request, redirect, url_for, g
+from flask import session, request, redirect, url_for
 from decimal import Decimal
 from datetime import datetime
 import sys
@@ -6,6 +6,7 @@ import json
 import time
 from functools import wraps
 
+from twisted.internet import threads
 from crochet import run_in_reactor, setup
 setup()
 
@@ -51,35 +52,20 @@ def ask_for_pin():
 #----------------------------------------------------------------------
 # Post-response processing
 #----------------------------------------------------------------------
-
-def enable_after_response(app):
-    """
-    Enable the use of after_response(...) on an app.
-    """
-    
-
-    @app.after_request
-    def after_request():
-        try:
-            for func,args,kwargs in g.get('_after_response_funcs', []):
-                
-                try:
-                    func(*args, **kwargs)
-                except Exception as e:
-                    logger.error('Error running after_response func')
-                    logger.exception(e)
-        except Exception as e:
-            logger.error('Error in after_response')
-            logger.exception(e)
-
-
 def run_async(func, *args, **kwargs):
     """
     Run a function in another thread.
     """
     @run_in_reactor
     def run_func():
-        func(*args, **kwargs)
+        # XXX Set up the logger so that you can tie what
+        # happens inside this function back to the request
+        # that started it.
+        d = threads.deferToThread(func, *args, **kwargs)
+        def eb(err):
+            logger.exception('error processing async func', exc_info=err)
+            return
+        d.addErrback(eb)
     run_func()
 
 

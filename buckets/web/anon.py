@@ -15,13 +15,6 @@ blue = Blueprint('anon', __name__)
 
 @blue.route('/home')
 def index():
-    def sleeper():
-        logger.info('Before sleep')
-        time.sleep(5)
-        logger.info('Between sleep')
-        time.sleep(5)
-        logger.info('After sleep')
-    run_async(sleeper)
     return render_template('anon/index.html',
         plans=BillingManagement.PLANS)
 

@@ -14,7 +14,6 @@ from buckets.model import authProtectedAPI
 from buckets.web.util import all_filters, all_globals
 from buckets.web.util import is_pin_expired, get_pin_expiration
 from buckets.web.util import GLOBAL_CSRF
-from buckets.web.util import enable_after_response
 from buckets.mailing import PostmarkMailer, NoMailer
 from buckets.dbutil import transaction_per_request
 
@@ -23,7 +22,6 @@ f.jinja_env.filters.update(all_filters)
 f.jinja_env.globals.update(all_globals)
 
 sentry = Sentry()
-enable_after_response(f)
 
 # monkey patch for https://github.com/getsentry/raven-python/issues/842
 _real = sentry.get_user_info

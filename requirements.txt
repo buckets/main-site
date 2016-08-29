@@ -1,6 +1,8 @@
 -i https://pypi.python.org/simple
 click==6.6
+crochet==1.5.0
 Flask==0.11.1
+gunicorn==19.6.0
 humancrypto==0.3.0
 itsdangerous==0.24
 Jinja2==2.8
@@ -14,4 +16,3 @@ stripe==1.37.0
 structlog==16.1.0
 Werkzeug==0.11.10
 wheel==0.24.0
-gunicorn==19.6.0
