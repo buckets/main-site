@@ -6,6 +6,9 @@ import json
 import time
 from functools import wraps
 
+from crochet import run_in_reactor, setup
+setup()
+
 from jose import jwt
 
 import structlog
@@ -53,8 +56,7 @@ def enable_after_response(app):
     """
     Enable the use of after_response(...) on an app.
     """
-    from crochet import wait_for, run_in_reactor, setup
-    setup()
+    
 
     @app.after_request
     def after_request():
@@ -71,14 +73,14 @@ def enable_after_response(app):
             logger.exception(e)
 
 
-def after_response(func, *args, **kwargs):
+def run_async(func, *args, **kwargs):
     """
-    Register a function to be run after the response is sent
-    to a client.
+    Run a function in another thread.
     """
-    if '_after_response_funcs' not in g:
-        g._after_response_funcs = []
-    g._after_response_funcs.append((func, args, kwargs))
+    @run_in_reactor
+    def run_func():
+        func(*args, **kwargs)
+    run_func()
 
 
 #----------------------------------------------------------------------
