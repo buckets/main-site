@@ -1,10 +1,13 @@
-from flask import session, request, redirect, url_for
-from decimal import Decimal
 from datetime import datetime
-import sys
-import json
-import time
+from decimal import Decimal
 from functools import wraps
+from uuid import uuid4
+import json
+import sys
+import time
+
+from flask import current_app
+from flask import session, request, redirect, url_for, g
 
 from twisted.internet import threads
 from crochet import run_in_reactor, setup
@@ -56,18 +59,97 @@ def run_async(func, *args, **kwargs):
     """
     Run a function in another thread.
     """
+    def run_with_log(log_context):
+        logger.new(background=True, **log_context)
+        return func(*args, **kwargs)
+
     @run_in_reactor
-    def run_func():
+    def run_func(log_context):
         # XXX Set up the logger so that you can tie what
         # happens inside this function back to the request
         # that started it.
-        d = threads.deferToThread(func, *args, **kwargs)
+        d = threads.deferToThread(run_with_log, log_context)
         def eb(err):
             logger.exception('error processing async func', exc_info=err)
             return
         d.addErrback(eb)
-    run_func()
+    run_func(structlog_context())
 
+
+#----------------------------------------------------------------------
+# Logging
+#----------------------------------------------------------------------
+def get_remote_addr():
+    return request.headers.get('Cf-Connecting-Ip') \
+        or request.headers.get('X-Client-Ip') \
+        or request.remote_addr
+
+def send_warnings_to_sentry(_logger, method, event_dict):
+    """
+    A processor for structlog that will send warnings to sentry.
+    """
+    try:
+        sentry = current_app.extensions['sentry']
+    except (AttributeError, IndexError):
+        return event_dict
+
+    sentry.client.captureMessage(event_dict.get('event', 'WARNING'),
+        extra=event_dict, level='warning')
+
+    return event_dict
+
+
+def structlog_context():
+    """
+    Return a dictionary of the current request-related stuff to log
+    with structlog.
+
+    Use like this:
+
+        logger.new(**structlog_context())
+
+    or use logger.bind instead of logger.new
+    """
+    if 'reqid' not in g:
+        g.reqid = str(uuid4())
+    ret = {
+        'reqid': g.reqid,
+        'path': request.path,
+        'ip': get_remote_addr(),
+    }
+    if 'user_id' in g:
+        ret['user_id'] = g.user_id
+    return ret
+
+def sentry_context():
+    """
+    Return a dictionary of the current request-related context
+    for sentry to use in logging.
+
+    Use like this:
+
+        sentry.client.context.merge(sentry_context())
+    """
+    if 'reqid' not in g:
+        g.reqid = str(uuid4())
+    ip = get_remote_addr()
+    user_context = {
+        'ip_address': ip,
+    }
+    extra_context = {
+        'ip_address': ip,
+    }
+    if 'user' in g:
+        user_context['user_id'] = g.get('user_id')
+        if g.user.get('email_verified'):
+            user_context['email'] = g.user['email']
+        else:
+            user_context['username'] = g.user.get('email')
+    
+    return {
+        'user': user_context,
+        'extra': extra_context,
+    }
 
 #----------------------------------------------------------------------
 # CSRF

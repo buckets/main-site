@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 import structlog
 import stripe
 import logging
@@ -10,12 +8,14 @@ from flask import render_template
 
 from raven.contrib.flask import Sentry
 
+from buckets.dbutil import transaction_per_request
+from buckets.mailing import PostmarkMailer, NoMailer
 from buckets.model import authProtectedAPI
 from buckets.web.util import all_filters, all_globals
-from buckets.web.util import is_pin_expired, get_pin_expiration
 from buckets.web.util import GLOBAL_CSRF
-from buckets.mailing import PostmarkMailer, NoMailer
-from buckets.dbutil import transaction_per_request
+from buckets.web.util import is_pin_expired, get_pin_expiration
+from buckets.web.util import structlog_context, sentry_context
+from buckets.web.util import send_warnings_to_sentry
 
 f = Flask(__name__)
 f.jinja_env.filters.update(all_filters)
@@ -73,8 +73,9 @@ def configureApp(engine, flask_secret_key,
 
     structlog.configure(
         processors=[
+            send_warnings_to_sentry,
             structlog.processors.KeyValueRenderer(
-                key_order=['reqid', 'event'],
+                key_order=['reqid', 'event', 'path'],
             ),
         ],
         context_class=structlog.threadlocal.wrap_dict(dict),
@@ -114,18 +115,9 @@ transaction_per_request(f)
 
 @f.before_request
 def put_user_on_request():
-    log = logger.new(reqid=str(uuid4()))
-    log.bind(path=request.path)
-    g.remote_addr = request.headers.get('Cf-Connecting-Ip') \
-        or request.headers.get('X-Client-Ip') \
-        or request.remote_addr
-    log.bind(ip=g.remote_addr)
-    sentry.user_context({
-        'ip_address': g.remote_addr,
-    })
-    sentry.extra_context({
-        'ip_address': g.remote_addr,
-    })
+    # initial context
+    log = logger.new(**structlog_context())
+    sentry.client.context.merge(sentry_context())
 
     g.auth_context = {}
     g.user = {}
@@ -146,24 +138,18 @@ def put_user_on_request():
         try:
             g.user = g.api.user.get_user(id=user_id)
             g.user_id = user_id
-            user_data = {'id': user_id}
-            if g.user['email_verified']:
-                user_data.update({
-                    'email': g.user['email'],
-                })
-            else:
-                user_data.update({
-                    'username': g.user['email'],
-                })
-            sentry.client.user_context(user_data)
             log.bind(user_id=user_id)
         except Exception as e:
             logger.warning('invalid user id', user_id=user_id, exc_info=e)
-            sentry.client.captureMessage('invalid user id')
+            sentry.captureMessage('invalid user id')
             session.pop('user_id', None)
             g.user = {}
             g.auth_context = {}
             g.api = unbound_api.bindContext(g.auth_context)
+
+    # context that includes user stuff
+    sentry.client.context.merge(sentry_context())
+    log.bind(**structlog_context())
 
 @f.route('/')
 def root():
@@ -175,6 +161,11 @@ def root():
 @f.route('/error')
 def err():
     raise Exception('The exception')
+
+@f.route('/warning')
+def warning():
+    logger.warning('Test warning', name='the test')
+    return 'warning'
 
 from buckets.web import app, anon, farm
 f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>')
