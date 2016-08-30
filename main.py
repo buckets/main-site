@@ -20,6 +20,8 @@ ap.add_argument('-D', '--database',
     help='Database URL.  (env: DATABASE_URL)')
 ap.add_argument('-k', '--flask-secret-key',
     default=os.environ.get('FLASK_SECRET_KEY', str(uuid4())))
+ap.add_argument('--postmark-key',
+    default=os.environ.get('POSTMARK_KEY', ''))
 ap.add_argument('--stripe-api-key',
     default=os.environ.get('STRIPE_API_KEY', ''))
 ap.add_argument('--stripe-public-key',
@@ -53,7 +55,7 @@ app = configureApp(
     debug=args.debug,
     engine=engine,
     flask_secret_key=args.flask_secret_key,
-    postmark_key=None,
+    postmark_key=args.postmark_key,
     registration_delay=args.reg_delay,
     stripe_api_key=args.stripe_api_key,
     stripe_public_key=args.stripe_public_key,

@@ -27,8 +27,8 @@ class PostmarkMailer(object):
         return requests.post(
             self.api_root + '/email',
             headers={
-                'Accept': ['application/json'],
-                'Content-Type': ['application/json'],
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
                 'X-Postmark-Server-Token': self.api_key,
             },
             data=json.dumps(data))
@@ -51,8 +51,8 @@ class PostmarkMailer(object):
         return requests.post(
             self.api_root + '/email/withTemplate',
             headers={
-                'Accept': ['application/json'],
-                'Content-Type': ['application/json'],
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
                 'X-Postmark-Server-Token': self.api_key,
             },
             data=json.dumps(data))
