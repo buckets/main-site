@@ -4,6 +4,17 @@
 
 <h1>Buckets</h1>
 
+{% if not buckets %}
+<div class="empty-instruction">
+  <p>
+  Looks like you haven't created any buckets yet.
+  </p>
+
+  <p>
+  Use the form below to add your first bucket.  Maybe a bucket for Groceries?
+  </p>
+</div>
+{% else %}
 <script type="text/babel" id="el1">
 var target_el = afterEl(document.getElementById('el1'));
 
@@ -511,14 +522,16 @@ var BucketTable = React.createClass({
 });
 Store.rerender();
 </script>
+{% endif %}
 
 <h2>Create bucket</h2>
+<p>Buckets are the categories you divide your money into.  They're a lot like buckets in real life&mdash;you put things in and take things out.</p>
 <form method="post">
 {{ csrf_input() }}
 <div class="form">
   <div class="pair">
     <div class="label">Name</div>
-    <div class="control"><input type="text" name="name"></div>
+    <div class="control"><input type="text" name="name" placeholder="Groceries, Vacation, etc..."></div>
   </div>
   <div class="pair">
     <div class="label"></div>
@@ -528,12 +541,13 @@ Store.rerender();
 </form>
 
 <h2>Create group</h2>
+<p>Groups help you prioritize which buckets receive rain (money) first.</p>
 <form method="post" action="{{ url_for('.groups') }}">
 {{ csrf_input() }}
 <div class="form">
   <div class="pair">
     <div class="label">Name</div>
-    <div class="control"><input type="text" name="name"></div>
+    <div class="control"><input type="text" name="name" placeholder="Needs, Wants, etc..."></div>
   </div>
   <div class="pair">
     <div class="label"></div>

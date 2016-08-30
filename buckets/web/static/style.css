@@ -29,6 +29,16 @@ body, html {
     width: 10rem;
     margin: 0 auto;
 }
+.empty-instruction {
+    padding: 1rem;
+    border: 0px solid lightgrey;
+    border-radius: 3px;
+    text-align: center;
+    background-color: rgba(241, 196, 15, 0.4);;
+}
+.empty-instruction p {
+    margin: 1rem auto;
+}
 
 a {
     color: rgba(41, 128, 185,1.0);
@@ -151,20 +161,16 @@ header .navlinks div {
 }
 .flash-messages .message {
     background-color: rgba(52, 152, 219, 0.2);
-    border-radius: 2px;
     padding: .75rem;
-    margin-bottom: 1rem;
-    margin-top: .5rem;
 }
 .flash-messages .message .close {
     float: right;
+    margin-right: 1rem;
 }
 .message.error {
     background-color: rgba(231, 76, 60, 0.2);
     border-radius: 2px;
     color: rgba(231, 76, 60,1.0);
-    margin-bottom: 1rem;
-    margin-top: .5rem;
     padding: .75rem;
 }
 .message.error .close {
