@@ -2,10 +2,9 @@ Now:
   ✔ cron simplefin fetching   @done (16-08-26 16:21)
 
 Less critical:
+  ☐ Guide people on empty things
   ☐ Use unprivileged db user
-  ☐ Send all structlog warnings and errors to Sentry
-  ☐ Post deploys to sentry
-  ☐ Update account balance/names
+  ☐ Allow updating account balance/names
   ☐ You shouldn't be able to mark a negative amount as income.
   ☐ Make sure you can't directly set account balance -- there must be a transaction
     ☐ check update_account

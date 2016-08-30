@@ -93,8 +93,9 @@ def send_warnings_to_sentry(_logger, method, event_dict):
     except (AttributeError, IndexError):
         return event_dict
 
-    sentry.client.captureMessage(event_dict.get('event', 'WARNING'),
-        extra=event_dict, level='warning')
+    if method == 'warning':
+        sentry.client.captureMessage(event_dict.get('event', 'WARNING'),
+            extra=event_dict, level='warning')
 
     return event_dict
 
