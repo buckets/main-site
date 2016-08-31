@@ -341,6 +341,29 @@ patches['init'] = [
         ON account_mapping(farm_id)''',
 ]
 
+patches['web_r'] = [
+    #-------------------------------------
+    # roles
+    #-------------------------------------
+    'CREATE ROLE web_r',
+    '''GRANT SELECT, INSERT, UPDATE, DELETE
+        ON ALL TABLES IN SCHEMA public
+        TO web_r''',
+    '''GRANT USAGE, SELECT
+        ON ALL SEQUENCES IN SCHEMA public
+        TO web_r''',
+
+    #-------------------------------------
+    # web user
+    #-------------------------------------
+    # password is 'md5' + md5(password + username).hexdigest()
+    # '''CREATE ROLE web
+    #     LOGIN
+    #     IN ROLE web_r
+    #     ENCRYPTED PASSWORD ''
+    # '''
+]
+
 
 def upgrade_schema(engine, patches=patches, version_table=PATCH_TABLE):
     """

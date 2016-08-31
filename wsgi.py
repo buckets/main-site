@@ -14,10 +14,9 @@ except IOError:
 
 import time
 from sqlalchemy import create_engine
-from buckets.schema import upgrade_schema
 from buckets.web import configureApp
 
-DATABASE_URL = os.environ['OPENSHIFT_POSTGRESQL_DB_URL']
+DATABASE_URL = os.environ['DATABASE_URL']
 FLASK_SECRET_KEY = os.environ['FLASK_SECRET_KEY']
 POSTMARK_KEY = os.environ['POSTMARK_KEY']
 STRIPE_API_KEY = os.environ['STRIPE_API_KEY']
@@ -31,8 +30,6 @@ while True:
         break
     except:
         time.sleep(0.5)
-upgrade_schema(engine)
-
 
 application = configureApp(
     engine=engine,
