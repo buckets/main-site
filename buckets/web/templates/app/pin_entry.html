@@ -5,14 +5,19 @@
 {% block title %}Enter you PIN{% endblock %}
 
 {% block content %}
-<h1>Enter your PIN</h1>
 
-<p>
-  Enter your PIN to access your account.
-</p>
+<div class="lockscreen">
+  <div class="lock-entry">
+    <h1>Enter your PIN</h1>
 
-<form method="post">
-{{ csrf_input() }}
-{{ pin_input('pin') }}
-</form>
+    <p>
+      Enter your PIN to access your account.
+    </p>
+
+    <form method="post">
+    {{ csrf_input() }}
+    {{ pin_input('pin') }}
+    </form>
+  </div>
+</div>
 {% endblock %}

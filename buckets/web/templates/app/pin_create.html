@@ -3,21 +3,25 @@
 {% from 'app/macros.html' import pin_input %}
 
 {% block content %}
-<h1>Create a PIN</h1>
+<div class="lockscreen">
+  <div class="lock-entry">
+    <h1>Create a PIN</h1>
 
-{% if previous_pin %}
-<p>
-  Enter it again to make sure it's the same.
-</p>
-{% else %}
-<p>
-  Create a 4-digit PIN to secure your account.  You will have to enter this PIN every time you access your account.
-</p>
-{% endif %}
+    {% if previous_pin %}
+    <p>
+      Enter it again to make sure it's the same.
+    </p>
+    {% else %}
+    <p>
+      Create a 4-digit PIN to secure your account.  You will have to enter this PIN every time you access your account.
+    </p>
+    {% endif %}
 
-<form method="post">
-{{ csrf_input() }}
-<input type="hidden" name="previous_pin" value="{{ previous_pin }}">
-{{ pin_input('pin') }}
-</form>
+    <form method="post">
+    {{ csrf_input() }}
+    <input type="hidden" name="previous_pin" value="{{ previous_pin }}">
+    {{ pin_input('pin') }}
+    </form>
+  </div>
+</div>
 {% endblock %}
