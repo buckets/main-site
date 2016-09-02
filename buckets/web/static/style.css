@@ -571,6 +571,45 @@ ol li {
     color: rgba(231, 76, 60,1.0);
 }
 
+.lockscreen {
+    background-image:  radial-gradient(ellipse at 50% 50%,
+        rgba(44, 62, 80, 0.5) 0%,
+        rgba(44, 62, 80, 0.3) 10%,
+        #ffffff 60%,
+        #ffffff 100%
+    );
+    padding: 2rem;
+    perspective: 2000px;
+}
+.lockscreen .lock-entry {
+    width: 24rem;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 3px;
+    border: 1px solid lightgrey;
+    box-shadow: 0 8px 13px -4px rgba(0,0,0,0.3);
+    position: relative;
+    text-align: center;
+}
+.lock-entry h1 {
+    margin-top: -3rem;
+}
+.lockscreen .lock-entry .lock {
+    border: 3px solid lightgrey;
+    color: lightgrey;
+    border-radius: 1000px;
+    height: 6rem;
+    width: 6rem;
+    position: relative;
+    top: -5rem;
+    margin-bottom: -5rem;
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .numberpad {
     width: 20rem;
 }
@@ -582,6 +621,8 @@ ol li {
     font-size: 2rem;
     width: 100%;
     text-align: center;
+    border: 1px solid lightgrey;
+    border-bottom: 0;
 }
 .numberpad button {
     font-size: 1.5rem;
@@ -596,6 +637,7 @@ ol li {
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
+    cursor: pointer;
 }
 
 img.farm-logo {
