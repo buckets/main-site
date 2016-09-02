@@ -1,6 +1,6 @@
 {% extends 'app/base.html' %}
 
-{% from 'app/macros.html' import pin_input %}
+{% from 'app/macros.html' import pin_form %}
 
 {% block content %}
 <div class="lockscreen">
@@ -18,10 +18,9 @@
     </p>
     {% endif %}
 
-    <form method="post">
-    {{ csrf_input() }}
+    {% call pin_form('pin') %}
     <input type="hidden" name="previous_pin" value="{{ previous_pin }}">
-    {{ pin_input('pin') }}
+    {% endcall %}
     </form>
   </div>
 </div>

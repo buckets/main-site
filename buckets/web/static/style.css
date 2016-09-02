@@ -572,14 +572,14 @@ ol li {
 }
 
 .lockscreen {
-    sbackground: rgba(44, 62, 80,1.0);
     background-image:  radial-gradient(ellipse at 50% 50%,
         rgba(44, 62, 80, 0.5) 0%,
         rgba(44, 62, 80, 0.3) 10%,
         #ffffff 60%,
         #ffffff 100%
     );
-    padding: 2rem; 
+    padding: 2rem;
+    perspective: 2000px;
 }
 .lockscreen .lock-entry {
     width: 24rem;

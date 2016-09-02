@@ -1,6 +1,6 @@
 {% extends 'app/base.html' %}
 
-{% from 'app/macros.html' import pin_input %}
+{% from 'app/macros.html' import pin_form %}
 
 {% block title %}Enter you PIN{% endblock %}
 
@@ -15,10 +15,7 @@
       Enter your PIN to access your account.
     </p>
 
-    <form method="post">
-    {{ csrf_input() }}
-    {{ pin_input('pin') }}
-    </form>
+    {% call pin_form('pin') %}{% endcall %}
   </div>
 </div>
 {% endblock %}
