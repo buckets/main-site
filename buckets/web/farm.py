@@ -76,7 +76,6 @@ def before_request():
     today = date.today()
     exp = farm['service_expiration'] or date(1999, 1, 1)
     days_over = (today - exp)
-    logger.info('days_over', days_over=days_over, today=today, exp=exp)
     if days_over > timedelta(days=7):
         flash("Your service has expired.  Please pay to continue"
               " using Buckets.", "error")
@@ -135,6 +134,20 @@ def accounts():
     accounts = g.farmapi.list_accounts(month=g.month)
     return render_template('farm/accounts.html',
         accounts=accounts)
+
+@blue.route('/account/<int:account_id>', methods=['GET', 'POST'])
+@require_csrf
+def account(account_id):
+    account = g.farmapi.get_account(id=account_id)
+    if request.method == 'POST':
+        data = {}
+        data['name'] = request.form['name']
+        
+        g.farmapi.update_account(id=account_id, data=data)
+        flash('{0} updated'.format(data['name']))
+        return redirect(url_for('.accounts'))
+    return render_template('farm/account.html',
+        account=account)
 
 @blue.route('/buckets', methods=['GET', 'POST'])
 @require_csrf

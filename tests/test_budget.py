@@ -211,9 +211,8 @@ class TestAccount(object):
     def test_update(self, api):
         account = api.create_account('Checking')
         new_account = api.update_account(account['id'],
-            dict(name='IRA', balance=12, currency='ZWA'))
+            dict(name='IRA', currency='ZWA'))
         assert new_account['name'] == 'IRA'
-        assert new_account['balance'] == 12
         assert new_account['currency'] == 'ZWA'
         again = api.get_account(account['id'])
         assert again == new_account

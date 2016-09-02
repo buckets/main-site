@@ -62,4 +62,5 @@ app = configureApp(
     sentry_dsn=args.sentry_dsn)
 
 if __name__ == '__main__':
-    app.run(args.host, args.port)
+    threaded = not not args.debug
+    app.run(args.host, args.port, threaded=threaded)

@@ -7,7 +7,7 @@ from flask import redirect, url_for
 from flask import current_app
 
 from buckets.billing import BillingManagement
-from buckets.error import NotFound, DuplicateRegistration
+from buckets.error import NotFound, DuplicateRegistration, BadValue
 from buckets.web.util import bump_pin_expiration, clear_pin_expiration
 from buckets.web.util import run_async
 
@@ -25,6 +25,9 @@ def register():
     time.sleep(current_app.config.get('REGISTRATION_DELAY', 3))
     try:
         user = g.api.user.create_user(email=email, name=name)
+    except BadValue:
+        flash('You need a valid email address and a name', 'error')
+        return redirect('/')
     except DuplicateRegistration:
         flash('Account already registered', 'error')
         return redirect('/')

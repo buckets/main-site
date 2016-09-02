@@ -1,0 +1,25 @@
+{% extends 'farm/base.html' %}
+
+{% block content %}
+
+<h1>{{ account.name }}</h1>
+
+<form method="post">
+{{ csrf_input() }}
+<div class="form">
+  <div class="pair">
+    <div class="label">Name</div>
+    <div class="control"><input type="text" name="name" value="{{ account.name }}" autofocus></div>
+  </div>
+  <div class="pair">
+    <div class="label">Balance</div>
+    <div class="control">{{ account.balance|money }}</div>
+  </div>
+  <div class="pair">
+    <div class="label"></div>
+    <div class="control"><button type="submit">Save Changes</button></div>
+  </div>
+</div>
+</form>
+
+{% endblock %}

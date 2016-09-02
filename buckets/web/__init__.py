@@ -47,28 +47,33 @@ def configureApp(engine, flask_secret_key,
     GLOBAL_CSRF.secret = flask_secret_key
 
     if debug:
-        logger.info('Running in DEBUG MODE')
+        logger.info('Flask: debug')
         f.jinja_env.cache_size = 0
         f.jinja_env.auto_reload = True
+    else:
+        logger.info('Flask: PRODUCTION')
     
     # mailing
     mailer = None
     if not postmark_key and not debug:
-        logger.warning('Production mode with no email token.')
+        logger.warning('Mail: PRODUCTION with no email token.')
     elif postmark_key:
         mailer = PostmarkMailer(postmark_key)
+        logger.info('Mail: PRODUCTION')
     else:
-        logger.warning('No email token -- using debug mailer')
+        logger.info('Mail: debug')
         mailer = NoMailer()
     f.mailer = mailer
 
     # stripe
     if debug and 'test' not in stripe_api_key:
-        raise Exception('Test Stripe key must be used in debug mode')
+        raise Exception('Stripe: Test Stripe key must be used in debug mode')
     elif not debug and 'test' in stripe_api_key:
-        logger.warning('Using test Stripe key in production mode')
+        logger.warning('Stripe: Using test Stripe key in production mode')
     if 'test' in stripe_api_key:
-        logger.warning('Using test Stripe key')
+        logger.info('Stripe: debug')
+    else:
+        logger.info('Stripe: PRODUCTION')
     stripe.api_key = stripe_api_key
 
     structlog.configure(

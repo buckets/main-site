@@ -10,7 +10,7 @@ from humancrypto.error import VerifyMismatchError
 from datetime import timedelta
 
 from buckets.error import NotFound, VerificationError, Forbidden, AccountLocked
-from buckets.error import DuplicateRegistration
+from buckets.error import DuplicateRegistration, BadValue
 from buckets.schema import User, Farm, UserFarm, AuthToken
 from buckets.authz import AuthPolicy, anything, nothing
 from buckets.dbutil import begin
@@ -36,6 +36,22 @@ def farmHandOnly(farm_id_getter):
     return authorizer
 
 
+def sortof_validate_email(email_address):
+    """
+    Perform cursory examination of email to see if it's
+    email-like.
+    """
+    if '@' not in email_address:
+        raise BadValue()
+    fore, aft = email_address.split('@', 1)
+    if not fore.strip() or not aft.strip():
+        raise BadValue()
+    if not fore.replace('.', '').strip():
+        raise BadValue()
+    if not aft.replace('.', '').strip():
+        raise BadValue()
+
+
 class UserManagement(object):
     """
     This contains functions for user management
@@ -56,6 +72,11 @@ class UserManagement(object):
     @policy.allow(anything)
     def create_user(self, email, name):
         email = email.lower()
+        # This is just basic checking -- it is not comprehensive
+        try:
+            sortof_validate_email(email)
+        except BadValue:
+            raise BadValue('email')
         try:
             r = self.engine.execute(User.insert()
                 .values(email=email, name=name)

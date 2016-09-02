@@ -7,6 +7,7 @@ import pytest
 import six
 from buckets.error import NotFound, VerificationError, Forbidden
 from buckets.error import AccountLocked, DuplicateRegistration
+from buckets.error import BadValue
 from buckets.authn import UserManagement
 from buckets.mailing import DebugMailer
 
@@ -48,6 +49,22 @@ def test_create_user(api):
     assert user['want_newsletter'] == False
     assert user['_pin'] is None
     assert user['last_login'] is None
+
+def test_create_user_blank_name(api):
+    with pytest.raises(BadValue):
+        api.create_user(random('jim', '@jim.com'), '')
+
+def test_create_user_email(api):
+    bads = [
+        'notanemail',
+        '@email.com',
+        'notsomethin@',
+        '...@...com',
+    ]
+    for bad in bads:
+        with pytest.raises(BadValue):
+            api.create_user(bad, 'jim')
+
 
 def test_unique_email(api):
     email = random('hal', '@hal.com')

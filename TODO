@@ -2,12 +2,14 @@ Now:
   ✔ cron simplefin fetching   @done (16-08-26 16:21)
 
 Less critical:
-  ☐ Guide people on empty things
+  ✔ Guide people on empty things @done (16-09-02 16:43)
+  ☐ Allow people to set a starting balance for accounts
+  ☐ Allow people to adjust account balance directly, but perform a transaction underneath (and maybe classify it as a transfer?)
   ☐ Use unprivileged db user
   ☐ Allow updating account balance/names
   ☐ You shouldn't be able to mark a negative amount as income.
-  ☐ Make sure you can't directly set account balance -- there must be a transaction
-    ☐ check update_account
+  ✔ Make sure you can't directly set account balance -- there must be a transaction @done (16-09-02 16:53)
+    ✔ check update_account @done (16-09-02 16:53)
   ☐ Sign out
   ☐ Make it rain when rain is negative is goofy.
   ☐ bucket.html charts
