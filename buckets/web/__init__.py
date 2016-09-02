@@ -83,6 +83,8 @@ def configureApp(engine, flask_secret_key,
     )
     sentry_errors_log = logging.getLogger("sentry.errors")
     sentry_errors_log.addHandler(logging.StreamHandler())
+    twisted_log = logging.getLogger("twisted")
+    twisted_log.addHandler(logging.StreamHandler())
     return f
 
 @f.errorhandler(404)

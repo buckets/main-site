@@ -35,6 +35,28 @@ def register():
             ('Buckets', 'hello@bucketsisbetter.com'),
             'New user: %s' % (email,),
             'Email: %s\n' % (email,))
+    run_async(current_app.mailer.sendPlain,
+        email,
+        ('Buckets', 'hello@bucketsisbetter.com'),
+        subject='Welcome to Buckets',
+        body='''Welcome to Buckets!
+
+I hope you enjoy using Buckets as much as we do.  Here's the basics
+to get you started:
+
+- Track your real-life account balances (Checking, Savings)
+- Assign your money into various buckets (Food, Rent, Gas, etc...)
+- Every month, "make it rain" to replenish your buckets (your income is the rain)
+
+After you poke around a bit let me know if you have any questions
+about Buckets.  We're a small operation (my wife and I), so I'd
+be happy to take the time to walk you through setting up your budget.
+
+Thanks,
+
+Matt Haggard
+hello@bucketsisbetter.com
+''')
     flash('You are registered!')
     
     # sign in

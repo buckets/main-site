@@ -9,14 +9,14 @@ import time
 from flask import current_app
 from flask import session, request, redirect, url_for, g
 
+import structlog
+logger = structlog.get_logger()
+
 from twisted.internet import threads
 from crochet import run_in_reactor, setup
 setup()
 
 from jose import jwt
-
-import structlog
-logger = structlog.get_logger()
 
 from buckets.error import Forbidden
 
@@ -60,19 +60,27 @@ def run_async(func, *args, **kwargs):
     Run a function in another thread.
     """
     def run_with_log(log_context):
-        logger.new(background=True, **log_context)
-        return func(*args, **kwargs)
+        log = logger.new(background=True, **log_context)
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            log.exception('Error running async func', exc_info=e)
+            raise
 
     @run_in_reactor
     def run_func(log_context):
         # XXX Set up the logger so that you can tie what
         # happens inside this function back to the request
         # that started it.
-        d = threads.deferToThread(run_with_log, log_context)
-        def eb(err):
-            logger.exception('error processing async func', exc_info=err)
-            return
-        d.addErrback(eb)
+        log = logger.new(background=True, **log_context)
+        try:
+            d = threads.deferToThread(run_with_log, log_context)
+            def eb(err):
+                log.exception('error processing async func', exc_info=err)
+                return
+            d.addErrback(eb)
+        except Exception as e:
+            log.exception('Error spawning thread', exc_info=e)
     run_func(structlog_context())
 
 
@@ -90,7 +98,7 @@ def send_warnings_to_sentry(_logger, method, event_dict):
     """
     try:
         sentry = current_app.extensions['sentry']
-    except (AttributeError, IndexError):
+    except (AttributeError, IndexError, RuntimeError):
         return event_dict
 
     if method == 'warning':

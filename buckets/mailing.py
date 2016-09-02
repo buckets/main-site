@@ -83,16 +83,15 @@ class PostmarkMailer(object):
 
 class NoMailer(object):
 
-    def sendPlain(self, *args, **kwargs):
-        logger.info('sendPlain: %r %r' % (args, kwargs), system='fake-email')
+    def sendPlain(self, to_email, (from_name, from_email), subject, body=None, html=None):
+        logger.info('sendPlain', system='NoMailer', to_email=to_email, from_name=from_name, from_email=from_email, subject=subject, body=body, html=html)
         return 'No mail'
 
     def sendTemplate(self, template_name, to_email, data):
         """
         Pretend to send an email template.
         """
-        logger.info('sendTemplate(%r, %r, %r)' % (template_name, to_email, data),
-            system='fake-email')
+        logger.info('sendTemplate', system='NoMailer', template_name=template_name, to_email=to_email, data=data)
         return 'Pretended to send mail'
 
 
