@@ -17,4 +17,4 @@ set -xe
     echo 'CREATE SCHEMA public;'
 ) | psql "$DATABASE_URL"
 
-PYTHONPATH=$(dirname $0)/../../ python ../../upgrade_db.py -D "${DATABASE_URL}"
+PYTHONPATH=$(dirname $0)/../../ python ../../scripts/upgrade_db.py -D "${DATABASE_URL}"

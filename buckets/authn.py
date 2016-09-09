@@ -113,7 +113,7 @@ class UserManagement(object):
         token = self.generate_signin_token(user_id)
         signin_url = self.signin_urlmaker(token)
         self.mailer.sendTemplate(
-            template_name='login',
+            template_name='login2',
             to_email=email,
             data={
                 'signin_url': signin_url,

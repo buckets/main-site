@@ -11,10 +11,27 @@ Put it into the database
 
     ./putdump.sh $DATABASE_URL
 
-Optionall wipe existing data
+Optionally wipe existing data
 
     ./wipe.sh $DATABASE_URL
 
 Copy from old schema to new schema
 
     ./convert.sh $DATABASE_URL
+
+
+# openshift
+
+For the live one:
+
+    PGHOST=$(rhc ssh --command 'echo $OPENSHIFT_POSTGRESQL_DB_HOST')
+    PGUSER=$(rhc ssh --command 'echo $OPENSHIFT_POSTGRESQL_DB_USERNAME')
+    PGPASS=$(rhc ssh --command 'echo $OPENSHIFT_POSTGRESQL_DB_PASSWORD')
+
+Then start forwarding:
+
+    rhc ssh --ssh "ssh -L 5432:${PGHOST}:5432"
+
+Then set the db url:
+    
+    export DATABASE_URL="postgresql://${PGUSER}:${PGPASS}@127.0.0.1:5432/buckets"

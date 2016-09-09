@@ -19,7 +19,7 @@ To run JavaScript tests:
 After you push, you'll need to make the `web` database user and set
 `DATABASE_URL`.  You can do it like this:
 
-    WEB_DB_URL="$(rhc ssh --command 'cd ${OPENSHIFT_REPO_DIR} && PYTHONPATH=. scripts/create_db_user.py --database "${OPENSHIFT_POSTGRESQL_DB_URL}" ')"
+    WEB_DB_URL="$(rhc ssh --command 'cd ${OPENSHIFT_REPO_DIR} && PYTHONPATH=. scripts/create_db_user.py --database "${OPENSHIFT_POSTGRESQL_DB_URL}" ')/buckets"
     rhc set-env DATABASE_URL="${WEB_DB_URL}"
     rhc app restart
 

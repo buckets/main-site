@@ -345,12 +345,26 @@ patches['web_r'] = [
     #-------------------------------------
     # roles
     #-------------------------------------
-    'CREATE ROLE web_r',
+    '''
+    DO
+    $body$
+    BEGIN
+       IF NOT EXISTS (
+          SELECT *
+          FROM   pg_catalog.pg_roles
+          WHERE  rolname = 'web_r') THEN
+          CREATE ROLE web_r;
+       END IF;
+    END
+    $body$;
+    ''',
     '''GRANT SELECT, INSERT, UPDATE, DELETE
         ON ALL TABLES IN SCHEMA public
         TO web_r''',
     '''GRANT USAGE, SELECT
         ON ALL SEQUENCES IN SCHEMA public
+        TO web_r''',
+    '''GRANT USAGE ON SCHEMA public
         TO web_r''',
 
     #-------------------------------------
