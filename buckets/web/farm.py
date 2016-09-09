@@ -144,7 +144,7 @@ def account(account_id):
         data['name'] = request.form['name']
         
         g.farmapi.update_account(id=account_id, data=data)
-        flash('{0} updated'.format(data['name']))
+        flash(u'{0} updated'.format(data['name']))
         return redirect(url_for('.accounts'))
     return render_template('farm/account.html',
         account=account)
@@ -193,7 +193,7 @@ def bucket(bucket_id):
             data['end_date'] = None
         
         g.farmapi.update_bucket(id=bucket_id, data=data)
-        flash('{0} updated'.format(data['name']))
+        flash(u'{0} updated'.format(data['name']))
         return redirect(url_for('.buckets'))
     bucket = g.farmapi.get_bucket(id=bucket_id, month=g.month)
     transactions = g.farmapi.list_bucket_trans(bucket_id=bucket_id,
@@ -220,7 +220,7 @@ def group(group_id):
         data['name'] = request.form['name']
         
         g.farmapi.update_group(id=group_id, data=data)
-        flash('{0} updated'.format(data['name']))
+        flash(u'{0} updated'.format(data['name']))
         return redirect(url_for('.buckets'))
     group = g.farmapi.get_group(id=group_id)
     return render_template('farm/group.html',
