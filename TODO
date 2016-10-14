@@ -2,9 +2,9 @@ Now:
   ✔ cron simplefin fetching   @done (16-08-26 16:21)
   ☐ Allow kicking buckets (or don't show them after kicking)
   ☐ Rain is wrong amount.  It should include all the income and be depleted as you put money into buckets.  Hrm... this is a migration proelbme
-  ☐ UX
-    ☐ Enter on categorizing should submit
-    ☐ Don't make table get wider when entering/exiting categories
+  ✔ UX @done (16-10-13 21:47)
+    ✔ Enter on categorizing should submit @done (16-10-13 21:47)
+    ✔ Don't make table get wider when entering/exiting categories @done (16-10-13 21:47)
     ✔ Alphabetize the bucket dropdown when categorizing @done (16-10-13 21:21)
     ✔ Put a symbol (or something recognizeable) when it's a trasnfer/income @done (16-10-13 21:34)
 
