@@ -99,7 +99,7 @@ UPDATE bucket_transaction as bt
     FROM account_transaction as at
     WHERE bt.account_transaction_id = at.id;
 UPDATE bucket_transaction
-    SET posted=created
+    SET posted=(date_trunc('month', created) - '1 day'::interval)
     WHERE posted is null;
 
 -- bucket balance
@@ -109,6 +109,9 @@ UPDATE bucket as b
     WHERE b.id = oldb.id;
 
 -- fix bucket_transaction.posted
+-- UPDATE bucket_transaction
+--     SET posted=(date_trunc('month', current_timestamp) - '1 day'::interval)
+--     WHERE posted >= date_trunc('month', current_timestamp);
 -- DO $$
 -- DECLARE
 --     r bucket_transaction%rowtype;
@@ -154,4 +157,4 @@ SELECT SETVAL('account_mapping_id_seq', COALESCE(MAX(id), 1)) FROM account_mappi
 
 -- stats
 select count(*), coalesce(general_cat, 'nothing') from account_transaction group by 2;
-select count(*), case when posted is null then 'NULL' ELSE 'SET' END FROM bucket_transaction group by 2;
+select count(*), case when posted is null then 'No posted date' ELSE 'Has posted date' END FROM bucket_transaction group by 2;

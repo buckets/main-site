@@ -1,24 +1,34 @@
 
-Set up connection:
+# How to migrate data from old pb database to new one
+
+1. Set up connection.
+
+For dev:
     
     export DATABASE_URL="postgres://postgres:postgres@192.168.99.100:5432/postgres"
 
-Get the live dump:
+For openshift, see below.
 
+
+
+2. Get the live dump:
+
+    rhc ssh pybuckets --command 'echo working'
     ./getdump.sh
 
-Put it into the database
+3. Put it into the database
 
     ./putdump.sh $DATABASE_URL
 
-Optionally wipe existing data
+4. Optionally wipe existing data
 
     ./wipe.sh $DATABASE_URL
 
-Copy from old schema to new schema
+5. Copy from old schema to new schema
 
     ./convert.sh $DATABASE_URL
 
+(You can repeat steps 4 and 5 to test out convert.sh)
 
 # openshift
 

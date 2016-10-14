@@ -229,7 +229,7 @@ var TransRow = React.createClass({
           onKeyDown={onEnter(this.startCategorizing)}>{display}</a>);
       } else {
         // No categorization
-        categories_section = (<a tabIndex="0" onClick={this.startCategorizing} onFocus={this.startCategorizing}>Categorize</a>);
+        categories_section = (<a tabIndex="0" onClick={this.startCategorizing} onFocus={this.startCategorizing}>??? Categorize</a>);
       }
     }
     return (
