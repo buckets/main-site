@@ -36,6 +36,14 @@ Store.rmTransaction = function(trans_id) {
   });
 }
 
+function onEnter(func) {
+  return function(ev) {
+    if (ev.key === 'Enter') {
+      func();
+    }
+  }
+};
+
 var Categorizer = React.createClass({
   getInitialState: function() {
     return {
@@ -130,6 +138,7 @@ var Categorizer = React.createClass({
           ref={this.focusOnFirst}
           className="bucket"
           value={cat.bucket_id}
+          onKeyDown={onEnter(this.ok)}
           onChange={this.categoryChangedHandler(cat)}>
             <option value=""></option>
             {bucket_options}
@@ -138,6 +147,7 @@ var Categorizer = React.createClass({
           className="amount"
           value={cat.amount}
           size="7"
+          onKeyDown={onEnter(this.ok)}
           onChange={this.amountChangedHandler(cat)} />
         <a className="text-button" onClick={this.deleteCategoryHandler(cat)}>X</a>
       </div>)
@@ -206,6 +216,7 @@ var TransRow = React.createClass({
             key={i}
             tabIndex="0"
             onClick={this.startCategorizing}
+            onKeyDown={onEnter(this.startCategorizing)}
             className="category-tag"
             style={style}><div className="category-name">{name}</div>{amount_part}</div>);
         }.bind(this))
@@ -213,7 +224,9 @@ var TransRow = React.createClass({
       } else if (this.props.transaction.general_cat) {
         // General category (income/transfer)
         var display = this.props.transaction.general_cat == 'income' ? '💰 Income' : '⇄ Transfer';
-        categories_section = (<a tabIndex="0" onClick={this.startCategorizing}>{display}</a>);
+        categories_section = (<a tabIndex="0"
+          onClick={this.startCategorizing}
+          onKeyDown={onEnter(this.startCategorizing)}>{display}</a>);
       } else {
         // No categorization
         categories_section = (<a tabIndex="0" onClick={this.startCategorizing} onFocus={this.startCategorizing}>Categorize</a>);
