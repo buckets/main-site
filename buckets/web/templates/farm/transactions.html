@@ -385,17 +385,16 @@ var TransTable = React.createClass({
       <div className="toolbar">
         <button className="danger" disabled={delete_button_disabled} onClick={this.deleteSelected}>Delete {display_num_selected}</button>
         <button onClick={this.doNothing}>Do nothing</button>
-        <button>Upload</button>
       </div>
       <table className="ledger" width="100%">
         <thead>
           <tr>
             <th></th>
-            <th>Account</th>
-            <th>Date</th>
+            <th style={ {width: '8rem'}}>Account</th>
+            <th style={ {width: '8rem'}}>Date</th>
             <th>Description</th>
             <th>Amount</th>
-            <th>Categories</th>
+            <th style={ {width: '20rem'}}>Categories</th>
           </tr>
         </thead>
         <tbody>
