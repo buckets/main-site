@@ -1,3 +1,7 @@
+# Run development server
+
+    docker-compose up
+
 # Tests
 
 To run all tests:

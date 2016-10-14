@@ -102,9 +102,12 @@ var Categorizer = React.createClass({
     }
   },
   render: function() {
-    var bucket_options = this.props.buckets.map(function(bucket) {
-      return (<option key={bucket.id} value={bucket.id}>{bucket.name}</option>);
-    })
+    var bucket_options = _(this.props.buckets)
+      .sortBy(['name', 'id'])
+      .map(function(bucket) {
+        return (<option key={bucket.id} value={bucket.id}>{bucket.name}</option>);
+      })
+      .value();
     var buckets = this.state.buckets;
     var used_amount = Math.abs(_.sumBy(buckets, 'amount'));
     var left = Math.abs(this.state.total) - used_amount;
@@ -208,8 +211,8 @@ var TransRow = React.createClass({
         }.bind(this))
         categories_section = (<div>{labels}</div>);
       } else if (this.props.transaction.general_cat) {
-        // General
-        var display = this.props.transaction.general_cat == 'income' ? 'Income' : 'Transfer';
+        // General category (income/transfer)
+        var display = this.props.transaction.general_cat == 'income' ? '💰 Income' : '⇄ Transfer';
         categories_section = (<a tabIndex="0" onClick={this.startCategorizing}>{display}</a>);
       } else {
         // No categorization
