@@ -245,7 +245,7 @@ var MonthBar = React.createClass({
     var transfers_net = transfers_in + transfers_out;
     if (transfers_net) {
       transfer_delta = (<div className="item">
-        <div className="label">Transfers ⇄</div>
+        <div className="label">Unmatched Transfers</div>
         <div className="value"><Money value={transfers_net} /></div>
       </div>);
     }
@@ -273,7 +273,7 @@ var MonthBar = React.createClass({
       {transfer_delta}
       <div className="item">
         <div className="label">Rain💧</div>
-        <div className="value"><Money value={this.props.data.buckets.rain} /></div>
+        <div className="value"><Money value={this.props.data.rain} /></div>
       </div>
     </div>);
   }

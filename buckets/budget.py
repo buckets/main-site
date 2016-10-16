@@ -258,13 +258,9 @@ class BudgetManagement(object):
             )))
         bucket_totals = r.fetchone()
 
-        rain = (
-            (account_totals.income - bucket_totals.income)
-            +
-            (account_totals.expenses - bucket_totals.expenses)
-        )
         return {
             'month': start,
+            'rain': accounts_balance - buckets_balance,
             'accounts': {
                 'balance': accounts_balance,
                 'income': account_totals.income,
@@ -276,7 +272,6 @@ class BudgetManagement(object):
                 'balance': buckets_balance,
                 'income': bucket_totals.income,
                 'expenses': bucket_totals.expenses,
-                'rain': rain,
             },
         }
 

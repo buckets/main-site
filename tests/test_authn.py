@@ -146,7 +146,7 @@ def test_signin(api, mailer, mkuser):
     assert len(mailer.calls) == 1, "Should have sent an email"
     method, args, kwargs = mailer.calls[0]
     assert method == 'sendTemplate'
-    assert kwargs['template_name'] == 'login'
+    assert kwargs['template_name'] == 'login2'
     assert kwargs['to_email'] == user['email']
     
     data = kwargs['data']

@@ -99,8 +99,11 @@ UPDATE bucket_transaction as bt
     FROM account_transaction as at
     WHERE bt.account_transaction_id = at.id;
 UPDATE bucket_transaction
-    SET posted=(date_trunc('month', created) - '1 day'::interval)
+    SET posted=(date_trunc('month', created) - '2 day'::interval)
     WHERE posted is null;
+-- UPDATE bucket_transaction
+--     SET posted=created
+--     WHERE posted is null;
 
 -- bucket balance
 UPDATE bucket as b

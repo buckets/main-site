@@ -77,6 +77,9 @@ class UserManagement(object):
             sortof_validate_email(email)
         except BadValue:
             raise BadValue('email')
+        name = name.strip()
+        if not name.strip():
+            raise BadValue('name')
         try:
             r = self.engine.execute(User.insert()
                 .values(email=email, name=name)
