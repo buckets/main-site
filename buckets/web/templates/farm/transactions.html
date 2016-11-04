@@ -345,11 +345,34 @@ var TransTable = React.createClass({
       }
     });
   },
+  toggleShowingUncategorized: function(ev) {
+    if (ev.target.checked) {
+      // Show only the uncategorized
+      var onlyShow = [];
+      _.each(this.props.transactions, function(trans) {
+        if (!trans.buckets.length && !trans.general_cat) {
+          onlyShow.push(trans.id);
+        }
+      })
+      this.setState({onlyShow: onlyShow});
+    } else {
+      // Show all transactions
+      this.setState({onlyShow: null});
+    }
+  },
   render: function() {
     var transaction_rows = [];
-    transaction_rows = _.reverse(_.sortBy(this.props.transactions, function(trans) {
-      return [trans.posted, trans.account_id, trans.id];
-    }))
+    transaction_rows = _(this.props.transactions)
+      .sortBy(function(trans) {
+        return [trans.posted, trans.account_id, trans.id];
+      })
+      .reverse();
+    if (_.isArray(this.state.onlyShow)) {
+      transaction_rows = transaction_rows.filter(function(trans) {
+        return _.includes(this.state.onlyShow, trans.id);
+      }.bind(this));
+    }
+    transaction_rows = transaction_rows
       .map(function(trans) {
         var selected = false;
         if (this.state.selected[trans.id]) {
@@ -362,7 +385,8 @@ var TransTable = React.createClass({
           buckets={this.props.buckets}
           onSelected={this.transSelected}
           />);
-    }.bind(this));
+        }.bind(this))
+      .value();
 
     if (!transaction_rows.length) {
       var nice_month = formatMonth(this.props.month);
@@ -385,6 +409,7 @@ var TransTable = React.createClass({
       <div className="toolbar">
         <button className="danger" disabled={delete_button_disabled} onClick={this.deleteSelected}>Delete {display_num_selected}</button>
         <button onClick={this.doNothing}>Do nothing</button>
+        <label><input type="checkbox" onClick={this.toggleShowingUncategorized}/>Uncategorized</label>
       </div>
       <table className="ledger" width="100%">
         <thead>

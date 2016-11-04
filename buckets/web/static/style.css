@@ -324,6 +324,14 @@ div.toolbar {
 .toolbar > *:first-child {
     margin-left: 0;
 }
+.toolbar label {
+    font-size: 1rem;
+    padding-bottom: 3px;
+}
+.toolbar label input[type="checkbox"] {
+    position: relative;
+    top: -1px;
+}
 .pair {
     display: flex;
     flex-direction: column;
