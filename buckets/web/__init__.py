@@ -158,6 +158,10 @@ def put_user_on_request():
     sentry.client.context.merge(sentry_context())
     log.bind(**structlog_context())
 
+@f.route('/robots.txt')
+def robots_txt():
+    return 'User-Agent: *\n'
+
 @f.route('/')
 def root():
     if g.user:
