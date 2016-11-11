@@ -178,8 +178,9 @@ def warning():
     logger.warning('Test warning', name='the test')
     return 'warning'
 
-from buckets.web import app, anon, farm
+from buckets.web import app, anon, farm, ext
 f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>')
 f.register_blueprint(farm.blue, url_prefix='/farm/<int:farm_id>/y<int:year>m<int:month>')
 f.register_blueprint(app.blue, url_prefix='/app')
+f.register_blueprint(ext.blue, url_prefix='/_ext')
 f.register_blueprint(anon.blue, url_prefix='')
