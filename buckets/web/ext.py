@@ -20,5 +20,6 @@ def stripe_webhook():
         log = logger.bind(subscription_id=sub_id)
         api.sync_service_expiration(sub_id)
         log.info('sync_service_expiration done')
+        return 'Thanks, Stripe!'
     else:
         return 'Thanks, Stripe'
