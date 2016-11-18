@@ -94,7 +94,10 @@ def configureApp(engine, flask_secret_key,
 
 @f.errorhandler(404)
 def handle_404(err):
-    sentry.client.captureMessage('404 {0}'.format(request.path))
+    if request.path.endswith('.php'):
+        pass
+    else:
+        sentry.client.captureMessage('404 {0}'.format(request.path))
     return render_template('err404.html')
 
 @f.template_global()
