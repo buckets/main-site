@@ -268,7 +268,17 @@ table.ledger .dragging {
 table.ledger tr.group td:first-child {
     /*border-left: 6px solid rgba(44, 62, 80, 0.5);*/
 }
+table.ledger a {
+    text-decoration: none;
+}
+table.ledger a:hover {
+    text-decoration: underline;
+}
 table.ledger tr.group td {
+    color: rgba(44, 62, 80, 0.5);
+    padding-top: 2rem;
+}
+table.ledger tr.group a {
     color: rgba(44, 62, 80, 0.5);
 }
 
