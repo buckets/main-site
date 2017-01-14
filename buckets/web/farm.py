@@ -173,6 +173,7 @@ def bucket(bucket_id):
         data['name'] = request.form['name']
         data['kind'] = request.form['kind']
         data['color'] = request.form['color']
+        data['out_to_pasture'] = request.form.get('out_to_pasture', False)
         
         goal = request.form['goal']
         if goal:

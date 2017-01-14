@@ -19,7 +19,12 @@
 var target_el = afterEl(document.getElementById('el1'));
 
 Store.groups = {{ groups|json|safe }};
-Store.buckets = {{ buckets|json|safe }};
+Store.all_buckets = {{ buckets|json|safe }};
+Store.buckets = _(Store.all_buckets)
+  .filter(bucket => {
+    return !bucket.out_to_pasture;
+  })
+  .value();
 
 Store.rerender = function() {
   ReactDOM.render(<BucketTable

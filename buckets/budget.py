@@ -180,7 +180,10 @@ class BudgetManagement(object):
         r = self.engine.execute(select([
                 func.sum(Bucket.c.balance),
             ])
-            .where(Bucket.c.farm_id == self.farm_id))
+            .where(and_(
+                Bucket.c.farm_id == self.farm_id,
+                Bucket.c.out_to_pasture == False,
+            )))
         buckets_balance = r.fetchone()[0] or 0
 
 
@@ -203,6 +206,7 @@ class BudgetManagement(object):
                 BucketTrans.c.bucket_id == Bucket.c.id,
                 Bucket.c.farm_id == self.farm_id,
                 BucketTrans.c.posted >= end,
+                Bucket.c.out_to_pasture == False,
             )))
         trans_since = r.fetchone()[0] or 0
         buckets_balance -= trans_since
@@ -253,6 +257,7 @@ class BudgetManagement(object):
             .where(and_(
                 BucketTrans.c.bucket_id == Bucket.c.id,
                 Bucket.c.farm_id == self.farm_id,
+                Bucket.c.out_to_pasture == False,
                 BucketTrans.c.posted >= start,
                 BucketTrans.c.posted < end,
             )))

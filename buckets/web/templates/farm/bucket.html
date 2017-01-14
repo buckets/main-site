@@ -226,6 +226,10 @@ Store.render();
   </div>
   <div id="bucket-type-chooser"></div>
   <div class="pair">
+    <div class="label">Kicked</div>
+    <div class="control"><input type="checkbox" name="out_to_pasture" {% if bucket.out_to_pasture %}checked{% endif %} /> (kick buckets you're finished with)</div>
+  </div>
+  <div class="pair">
     <div class="label"></div>
     <div class="control"><button type="submit">Save Changes</button></div>
   </div>

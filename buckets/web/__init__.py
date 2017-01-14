@@ -10,6 +10,7 @@ from raven.contrib.flask import Sentry
 
 from buckets.dbutil import transaction_per_request
 from buckets.mailing import PostmarkMailer, NoMailer
+from buckets.billing import BillingManagement
 from buckets.model import authProtectedAPI
 from buckets.web.util import all_filters, all_globals
 from buckets.web.util import GLOBAL_CSRF
@@ -75,6 +76,8 @@ def configureApp(engine, flask_secret_key,
     else:
         logger.info('Stripe: PRODUCTION')
     stripe.api_key = stripe_api_key
+    BillingManagement(None, stripe).sync_plans_with_stripe()
+    logger.info('Stripe: billing plans synched')
 
     structlog.configure(
         processors=[
@@ -94,7 +97,10 @@ def configureApp(engine, flask_secret_key,
 
 @f.errorhandler(404)
 def handle_404(err):
-    sentry.client.captureMessage('404 {0}'.format(request.path))
+    if request.path.endswith('.php'):
+        pass
+    else:
+        sentry.client.captureMessage('404 {0}'.format(request.path))
     return render_template('err404.html')
 
 @f.template_global()
