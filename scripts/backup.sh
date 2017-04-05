@@ -11,4 +11,4 @@ rhc ssh buckets --command 'pg_dump --blobs --no-privileges --no-owner' > "$OUTPU
 
 echo "Wrote $OUTPUT_FILE"
 chmod 700 "$D"
-chmod 600 "${D}/*"
+chmod 600 ${D}/*
