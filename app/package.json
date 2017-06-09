@@ -1,0 +1,35 @@
+{
+  "name": "Buckets",
+  "version": "0.0.1",
+  "main": "out/main.js",
+  "description": "Buckets Family Budgeting",
+  "author": "Matt Haggard",
+  "scripts": {
+    "build": "tsc && rsync -vrut --include='*.html' --exclude='*' src/ out/",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-log": "2.2.6",
+    "electron-updater": "2.1.2",
+    "sqlite": "2.8.0",
+    "typescript": "2.3.4"
+  },
+  "build": {
+    "appId": "com.github.buckets.app",
+    "mac": {
+      "category": "your.app.category.type",
+      "target": [
+        "zip",
+        "dmg"
+      ]
+    },
+    "nsis": {
+      "perMachine": true
+    }
+  },
+  "devDependencies": {
+    "@types/electron-builder": "^2.8.0",
+    "electron": "1.6.10",
+    "electron-builder": "18.6.2"
+  }
+}
