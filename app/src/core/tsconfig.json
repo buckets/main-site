@@ -16,9 +16,7 @@
   },
   "include": [
     "*.ts",
-    "**/*.ts",
-    "../common/*.ts",
-    "../common/**/*.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules"

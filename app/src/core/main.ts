@@ -1,15 +1,40 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, BrowserWindow, Menu} from 'electron'
+import {app, BrowserWindow, Menu, session, protocol} from 'electron'
 import * as log from 'electron-log'
 import {autoUpdater} from 'electron-updater'
+import * as URL from 'url';
+import * as Path from 'path';
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.info('App starting...');
 
 const APPPATH = app.getAppPath();
+
+// Make accessing '/' access the expected place
+protocol.registerStandardSchemes(['buckets'])
+app.on('ready', () => {
+  session.defaultSession.protocol.registerFileProtocol('buckets', (request, callback) => {
+    log.debug('request for', request.url);
+    const parsed = URL.parse(request.url);
+    if (parsed.hostname !== 'main') {
+      // Only main host supported right now
+      callback()
+    } else {
+      let path = Path.join(APPPATH, 'out/wwwroot/', parsed.path);
+      console.log('returning file', path);
+      callback(path);
+    }
+    log.debug('url', parsed);
+    
+  }, error => {
+    if (error) {
+      throw new Error('failed to register buckets: protocol');
+    }
+  })
+})
 
 let template = []
 if (process.platform === 'darwin') {
@@ -42,7 +67,7 @@ function createDefaultWindow() {
     win = null;
   });
   win.openDevTools();
-  win.loadURL(`file://${APPPATH}/out/pages/pages/index/index.html`);
+  win.loadURL('buckets://main/index.html');
   return win;
 }
 app.on('ready', function() {

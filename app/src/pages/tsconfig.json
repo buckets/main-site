@@ -12,17 +12,13 @@
     "noUnusedParameters": false,
     "sourceMap": true,
     "jsx": "react",
-    "outDir": "../../out/pages/"
+    "outDir": "../../out/wwwroot/"
   },
   "include": [
     "*.ts",
     "*.tsx",
     "**/*.ts",
-    "**/*.tsx",
-    "../common/*.ts",
-    "../common/**/*.ts",
-    "../common/*.tsx",
-    "../common/**/*.tsx"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules"
