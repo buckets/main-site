@@ -41,7 +41,8 @@ function createDefaultWindow() {
   win.on('closed', () => {
     win = null;
   });
-  win.loadURL(`file://${APPPATH}/html/index.html`);
+  win.openDevTools();
+  win.loadURL(`file://${APPPATH}/out/pages/pages/index/index.html`);
   return win;
 }
 app.on('ready', function() {

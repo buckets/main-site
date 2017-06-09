@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "es6",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -12,11 +12,17 @@
     "noUnusedParameters": false,
     "sourceMap": true,
     "jsx": "react",
-    "outDir": "out/"
+    "outDir": "../../out/pages/"
   },
   "include": [
-    "src/*.ts",
-    "src/**/*.ts"
+    "*.ts",
+    "*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "../common/*.ts",
+    "../common/**/*.ts",
+    "../common/*.tsx",
+    "../common/**/*.tsx"
   ],
   "exclude": [
     "node_modules"
