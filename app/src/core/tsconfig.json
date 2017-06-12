@@ -12,11 +12,10 @@
     "noUnusedParameters": false,
     "sourceMap": true,
     "jsx": "react",
-    "outDir": "../../out/core/"
+    "listEmittedFiles": true
   },
   "include": [
-    "*.ts",
-    "**/*.ts"
+    "main.ts"
   ],
   "exclude": [
     "node_modules"

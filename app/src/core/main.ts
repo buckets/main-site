@@ -7,6 +7,10 @@ import {autoUpdater} from 'electron-updater'
 import * as URL from 'url';
 import * as Path from 'path';
 
+import * as Foo from './foo';
+
+Foo.foofunc();
+
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.info('App starting...');

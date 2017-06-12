@@ -12,13 +12,10 @@
     "noUnusedParameters": false,
     "sourceMap": true,
     "jsx": "react",
-    "outDir": "../../out/wwwroot/"
+    "listEmittedFiles": true
   },
   "include": [
-    "*.ts",
-    "*.tsx",
-    "**/*.ts",
-    "**/*.tsx"
+    "budget.ts"
   ],
   "exclude": [
     "node_modules"

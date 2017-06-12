@@ -1,11 +1,10 @@
 {
   "name": "Buckets",
   "version": "0.0.1",
-  "main": "out/core/core/main.js",
+  "main": "src/core/main.js",
   "description": "Buckets Family Budgeting",
   "author": "Matt Haggard",
   "scripts": {
-    "build": "tsc && rsync -vrut html/ out/",
     "start": "electron ."
   },
   "dependencies": {

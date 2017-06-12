@@ -6,12 +6,11 @@ To install deps:
 
 To compile:
 
-    yarn build
+    ./build.sh
 
 
 To run:
 
-    yarn build
-    yarn start
+    ./build.sh && yarn start
 
 

@@ -1,3 +1,7 @@
 node_modules
 dist/
 out
+*.js
+*.js.map
+*.sublime-workspace
+*.sublime-project
