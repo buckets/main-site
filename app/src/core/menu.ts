@@ -1,73 +1,80 @@
 import {app, Menu} from 'electron';
-import {openDialog} from './files';
+import {openDialog, newBudgetFileDialog} from './files';
+
+let FileMenu = {
+  label: 'File',
+  submenu: [
+    {
+      label: 'New Budget',
+      accelerator: 'CmdOrCtrl+Shift+N',
+      click() {
+        newBudgetFileDialog();
+      }
+    },
+    {
+      label: 'Open...',
+      accelerator: 'CmdOrCtrl+O',
+      click() {
+        openDialog();
+      }
+    }
+  ],
+};
+let EditMenu = {
+  label: 'Edit',
+  submenu: [
+    {role: 'undo'},
+    {role: 'redo'},
+    {type: 'separator'},
+    {role: 'cut'},
+    {role: 'copy'},
+    {role: 'paste'},
+    {role: 'pasteandmatchstyle'},
+    {role: 'delete'},
+    {role: 'selectall'}
+  ]
+};
+let ViewMenu = {
+  label: 'View',
+  submenu: [
+    {role: 'reload'},
+    {role: 'forcereload'},
+    {role: 'toggledevtools'},
+    {type: 'separator'},
+    {role: 'resetzoom'},
+    {role: 'zoomin'},
+    {role: 'zoomout'},
+    {type: 'separator'},
+    {role: 'togglefullscreen'}
+  ]
+};
+let WindowMenu = {
+  role: 'window',
+  submenu: [
+    {role: 'minimize'},
+    {role: 'close'}
+  ]
+};
+let HelpMenu = {
+  role: 'help',
+  submenu: [
+    {
+      label: 'Learn More',
+      click () { require('electron').shell.openExternal('https://www.bucketsisbetter.com') }
+    }
+  ]
+};
 
 let template:any[] = [
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'New Budget',
-        accelerator: 'CmdOrCtrl+Shift+N',
-        click() {
-          console.log('new budget');
-        }
-      },
-      {
-        label: 'Open...',
-        accelerator: 'CmdOrCtrl+O',
-        click() {
-          openDialog();
-        }
-      }
-    ],
-  },
-  {
-    label: 'Edit',
-    submenu: [
-      {role: 'undo'},
-      {role: 'redo'},
-      {type: 'separator'},
-      {role: 'cut'},
-      {role: 'copy'},
-      {role: 'paste'},
-      {role: 'pasteandmatchstyle'},
-      {role: 'delete'},
-      {role: 'selectall'}
-    ]
-  },
-  {
-    label: 'View',
-    submenu: [
-      {role: 'reload'},
-      {role: 'forcereload'},
-      {role: 'toggledevtools'},
-      {type: 'separator'},
-      {role: 'resetzoom'},
-      {role: 'zoomin'},
-      {role: 'zoomout'},
-      {type: 'separator'},
-      {role: 'togglefullscreen'}
-    ]
-  },
-  {
-    role: 'window',
-    submenu: [
-      {role: 'minimize'},
-      {role: 'close'}
-    ]
-  },
-  {
-    role: 'help',
-    submenu: [
-      {
-        label: 'Learn More',
-        click () { require('electron').shell.openExternal('https://www.bucketsisbetter.com') }
-      }
-    ]
-  }
+  FileMenu,
+  EditMenu,
+  ViewMenu,
+  WindowMenu,
+  HelpMenu,
 ]
 
 if (process.platform === 'darwin') {
+  // Buckets Menu
   template.unshift({
     label: app.getName(),
     submenu: [
@@ -82,11 +89,9 @@ if (process.platform === 'darwin') {
       {role: 'quit'}
     ]
   })
-
-  // Edit menu
-  template[1].submenu.push(
+  EditMenu.submenu.push(
     {type: 'separator'},
-    {
+    <any>{
       label: 'Speech',
       submenu: [
         {role: 'startspeaking'},
@@ -94,9 +99,7 @@ if (process.platform === 'darwin') {
       ]
     }
   )
-
-  // Window menu
-  template[3].submenu = [
+  WindowMenu.submenu = <any>[
     {role: 'close'},
     {role: 'minimize'},
     {role: 'zoom'},

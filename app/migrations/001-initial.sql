@@ -1,4 +1,5 @@
 -- Up
+
 CREATE TABLE account (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -12,11 +13,11 @@ CREATE TABLE account_transaction (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     account_id INTEGER,
-    FOREIGN KEY(account_id) REFERENCES account(id),
     amount INTEGER,
     memo TEXT,
     fi_id TEXT,
-    general_cat TEXT DEFAULT ''
+    general_cat TEXT DEFAULT '',
+    FOREIGN KEY(account_id) REFERENCES account(id)
 );
 
 CREATE TABLE bucket_group (
@@ -34,13 +35,13 @@ CREATE TABLE bucket (
     balance INTEGER DEFAULT 0,
     out_to_pasture TINYINT DEFAULT 0,
     group_id INTEGER,
-    FOREIGN KEY(group_id) REFERENCES bucket_group(id),
     ranking TEXT,
     kind TEXT default '',
     goal INTEGER,
     end_date DATE,
     deposit INTEGER,
-    color TEXT
+    color TEXT,
+    FOREIGN KEY(group_id) REFERENCES bucket_group(id)
 );
 
 CREATE TABLE bucket_transaction (
@@ -48,22 +49,23 @@ CREATE TABLE bucket_transaction (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     bucket_id INTEGER,
-    FOREIGN KEY(bucket_id) REFERENCES bucket(id),
     amount INTEGER,
     memo TEXT,
-    account_transaction_id INTEGER
+    account_transaction_id INTEGER,
+    FOREIGN KEY(bucket_id) REFERENCES bucket(id)
 );
-
-Connection = Table('simplefin_connection', metadata,
+CREATE TABLE simplefin_connection (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     access_token TEXT,
-    last_used TIMESTAMP,
-)
-AccountMapping = Table('account_mapping', metadata,
+    last_used TIMESTAMP
+);
+CREATE TABLE account_mapping (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     account_id INTEGER,
     account_hash TEXT,
-)
+    FOREIGN KEY(account_id) REFERENCES account(id)
+);
+
 -- Down

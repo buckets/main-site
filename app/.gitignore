@@ -5,3 +5,4 @@ out
 *.js.map
 *.sublime-workspace
 *.sublime-project
+*.buckets

@@ -7,19 +7,21 @@ import {autoUpdater} from 'electron-updater'
 import * as URL from 'url';
 import * as Path from 'path';
 import {menu} from './menu';
+import {BudgetFile} from './files';
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.info('App starting...');
 
-const APPPATH = app.getAppPath();
+export const APPPATH = app.getAppPath();
 
 // Make accessing '/' access the expected place
 protocol.registerStandardSchemes(['buckets'])
 app.on('ready', () => {
   session.defaultSession.protocol.registerFileProtocol('buckets', (request, callback) => {
     const parsed = URL.parse(request.url);
-    if (parsed.hostname === 'main') {
+    let bf = BudgetFile.REGISTRY[parsed.hostname];
+    if (bf || parsed.hostname === 'main') {
       let path = Path.join(APPPATH, 'src/wwwroot/', parsed.path);
       console.log('returning file', path);
       callback(path);

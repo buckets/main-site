@@ -17,7 +17,8 @@
     "rxjs-es": "^5.0.0-beta.12",
     "sqlite": "2.8.0",
     "tmp": "0.0.31",
-    "typescript": "2.3.4"
+    "typescript": "2.3.4",
+    "uuid": "^3.0.1"
   },
   "build": {
     "appId": "com.github.buckets.app",
@@ -33,8 +34,10 @@
     }
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.5",
     "@types/electron-builder": "2.8.0",
     "@types/jest": "19.2.4",
+    "@types/uuid": "^3.0.0",
     "electron": "1.6.10",
     "electron-builder": "18.6.2",
     "electron-rebuild": "1.5.11",
