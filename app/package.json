@@ -5,13 +5,16 @@
   "description": "Buckets Family Budgeting",
   "author": "Matt Haggard",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "./test.sh",
+    "postinstall": "electron-rebuild"
   },
   "dependencies": {
     "adm-zip": "0.4.7",
     "bluebird": "3.5.0",
     "electron-log": "2.2.6",
     "electron-updater": "2.1.2",
+    "rxjs-es": "^5.0.0-beta.12",
     "sqlite": "2.8.0",
     "tmp": "0.0.31",
     "typescript": "2.3.4"
@@ -30,8 +33,12 @@
     }
   },
   "devDependencies": {
-    "@types/electron-builder": "^2.8.0",
+    "@types/electron-builder": "2.8.0",
+    "@types/jest": "19.2.4",
     "electron": "1.6.10",
-    "electron-builder": "18.6.2"
+    "electron-builder": "18.6.2",
+    "electron-rebuild": "1.5.11",
+    "jest": "20.0.4",
+    "ts-jest": "20.0.6"
   }
 }
