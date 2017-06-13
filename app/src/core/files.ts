@@ -3,7 +3,7 @@ import * as log from 'electron-log'
 import {dialog, BrowserWindow} from 'electron';
 import {} from 'bluebird';
 import * as sqlite from 'sqlite';
-import {APPPATH} from './main';
+import {APP_ROOT} from './globals';
 import {v4 as uuid} from 'uuid';
 
 interface Registry {
@@ -36,7 +36,7 @@ export class BudgetFile {
     // upgrade database
     try {
       await this._db.migrate({
-        migrationsPath: Path.join(APPPATH, 'migrations'),
+        migrationsPath: Path.join(APP_ROOT, 'migrations'),
       })  
     } catch(err) {
       log.error(err.stack);

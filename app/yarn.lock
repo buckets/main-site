@@ -63,7 +63,7 @@
   dependencies:
     electron-builder "*"
 
-"@types/jest@19.2.4":
+"@types/jest@^19.2.4":
   version "19.2.4"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-19.2.4.tgz#543651712535962b7dc615e18e4a381fc2687442"
 
