@@ -50,7 +50,6 @@ export class BudgetFile {
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
   }
-
   get db() {
     return this._db;
   }

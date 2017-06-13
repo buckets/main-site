@@ -10,6 +10,7 @@
     "postinstall": "electron-rebuild"
   },
   "dependencies": {
+    "@types/rx": "^4.1.1",
     "adm-zip": "0.4.7",
     "bluebird": "3.5.0",
     "electron-log": "2.2.6",
