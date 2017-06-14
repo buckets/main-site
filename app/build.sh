@@ -3,13 +3,13 @@
 extraargs="$*"
 childpids=""
 for i in $(find src -name "tsconfig.json"); do
+    set -x
     tsc -p "$i" $* &
     childpid=$!
+    set +x
     childpids="$childpid $childpids"
 done
 
 for p in $childpids; do
     wait $childpids
 done
-# tsc -p src/core/tsconfig.json
-# tsc -p src/pages/tsconfig.json

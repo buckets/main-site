@@ -17,5 +17,5 @@
   "transform": {
     "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
   },
-  "testRegex": "src/wwwroot/budget/__tests__/test_.*\\.(ts|tsx|js)$"
+  "testRegex": "src/wwwroot/budget/__tests__/.*test_.*\\.(ts|tsx|js)$"
 }
