@@ -3,7 +3,7 @@ import * as log from 'electron-log'
 import {dialog, BrowserWindow} from 'electron';
 import {} from 'bluebird';
 import * as sqlite from 'sqlite';
-import {APP_ROOT} from './globals';
+import {APP_ROOT} from '../lib/globals';
 import {v4 as uuid} from 'uuid';
 
 interface Registry {

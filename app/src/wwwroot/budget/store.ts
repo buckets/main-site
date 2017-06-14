@@ -1,9 +1,10 @@
-import * as Rx from 'rxjs/Rx';
-import * as sqlite from 'sqlite';
-import {} from 'bluebird';
-import {AccountStore} from './models/account';
-
-console.log('hello?');
+import * as Path from 'path'
+import * as Rx from 'rxjs/Rx'
+import * as sqlite from 'sqlite'
+import * as log from 'electron-log'
+import {} from 'bluebird'
+import {AccountStore} from './models/account'
+import {APP_ROOT} from '../../lib/globals'
 
 type DataEventType =
   'update'
@@ -32,7 +33,7 @@ function sanitizeDbFieldName(x) {
 export class Store {
   private filename:string;
   private _db:sqlite.Database;
-  public data:Rx.Observable<DataEvent>;
+  public data:Rx.Subject<DataEvent>;
 
   readonly accounts:AccountStore;
   constructor(filename) {
@@ -42,28 +43,52 @@ export class Store {
   }
   async open() {
     this._db = await sqlite.open(this.filename, {promise:Promise})
+
+    // upgrade database
+    try {
+      await this._db.migrate({
+        migrationsPath: Path.join(APP_ROOT, 'migrations'),
+      })  
+    } catch(err) {
+      log.error(err.stack);
+      throw err;
+    }
   }
   get db():sqlite.Database {
     return this._db;
   }
-  async createObject(tablename:string, data:object):Promise<IObject> {
-    let keys = Object.keys(data).map(sanitizeDbFieldName);
-    let columns = keys.join(',');
-    let values = keys.map(n => '$'+n).join(',');
-    let sql = `INSET INTO ${tablename} (${columns}) VALUES (${values})`;
-    console.log('sql', sql);
-    // this.db.run(`INSERT INTO ${tablename} VALUES`,
-    //   )
-    return {
-      id: 10,
-      _type: 'foobar',
-    }
+  publishObject(event:DataEventType, obj:IObject) {
+    this.data.next(new DataEvent(event, obj));
   }
-  async getObject(tablename:string, id:number):Promise<IObject> {
-    return {
-      id: 12,
-      _type: 'gumption',
-    }
+  async createObject(tablename:string, data:object):Promise<IObject> {
+    let params = {};
+    let columns = [];
+    let values = [];
+    Object.keys(data).forEach(key => {
+      let snkey = sanitizeDbFieldName(key);
+      columns.push(snkey);
+      params['$'+snkey] = data[key];
+      values.push('$'+snkey);
+    })
+    let sql = `INSERT INTO ${tablename} (${columns}) VALUES ( ${values} );`;
+    let result = await this.db.run(sql, params);
+    let obj = Object.assign({}, data, {
+      id: result.lastID,
+      _type: tablename,
+    });
+    this.publishObject('update', obj);
+    return obj;
+  }
+  async getObject<T>(tablename:string, id:number):Promise<T> {
+    let sql = `SELECT * FROM ${tablename} WHERE id=$id`;
+    let obj = await this.db.get(sql, {$id: id});
+    return Object.assign(obj, {_type: tablename});
+  }
+  async deleteObject(tablename:string, id:number):Promise<any> {
+    let obj = await this.getObject<IObject>(tablename, id);
+    let sql = `DELETE FROM ${tablename} WHERE id=$id`;
+    await this.db.run(sql, {$id: id});
+    this.publishObject('delete', obj);
   }
 }
 

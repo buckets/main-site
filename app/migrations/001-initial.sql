@@ -20,6 +20,23 @@ CREATE TABLE account_transaction (
     FOREIGN KEY(account_id) REFERENCES account(id)
 );
 
+CREATE TRIGGER update_account_balance_insert
+    AFTER INSERT ON account_transaction
+    BEGIN
+        UPDATE account SET balance = balance + new.amount WHERE id = new.account_id;
+    END;
+CREATE TRIGGER update_account_balance_delete
+    AFTER DELETE ON account_transaction
+    BEGIN
+        UPDATE account SET balance = balance - old.amount WHERE id = old.account_id;
+    END;
+CREATE TRIGGER update_account_balance_update
+    AFTER UPDATE ON account_transaction
+    BEGIN
+        UPDATE account SET balance = balance - old.amount WHERE id = old.account_id;
+        UPDATE account SET balance = balance + new.amount WHERE id = new.account_id;
+    END;
+
 CREATE TABLE bucket_group (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

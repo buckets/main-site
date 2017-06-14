@@ -1,3 +1,2 @@
-test('nothing', () => {
-  expect(true).toEqual(true);
-})
+// import {expect} from 'chai';
+import 'mocha';
