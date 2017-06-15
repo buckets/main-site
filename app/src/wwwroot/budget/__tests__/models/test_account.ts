@@ -1,5 +1,5 @@
-import {Store, DataEvent} from '../../store';
-import {Account, isAccount, Transaction, isTransaction} from '../../models/account';
+import {Store, DataEvent, isObj} from '../../store';
+import {Account, Transaction} from '../../models/account';
 import {expect} from 'chai';
 import 'mocha';
 
@@ -25,7 +25,7 @@ describe('add account', () => {
   });
   it('obj', () => {
     let obj = ev.obj as Account;
-    expect(isAccount(ev.obj)).to.eq(true);
+    expect(isObj(Account, ev.obj)).to.eq(true);
     expect(obj.id).not.to.eq(null);
     expect(obj._type).to.eq('account');
     expect(obj.name).to.eq('Checking');
@@ -33,7 +33,7 @@ describe('add account', () => {
     expect(obj.currency).to.eq('USD');
   })
   it('stored in database', async () => {
-    let obj = <Account> await store.getObject('account', ev.obj.id);
+    let obj = await store.getObject(Account, ev.obj.id);
     expect(obj.id).to.eq(ev.obj.id);
     expect(obj._type).to.eq('account');
     expect(obj.name).to.eq('Checking');
@@ -54,7 +54,7 @@ describe('transact', () => {
   it('should emit the new transaction', () => {
     let tevent = events[0];
     expect(tevent.event).to.eq('update');
-    expect(isTransaction(tevent.obj)).to.eq(true);
+    expect(isObj(Transaction, tevent.obj)).to.eq(true);
     let t = <Transaction>tevent.obj;
     expect(t.amount).to.eq(800);
     expect(t.memo).to.eq('something important');
@@ -63,7 +63,7 @@ describe('transact', () => {
   it('should emit the new account', () => {
     let aevent = events[1];
     expect(aevent.event).to.eq('update');
-    expect(isAccount(aevent.obj)).to.eq(true);
+    expect(isObj(Account, aevent.obj)).to.eq(true);
     let a = <Account>aevent.obj;
     expect(a.balance).to.eq(800);
   })
@@ -79,7 +79,7 @@ describe('transact', () => {
     it('should emit the deleted transaction', () => {
       let tevent = events[0];
       expect(tevent.event).to.eq('delete');
-      expect(isTransaction(tevent.obj)).to.eq(true);
+      expect(isObj(Transaction, tevent.obj)).to.eq(true);
       let t = <Transaction>tevent.obj;
       expect(t.id).to.eq(trans.id);
       expect(t.amount).to.eq(800);
@@ -89,7 +89,7 @@ describe('transact', () => {
     it('should emit the new account', () => {
       let aevent = events[1];
       expect(aevent.event).to.eq('update');
-      expect(isAccount(aevent.obj)).to.eq(true);
+      expect(isObj(Account, aevent.obj)).to.eq(true);
       let a = <Account>aevent.obj;
       expect(a.balance).to.eq(0);
     })

@@ -14,6 +14,14 @@ export interface IObject {
   id:number;
   _type:string;
 }
+interface IObjectClass<T> {
+  new(): T;
+  table_name: string;
+}
+// Return whether an object is an X
+export function isObj<T extends IObject>(cls: IObjectClass<T>, obj: IObject): obj is T {
+  return obj._type === cls.table_name;
+} 
 
 export class DataEvent {
   public event: DataEventType;
@@ -60,35 +68,32 @@ export class Store {
   publishObject(event:DataEventType, obj:IObject) {
     this.data.next(new DataEvent(event, obj));
   }
-  async createObject(tablename:string, data:object):Promise<IObject> {
-    tablename = sanitizeDbFieldName(tablename);
+  async createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
     let params = {};
     let columns = [];
     let values = [];
     Object.keys(data).forEach(key => {
       let snkey = sanitizeDbFieldName(key);
       columns.push(snkey);
-      params['$'+snkey] = data[key];
+      params['$'+snkey] = (<T>data)[key];
       values.push('$'+snkey);
     })
-    let sql = `INSERT INTO ${tablename} (${columns}) VALUES ( ${values} );`;
+    let sql = `INSERT INTO ${cls.table_name} (${columns}) VALUES ( ${values} );`;
     let result = await this.db.run(sql, params);
-    let obj = Object.assign({}, data, {
+    let obj = <T>Object.assign({}, data, {
       id: result.lastID,
-      _type: tablename,
+      _type: cls.table_name,
     });
     this.publishObject('update', obj);
     return obj;
   }
-  async getObject<T>(tablename:string, id:number):Promise<T> {
-    tablename = sanitizeDbFieldName(tablename);
-    let sql = `SELECT *,'${tablename}' as _type FROM ${tablename} WHERE id=$id`;
+  async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
+    let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name} WHERE id=$id`;
     return this.db.get(sql, {$id: id});
   }
-  async deleteObject(tablename:string, id:number):Promise<any> {
-    tablename = sanitizeDbFieldName(tablename);
-    let obj = await this.getObject<IObject>(tablename, id);
-    let sql = `DELETE FROM ${tablename} WHERE id=$id`;
+  async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
+    let obj = await this.getObject<T>(cls, id);
+    let sql = `DELETE FROM ${cls.table_name} WHERE id=$id`;
     await this.db.run(sql, {$id: id});
     this.publishObject('delete', obj);
   }

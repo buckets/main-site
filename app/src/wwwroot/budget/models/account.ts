@@ -1,15 +1,20 @@
 import {IObject, Store} from '../store';
 
-type account_type = 'account'
-
-export function isAccount(obj: IObject): obj is Account {
-  return obj._type === 'account';
-}
-export interface Account extends IObject {
-  _type: account_type;
+export class Account implements IObject {
+  static table_name: string = 'account';
+  id: number;
+  readonly _type: string = Account.table_name;
   name: string;
   balance: number;
   currency: string;
+}
+export class Transaction implements IObject {
+  static table_name: string = 'account_transaction';
+  id: number;
+  readonly _type: string = Transaction.table_name;
+  account_id: number;
+  amount: number;
+  memo: string;
 }
 
 export class AccountStore {
@@ -18,19 +23,19 @@ export class AccountStore {
     this.store = store;
   }
   async add(name:string):Promise<Account> {
-    return this.store.createObject('account', {
+    return this.store.createObject(Account, {
       name: name,
       balance: 0,
       currency: 'USD',
-    }) as Promise<Account>;
+    });
   }
   async transact(account_id:number, amount:number, memo:string):Promise<Transaction> {
-    let trans = <Transaction>await this.store.createObject('account_transaction', {
+    let trans = await this.store.createObject(Transaction, {
       account_id: account_id,
       amount: amount,
       memo: memo,
     });
-    let account = await this.store.getObject<Account>('account', account_id);
+    let account = await this.store.getObject(Account, account_id);
     this.store.publishObject('update', account);
     return trans;
   }
@@ -39,26 +44,15 @@ export class AccountStore {
 
     // This could be optimized later
     await Promise.all(transaction_ids.map(async (transid) => {
-      let trans = await this.store.getObject<Transaction>('account_transaction', transid);
+      let trans = await this.store.getObject(Transaction, transid);
       affected_account_ids.add(trans.account_id)
-      await this.store.deleteObject('account_transaction', transid);
+      await this.store.deleteObject(Transaction, transid);
     }));
     console.log('affected ids', affected_account_ids);
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
-      let account = await this.store.getObject<Account>('account', account_id);
+      let account = await this.store.getObject(Account, account_id);
       this.store.publishObject('update', account);
     }));
   }
 }
 
-type account_transaction_type = 'account_transaction';
-
-export function isTransaction(obj: IObject): obj is Transaction {
-  return obj._type === 'account_transaction';
-}
-export interface Transaction extends IObject {
-  _type: account_transaction_type;
-  account_id: number;
-  amount: number;
-  memo: string;
-}
