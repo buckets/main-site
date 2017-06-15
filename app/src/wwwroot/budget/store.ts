@@ -61,6 +61,7 @@ export class Store {
     this.data.next(new DataEvent(event, obj));
   }
   async createObject(tablename:string, data:object):Promise<IObject> {
+    tablename = sanitizeDbFieldName(tablename);
     let params = {};
     let columns = [];
     let values = [];
@@ -80,11 +81,12 @@ export class Store {
     return obj;
   }
   async getObject<T>(tablename:string, id:number):Promise<T> {
-    let sql = `SELECT * FROM ${tablename} WHERE id=$id`;
-    let obj = await this.db.get(sql, {$id: id});
-    return Object.assign(obj, {_type: tablename});
+    tablename = sanitizeDbFieldName(tablename);
+    let sql = `SELECT *,'${tablename}' as _type FROM ${tablename} WHERE id=$id`;
+    return this.db.get(sql, {$id: id});
   }
   async deleteObject(tablename:string, id:number):Promise<any> {
+    tablename = sanitizeDbFieldName(tablename);
     let obj = await this.getObject<IObject>(tablename, id);
     let sql = `DELETE FROM ${tablename} WHERE id=$id`;
     await this.db.run(sql, {$id: id});
