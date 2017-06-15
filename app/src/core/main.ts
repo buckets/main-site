@@ -1,7 +1,7 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, BrowserWindow, Menu, session, protocol} from 'electron'
+import {app, Menu, session, protocol} from 'electron'
 import * as log from 'electron-log'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url';
@@ -21,7 +21,7 @@ app.on('ready', () => {
     const parsed = URL.parse(request.url);
     let bf = BudgetFile.REGISTRY[parsed.hostname];
     if (bf || parsed.hostname === 'main') {
-      let path = Path.join(APP_ROOT, 'src/wwwroot/', parsed.path);
+      let path = Path.join(APP_ROOT, 'src/wwwroot/', parsed.pathname);
       console.log('returning file', path);
       callback(path);
     } else {
@@ -41,7 +41,10 @@ app.on('ready', function() {
   Menu.setApplicationMenu(menu);
 
   // Temporary window just to nab focus
-  new BrowserWindow({width: 400, height: 300});
+  // new BrowserWindow({width: 400, height: 300});
+
+  // For now, open a standard file for testing
+  BudgetFile.openFile('/tmp/test.bkts');
 });
 app.on('window-all-closed', () => {
   app.quit();

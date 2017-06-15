@@ -27,6 +27,7 @@ describe('add account', () => {
     let obj = ev.obj as Account;
     expect(isObj(Account, ev.obj)).to.eq(true);
     expect(obj.id).not.to.eq(null);
+    expect(obj.created).not.to.eq(null);
     expect(obj._type).to.eq('account');
     expect(obj.name).to.eq('Checking');
     expect(obj.balance).to.eq(0);

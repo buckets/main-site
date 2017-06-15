@@ -3,6 +3,7 @@ import {IObject, Store} from '../store';
 export class Account implements IObject {
   static table_name: string = 'account';
   id: number;
+  created: Date;
   readonly _type: string = Account.table_name;
   name: string;
   balance: number;
@@ -11,6 +12,7 @@ export class Account implements IObject {
 export class Transaction implements IObject {
   static table_name: string = 'account_transaction';
   id: number;
+  created: Date;
   readonly _type: string = Transaction.table_name;
   account_id: number;
   amount: number;
@@ -48,7 +50,6 @@ export class AccountStore {
       affected_account_ids.add(trans.account_id)
       await this.store.deleteObject(Transaction, transid);
     }));
-    console.log('affected ids', affected_account_ids);
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
       let account = await this.store.getObject(Account, account_id);
       this.store.publishObject('update', account);

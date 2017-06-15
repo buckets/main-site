@@ -10,8 +10,11 @@ type DataEventType =
   'update'
   | 'delete';
 
+
+
 export interface IObject {
   id:number;
+  created: Date;
   _type:string;
 }
 interface IObjectClass<T> {
@@ -39,17 +42,16 @@ function sanitizeDbFieldName(x) {
 
 
 export class Store {
-  private filename:string;
   private _db:sqlite.Database;
   public data:Rx.Subject<DataEvent>;
 
   readonly accounts:AccountStore;
-  constructor(filename) {
-    this.filename = filename;
+  constructor(private filename:string) {
     this.data = new Rx.Subject();
     this.accounts = new AccountStore(this);
   }
-  async open() {
+  async open():Promise<Store> {
+    console.log('opening database', this.filename);
     this._db = await sqlite.open(this.filename, {promise:Promise})
 
     // upgrade database
@@ -61,6 +63,7 @@ export class Store {
       log.error(err.stack);
       throw err;
     }
+    return this;
   }
   get db():sqlite.Database {
     return this._db;

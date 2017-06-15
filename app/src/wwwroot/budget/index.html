@@ -7,42 +7,16 @@
     html {
       height: 100%;
     }
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: rgba(52, 73, 94,1.0);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .centered {
-      text-align: center;
-      padding: 1rem;
-    }
-    .title {
-      font-size: 3rem;
-    }
-    .subtitle {
-
-    }
   </style>
 </head>
 <body>
-  <div class="centered">
-    <div class="title">
-      Buckets
-    </div>
-    <div class="subtitle">
-      Better family budgeting
-    </div>
-    <div>
-      <a>Open an existing budget...</a>
-    </div>
-    <div>
-      <a>Start a new budget...</a>
-    </div>
-  </div>
+  <div id="root">Loading...</div>
+  <script>
+const qs = require('qs');
+const parsed = qs.parse(window.location.search.substr(1));
+const {start} = require(require('path').resolve('./src/wwwroot/budget/budget.js'));
+start(document.getElementById('root'), parsed.file);
+
+  </script>
 </body>
 </html>

@@ -1,9 +1,6 @@
-import * as Path from 'path';
 import * as log from 'electron-log'
 import {dialog, BrowserWindow} from 'electron';
 import {} from 'bluebird';
-import * as sqlite from 'sqlite';
-import {APP_ROOT} from '../lib/globals';
 import {v4 as uuid} from 'uuid';
 
 interface Registry {
@@ -18,7 +15,6 @@ export class BudgetFile {
   static REGISTRY:Registry={};
 
   readonly id:string;
-  private _db:sqlite.Database;
   readonly windows:Array<Electron.BrowserWindow>=[];
   readonly filename:string;
   constructor(filename?:string) {
@@ -29,20 +25,6 @@ export class BudgetFile {
   async start() {
     log.debug('start', this.filename);
 
-    // start up the database
-    this._db = await sqlite.open(this.filename, {promise:Promise})
-    log.debug('db opened');
-
-    // upgrade database
-    try {
-      await this._db.migrate({
-        migrationsPath: Path.join(APP_ROOT, 'migrations'),
-      })  
-    } catch(err) {
-      log.error(err.stack);
-      throw err;
-    }
-    
     // open default windows
     this.openDefaultWindows();
     return this;
@@ -50,14 +32,11 @@ export class BudgetFile {
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
   }
-  get db() {
-    return this._db;
-  }
   openDefaultWindows() {
     // Later, it might save state so that the last thing opened
     // is what opens the next time.  But for now, just start
     // at the top.
-    this.openWindow('/budget/index.html');
+    this.openWindow(`/budget/index.html?file=${this.filename}`);
   }
   openWindow(path:string) {
     log.debug('opening window to', path);
@@ -76,6 +55,7 @@ export class BudgetFile {
     let url = `buckets://${this.id}${path}`;
     log.debug('url', url);
     win.loadURL(url);
+    win.setRepresentedFilename(this.filename);
     win.on('close', ev => {
       // unlink from this instance
       delete WIN2FILE[win.id];
