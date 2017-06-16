@@ -2,6 +2,7 @@ import * as log from 'electron-log'
 import {dialog, BrowserWindow} from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
+import {DBStore, RPCMainStore} from './store';
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -13,6 +14,8 @@ export let WIN2FILE:{
 
 export class BudgetFile {
   static REGISTRY:Registry={};
+  public store:DBStore;
+  private rpc_store:RPCMainStore = null;
 
   readonly id:string;
   readonly windows:Array<Electron.BrowserWindow>=[];
@@ -20,10 +23,16 @@ export class BudgetFile {
   constructor(filename?:string) {
     this.id = uuid();
     this.filename = filename || '';
+    this.store = new DBStore(filename);
     BudgetFile.REGISTRY[this.id] = this;
   }
   async start() {
     log.debug('start', this.filename);
+
+    // connect to database
+    await this.store.open();
+    this.rpc_store = new RPCMainStore(this.store, this.id);
+    await this.rpc_store.start();
 
     // open default windows
     this.openDefaultWindows();
@@ -36,7 +45,7 @@ export class BudgetFile {
     // Later, it might save state so that the last thing opened
     // is what opens the next time.  But for now, just start
     // at the top.
-    this.openWindow(`/budget/index.html?file=${this.filename}`);
+    this.openWindow(`/budget/index.html`);
   }
   openWindow(path:string) {
     log.debug('opening window to', path);

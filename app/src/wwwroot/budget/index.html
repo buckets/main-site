@@ -12,10 +12,9 @@
 <body>
   <div id="root">Loading...</div>
   <script>
-const qs = require('qs');
-const parsed = qs.parse(window.location.search.substr(1));
+const hostname = window.location.hostname;
 const {start} = require(require('path').resolve('./src/wwwroot/budget/budget.js'));
-start(document.getElementById('root'), parsed.file);
+start(document.getElementById('root'), hostname);
 
   </script>
 </body>

@@ -1,8 +1,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Store} from './store';
-export async function start(base_element, dbfilename) {
-  let store = await (new Store(dbfilename)).open();
+import {RPCRendererStore} from '../../core/store';
+
+import {Account} from '../../core/models/account';
+
+export async function start(base_element, room) {
+  let store = new RPCRendererStore(room);
   ReactDOM.render(<div>hello</div>, base_element);
-  console.log('store', store);
+  store.createObject(Account, {name: 'Checking'})
 }

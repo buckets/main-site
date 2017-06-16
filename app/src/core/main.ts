@@ -22,7 +22,6 @@ app.on('ready', () => {
     let bf = BudgetFile.REGISTRY[parsed.hostname];
     if (bf || parsed.hostname === 'main') {
       let path = Path.join(APP_ROOT, 'src/wwwroot/', parsed.pathname);
-      console.log('returning file', path);
       callback(path);
     } else {
       // No a known host

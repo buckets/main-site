@@ -1,12 +1,12 @@
-import {Store, DataEvent, isObj} from '../../store';
-import {Account, Transaction} from '../../models/account';
+import {DBStore, DataEvent, isObj} from '../store';
+import {Account, Transaction} from './account';
 import {expect} from 'chai';
 import 'mocha';
 
-let store:Store;
+let store:DBStore;
 let events:Array<DataEvent>;
 beforeEach(async () => {
-  store = new Store(':memory:');
+  store = new DBStore(':memory:');
   await store.open();
   events = [];
   store.data.subscribe(message => {

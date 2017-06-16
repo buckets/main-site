@@ -1,4 +1,4 @@
-import {callOnce} from '../promise';
+import {callOnce} from './promise';
 import {expect} from 'chai';
 import 'mocha'
 

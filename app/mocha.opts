@@ -1,1 +1,1 @@
-src/wwwroot/**/*.js
+src/**/*.spec.js

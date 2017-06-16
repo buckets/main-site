@@ -1,4 +1,4 @@
-import {IObject, Store} from '../store';
+import {IObject, IStore} from '../store';
 
 export class Account implements IObject {
   static table_name: string = 'account';
@@ -20,8 +20,8 @@ export class Transaction implements IObject {
 }
 
 export class AccountStore {
-  public store:Store;
-  constructor(store:Store) {
+  public store:IStore;
+  constructor(store:IStore) {
     this.store = store;
   }
   async add(name:string):Promise<Account> {
