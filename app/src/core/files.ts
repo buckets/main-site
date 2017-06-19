@@ -82,7 +82,7 @@ export function openDialog() {
   dialog.showOpenDialog({
     title: 'Open Buckets Budget',
     filters: [
-      {name: 'Buckets Budget', extensions: ['bkts']},
+      {name: 'Buckets Budget', extensions: ['buckets']},
     ],
   }, (paths) => {
     if (paths) {
@@ -95,7 +95,7 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
       title: 'Buckets Budget Filename',
-      defaultPath: 'mybudget.bkts',
+      defaultPath: 'mybudget.buckets',
     }, (filename) => {
       resolve(BudgetFile.openFile(filename));
     })

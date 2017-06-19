@@ -6,11 +6,12 @@ To install deps:
 
 To compile:
 
-    ./build.sh
+    tsc
+    tsc --watch
 
 
 To run:
 
-    ./build.sh && yarn start
+    tsc && yarn start
 
 

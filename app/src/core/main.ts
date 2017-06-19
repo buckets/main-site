@@ -43,7 +43,7 @@ app.on('ready', function() {
   // new BrowserWindow({width: 400, height: 300});
 
   // For now, open a standard file for testing
-  BudgetFile.openFile('/tmp/test.bkts');
+  BudgetFile.openFile('/tmp/test.buckets');
 });
 app.on('window-all-closed', () => {
   app.quit();

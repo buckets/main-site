@@ -6,7 +6,3 @@ let bf;
 beforeEach(() => {
   bf = new BudgetFile();
 })
-
-it('should know about windows', () => {
-  expect(bf.windows).to.eq([]);
-});

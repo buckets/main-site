@@ -61,7 +61,9 @@ export interface IStore {
   publishObject(event:DataEventType, obj:IObject);
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
+  listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
+  query(sql:string, params:{}):Promise<any>;
 }
 
 //--------------------------------------------------------------------------------
@@ -132,8 +134,24 @@ export class DBStore implements IStore {
     return obj;
   }
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name} WHERE id=$id`;
+    let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
+    WHERE id=$id`;
     return this.db.get(sql, {$id: id});
+  }
+  async listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]> {
+    let select = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}`;
+    if (where) {
+      where = `WHERE ${where}`;
+    }
+    if (!params) {
+      params = {};
+    }
+    let order = `ORDER BY id`;
+    let sql = `${select} ${where} ${order}`;
+    return this.db.all(sql, params);
+  }
+  async query(sql:string, params:{}):Promise<any> {
+    return this.db.all(sql, params);
   }
   async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     let obj = await this.getObject<T>(cls, id);
@@ -206,7 +224,7 @@ export class RPCRendererStore implements IStore {
   public data:Rx.Subject<DataEvent>;
   constructor(private room:string) {
     this.data = new Rx.Subject<DataEvent>();
-    ipcRenderer.on(`data-${room}`, this.dataReceived);
+    ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
   }
   get channel() {
     return `rpc-${this.room}`;
@@ -231,7 +249,6 @@ export class RPCRendererStore implements IStore {
     })
   }
   dataReceived(event, message:DataEvent) {
-    log.debug('dataReceived', event, message);
     this.data.next(message);
   }
 
@@ -244,6 +261,12 @@ export class RPCRendererStore implements IStore {
   }
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     return this.callRemote('getObject', serializeObjectClass(cls), id);
+  }
+  listObjects<T extends IObject>(cls: IObjectClass<T>, ...args):Promise<T[]> {
+    return this.callRemote('listObjects', serializeObjectClass(cls), ...args);
+  }
+  query(sql:string, params:{}):Promise<any> {
+    return this.callRemote('query', sql, params);
   }
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     return this.callRemote('deleteObject', serializeObjectClass(cls), id);

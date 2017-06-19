@@ -1,5 +1,9 @@
 import {IObject, IStore} from '../store';
+import * as moment from 'moment';
 
+export class Balances {
+  [k:number]:number;
+}
 export class Account implements IObject {
   static table_name: string = 'account';
   id: number;
@@ -54,6 +58,29 @@ export class AccountStore {
       let account = await this.store.getObject(Account, account_id);
       this.store.publishObject('update', account);
     }));
+  }
+  async balances(asof?:string):Promise<Balances> {
+    if (!asof) {
+      asof = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+    }
+    let sql = `
+      SELECT
+        a.id, a.balance - sum(coalesce(t.amount,0)) as balance, sum(t.amount)
+      FROM
+        account as a
+        left join account_transaction as t
+          on a.id = t.account_id
+             AND t.posted > $asof
+    `;
+    let params = {
+      $asof: asof,
+    }
+    let rows = await this.store.query(sql, params);
+    let ret:Balances = {};
+    rows.forEach(row => {
+      ret[row.id] = row.balance;
+    })
+    return ret;
   }
 }
 

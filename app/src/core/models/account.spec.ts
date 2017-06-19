@@ -69,6 +69,22 @@ describe('transact', () => {
     expect(a.balance).to.eq(800);
   })
 
+  describe('balances', () => {
+    let bal_before;
+    let bal_after;
+    beforeEach(async () => {
+      bal_before = await store.accounts.balances('2000-01-01 00:00:00');
+      bal_after = await store.accounts.balances();
+    })
+
+    it('balance before transaction', () => {
+      expect(bal_before[account.id]).to.eq(0);
+    })
+    it('balance after transaction', () => {
+      expect(bal_after[account.id]).to.eq(800);
+    })
+  })
+
   describe('delete transaction', () => {
     beforeEach(async () => {
       events.length = 0;
