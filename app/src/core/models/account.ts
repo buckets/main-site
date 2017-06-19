@@ -82,5 +82,8 @@ export class AccountStore {
     })
     return ret;
   }
+  async list():Promise<Account[]> {
+    return this.store.listObjects(Account);
+  }
 }
 

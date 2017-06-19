@@ -64,6 +64,9 @@ export interface IStore {
   listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
+
+  // model-specific stuff
+  accounts:AccountStore;
 }
 
 //--------------------------------------------------------------------------------
@@ -199,7 +202,7 @@ export class RPCMainStore {
     ipcMain.removeListener(this.channel, this.gotMessage);
   }
   gotMessage = async (event, message:RPCMessage) => {
-    log.debug('MAIN RPC', message);
+    // log.debug('MAIN RPC', message);
     try {
       // convert args to classes
       let args = message.params.map(arg => {
@@ -222,9 +225,11 @@ export class RPCMainStore {
 export class RPCRendererStore implements IStore {
   private next_msg_id:number = 1;
   public data:Rx.Subject<DataEvent>;
+  public accounts:AccountStore;
   constructor(private room:string) {
     this.data = new Rx.Subject<DataEvent>();
     ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
+    this.accounts = new AccountStore(this);
   }
   get channel() {
     return `rpc-${this.room}`;
@@ -235,10 +240,10 @@ export class RPCRendererStore implements IStore {
       method: method,
       params: args,
     }
-    log.debug('CLIENT CALL', msg);
+    // log.debug('CLIENT CALL', msg);
     return new Promise((resolve, reject) => {
       ipcRenderer.once(`rpc-reply-${msg.id}`, (event, reply:RPCReply) => {
-        log.debug('CLIENT RECV', reply);
+        // log.debug('CLIENT RECV', reply);
         if (reply.ok) {
           resolve(reply.value);
         } else {
