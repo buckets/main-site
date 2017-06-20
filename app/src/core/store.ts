@@ -80,10 +80,12 @@ export class ObjectEvent {
   }
 }
 class DataEventEmitter extends EventEmitter {
-  emit(event: 'obj', obj:ObjectEvent):boolean {
+  emit(event: 'obj', obj:ObjectEvent):boolean;
+  emit(event, obj):boolean {
     return super.emit(event, obj);
   }
-  on(event: 'obj', listener: (obj:ObjectEvent) => void): this {
+  on(event: 'obj', listener: (obj:ObjectEvent) => void):this;
+  on(event, listener):this {
     return super.on(event, listener);
   }
 }

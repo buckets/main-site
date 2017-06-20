@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
+import {AccountsPage} from './accounts';
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -19,17 +20,22 @@ export async function start(base_element, room) {
     return renderer.doUpdate();
   })
 
+  // routing
+  window.addEventListener('hashchange', () => {
+    renderer.doUpdate();
+  }, false);
+
+
   let renderer = new Renderer();
   renderer.registerRendering(() => {
-    return (<div>
-      <AccountList accounts={state.accounts} />
-    </div>);
+    let path = (window.location.hash || '#/accounts').substr(1);
+    return <Application state={state} url={path} />;
   }, base_element);
   store.createObject(Account, {name: 'Checking'})
 }
 
 
-class State {
+export class State {
   public accounts: {
     [k:number]: Account,
   } = {};
@@ -41,7 +47,7 @@ class State {
   public current_date: string = null;
   private _fetch_account_balances: boolean = false;
 
-  constructor(private store:IStore) {
+  constructor(public store:IStore) {
 
   }
 
@@ -102,15 +108,48 @@ class State {
   }
 }
 
-class AccountList extends React.Component<{accounts:{}},any> {
+interface ApplicationProps {
+  state: State,
+  url: string;
+}
+class Application extends React.Component<ApplicationProps, any> {
   render() {
-    console.log('AccountList render', JSON.stringify(this.props.accounts));
-    let accounts = _.values(this.props.accounts)
-    .map((account:Account) => {
-      return <div key={account.id}>{account.id} Account {account.name} {account.balance}</div>
-    })
-    return <div>
-      {accounts}
-    </div>
+    let state = this.props.state;
+    let segments = this.props.url.split('/').filter(a => a);
+    let link = (name, href) => {
+      let cls = href == this.props.url ? 'selected' : '';
+      href = `#${href}`;
+      return <a href={href} className={cls}>{name}</a>
+    }
+    // routing
+    let body:JSX.Element;
+    switch (segments[0]) {
+      case 'accounts': {
+        body = <AccountsPage state={state} />
+        break;
+      }
+      default: {
+        body = <div>404</div>;
+      }
+    }
+    return (<div className="app">
+      <div className="nav">
+        <div>
+          {link('Accounts', '/accounts')}
+          {link('Transactions', '/transactions')}
+          {link('Buckets', '/buckets')}
+          {link('Connections', '/connections')}
+          {link('Reports', '/reports')}
+        </div>
+      </div>
+      <div className="content">
+        <div className="header">
+          Header information
+        </div>
+        <div className="body">
+          {body}
+        </div>
+      </div>
+    </div>);    
   }
 }
