@@ -198,7 +198,6 @@ export class RPCMainStore {
       webContents.getAllWebContents().forEach(wc => {
         if (URL.parse(wc.getURL()).hostname === this.room) {
           let ch = `data-${this.room}`;
-          console.log('sending to window', wc.id, ch, value);
           wc.send(ch, value);
         }
       })
@@ -261,7 +260,6 @@ export class RPCRendererStore implements IStore {
     })
   }
   dataReceived(event, message:ObjectEvent) {
-    console.log('dataReceived', message);
     this.data.emit('obj', message);
   }
 
