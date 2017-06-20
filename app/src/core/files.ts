@@ -3,6 +3,7 @@ import {dialog, BrowserWindow} from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
 import {DBStore, RPCMainStore} from './store';
+import * as URL from 'url';
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -52,7 +53,11 @@ export class BudgetFile {
     let win = new BrowserWindow({
       width: 1200,
       height: 900,
+      show: false,
     });
+    win.once('ready-to-show', () => {
+      win.show();
+    })
 
     // Link this instance and the window
     this.windows.push(win);
@@ -76,6 +81,14 @@ export class BudgetFile {
     let bf = new BudgetFile(filename);
     return bf.start();
   }
+}
+
+export function newBudgetWindow() {
+  let win = BrowserWindow.getFocusedWindow();
+  let bf = WIN2FILE[win.id];
+  let url = win.webContents.getURL();
+  let parsed = URL.parse(url);
+  bf.openWindow(parsed.pathname);
 }
 
 export function openDialog() {

@@ -1,9 +1,16 @@
 import {app, Menu} from 'electron';
-import {openDialog, newBudgetFileDialog} from './files';
+import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files';
 
 let FileMenu = {
   label: 'File',
   submenu: [
+    {
+      label: 'New Window',
+      accelerator: 'CmdOrCtrl+N',
+      click() {
+        newBudgetWindow();
+      }
+    },
     {
       label: 'New Budget',
       accelerator: 'CmdOrCtrl+Shift+N',

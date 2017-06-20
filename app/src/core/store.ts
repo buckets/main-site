@@ -1,17 +1,12 @@
 import * as Path from 'path'
 import * as URL from 'url';
-import * as Rx from 'rxjs/Rx'
 import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
+import {EventEmitter} from 'events';
 import {} from 'bluebird'
 import {AccountStore, Account, Transaction as AccountTransaction} from './models/account'
 import {APP_ROOT} from '../lib/globals'
 import {ipcMain, ipcRenderer, webContents} from 'electron';
-
-type DataEventType =
-  'update'
-  | 'delete';
-
 
 //--------------------------------------------------------------------------------
 // objects
@@ -57,8 +52,8 @@ function deserializeObjectClass<T extends IObject>(obj:SerializedObjectClass):IO
 // Store interface used in both main and renderer processes
 //--------------------------------------------------------------------------------
 export interface IStore {
-  data:Rx.Subject<DataEvent>;
-  publishObject(event:DataEventType, obj:IObject);
+  data:DataEventEmitter;
+  publishObject(event:ObjectEventType, obj:IObject);
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
   listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]>;
@@ -72,12 +67,24 @@ export interface IStore {
 //--------------------------------------------------------------------------------
 // DataEvents
 //--------------------------------------------------------------------------------
-export class DataEvent {
-  public event: DataEventType;
+type ObjectEventType =
+  'update'
+  | 'delete';
+
+export class ObjectEvent {
+  public event: ObjectEventType;
   public obj: IObject;
-  constructor(event:DataEventType, obj:IObject) {
+  constructor(event:ObjectEventType, obj:IObject) {
     this.event = event;
     this.obj = obj;
+  }
+}
+class DataEventEmitter extends EventEmitter {
+  emit(event: 'obj', obj:ObjectEvent):boolean {
+    return super.emit(event, obj);
+  }
+  on(event: 'obj', listener: (obj:ObjectEvent) => void): this {
+    return super.on(event, listener);
   }
 }
 
@@ -93,11 +100,11 @@ function sanitizeDbFieldName(x) {
 }
 export class DBStore implements IStore {
   private _db:sqlite.Database;
-  public data:Rx.Subject<DataEvent>;
+  public data:DataEventEmitter;
 
   readonly accounts:AccountStore;
   constructor(private filename:string) {
-    this.data = new Rx.Subject();
+    this.data = new DataEventEmitter();
     this.accounts = new AccountStore(this);
   }
   async open():Promise<DBStore> {
@@ -117,8 +124,8 @@ export class DBStore implements IStore {
   get db():sqlite.Database {
     return this._db;
   }
-  publishObject(event:DataEventType, obj:IObject) {
-    this.data.next(new DataEvent(event, obj));
+  publishObject(event:ObjectEventType, obj:IObject) {
+    this.data.emit('obj', new ObjectEvent(event, obj));
   }
   async createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
     let params = {};
@@ -178,24 +185,24 @@ interface RPCReply {
   value: any;
 }
 export class RPCMainStore {
-  private subscription:Rx.Subscription;
+  private data:DataEventEmitter;
   constructor(private store:IStore, private room:string) {
   }
   get channel() {
     return `rpc-${this.room}`;
   }
   start() {
-    this.subscription = this.store.data.subscribe({
-      next: (value) => {
-        // probably not efficient if you have two different files open...
-        // but... that's an edge case, and still probably plenty fast
-        webContents.getAllWebContents().forEach(wc => {
-          if (URL.parse(wc.getURL()).hostname === this.room) {
-            wc.send(`data-${this.room}`, value);
-          }
-        })
-      }
-    })
+    this.data = this.store.data.on('obj', (value) => {
+      // probably not efficient if you have two different files open...
+      // but... that's an edge case, and still probably plenty fast
+      webContents.getAllWebContents().forEach(wc => {
+        if (URL.parse(wc.getURL()).hostname === this.room) {
+          let ch = `data-${this.room}`;
+          console.log('sending to window', wc.id, ch, value);
+          wc.send(ch, value);
+        }
+      })
+    });
     ipcMain.on(this.channel, this.gotMessage);
   }
   stop() {
@@ -224,10 +231,10 @@ export class RPCMainStore {
 }
 export class RPCRendererStore implements IStore {
   private next_msg_id:number = 1;
-  public data:Rx.Subject<DataEvent>;
+  public data:DataEventEmitter;
   public accounts:AccountStore;
   constructor(private room:string) {
-    this.data = new Rx.Subject<DataEvent>();
+    this.data = new DataEventEmitter();
     ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
     this.accounts = new AccountStore(this);
   }
@@ -253,12 +260,13 @@ export class RPCRendererStore implements IStore {
       ipcRenderer.send(this.channel, msg);
     })
   }
-  dataReceived(event, message:DataEvent) {
-    this.data.next(message);
+  dataReceived(event, message:ObjectEvent) {
+    console.log('dataReceived', message);
+    this.data.emit('obj', message);
   }
 
   // IStore methods
-  publishObject(event:DataEventType, obj:IObject) {
+  publishObject(event:ObjectEventType, obj:IObject) {
     return this.callRemote('publishObject', event, obj);
   }
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {

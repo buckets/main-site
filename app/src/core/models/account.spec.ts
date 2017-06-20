@@ -1,21 +1,21 @@
-import {DBStore, DataEvent, isObj} from '../store';
+import {DBStore, ObjectEvent, isObj} from '../store';
 import {Account, Transaction} from './account';
 import {expect} from 'chai';
 import 'mocha';
 
 let store:DBStore;
-let events:Array<DataEvent>;
+let events:Array<ObjectEvent>;
 beforeEach(async () => {
   store = new DBStore(':memory:');
   await store.open();
   events = [];
-  store.data.subscribe(message => {
-    events.push(message as DataEvent);
+  store.data.on('obj', message => {
+    events.push(message as ObjectEvent);
   })
 })
 
 describe('add account', () => {
-  let ev:DataEvent;
+  let ev:ObjectEvent;
   beforeEach(async () => {
     await store.accounts.add('Checking');
     ev = events[0];
