@@ -3,6 +3,7 @@
 To install deps:
 
     yarn
+    electron-rebuild
 
 To compile:
 

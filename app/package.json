@@ -6,8 +6,7 @@
   "author": "Matt Haggard",
   "scripts": {
     "start": "electron .",
-    "test": "./test.sh",
-    "postinstall": "electron-rebuild"
+    "test": "./test.sh"
   },
   "dependencies": {
     "adm-zip": "0.4.7",
