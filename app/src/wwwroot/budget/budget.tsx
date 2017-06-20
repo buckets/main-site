@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
@@ -16,7 +17,6 @@ export async function start(base_element, room) {
   store.data.on('obj', async (data) => {
     state.processEvent(data);
     await state.flush()
-    console.log('RENDERING');
     return renderer.doUpdate();
   })
 
@@ -28,10 +28,15 @@ export async function start(base_element, room) {
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
-    let path = (window.location.hash || '#/accounts').substr(1);
-    return <Application state={state} url={path} />;
+    let path = window.location.hash.substr(1);
+    let route = getRoute(path, state, {});
+    return <Application state={state} route={route} />;
   }, base_element);
-  store.createObject(Account, {name: 'Checking'})
+  renderer.doUpdate();
+
+  if (!window.location.hash) {
+    window.location.hash = `#/accounts`;
+  }
 }
 
 
@@ -108,43 +113,94 @@ export class State {
   }
 }
 
+interface IRoute {
+  params: {[k:string]:any};
+  title: string;
+  section: 'accounts' | 'buckets';
+  header: JSX.Element;
+  body: JSX.Element;
+}
+
+function getRoute(path:string, state:State, context:any):IRoute {
+  context = context || {};
+  let segments = path.split('/').filter(a => a);
+  let seg0 = segments[0];
+  let m;
+  let ret:IRoute = {
+    params: context,
+    title: 'not found',
+    section: 'accounts',
+    header: <div>HEADER {window.location.href}</div>,
+    body: <div>Not found</div>,
+  }
+
+  if (!)
+
+  // Year and month prefix segment
+  if (m = seg0.match(/^(\d\d\d\d)-(\d\d?)$/)) {
+    context.year = parseInt(m[1]);
+    context.month = parseInt(m[2]);
+    segments = segments.slice(1);
+    seg0 = segments[0]
+  } else {
+    let today = moment();
+    context.year = today.year();
+    context.month = today.month()+1;
+  }
+
+  switch (seg0) {
+    case 'accounts': {
+      if (segments.length) {
+        // single account
+      } else {
+        // all accounts
+        ret.title = 'Accounts';
+        ret.section = 'accounts';
+        ret.body = (<AccountsPage state={state} />);
+      }
+      break;
+    }
+  }
+  return ret;
+}
+
+
 interface ApplicationProps {
   state: State,
-  url: string;
+  route: IRoute;
 }
 class Application extends React.Component<ApplicationProps, any> {
   render() {
     let state = this.props.state;
-    let segments = this.props.url.split('/').filter(a => a);
-    let link = (name, href) => {
-      let cls = href == this.props.url ? 'selected' : '';
-      href = `#${href}`;
-      return <a href={href} className={cls}>{name}</a>
-    }
+    let route = this.props.route;
+    
     // routing
     let body:JSX.Element;
-    switch (segments[0]) {
-      case 'accounts': {
-        body = <AccountsPage state={state} />
-        break;
-      }
-      default: {
-        body = <div>404</div>;
-      }
+
+    let link = (title, page) => {
+      let cls = page == route.page ? 'selected' : '';
+      href = `#${href}`;
+      return <a href={href} className={cls}>{title}</a>
     }
+
+    body = route.body;
+    console.log("route", route);
     return (<div className="app">
       <div className="nav">
         <div>
           {link('Accounts', '/accounts')}
           {link('Transactions', '/transactions')}
           {link('Buckets', '/buckets')}
-          {link('Connections', '/connections')}
           {link('Reports', '/reports')}
+        </div>
+        <div>
+          {link('Connections', '/connections')}
         </div>
       </div>
       <div className="content">
         <div className="header">
           Header information
+          {window.location.hash}
         </div>
         <div className="body">
           {body}

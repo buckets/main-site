@@ -3,8 +3,8 @@
 CREATE TABLE account (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    name TEXT,
-    balance INTEGER,
+    name TEXT DEFAULT '',
+    balance INTEGER DEFAULT 0,
     currency TEXT
 );
 
