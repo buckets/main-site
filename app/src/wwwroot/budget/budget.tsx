@@ -1,11 +1,11 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import * as moment from 'moment';
+// import * as moment from 'moment';
 import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
-import {AccountsPage} from './accounts';
-import {Router, Route, Link, WithRouting, CurrentPath} from './routing';
+// import {AccountsPage} from './accounts';
+import {Router, Route, Link, Switch, Redirect, CurrentPath} from './routing';
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -30,11 +30,13 @@ export async function start(base_element, room) {
     window.location.hash = '#' + x;
   }
 
-
   let renderer = new Renderer();
   renderer.registerRendering(() => {
     let path = window.location.hash.substr(1);
-    return <Application path={path} setPath={setPath} state={state} />;
+    return <Application
+      path={path}
+      setPath={setPath}
+      state={state} />;
   }, base_element);
   renderer.doUpdate();
 
@@ -117,54 +119,6 @@ export class State {
   }
 }
 
-interface IRoute {
-  params: {[k:string]:any};
-  title: string;
-  section: 'accounts' | 'buckets';
-  header: JSX.Element;
-  body: JSX.Element;
-}
-
-export function getRoute(path:string, state:State, context:any):IRoute {
-  context = context || {};
-  let segments = path.split('/').filter(a => a);
-  let seg0 = segments[0];
-  let m;
-  let ret:IRoute = {
-    params: context,
-    title: 'not found',
-    section: 'accounts',
-    header: <div>HEADER {window.location.href}</div>,
-    body: <div>Not found</div>,
-  }
-
-  // Year and month prefix segment
-  if (m = seg0.match(/^(\d\d\d\d)-(\d\d?)$/)) {
-    context.year = parseInt(m[1]);
-    context.month = parseInt(m[2]);
-    segments = segments.slice(1);
-    seg0 = segments[0]
-  } else {
-    let today = moment();
-    context.year = today.year();
-    context.month = today.month()+1;
-  }
-
-  switch (seg0) {
-    case 'accounts': {
-      if (segments.length) {
-        // single account
-      } else {
-        // all accounts
-        ret.title = 'Accounts';
-        ret.section = 'accounts';
-        ret.body = (<AccountsPage state={state} />);
-      }
-      break;
-    }
-  }
-  return ret;
-}
 
 
 interface ApplicationProps {
@@ -175,94 +129,58 @@ interface ApplicationProps {
 class Application extends React.Component<ApplicationProps, any> {
   render() {
     return (
-      <Router path={this.props.path} setPath={this.props.setPath}>
-        <div>Current path: <CurrentPath /></div>
-        <Route path="/<int:year>-<int:month>">
-          <div className="app">
-            <div className="nav">
-              <div>
-                <Link to="/accounts">Accounts</Link>
-                <Link to="/transactions">Transactions</Link>
+      <Router
+        path={this.props.path}
+        setPath={this.props.setPath}
+        >
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          right: 0,
+        }}>Current path: <CurrentPath /></div>
+        <Switch>
+          <Route path="/y<int:year>m<int:month>">
+            <div className="app">
+              <div className="nav">
+                <div>
+                  <Link relative to="/accounts" classWhenActive="selected">Accounts</Link>
+                  <Link relative to="/transactions" classWhenActive="selected">Transactions</Link>
+                  <Link relative to="/buckets" classWhenActive="selected">Buckets</Link>
+                  <Link relative to="/reports" classWhenActive="selected">Reports</Link>
+                </div>
+                <div>
+                </div>
               </div>
-              <div>
+              <div className="content">
+                <div className="header">
+                  Header information
+                  {window.location.hash}
+                  <WithParams component={MonthSelector} year=/>
+                </div>
+                <div className="body">
+                  <Route path="/accounts">
+                    You are on /accounts
+                  </Route>
+                  <Route path="/transactions">
+                    You are on /transactions
+                  </Route>
+                </div>
               </div>
             </div>
-            <div className="content">
-              <div className="header">
-                Header information
-                {window.location.hash}
-              </div>
-              <div className="body">
-                <Route path="/accounts">
-                  You are on /accounts
-                </Route>
-                <Route path="/transactions">
-                  You are on /transactions
-                </Route>
-              </div>
-            </div>
-          </div>
-        </Route>
-        <Route path="/a">
-          /a
-          <Route path="/c">
-            /c
           </Route>
-          <Route path="/d">
-            /d
-            <Container>
-              something here
-              <Route path="/f">
-                /f
-              </Route>
-              <Route path="/g">
-                /g
-              </Route>
-            </Container>
-          </Route>
-          <ul>
-            <li><Link relative to="/c">/c</Link></li>
-            <li><Link relative to="/d">/d</Link></li>
-            <li><Link relative to="/d/f">/d/f</Link></li>
-            <li><Link relative to="/d/g">/d/g</Link></li>
-            <li><Link relative to="/..">..</Link></li>
-          </ul>
-        </Route>
-        <Route path="/b">
-          /b
-        </Route>
-        <Route path="/i<int:number>">
-          /i:number
-          <WithRouting component={Debug}/>
-          <Route path="/name" exact>
-            <WithRouting component={Debug}/>
-          </Route>
-          <ul>
-            <li><Link relative to="/name">/name</Link></li>
-          </ul>
-        </Route>
-        <ul>
-          <li><Link to="/a">/a</Link></li>
-          <li><Link to="/a/c">/a/c</Link></li>
-          <li><Link to="/a/d">/a/d</Link></li>
-          <li><Link to="/b">/b</Link></li>
-          <li><Link to="/i5">/i5</Link></li>
-          <li><Link to="/i8">/i8</Link></li>
-          <li><Link fromcurrent to="..">..</Link></li>
-        </ul>
-        <WithRouting component={Debug} />
+          <Redirect to="/y2000m1" />
+        </Switch>
       </Router>);
   }
 }
 
-class Debug extends React.Component<{foo:string}, any> {
-  render() {
-    return <pre>DEBUG {JSON.stringify(this.props, null, 2)}</pre>
-  }
+interface MonthSelectorProps {
+  year: number;
+  month: number;
+  onChange: (year:number, month:number):void;
 }
-
-class Container extends React.Component<any, any> {
+class MonthSelector extends React.Component<MonthSelectorProps, any> {
   render() {
-    return <div>{this.props.children}</div>
+    return <div>Year: {this.props.year} Month: {this.props.month}</div>;
   }
 }

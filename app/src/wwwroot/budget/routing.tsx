@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as PropTypes from 'prop-types';
 import * as _ from 'lodash';
 import * as Path from 'path';
 
@@ -105,6 +106,14 @@ interface IRoutingContext {
     master: MatcherMaster;
   };
 }
+
+
+function matchPath(path:string, props:RouteProps, master:MatcherMaster):IMatch {
+  return master.makeMatcher(props.path, {
+    exact: props.exact || false,
+  })(path);
+}
+
 interface IRouterProps {
   path: string;
   setPath: (x:string)=>void;
@@ -113,7 +122,7 @@ interface IRouterProps {
 export class Router extends React.Component<IRouterProps, any> {
   private master: MatcherMaster;
   static childContextTypes = {
-    routing: React.PropTypes.object,
+    routing: PropTypes.object,
   }
   getChildContext():IRoutingContext {
     return {
@@ -143,14 +152,13 @@ export class Router extends React.Component<IRouterProps, any> {
 
 class _Routable<P, S> extends React.Component<P, S> {
   static contextTypes = {
-    routing: React.PropTypes.object,
+    routing: PropTypes.object,
   }
   context: IRoutingContext;
 }
 
 interface RouteProps {
   path: string;
-  absolute?: boolean;
   exact?: boolean;
 }
 interface RouteState {
@@ -163,12 +171,9 @@ export class Route extends _Routable<RouteProps, RouteState> {
     this.state = {
       match: null,
     };
-    this.matcher = context.routing.master.makeMatcher(props.path, {
-      exact: props.exact || false,
-    });
   }
   static childContextTypes = {
-    routing: React.PropTypes.object,
+    routing: PropTypes.object,
   }
   getChildContext():IRoutingContext {
     let base = Object.assign({}, this.context.routing);
@@ -187,17 +192,28 @@ export class Route extends _Routable<RouteProps, RouteState> {
     return `<Route path="${this.props.path}">`;
   }
   componentWillMount() {
-    this.setState({match: this.matcher(this.context.routing.rest)})
+    this.setState({
+      match: matchPath(
+        this.context.routing.rest,
+        this.props,
+        this.context.routing.master,
+      )
+    })
   }
   componentWillReceiveProps(nextProps, nextContext:IRoutingContext) {
     this.matcher = nextContext.routing.master.makeMatcher(nextProps.path, {
       exact: nextProps.exact || false,
     });
-    this.setState({match: this.matcher(nextContext.routing.rest)})
+    this.setState({
+      match: matchPath(
+        nextContext.routing.rest,
+        nextProps,
+        nextContext.routing.master,
+      ),
+    })
   }
   shouldComponentUpdate(nextProps, nextState, nextContext:IRoutingContext) {
     if (nextProps.path !== this.props.path
-      || nextProps.absolute !== this.props.absolute
       || nextProps.exact !== this.props.exact) {
       return true;
     }
@@ -235,31 +251,84 @@ export class Route extends _Routable<RouteProps, RouteState> {
   }
 }
 
+//
+//  Display only the first element that matches the current URL.
+//
+export class Switch extends _Routable<any, any> {
+  render() {
+    let children = React.Children.toArray(this.props.children);
+    for (var i = 0; i < children.length; i++) {
+      let element = children[i];
+      if (!React.isValidElement(element)) {
+        continue;
+      }
+      let props:any = element.props;
+      if (props.path !== undefined) {
+        // Route
+        let match = matchPath(
+          this.context.routing.rest,
+          props,
+          this.context.routing.master);
+        if (match) {
+          return element;  
+        }
+      } else {
+        return element;
+      }
+    }
+    return null;
+  }
+}
+
+function computeLinkPath(props:LinkProps, context:IRoutingContext) {
+  let path = props.to;
+  if (props.relative) {
+    path = Path.resolve(Path.join(context.routing.linking_root + '/', path));
+  } else if (props.fromcurrent) {
+    path = Path.resolve(Path.join(context.routing.fullpath + '/', path));
+  }
+  return path;
+}
+
+export class Redirect extends _Routable<LinkProps, any> {
+  render() {
+    let path = computeLinkPath(this.props, this.context);
+    this.context.routing.setPath(path);
+    return null;
+  }
+}
+
 
 interface LinkProps {
   to: string;
   relative?: boolean;
   fromcurrent?: boolean;
+  classWhenActive?: string;
+  [x:string]: any;
 }
 export class Link extends _Routable<LinkProps, any> {
   render() {
-    return (<a href={this.props.to} onClick={this.click.bind(this)}>{this.props.children}</a>);
+    let cls = this.props.className || '';
+    let {to, relative, fromcurrent, classWhenActive, ...rest} = this.props; 
+    if (classWhenActive) {
+      let path = computeLinkPath(this.props, this.context);
+      if (path === this.context.routing.fullpath) {
+        cls += ' ' + classWhenActive;
+      }
+    }
+    return (<a href={to} onClick={this.click.bind(this)} className={cls} {...rest}>{this.props.children}</a>);
   }
   toString() {
     return `<Link to="${this.props.to}"${this.props.relative?' relative':''}>`;
   }
   click(ev) {
     ev.preventDefault();
-    let path = this.props.to;
-    if (this.props.relative) {
-      path = Path.resolve(Path.join(this.context.routing.linking_root + '/', path));
-    } else if (this.props.fromcurrent) {
-      path = Path.resolve(Path.join(this.context.routing.fullpath + '/', path));
-    }
+    let path = computeLinkPath(this.props, this.context);
     this.context.routing.setPath(path);
     return false;
   }
 }
+
 
 interface WithRoutingProps<T> {
   component: React.ComponentClass<T>;
