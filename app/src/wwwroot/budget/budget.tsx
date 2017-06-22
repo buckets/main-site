@@ -5,7 +5,7 @@ import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
 import {AccountsPage} from './accounts';
-import {Router, Route, Link, WithRouting} from './routing';
+import {Router, Route, Link, WithRouting, CurrentPath} from './routing';
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -176,6 +176,7 @@ class Application extends React.Component<ApplicationProps, any> {
   render() {
     return (
       <Router path={this.props.path} setPath={this.props.setPath}>
+        <div>Current path: <CurrentPath /></div>
         <Route path="/<int:year>-<int:month>">
           <div className="app">
             <div className="nav">
@@ -207,13 +208,24 @@ class Application extends React.Component<ApplicationProps, any> {
           <Route path="/c">
             /c
           </Route>
-          <Route path="/d" exact>
+          <Route path="/d">
             /d
+            <Container>
+              something here
+              <Route path="/f">
+                /f
+              </Route>
+              <Route path="/g">
+                /g
+              </Route>
+            </Container>
           </Route>
           <ul>
             <li><Link relative to="/c">/c</Link></li>
             <li><Link relative to="/d">/d</Link></li>
-            <li><Link relative to="/..">../</Link></li>
+            <li><Link relative to="/d/f">/d/f</Link></li>
+            <li><Link relative to="/d/g">/d/g</Link></li>
+            <li><Link relative to="/..">..</Link></li>
           </ul>
         </Route>
         <Route path="/b">
@@ -236,7 +248,9 @@ class Application extends React.Component<ApplicationProps, any> {
           <li><Link to="/b">/b</Link></li>
           <li><Link to="/i5">/i5</Link></li>
           <li><Link to="/i8">/i8</Link></li>
+          <li><Link fromcurrent to="..">..</Link></li>
         </ul>
+        <WithRouting component={Debug} />
       </Router>);
   }
 }
@@ -244,5 +258,11 @@ class Application extends React.Component<ApplicationProps, any> {
 class Debug extends React.Component<{foo:string}, any> {
   render() {
     return <pre>DEBUG {JSON.stringify(this.props, null, 2)}</pre>
+  }
+}
+
+class Container extends React.Component<any, any> {
+  render() {
+    return <div>{this.props.children}</div>
   }
 }

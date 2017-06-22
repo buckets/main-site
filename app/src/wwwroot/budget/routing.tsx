@@ -163,8 +163,6 @@ export class Route extends _Routable<RouteProps, RouteState> {
     this.state = {
       match: null,
     };
-    // console.log(this + ' constructor', context.routing);
-    // let abspath = [context.routing.routing_root, props.path].join('');
     this.matcher = context.routing.master.makeMatcher(props.path, {
       exact: props.exact || false,
     });
@@ -229,7 +227,6 @@ export class Route extends _Routable<RouteProps, RouteState> {
     }
   }
   render() {
-    console.log(this + ' render; match=', this.state.match);
     if (this.state.match) {
       return renderChildren(this.props.children);
     } else {
@@ -242,6 +239,7 @@ export class Route extends _Routable<RouteProps, RouteState> {
 interface LinkProps {
   to: string;
   relative?: boolean;
+  fromcurrent?: boolean;
 }
 export class Link extends _Routable<LinkProps, any> {
   render() {
@@ -252,12 +250,12 @@ export class Link extends _Routable<LinkProps, any> {
   }
   click(ev) {
     ev.preventDefault();
-    console.log('click ' + this);
     let path = this.props.to;
     if (this.props.relative) {
       path = Path.resolve(Path.join(this.context.routing.linking_root + '/', path));
+    } else if (this.props.fromcurrent) {
+      path = Path.resolve(Path.join(this.context.routing.fullpath + '/', path));
     }
-    console.log('-->', path);
     this.context.routing.setPath(path);
     return false;
   }
@@ -274,5 +272,11 @@ export class WithRouting extends _Routable<WithRoutingProps<any>, any> {
     _name = _name || 'routing';
     let props = Object.assign({[_name]:this.context.routing}, rest);
     return React.createElement(this.props.component, props, this.props.children);
+  }
+}
+
+export class CurrentPath extends _Routable<{}, any> {
+  render() {
+    return <span>{this.context.routing.fullpath}</span>
   }
 }
