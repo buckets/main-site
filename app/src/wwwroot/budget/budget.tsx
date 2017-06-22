@@ -5,6 +5,7 @@ import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
 import {AccountsPage} from './accounts';
+import {Router, Route, Link, WithRouting} from './routing';
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -24,13 +25,16 @@ export async function start(base_element, room) {
   window.addEventListener('hashchange', () => {
     renderer.doUpdate();
   }, false);
+  let setPath = (x:string) => {
+    console.log(`setPath("${x}")`)
+    window.location.hash = '#' + x;
+  }
 
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
     let path = window.location.hash.substr(1);
-    let route = getRoute(path, state, {});
-    return <Application state={state} route={route} />;
+    return <Application path={path} setPath={setPath} state={state} />;
   }, base_element);
   renderer.doUpdate();
 
@@ -121,7 +125,7 @@ interface IRoute {
   body: JSX.Element;
 }
 
-function getRoute(path:string, state:State, context:any):IRoute {
+export function getRoute(path:string, state:State, context:any):IRoute {
   context = context || {};
   let segments = path.split('/').filter(a => a);
   let seg0 = segments[0];
@@ -133,8 +137,6 @@ function getRoute(path:string, state:State, context:any):IRoute {
     header: <div>HEADER {window.location.href}</div>,
     body: <div>Not found</div>,
   }
-
-  if (!)
 
   // Year and month prefix segment
   if (m = seg0.match(/^(\d\d\d\d)-(\d\d?)$/)) {
@@ -166,46 +168,81 @@ function getRoute(path:string, state:State, context:any):IRoute {
 
 
 interface ApplicationProps {
+  path: string,
+  setPath: (x:string)=>void;
   state: State,
-  route: IRoute;
 }
 class Application extends React.Component<ApplicationProps, any> {
   render() {
-    let state = this.props.state;
-    let route = this.props.route;
-    
-    // routing
-    let body:JSX.Element;
+    return (
+      <Router path={this.props.path} setPath={this.props.setPath}>
+        <Route path="/<int:year>-<int:month>">
+          <div className="app">
+            <div className="nav">
+              <div>
+                <Link to="/accounts">Accounts</Link>
+                <Link to="/transactions">Transactions</Link>
+              </div>
+              <div>
+              </div>
+            </div>
+            <div className="content">
+              <div className="header">
+                Header information
+                {window.location.hash}
+              </div>
+              <div className="body">
+                <Route path="/accounts">
+                  You are on /accounts
+                </Route>
+                <Route path="/transactions">
+                  You are on /transactions
+                </Route>
+              </div>
+            </div>
+          </div>
+        </Route>
+        <Route path="/a">
+          /a
+          <Route path="/c">
+            /c
+          </Route>
+          <Route path="/d" exact>
+            /d
+          </Route>
+          <ul>
+            <li><Link relative to="/c">/c</Link></li>
+            <li><Link relative to="/d">/d</Link></li>
+            <li><Link relative to="/..">../</Link></li>
+          </ul>
+        </Route>
+        <Route path="/b">
+          /b
+        </Route>
+        <Route path="/i<int:number>">
+          /i:number
+          <WithRouting component={Debug}/>
+          <Route path="/name" exact>
+            <WithRouting component={Debug}/>
+          </Route>
+          <ul>
+            <li><Link relative to="/name">/name</Link></li>
+          </ul>
+        </Route>
+        <ul>
+          <li><Link to="/a">/a</Link></li>
+          <li><Link to="/a/c">/a/c</Link></li>
+          <li><Link to="/a/d">/a/d</Link></li>
+          <li><Link to="/b">/b</Link></li>
+          <li><Link to="/i5">/i5</Link></li>
+          <li><Link to="/i8">/i8</Link></li>
+        </ul>
+      </Router>);
+  }
+}
 
-    let link = (title, page) => {
-      let cls = page == route.page ? 'selected' : '';
-      href = `#${href}`;
-      return <a href={href} className={cls}>{title}</a>
-    }
-
-    body = route.body;
-    console.log("route", route);
-    return (<div className="app">
-      <div className="nav">
-        <div>
-          {link('Accounts', '/accounts')}
-          {link('Transactions', '/transactions')}
-          {link('Buckets', '/buckets')}
-          {link('Reports', '/reports')}
-        </div>
-        <div>
-          {link('Connections', '/connections')}
-        </div>
-      </div>
-      <div className="content">
-        <div className="header">
-          Header information
-          {window.location.hash}
-        </div>
-        <div className="body">
-          {body}
-        </div>
-      </div>
-    </div>);    
+class Debug extends React.Component<{foo:string}, any> {
+  render() {
+    return <pre>DEBUG {JSON.stringify(this.props, null, 2)}</pre>
   }
 }
