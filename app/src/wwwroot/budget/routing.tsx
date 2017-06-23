@@ -186,7 +186,6 @@ export class Route extends _Routable<RouteProps, RouteState> {
       base.params = Object.assign({}, base.params, this.state.match.params);
       base.matches = [...base.matches, this.state.match];
     }
-    console.log(this + ' returning params', base.params);
     return {
       routing: base,
     }
@@ -216,39 +215,43 @@ export class Route extends _Routable<RouteProps, RouteState> {
     })
   }
   shouldComponentUpdate(nextProps, nextState, nextContext:IRoutingContext) {
-    console.log(this + ' shouldComponentUpdate');
-    if (nextProps.path !== this.props.path
-      || nextProps.exact !== this.props.exact) {
-      return true;
-    }
-    let prevMatch = this.state.match;
-    let nextMatch = nextState.match;
-    if (prevMatch) {
-      if (nextMatch) {
-        // still matching
-        if (prevMatch.rest !== nextMatch.rest) {
-          // but the children need to be updated
-          return true;
-        } else if (!_.isEqual(prevMatch.params, nextMatch.params)) {
-          return true;
-        } else if (!_.isEqual(this.context.routing.params, nextContext.routing.params)) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        // no longer matching
-        return true;
-      }
-    } else {
-      if (nextState.match) {
-        // matching now
-        return true;
-      } else {
-        // still not matching
-        return false;
-      }
-    }
+    return true;
+    // if (nextProps.path !== this.props.path
+    //   || nextProps.exact !== this.props.exact) {
+    //   return true;
+    // }
+    // let prevMatch = this.state.match;
+    // let nextMatch = nextState.match;
+    // if (prevMatch) {
+    //   if (nextMatch) {
+    //     // still matching
+    //     console.log('prevMatch', prevMatch);
+    //     console.log('nextMatch', nextMatch);
+    //     if (prevMatch.rest !== nextMatch.rest) {
+    //       // but the children need to be updated
+    //       return true;
+    //     } else if (!_.isEqual(prevMatch.params, nextMatch.params)) {
+    //       return true;
+    //     } else if (!_.isEqual(this.context.routing.params, nextContext.routing.params)) {
+    //       return true;
+    //     } else {
+    //       console.log('NO 1');
+    //       return false;
+    //     }
+    //   } else {
+    //     // no longer matching
+    //     return true;
+    //   }
+    // } else {
+    //   if (nextState.match) {
+    //     // matching now
+    //     return true;
+    //   } else {
+    //     // still not matching
+    //     console.log('NO 2');
+    //     return false;
+    //   }
+    // }
   }
   render() {
     if (this.state.match) {
@@ -319,6 +322,7 @@ interface LinkProps {
   //   This link is relative to the current URL
   relative?: boolean|'current';
   classWhenActive?: string;
+  exact?: boolean;
   computeProps?: {
     [x:string]: (info:IRoutingInfo, instance?:_Routable<any,any>)=>any;
   };
@@ -326,11 +330,13 @@ interface LinkProps {
 }
 export class Link extends _Routable<LinkProps, any> {
   render() {
-    let {to, relative, classWhenActive, computeProps, className, ...rest} = this.props; 
+    let {to, relative, classWhenActive, computeProps, exact, className, ...rest} = this.props; 
     let cls = this.props.className || '';
     if (classWhenActive) {
       let path = computeLinkPath(this.props, this.context);
-      if (path === this.context.routing.fullpath) {
+      let fullpath = this.context.routing.fullpath;
+      if ((exact && fullpath === path)
+          || (!exact && fullpath.startsWith(path))) {
         cls += ' ' + classWhenActive;
       }
     }
@@ -368,14 +374,14 @@ interface WithRoutingProps {
 }
 export class WithRouting extends _Routable<WithRoutingProps, any> {
   shouldComponentUpdate(nextProps, nextState, nextContext:IRoutingContext) {
-    console.log('withRouting shouldComponentUpdate');
-    if (nextProps.func !== this.props.func) {
-      return true;
-    }
-    if (nextContext.routing.rest !== this.context.routing.rest) {
-      return true;
-    }
-    return false;
+    return true;
+    // if (nextProps.func !== this.props.func) {
+    //   return true;
+    // }
+    // if (nextContext.routing.rest !== this.context.routing.rest) {
+    //   return true;
+    // }
+    // return false;
   }
   render() {
     return this.props.func(this.context.routing);

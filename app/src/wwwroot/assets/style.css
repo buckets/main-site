@@ -40,7 +40,7 @@ body {
     display: flex;
     height: 100vh;
     width: 100vw;
-    overflow: auto;
+    overflow: hidden;
 }
 .app .nav {
     background-color: var(--darker-darkblue);
@@ -78,11 +78,13 @@ body {
 }
 .app .content .header {
     display: flex;
+    justify-content: space-between;
     background-color: var(--lightest-grey);
 }
 .app .content .body {
-    padding: 1rem;
     overflow: auto;
+    flex-basis: 10px;
+    flex-grow: 1;
 }
 
 table.ledger {
@@ -93,6 +95,21 @@ table.ledger td {
     border: 1px solid lightgrey;
     padding: 1px 5px;
     text-align: left;
+}
+
+.panes {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+.panes > * {
+    flex-grow: 1;
+    flex-basis: 1px;
+    border-left: 1px solid var(--lighter-grey);
+}
+.panes > *:first-child {
+    border: 0;
 }
 
 

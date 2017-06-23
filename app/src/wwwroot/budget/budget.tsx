@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
-// import {AccountsPage} from './accounts';
+import {AccountsPage} from './accounts';
 import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing';
 
 export async function start(base_element, room) {
@@ -12,22 +12,20 @@ export async function start(base_element, room) {
 
   // initial state
   let state = new State(store);
-  await state.start();
+  await state.refresh();
 
   // watch for changes
   store.data.on('obj', async (data) => {
+    console.log('processEvent', data);
     state.processEvent(data);
-    await state.flush()
     return renderer.doUpdate();
   })
 
   // routing
   window.addEventListener('hashchange', () => {
-    console.log('hashchange');
     renderer.doUpdate();
   }, false);
   let setPath = (x:string) => {
-    console.log(`setPath("${x}")`)
     window.location.hash = '#' + x;
   }
 
@@ -56,54 +54,37 @@ export class State {
   } = {
     accounts: {},
   }
-  public current_date: string = null;
-  private _fetch_account_balances: boolean = false;
+  public month:number;
+  public year:number;
 
   constructor(public store:IStore) {
-
   }
-
   processEvent(ev:ObjectEvent) {
-    console.log('processing event', ev);
     let obj = ev.obj;
     if (isObj(Account, obj)) {
       this.accounts = _.cloneDeep(this.accounts);
       if (ev.event === 'update') {
-        console.log('adding to this.accounts');
         this.accounts[obj.id] = obj;
-        this._fetch_account_balances = true;
+        this.fetchAccountBalances();
       } else if (ev.event === 'delete') {
         delete this.accounts[obj.id];
       }
     }
   }
-
-  private scheduled = [];
-  schedule(func:()=>any) {
-    this.scheduled.push(func);
-  }
-  async flush():Promise<any> {
-    // fetch balances
-    if (this._fetch_account_balances) {
-      this._fetch_account_balances = false;
-      this.schedule(this.fetchAccountBalances.bind(this))
+  setDate(year:number, month:number) {
+    console.log(`State.setDate(${year}, ${month})`);
+    if (this.year !== year || this.month !== month) {
+      this.year = year;
+      this.month = month;  
+      this.refresh();
     }
-
-    // run scheduled events
-    let scheduled = this.scheduled.slice();
-    this.scheduled.length = 0;
-    return Promise.all([
-      ...scheduled.map(func => func()),
-    ]);
   }
-
-  start():Promise<any> {
+  refresh():Promise<any> {
     return Promise.all([
       this.fetchAllAccounts(),
       this.fetchAccountBalances(),
     ])
   }
-
   fetchAllAccounts() {
     return this.store.accounts.list()
       .then(accounts => {
@@ -113,6 +94,7 @@ export class State {
       })
   }
   fetchAccountBalances() {
+    console.log('fetching account balances');
     return this.store.accounts.balances()
       .then(balances => {
         this.balances.accounts = balances;
@@ -129,6 +111,8 @@ interface ApplicationProps {
 }
 class Application extends React.Component<ApplicationProps, any> {
   render() {
+    let today = moment();
+    let state = this.props.state;
     return (
       <Router
         path={this.props.path}
@@ -141,6 +125,10 @@ class Application extends React.Component<ApplicationProps, any> {
         }}>Current path: <CurrentPath /></div>
         <Switch>
           <Route path="/y<int:year>m<int:month>">
+            <WithRouting func={({params}) => {
+              this.props.state.setDate(params.year, params.month);
+              return null;
+            }} />
             <div className="app">
               <div className="nav">
                 <div>
@@ -157,21 +145,22 @@ class Application extends React.Component<ApplicationProps, any> {
               </div>
               <div className="content">
                 <div className="header">
-                  <WithRouting func={(routing) => {
-                    return (<MonthSelector
-                      month={routing.params.month}
-                      year={routing.params.year}
-                      onChange={(year, month) => {
-                        console.log('onChange', year, month);
-                        console.log(routing);
-                        routing.setPath(`/y${year}m${month}${routing.rest}`);
-                      }}
-                    />);
-                  }} />
+                  <div></div>
+                  <div>
+                    <WithRouting func={(routing) => {
+                      return (<MonthSelector
+                        month={routing.params.month}
+                        year={routing.params.year}
+                        onChange={(year, month) => {
+                          routing.setPath(`/y${year}m${month}${routing.rest}`);
+                        }}
+                      />);
+                    }} />
+                  </div>
                 </div>
                 <div className="body">
                   <Route path="/accounts">
-                    You are on /accounts
+                    <AccountsPage state={state} />
                   </Route>
                   <Route path="/buckets">
                     You are on /buckets
@@ -190,7 +179,7 @@ class Application extends React.Component<ApplicationProps, any> {
               </div>
             </div>
           </Route>
-          <Redirect to="/y2000m1" />
+          <Redirect to={`/y${today.year()}m${today.month()+1}`} />
         </Switch>
       </Router>);
   }
@@ -202,8 +191,7 @@ interface MonthSelectorProps {
   onChange: (year, month)=>void;
 }
 export class MonthSelector extends React.Component<MonthSelectorProps, any> {
-  private minyear = 1984;
-  private maxyear = moment().year() + 1;
+  private minyear = 1900;
   constructor(props) {
     super(props)
     this.state = {
@@ -212,7 +200,10 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
     }
   }
   componentWillReceiveProps(nextProps) {
-    console.log('new props');
+    this.setState({
+      year: nextProps.year,
+      month: nextProps.month,
+    })
   }
   render() {
     let months = moment.monthsShort();
@@ -263,7 +254,7 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
     if (isNaN(year)) {
       return false;
     } else {
-      return year >= this.minyear && year <= this.maxyear;
+      return year >= this.minyear;
     }
   }
   monthChanged = (ev) => {
