@@ -106,10 +106,20 @@ table.ledger td {
 .panes > * {
     flex-grow: 1;
     flex-basis: 1px;
-    border-left: 1px solid var(--lighter-grey);
+    border-left: 1px solid var(--lightest-grey);
 }
 .panes > *:first-child {
     border: 0;
+}
+
+.page {
+    padding: 1rem;
+}
+
+h1 {
+    margin-top: 0;
+    font-weight: 800;
+    color: var(--darkblue);
 }
 
 

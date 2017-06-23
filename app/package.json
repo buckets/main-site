@@ -9,12 +9,15 @@
     "test": "./test.sh"
   },
   "dependencies": {
+    "@types/mathjs": "0.0.34",
     "@types/prop-types": "15.5.1",
     "adm-zip": "0.4.7",
     "bluebird": "3.5.0",
+    "classnames": "2.2.5",
     "electron-log": "2.2.6",
     "electron-updater": "2.1.2",
     "lodash": "4.17.4",
+    "mathjs": "3.13.3",
     "moment": "2.18.1",
     "prop-types": "15.5.10",
     "qs": "6.4.0",
