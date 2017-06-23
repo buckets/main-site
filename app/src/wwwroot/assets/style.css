@@ -152,22 +152,22 @@ table.ledger td {
 }
 
 .color-1 {
-    color: var(--darker-blue);
+    color: var(--blue);
 }
 .color-2 {
-    color: var(--darker-purple);
+    color: var(--purple);
 }
 .color-3 {
-    color: var(--darker-red);
+    color: var(--red);
 }
 .color-4 {
-    color: var(--darker-orange);
+    color: var(--orange);
 }
 .color-5 {
-    color: var(--darker-yellow);
+    color: var(--yellow);
 }
 .color-6 {
-    color: var(--darker-green);
+    color: var(--green);
 }
 .color-7 {
     color: var(--blue);
