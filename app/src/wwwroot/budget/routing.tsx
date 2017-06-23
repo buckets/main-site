@@ -91,20 +91,22 @@ function renderChildren(x) {
 }
 
 
+interface IRoutingInfo {
+  // actual path in the URL bar right now
+  rest: string;
+  fullpath: string;
+  setPath: (x:string)=>void;
+  linking_root: string;
+  params: any;
+  matches: IMatch[];
+  // routing path
+  routing_root: string;
+  // matcher
+  master: MatcherMaster;
+}
+
 interface IRoutingContext {
-  routing: {
-    // actual path in the URL bar right now
-    rest: string;
-    fullpath: string;
-    setPath: (x:string)=>void;
-    linking_root: string;
-    params: object;
-    matches: IMatch[];
-    // routing path
-    routing_root: string;
-    // matcher
-    master: MatcherMaster;
-  };
+  routing: IRoutingInfo;
 }
 
 
@@ -184,6 +186,7 @@ export class Route extends _Routable<RouteProps, RouteState> {
       base.params = Object.assign({}, base.params, this.state.match.params);
       base.matches = [...base.matches, this.state.match];
     }
+    console.log(this + ' returning params', base.params);
     return {
       routing: base,
     }
@@ -213,6 +216,7 @@ export class Route extends _Routable<RouteProps, RouteState> {
     })
   }
   shouldComponentUpdate(nextProps, nextState, nextContext:IRoutingContext) {
+    console.log(this + ' shouldComponentUpdate');
     if (nextProps.path !== this.props.path
       || nextProps.exact !== this.props.exact) {
       return true;
@@ -224,6 +228,10 @@ export class Route extends _Routable<RouteProps, RouteState> {
         // still matching
         if (prevMatch.rest !== nextMatch.rest) {
           // but the children need to be updated
+          return true;
+        } else if (!_.isEqual(prevMatch.params, nextMatch.params)) {
+          return true;
+        } else if (!_.isEqual(this.context.routing.params, nextContext.routing.params)) {
           return true;
         } else {
           return false;
@@ -282,9 +290,9 @@ export class Switch extends _Routable<any, any> {
 
 function computeLinkPath(props:LinkProps, context:IRoutingContext) {
   let path = props.to;
-  if (props.relative) {
+  if (props.relative === true) {
     path = Path.resolve(Path.join(context.routing.linking_root + '/', path));
-  } else if (props.fromcurrent) {
+  } else if (props.relative === 'current') {
     path = Path.resolve(Path.join(context.routing.fullpath + '/', path));
   }
   return path;
@@ -301,22 +309,39 @@ export class Redirect extends _Routable<LinkProps, any> {
 
 interface LinkProps {
   to: string;
-  relative?: boolean;
-  fromcurrent?: boolean;
+  
+  // relative
+  // True = 
+  //   This link is relative to the nearest ancestor Route
+  // False (default) =
+  //   This is an absolute link.
+  // 'current' =
+  //   This link is relative to the current URL
+  relative?: boolean|'current';
   classWhenActive?: string;
+  computeProps?: {
+    [x:string]: (info:IRoutingInfo, instance?:_Routable<any,any>)=>any;
+  };
   [x:string]: any;
 }
 export class Link extends _Routable<LinkProps, any> {
   render() {
+    let {to, relative, classWhenActive, computeProps, className, ...rest} = this.props; 
     let cls = this.props.className || '';
-    let {to, relative, fromcurrent, classWhenActive, ...rest} = this.props; 
     if (classWhenActive) {
       let path = computeLinkPath(this.props, this.context);
       if (path === this.context.routing.fullpath) {
         cls += ' ' + classWhenActive;
       }
     }
-    return (<a href={to} onClick={this.click.bind(this)} className={cls} {...rest}>{this.props.children}</a>);
+    let computed = {};
+    if (computeProps) {
+      computed = getComputedProps(this, computeProps);
+    }
+    let props = Object.assign({
+      className: cls,
+    }, rest, computed)
+    return (<a href={to} onClick={this.click.bind(this)} {...props}>{this.props.children}</a>);
   }
   toString() {
     return `<Link to="${this.props.to}"${this.props.relative?' relative':''}>`;
@@ -329,18 +354,31 @@ export class Link extends _Routable<LinkProps, any> {
   }
 }
 
-
-interface WithRoutingProps<T> {
-  component: React.ComponentClass<T>;
-  _name?: string;
-  [x:string]: any;
+function getComputedProps(instance:_Routable<any,any>, obj:object):object {
+  let ret = {};
+  Object.keys(obj).forEach(key => {
+    ret[key] = obj[key](instance.context.routing, instance)
+  });
+  return ret;
 }
-export class WithRouting extends _Routable<WithRoutingProps<any>, any> {
+
+
+interface WithRoutingProps {
+  func: (routing:IRoutingInfo)=>any;
+}
+export class WithRouting extends _Routable<WithRoutingProps, any> {
+  shouldComponentUpdate(nextProps, nextState, nextContext:IRoutingContext) {
+    console.log('withRouting shouldComponentUpdate');
+    if (nextProps.func !== this.props.func) {
+      return true;
+    }
+    if (nextContext.routing.rest !== this.context.routing.rest) {
+      return true;
+    }
+    return false;
+  }
   render() {
-    let {component, _name, ...rest} = this.props;
-    _name = _name || 'routing';
-    let props = Object.assign({[_name]:this.context.routing}, rest);
-    return React.createElement(this.props.component, props, this.props.children);
+    return this.props.func(this.context.routing);
   }
 }
 

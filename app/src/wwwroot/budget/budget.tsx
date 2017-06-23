@@ -1,11 +1,11 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-// import * as moment from 'moment';
+import * as moment from 'moment';
 import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
 // import {AccountsPage} from './accounts';
-import {Router, Route, Link, Switch, Redirect, CurrentPath} from './routing';
+import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing';
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -23,6 +23,7 @@ export async function start(base_element, room) {
 
   // routing
   window.addEventListener('hashchange', () => {
+    console.log('hashchange');
     renderer.doUpdate();
   }, false);
   let setPath = (x:string) => {
@@ -146,6 +147,9 @@ class Application extends React.Component<ApplicationProps, any> {
                   <Link relative to="/accounts" classWhenActive="selected">Accounts</Link>
                   <Link relative to="/transactions" classWhenActive="selected">Transactions</Link>
                   <Link relative to="/buckets" classWhenActive="selected">Buckets</Link>
+                  <Route path="/buckets">
+                    <Link relative to="/kicked" className="sub" classWhenActive="selected">Kicked</Link>
+                  </Route>
                   <Link relative to="/reports" classWhenActive="selected">Reports</Link>
                 </div>
                 <div>
@@ -153,13 +157,31 @@ class Application extends React.Component<ApplicationProps, any> {
               </div>
               <div className="content">
                 <div className="header">
-                  Header information
-                  {window.location.hash}
-                  <WithParams component={MonthSelector} year=/>
+                  <WithRouting func={(routing) => {
+                    return (<MonthSelector
+                      month={routing.params.month}
+                      year={routing.params.year}
+                      onChange={(year, month) => {
+                        console.log('onChange', year, month);
+                        console.log(routing);
+                        routing.setPath(`/y${year}m${month}${routing.rest}`);
+                      }}
+                    />);
+                  }} />
                 </div>
                 <div className="body">
                   <Route path="/accounts">
                     You are on /accounts
+                  </Route>
+                  <Route path="/buckets">
+                    You are on /buckets
+                    <Custom>
+                      <div>
+                        <WithRouting func={(routing) => {
+                          return (<div>fullpath: {routing.fullpath}</div>);
+                        }} />
+                      </div>
+                    </Custom>
                   </Route>
                   <Route path="/transactions">
                     You are on /transactions
@@ -177,10 +199,98 @@ class Application extends React.Component<ApplicationProps, any> {
 interface MonthSelectorProps {
   year: number;
   month: number;
-  onChange: (year:number, month:number):void;
+  onChange: (year, month)=>void;
 }
-class MonthSelector extends React.Component<MonthSelectorProps, any> {
+export class MonthSelector extends React.Component<MonthSelectorProps, any> {
+  private minyear = 1984;
+  private maxyear = moment().year() + 1;
+  constructor(props) {
+    super(props)
+    this.state = {
+      year: props.year,
+      month: props.month,
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    console.log('new props');
+  }
   render() {
-    return <div>Year: {this.props.year} Month: {this.props.month}</div>;
+    let months = moment.monthsShort();
+    let current_month = this.state.month - 1;
+    let options = months.map((name, idx) => {
+      return <option key={idx} value={idx}>{name.toUpperCase()}</option>
+    })
+    let cls = `month-selector bg-${this.state.month}`;
+    return (<div className={cls}>
+      <button onClick={this.increment(-1)}>&#x25c0;</button>
+      <select
+        className={`month color-${this.state.month}`}
+        value={current_month}
+        onChange={this.monthChanged}>
+        {options}
+      </select>
+      <input
+        className="year"
+        type="text"
+        size={4}
+        value={this.state.year}
+        onChange={this.yearChanged} />
+      <button onClick={this.increment(1)}>&#x25b6;</button>
+    </div>);
+  }
+  increment(amount) {
+    return (ev) => {
+      let month = this.state.month + amount;
+      month--; // move to 0-based indexing
+      let year = this.state.year;
+      while (month < 0) {
+        month = 12 + month;
+        if (!isNaN(year)) {
+          year -= 1;  
+        }
+      }
+      while (month >= 12) {
+        month = month - 12;
+        if (!isNaN(year)) {
+          year += 1;
+        }
+      }
+      month++; // return to 1-based indexing
+      this.setDate(year, month);
+    }
+  }
+  isValidYear(year):boolean {
+    if (isNaN(year)) {
+      return false;
+    } else {
+      return year >= this.minyear && year <= this.maxyear;
+    }
+  }
+  monthChanged = (ev) => {
+    let new_month = parseInt(ev.target.value) + 1;
+    this.setDate(this.state.year, new_month);
+  }
+  yearChanged = (ev) => {
+    let new_year = parseInt(ev.target.value);
+    this.setDate(new_year, this.state.month);
+  }
+  setDate(year:number, month:number) {
+    let newstate:any = {year, month};
+    if (isNaN(year)) {
+      newstate = {year:'', month};
+      this.setState(newstate);
+      return;
+    }
+    if (this.isValidYear(year)) {
+      this.props.onChange(year, month);
+    }
+    this.setState(newstate);
+  }
+}
+
+
+class Custom extends React.Component<any, any> {
+  render() {
+    return <div>{this.props.children}</div>
   }
 }
