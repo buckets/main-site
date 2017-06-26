@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import {EventEmitter} from 'events';
 import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
 import {Renderer} from '../render';
 import {Account, Balances} from '../../core/models/account';
@@ -19,6 +20,9 @@ export async function start(base_element, room) {
     console.log('processEvent', data);
     state.processEvent(data);
     return renderer.doUpdate();
+  })
+  state.on('change', () => {
+    renderer.doUpdate();
   })
 
   // routing
@@ -45,7 +49,7 @@ export async function start(base_element, room) {
 }
 
 
-export class State {
+export class State extends EventEmitter {
   public accounts: {
     [k:number]: Account,
   } = {};
@@ -58,14 +62,15 @@ export class State {
   public year:number;
 
   constructor(public store:IStore) {
+    super()
   }
-  processEvent(ev:ObjectEvent) {
+  async processEvent(ev:ObjectEvent):Promise<any> {
     let obj = ev.obj;
     if (isObj(Account, obj)) {
       this.accounts = _.cloneDeep(this.accounts);
       if (ev.event === 'update') {
         this.accounts[obj.id] = obj;
-        this.fetchAccountBalances();
+        await this.fetchAccountBalances();
       } else if (ev.event === 'delete') {
         delete this.accounts[obj.id];
       }
@@ -94,10 +99,16 @@ export class State {
       })
   }
   fetchAccountBalances() {
-    console.log('fetching account balances');
-    return this.store.accounts.balances()
+    console.log('fetching account balances', this.year, this.month);
+    let nextmonth = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD')
+      .add(1, 'month')
+      .utc()
+      .format('YYYY-MM-DD HH:mm:ss')
+    console.log('nextmonth', nextmonth)
+    return this.store.accounts.balances(nextmonth)
       .then(balances => {
         this.balances.accounts = balances;
+        this.emit('change', null);
       })
   }
 }

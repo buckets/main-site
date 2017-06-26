@@ -62,7 +62,7 @@ export class MoneyInput extends React.Component<MoneyInputProps, {display:string
         <input
           type="text"
           value={this.state.display}
-          onChange={this.onDisplayChanged}
+          onChange={this.onDisplayChanged.bind(this)}
           {...rest}
           className={input_classes} />&nbsp;{computed_value_elem}
       </div>
@@ -74,11 +74,76 @@ interface MoneyProps {
   value: number;
   className?: string;
   hidezero?: boolean;
+  noanimate?: boolean;
   [x:string]: any;
 }
-export class Money extends React.Component<MoneyProps, any> {
+export class Money extends React.Component<MoneyProps, {
+  old_value: number;
+  current_value: number;
+  duration: number;
+  start_time: number;
+  animating: boolean;
+}> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      current_value: props.value,
+      old_value: props.value,
+      duration: 0,
+      start_time: 0,
+      animating: false,
+    }
+  }
+  animateToNewValue(duration:number=200) {
+    this.setState({
+      start_time: 0,
+      old_value: this.state.current_value,
+      duration: duration,
+    }, () => {
+      window.requestAnimationFrame(this.step.bind(this))  
+    })
+  }
+  step(timestamp) {
+    let progress;
+    if (!this.state.start_time) {
+      this.setState({
+        start_time: timestamp,
+        animating: true,
+      }, () => {
+        window.requestAnimationFrame(this.step.bind(this));
+      });
+      progress = 0;
+    } else {
+      progress = (timestamp - this.state.start_time) / this.state.duration;
+      if (progress >= 1) {
+        // done
+        this.setState({
+          current_value: this.props.value,
+          animating: false,
+        });
+      } else {
+        // animating
+        let num = Math.floor(progress * (this.props.value - this.state.old_value) + this.state.old_value);
+        this.setState({
+          current_value: num,
+          animating: true,
+        });
+        window.requestAnimationFrame(this.step.bind(this))
+      }
+    }
+  }
+  componentWillReceiveProps(nextProps:MoneyProps) {
+    if (!nextProps.noanimate && nextProps.value !== this.props.value) {
+      this.animateToNewValue();
+    }
+  }
   render() {
-    let { value, className, hidezero, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, ...rest } = this.props;
+    let going_up = true;
+    if (!noanimate) {
+      going_up = value > this.state.current_value;
+      value = this.state.current_value;  
+    }
     let display = cents2decimal(value) || '0';
     if (hidezero && !value) {
       display = '';
@@ -86,9 +151,13 @@ export class Money extends React.Component<MoneyProps, any> {
     return (<span className={cx(
       'number',
       className, {
-      negative: value < 0,
-    })} {...rest}>{display}</span>);
+        negative: value < 0,
+        animating: this.state.animating,
+        up: this.state.animating && going_up,
+        down: this.state.animating && !going_up,
+      })} {...rest}>{display}</span>);
   }
+
 }
 
 

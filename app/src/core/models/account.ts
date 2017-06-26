@@ -70,7 +70,8 @@ export class AccountStore {
         account as a
         left join account_transaction as t
           on a.id = t.account_id
-             AND t.posted > $asof
+             AND t.posted >= $asof
+      GROUP BY 1
     `;
     let params = {
       $asof: asof,

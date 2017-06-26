@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import {State} from './budget';
 import {Account, Balances} from '../../core/models/account';
 import {Route, Link, WithRouting} from './routing';
-import {Money} from '../../lib/money';
+import {Money, MoneyInput} from '../../lib/money';
 
 interface AccountListProps {
   accounts: Account[];
@@ -36,13 +36,33 @@ export class AccountList extends React.Component<AccountListProps,any> {
 interface AccountViewProps {
   account: Account;
   balance: number;
+  state: State;
 }
 export class AccountView extends React.Component<AccountViewProps, any> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      deposit_amount: 0,
+    }
+  }
   render() {
-    let { account, balance } = this.props;
+    let { account, balance, state } = this.props;
     return (<div className="page">
       <h1>{account.name}</h1>
       Balance: $<Money value={balance} />
+      <hr/>
+      <MoneyInput
+        value={this.state.deposit_amount}
+        onChange={(newval) => {
+          this.setState({deposit_amount: newval})}} />
+      <button
+        onClick={() => {
+          console.log('transacting for', account.id, this.state.deposit_amount);
+          state.store.accounts.transact(account.id, this.state.deposit_amount, 'test')
+          .then(newtrans => {
+            console.log('new transaction', newtrans);
+          })
+        }}>Transact</button>
     </div>)
   }
 }
@@ -65,7 +85,10 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
           <WithRouting func={(routing) => {
             let account = state.accounts[routing.params.id];
             let balance = state.balances.accounts[account.id];
-            return (<AccountView account={account} balance={balance} />);
+            return (<AccountView
+              account={account}
+              balance={balance}
+              state={state} />);
           }} />
         </Route>
       </div>);
