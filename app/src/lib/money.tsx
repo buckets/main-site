@@ -94,7 +94,7 @@ export class Money extends React.Component<MoneyProps, {
       animating: false,
     }
   }
-  animateToNewValue(duration:number=200) {
+  animateToNewValue(duration:number=300) {
     this.setState({
       start_time: 0,
       old_value: this.state.current_value,

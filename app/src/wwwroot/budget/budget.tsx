@@ -17,7 +17,6 @@ export async function start(base_element, room) {
 
   // watch for changes
   store.data.on('obj', async (data) => {
-    console.log('processEvent', data);
     state.processEvent(data);
     return renderer.doUpdate();
   })
@@ -75,6 +74,19 @@ export class State extends EventEmitter {
         delete this.accounts[obj.id];
       }
     }
+  }
+  get defaultPostingDate() {
+    let today = moment();
+    let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
+    if (d.month() == today.month() && d.year() == today.year()) {
+      d = today;
+    } else if (d < today) {
+      d = d.endOf('month').startOf('day');
+    } else {
+      d = d.startOf('month').startOf('day');
+    }
+    d = d.utc();
+    return d.utc();
   }
   setDate(year:number, month:number) {
     console.log(`State.setDate(${year}, ${month})`);
@@ -188,7 +200,10 @@ class Application extends React.Component<ApplicationProps, any> {
               </div>
             </div>
           </Route>
-          <Redirect to={`/y${today.year()}m${today.month()+1}`} />
+          <WithRouting func={(routing) => {
+            let dft_path = routing.fullpath || '/accounts';
+            return (<Redirect to={`/y${today.year()}m${today.month()+1}${dft_path}`} />)
+          }} />
         </Switch>
       </Router>);
   }

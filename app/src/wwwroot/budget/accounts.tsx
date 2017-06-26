@@ -5,6 +5,7 @@ import {State} from './budget';
 import {Account, Balances} from '../../core/models/account';
 import {Route, Link, WithRouting} from './routing';
 import {Money, MoneyInput} from '../../lib/money';
+import {Date, DateInput} from './time';
 
 interface AccountListProps {
   accounts: Account[];
@@ -39,37 +40,36 @@ interface AccountViewProps {
   balance: number;
   state: State;
 }
-export class AccountView extends React.Component<AccountViewProps, any> {
+export class AccountView extends React.Component<AccountViewProps, {
+  deposit_amount: number;
+  posted_date: null|moment.Moment;
+  account_name: string;
+}> {
   constructor(props) {
     super(props)
     this.state = {
       deposit_amount: 0,
-      posted_date: this.computePosted(props.state),
+      posted_date: null,
       account_name: props.account.name,
     }
-  }
-  computePosted(state:State) {
-    let today = moment();
-    let d = moment(`${state.year}-${state.month}-1`, 'YYYY-MM-DD');
-    if (d.month() == today.month() && d.year() == today.year() && d > today) {
-      d = today;
-    } else if (d < today) {
-      d = d.endOf('month');
-    } else {
-      d = d.startOf('month');
-    }
-    d = d.utc();
-    console.log('posted', d.format());
-    return d.utc().format('YYYY-MM-DD HH:mm:ss');
   }
   stateFromProps(props:AccountViewProps) {
-    this.setState({
+    let newstate:any = {
       account_name: props.account.name,
-    });
+    } 
+    if (this.state.posted_date) {
+      console.log('getting new props');
+      let dft_posting = props.state.defaultPostingDate;
+      if (dft_posting.year() !== this.state.posted_date.year()
+          || dft_posting.month() !== this.state.posted_date.month()) {
+        console.log('setting newstate.posted to null');
+        newstate.posted_date = null;
+      }
+    }
+    this.setState(newstate);
   }
   saveChanges = _.debounce(() => {
     if (this.state.account_name !== this.props.account.name) {
-      console.log('saving changes', this.state.account_name);
       return this.props.state.store.accounts.update(this.props.account.id, {
         name: this.state.account_name,
       })  
@@ -78,6 +78,10 @@ export class AccountView extends React.Component<AccountViewProps, any> {
   componentWillReceiveProps(nextProps, nextState) {
     this.stateFromProps(nextProps);
   }
+  get postedDate() {
+    let val = this.state.posted_date || this.props.state.defaultPostingDate;
+    return val;
+  }
   render() {
     let { account, balance, state } = this.props;
     return (<div className="page" key={account.id}>
@@ -85,7 +89,6 @@ export class AccountView extends React.Component<AccountViewProps, any> {
         value={this.state.account_name}
         className="ctx-matching-input"
         onChange={(ev) => {
-          console.log('setting account name to', ev.target.value);
           this.setState({account_name: ev.target.value}, () => {
             this.saveChanges();  
           })
@@ -97,16 +100,21 @@ export class AccountView extends React.Component<AccountViewProps, any> {
         onChange={(amount) => {
           this.setState({deposit_amount: amount})
         }} />
-      {this.state.posted_date}
+      <DateInput
+        value={this.postedDate}
+        onChange={(newposteddate) => {
+          this.setState({posted_date: newposteddate})
+        }} />
+      <Date value={this.postedDate} />
+      <br/>
       <button
         onClick={() => {
-          console.log('transacting for', account.id, this.state.deposit_amount);
           state.store.accounts.transact(
             account.id,
             this.state.deposit_amount,
-            'test')
+            'test',
+            this.postedDate)
           .then(newtrans => {
-            console.log('new transaction', newtrans);
           })
         }}>Transact</button>
     </div>)
@@ -140,7 +148,6 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
       </div>);
   }
   addAccount = () => {
-    console.log('Adding account');
     this.props.state.store.accounts.add('Savings');
   }
 }
