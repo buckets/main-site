@@ -55,6 +55,7 @@ export interface IStore {
   data:DataEventEmitter;
   publishObject(event:ObjectEventType, obj:IObject);
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
+  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
   listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
@@ -144,6 +145,20 @@ export class DBStore implements IStore {
     let obj = await this.getObject(cls, result.lastID);
     this.publishObject('update', obj);
     return obj;
+  }
+  async updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<any> {
+    let params = {'$id': id};
+    let settings = Object.keys(data).map(key => {
+      let snkey = sanitizeDbFieldName(key);
+      params['$'+snkey] = (<T>data)[key];
+      return `${snkey}=$${snkey}`
+    })
+    let sql = `UPDATE ${cls.table_name}
+      SET ${settings} WHERE id=$id;`;
+    console.log('Running', sql, params);
+    await this.db.run(sql, params);
+    let obj = await this.getObject<T>(cls, id);
+    this.publishObject('update', obj);
   }
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
@@ -271,6 +286,9 @@ export class RPCRendererStore implements IStore {
   }
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
     return this.callRemote('createObject', serializeObjectClass(cls), data);
+  }
+  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
+    return this.callRemote('updateObject', serializeObjectClass(cls), id, data);
   }
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     return this.callRemote('getObject', serializeObjectClass(cls), id);

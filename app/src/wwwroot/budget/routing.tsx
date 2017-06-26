@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as _ from 'lodash';
 import * as Path from 'path';
+import * as cx from 'classnames';
 
 interface IMatch {
   matched_string: string;
@@ -321,8 +322,8 @@ interface LinkProps {
   // 'current' =
   //   This link is relative to the current URL
   relative?: boolean|'current';
-  classWhenActive?: string;
-  exact?: boolean;
+  exactMatchClass?: string;
+  matchClass?: string;
   computeProps?: {
     [x:string]: (info:IRoutingInfo, instance?:_Routable<any,any>)=>any;
   };
@@ -330,14 +331,15 @@ interface LinkProps {
 }
 export class Link extends _Routable<LinkProps, any> {
   render() {
-    let {to, relative, classWhenActive, computeProps, exact, className, ...rest} = this.props; 
-    let cls = this.props.className || '';
-    if (classWhenActive) {
+    let {to, relative, exactMatchClass, matchClass, computeProps, className, ...rest} = this.props; 
+    let cls = cx(this.props.className);
+    if (exactMatchClass || matchClass) {
       let path = computeLinkPath(this.props, this.context);
       let fullpath = this.context.routing.fullpath;
-      if ((exact && fullpath === path)
-          || (!exact && fullpath.startsWith(path))) {
-        cls += ' ' + classWhenActive;
+      if (exactMatchClass && fullpath === path) {
+        cls = cx(cls, exactMatchClass);
+      } else if (matchClass && fullpath.startsWith(path)) {
+        cls = cx(cls, matchClass);
       }
     }
     let computed = {};

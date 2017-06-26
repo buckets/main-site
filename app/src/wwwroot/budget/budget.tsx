@@ -99,12 +99,10 @@ export class State extends EventEmitter {
       })
   }
   fetchAccountBalances() {
-    console.log('fetching account balances', this.year, this.month);
     let nextmonth = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD')
       .add(1, 'month')
       .utc()
       .format('YYYY-MM-DD HH:mm:ss')
-    console.log('nextmonth', nextmonth)
     return this.store.accounts.balances(nextmonth)
       .then(balances => {
         this.balances.accounts = balances;
@@ -143,13 +141,13 @@ class Application extends React.Component<ApplicationProps, any> {
             <div className="app">
               <div className="nav">
                 <div>
-                  <Link relative to="/accounts" classWhenActive="selected">Accounts</Link>
-                  <Link relative to="/transactions" classWhenActive="selected">Transactions</Link>
-                  <Link relative to="/buckets" classWhenActive="selected">Buckets</Link>
+                  <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
+                  <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent">Transactions</Link>
+                  <Link relative to="/buckets" exactMatchClass="selected" matchClass="selected-parent">Buckets</Link>
                   <Route path="/buckets">
-                    <Link relative to="/kicked" className="sub" classWhenActive="selected">Kicked</Link>
+                    <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
                   </Route>
-                  <Link relative to="/reports" classWhenActive="selected">Reports</Link>
+                  <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
                 </div>
                 <div>
                 </div>

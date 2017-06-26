@@ -35,12 +35,21 @@ export class AccountStore {
       currency: 'USD',
     });
   }
-  async transact(account_id:number, amount:number, memo:string):Promise<Transaction> {
-    let trans = await this.store.createObject(Transaction, {
+  async update(account_id:number, data:{name:string}):Promise<any> {
+    console.log(`AccountStore.update(${account_id}, ${data})`);
+    return this.store.updateObject(Account, account_id, data);
+  }
+  // posted is a UTC time
+  async transact(account_id:number, amount:number, memo:string, posted?:string):Promise<Transaction> {
+    let data:any = {
       account_id: account_id,
       amount: amount,
       memo: memo,
-    });
+    };
+    if (posted) {
+      data.posted = posted;
+    }
+    let trans = await this.store.createObject(Transaction, data);
     let account = await this.store.getObject(Account, account_id);
     this.store.publishObject('update', account);
     return trans;
@@ -59,6 +68,7 @@ export class AccountStore {
       this.store.publishObject('update', account);
     }));
   }
+  // asof is a UTC time
   async balances(asof?:string):Promise<Balances> {
     if (!asof) {
       asof = moment.utc().format('YYYY-MM-DD HH:mm:ss');
