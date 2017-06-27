@@ -21,6 +21,8 @@ export class Transaction implements IObject {
   account_id: number;
   amount: number;
   memo: string;
+  fi_id: string;
+  general_cat: string;
 }
 
 export class AccountStore {
@@ -98,6 +100,20 @@ export class AccountStore {
   }
   async list():Promise<Account[]> {
     return this.store.listObjects(Account);
+  }
+  async listTransactions(args?:{
+    account_id?:number,
+    posted?:{
+      start?:moment.Moment,
+      end?:moment.Moment,
+    },
+    limit?:number,
+    offset?:number,
+  }):Promise<Transaction[]> {
+    let where_parts = [];
+    let params = {};
+    let where = where_parts.join(' AND ');
+    return this.store.listObjects(Transaction, where, params);
   }
 }
 
