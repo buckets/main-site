@@ -109,11 +109,12 @@ export class AccountView extends React.Component<AccountViewProps, {
       <br/>
       <button
         onClick={() => {
-          state.store.accounts.transact(
-            account.id,
-            this.state.deposit_amount,
-            'test',
-            this.postedDate)
+          state.store.accounts.transact({
+            account_id: account.id,
+            amount: this.state.deposit_amount,
+            memo: 'test',
+            posted: this.postedDate
+          })
           .then(newtrans => {
           })
         }}>Transact</button>

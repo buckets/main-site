@@ -41,21 +41,21 @@ export class AccountStore {
     return this.store.updateObject(Account, account_id, data);
   }
   // posted is a UTC time
-  async transact(account_id:number, amount:number, memo:string, posted?:string|moment.Moment):Promise<Transaction> {
+  async transact(args:{account_id:number, amount:number, memo:string, posted?:string|moment.Moment}):Promise<Transaction> {
     let data:any = {
-      account_id: account_id,
-      amount: amount,
-      memo: memo,
+      account_id: args.account_id,
+      amount: args.amount,
+      memo: args.memo,
     };
-    if (posted) {
-      if (moment.isMoment(posted)) {
-        data.posted = posted.utc().format();
+    if (args.posted) {
+      if (moment.isMoment(args.posted)) {
+        data.posted = args.posted.utc().format();
       } else {
-        data.posted = posted;
+        data.posted = args.posted;
       }
     }
     let trans = await this.store.createObject(Transaction, data);
-    let account = await this.store.getObject(Account, account_id);
+    let account = await this.store.getObject(Account, args.account_id);
     this.store.publishObject('update', account);
     return trans;
   }
@@ -113,7 +113,8 @@ export class AccountStore {
     let where_parts = [];
     let params = {};
     let where = where_parts.join(' AND ');
-    return this.store.listObjects(Transaction, where, params);
+    return this.store.listObjects(Transaction, where, params,
+      ['posted DESC', 'id']);
   }
 }
 

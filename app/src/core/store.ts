@@ -57,7 +57,7 @@ export interface IStore {
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
-  listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]>;
+  listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}, order?:string[]):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
 
@@ -165,7 +165,7 @@ export class DBStore implements IStore {
     WHERE id=$id`;
     return this.db.get(sql, {$id: id});
   }
-  async listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}):Promise<T[]> {
+  async listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}, order?:string[]):Promise<T[]> {
     let select = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}`;
     if (where) {
       where = `WHERE ${where}`;
@@ -173,8 +173,11 @@ export class DBStore implements IStore {
     if (!params) {
       params = {};
     }
-    let order = `ORDER BY id`;
-    let sql = `${select} ${where} ${order}`;
+    let order_clause = 'ORDER BY id';
+    if (order && order.length) {
+      order_clause = `ORDER BY ${order.join(',')}`;
+    }
+    let sql = `${select} ${where} ${order_clause}`;
     return this.db.all(sql, params);
   }
   async query(sql:string, params:{}):Promise<any> {

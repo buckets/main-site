@@ -1,4 +1,5 @@
 #!/bin/bash
 
 extraargs="$*"
-mocha --opts mocha.opts $*
+export TAP_RCFILE=".taprc"
+find src -name "*.test.js" | xargs tap $* --

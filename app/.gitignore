@@ -7,3 +7,4 @@ out
 *.sublime-project
 *.buckets
 *.bkts
+.nyc_output

@@ -69,6 +69,10 @@ describe('transact', () => {
     expect(a.balance).to.eq(800);
   })
 
+  describe('listTransactions', () => {
+    
+  })
+
   describe('balances', () => {
     let bal_before;
     let bal_after;
