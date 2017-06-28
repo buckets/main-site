@@ -1,13 +1,26 @@
 import {IObject, IStore} from '../store';
 import * as moment from 'moment';
 
+function ensureUTCMoment(x:Timestamp):moment.Moment {
+  if (moment.isMoment(x)) {
+    return x.utc()
+  } else {
+    return moment.utc(x)
+  }
+}
+function ts2db(x:Timestamp):string {
+  return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
+}
+
+type Timestamp = string | moment.Moment;
+
 export class Balances {
   [k:number]:number;
 }
 export class Account implements IObject {
   static table_name: string = 'account';
   id: number;
-  created: Date;
+  created: string;
   readonly _type: string = Account.table_name;
   name: string;
   balance: number;
@@ -16,7 +29,8 @@ export class Account implements IObject {
 export class Transaction implements IObject {
   static table_name: string = 'account_transaction';
   id: number;
-  created: Date;
+  created: string;
+  posted: string;
   readonly _type: string = Transaction.table_name;
   account_id: number;
   amount: number;
@@ -41,18 +55,14 @@ export class AccountStore {
     return this.store.updateObject(Account, account_id, data);
   }
   // posted is a UTC time
-  async transact(args:{account_id:number, amount:number, memo:string, posted?:string|moment.Moment}):Promise<Transaction> {
+  async transact(args:{account_id:number, amount:number, memo:string, posted?:Timestamp}):Promise<Transaction> {
     let data:any = {
       account_id: args.account_id,
       amount: args.amount,
       memo: args.memo,
     };
     if (args.posted) {
-      if (moment.isMoment(args.posted)) {
-        data.posted = args.posted.utc().format();
-      } else {
-        data.posted = args.posted;
-      }
+      data.posted = ts2db(args.posted)
     }
     let trans = await this.store.createObject(Transaction, data);
     let account = await this.store.getObject(Account, args.account_id);
@@ -74,9 +84,11 @@ export class AccountStore {
     }));
   }
   // asof is a UTC time
-  async balances(asof?:string):Promise<Balances> {
+  async balances(asof?:Timestamp):Promise<Balances> {
     if (!asof) {
-      asof = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+      asof = ts2db(moment.utc())
+    } else {
+      asof = ts2db(asof);
     }
     let sql = `
       SELECT
@@ -99,22 +111,43 @@ export class AccountStore {
     return ret;
   }
   async list():Promise<Account[]> {
-    return this.store.listObjects(Account);
+    return this.store.listObjects(Account, {
+      order: ['name ASC', 'id'],
+    });
   }
   async listTransactions(args?:{
     account_id?:number,
     posted?:{
-      start?:moment.Moment,
-      end?:moment.Moment,
+      onOrAfter?:Timestamp,
+      before?:Timestamp,
     },
-    limit?:number,
-    offset?:number,
   }):Promise<Transaction[]> {
-    let where_parts = [];
-    let params = {};
+    let where_parts:string[] = [];
+    let params:any = {};
+
+    if (args) {
+      // account
+      if (args.account_id !== undefined) {
+        where_parts.push('account_id = $account_id');
+        params['$account_id'] = args.account_id;
+      }
+
+      // posted range
+      if (args.posted) {
+        if (args.posted.onOrAfter) {
+          where_parts.push('posted >= $onOrAfter');
+          params['$onOrAfter'] = ts2db(args.posted.onOrAfter);
+        }
+        if (args.posted.before) {
+          where_parts.push('posted < $before');
+          params['$before'] = ts2db(args.posted.before);
+        }
+      }
+    }
+
     let where = where_parts.join(' AND ');
-    return this.store.listObjects(Transaction, where, params,
-      ['posted DESC', 'id']);
+    return this.store.listObjects(Transaction, {where, params,
+      order: ['posted DESC', 'id']});
   }
 }
 

@@ -13,7 +13,7 @@ import {ipcMain, ipcRenderer, webContents} from 'electron';
 //--------------------------------------------------------------------------------
 export interface IObject {
   id:number;
-  created: Date;
+  created: string;
   _type:string;
 }
 interface IObjectClass<T> {
@@ -57,7 +57,7 @@ export interface IStore {
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
-  listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}, order?:string[]):Promise<T[]>;
+  listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
 
@@ -146,7 +146,7 @@ export class DBStore implements IStore {
     this.publishObject('update', obj);
     return obj;
   }
-  async updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<any> {
+  async updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
     let params = {'$id': id};
     let settings = Object.keys(data).map(key => {
       let snkey = sanitizeDbFieldName(key);
@@ -154,18 +154,19 @@ export class DBStore implements IStore {
       return `${snkey}=$${snkey}`
     })
     let sql = `UPDATE ${cls.table_name}
-      SET ${settings} WHERE id=$id;`;
-    console.log('Running', sql, params);
+      SET ${settings} WHERE id=$id;`;;
     await this.db.run(sql, params);
     let obj = await this.getObject<T>(cls, id);
     this.publishObject('update', obj);
+    return obj
   }
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
     WHERE id=$id`;
     return this.db.get(sql, {$id: id});
   }
-  async listObjects<T extends IObject>(cls: IObjectClass<T>, where?:string, params?:{}, order?:string[]):Promise<T[]> {
+  async listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]> {
+    let { where, params, order } = <any>(args || {});
     let select = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}`;
     if (where) {
       where = `WHERE ${where}`;

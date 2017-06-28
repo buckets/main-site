@@ -2,10 +2,11 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import {State} from './budget';
-import {Account, Balances} from '../../core/models/account';
+import {Account, Balances, Transaction} from '../../core/models/account';
 import {Route, Link, WithRouting} from './routing';
 import {Money, MoneyInput} from '../../lib/money';
 import {Date, DateInput} from './time';
+import {TransactionList} from './transactions';
 
 interface AccountListProps {
   accounts: Account[];
@@ -44,6 +45,7 @@ export class AccountView extends React.Component<AccountViewProps, {
   deposit_amount: number;
   posted_date: null|moment.Moment;
   account_name: string;
+  transactions: Transaction[];
 }> {
   constructor(props) {
     super(props)
@@ -51,22 +53,37 @@ export class AccountView extends React.Component<AccountViewProps, {
       deposit_amount: 0,
       posted_date: null,
       account_name: props.account.name,
+      transactions: [],
     }
+    this.refreshTransactions();
+  }
+  async refreshTransactions(props?:AccountViewProps) {
+    props = props || this.props;
+    let dr = props.state.viewDateRange;
+    console.log('fetching transactions', dr.before.format(), dr.onOrAfter.format());
+    let trans = await props.state.store.accounts.listTransactions({
+      account_id: props.account.id,
+      posted: {
+        before: dr.before,
+        onOrAfter: dr.onOrAfter,
+      }
+    })
+    console.log('got transactions', trans);
+    this.setState({transactions: trans});
   }
   stateFromProps(props:AccountViewProps) {
     let newstate:any = {
       account_name: props.account.name,
     } 
     if (this.state.posted_date) {
-      console.log('getting new props');
       let dft_posting = props.state.defaultPostingDate;
       if (dft_posting.year() !== this.state.posted_date.year()
           || dft_posting.month() !== this.state.posted_date.month()) {
-        console.log('setting newstate.posted to null');
         newstate.posted_date = null;
       }
     }
     this.setState(newstate);
+    this.refreshTransactions(props);
   }
   saveChanges = _.debounce(() => {
     if (this.state.account_name !== this.props.account.name) {
@@ -118,6 +135,10 @@ export class AccountView extends React.Component<AccountViewProps, {
           .then(newtrans => {
           })
         }}>Transact</button>
+       <hr/>
+       <TransactionList
+         transactions={this.state.transactions}
+         state={this.props.state} />
     </div>)
   }
 }

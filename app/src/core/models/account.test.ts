@@ -1,7 +1,5 @@
 import {DBStore, ObjectEvent, isObj} from '../store';
 import {Account, Transaction} from './account';
-// import {expect} from 'chai';
-// import 'mocha';
 import * as tap from 'tap';
 
 //-----------------------------
@@ -46,6 +44,28 @@ tap.test('add account', async (t) => {
   // stored in the database
   let stored = await store.getObject(Account, ev.obj.id);
   t.same(stored, account);
+})
+
+tap.test('list accounts', async (t) => {
+  let { store } = await getStore();
+  let a1 = await store.accounts.add('Checking');
+  let a2 = await store.accounts.add('Savings');
+  let a3 = await store.accounts.add('Ally');
+
+  let accounts = await store.accounts.list();
+  t.same(accounts, [a3, a1, a2]);
+})
+
+tap.test('update account', async (t) => {
+  let { store, events } = await getStore();
+  let account = await store.accounts.add('Checking');
+  events.length = 0;
+  let new_account = await store.accounts.update(account.id, {name: 'Bono'});
+
+  t.equal(account.id, new_account.id);
+  t.equal(new_account.name, 'Bono');
+  t.equal(events[0].event, 'update');
+  t.same(events[0].obj, new_account);
 })
 
 tap.test('transact', async (t) => {
@@ -158,56 +178,43 @@ tap.test('deleteTransactions', async (t) => {
 
 tap.test('listTransactions', async (t) => {
   let { store } = await getStore()
-  let a = await store.accounts.add('Checking')
+  let acc1 = await store.accounts.add('Checking')
+  let acc2 = await store.accounts.add('Savings')
   let t1 = await store.accounts.transact({
-    account_id: a.id,
+    account_id: acc1.id,
     amount: 1,
     memo: 'first',
     posted: '2000-01-01',
   })
   let t2 = await store.accounts.transact({
-    account_id: a.id,
+    account_id: acc1.id,
     amount: 2,
     memo: 'second',
     posted: '2000-02-01',
   })
-
-  let trans = await store.accounts.listTransactions({
-    limit: 5,
+  let t3 = await store.accounts.transact({
+    account_id: acc2.id,
+    amount: 3,
+    memo: 'other',
+    posted: '2000-02-01',
   })
-  t.equal(trans.length, 2)
-  t.same(trans[0], t2)
-  t.same(trans[1], t1)
+
+  await t.test('no args', async (tt) => {
+    let trans = await store.accounts.listTransactions()
+    tt.same(trans, [t2, t3, t1])
+  })
+  await t.test('onOrAfter', async (tt) => {
+    let trans = await store.accounts.listTransactions({posted: {onOrAfter: '2000-02-01 00:00:00'}})
+    tt.same(trans, [t2, t3])
+  })
+  await t.test('before', async (tt) => {
+    let trans = await store.accounts.listTransactions({posted: {before: '2000-02-01 00:00:00'}})
+    tt.same(trans, [t1])
+  })
+  await t.test('account_id', async (tt) => {
+    let trans = await store.accounts.listTransactions({account_id: acc1.id})
+    tt.same(trans, [t2, t1])
+    trans = await store.accounts.listTransactions({account_id: acc2.id})
+    tt.same(trans, [t3])
+  })
 })
-
-// describe('transact', () => {
-//   let account;
-//   let trans;
-//   beforeEach(async () => {
-//     account = await store.accounts.add('Checking');
-//     events.length = 0;
-//     trans = await store.accounts.transact(account.id, 800, 'something important');
-//   })
-//   it('2 events', () => {
-//     expect(events.length).to.eq(2);
-//   });
-//   it('should emit the new transaction', () => {
-//     let tevent = events[0];
-//     expect(tevent.event).to.eq('update');
-//     expect(isObj(Transaction, tevent.obj)).to.eq(true);
-//     let t = <Transaction>tevent.obj;
-//     expect(t.amount).to.eq(800);
-//     expect(t.memo).to.eq('something important');
-//     expect(t.account_id).to.eq(account.id);
-//   })
-//   it('should emit the new account', () => {
-//     let aevent = events[1];
-//     expect(aevent.event).to.eq('update');
-//     expect(isObj(Account, aevent.obj)).to.eq(true);
-//     let a = <Account>aevent.obj;
-//     expect(a.balance).to.eq(800);
-//   })
-
-//   describe('listTransactions', () => {
-    
-//   })

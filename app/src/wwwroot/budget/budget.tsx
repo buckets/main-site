@@ -88,6 +88,18 @@ export class State extends EventEmitter {
     d = d.utc();
     return d.utc();
   }
+  get viewDateRange():{onOrAfter:moment.Moment, before:moment.Moment} {
+    let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
+    let start = d.startOf('month').startOf('day');
+    console.log('start', start.format());
+    let end = start.clone().add(1, 'month').startOf('month').startOf('day');
+    console.log('start', start.format());
+    console.log('end', end.format());
+    return {
+      onOrAfter: start,
+      before: end,
+    }
+  }
   setDate(year:number, month:number) {
     console.log(`State.setDate(${year}, ${month})`);
     if (this.year !== year || this.month !== month) {
