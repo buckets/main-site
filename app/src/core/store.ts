@@ -4,7 +4,7 @@ import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
 import {EventEmitter} from 'events';
 import {} from 'bluebird'
-import {BucketStore} from './models/bucket';
+import {BucketStore, Bucket, Transaction as BucketTransaction} from './models/bucket';
 import {AccountStore, Account, Transaction as AccountTransaction} from './models/account'
 import {APP_ROOT} from '../lib/globals'
 import {ipcMain, ipcRenderer, webContents} from 'electron';
@@ -20,6 +20,7 @@ export interface IObject {
 interface IObjectClass<T> {
   new(): T;
   table_name: string;
+  fromdb?(obj:T):T;
 }
 export function isObj<T extends IObject>(cls: IObjectClass<T>, obj: IObject): obj is T {
   return obj._type === cls.table_name;
@@ -29,6 +30,8 @@ export function isObj<T extends IObject>(cls: IObjectClass<T>, obj: IObject): ob
 const OBJECT_CLASSES = [
   Account,
   AccountTransaction,
+  Bucket,
+  BucketTransaction,
 ]
 let TABLE2CLASS = {};
 OBJECT_CLASSES.forEach(cls => {
@@ -74,20 +77,20 @@ type ObjectEventType =
   'update'
   | 'delete';
 
-export class ObjectEvent {
+export class ObjectEvent<T extends IObject> {
   public event: ObjectEventType;
-  public obj: IObject;
-  constructor(event:ObjectEventType, obj:IObject) {
+  public obj: T;
+  constructor(event:ObjectEventType, obj:T) {
     this.event = event;
     this.obj = obj;
   }
 }
 class DataEventEmitter extends EventEmitter {
-  emit(event: 'obj', obj:ObjectEvent):boolean;
+  emit(event: 'obj', obj:ObjectEvent<any>):boolean;
   emit(event, obj):boolean {
     return super.emit(event, obj);
   }
-  on(event: 'obj', listener: (obj:ObjectEvent) => void):this;
+  on(event: 'obj', listener: (obj:ObjectEvent<any>) => void):this;
   on(event, listener):this {
     return super.on(event, listener);
   }
@@ -167,7 +170,11 @@ export class DBStore implements IStore {
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
     WHERE id=$id`;
-    return this.db.get(sql, {$id: id});
+    let ret = this.db.get(sql, {$id: id});
+    if (cls.fromdb !== undefined) {
+      ret.then(cls.fromdb);
+    }
+    return ret;
   }
   async listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]> {
     let { where, params, order } = <any>(args || {});
@@ -183,7 +190,13 @@ export class DBStore implements IStore {
       order_clause = `ORDER BY ${order.join(',')}`;
     }
     let sql = `${select} ${where} ${order_clause}`;
-    return this.db.all(sql, params);
+    let ret = this.db.all(sql, params);
+    if (cls.fromdb) {
+      ret.then(objects => {
+        return objects.map(cls.fromdb);
+      })
+    }
+    return ret;
   }
   async query(sql:string, params:{}):Promise<any> {
     return this.db.all(sql, params);
@@ -286,7 +299,7 @@ export class RPCRendererStore implements IStore {
       ipcRenderer.send(this.channel, msg);
     })
   }
-  dataReceived(event, message:ObjectEvent) {
+  dataReceived(event, message:ObjectEvent<any>) {
     this.data.emit('obj', message);
   }
 

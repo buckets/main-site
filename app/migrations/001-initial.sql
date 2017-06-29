@@ -1,5 +1,8 @@
 -- Up
 
+-- -----------------------------------------------------
+-- Accounts
+-- -----------------------------------------------------
 CREATE TABLE account (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -37,6 +40,9 @@ CREATE TRIGGER update_account_balance_update
         UPDATE account SET balance = balance + new.amount WHERE id = new.account_id;
     END;
 
+-- -----------------------------------------------------
+-- Buckets
+-- -----------------------------------------------------
 CREATE TABLE bucket_group (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -48,11 +54,11 @@ CREATE TABLE bucket (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     name TEXT,
-    notes TEXT,
+    notes TEXT DEFAULT '',
     balance INTEGER DEFAULT 0,
-    out_to_pasture TINYINT DEFAULT 0,
-    group_id INTEGER,
-    ranking TEXT,
+    kicked TINYINT DEFAULT 0,
+    group_id INTEGER default NULL,
+    ranking TEXT default '',
     kind TEXT default '',
     goal INTEGER,
     end_date DATE,
@@ -68,9 +74,30 @@ CREATE TABLE bucket_transaction (
     bucket_id INTEGER,
     amount INTEGER,
     memo TEXT,
-    account_transaction_id INTEGER,
+    account_trans_id INTEGER,
     FOREIGN KEY(bucket_id) REFERENCES bucket(id)
 );
+
+CREATE TRIGGER update_bucket_balance_insert
+    AFTER INSERT ON bucket_transaction
+    BEGIN
+        UPDATE bucket SET balance = balance + new.amount WHERE id = new.bucket_id;
+    END;
+CREATE TRIGGER update_bucket_balance_delete
+    AFTER DELETE ON bucket_transaction
+    BEGIN
+        UPDATE bucket SET balance = balance - old.amount WHERE id = old.bucket_id;
+    END;
+CREATE TRIGGER update_bucket_balance_update
+    AFTER UPDATE ON bucket_transaction
+    BEGIN
+        UPDATE bucket SET balance = balance - old.amount WHERE id = old.bucket_id;
+        UPDATE bucket SET balance = balance + new.amount WHERE id = new.bucket_id;
+    END;
+
+-- -----------------------------------------------------
+-- Misc
+-- -----------------------------------------------------
 CREATE TABLE simplefin_connection (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

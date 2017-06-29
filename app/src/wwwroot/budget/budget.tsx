@@ -63,7 +63,7 @@ export class State extends EventEmitter {
   constructor(public store:IStore) {
     super()
   }
-  async processEvent(ev:ObjectEvent):Promise<any> {
+  async processEvent(ev:ObjectEvent<any>):Promise<any> {
     let obj = ev.obj;
     if (isObj(Account, obj)) {
       this.accounts = _.cloneDeep(this.accounts);

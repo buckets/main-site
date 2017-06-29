@@ -26,6 +26,10 @@ export class Transaction implements IObject {
   fi_id: string;
   general_cat: string;
 }
+interface Category {
+  bucket_id: number;
+  amount: number;
+}
 
 export class AccountStore {
   public store:IStore;
@@ -43,7 +47,12 @@ export class AccountStore {
     return this.store.updateObject(Account, account_id, data);
   }
   // posted is a UTC time
-  async transact(args:{account_id:number, amount:number, memo:string, posted?:Timestamp}):Promise<Transaction> {
+  async transact(args:{
+    account_id:number,
+    amount:number,
+    memo:string,
+    posted?:Timestamp,
+  }):Promise<Transaction> {
     let data:any = {
       account_id: args.account_id,
       amount: args.amount,
@@ -136,6 +145,58 @@ export class AccountStore {
     let where = where_parts.join(' AND ');
     return this.store.listObjects(Transaction, {where, params,
       order: ['posted DESC', 'id']});
+  }
+
+  //------------------------------------------------------------
+  // categorizing
+  //------------------------------------------------------------
+  async categorize(trans_id:number, categories:Category[]):Promise<Category[]> {
+    let trans = await this.store.getObject(Transaction, trans_id);
+
+    // ignore 0s
+    categories = categories.filter(cat => {
+      return cat.amount;
+    })
+
+    // make sure the sum is right and the signs are right
+    let sign = Math.sign(trans.amount);
+    let sum = categories.reduce((sum, cat) => {
+      if (Math.sign(cat.amount) !== sign) {
+        throw new Error(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
+      }
+      return sum + cat.amount;
+    }, 0)
+
+    if (sum !== trans.amount) {
+      throw new Error(`Categories must add up to ${trans.amount} not ${sum}`);
+    }
+
+    // delete old
+    let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
+      {$id: trans_id});
+    await this.store.buckets.deleteTransactions(old_ids.map(obj => obj.id))
+
+    // create new bucket transactions
+    await Promise.all(categories.map(cat => {
+      return this.store.buckets.transact({
+        bucket_id: cat.bucket_id,
+        amount: cat.amount,
+        memo: trans.memo,
+        posted: trans.posted,
+        account_trans_id: trans.id,
+      })  
+    }))
+    await this.store.publishObject('update', trans);
+    return categories;
+  }
+  async getCategories(trans_id:number):Promise<Category[]> {
+    return this.store.query(
+      `SELECT bucket_id, amount
+      FROM bucket_transaction
+      WHERE account_trans_id = $trans_id
+      ORDER by id`, {
+        $trans_id: trans_id,
+    })
   }
 }
 
