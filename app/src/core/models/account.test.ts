@@ -1,12 +1,12 @@
 import {DBStore, ObjectEvent, isObj} from '../store';
 import {Account, Transaction} from './account';
-import * as tap from 'tap';
+import {test} from 'tap';
 
 //-----------------------------
 // Utilities
 //-----------------------------
 
-async function getStore():Promise<{store:DBStore, events:ObjectEvent[]}> {
+export async function getStore():Promise<{store:DBStore, events:ObjectEvent[]}> {
   let store = new DBStore(':memory:');
   let events = [];
   await store.open();
@@ -20,7 +20,7 @@ async function getStore():Promise<{store:DBStore, events:ObjectEvent[]}> {
 // Tests
 //-----------------------------
 
-tap.test('add account', async (t) => {
+test('add account', async (t) => {
   let { store, events } = await getStore();
   let account = await store.accounts.add('Checking');
 
@@ -46,7 +46,7 @@ tap.test('add account', async (t) => {
   t.same(stored, account);
 })
 
-tap.test('list accounts', async (t) => {
+test('list accounts', async (t) => {
   let { store } = await getStore();
   let a1 = await store.accounts.add('Checking');
   let a2 = await store.accounts.add('Savings');
@@ -56,7 +56,7 @@ tap.test('list accounts', async (t) => {
   t.same(accounts, [a3, a1, a2]);
 })
 
-tap.test('update account', async (t) => {
+test('update account', async (t) => {
   let { store, events } = await getStore();
   let account = await store.accounts.add('Checking');
   events.length = 0;
@@ -68,7 +68,7 @@ tap.test('update account', async (t) => {
   t.same(events[0].obj, new_account);
 })
 
-tap.test('transact', async (t) => {
+test('transact', async (t) => {
   let { store, events } = await getStore();
   let account = await store.accounts.add('Savings');
   events.length = 0;
@@ -103,7 +103,7 @@ tap.test('transact', async (t) => {
   t.equal(new_account.balance, 800);
 })
 
-tap.test('balances', async (t) => {
+test('balances', async (t) => {
   let { store } = await getStore();
   let a1 = await store.accounts.add('Savings');
   let a2 = await store.accounts.add('Checking');
@@ -150,7 +150,7 @@ tap.test('balances', async (t) => {
   })
 })
 
-tap.test('deleteTransactions', async (t) => {
+test('deleteTransactions', async (t) => {
   let { store, events } = await getStore()
   let a = await store.accounts.add('Checking');
   let tr = await store.accounts.transact({
@@ -176,7 +176,7 @@ tap.test('deleteTransactions', async (t) => {
   t.equal(new_a.balance, 0, "Should return the balance to 0")
 })
 
-tap.test('listTransactions', async (t) => {
+test('listTransactions', async (t) => {
   let { store } = await getStore()
   let acc1 = await store.accounts.add('Checking')
   let acc2 = await store.accounts.add('Savings')

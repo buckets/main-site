@@ -2886,7 +2886,7 @@ tap-parser@^5.1.0, tap-parser@^5.3.1:
   optionalDependencies:
     readable-stream "^2"
 
-tap@10.7.0:
+tap@^10.7.0:
   version "10.7.0"
   resolved "https://registry.yarnpkg.com/tap/-/tap-10.7.0.tgz#ecde1ebd2b86981f741ae089f1448c9f294ac548"
   dependencies:

@@ -48,7 +48,7 @@ CREATE TABLE bucket (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     name TEXT,
-    description TEXT,
+    notes TEXT,
     balance INTEGER DEFAULT 0,
     out_to_pasture TINYINT DEFAULT 0,
     group_id INTEGER,

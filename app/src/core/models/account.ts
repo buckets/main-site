@@ -1,18 +1,6 @@
 import {IObject, IStore} from '../store';
+import {Timestamp, ts2db} from './util';
 import * as moment from 'moment';
-
-function ensureUTCMoment(x:Timestamp):moment.Moment {
-  if (moment.isMoment(x)) {
-    return x.utc()
-  } else {
-    return moment.utc(x)
-  }
-}
-function ts2db(x:Timestamp):string {
-  return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
-}
-
-type Timestamp = string | moment.Moment;
 
 export class Balances {
   [k:number]:number;

@@ -4,6 +4,7 @@ import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
 import {EventEmitter} from 'events';
 import {} from 'bluebird'
+import {BucketStore} from './models/bucket';
 import {AccountStore, Account, Transaction as AccountTransaction} from './models/account'
 import {APP_ROOT} from '../lib/globals'
 import {ipcMain, ipcRenderer, webContents} from 'electron';
@@ -63,6 +64,7 @@ export interface IStore {
 
   // model-specific stuff
   accounts:AccountStore;
+  buckets:BucketStore;
 }
 
 //--------------------------------------------------------------------------------
@@ -106,9 +108,11 @@ export class DBStore implements IStore {
   public data:DataEventEmitter;
 
   readonly accounts:AccountStore;
+  readonly buckets:BucketStore;
   constructor(private filename:string) {
     this.data = new DataEventEmitter();
     this.accounts = new AccountStore(this);
+    this.buckets = new BucketStore(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})
@@ -252,11 +256,13 @@ export class RPCMainStore {
 export class RPCRendererStore implements IStore {
   private next_msg_id:number = 1;
   public data:DataEventEmitter;
-  public accounts:AccountStore;
+  readonly accounts:AccountStore;
+  readonly buckets:BucketStore;
   constructor(private room:string) {
     this.data = new DataEventEmitter();
     ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
     this.accounts = new AccountStore(this);
+    this.buckets = new BucketStore(this);
   }
   get channel() {
     return `rpc-${this.room}`;
