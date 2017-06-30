@@ -1,12 +1,18 @@
-import * as React from 'react';
-import * as _ from 'lodash';
-import * as moment from 'moment';
-import {EventEmitter} from 'events';
-import {RPCRendererStore, isObj, ObjectEvent, IStore} from '../../core/store';
-import {Renderer} from '../render';
-import {Account, Balances} from '../../core/models/account';
-import {AccountsPage} from './accounts';
-import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing';
+import * as React from 'react'
+import * as _ from 'lodash'
+import * as moment from 'moment'
+import {EventEmitter} from 'events'
+import {isObj, ObjectEvent, IStore} from '../store'
+import {RPCRendererStore} from '../rpc'
+import {Renderer} from './render'
+import {Account, Transaction as ATrans} from '../models/account'
+import {Bucket} from '../models/bucket'
+import {Balances} from '../models/balances'
+import {AccountsPage} from './accounts'
+import {BucketsPage} from './buckets'
+import {TransactionPage} from './transactions'
+import {isBetween} from '../time'
+import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing'
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -34,6 +40,7 @@ export async function start(base_element, room) {
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
+    console.log('RENDERING');
     let path = window.location.hash.substr(1);
     return <Application
       path={path}
@@ -52,10 +59,16 @@ export class State extends EventEmitter {
   public accounts: {
     [k:number]: Account,
   } = {};
+  public buckets: {
+    [k:number]: Bucket,
+  } = {};
+  public transactions: ATrans[] = [];
   public balances: {
     accounts: Balances;
+    buckets: Balances;
   } = {
     accounts: {},
+    buckets: {},
   }
   public month:number;
   public year:number;
@@ -72,6 +85,46 @@ export class State extends EventEmitter {
         await this.fetchAccountBalances();
       } else if (ev.event === 'delete') {
         delete this.accounts[obj.id];
+      }
+    } else if (isObj(Bucket, obj)) {
+      this.buckets = _.cloneDeep(this.buckets);
+      if (ev.event === 'update') {
+        this.buckets[obj.id] = obj;
+        await this.fetchBucketBalances();
+      } else if (ev.event === 'delete') {
+        delete this.buckets[obj.id];
+      }
+    } else if (isObj(ATrans, obj)) {
+      this.transactions = _.cloneDeep(this.transactions);
+      let found:ATrans;
+      let idx:number = 0;
+      for (idx = 0; idx < this.transactions.length; idx++) {
+        let t = this.transactions[idx];
+        if (t.id === obj.id) {
+          found = t;
+          break;
+        }
+      }
+      if (ev.event === 'update') {
+        if (found) {
+          // update
+          this.transactions.splice(idx, 1, obj);
+        } else {
+          // create or out of bounds
+          let dr = this.viewDateRange;
+          if (isBetween(obj.posted, dr.onOrAfter, dr.before)) {
+            // new transaction
+            this.transactions.push(obj);
+          } else {
+            // out of date bounds
+          }
+        }
+      } else if (ev.event === 'delete') {
+        if (found) {
+          this.transactions.splice(idx, 1);
+        } else {
+          // out of date bounds
+        }
       }
     }
   }
@@ -91,17 +144,13 @@ export class State extends EventEmitter {
   get viewDateRange():{onOrAfter:moment.Moment, before:moment.Moment} {
     let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
     let start = d.startOf('month').startOf('day');
-    console.log('start', start.format());
     let end = start.clone().add(1, 'month').startOf('month').startOf('day');
-    console.log('start', start.format());
-    console.log('end', end.format());
     return {
       onOrAfter: start,
       before: end,
     }
   }
   setDate(year:number, month:number) {
-    console.log(`State.setDate(${year}, ${month})`);
     if (this.year !== year || this.month !== month) {
       this.year = year;
       this.month = month;  
@@ -111,7 +160,9 @@ export class State extends EventEmitter {
   refresh():Promise<any> {
     return Promise.all([
       this.fetchAllAccounts(),
+      this.fetchAllBuckets(),
       this.fetchAccountBalances(),
+      this.fetchTransactions(),
     ])
   }
   fetchAllAccounts() {
@@ -123,13 +174,37 @@ export class State extends EventEmitter {
       })
   }
   fetchAccountBalances() {
-    let nextmonth = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD')
-      .add(1, 'month')
-      .utc()
-      .format('YYYY-MM-DD HH:mm:ss')
-    return this.store.accounts.balances(nextmonth)
+    return this.store.accounts.balances(this.viewDateRange.before)
       .then(balances => {
         this.balances.accounts = balances;
+        this.emit('change', null);
+      })
+  }
+  fetchAllBuckets() {
+    return this.store.buckets.list()
+      .then(buckets => {
+        buckets.forEach(bucket => {
+          this.buckets[bucket.id] = bucket;
+        })
+      })
+  }
+  fetchBucketBalances() {
+    return this.store.buckets.balances(this.viewDateRange.before)
+      .then(balances => {
+        this.balances.buckets = balances;
+        this.emit('change', null);
+      })  
+  }
+  fetchTransactions() {
+    let range = this.viewDateRange;
+    return this.store.accounts.listTransactions({
+      posted: {
+        onOrAfter: range.onOrAfter,
+        before: range.before,
+      }
+    })
+      .then(transactions => {
+        this.transactions = transactions;
         this.emit('change', null);
       })
   }
@@ -196,17 +271,10 @@ class Application extends React.Component<ApplicationProps, any> {
                     <AccountsPage state={state} />
                   </Route>
                   <Route path="/buckets">
-                    You are on /buckets
-                    <Custom>
-                      <div>
-                        <WithRouting func={(routing) => {
-                          return (<div>fullpath: {routing.fullpath}</div>);
-                        }} />
-                      </div>
-                    </Custom>
+                    <BucketsPage state={state} />
                   </Route>
                   <Route path="/transactions">
-                    You are on /transactions
+                    <TransactionPage state={state} />
                   </Route>
                 </div>
               </div>
@@ -312,12 +380,5 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
       this.props.onChange(year, month);
     }
     this.setState(newstate);
-  }
-}
-
-
-class Custom extends React.Component<any, any> {
-  render() {
-    return <div>{this.props.children}</div>
   }
 }

@@ -13,11 +13,15 @@ interface MoneyInputProps {
   onChange: (value:number)=>any;
   className?: string;
 }
-export class MoneyInput extends React.Component<MoneyInputProps, {display:string}> {
+export class MoneyInput extends React.Component<MoneyInputProps, {
+  display:string,
+  focused:boolean,
+}> {
   constructor(props) {
     super(props)
     this.state = {
       display: cents2decimal(props.value) || '',
+      focused: false,
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -42,29 +46,38 @@ export class MoneyInput extends React.Component<MoneyInputProps, {display:string
       this.props.onChange(value);
     });
   }
+  onFocus = () => {
+    this.setState({focused: true});
+  }
+  onBlur = () => {
+    this.setState({focused: false});
+  }
   render() {
     let { value, onChange, className, ...rest } = this.props;
-    let computed_value_elem;
+    let computed_value_elem = null;
     let computed_value = this.display2Cents(this.state.display);
-    let input_classes = cx(className);
     if (computed_value !== decimal2cents(this.state.display)) {
-      input_classes = cx(input_classes, 'with-computed');
-      let cls = cx(
-        className,
-        'computed-value', {
-        negative: computed_value < 0,
-      })
-      computed_value_elem = (<div className={cls}>{cents2decimal(computed_value)}</div>);
+      computed_value_elem = (<Money
+        className="computed-value"
+        noanimate
+        value={computed_value}/>);
     }
-    let outer_cls = cx('money-input', className)
+    let outer_cls = cx('money-input', className, {
+      focused: this.state.focused,
+      computed: computed_value_elem !== null,
+    })
+    let size = this.state.display.length+1;
     return (
       <div className={outer_cls}>
         <input
           type="text"
+          size={size}
           value={this.state.display}
           onChange={this.onDisplayChanged.bind(this)}
+          onFocus={this.onFocus}
+          onBlur={this.onBlur}
           {...rest}
-          className={input_classes} />&nbsp;{computed_value_elem}
+        />{computed_value_elem}
       </div>
     );
   }

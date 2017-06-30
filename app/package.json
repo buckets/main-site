@@ -1,7 +1,7 @@
 {
   "name": "Buckets",
   "version": "0.0.1",
-  "main": "src/core/main.js",
+  "main": "src/mainprocess/main.js",
   "description": "Buckets Family Budgeting",
   "author": "Matt Haggard",
   "scripts": {

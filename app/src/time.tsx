@@ -2,6 +2,25 @@ import * as React from 'react';
 import * as moment from 'moment';
 import * as cx from 'classnames';
 
+export function ensureUTCMoment(x:Timestamp):moment.Moment {
+  if (moment.isMoment(x)) {
+    return x.utc()
+  } else {
+    return moment.utc(x)
+  }
+}
+export function ts2db(x:Timestamp):string {
+  return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
+}
+
+export function isBetween(x:Timestamp, start:Timestamp, end:Timestamp):boolean {
+  x = ensureUTCMoment(x)
+  start = ensureUTCMoment(start)
+  end = ensureUTCMoment(end)
+  return x.isSameOrAfter(start) && x.isBefore(end);
+}
+
+export type Timestamp = string | moment.Moment;
 
 interface DateProps {
   value: string|moment.Moment;

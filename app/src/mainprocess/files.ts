@@ -2,7 +2,8 @@ import * as log from 'electron-log'
 import {dialog, BrowserWindow} from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
-import {DBStore, RPCMainStore} from './store';
+import {DBStore} from './dbstore';
+import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
 
 interface Registry {

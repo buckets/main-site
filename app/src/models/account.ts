@@ -1,6 +1,6 @@
 import {IObject, IStore} from '../store';
-import {Timestamp, ts2db} from './util';
-import * as moment from 'moment';
+import {Timestamp, ts2db} from '../time';
+import {Balances, computeBalances} from './balances';
 
 export class Failure extends Error {
 
@@ -11,9 +11,7 @@ export type GeneralCatType =
   | 'income'
   | 'transfer';
 
-export class Balances {
-  [k:number]:number;
-}
+
 export class Account implements IObject {
   static table_name: string = 'account';
   id: number;
@@ -35,7 +33,7 @@ export class Transaction implements IObject {
   fi_id: string;
   general_cat: GeneralCatType;
 }
-interface Category {
+export interface Category {
   bucket_id: number;
   amount: number;
 }
@@ -91,30 +89,7 @@ export class AccountStore {
   }
   // asof is a UTC time
   async balances(asof?:Timestamp):Promise<Balances> {
-    if (!asof) {
-      asof = ts2db(moment.utc())
-    } else {
-      asof = ts2db(asof);
-    }
-    let sql = `
-      SELECT
-        a.id, a.balance - sum(coalesce(t.amount,0)) as balance, sum(t.amount)
-      FROM
-        account as a
-        left join account_transaction as t
-          on a.id = t.account_id
-             AND t.posted >= $asof
-      GROUP BY 1
-    `;
-    let params = {
-      $asof: asof,
-    }
-    let rows = await this.store.query(sql, params);
-    let ret:Balances = {};
-    rows.forEach(row => {
-      ret[row.id] = row.balance;
-    })
-    return ret;
+    return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof);
   }
   async list():Promise<Account[]> {
     return this.store.listObjects(Account, {

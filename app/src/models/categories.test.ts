@@ -127,17 +127,22 @@ test('switch categories', async t => {
 })
 
 test('wrong total', async t => {
-  let { store, b1, b2, trans } = await setup();
-  await t.rejects(() => {
+  let { store, b1, trans } = await setup();
+
+  return t.rejects(() => {
     return store.accounts.categorize(trans.id, [
       {
         bucket_id: b1.id,
         amount: 750,
       },
     ])
-  }, Failure, 'message', {})
+  }, Failure, {})
+})
 
-  await t.rejects(() => {
+test('wrong total 2 buckets', async t => {
+  let { store, b1, b2, trans } = await setup();
+
+  return t.rejects(() => {
     return store.accounts.categorize(trans.id, [
       {
         bucket_id: b1.id,
@@ -148,7 +153,7 @@ test('wrong total', async t => {
         amount: 100,
       },
     ])
-  }, Failure, 'message', {})
+  }, Failure, {})
 })
 
 test('negative', async t => {

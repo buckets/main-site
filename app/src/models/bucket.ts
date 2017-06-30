@@ -1,5 +1,6 @@
-import {IObject, IStore} from '../store';
-import {ts2db, Timestamp} from './util';
+import {IObject, IStore} from '../store'
+import {ts2db, Timestamp} from '../time'
+import {Balances, computeBalances} from './balances'
 
 type BucketKind =
   ''
@@ -93,6 +94,12 @@ export class BucketStore {
       let account = await this.store.getObject(Bucket, bucket_id);
       this.store.publishObject('update', account);
     }));
+  }
+
+  async balances(asof?:Timestamp):Promise<Balances> {
+    return computeBalances(this.store,
+      'bucket', 'bucket_transaction', 'bucket_id',
+      asof)
   }
   async listTransactions(args:{
     bucket_id: number,

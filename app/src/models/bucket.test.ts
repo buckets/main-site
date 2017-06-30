@@ -93,6 +93,53 @@ test('transact', async t => {
   t.equal(newbucket.balance, 500)
 })
 
+test('balances', async (t) => {
+  let { store } = await getStore();
+  let b1 = await store.buckets.add({name: 'Food'});
+  let b2 = await store.buckets.add({name: 'Volleyball'});
+
+  await store.buckets.transact({
+    bucket_id: b1.id,
+    amount: 800,
+    memo: 'something',
+    posted: '2000-01-01 00:00:00',
+  });
+  await store.buckets.transact({
+    bucket_id: b2.id,
+    amount: 750,
+    memo: 'heyo',
+    posted: '2001-01-01 00:00:00',
+  })
+
+  // before any transactions
+  let bal = await store.buckets.balances('1999-01-01');
+  t.same(bal, {
+    [b1.id]: 0,
+    [b2.id]: 0,
+  })
+
+  // after the first transaction
+  bal = await store.buckets.balances('2000-06-06')
+  t.same(bal, {
+    [b1.id]: 800,
+    [b2.id]: 0,
+  })
+
+  // after both transactions
+  bal = await store.buckets.balances('2001-06-06')
+  t.same(bal, {
+    [b1.id]: 800,
+    [b2.id]: 750,
+  })
+
+  // now
+  bal = await store.buckets.balances()
+  t.same(bal, {
+    [b1.id]: 800,
+    [b2.id]: 750,
+  })
+})
+
 test('deleteTransactions', async (t) => {
   let { store, events } = await getStore()
   let bucket = await store.buckets.add({name: 'Grocery'});

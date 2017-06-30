@@ -30,6 +30,8 @@ body {
   --lighter-grey: rgba(189, 195, 199,1.0);
   --grey: rgba(149, 165, 166,1.0);
   --darker-grey: rgba(127, 140, 141,1.0);
+
+  --highlighter: rgb(255,255,204);
 }
 
 * {
@@ -99,6 +101,7 @@ table.ledger td {
   border: 1px solid lightgrey;
   padding: 1px 5px;
   text-align: left;
+  vertical-align: top;
 }
 
 .panes {
@@ -252,4 +255,56 @@ h1 {
   appearance: none;
   background-color: transparent;
   color: inherit;
+  transition: color 0.2s, border-bottom-color 0.2s;
+  border-bottom: 3px solid transparent;
+  border-top: 3px solid transparent;
+}
+.ctx-matching-input:focus {
+  outline: none;
+  border-bottom-color: var(--blue);
+}
+
+
+/* Money */
+.money-input {
+  display: inline-flex;
+  align-items: center;
+}
+.money-input.focused {
+}
+.money-input.computed {
+}
+.money-input input {
+  max-width: 100px;
+}
+.money-input .computed-value {
+}
+.money-input .computed-value:before {
+  content: '=';
+  padding: 0 4px 0 7px;
+  color: var(--grey);
+  font-weight: bold;
+}
+
+/* Categories */
+.categorizer {
+
+}
+.categorizer tag {
+  display: inline-flex;
+  background-color: blue;
+  color: white;
+  margin-right: .2rem;
+  border-radius: 2px;
+  font-size: .75rem;
+  cursor: pointer;
+  margin-bottom: .1rem;
+}
+.categorizer tag .name {
+  padding: .1rem .3rem .2rem;
+}
+.categorizer tag .amount {
+  padding: .1rem .3rem;
+  vertical-align: middle;
+  background-color: rgba(255,255,255,0.2);
 }

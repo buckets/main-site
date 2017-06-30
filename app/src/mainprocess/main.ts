@@ -8,7 +8,7 @@ import * as URL from 'url';
 import * as Path from 'path';
 import {menu} from './menu';
 import {BudgetFile} from './files';
-import {APP_ROOT} from '../lib/globals';
+import {APP_ROOT} from './globals';
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';

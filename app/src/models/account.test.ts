@@ -1,4 +1,5 @@
-import {DBStore, ObjectEvent, isObj} from '../store';
+import {ObjectEvent, isObj} from '../store';
+import {DBStore} from '../mainprocess/dbstore';
 import {Account, Transaction} from './account';
 import {test} from 'tap';
 
