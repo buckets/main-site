@@ -69,7 +69,7 @@ export class BudgetFile {
     let url = `buckets://${this.id}${path}`;
     log.debug('url', url);
     win.loadURL(url);
-    win.setRepresentedFilename(this.filename);
+    // win.setRepresentedFilename(this.filename);
     win.on('close', ev => {
       // unlink from this instance
       delete WIN2FILE[win.id];

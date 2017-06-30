@@ -3,6 +3,7 @@ import {isObj} from '../store';
 import {getStore} from './account.test'
 import {Failure} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
+import {Transaction as ATrans} from './account';
 
 async function setup(amount=1000) {
   let { store, events } = await getStore();
@@ -188,4 +189,14 @@ test('positive sign mismatch', async t => {
       },
     ]);
   }, Failure, 'message', {});
+})
+
+test('categorize as income', async t => {
+  let { store, events, trans } = await setup();
+
+  await store.accounts.categorizeGeneral(trans.id, 'income');
+  t.equal(events.length, 1)
+  let newtrans = events[0].obj as ATrans;
+  t.equal(newtrans.id, trans.id)
+  t.equal(newtrans.general_cat, 'income');
 })

@@ -6,6 +6,11 @@ export class Failure extends Error {
 
 }
 
+export type GeneralCatType =
+  ''
+  | 'income'
+  | 'transfer';
+
 export class Balances {
   [k:number]:number;
 }
@@ -28,7 +33,7 @@ export class Transaction implements IObject {
   amount: number;
   memo: string;
   fi_id: string;
-  general_cat: string;
+  general_cat: GeneralCatType;
 }
 interface Category {
   bucket_id: number;
@@ -176,9 +181,7 @@ export class AccountStore {
     }
 
     // delete old
-    let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
-      {$id: trans_id});
-    await this.store.buckets.deleteTransactions(old_ids.map(obj => obj.id))
+    await this.removeCategorization(trans_id)
 
     // create new bucket transactions
     await Promise.all(categories.map(cat => {
@@ -192,6 +195,21 @@ export class AccountStore {
     }))
     await this.store.publishObject('update', trans);
     return categories;
+  }
+  async removeCategorization(trans_id:number):Promise<any> {
+    // delete old
+    let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
+      {$id: trans_id});
+    await this.store.buckets.deleteTransactions(old_ids.map(obj => obj.id))
+    await this.store.query(`
+      UPDATE account_transaction
+      SET general_cat = ''
+      WHERE id = $id`, {$id: trans_id})
+  }
+  async categorizeGeneral(trans_id:number, category:GeneralCatType):Promise<Transaction> {
+    // delete old
+    await this.removeCategorization(trans_id)
+    return this.store.updateObject(Transaction, trans_id, {general_cat: category})
   }
   async getCategories(trans_id:number):Promise<Category[]> {
     return this.store.query(
