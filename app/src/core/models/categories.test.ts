@@ -1,6 +1,7 @@
 import {test} from 'tap'
 import {isObj} from '../store';
 import {getStore} from './account.test'
+import {Failure} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
 
 async function setup(amount=1000) {
@@ -133,7 +134,7 @@ test('wrong total', async t => {
         amount: 750,
       },
     ])
-  })
+  }, Failure, 'message', {})
 
   await t.rejects(() => {
     return store.accounts.categorize(trans.id, [
@@ -146,7 +147,7 @@ test('wrong total', async t => {
         amount: 100,
       },
     ])
-  })
+  }, Failure, 'message', {})
 })
 
 test('negative', async t => {
@@ -173,7 +174,7 @@ test('negative sign mismatch', async t => {
         amount: 1000,
       },
     ]);
-  });
+  }, Failure, 'message', {});
 })
 
 test('positive sign mismatch', async t => {
@@ -186,5 +187,5 @@ test('positive sign mismatch', async t => {
         amount: -1000,
       },
     ]);
-  });
+  }, Failure, 'message', {});
 })

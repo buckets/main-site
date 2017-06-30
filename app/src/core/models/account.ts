@@ -2,6 +2,10 @@ import {IObject, IStore} from '../store';
 import {Timestamp, ts2db} from './util';
 import * as moment from 'moment';
 
+export class Failure extends Error {
+
+}
+
 export class Balances {
   [k:number]:number;
 }
@@ -162,13 +166,13 @@ export class AccountStore {
     let sign = Math.sign(trans.amount);
     let sum = categories.reduce((sum, cat) => {
       if (Math.sign(cat.amount) !== sign) {
-        throw new Error(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
+        throw new Failure(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
       }
       return sum + cat.amount;
     }, 0)
 
     if (sum !== trans.amount) {
-      throw new Error(`Categories must add up to ${trans.amount} not ${sum}`);
+      throw new Failure(`Categories must add up to ${trans.amount} not ${sum}`);
     }
 
     // delete old
