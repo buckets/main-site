@@ -18,6 +18,7 @@ export class Bucket implements IObject {
   group_id: number;
   ranking: string;
   kind: BucketKind;
+  color: string;
 
   static fromdb(obj:Bucket) {
     // convert to boolean

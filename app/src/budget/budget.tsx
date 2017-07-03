@@ -1,32 +1,28 @@
 import * as React from 'react'
-import * as _ from 'lodash'
 import * as moment from 'moment'
-import {EventEmitter} from 'events'
-import {isObj, ObjectEvent, IStore} from '../store'
+import * as _ from 'lodash';
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
-import {Account, Transaction as ATrans} from '../models/account'
-import {Bucket} from '../models/bucket'
-import {Balances} from '../models/balances'
 import {AccountsPage} from './accounts'
-import {BucketsPage} from './buckets'
+import {BucketsPage, BucketStyles} from './buckets'
 import {TransactionPage} from './transactions'
-import {isBetween} from '../time'
 import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing'
+
+import { manager, AppState } from './appstate'
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
 
   // initial state
-  let state = new State(store);
-  await state.refresh();
+  manager.setStore(store);
+  await manager.refresh();
 
   // watch for changes
   store.data.on('obj', async (data) => {
-    state.processEvent(data);
+    manager.processEvent(data);
     return renderer.doUpdate();
   })
-  state.on('change', () => {
+  manager.on('change', () => {
     renderer.doUpdate();
   })
 
@@ -45,7 +41,8 @@ export async function start(base_element, room) {
     return <Application
       path={path}
       setPath={setPath}
-      state={state} />;
+      appstate={manager.appstate}
+      />;
   }, base_element);
   renderer.doUpdate();
 
@@ -54,179 +51,21 @@ export async function start(base_element, room) {
   }
 }
 
-
-export class State extends EventEmitter {
-  public accounts: {
-    [k:number]: Account,
-  } = {};
-  public buckets: {
-    [k:number]: Bucket,
-  } = {};
-  public transactions: ATrans[] = [];
-  public balances: {
-    accounts: Balances;
-    buckets: Balances;
-  } = {
-    accounts: {},
-    buckets: {},
-  }
-  public month:number;
-  public year:number;
-
-  constructor(public store:IStore) {
-    super()
-  }
-  async processEvent(ev:ObjectEvent<any>):Promise<any> {
-    let obj = ev.obj;
-    if (isObj(Account, obj)) {
-      this.accounts = _.cloneDeep(this.accounts);
-      if (ev.event === 'update') {
-        this.accounts[obj.id] = obj;
-        await this.fetchAccountBalances();
-      } else if (ev.event === 'delete') {
-        delete this.accounts[obj.id];
-      }
-    } else if (isObj(Bucket, obj)) {
-      this.buckets = _.cloneDeep(this.buckets);
-      if (ev.event === 'update') {
-        this.buckets[obj.id] = obj;
-        await this.fetchBucketBalances();
-      } else if (ev.event === 'delete') {
-        delete this.buckets[obj.id];
-      }
-    } else if (isObj(ATrans, obj)) {
-      console.log('new transaction', obj);
-      this.transactions = _.cloneDeep(this.transactions);
-      let found:ATrans;
-      let idx:number = 0;
-      for (idx = 0; idx < this.transactions.length; idx++) {
-        let t = this.transactions[idx];
-        if (t.id === obj.id) {
-          found = t;
-          break;
-        }
-      }
-      if (ev.event === 'update') {
-        if (found) {
-          // update
-          this.transactions.splice(idx, 1, obj);
-        } else {
-          // create or out of bounds
-          let dr = this.viewDateRange;
-          if (isBetween(obj.posted, dr.onOrAfter, dr.before)) {
-            // new transaction
-            this.transactions.push(obj);
-          } else {
-            // out of date bounds
-          }
-        }
-      } else if (ev.event === 'delete') {
-        if (found) {
-          this.transactions.splice(idx, 1);
-        } else {
-          // out of date bounds
-        }
-      }
-    }
-  }
-  get defaultPostingDate() {
-    let today = moment();
-    let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
-    if (d.month() == today.month() && d.year() == today.year()) {
-      d = today;
-    } else if (d < today) {
-      d = d.endOf('month').startOf('day');
-    } else {
-      d = d.startOf('month').startOf('day');
-    }
-    d = d.utc();
-    return d.utc();
-  }
-  get viewDateRange():{onOrAfter:moment.Moment, before:moment.Moment} {
-    let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
-    let start = d.startOf('month').startOf('day');
-    let end = start.clone().add(1, 'month').startOf('month').startOf('day');
-    return {
-      onOrAfter: start,
-      before: end,
-    }
-  }
-  setDate(year:number, month:number) {
-    if (this.year !== year || this.month !== month) {
-      this.year = year;
-      this.month = month;  
-      this.refresh();
-    }
-  }
-  refresh():Promise<any> {
-    return Promise.all([
-      this.fetchAllAccounts(),
-      this.fetchAllBuckets(),
-      this.fetchAccountBalances(),
-      this.fetchTransactions(),
-    ])
-  }
-  fetchAllAccounts() {
-    return this.store.accounts.list()
-      .then(accounts => {
-        accounts.forEach(account => {
-          this.accounts[account.id] = account;
-        })
-      })
-  }
-  fetchAccountBalances() {
-    return this.store.accounts.balances(this.viewDateRange.before)
-      .then(balances => {
-        this.balances.accounts = balances;
-        this.emit('change', null);
-      })
-  }
-  fetchAllBuckets() {
-    return this.store.buckets.list()
-      .then(buckets => {
-        buckets.forEach(bucket => {
-          this.buckets[bucket.id] = bucket;
-        })
-      })
-  }
-  fetchBucketBalances() {
-    return this.store.buckets.balances(this.viewDateRange.before)
-      .then(balances => {
-        this.balances.buckets = balances;
-        this.emit('change', null);
-      })  
-  }
-  fetchTransactions() {
-    let range = this.viewDateRange;
-    return this.store.accounts.listTransactions({
-      posted: {
-        onOrAfter: range.onOrAfter,
-        before: range.before,
-      }
-    })
-      .then(transactions => {
-        this.transactions = transactions;
-        this.emit('change', null);
-      })
-  }
-}
-
-
-
 interface ApplicationProps {
-  path: string,
+  path: string;
   setPath: (x:string)=>void;
-  state: State,
+  appstate: AppState;
 }
 class Application extends React.Component<ApplicationProps, any> {
   render() {
     let today = moment();
-    let state = this.props.state;
+    let { appstate } = this.props;
     return (
       <Router
         path={this.props.path}
         setPath={this.props.setPath}
         >
+        <BucketStyles buckets={_.values(appstate.buckets)} />
         <div style={{
           position: 'fixed',
           bottom: 0,
@@ -235,7 +74,7 @@ class Application extends React.Component<ApplicationProps, any> {
         <Switch>
           <Route path="/y<int:year>m<int:month>">
             <WithRouting func={({params}) => {
-              this.props.state.setDate(params.year, params.month);
+              manager.setDate(params.year, params.month);
               return null;
             }} />
             <div className="app">
@@ -269,13 +108,13 @@ class Application extends React.Component<ApplicationProps, any> {
                 </div>
                 <div className="body">
                   <Route path="/accounts">
-                    <AccountsPage state={state} />
+                    <AccountsPage appstate={appstate} />
                   </Route>
                   <Route path="/buckets">
-                    <BucketsPage state={state} />
+                    <BucketsPage appstate={appstate} />
                   </Route>
                   <Route path="/transactions">
-                    <TransactionPage state={state} />
+                    <TransactionPage appstate={appstate} />
                   </Route>
                 </div>
               </div>

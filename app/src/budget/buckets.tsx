@@ -1,41 +1,41 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import {Route, Link, WithRouting} from './routing'
-import {State} from './budget'
 import {Bucket, Transaction} from '../models/bucket'
 import {Balances} from '../models/balances'
 import {Money} from '../money'
 import {DebouncedInput} from '../input'
+import { manager, AppState } from './appstate'
 
 
 interface BucketsPageProps {
-  state: State;
+  appstate: AppState;
 }
 export class BucketsPage extends React.Component<BucketsPageProps, any> {
   render() {
-    let state = this.props.state;
+    let { appstate } = this.props;
     return (
       <div className="panes">
         <div className="page">
           <button onClick={this.addBucket}>Create bucket</button>
           <BucketList
-            buckets={_.values(state.buckets)}
-            balances={state.balances.buckets} />
+            buckets={_.values(appstate.buckets)}
+            balances={appstate.bucket_balances} />
         </div>
         <Route path="/<int:id>">
           <WithRouting func={(routing) => {
-            let bucket = state.buckets[routing.params.id];
-            let balance = state.balances.buckets[bucket.id];
+            let bucket = appstate.buckets[routing.params.id];
+            let balance = appstate.bucket_balances[bucket.id];
             return (<BucketView
               bucket={bucket}
               balance={balance}
-              state={state} />);
+              appstate={appstate} />);
           }} />
         </Route>
       </div>);
   }
   addBucket = () => {
-    this.props.state.store.buckets.add({name: 'new bucket'})
+    manager.store.buckets.add({name: 'new bucket'})
   }
 }
 
@@ -49,13 +49,24 @@ export class BucketList extends React.Component<BucketListProps, any> {
     let buckets = this.props.buckets
     .map(bucket => {
       return <tr key={bucket.id}>
-        <td><Link relative to={`/${bucket.id}`}>{bucket.name || '???'}</Link></td>
+        <td><Link relative to={`/${bucket.id}`}>edit</Link></td>
+        <td>
+          <DebouncedInput
+            blendin
+            value={bucket.name}
+            placeholder="no name"
+            onChange={(val) => {
+              manager.store.buckets.update(bucket.id, {name: val});
+            }}
+          />
+        </td>
         <td><Money value={balances[bucket.id]} /></td>
       </tr>
     })
     return <table className="ledger">
       <thead>
         <tr>
+          <th></th>
           <th>Bucket</th>
           <th>Balance</th>
         </tr>
@@ -70,7 +81,7 @@ export class BucketList extends React.Component<BucketListProps, any> {
 interface BucketViewProps {
   bucket: Bucket;
   balance: number;
-  state: State;
+  appstate: AppState;
 }
 export class BucketView extends React.Component<BucketViewProps, {
   transactions: Transaction[];
@@ -84,9 +95,9 @@ export class BucketView extends React.Component<BucketViewProps, {
   }
   async refreshTransactions(props?:BucketViewProps) {
     props = props || this.props;
-    let dr = props.state.viewDateRange;
+    let dr = props.appstate.viewDateRange;
     console.log('fetching transactions', dr.before.format(), dr.onOrAfter.format());
-    let trans = await props.state.store.buckets.listTransactions({
+    let trans = await manager.store.buckets.listTransactions({
       bucket_id: props.bucket.id,
       // posted: {
       //   before: dr.before,
@@ -100,13 +111,32 @@ export class BucketView extends React.Component<BucketViewProps, {
     this.refreshTransactions(nextProps);
   }
   render() {
-    let { bucket, balance, state } = this.props;
+    let { bucket, balance } = this.props;
     return (<div className="page" key={bucket.id}>
-      <h1><DebouncedInput blendin value={bucket.name} onChange={(val) => {
-          state.store.buckets.update(bucket.id, {name: val});
-        }} /></h1>
+      <h1>
+        <DebouncedInput
+          blendin
+          value={bucket.name}
+          placeholder="no name"
+          onChange={(val) => {
+            manager.store.buckets.update(bucket.id, {name: val});
+          }}
+        />
+      </h1>
       Balance: $<Money value={balance} />
       <hr/>
     </div>)
+  }
+}
+
+
+export class BucketStyles extends React.Component<{buckets: Bucket[]}, {}> {
+  render() {
+    let guts = this.props.buckets.map(bucket => {
+      return `.tag.custom-bucket-style-${bucket.id} { background-color: ${bucket.color || 'var(--blue)'}; }`
+    })
+    return <style>
+      {guts.join('\n')}
+    </style>
   }
 }

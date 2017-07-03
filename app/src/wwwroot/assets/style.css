@@ -260,12 +260,13 @@ h1 {
   background-color: transparent;
   color: inherit;
   transition: color 0.2s, border-bottom-color 0.2s;
-  border-bottom: 3px solid transparent;
-  border-top: 3px solid transparent;
+  sborder-bottom: 3px solid transparent;
+  sborder-top: 3px solid transparent;
 }
 .ctx-matching-input:focus {
   outline: none;
-  border-bottom-color: var(--blue);
+  sborder-bottom-color: var(--blue);
+  background-color: rgb(255,250,205);
 }
 
 

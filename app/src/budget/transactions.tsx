@@ -1,21 +1,22 @@
 'use strict';
 import * as React from 'react'
 import * as _ from 'lodash'
-import {State} from './budget'
+import * as cx from 'classnames'
+import {manager, AppState} from './appstate'
 import {Category, Transaction} from '../models/account'
 import {Date, ensureUTCMoment} from '../time'
 import {Money, MoneyInput} from '../money'
 
 
 interface TransactionPageProps {
-  state: State;
+  appstate: AppState;
 }
 export class TransactionPage extends React.Component<TransactionPageProps, {}> {
   render() {
     return <div className="page">
       <TransactionList
-        state={this.props.state}
-        transactions={this.props.state.transactions}
+        appstate={this.props.appstate}
+        transactions={_.values(this.props.appstate.transactions)}
       />
     </div>
   }
@@ -23,15 +24,13 @@ export class TransactionPage extends React.Component<TransactionPageProps, {}> {
 
 interface TransactionListProps {
   transactions: Transaction[];
-  state: State;
+  appstate: AppState;
   hideAccount?: boolean;
 }
 export class TransactionList extends React.Component<TransactionListProps, any> {
-  shouldComponentUpdate(nextProps, nextState) {
-    return !_.isEqual(nextProps, this.props);
-  }
   render() {
-    let state = this.props.state;
+    console.log('TransactionList render', this.props.transactions)
+    let { appstate } = this.props;
     let hideAccount = this.props.hideAccount || false;
     let elems = _.sortBy(this.props.transactions, [
       item => -ensureUTCMoment(item.posted).unix(),
@@ -41,12 +40,12 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
     .map(trans => {
       return <tr key={trans.id}>
         <td className="nobr"><Date value={trans.posted} /></td>
-        {hideAccount ? null : <td>{state.accounts[trans.account_id].name}</td>}
+        {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td><Money value={trans.amount} /></td>
         <td><Categorizer
           transaction={trans}
-          state={state} /></td>
+          appstate={appstate} /></td>
       </tr>
     })
     return <table className="ledger">
@@ -68,7 +67,7 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
 
 interface CategorizerProps {
   transaction: Transaction;
-  state: State;
+  appstate: AppState;
 }
 class Categorizer extends React.Component<CategorizerProps, {
   categories: Category[];
@@ -88,7 +87,7 @@ class Categorizer extends React.Component<CategorizerProps, {
     this.refreshCategories(nextProps)
   }
   refreshCategories(props:CategorizerProps) {
-    return props.state.store.accounts.getCategories(props.transaction.id)
+    return manager.store.accounts.getCategories(props.transaction.id)
     .then(cats => {
       this.setState({
         categories: cats,
@@ -103,17 +102,17 @@ class Categorizer extends React.Component<CategorizerProps, {
     this.setState({open: false})
   }
   saveChanges = async () => {
-    let { state, transaction } = this.props;
+    let { transaction } = this.props;
 
-    await state.store.accounts.categorize(transaction.id, this.state.clean_cats)
+    await manager.store.accounts.categorize(transaction.id, this.state.clean_cats)
     await this.refreshCategories(this.props);
     this.setState({open: false})
   }
   generalCat = (name) => {
     return async () => {
-      let { state, transaction } = this.props;
+      let { transaction } = this.props;
 
-      await state.store.accounts.categorizeGeneral(transaction.id, name);
+      await manager.store.accounts.categorizeGeneral(transaction.id, name);
       await this.refreshCategories(this.props);
       this.setState({open: false})
     }
@@ -158,8 +157,8 @@ class Categorizer extends React.Component<CategorizerProps, {
     return ret;
   }
   renderOpen() {
-    let {transaction, state} = this.props;
-    let bucket_options = _.values(state.buckets)
+    let { transaction, appstate } = this.props;
+    let bucket_options = _.values(appstate.buckets)
       .map(bucket => {
         return <option key={bucket.id} value={bucket.id}>{bucket.name}</option>
       })
@@ -211,7 +210,7 @@ class Categorizer extends React.Component<CategorizerProps, {
     </div>
   }
   renderClosed() {
-    let { state, transaction } = this.props;
+    let { appstate, transaction } = this.props;
     let cats = this.state.categories;
     let guts;
     if (transaction.general_cat === 'income') {
@@ -227,10 +226,11 @@ class Categorizer extends React.Component<CategorizerProps, {
     } else if (cats.length) {
       // categorized
       let bucketName = (cat:Category):string => {
-        return (state.buckets[cat.bucket_id] || {} as any).name || '???';
+        return (appstate.buckets[cat.bucket_id] || {} as any).name || '???';
       }
       let categories = cats.map((cat, idx) => {
-        return <a key={idx} className="tag" onClick={this.openCategorizer}>
+        let className = cx('tag', `custom-bucket-style-${cat.bucket_id}`);
+        return <a key={idx} className={className} onClick={this.openCategorizer}>
           <div className="name">
             {bucketName(cat)}
           </div>
