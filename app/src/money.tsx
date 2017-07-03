@@ -88,6 +88,7 @@ interface MoneyProps {
   className?: string;
   hidezero?: boolean;
   noanimate?: boolean;
+  nocolor?: boolean;
   [x:string]: any;
 }
 export class Money extends React.Component<MoneyProps, {
@@ -151,7 +152,7 @@ export class Money extends React.Component<MoneyProps, {
     }
   }
   render() {
-    let { value, className, hidezero, noanimate, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, ...rest } = this.props;
     let going_up = true;
     if (!noanimate) {
       going_up = value > this.state.current_value;
@@ -162,9 +163,9 @@ export class Money extends React.Component<MoneyProps, {
       display = '';
     }
     return (<span className={cx(
-      'number',
       className, {
-        negative: value < 0,
+        number: !nocolor,
+        negative: value < 0 && !nocolor,
         animating: this.state.animating,
         up: this.state.animating && going_up,
         down: this.state.animating && !going_up,

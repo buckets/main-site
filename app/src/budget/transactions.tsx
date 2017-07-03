@@ -31,7 +31,6 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
     return !_.isEqual(nextProps, this.props);
   }
   render() {
-    console.log('TransactionList rendering');
     let state = this.props.state;
     let hideAccount = this.props.hideAccount || false;
     let elems = _.sortBy(this.props.transactions, [
@@ -41,7 +40,7 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
     ])
     .map(trans => {
       return <tr key={trans.id}>
-        <td><Date value={trans.posted} /></td>
+        <td className="nobr"><Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{state.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td><Money value={trans.amount} /></td>
@@ -53,7 +52,7 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
     return <table className="ledger">
       <thead>
         <tr>
-          <th>Posted</th>
+          <th className="nobr">Posted</th>
           {hideAccount ? null : <th>Account</th>}
           <th>Memo</th>
           <th>Amount</th>
@@ -83,15 +82,17 @@ class Categorizer extends React.Component<CategorizerProps, {
       clean_cats: [],
       open: false,
     }
-    this.refreshCategories()
+    this.refreshCategories(this.props)
   }
-  refreshCategories() {
-    return this.props.state.store.accounts.getCategories(this.props.transaction.id)
+  componentWillReceiveProps(nextProps) {
+    this.refreshCategories(nextProps)
+  }
+  refreshCategories(props:CategorizerProps) {
+    return props.state.store.accounts.getCategories(props.transaction.id)
     .then(cats => {
-      console.log('got categories', cats);
       this.setState({
         categories: cats,
-        clean_cats: this.cleanCats(this.props.transaction, cats),
+        clean_cats: this.cleanCats(props.transaction, cats),
       })
     })
   }
@@ -101,18 +102,26 @@ class Categorizer extends React.Component<CategorizerProps, {
   closeCategorizer = () => {
     this.setState({open: false})
   }
-  saveChanges = () => {
+  saveChanges = async () => {
+    let { state, transaction } = this.props;
+
+    await state.store.accounts.categorize(transaction.id, this.state.clean_cats)
+    await this.refreshCategories(this.props);
     this.setState({open: false})
   }
   generalCat = (name) => {
-    return () => {
-      console.log('setting to', name);
+    return async () => {
+      let { state, transaction } = this.props;
+
+      await state.store.accounts.categorizeGeneral(transaction.id, name);
+      await this.refreshCategories(this.props);
       this.setState({open: false})
     }
   }
   cleanCats(trans:Transaction, categories:Category[],
       idx?:number, replacement?:Category|'delete'):Category[] {
     let left = Math.abs(trans.amount);
+    let sign = Math.sign(trans.amount);
     let ret = categories.map((cat, i) => {
       if (idx !== undefined && i == idx) {
         if (replacement === 'delete') {
@@ -128,7 +137,7 @@ class Categorizer extends React.Component<CategorizerProps, {
       left -= amount;
       return {
         bucket_id: cat.bucket_id,
-        amount: amount,
+        amount: amount * sign,
       }
     })
     .filter(x => x !== null);
@@ -138,11 +147,11 @@ class Categorizer extends React.Component<CategorizerProps, {
       if (replacement === 'delete' && ret.length) {
         let target = idx - 1;
         target = target >= 0 ? target : 0;
-        ret[target].amount += left;
+        ret[target].amount += (left * sign);
       } else {
         ret.push({
           bucket_id: null,
-          amount: left,
+          amount: left * sign,
         })
       }
     }
@@ -167,10 +176,11 @@ class Categorizer extends React.Component<CategorizerProps, {
               }),
             })
           }}>
+          <option></option>
           {bucket_options}
         </select>
         <MoneyInput
-          value={cat.amount}
+          value={Math.abs(cat.amount)}
           onChange={val => {
             this.setState({
               clean_cats: this.cleanCats(transaction, cats, idx, {
@@ -201,16 +211,35 @@ class Categorizer extends React.Component<CategorizerProps, {
     </div>
   }
   renderClosed() {
-    let {transaction} = this.props;
+    let { state, transaction } = this.props;
     let cats = this.state.categories;
     let guts;
     if (transaction.general_cat === 'income') {
       // income
+      guts = <a className="general-tag" onClick={this.openCategorizer}>
+          💰 Income
+        </a>
     } else if (transaction.general_cat === 'transfer') {
       // transfer
+      guts = <a className="general-tag" onClick={this.openCategorizer}>
+          ⇄ Transfer
+        </a>
     } else if (cats.length) {
       // categorized
-      guts = <div>Categorized</div>
+      let bucketName = (cat:Category):string => {
+        return (state.buckets[cat.bucket_id] || {} as any).name || '???';
+      }
+      let categories = cats.map((cat, idx) => {
+        return <a key={idx} className="tag" onClick={this.openCategorizer}>
+          <div className="name">
+            {bucketName(cat)}
+          </div>
+          <div className="amount">
+            <Money nocolor value={cat.amount} />
+          </div>
+        </a>
+      })
+      guts = <div>{categories}</div>
     } else {
       // no category
       guts = <button

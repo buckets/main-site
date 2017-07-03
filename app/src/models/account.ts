@@ -137,9 +137,9 @@ export class AccountStore {
   async categorize(trans_id:number, categories:Category[]):Promise<Category[]> {
     let trans = await this.store.getObject(Transaction, trans_id);
 
-    // ignore 0s
+    // ignore 0s and null bucket ids
     categories = categories.filter(cat => {
-      return cat.amount;
+      return cat.amount && cat.bucket_id !== null;
     })
 
     // make sure the sum is right and the signs are right
@@ -147,6 +147,9 @@ export class AccountStore {
     let sum = categories.reduce((sum, cat) => {
       if (Math.sign(cat.amount) !== sign) {
         throw new Failure(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
+      }
+      if (cat.bucket_id === null) {
+        throw new Failure(`You must choose a bucket.`);
       }
       return sum + cat.amount;
     }, 0)
@@ -168,6 +171,7 @@ export class AccountStore {
         account_trans_id: trans.id,
       })  
     }))
+    trans = await this.store.getObject(Transaction, trans_id);
     await this.store.publishObject('update', trans);
     return categories;
   }

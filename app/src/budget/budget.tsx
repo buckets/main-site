@@ -95,6 +95,7 @@ export class State extends EventEmitter {
         delete this.buckets[obj.id];
       }
     } else if (isObj(ATrans, obj)) {
+      console.log('new transaction', obj);
       this.transactions = _.cloneDeep(this.transactions);
       let found:ATrans;
       let idx:number = 0;

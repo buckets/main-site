@@ -23,7 +23,7 @@ interface SerializedObjectClass {
   _buckets_serialized_object_class: string;
 }
 function isSerializedObjectClass(obj): obj is SerializedObjectClass {
-  return (<any>obj)._buckets_serialized_object_class !== undefined;
+  return obj !== null && (<any>obj)._buckets_serialized_object_class !== undefined;
 }
 function serializeObjectClass<T extends IObject>(cls:IObjectClass<T>):SerializedObjectClass {
   return {
@@ -111,6 +111,7 @@ export class RPCRendererStore implements IStore {
       params: args,
     }
     // log.debug('CLIENT CALL', msg);
+    // console.trace();
     return new Promise((resolve, reject) => {
       ipcRenderer.once(`rpc-reply-${msg.id}`, (event, reply:RPCReply) => {
         // log.debug('CLIENT RECV', reply);

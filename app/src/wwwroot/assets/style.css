@@ -37,6 +37,10 @@ body {
 * {
   box-sizing: border-box;
 }
+.nobr {
+  white-space: nowrap;
+}
+
 
 .app {
   display: flex;
@@ -290,21 +294,29 @@ h1 {
 .categorizer {
 
 }
-.categorizer tag {
+.categorizer .tag {
   display: inline-flex;
-  background-color: blue;
+  justify-content: space-between;
+  background-color: var(--blue);
   color: white;
-  margin-right: .2rem;
   border-radius: 2px;
-  font-size: .75rem;
+  font-size: .8rem;
   cursor: pointer;
-  margin-bottom: .1rem;
+  margin: .1rem;
 }
-.categorizer tag .name {
-  padding: .1rem .3rem .2rem;
+.categorizer .tag .name {
+  padding: .1rem .5rem .2rem;
+  flex-grow: 3;
 }
-.categorizer tag .amount {
-  padding: .1rem .3rem;
+.categorizer .tag .amount {
+  padding: .1rem .5rem .2rem;
+  flex-grow: 1;
   vertical-align: middle;
   background-color: rgba(255,255,255,0.2);
+}
+.categorizer .general-tag {
+  display: inline-block;
+  padding: .1rem .5rem;
+  cursor: pointer;
+  margin: 0;
 }
