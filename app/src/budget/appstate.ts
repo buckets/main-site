@@ -152,6 +152,14 @@ export class StateManager extends EventEmitter {
         delete this.appstate.buckets[obj.id];
         changed = true;
       }
+    } else if (isObj(Group, obj)) {
+      if (ev.event === 'update') {
+        this.appstate.groups[obj.id] = obj;
+        changed = true;
+      } else if (ev.event === 'delete') {
+        delete this.appstate.groups[obj.id];
+        changed = true;
+      }
     } else if (isObj(ATrans, obj)) {
       let dr = this.appstate.viewDateRange;
       if (isBetween(obj.posted, dr.onOrAfter, dr.before)) {
@@ -182,6 +190,7 @@ export class StateManager extends EventEmitter {
     await Promise.all([
       this.fetchAllAccounts(),
       this.fetchAllBuckets(),
+      this.fetchAllGroups(),
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
       this.fetchTransactions(),
@@ -215,6 +224,15 @@ export class StateManager extends EventEmitter {
         this.appstate.buckets = {};
         buckets.forEach(bucket => {
           this.appstate.buckets[bucket.id] = bucket;
+        })
+      })
+  }
+  fetchAllGroups() {
+    return this.store.buckets.listGroups()
+      .then(groups => {
+        this.appstate.groups = {}
+        groups.forEach(group => {
+          this.appstate.groups[group.id] = group;
         })
       })
   }

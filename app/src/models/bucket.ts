@@ -43,6 +43,7 @@ export class Group implements IObject {
   id: number;
   created: string;
   readonly _type: string = Group.table_name;
+  name: string;
   ranking: string;
 }
 
@@ -52,7 +53,7 @@ export class BucketStore {
   constructor(store:IStore) {
     this.store = store;
   }
-  async add(args?:{name:string}):Promise<Bucket> {
+  async add(args?:{name:string, group_id?:number}):Promise<Bucket> {
     let data = args || {};
     return this.store.createObject(Bucket, data);
   }
@@ -126,5 +127,21 @@ export class BucketStore {
     let where = where_parts.join(' AND ');
     return this.store.listObjects(Transaction, {where, params,
       order: ['posted DESC', 'id']});
+  }
+
+  //-------------------------------------------------------------
+  // Group stuff
+  //-------------------------------------------------------------
+  async addGroup(args:{name: string}):Promise<Group> {
+    let data = args || {};
+    return this.store.createObject(Group, data);
+  }
+  async listGroups():Promise<Group[]> {
+    return this.store.listObjects(Group, {
+      order: ['ranking', 'name', 'id'],
+    })
+  }
+  async updateGroup(id:number, data:{name?:string, ranking?:string}):Promise<Group> {
+    return this.store.updateObject(Group, id, data);
   }
 }

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import {Route, Link, WithRouting} from './routing'
-import {Bucket, Transaction} from '../models/bucket'
+import {Bucket, Group, Transaction} from '../models/bucket'
 import {Balances} from '../models/balances'
 import {Money} from '../money'
 import {DebouncedInput} from '../input'
@@ -18,6 +18,11 @@ export class BucketsPage extends React.Component<BucketsPageProps, any> {
       <div className="panes">
         <div className="page">
           <button onClick={this.addBucket}>Create bucket</button>
+          <GroupedBucketList
+            buckets={_.values(appstate.buckets)}
+            balances={appstate.bucket_balances}
+            groups={_.values(appstate.groups)} />
+          bucket list:
           <BucketList
             buckets={_.values(appstate.buckets)}
             balances={appstate.bucket_balances} />
@@ -78,12 +83,61 @@ export class BucketList extends React.Component<BucketListProps, any> {
   }
 }
 
-interface GroupedBucketListProps {
+function bucketRows(buckets:Bucket[]) {
+  return buckets.map(bucket => {
+    return <tr key={bucket.id}>
+      <td>{bucket.name}</td>
+    </tr>
+  })
+}
 
+interface GroupedBucketListProps {
+  groups: Group[];
+  buckets: Bucket[];
+  balances: Balances;
 }
 export class GroupedBucketList extends React.Component<GroupedBucketListProps, any> {
   render() {
-    return <div>Grouped bucket list</div>
+    const NOGROUP = -1;
+    let grouped_buckets = {};
+    this.props.buckets.forEach(bucket => {
+      let group_id = bucket.group_id || NOGROUP;
+      if (!grouped_buckets[group_id]) {
+        grouped_buckets[group_id] = [];
+      }
+      grouped_buckets[group_id].push(bucket);
+    })
+    let groups = this.props.groups.slice();
+    if (grouped_buckets[NOGROUP]) {
+      groups.push({
+        id: NOGROUP,
+        name: 'Misc',
+        ranking: 'z',
+      } as Group)
+    }
+    console.log('groups', groups);
+    console.log('grouped_buckets', grouped_buckets);
+    let group_elems = _.sortBy(groups, ['ranking'])
+      .map((group:Group) => {
+        return [
+        <thead key={`group-${group.id}`}>
+          <tr>
+            <th colSpan={100}>{group.name}</th>
+          </tr>
+        </thead>,
+        <tbody key={`buckets-${group.id}`}>
+          {bucketRows(grouped_buckets[group.id])}
+        </tbody>
+        ]
+      })
+    return <table className="ledger">
+      <thead>
+        <tr>
+          <th>Hello</th>
+        </tr>
+      </thead>
+      {group_elems}
+    </table>
   }
 }
 
@@ -113,7 +167,6 @@ export class BucketView extends React.Component<BucketViewProps, {
       //   onOrAfter: dr.onOrAfter,
       // }
     })
-    console.log('got transactions', trans);
     this.setState({transactions: trans});
   }
   componentWillReceiveProps(nextProps, nextState) {

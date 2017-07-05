@@ -165,3 +165,24 @@ test('deleteTransactions', async (t) => {
   let new_bucket = bucket_ev.obj as Bucket;
   t.equal(new_bucket.balance, 0, "Should return the balance to 0")
 })
+
+test('create bucket in group', async t => {
+  let { store, events } = await getStore()
+
+  let group = await store.buckets.addGroup({name: 'The Group'})
+  t.equal(events.length, 1);
+  
+  let b = await store.buckets.add({name: 'Bob', group_id: group.id});
+  t.equal(b.group_id, group.id);
+})
+
+test('update group', async t => {
+  let { store, events } = await getStore()
+  let group = await store.buckets.addGroup({name: 'The Group'})
+  events.length = 0;
+
+  let new_group = await store.buckets.updateGroup(group.id, {name: 'Bob', ranking: 't'})
+  t.equal(new_group.name, 'Bob')
+  t.equal(new_group.ranking, 't')
+  t.same(events[0].obj, new_group);
+})

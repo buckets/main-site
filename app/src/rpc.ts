@@ -2,7 +2,7 @@ import * as log from 'electron-log'
 import * as URL from 'url'
 import {IStore, DataEventEmitter, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
 import {ipcMain, ipcRenderer, webContents} from 'electron'
-import {BucketStore, Bucket, Transaction as BucketTransaction} from './models/bucket'
+import {BucketStore, Group, Bucket, Transaction as BucketTransaction} from './models/bucket'
 import {AccountStore, Account, Transaction as AccountTransaction} from './models/account'
 
 //--------------------------------------------------------------------------------
@@ -14,6 +14,7 @@ const OBJECT_CLASSES = [
   AccountTransaction,
   Bucket,
   BucketTransaction,
+  Group,
 ]
 let TABLE2CLASS = {};
 OBJECT_CLASSES.forEach(cls => {
