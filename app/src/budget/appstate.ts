@@ -1,4 +1,5 @@
 import * as moment from 'moment'
+import * as _ from 'lodash'
 
 import {EventEmitter} from 'events'
 import {isObj, ObjectEvent, IStore} from '../store'
@@ -23,7 +24,17 @@ interface IAppState {
   year: number;
 }
 
-export class AppState implements IAppState {
+interface IComputedAppState {
+  rain: number;
+  bucket_total_balance: number;
+  account_total_balance: number;
+  transfers_in: number;
+  transfers_out: number;
+  income: number;
+  expenses: number;
+}
+
+export class AppState implements IAppState, IComputedAppState {
   accounts = {};
   buckets = {};
   transactions = {};
@@ -31,6 +42,14 @@ export class AppState implements IAppState {
   bucket_balances = {};
   month = null;
   year = null;
+
+  rain: number = 0;
+  bucket_total_balance: number = 0;
+  account_total_balance: number = 0;
+  transfers_in: number = 0;
+  transfers_out: number = 0;
+  income: number = 0;
+  expenses: number = 0;
 
   get defaultPostingDate() {
     let today = moment();
@@ -54,6 +73,43 @@ export class AppState implements IAppState {
       before: end,
     }
   }
+}
+
+function computeTotals(appstate:AppState):IComputedAppState {
+  let bucket_total_balance = _.values(appstate.bucket_balances)
+    .reduce((a,b) => a+b, 0);
+  let account_total_balance = _.values(appstate.account_balances)
+    .reduce((a,b) => a+b, 0);
+  let income = 0;
+  let expenses = 0;
+  let transfers_in = 0;
+  let transfers_out = 0;
+  _.values(appstate.transactions)
+  .forEach((trans:ATrans) => {
+    if (trans.general_cat === 'transfer') {
+      if (trans.amount > 0) {
+        transfers_in += trans.amount;
+      } else {
+        transfers_out += trans.amount;
+      }
+    } else {
+      if (trans.amount > 0) {
+        income += trans.amount;
+      } else {
+        expenses += trans.amount;
+      }
+    }
+  })
+  let rain = account_total_balance - bucket_total_balance;
+  return {
+    bucket_total_balance,
+    account_total_balance,
+    rain,
+    transfers_in,
+    transfers_out,
+    income,
+    expenses,
+  };
 }
 
 export class StateManager extends EventEmitter {
@@ -101,6 +157,7 @@ export class StateManager extends EventEmitter {
       }
     }
     if (changed) {
+      this.recomputeTotals();
       this.emit('change', this.appstate);
     }
     return this.appstate;
@@ -113,13 +170,21 @@ export class StateManager extends EventEmitter {
       this.emit('change', this.appstate);
     }
   }
-  refresh():Promise<any> {
-    return Promise.all([
+  async refresh():Promise<any> {
+    await Promise.all([
       this.fetchAllAccounts(),
       this.fetchAllBuckets(),
       this.fetchAccountBalances(),
+      this.fetchBucketBalances(),
       this.fetchTransactions(),
     ])
+    this.recomputeTotals();
+    return this;
+  }
+  recomputeTotals() {
+    console.log('recomputeTotals');
+    let totals = computeTotals(this.appstate);
+    Object.assign(this.appstate, totals);
   }
   fetchAllAccounts() {
     return this.store.accounts.list()
@@ -161,7 +226,6 @@ export class StateManager extends EventEmitter {
     })
       .then(transactions => {
         this.appstate.transactions = {};
-        console.log('fetched Transactions', transactions);
         transactions.forEach(trans => {
           this.appstate.transactions[trans.id] = trans;
         })

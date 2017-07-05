@@ -6,6 +6,7 @@ import {Renderer} from './render'
 import {AccountsPage} from './accounts'
 import {BucketsPage, BucketStyles} from './buckets'
 import {TransactionPage} from './transactions'
+import {Money} from '../money'
 import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing'
 
 import { manager, AppState } from './appstate'
@@ -93,7 +94,26 @@ class Application extends React.Component<ApplicationProps, any> {
               </div>
               <div className="content">
                 <div className="header">
-                  <div></div>
+                  <div className="totals">
+                    <total>
+                      <name>Rain</name>
+                      <amount>💧<Money value={appstate.rain} /></amount>
+                    </total>
+                    <total>
+                      <name>Income</name>
+                      <amount><Money value={appstate.income} /></amount>
+                    </total>
+                    <inter-total>-</inter-total>
+                    <total>
+                      <name>Expenses</name>
+                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} /></amount>
+                    </total>
+                    <inter-total>=</inter-total>
+                    <total>
+                      <name>Gain</name>
+                      <amount><Money value={appstate.income+appstate.expenses} /></amount>
+                    </total>
+                  </div>
                   <div>
                     <WithRouting func={(routing) => {
                       return (<MonthSelector
