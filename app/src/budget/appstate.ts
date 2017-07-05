@@ -4,13 +4,16 @@ import * as _ from 'lodash'
 import {EventEmitter} from 'events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import {Account, Transaction as ATrans} from '../models/account'
-import {Bucket} from '../models/bucket'
+import {Bucket, Group} from '../models/bucket'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 
 interface IAppState {
   accounts: {
     [k: number]: Account;
+  };
+  groups: {
+    [k: number]: Group;
   };
   buckets: {
     [k: number]: Bucket;
@@ -32,11 +35,13 @@ interface IComputedAppState {
   transfers_out: number;
   income: number;
   expenses: number;
+  gain: number;
 }
 
 export class AppState implements IAppState, IComputedAppState {
   accounts = {};
   buckets = {};
+  groups = {};
   transactions = {};
   account_balances = {};
   bucket_balances = {};
@@ -50,6 +55,7 @@ export class AppState implements IAppState, IComputedAppState {
   transfers_out: number = 0;
   income: number = 0;
   expenses: number = 0;
+  gain: number = 0;
 
   get defaultPostingDate() {
     let today = moment();
@@ -101,6 +107,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     }
   })
   let rain = account_total_balance - bucket_total_balance;
+  let gain = income + expenses;
   return {
     bucket_total_balance,
     account_total_balance,
@@ -109,6 +116,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     transfers_out,
     income,
     expenses,
+    gain,
   };
 }
 

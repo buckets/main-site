@@ -78,6 +78,15 @@ export class BucketList extends React.Component<BucketListProps, any> {
   }
 }
 
+interface GroupedBucketListProps {
+
+}
+export class GroupedBucketList extends React.Component<GroupedBucketListProps, any> {
+  render() {
+    return <div>Grouped bucket list</div>
+  }
+}
+
 interface BucketViewProps {
   bucket: Bucket;
   balance: number;

@@ -99,7 +99,7 @@ class Application extends React.Component<ApplicationProps, any> {
                       <name>Rain</name>
                       <amount>💧<Money value={appstate.rain} /></amount>
                     </total>
-                    <total>
+                    <total className="section-start">
                       <name>Income</name>
                       <amount><Money value={appstate.income} /></amount>
                     </total>
@@ -110,8 +110,8 @@ class Application extends React.Component<ApplicationProps, any> {
                     </total>
                     <inter-total>=</inter-total>
                     <total>
-                      <name>Gain</name>
-                      <amount><Money value={appstate.income+appstate.expenses} /></amount>
+                      <name>Month's {appstate.gain >= 0 ? 'Gain' : 'Loss'}</name>
+                      <amount><Money value={appstate.gain} /></amount>
                     </total>
                   </div>
                   <div>

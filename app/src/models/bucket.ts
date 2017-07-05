@@ -38,6 +38,13 @@ export class Transaction implements IObject {
   posted: string;
   account_trans_id: number;
 }
+export class Group implements IObject {
+  static table_name: string = 'bucket_group';
+  id: number;
+  created: string;
+  readonly _type: string = Group.table_name;
+  ranking: string;
+}
 
 
 export class BucketStore {

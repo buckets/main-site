@@ -343,6 +343,10 @@ h1 {
   font-size: 1.5rem;
   text-align: left;
 }
+.totals total.section-start {
+  border-left: 1px solid var(--lighter-grey);
+  padding-left: 2rem;
+}
 .totals inter-total {
   font-size: 1.5rem;
   color: var(--lighter-grey);
