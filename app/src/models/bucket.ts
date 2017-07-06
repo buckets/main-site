@@ -1,6 +1,7 @@
 import {IObject, IStore} from '../store'
 import {ts2db, Timestamp} from '../time'
 import {Balances, computeBalances} from './balances'
+import { rankBetween } from '../ranking'
 
 type BucketKind =
   ''
@@ -54,7 +55,15 @@ export class BucketStore {
     this.store = store;
   }
   async add(args?:{name:string, group_id?:number}):Promise<Bucket> {
-    let data = args || {};
+    let data:Partial<Bucket> = args || {};
+    let group_id = args.group_id || null;
+    let rows = await this.store.query(`
+        SELECT max(ranking) as highrank
+        FROM bucket
+        WHERE coalesce(group_id, -1) = coalesce($group_id, -1)`, {
+          $group_id: group_id,
+        })
+    data.ranking = rankBetween(rows[0].highrank, 'z')
     return this.store.createObject(Bucket, data);
   }
   async list():Promise<Bucket[]> {
@@ -128,12 +137,58 @@ export class BucketStore {
     return this.store.listObjects(Transaction, {where, params,
       order: ['posted DESC', 'id']});
   }
+  async moveBucket(moving_id:number, placement:'before'|'after', reference_id:number):Promise<Bucket> {
+    let where;
+    let order;
+    if (placement === 'before') {
+      // before
+      where = 'ranking <= (SELECT ranking FROM bucket WHERE id=$reference_id)'
+      order = 'ranking DESC'
+    } else {
+      // after
+      where = 'ranking >= (SELECT ranking FROM bucket WHERE id=$reference_id)'
+      order = 'ranking ASC'
+    }
+    let rows = await this.store.query(`
+        SELECT id, ranking, group_id
+        FROM bucket
+        WHERE
+          coalesce(group_id, -1) = coalesce(
+            (SELECT group_id FROM bucket WHERE id=$reference_id), -1)
+          AND ${where}
+        ORDER BY ${order}
+        LIMIT 2
+        `, {
+          $reference_id: reference_id,
+        })
+    let ranking;
+    let group_id;
+    if (rows.length === 0) {
+      throw new Error(`No such reference bucket: ${reference_id}`);
+    } else if (rows.length === 1) {
+      group_id = rows[0].group_id;
+      if (placement === 'before') {
+        ranking = rankBetween(null, rows[0].ranking);
+      } else if (placement === 'after') {
+        ranking = rankBetween(rows[0].ranking, null);
+      }
+    } else {
+      // 2 rows
+      group_id = rows[0].group_id;
+      ranking = rankBetween(rows[0].ranking, rows[1].ranking);
+    }
+    return this.update(moving_id, {ranking, group_id})
+  }
 
   //-------------------------------------------------------------
   // Group stuff
   //-------------------------------------------------------------
   async addGroup(args:{name: string}):Promise<Group> {
-    let data = args || {};
+    let data:Partial<Group> = args || {};
+    let rows = await this.store.query(`
+      SELECT max(ranking) as highrank
+      FROM bucket_group`, {})
+    data.ranking = rankBetween(rows[0].highrank, 'z')
     return this.store.createObject(Group, data);
   }
   async listGroups():Promise<Group[]> {

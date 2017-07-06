@@ -22,7 +22,7 @@ test('add bucket', async (t) => {
   t.equal(bucket.balance, 0)
   t.equal(bucket.kicked, false)
   t.equal(bucket.group_id, null)
-  t.equal(bucket.ranking, '')
+  t.equal(bucket.ranking, 'm')
   t.equal(bucket.kind, '')
 })
 
@@ -185,4 +185,56 @@ test('update group', async t => {
   t.equal(new_group.name, 'Bob')
   t.equal(new_group.ranking, 't')
   t.same(events[0].obj, new_group);
+})
+
+test('group different ranking', async t => {
+  let { store } = await getStore()
+  let g1 = await store.buckets.addGroup({name: 'Group 1'})
+  let g2 = await store.buckets.addGroup({name: 'Group 2'})
+
+  t.ok(g1.ranking < g2.ranking)
+})
+
+test('moveBucket', async t => {
+  let { store, events } = await getStore()
+  let b1 = await store.buckets.add({name: 'Grocery'})
+  let b2 = await store.buckets.add({name: 'Vacation'})
+  events.length = 0;
+
+  t.ok(b1.ranking < b2.ranking, `b1 ${b1.ranking} should be < b2 ${b2.ranking}`)
+
+  await store.buckets.moveBucket(b2.id, 'before', b1.id);
+  t.equal(events.length, 1, "Should only notify about the changed bucket")
+
+  b1 = await store.buckets.get(b1.id);
+  b2 = await store.buckets.get(b2.id);
+
+  t.same(b2, events[0].obj, "Should emit the bucket changed")
+  t.ok(b1.ranking > b2.ranking, "b1 should be after b2 now")
+
+  await store.buckets.moveBucket(b2.id, 'after', b1.id);
+
+  b1 = await store.buckets.get(b1.id);
+  b2 = await store.buckets.get(b2.id);
+
+  t.ok(b1.ranking < b2.ranking, `b1 ${b1.ranking} should be < b2 ${b2.ranking}`)
+})
+test('moveBucket', async t => {
+  let { store, events } = await getStore()
+  let b1 = await store.buckets.add({name: 'Grocery', group_id: 4})
+  let b2 = await store.buckets.add({name: 'Vacation', group_id: 4})
+  let b3 = await store.buckets.add({name: 'Johnson', group_id: 1})
+  events.length = 0;
+
+  await store.buckets.moveBucket(b3.id, 'before', b2.id);
+  t.equal(events.length, 1, "Should only notify about the changed bucket")
+
+  b1 = await store.buckets.get(b1.id);
+  b2 = await store.buckets.get(b2.id);
+  b3 = await store.buckets.get(b3.id);
+
+  t.same(b3, events[0].obj, "Should emit the bucket changed")
+  t.ok(b1.ranking < b3.ranking)
+  t.ok(b3.ranking < b2.ranking)
+  t.equal(b3.group_id, 4)
 })

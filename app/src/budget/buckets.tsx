@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import * as cx from 'classnames'
 import {Route, Link, WithRouting} from './routing'
 import {Bucket, Group, Transaction} from '../models/bucket'
 import {Balances} from '../models/balances'
@@ -7,6 +8,25 @@ import { Money, MoneyInput } from '../money'
 import {DebouncedInput} from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
+
+function pageY(elem):number {
+  let result = elem.offsetTop;
+  while (elem.offsetParent) {
+    elem = elem.offsetParent;
+    result += elem.offsetTop;
+  }
+  return result;
+}
+
+function overTopOrBottom(ev):'top'|'bottom' {
+  let yoffset = ev.pageY - pageY(ev.currentTarget);
+  let percent = yoffset / ev.currentTarget.offsetHeight;
+  let dropHalf:'top'|'bottom' = 'top';
+  if (percent >= 0.5) {
+    dropHalf = 'bottom';
+  }
+  return dropHalf;
+}
 
 
 interface BucketsPageProps {
@@ -49,12 +69,43 @@ interface BucketRowProps {
   bucket: Bucket;
   balance: number;
 }
-class BucketRow extends React.Component<BucketRowProps, {}> {
+class BucketRow extends React.Component<BucketRowProps, {
+  isDragging: boolean;
+  underDrag: boolean;
+  dropHalf: 'top'|'bottom';
+}> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isDragging: false,
+      underDrag: false,
+      dropHalf: 'top',
+    }
+  }
   render() {
     let { bucket, balance } = this.props;
-    return <tr key={bucket.id}>
-      <td><span className="fa fa-bars"/></td>
-      <td>
+    return <tr
+      key={bucket.id}
+      onDragOver={this.onDragOver}
+      onDrop={this.onDrop}
+      onDragLeave={this.onDragLeave}
+      className={cx({
+        underDrag: this.state.underDrag,
+        isDragging: this.state.isDragging,
+        dropTopHalf: this.state.underDrag && this.state.dropHalf === 'top',
+        dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
+      })}
+    >
+      <td className="nopad">
+        <div
+          className="drophandle"
+          draggable
+          onDragStart={this.onDragStart}
+          onDragEnd={this.onDragEnd}>
+            <span className="fa fa-bars"/>
+        </div>
+      </td>
+      <td className="nobr">
         <ColorPicker
           className="small"
           value={bucket.color}
@@ -69,15 +120,202 @@ class BucketRow extends React.Component<BucketRowProps, {}> {
             manager.store.buckets.update(bucket.id, {name: val});
           }}
         />
-        <Link relative to={`/${bucket.id}`} className="fa fa-gear"></Link>
       </td>
       <td className="right"><Money value={balance} /></td>
       <td><MoneyInput value={0} onChange={() => {}}/></td>
       <td className="right">12.22/mo</td>
       <td>goal</td>
+      <td className="nobr">
+        <DebouncedInput
+          blendin
+          value={bucket.name}
+          placeholder="no name"
+          onChange={(val) => {
+            manager.store.buckets.update(bucket.id, {name: val});
+          }}
+        />
+        <Link relative to={`/${bucket.id}`} className="fa fa-gear"></Link>
+      </td>
     </tr>
   }
+
+  //----------------------------------
+  // Draggable
+  //----------------------------------
+  onDragStart = (ev) => {
+    ev.dataTransfer.setData('bucket', this.props.bucket.id);
+    ev.dataTransfer.effectAllowed = 'move';
+    this.setState({isDragging: true});
+  }
+  onDragEnd = (ev) => {
+    this.setState({isDragging: false});
+  }
+
+  //----------------------------------
+  // Drop zone
+  //----------------------------------
+  onDrop = (ev) => {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      _.each(ev.dataTransfer.items, item => {
+        let bucket_id = ev.dataTransfer.getData(item.type);
+        if (bucket_id !== this.props.bucket.id) {
+          const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
+          manager.store.buckets.moveBucket(bucket_id, placement, this.props.bucket.id)
+        }
+      })
+      this.setState({
+        underDrag: false,
+      })
+    }
+  }
+
+  onDragOver = (ev) => {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = 'move';
+      this.setState({
+        underDrag: true,
+        dropHalf: overTopOrBottom(ev),
+      });
+    }
+  }
+  onDragLeave = (ev) => {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: false});
+    }
+  }
+  canAcceptDrop = (ev):boolean => {
+    return _.includes(ev.dataTransfer.types, 'bucket');
+  }
 }
+
+
+class GroupRow extends React.Component<{
+  group: Group;
+  buckets: Bucket[];
+  balances: Balances;
+}, {
+  isDragging: boolean;
+  underDrag: boolean;
+  dropHalf: 'top'|'bottom';
+}> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isDragging: false,
+      underDrag: false,
+      dropHalf: 'top',
+    }
+  }
+  render() {
+    let { buckets, group, balances } = this.props;
+    let bucket_rows = _.sortBy(buckets || [], ['ranking'])
+    .map(bucket => {
+      return <BucketRow key={bucket.id} bucket={bucket} balance={balances[bucket.id]} />
+    })
+    return (
+      <tbody
+        key={`group-${group.id}`}
+        onDragOver={this.onDragOver}
+        onDrop={this.onDrop}
+        onDragLeave={this.onDragLeave}
+        >
+      <tr>
+        <td className={cx(
+          'nopad', 
+          {
+            underDrag: this.state.underDrag,
+            isDragging: this.state.isDragging,
+            dropTopHalf: this.state.underDrag && this.state.dropHalf === 'top',
+            dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
+          })}>
+          <div
+            className="drophandle"
+            draggable
+            onDragStart={this.onDragStart}
+            onDragEnd={this.onDragEnd}>
+              <span className="fa fa-bars"/>
+          </div>
+        </td>
+        <td colSpan={100}>
+        <DebouncedInput
+          blendin
+          value={group.name}
+          placeholder="no name"
+          onChange={(val) => {
+            manager.store.buckets.updateGroup(group.id, {name: val});
+          }}
+        /></td>
+      </tr>
+      {bucket_rows}
+    </tbody>);
+  }
+  //----------------------------------
+  // Draggable
+  //----------------------------------
+  onDragStart = (ev) => {
+    ev.dataTransfer.setData('group', this.props.group.id);
+    ev.dataTransfer.effectAllowed = 'move';
+    this.setState({isDragging: true});
+  }
+  onDragEnd = (ev) => {
+    this.setState({isDragging: false});
+  }
+
+  //----------------------------------
+  // Drop zone
+  //----------------------------------
+  onDrop = (ev) => {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      _.each(ev.dataTransfer.items, item => {
+        if (item.type === 'group') {
+          let group_id = ev.dataTransfer.getData(item.type);
+          if (group_id !== this.props.group.id) {
+            console.log('dropping group', group_id, 'on', this.props.group.id);
+            // const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
+            // manager.store.buckets.moveBucket(group_id, placement, this.props.bucket.id)
+          }
+        } else if (item.type === 'bucket') {
+          let bucket_id = ev.dataTransfer.getData(item.type);
+          manager.store.buckets.update(bucket_id, {group_id: this.props.group.id})
+        }
+      })
+      this.setState({
+        underDrag: false,
+      })
+    }
+  }
+
+  onDragOver = (ev) => {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = 'move';
+      this.setState({
+        underDrag: true,
+        dropHalf: overTopOrBottom(ev),
+      });
+    }
+  }
+  onDragLeave = (ev) => {
+    if (this.canAcceptDrop(ev)) {
+      ev.preventDefault();
+      this.setState({underDrag: false});
+    }
+  }
+  canAcceptDrop = (ev):boolean => {
+    if (this.props.buckets.length === 0) {
+      // I'm an empty group; I will accept buckets
+      return _.includes(ev.dataTransfer.types, 'group')
+        || _.includes(ev.dataTransfer.types, 'bucket');
+    } else {
+      return _.includes(ev.dataTransfer.types, 'group');  
+    }
+  }
+}
+
 
 interface GroupedBucketListProps {
   groups: Group[];
@@ -106,31 +344,13 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, a
         ranking: 'z',
       } as Group)
     }
-    let group_elems = _.sortBy(groups, ['ranking'])
+    let group_elems = _.sortBy(groups, ['ranking', 'name'])
       .map((group:Group) => {
-        let bucket_rows = (grouped_buckets[group.id] || [])
-        .map(bucket => {
-          return <BucketRow key={bucket.id} bucket={bucket} balance={balances[bucket.id]} />
-        })
-        return [
-        <thead key={`group-${group.id}`}>
-          <tr>
-            <th><span className="fa fa-bars"/></th>
-            <th colSpan={100}>
-            <DebouncedInput
-              blendin
-              value={group.name}
-              placeholder="no name"
-              onChange={(val) => {
-                manager.store.buckets.updateGroup(group.id, {name: val});
-              }}
-            /></th>
-          </tr>
-        </thead>,
-        <tbody key={`buckets-${group.id}`}>
-          {bucket_rows}
-        </tbody>
-        ]
+        return <GroupRow
+          key={group.id}
+          group={group}
+          buckets={grouped_buckets[group.id] || []}
+          balances={balances} />
       })
     return <table className="ledger">
       <thead>
@@ -141,11 +361,13 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, a
           <th>Transaction</th>
           <th>Monthly Deposit</th>
           <th>Goal</th>
+          <th>Name</th>
         </tr>
       </thead>
       {group_elems}
     </table>
   }
+
 }
 
 interface BucketViewProps {

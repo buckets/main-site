@@ -404,3 +404,36 @@ h1 {
 .color-picker .pallete .dot {
   margin: 0.25rem;
 }
+
+
+/* Drag and Drop */
+.nopad {
+  padding: 0 !important;
+}
+.drophandle {
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  color: var(--lightest-grey);
+  user-select: none;
+  padding: 0 0.5rem;
+}
+.drophandle:hover {
+  color: var(--grey);
+  cursor: -webkit-grab;
+}
+.drophandle:active {
+}
+.isDragging {
+  opacity: 0.5;
+}
+.underDrag {
+}
+.dropTopHalf .drophandle {
+  border-top-color: red;
+}
+.dropBottomHalf .drophandle {
+  border-bottom-color: red;
+}
