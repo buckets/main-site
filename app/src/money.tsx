@@ -9,9 +9,10 @@ function fancyEval(x:string) {
 }
 
 interface MoneyInputProps {
-  value: number;
-  onChange: (value:number)=>any;
+  value?: number;
+  onChange?: (value:number)=>any;
   className?: string;
+  [k:string]: any;
 }
 export class MoneyInput extends React.Component<MoneyInputProps, {
   display:string,
@@ -25,10 +26,12 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
     }
   }
   componentWillReceiveProps(nextProps) {
-    var current = this.display2Cents(this.state.display);
-    if ((current && current !== nextProps.value) || (!current && nextProps.value)) {
-      // effectively different
-      this.setState({display: cents2decimal(nextProps.value) || ''})
+    if (nextProps.value !== undefined) {
+      var current = this.display2Cents(this.state.display);
+      if ((current && current !== nextProps.value) || (!current && nextProps.value)) {
+        // effectively different
+        this.setState({display: cents2decimal(nextProps.value) || ''})
+      }
     }
   }
   display2Cents(display) {
@@ -43,7 +46,9 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
     var display = e.target.value;
     var value = this.display2Cents(display);
     this.setState({display: display}, function() {
-      this.props.onChange(value);
+      if (this.props.onChange) {
+        this.props.onChange(value);
+      }
     });
   }
   onFocus = () => {

@@ -101,12 +101,21 @@ body {
   flex-grow: 1;
 }
 
+a.subtle {
+  color: var(--lightest-grey);
+  text-decoration: none;
+  transform: color 0.2s;
+}
+a.subtle:hover {
+  color: var(--blue);
+}
+
 table.ledger {
   border-collapse: collapse;
 }
 table.ledger th,
 table.ledger td {
-  border: 1px solid lightgrey;
+  border: 1px solid var(--lightest-grey);
   padding: 1px 5px;
   text-align: left;
   vertical-align: top;
@@ -123,6 +132,20 @@ table.ledger tr.group-row td {
   padding-top: 1rem;
   vertical-align: bottom;
 }
+
+table.ledger th {
+  text-align: left;
+  vertical-align: bottom;
+
+  border: none;
+  border-bottom: 1px solid var(--lighter-grey);
+  color: var(--lighter-grey);
+  font-weight: normal;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+
 tr.group-row .group-name {
   font-size: 1.25rem;
 }
@@ -409,7 +432,7 @@ h1 {
   background-color: white;
   box-shadow: 1px 1px 14px rgba(0,0,0,0.2);
   padding: 0.5rem;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-around;
 }
 .color-picker.small .pallete {
@@ -417,6 +440,8 @@ h1 {
   left: .5rem;
 }
 .color-picker .pallete .dot {
+  width: 20px;
+  height: 20px;
   margin: 0.25rem;
 }
 

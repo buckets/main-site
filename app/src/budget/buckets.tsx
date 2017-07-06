@@ -31,6 +31,11 @@ function overTopOrBottom(ev):'top'|'bottom' {
 }
 
 
+interface PendingAmounts {
+  [k:number]: number;
+}
+
+
 interface BucketsPageProps {
   appstate: AppState;
 }
@@ -70,6 +75,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, any> {
 interface BucketRowProps {
   bucket: Bucket;
   balance: number;
+  onPendingChanged?: (amounts:PendingAmounts) => any;
 }
 class BucketRow extends React.Component<BucketRowProps, {
   isDragging: boolean;
@@ -85,7 +91,7 @@ class BucketRow extends React.Component<BucketRowProps, {
     }
   }
   render() {
-    let { bucket, balance } = this.props;
+    let { bucket, balance, onPendingChanged } = this.props;
     return <tr
       key={bucket.id}
       onDragOver={this.onDragOver}
@@ -124,7 +130,15 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right"><Money value={balance} /></td>
-      <td><MoneyInput value={0} onChange={() => {}}/></td>
+      <td>
+        <MoneyInput
+          onChange={(val) => {
+            if (onPendingChanged) {
+              onPendingChanged({[bucket.id]: val});
+            }
+          }}
+        />
+      </td>
       <td className="right">12.22/mo</td>
       <td>goal</td>
       <td className="nobr">
@@ -136,7 +150,7 @@ class BucketRow extends React.Component<BucketRowProps, {
             manager.store.buckets.update(bucket.id, {name: val});
           }}
         />
-        <Link relative to={`/${bucket.id}`} className="fa fa-gear"></Link>
+        <Link relative to={`/${bucket.id}`} className="subtle fa fa-gear"></Link>
       </td>
     </tr>
   }
@@ -198,6 +212,7 @@ class GroupRow extends React.Component<{
   group: Group;
   buckets: Bucket[];
   balances: Balances;
+  onPendingChanged?: (amounts:PendingAmounts) => any;
 }, {
   isDragging: boolean;
   underDrag: boolean;
@@ -212,10 +227,14 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, balances } = this.props;
+    let { buckets, group, balances, onPendingChanged } = this.props;
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
-      return <BucketRow key={bucket.id} bucket={bucket} balance={balances[bucket.id]} />
+      return <BucketRow
+        key={bucket.id}
+        bucket={bucket}
+        balance={balances[bucket.id]}
+        onPendingChanged={onPendingChanged} />
     })
     return (
       <tbody
@@ -251,6 +270,15 @@ class GroupRow extends React.Component<{
             manager.store.buckets.updateGroup(group.id, {name: val});
           }}
         /></td>
+      </tr>
+      <tr>
+        <th className="border"></th>
+        <th>Bucket</th>
+        <th>Balance</th>
+        <th>Deposit/Withdraw</th>
+        <th>Monthly Deposit</th>
+        <th>Goal</th>
+        <th>Name</th>
       </tr>
       {bucket_rows}
     </tbody>);
@@ -323,8 +351,22 @@ interface GroupedBucketListProps {
   groups: Group[];
   buckets: Bucket[];
   balances: Balances;
+  onPendingChanged?: (amounts:PendingAmounts) => any;
 }
-export class GroupedBucketList extends React.Component<GroupedBucketListProps, any> {
+export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
+  pending: PendingAmounts;
+}> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      pending: {},
+    };
+  }
+  pendingChanged = (changed:PendingAmounts) => {
+    console.log('new pending', changed);
+    let new_pending = Object.assign({}, this.state.pending, changed);
+    this.setState({pending: new_pending})
+  }
   render() {
     let { buckets, balances } = this.props;    
     let grouped_buckets = {};
@@ -351,20 +393,12 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, a
           key={group.id}
           group={group}
           buckets={grouped_buckets[group.id] || []}
-          balances={balances} />
+          balances={balances}
+          onPendingChanged={this.pendingChanged} />
       })
+    console.log(this.state.pending);
+    hey matt, the next step is to make it so that you can press enter to make it rain
     return <table className="ledger">
-      <thead>
-        <tr>
-          <th className="border"></th>
-          <th>Name</th>
-          <th>Balance</th>
-          <th>Transaction</th>
-          <th>Monthly Deposit</th>
-          <th>Goal</th>
-          <th>Name</th>
-        </tr>
-      </thead>
       {group_elems}
     </table>
   }
