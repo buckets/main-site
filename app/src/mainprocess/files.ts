@@ -89,7 +89,7 @@ export function newBudgetWindow() {
   let bf = WIN2FILE[win.id];
   let url = win.webContents.getURL();
   let parsed = URL.parse(url);
-  bf.openWindow(parsed.pathname);
+  bf.openWindow(`${parsed.pathname}${parsed.hash}`);
 }
 
 export function openDialog() {
