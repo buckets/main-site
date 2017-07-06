@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i&subset=latin-ext');
+@import url('fonts.css');
 html,
 body {
   margin: 0;
@@ -39,6 +39,9 @@ body {
 }
 .nobr {
   white-space: nowrap;
+}
+.right {
+  text-align: right !important;
 }
 
 
@@ -354,4 +357,50 @@ h1 {
 
 .totals flow {
 
+}
+
+/* ColorPicker */
+.color-picker {
+  display: inline-block;
+  margin: 0 .5rem;
+}
+.color-picker.open:focus {
+  outline: none;
+}
+.color-picker .dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 1000px;
+  background-color: black;
+}
+.color-picker.small .dot {
+  width: 10px;
+  height: 10px;
+}
+.color-picker .dot.selected {
+  border: 3px solid black;
+}
+.color-picker .picker-wrap {
+  position: relative;
+}
+.color-picker .pallete {
+  position: absolute;
+  border-radius: 3px;
+  top: -10px;
+  left: .5rem;
+  display: flex;
+  flex-wrap: wrap;
+  width: 9rem;
+  background-color: white;
+  box-shadow: 1px 1px 14px rgba(0,0,0,0.2);
+  padding: 0.5rem;
+  align-items: center;
+  justify-content: space-around;
+}
+.color-picker.small .pallete {
+  top: -5px;
+  left: .5rem;
+}
+.color-picker .pallete .dot {
+  margin: 0.25rem;
 }

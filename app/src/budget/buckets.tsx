@@ -3,9 +3,10 @@ import * as _ from 'lodash'
 import {Route, Link, WithRouting} from './routing'
 import {Bucket, Group, Transaction} from '../models/bucket'
 import {Balances} from '../models/balances'
-import {Money} from '../money'
+import { Money, MoneyInput } from '../money'
 import {DebouncedInput} from '../input'
 import { manager, AppState } from './appstate'
+import { ColorPicker } from '../color'
 
 
 interface BucketsPageProps {
@@ -18,14 +19,11 @@ export class BucketsPage extends React.Component<BucketsPageProps, any> {
       <div className="panes">
         <div className="page">
           <button onClick={this.addBucket}>Create bucket</button>
+          <button onClick={this.addGroup}>Create group</button>
           <GroupedBucketList
             buckets={_.values(appstate.buckets)}
             balances={appstate.bucket_balances}
             groups={_.values(appstate.groups)} />
-          bucket list:
-          <BucketList
-            buckets={_.values(appstate.buckets)}
-            balances={appstate.bucket_balances} />
         </div>
         <Route path="/<int:id>">
           <WithRouting func={(routing) => {
@@ -40,55 +38,45 @@ export class BucketsPage extends React.Component<BucketsPageProps, any> {
       </div>);
   }
   addBucket = () => {
-    manager.store.buckets.add({name: 'new bucket'})
+    manager.store.buckets.add({name: 'New Bucket'})
+  }
+  addGroup = () => {
+    manager.store.buckets.addGroup({name: 'New Group'})
   }
 }
 
-interface BucketListProps {
-  buckets: Bucket[];
-  balances: Balances;
+interface BucketRowProps {
+  bucket: Bucket;
+  balance: number;
 }
-export class BucketList extends React.Component<BucketListProps, any> {
+class BucketRow extends React.Component<BucketRowProps, {}> {
   render() {
-    let balances = this.props.balances;
-    let buckets = this.props.buckets
-    .map(bucket => {
-      return <tr key={bucket.id}>
-        <td><Link relative to={`/${bucket.id}`}>edit</Link></td>
-        <td>
-          <DebouncedInput
-            blendin
-            value={bucket.name}
-            placeholder="no name"
-            onChange={(val) => {
-              manager.store.buckets.update(bucket.id, {name: val});
-            }}
-          />
-        </td>
-        <td><Money value={balances[bucket.id]} /></td>
-      </tr>
-    })
-    return <table className="ledger">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Bucket</th>
-          <th>Balance</th>
-        </tr>
-      </thead>
-      <tbody>
-        {buckets}
-      </tbody>
-    </table>
-  }
-}
-
-function bucketRows(buckets:Bucket[]) {
-  return buckets.map(bucket => {
+    let { bucket, balance } = this.props;
     return <tr key={bucket.id}>
-      <td>{bucket.name}</td>
+      <td><span className="fa fa-bars"/></td>
+      <td>
+        <ColorPicker
+          className="small"
+          value={bucket.color}
+          onChange={(val) => {
+            manager.store.buckets.update(bucket.id, {color: val})
+          }} />
+        <DebouncedInput
+          blendin
+          value={bucket.name}
+          placeholder="no name"
+          onChange={(val) => {
+            manager.store.buckets.update(bucket.id, {name: val});
+          }}
+        />
+        <Link relative to={`/${bucket.id}`} className="fa fa-gear"></Link>
+      </td>
+      <td className="right"><Money value={balance} /></td>
+      <td><MoneyInput value={0} onChange={() => {}}/></td>
+      <td className="right">12.22/mo</td>
+      <td>goal</td>
     </tr>
-  })
+  }
 }
 
 interface GroupedBucketListProps {
@@ -98,9 +86,10 @@ interface GroupedBucketListProps {
 }
 export class GroupedBucketList extends React.Component<GroupedBucketListProps, any> {
   render() {
+    let { buckets, balances } = this.props;
     const NOGROUP = -1;
     let grouped_buckets = {};
-    this.props.buckets.forEach(bucket => {
+    buckets.forEach(bucket => {
       let group_id = bucket.group_id || NOGROUP;
       if (!grouped_buckets[group_id]) {
         grouped_buckets[group_id] = [];
@@ -108,6 +97,8 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, a
       grouped_buckets[group_id].push(bucket);
     })
     let groups = this.props.groups.slice();
+
+    // if there are ungrouped buckets
     if (grouped_buckets[NOGROUP]) {
       groups.push({
         id: NOGROUP,
@@ -115,25 +106,41 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, a
         ranking: 'z',
       } as Group)
     }
-    console.log('groups', groups);
-    console.log('grouped_buckets', grouped_buckets);
     let group_elems = _.sortBy(groups, ['ranking'])
       .map((group:Group) => {
+        let bucket_rows = (grouped_buckets[group.id] || [])
+        .map(bucket => {
+          return <BucketRow key={bucket.id} bucket={bucket} balance={balances[bucket.id]} />
+        })
         return [
         <thead key={`group-${group.id}`}>
           <tr>
-            <th colSpan={100}>{group.name}</th>
+            <th><span className="fa fa-bars"/></th>
+            <th colSpan={100}>
+            <DebouncedInput
+              blendin
+              value={group.name}
+              placeholder="no name"
+              onChange={(val) => {
+                manager.store.buckets.updateGroup(group.id, {name: val});
+              }}
+            /></th>
           </tr>
         </thead>,
         <tbody key={`buckets-${group.id}`}>
-          {bucketRows(grouped_buckets[group.id])}
+          {bucket_rows}
         </tbody>
         ]
       })
     return <table className="ledger">
       <thead>
         <tr>
-          <th>Hello</th>
+          <th></th>
+          <th>Name</th>
+          <th>Balance</th>
+          <th>Transaction</th>
+          <th>Monthly Deposit</th>
+          <th>Goal</th>
         </tr>
       </thead>
       {group_elems}
@@ -176,6 +183,11 @@ export class BucketView extends React.Component<BucketViewProps, {
     let { bucket, balance } = this.props;
     return (<div className="page" key={bucket.id}>
       <h1>
+        <ColorPicker
+        value={bucket.color}
+        onChange={(val) => {
+          manager.store.buckets.update(bucket.id, {color: val})
+        }} />
         <DebouncedInput
           blendin
           value={bucket.name}

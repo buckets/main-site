@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import {EventEmitter} from 'events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import {Account, Transaction as ATrans} from '../models/account'
-import {Bucket, Group} from '../models/bucket'
+import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 
@@ -12,14 +12,17 @@ interface IAppState {
   accounts: {
     [k: number]: Account;
   };
+  transactions: {
+    [k: number]: ATrans;
+  };
   groups: {
     [k: number]: Group;
   };
   buckets: {
     [k: number]: Bucket;
   };
-  transactions: {
-    [k: number]: ATrans;
+  btransactions: {
+    [k: number]: BTrans;
   };
   account_balances: Balances;
   bucket_balances: Balances;
@@ -43,6 +46,7 @@ export class AppState implements IAppState, IComputedAppState {
   buckets = {};
   groups = {};
   transactions = {};
+  btransactions = {};
   account_balances = {};
   bucket_balances = {};
   month = null;
