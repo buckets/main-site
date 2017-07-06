@@ -195,7 +195,7 @@ test('group different ranking', async t => {
   t.ok(g1.ranking < g2.ranking)
 })
 
-test('moveBucket', async t => {
+test('moveBucket 2', async t => {
   let { store, events } = await getStore()
   let b1 = await store.buckets.add({name: 'Grocery'})
   let b2 = await store.buckets.add({name: 'Vacation'})
@@ -219,7 +219,7 @@ test('moveBucket', async t => {
 
   t.ok(b1.ranking < b2.ranking, `b1 ${b1.ranking} should be < b2 ${b2.ranking}`)
 })
-test('moveBucket', async t => {
+test('moveBucket 3', async t => {
   let { store, events } = await getStore()
   let b1 = await store.buckets.add({name: 'Grocery', group_id: 4})
   let b2 = await store.buckets.add({name: 'Vacation', group_id: 4})
@@ -237,4 +237,30 @@ test('moveBucket', async t => {
   t.ok(b1.ranking < b3.ranking)
   t.ok(b3.ranking < b2.ranking)
   t.equal(b3.group_id, 4)
+})
+test('moveGroup', async t => {
+  let { store } = await getStore()
+  let g1 = await store.buckets.addGroup({name: 'Group 1'})
+  let g2 = await store.buckets.addGroup({name: 'Group 2'})
+  let g3 = await store.buckets.addGroup({name: 'Group 3'})
+
+  t.ok(g1.ranking < g2.ranking)
+  t.ok(g2.ranking < g3.ranking)
+
+  await store.buckets.moveGroup(g3.id, 'before', g1.id)
+
+  g1 = await store.buckets.getGroup(g1.id);
+  g2 = await store.buckets.getGroup(g2.id);
+  g3 = await store.buckets.getGroup(g3.id);
+
+  t.ok(g3.ranking < g1.ranking)
+  
+  await store.buckets.moveGroup(g3.id, 'after', g1.id)
+
+  g1 = await store.buckets.getGroup(g1.id);
+  g2 = await store.buckets.getGroup(g2.id);
+  g3 = await store.buckets.getGroup(g3.id);
+
+  t.ok(g1.ranking < g3.ranking)
+  t.ok(g3.ranking < g2.ranking)
 })

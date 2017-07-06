@@ -2,6 +2,7 @@ import {IObject, IStore} from '../store'
 import {ts2db, Timestamp} from '../time'
 import {Balances, computeBalances} from './balances'
 import { rankBetween } from '../ranking'
+import { DEFAULT_COLORS } from '../color'
 
 type BucketKind =
   ''
@@ -64,6 +65,7 @@ export class BucketStore {
           $group_id: group_id,
         })
     data.ranking = rankBetween(rows[0].highrank, 'z')
+    data.color = DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)];
     return this.store.createObject(Bucket, data);
   }
   async list():Promise<Bucket[]> {
@@ -196,7 +198,46 @@ export class BucketStore {
       order: ['ranking', 'name', 'id'],
     })
   }
+  async getGroup(id:number):Promise<Group> {
+    return this.store.getObject(Group, id);
+  }
   async updateGroup(id:number, data:{name?:string, ranking?:string}):Promise<Group> {
     return this.store.updateObject(Group, id, data);
+  }
+  async moveGroup(moving_id:number, placement:'before'|'after', reference_id:number) {
+    let where;
+    let order;
+    if (placement === 'before') {
+      // before
+      where = 'ranking <= (SELECT ranking FROM bucket_group WHERE id=$reference_id)'
+      order = 'ranking DESC'
+    } else {
+      // after
+      where = 'ranking >= (SELECT ranking FROM bucket_group WHERE id=$reference_id)'
+      order = 'ranking ASC'
+    }
+    let rows = await this.store.query(`
+        SELECT id, ranking
+        FROM bucket_group
+        WHERE ${where}
+        ORDER BY ${order}
+        LIMIT 2
+        `, {
+          $reference_id: reference_id,
+        })
+    let ranking;
+    if (rows.length === 0) {
+      throw new Error(`No such reference group: ${reference_id}`);
+    } else if (rows.length === 1) {
+      if (placement === 'before') {
+        ranking = rankBetween(null, rows[0].ranking);
+      } else if (placement === 'after') {
+        ranking = rankBetween(rows[0].ranking, null);
+      }
+    } else {
+      // 2 rows
+      ranking = rankBetween(rows[0].ranking, rows[1].ranking);
+    }
+    return this.updateGroup(moving_id, {ranking})
   }
 }

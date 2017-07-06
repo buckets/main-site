@@ -111,6 +111,21 @@ table.ledger td {
   text-align: left;
   vertical-align: top;
 }
+table.ledger td.noborder,
+table.ledger th.noborder {
+  border: 0px solid transparent;
+}
+table.ledger :empty {
+  border: none;
+}
+table.ledger tr.group-row td {
+  border: none;
+  padding-top: 1rem;
+  vertical-align: bottom;
+}
+tr.group-row .group-name {
+  font-size: 1.25rem;
+}
 
 .panes {
   display: flex;
@@ -416,9 +431,10 @@ h1 {
   width: 100%;
   height: 100%;
   text-align: center;
-  color: var(--lightest-grey);
+  color: transparent;
   user-select: none;
   padding: 0 0.5rem;
+  transform: color 0.2s;
 }
 .drophandle:hover {
   color: var(--grey);

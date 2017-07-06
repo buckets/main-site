@@ -9,6 +9,8 @@ import {DebouncedInput} from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 
+const NOGROUP = -1;
+
 function pageY(elem):number {
   let result = elem.offsetTop;
   while (elem.offsetParent) {
@@ -96,7 +98,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
       })}
     >
-      <td className="nopad">
+      <td className="nopad noborder">
         <div
           className="drophandle"
           draggable
@@ -222,9 +224,10 @@ class GroupRow extends React.Component<{
         onDrop={this.onDrop}
         onDragLeave={this.onDragLeave}
         >
-      <tr>
+      <tr className="group-row">
         <td className={cx(
-          'nopad', 
+          'nopad',
+          'noborder', 
           {
             underDrag: this.state.underDrag,
             isDragging: this.state.isDragging,
@@ -233,13 +236,13 @@ class GroupRow extends React.Component<{
           })}>
           <div
             className="drophandle"
-            draggable
+            draggable={group.id !== NOGROUP}
             onDragStart={this.onDragStart}
             onDragEnd={this.onDragEnd}>
               <span className="fa fa-bars"/>
           </div>
         </td>
-        <td colSpan={100}>
+        <td colSpan={100} className="group-name">
         <DebouncedInput
           blendin
           value={group.name}
@@ -274,9 +277,8 @@ class GroupRow extends React.Component<{
         if (item.type === 'group') {
           let group_id = ev.dataTransfer.getData(item.type);
           if (group_id !== this.props.group.id) {
-            console.log('dropping group', group_id, 'on', this.props.group.id);
-            // const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
-            // manager.store.buckets.moveBucket(group_id, placement, this.props.bucket.id)
+            const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
+            manager.store.buckets.moveGroup(group_id, placement, this.props.group.id);
           }
         } else if (item.type === 'bucket') {
           let bucket_id = ev.dataTransfer.getData(item.type);
@@ -324,8 +326,7 @@ interface GroupedBucketListProps {
 }
 export class GroupedBucketList extends React.Component<GroupedBucketListProps, any> {
   render() {
-    let { buckets, balances } = this.props;
-    const NOGROUP = -1;
+    let { buckets, balances } = this.props;    
     let grouped_buckets = {};
     buckets.forEach(bucket => {
       let group_id = bucket.group_id || NOGROUP;
@@ -355,7 +356,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, a
     return <table className="ledger">
       <thead>
         <tr>
-          <th></th>
+          <th className="border"></th>
           <th>Name</th>
           <th>Balance</th>
           <th>Transaction</th>
