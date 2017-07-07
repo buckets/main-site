@@ -84,7 +84,7 @@ export class AccountView extends React.Component<AccountViewProps, {
   }
   render() {
     let { account, balance } = this.props;
-    return (<div className="page" key={account.id}>
+    return (<div className="padded" key={account.id}>
       <h1>
         <DebouncedInput
           blendin
@@ -140,7 +140,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
     let { appstate } = this.props;
     return (
       <div className="panes">
-        <div className="page">
+        <div className="padded">
           <button onClick={this.addAccount}>Create account</button>
           <AccountList
             accounts={_.values(appstate.accounts)}

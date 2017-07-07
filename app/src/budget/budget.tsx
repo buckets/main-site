@@ -93,7 +93,7 @@ class Application extends React.Component<ApplicationProps, any> {
                 </div>
               </div>
               <div className="content">
-                <div className="header">
+                <header>
                   <div className="totals">
                     <total>
                       <name>Rain</name>
@@ -125,8 +125,8 @@ class Application extends React.Component<ApplicationProps, any> {
                       />);
                     }} />
                   </div>
-                </div>
-                <div className="body">
+                </header>
+                <div className="page">
                   <Route path="/accounts">
                     <AccountsPage appstate={appstate} />
                   </Route>

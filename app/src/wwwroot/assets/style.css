@@ -89,65 +89,23 @@ body {
   display: flex;
   flex-direction: column;
 }
-.app .content .header {
+.app .content header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: var(--lightest-grey);
+  flex-shrink: 0;
 }
-.app .content .body {
-  overflow: auto;
-  flex-basis: 10px;
+.app .content .page {
   flex-grow: 1;
+  flex-basis: 1px;
 }
 
-a.subtle {
-  color: var(--lightest-grey);
-  text-decoration: none;
-  transform: color 0.2s;
-}
-a.subtle:hover {
-  color: var(--blue);
-}
-
-table.ledger {
-  border-collapse: collapse;
-}
-table.ledger th,
-table.ledger td {
-  border: 1px solid var(--lightest-grey);
-  padding: 1px 5px;
-  text-align: left;
-  vertical-align: top;
-}
-table.ledger td.noborder,
-table.ledger th.noborder {
-  border: 0px solid transparent;
-}
-table.ledger :empty {
-  border: none;
-}
-table.ledger tr.group-row td {
-  border: none;
-  padding-top: 1rem;
-  vertical-align: bottom;
-}
-
-table.ledger th {
-  text-align: left;
-  vertical-align: bottom;
-
-  border: none;
-  border-bottom: 1px solid var(--lighter-grey);
-  color: var(--lighter-grey);
-  font-weight: normal;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-
-tr.group-row .group-name {
-  font-size: 1.25rem;
+.rows {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  overflow: auto;
 }
 
 .panes {
@@ -157,20 +115,21 @@ tr.group-row .group-name {
   flex-grow: 1;
   max-height: 100%;
   min-height: 100%;
-  overflow: hidden;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 .panes > * {
   flex-grow: 1;
   flex-basis: 1px;
   border-left: 1px solid var(--lightest-grey);
+  overflow: auto;
 }
 .panes > *:first-child {
   border: 0;
 }
 
-.page {
+.padded {
   padding: 1rem;
-  overflow: auto;
 }
 
 h1 {
@@ -310,6 +269,56 @@ h1 {
   sborder-bottom-color: var(--blue);
   background-color: rgb(255,250,205);
 }
+
+a.subtle {
+  color: var(--lightest-grey);
+  text-decoration: none;
+  transform: color 0.2s;
+}
+a.subtle:hover {
+  color: var(--blue);
+}
+
+table.ledger {
+  border-collapse: collapse;
+}
+table.ledger th,
+table.ledger td {
+  border: 1px solid var(--lightest-grey);
+  padding: 1px 5px;
+  text-align: left;
+  vertical-align: top;
+}
+table.ledger td.noborder,
+table.ledger th.noborder {
+  border: 0px solid transparent;
+}
+table.ledger :empty {
+  border: none;
+}
+table.ledger tr.group-row td {
+  border: none;
+  padding-top: 1rem;
+  vertical-align: bottom;
+}
+
+table.ledger th {
+  text-align: left;
+  vertical-align: bottom;
+
+  border: none;
+  border-bottom: 1px solid var(--lighter-grey);
+  color: var(--lighter-grey);
+  font-weight: normal;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+
+tr.group-row .group-name {
+  font-size: 1.25rem;
+}
+
 
 
 /* Money */

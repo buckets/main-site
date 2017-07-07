@@ -39,29 +39,66 @@ interface PendingAmounts {
 interface BucketsPageProps {
   appstate: AppState;
 }
-export class BucketsPage extends React.Component<BucketsPageProps, any> {
+export class BucketsPage extends React.Component<BucketsPageProps, {
+  pending: PendingAmounts;
+}> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      pending: {},
+    }
+  }
   render() {
     let { appstate } = this.props;
+    let { pending } = this.state;
+    let pending_deposits = 0;
+    let pending_withdrawls = 0;
+    _.each(pending, (amount, bucket_id) => {
+      if (amount >= 0) {
+        pending_deposits += amount;
+      } else {
+        pending_withdrawls += amount;
+      }
+    })
+    let doPendingLabelParts = [];
+    if (pending_deposits) {
+      doPendingLabelParts.push(<span key="deposit">Deposit <Money value={pending_deposits} /></span>);
+    }
+    if (pending_withdrawls) {
+      doPendingLabelParts.push(<span key="withdraw">Withdraw <Money value={pending_withdrawls} /></span>);
+    }
+    let doPendingButton;
+    if (doPendingLabelParts.length) {
+      doPendingButton = <button onClick={this.doPending}>{doPendingLabelParts}</button>;
+    } else {
+      doPendingButton = <button disabled>Deposit/Withdraw</button>;
+    }
     return (
-      <div className="panes">
-        <div className="page">
+      <div className="rows">
+        <div className="subheader">
           <button onClick={this.addBucket}>Create bucket</button>
           <button onClick={this.addGroup}>Create group</button>
-          <GroupedBucketList
-            buckets={_.values(appstate.buckets)}
-            balances={appstate.bucket_balances}
-            groups={_.values(appstate.groups)} />
+          {doPendingButton}
         </div>
-        <Route path="/<int:id>">
-          <WithRouting func={(routing) => {
-            let bucket = appstate.buckets[routing.params.id];
-            let balance = appstate.bucket_balances[bucket.id];
-            return (<BucketView
-              bucket={bucket}
-              balance={balance}
-              appstate={appstate} />);
-          }} />
-        </Route>
+        <div className="panes">
+          <div className="padded">
+            <GroupedBucketList
+              buckets={_.values(appstate.buckets)}
+              balances={appstate.bucket_balances}
+              groups={_.values(appstate.groups)}
+              onPendingChanged={this.pendingChanged} />
+          </div>
+          <Route path="/<int:id>">
+            <WithRouting func={(routing) => {
+              let bucket = appstate.buckets[routing.params.id];
+              let balance = appstate.bucket_balances[bucket.id];
+              return (<BucketView
+                bucket={bucket}
+                balance={balance}
+                appstate={appstate} />);
+            }} />
+          </Route>
+        </div>
       </div>);
   }
   addBucket = () => {
@@ -69,6 +106,13 @@ export class BucketsPage extends React.Component<BucketsPageProps, any> {
   }
   addGroup = () => {
     manager.store.buckets.addGroup({name: 'New Group'})
+  }
+  doPending = () => {
+    console.log('doPending', this.state.pending);
+  }
+  pendingChanged = (changed:PendingAmounts) => {
+    console.log('pending Changed', changed);
+    this.setState({pending: Object.assign(this.state.pending, changed)});
   }
 }
 
@@ -353,19 +397,14 @@ interface GroupedBucketListProps {
   balances: Balances;
   onPendingChanged?: (amounts:PendingAmounts) => any;
 }
-export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
-  pending: PendingAmounts;
-}> {
+export class GroupedBucketList extends React.Component<GroupedBucketListProps, {}> {
   constructor(props) {
     super(props)
-    this.state = {
-      pending: {},
-    };
   }
   pendingChanged = (changed:PendingAmounts) => {
-    console.log('new pending', changed);
-    let new_pending = Object.assign({}, this.state.pending, changed);
-    this.setState({pending: new_pending})
+    if (this.props.onPendingChanged) {
+      this.props.onPendingChanged(changed);
+    }
   }
   render() {
     let { buckets, balances } = this.props;    
@@ -396,8 +435,6 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           balances={balances}
           onPendingChanged={this.pendingChanged} />
       })
-    console.log(this.state.pending);
-    hey matt, the next step is to make it so that you can press enter to make it rain
     return <table className="ledger">
       {group_elems}
     </table>
@@ -438,7 +475,7 @@ export class BucketView extends React.Component<BucketViewProps, {
   }
   render() {
     let { bucket, balance } = this.props;
-    return (<div className="page" key={bucket.id}>
+    return (<div className="padded" key={bucket.id}>
       <h1>
         <ColorPicker
         value={bucket.color}
