@@ -65,7 +65,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       doPendingLabelParts.push(<span key="deposit">Deposit <Money value={pending_deposits} /></span>);
     }
     if (pending_withdrawls) {
-      doPendingLabelParts.push(<span key="withdraw">Withdraw <Money value={pending_withdrawls} /></span>);
+      doPendingLabelParts.push(<span key="withdraw">{pending_deposits ? ' and withdraw' : 'Withdraw'} <Money value={pending_withdrawls} /></span>);
     }
     let doPendingButton;
     if (doPendingLabelParts.length) {
@@ -125,6 +125,7 @@ class BucketRow extends React.Component<BucketRowProps, {
   isDragging: boolean;
   underDrag: boolean;
   dropHalf: 'top'|'bottom';
+  pending: number;
 }> {
   constructor(props) {
     super(props);
@@ -132,10 +133,21 @@ class BucketRow extends React.Component<BucketRowProps, {
       isDragging: false,
       underDrag: false,
       dropHalf: 'top',
+      pending: 0,
     }
   }
   render() {
     let { bucket, balance, onPendingChanged } = this.props;
+    let balance_el;
+    if (this.state.pending) {
+      balance_el = <span>
+        <Money key="bal" value={balance} className="strikeout" />
+        <span className="fa fa-long-arrow-right change-arrow" />
+        <Money key="pend" value={balance + this.state.pending} />
+      </span>
+    } else {
+      balance_el = <Money value={balance} />
+    }
     return <tr
       key={bucket.id}
       onDragOver={this.onDragOver}
@@ -173,10 +185,11 @@ class BucketRow extends React.Component<BucketRowProps, {
           }}
         />
       </td>
-      <td className="right"><Money value={balance} /></td>
-      <td>
+      <td className="right">{balance_el}</td>
+      <td className="center">
         <MoneyInput
           onChange={(val) => {
+            this.setState({pending: val});
             if (onPendingChanged) {
               onPendingChanged({[bucket.id]: val});
             }
@@ -319,10 +332,10 @@ class GroupRow extends React.Component<{
         <th className="border"></th>
         <th>Bucket</th>
         <th>Balance</th>
-        <th>Deposit/Withdraw</th>
+        <th className="center">Transact</th>
         <th>Monthly Deposit</th>
         <th>Goal</th>
-        <th>Name</th>
+        <th></th>
       </tr>
       {bucket_rows}
     </tbody>);

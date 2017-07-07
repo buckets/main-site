@@ -139,25 +139,29 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   render() {
     let { appstate } = this.props;
     return (
-      <div className="panes">
-        <div className="padded">
+      <div className="rows">
+        <div className="subheader">
           <button onClick={this.addAccount}>Create account</button>
-          <AccountList
-            accounts={_.values(appstate.accounts)}
-            balances={appstate.account_balances} />
         </div>
-        <Route path="/<int:id>">
-          <WithRouting func={(routing) => {
-            let account = appstate.accounts[routing.params.id];
-            let balance = appstate.account_balances[account.id];
-            return (<AccountView
-              account={account}
-              balance={balance}
-              transactions={_.values(appstate.transactions)
-                .filter(t => t.account_id == account.id)}
-              appstate={appstate} />);
-          }} />
-        </Route>
+        <div className="panes">
+          <div className="padded">
+            <AccountList
+              accounts={_.values(appstate.accounts)}
+              balances={appstate.account_balances} />
+          </div>
+          <Route path="/<int:id>">
+            <WithRouting func={(routing) => {
+              let account = appstate.accounts[routing.params.id];
+              let balance = appstate.account_balances[account.id];
+              return (<AccountView
+                account={account}
+                balance={balance}
+                transactions={_.values(appstate.transactions)
+                  .filter(t => t.account_id == account.id)}
+                appstate={appstate} />);
+            }} />
+          </Route>
+        </div>
       </div>);
   }
   addAccount = () => {

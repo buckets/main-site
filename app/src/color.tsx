@@ -25,6 +25,7 @@ export class ColorPicker extends React.Component<{
   onChange: (val:string)=>any;
   options?: string[];
   className?: string;
+  tabIndex?: number;
 }, {
   value: string;
   open: boolean;
@@ -49,8 +50,9 @@ export class ColorPicker extends React.Component<{
     this.setState({open: false});
   }
   render() {
-    let { options, onChange, className } = this.props;
+    let { options, onChange, className, tabIndex } = this.props;
     let { value } = this.state;
+    tabIndex = tabIndex || 0;
     options = options || DEFAULT_COLORS.slice();
     if (options.indexOf(value) === -1) {
       // custom color
@@ -90,7 +92,7 @@ export class ColorPicker extends React.Component<{
           open: this.state.open,
         }
       )}
-      tabIndex={1}
+      tabIndex={tabIndex}
       onBlur={(ev) => {
         this.closePicker();
       }}>
