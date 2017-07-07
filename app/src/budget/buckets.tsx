@@ -56,13 +56,13 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let doPendingLabelParts = [];
     if (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0)) {
       // transfer
-      doPendingLabelParts.push(<span key="transfer">Transfer <Money value={to_deposit} /></span>);
+      doPendingLabelParts.push(<span key="transfer">Transfer <Money value={to_deposit} symbol /></span>);
     } else {
       if (to_deposit) {
-        doPendingLabelParts.push(<span key="deposit">Deposit <Money value={to_deposit} /></span>);
+        doPendingLabelParts.push(<span key="deposit">Deposit <Money value={to_deposit} symbol /></span>);
       }
       if (to_withdraw) {
-        doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} /></span>);
+        doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} symbol /></span>);
       }
     }
 

@@ -88,12 +88,20 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
   }
 }
 
+let DEFAULT = {
+  symbol: '',
+}
+export function setDefaultSymbol(symbol:string) {
+  DEFAULT.symbol = symbol;
+}
+
 interface MoneyProps {
   value: number;
   className?: string;
   hidezero?: boolean;
   noanimate?: boolean;
   nocolor?: boolean;
+  symbol?: string|boolean;
   [x:string]: any;
 }
 export class Money extends React.Component<MoneyProps, {
@@ -165,7 +173,7 @@ export class Money extends React.Component<MoneyProps, {
     }
   }
   render() {
-    let { value, className, hidezero, noanimate, nocolor, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, symbol, ...rest } = this.props;
     let going_up = true;
     if (!noanimate) {
       // animating
@@ -175,6 +183,14 @@ export class Money extends React.Component<MoneyProps, {
     let display = cents2decimal(value, this.state.anim_show_decimal) || '0';
     if (hidezero && !value) {
       display = '';
+    }
+    if (symbol && display) {
+      let symbol_display:string = symbol === true ? DEFAULT.symbol : symbol;
+      if (value < 0) {
+        display = `-${symbol_display}${display.substr(1)}`
+      } else {
+        display = symbol_display + display;
+      }
     }
     return (<span className={cx(
       className, {
