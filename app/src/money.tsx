@@ -123,7 +123,7 @@ export class Money extends React.Component<MoneyProps, {
       anim_show_decimal: false,
     }
   }
-  animateToNewValue(newval:number, duration:number=300) {
+  animateToNewValue(newval:number, duration:number=200) {
     let anim_show_decimal = !!(newval % 100) || !!(this.props.value % 100);
     this.setState({
       start_time: 0,

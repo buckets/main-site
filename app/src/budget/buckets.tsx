@@ -65,6 +65,11 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} symbol /></span>);
       }
     }
+    
+    let rainleft;
+    if (appstate.rain > 0 && to_deposit) {
+      rainleft = <div>(<Money symbol value={appstate.rain - (to_deposit + to_withdraw)} /> rain left)</div>;
+    }
 
     let doPendingButton;
     if (doPendingLabelParts.length) {
@@ -75,9 +80,14 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     return (
       <div className="rows">
         <div className="subheader">
-          <button onClick={this.addBucket}>Create bucket</button>
-          <button onClick={this.addGroup}>Create group</button>
-          {doPendingButton}
+          <div>
+            <button onClick={this.addBucket}>Create bucket</button>
+            <button onClick={this.addGroup}>Create group</button>
+          </div>
+          <div className="group">
+            {rainleft}
+            {doPendingButton}
+          </div>
         </div>
         <div className="panes">
           <div className="padded">
@@ -220,14 +230,6 @@ class BucketRow extends React.Component<BucketRowProps, {
       <td className="right">12.22/mo</td>
       <td>goal</td>
       <td className="nobr">
-        <DebouncedInput
-          blendin
-          value={bucket.name}
-          placeholder="no name"
-          onChange={(val) => {
-            manager.store.buckets.update(bucket.id, {name: val});
-          }}
-        />
         <Link relative to={`/${bucket.id}`} className="subtle fa fa-gear"></Link>
       </td>
     </tr>
