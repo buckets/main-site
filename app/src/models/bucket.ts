@@ -39,6 +39,13 @@ export class Transaction implements IObject {
   memo: string;
   posted: string;
   account_trans_id: number;
+  transfer: boolean;
+
+  static fromdb(obj:Transaction) {
+    // convert to boolean
+    obj.transfer = !!obj.transfer;
+    return obj;
+  }
 }
 export class Group implements IObject {
   static table_name: string = 'bucket_group';
@@ -86,12 +93,14 @@ export class BucketStore {
     memo?: string,
     posted?: Timestamp,
     account_trans_id?: number,
+    transfer?: boolean,
   }):Promise<Transaction> {
     let data:any = {
       bucket_id: args.bucket_id,
       amount: args.amount,
       memo: args.memo || '',
       account_trans_id: args.account_trans_id || null,
+      transfer: args.transfer || false,
     };
     if (args.posted) {
       data.posted = ts2db(args.posted)

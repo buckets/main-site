@@ -51,22 +51,21 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   render() {
     let { appstate } = this.props;
     let { pending } = this.state;
-    let pending_deposits = 0;
-    let pending_withdrawls = 0;
-    _.each(pending, (amount, bucket_id) => {
-      if (amount >= 0) {
-        pending_deposits += amount;
-      } else {
-        pending_withdrawls += amount;
-      }
-    })
+    let { to_deposit, to_withdraw } = this.getPending();
+
     let doPendingLabelParts = [];
-    if (pending_deposits) {
-      doPendingLabelParts.push(<span key="deposit">Deposit <Money value={pending_deposits} /></span>);
+    if (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0)) {
+      // transfer
+      doPendingLabelParts.push(<span key="transfer">Transfer <Money value={to_deposit} /></span>);
+    } else {
+      if (to_deposit) {
+        doPendingLabelParts.push(<span key="deposit">Deposit <Money value={to_deposit} /></span>);
+      }
+      if (to_withdraw) {
+        doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} /></span>);
+      }
     }
-    if (pending_withdrawls) {
-      doPendingLabelParts.push(<span key="withdraw">{pending_deposits ? ' and withdraw' : 'Withdraw'} <Money value={pending_withdrawls} /></span>);
-    }
+
     let doPendingButton;
     if (doPendingLabelParts.length) {
       doPendingButton = <button onClick={this.doPending}>{doPendingLabelParts}</button>;
@@ -86,7 +85,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               buckets={_.values(appstate.buckets)}
               balances={appstate.bucket_balances}
               groups={_.values(appstate.groups)}
-              onPendingChanged={this.pendingChanged} />
+              onPendingChanged={this.pendingChanged}
+              pending={pending} />
           </div>
           <Route path="/<int:id>">
             <WithRouting func={(routing) => {
@@ -107,11 +107,33 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   addGroup = () => {
     manager.store.buckets.addGroup({name: 'New Group'})
   }
-  doPending = () => {
+  getPending = () => {
+    let to_deposit = 0;
+    let to_withdraw = 0;
+    _.each(this.state.pending, (amount, bucket_id) => {
+      if (amount >= 0) {
+        to_deposit += amount;
+      } else {
+        to_withdraw += amount;
+      }
+    })
+    return {to_deposit, to_withdraw};
+  }
+  doPending = async () => {
     console.log('doPending', this.state.pending);
+    let { to_deposit, to_withdraw } = this.getPending();
+    let transfer = (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0));
+    _.map(this.state.pending, (amount, bucket_id) => {
+      return manager.store.buckets.transact({
+        bucket_id: bucket_id,
+        amount: amount,
+        transfer: transfer,
+        posted: this.props.appstate.defaultPostingDate,
+      })
+    })
+    this.setState({pending: {}});
   }
   pendingChanged = (changed:PendingAmounts) => {
-    console.log('pending Changed', changed);
     this.setState({pending: Object.assign(this.state.pending, changed)});
   }
 }
@@ -120,12 +142,12 @@ interface BucketRowProps {
   bucket: Bucket;
   balance: number;
   onPendingChanged?: (amounts:PendingAmounts) => any;
+  pending?: number;
 }
 class BucketRow extends React.Component<BucketRowProps, {
   isDragging: boolean;
   underDrag: boolean;
   dropHalf: 'top'|'bottom';
-  pending: number;
 }> {
   constructor(props) {
     super(props);
@@ -133,17 +155,16 @@ class BucketRow extends React.Component<BucketRowProps, {
       isDragging: false,
       underDrag: false,
       dropHalf: 'top',
-      pending: 0,
     }
   }
   render() {
-    let { bucket, balance, onPendingChanged } = this.props;
+    let { bucket, balance, onPendingChanged, pending } = this.props;
     let balance_el;
-    if (this.state.pending) {
+    if (pending) {
       balance_el = <span>
         <Money key="bal" value={balance} className="strikeout" />
         <span className="fa fa-long-arrow-right change-arrow" />
-        <Money key="pend" value={balance + this.state.pending} />
+        <Money key="pend" value={balance + pending} />
       </span>
     } else {
       balance_el = <Money value={balance} />
@@ -188,8 +209,8 @@ class BucketRow extends React.Component<BucketRowProps, {
       <td className="right">{balance_el}</td>
       <td className="center">
         <MoneyInput
+          value={pending || null}
           onChange={(val) => {
-            this.setState({pending: val});
             if (onPendingChanged) {
               onPendingChanged({[bucket.id]: val});
             }
@@ -270,6 +291,7 @@ class GroupRow extends React.Component<{
   buckets: Bucket[];
   balances: Balances;
   onPendingChanged?: (amounts:PendingAmounts) => any;
+  pending?: PendingAmounts;
 }, {
   isDragging: boolean;
   underDrag: boolean;
@@ -284,14 +306,16 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, balances, onPendingChanged } = this.props;
+    let { buckets, group, balances, onPendingChanged, pending } = this.props;
+    pending = pending || {};
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
       return <BucketRow
         key={bucket.id}
         bucket={bucket}
         balance={balances[bucket.id]}
-        onPendingChanged={onPendingChanged} />
+        onPendingChanged={onPendingChanged}
+        pending={pending[bucket.id]} />
     })
     return (
       <tbody
@@ -409,6 +433,7 @@ interface GroupedBucketListProps {
   buckets: Bucket[];
   balances: Balances;
   onPendingChanged?: (amounts:PendingAmounts) => any;
+  pending?: PendingAmounts;
 }
 export class GroupedBucketList extends React.Component<GroupedBucketListProps, {}> {
   constructor(props) {
@@ -420,7 +445,8 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { buckets, balances } = this.props;    
+    let { buckets, balances, pending } = this.props;
+    pending = pending || {};
     let grouped_buckets = {};
     buckets.forEach(bucket => {
       let group_id = bucket.group_id || NOGROUP;
@@ -446,7 +472,8 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           group={group}
           buckets={grouped_buckets[group.id] || []}
           balances={balances}
-          onPendingChanged={this.pendingChanged} />
+          onPendingChanged={this.pendingChanged}
+          pending={pending} />
       })
     return <table className="ledger">
       {group_elems}

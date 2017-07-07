@@ -75,6 +75,7 @@ CREATE TABLE bucket_transaction (
     amount INTEGER,
     memo TEXT,
     account_trans_id INTEGER,
+    transfer TINYINT DEFAULT 0,
     FOREIGN KEY(bucket_id) REFERENCES bucket(id)
 );
 
