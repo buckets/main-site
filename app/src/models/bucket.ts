@@ -1,11 +1,14 @@
-import {IObject, IStore} from '../store'
-import {ts2db, Timestamp} from '../time'
-import {Balances, computeBalances} from './balances'
+import * as moment from 'moment'
+import * as _ from 'lodash'
+import { IObject, IStore} from '../store'
+import { ensureUTCMoment, ts2db, Timestamp } from '../time'
+import { Balances, computeBalances } from './balances'
 import { rankBetween } from '../ranking'
 import { DEFAULT_COLORS } from '../color'
 
-type BucketKind =
+export type BucketKind =
   ''
+  | 'deposit'
   | 'goal';
 
 export class Bucket implements IObject {
@@ -15,12 +18,16 @@ export class Bucket implements IObject {
   readonly _type: string = Bucket.table_name;
   name: string;
   notes: string;
-  balance: number;
+  balance: number = 0;
   kicked: boolean;
   group_id: number;
   ranking: string;
-  kind: BucketKind;
   color: string;
+
+  kind: BucketKind = '';
+  goal: number;
+  end_date: string;
+  deposit: number;
 
   static fromdb(obj:Bucket) {
     // convert to boolean
@@ -248,5 +255,93 @@ export class BucketStore {
       ranking = rankBetween(rows[0].ranking, rows[1].ranking);
     }
     return this.updateGroup(moving_id, {ranking})
+  }
+}
+
+//----------------------------------------------------------------
+// Deposits, goals, etc...
+//----------------------------------------------------------------
+interface ComputeArgs {
+  today: Timestamp;
+  balance: number;
+}
+export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs);
+export function computeBucketData(kind:'', b:Bucket);
+export function computeBucketData(kind:'deposit', b:Bucket);
+export function computeBucketData(kind:'goal', b:Bucket, args:ComputeArgs);
+export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):{
+  deposit: number;
+  goal: number;
+  end_date: moment.Moment;
+} {
+  let ret = {
+    deposit: 0,
+    goal: 0,
+    end_date: null,
+  };
+  if (b.kind === 'deposit') {
+    ret.deposit = b.deposit;
+  } else if (b.kind === 'goal') {
+    let today = args.today !== null ? ensureUTCMoment(args.today) : moment.utc();
+    let balance = args.balance !== null ? args.balance : b.balance;
+    if (!_.isNil(b.goal) && b.deposit) {
+      Object.assign(ret, {
+        goal: b.goal,
+        deposit: b.deposit,
+        end_date: computeGoalEndDate(balance, b.goal, b.deposit, today),
+      })
+    } else if (!_.isNil(b.goal) && b.end_date) {
+      Object.assign(ret, {
+        goal: b.goal,
+        deposit: computeGoalDeposit(balance, b.goal, b.end_date, today),
+        end_date: ensureUTCMoment(b.end_date),
+      })
+    } else if (b.deposit && b.end_date) {
+      Object.assign(ret, {
+        goal: computeGoal(balance, b.deposit, b.end_date, today),
+        deposit: b.deposit,
+        end_date: ensureUTCMoment(b.end_date),
+      })
+    } else {
+      Object.assign(ret, {
+        goal: b.goal || 0,
+        deposit: b.deposit || 0,
+        end_date: b.end_date || null,
+      })
+    }
+    
+  }
+  return ret;
+}
+
+function computeGoalEndDate(balance:number, goal:number, deposit:number, today:Timestamp):Timestamp {
+  let units = Math.ceil((goal - balance) / deposit) - 1;
+  let dt = ensureUTCMoment(today);
+  return dt.add(units, 'month').startOf('month');
+}
+function computeGoalDeposit(balance:number, goal:number, end_date:Timestamp, today:Timestamp):number {
+  let s = ensureUTCMoment(today);
+  let e = ensureUTCMoment(end_date);
+  let diff = e.diff(s, 'month') + 1;
+  let left = goal - balance;
+  left = left <= 0 ? 0 : left;
+  if (diff > 0) {
+    // there's time
+    return Math.ceil(left / diff)
+  } else {
+    // no time left
+    return left;
+  }
+}
+function computeGoal(balance:number, deposit:number, end_date:Timestamp, today:Timestamp):number {
+  let s = ensureUTCMoment(today);
+  let e = ensureUTCMoment(end_date);
+  let diff = e.diff(s, 'month') + 1;
+  if (diff > 0) {
+    // there's time
+    return balance + (diff * deposit);
+  } else {
+    // no time left
+    return balance;
   }
 }

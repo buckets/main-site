@@ -1,11 +1,13 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import * as moment from 'moment'
 import {Route, Link, WithRouting} from './routing'
-import {Bucket, Group, Transaction} from '../models/bucket'
+import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
+import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
-import {DebouncedInput} from '../input'
+import { DebouncedInput, MonthSelector } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 
@@ -56,24 +58,24 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let doPendingLabelParts = [];
     if (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0)) {
       // transfer
-      doPendingLabelParts.push(<span key="transfer">Transfer <Money value={to_deposit} symbol /></span>);
+      doPendingLabelParts.push(<span key="transfer">Transfer <Money value={to_deposit} symbol nocolor /></span>);
     } else {
       if (to_deposit) {
-        doPendingLabelParts.push(<span key="deposit">Deposit <Money value={to_deposit} symbol /></span>);
+        doPendingLabelParts.push(<span key="deposit">Deposit <Money value={to_deposit} symbol nocolor /></span>);
       }
       if (to_withdraw) {
-        doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} symbol /></span>);
+        doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} symbol nocolor /></span>);
       }
     }
     
     let rainleft;
     if (appstate.rain > 0 && to_deposit) {
-      rainleft = <div>(<Money symbol value={appstate.rain - (to_deposit + to_withdraw)} /> rain left)</div>;
+      rainleft = <div>(<Money symbol nocolor value={appstate.rain - (to_deposit + to_withdraw)} /> rain left)</div>;
     }
 
     let doPendingButton;
     if (doPendingLabelParts.length) {
-      doPendingButton = <button onClick={this.doPending}>{doPendingLabelParts}</button>;
+      doPendingButton = <button className="primary" onClick={this.doPending}>{doPendingLabelParts}</button>;
     } else {
       doPendingButton = <button disabled>Deposit/Withdraw</button>;
     }
@@ -96,7 +98,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               balances={appstate.bucket_balances}
               groups={_.values(appstate.groups)}
               onPendingChanged={this.pendingChanged}
-              pending={pending} />
+              pending={pending}
+              posting_date={appstate.defaultPostingDate} />
           </div>
           <Route path="/<int:id>">
             <WithRouting func={(routing) => {
@@ -148,9 +151,129 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   }
 }
 
+class BucketKindDetails extends React.Component<{
+  bucket: Bucket;
+  balance: number;
+}, {
+  open: boolean;
+}> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: false,
+    }
+  }
+  render() {
+    let { bucket, balance } = this.props;
+    let edit_rows = [];
+    if (this.state.open) {
+      edit_rows.push(
+      <tr>
+        <td>Bucket type:</td>
+        <td>
+          <select
+            value={bucket.kind}
+            onChange={(ev) => {
+              manager.store.buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
+            }}>
+            <option value="">Plain old bucket</option>
+            <option value="deposit">Recurring expense</option>
+            <option value="goal">Saving up</option>
+          </select>
+        </td>
+      </tr>)
+      if (bucket.kind === 'deposit') {
+        edit_rows.push(
+        <tr>
+          <td>Deposit</td>
+          <td>
+            <MoneyInput
+              value={bucket.deposit}
+              onChange={_.debounce(val => {
+                manager.store.buckets.update(bucket.id, {deposit: val});
+              }, 250)}/>
+          </td>
+        </tr>);
+      } else if (bucket.kind === 'goal') {
+        let dt = ensureUTCMoment(bucket.end_date);
+        if (!dt || !dt.isValid()) {
+          dt = moment.utc();
+        }
+        let year = dt.year();
+        let mon = dt.month() + 1;
+        edit_rows = edit_rows.concat([
+          <tr>
+            <td>Goal:</td>
+            <td>
+              <MoneyInput
+                value={bucket.goal}
+                onChange={_.debounce(val => {
+                  manager.store.buckets.update(bucket.id, {goal: val});
+                }, 250)} />
+            </td>
+          </tr>,
+          <tr>
+            <td>Target date:</td>
+            <td>
+              <MonthSelector
+                year={year}
+                month={mon}
+                onChange={(year, month) => {
+                  let ms = ('0' + month);
+                  let newmonth = moment(`${year}-${ms.substr(ms.length-2)}-01`);
+                  manager.store.buckets.update(bucket.id, {end_date: ts2db(newmonth)})
+                }} />
+            </td>
+          </tr>,
+          <tr>
+            <td>Monthly deposit:</td>
+            <td>
+              <MoneyInput
+                value={bucket.deposit}
+                onChange={_.debounce(val => {
+                  manager.store.buckets.update(bucket.id, {deposit: val});
+                }, 250)} />
+            </td>
+          </tr>
+        ])
+      }
+    }
+    let summary;
+    if (bucket.kind === 'goal') {
+      let percent = 0;
+      if (bucket.goal) {
+        percent = Math.floor(balance / bucket.goal * 100);
+      }
+      summary = [
+        <div className="progress-bar">
+          <div className="bar" style={{width: `${percent}%`}} />
+        </div>,
+        <Money value={bucket.goal} />,
+        <Date value={bucket.end_date} />,
+      ];
+    }
+    let edit_table;
+    if (edit_rows.length) {
+      edit_table = <table className="props"><tbody>{edit_rows}</tbody></table>;
+    }
+    return <div className="bucket-details">
+      <div className="summary">
+        {summary}
+        <a className="editlink subtle fa fa-pencil" onClick={this.toggleEdit}/>
+      </div>
+      {edit_table}
+    </div>
+  }
+  toggleEdit = () => {
+    console.log('toggle edit');
+    this.setState({open: !this.state.open})
+  }
+}
+
 interface BucketRowProps {
   bucket: Bucket;
   balance: number;
+  posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
 }
@@ -168,7 +291,7 @@ class BucketRow extends React.Component<BucketRowProps, {
     }
   }
   render() {
-    let { bucket, balance, onPendingChanged, pending } = this.props;
+    let { posting_date, bucket, balance, onPendingChanged, pending } = this.props;
     let balance_el;
     if (pending) {
       balance_el = <span>
@@ -179,6 +302,11 @@ class BucketRow extends React.Component<BucketRowProps, {
     } else {
       balance_el = <Money value={balance} />
     }
+    let computed = computeBucketData(bucket.kind, bucket, {
+      today: posting_date,
+      balance: balance,
+    })
+    console.log('computed', computed, bucket.deposit, bucket.goal, bucket.end_date);
     return <tr
       key={bucket.id}
       onDragOver={this.onDragOver}
@@ -227,10 +355,14 @@ class BucketRow extends React.Component<BucketRowProps, {
           }}
         />
       </td>
-      <td className="right">12.22/mo</td>
-      <td>goal</td>
+      <td className="right"><Money value={computed.deposit} hidezero />{computed.deposit ? '/mo' : ''}</td>
+      <td>
+        <BucketKindDetails
+          bucket={bucket}
+          balance={balance} />
+      </td>
       <td className="nobr">
-        <Link relative to={`/${bucket.id}`} className="subtle fa fa-gear"></Link>
+        <Link relative to={`/${bucket.id}`} className="subtle">more</Link>
       </td>
     </tr>
   }
@@ -292,6 +424,7 @@ class GroupRow extends React.Component<{
   group: Group;
   buckets: Bucket[];
   balances: Balances;
+  posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
 }, {
@@ -308,7 +441,7 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, balances, onPendingChanged, pending } = this.props;
+    let { buckets, group, balances, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
@@ -317,7 +450,8 @@ class GroupRow extends React.Component<{
         bucket={bucket}
         balance={balances[bucket.id]}
         onPendingChanged={onPendingChanged}
-        pending={pending[bucket.id]} />
+        pending={pending[bucket.id]}
+        posting_date={posting_date} />
     })
     return (
       <tbody
@@ -359,8 +493,8 @@ class GroupRow extends React.Component<{
         <th>Bucket</th>
         <th>Balance</th>
         <th className="center">Transact</th>
-        <th>Monthly Deposit</th>
-        <th>Goal</th>
+        <th>Rain</th>
+        <th>Details</th>
         <th></th>
       </tr>
       {bucket_rows}
@@ -434,6 +568,7 @@ interface GroupedBucketListProps {
   groups: Group[];
   buckets: Bucket[];
   balances: Balances;
+  posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
 }
@@ -447,7 +582,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { buckets, balances, pending } = this.props;
+    let { buckets, balances, pending, posting_date } = this.props;
     pending = pending || {};
     let grouped_buckets = {};
     buckets.forEach(bucket => {
@@ -475,7 +610,8 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           buckets={grouped_buckets[group.id] || []}
           balances={balances}
           onPendingChanged={this.pendingChanged}
-          pending={pending} />
+          pending={pending}
+          posting_date={posting_date} />
       })
     return <table className="ledger">
       {group_elems}

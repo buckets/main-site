@@ -126,30 +126,6 @@ button {
   justify-content: space-between;
   font-size: 0.8rem;
 }
-.subheader button {
-  padding: 0.2rem 0.8rem 0.3rem;
-  border: 1px solid var(--lighter-grey);
-  background-color: var(--lightest-grey);
-  border-radius: 300px;
-  margin: 0 2px;
-  cursor: pointer;
-}
-.subheader button:hover {
-  background-color: var(--yellow);
-  border-color: var(--yellow);
-}
-.subheader button:focus {
-  outline: none;
-  border-color: var(--blue);
-}
-.subheader button[disabled] {
-  opacity: 0.5;
-}
-.subheader button[disabled]:hover {
-  background-color: var(--lightest-grey);
-  border-color: var(--lighter-grey);
-  cursor: initial;
-}
 .subheader .group {
   display: flex;
   align-items: center;
@@ -190,21 +166,23 @@ h1 {
 
 
 .month-selector {
-  display: flex;
+  display: inline-flex;
   flex-direction: row;
   align-items: center;
-  padding: 0.5rem 0;
 }
 .month-selector button {
   border: 0;
   background-color: transparent;
   color: rgba(0,0,0,0.1);
-  font-size: 1rem;
+  font-size: 0.8rem;
   height: 100%;
   transition: color 0.2s;
+  margin: initial;
+  padding: initial;
 }
 .month-selector button:hover {
   color: rgba(0,0,0,0.4);
+  background-color: transparent;
 }
 .month-selector button:focus,
 .month-selector button:active {
@@ -217,12 +195,9 @@ h1 {
   border: 0;
   background-color: transparent;
   -webkit-appearance: none;
-  font-size: 1.5rem;
   transition: color 0.2s;
-  font-weight: bold;
   text-align: right;
   text-align-last: right;
-  margin-right: 0.2rem;
 }
 .month-selector select.month:active,
 .month-selector select.month:focus {
@@ -231,16 +206,33 @@ h1 {
 .month-selector input.year {
   border: 0;
   background: transparent;
-  font-size: 1.5rem;
   text-align: left;
   transition: color 0.2s, border-bottom-color 0.2s;
-  border-bottom: 3px solid transparent;
-  border-top: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-top: 2px solid transparent;
 }
 .month-selector input.year:focus,
 .month-selector input.year:active {
   outline: none;
   border-bottom-color: var(--blue);
+}
+
+.month-selector.big {
+  padding: 0.5rem 0;
+  margin-right: 1rem;
+}
+.month-selector.big button {
+  font-size: 1rem;
+}
+.month-selector.big select.month {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 0.2rem;
+}
+.month-selector.big input.year {
+  font-size: 1.5rem;
+  border-bottom-width: 3px;
+  border-top-width: 3px;
 }
 
 .color-1 {
@@ -297,6 +289,7 @@ h1 {
   color: var(--darker-red);
 }
 
+.money-input.ctx-matching-input input,
 .ctx-matching-input {
   border: none;
   outline: none;
@@ -313,6 +306,7 @@ h1 {
   sborder-bottom: 3px solid transparent;
   sborder-top: 3px solid transparent;
 }
+.money-input.ctx-matching-input input:focus,
 .ctx-matching-input:focus {
   outline: none;
   sborder-bottom-color: var(--blue);
@@ -320,7 +314,7 @@ h1 {
 }
 
 a.subtle {
-  color: var(--lightest-grey);
+  color: var(--lighter-grey);
   text-decoration: none;
   transform: color 0.2s;
 }
@@ -363,7 +357,6 @@ table.ledger th {
   padding-left: 1rem;
   padding-right: 1rem;
 }
-
 
 tr.group-row .group-name {
   font-size: 1.25rem;
@@ -555,4 +548,72 @@ tr.group-row .group-name {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
   color: var(--lighter-grey);
+}
+
+
+/* Inputs */
+button {
+  padding: 0.2rem 0.8rem 0.3rem;
+  border: 1px solid var(--lighter-grey);
+  background-color: var(--lightest-grey);
+  color: var(--darker-darkblue);
+  border-radius: 300px;
+  margin: 0 2px;
+  cursor: pointer;
+}
+button.primary {
+  background-color: var(--blue);
+  color: white;
+  border-color: var(--darker-blue);
+}
+button:hover {
+  background-color: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--darker-darkblue);
+}
+button:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+button[disabled] {
+  opacity: 0.5;
+}
+button[disabled]:hover {
+  background-color: var(--lightest-grey);
+  border-color: var(--lighter-grey);
+  cursor: initial;
+}
+
+/* Bucket goal details */
+.bucket-details {
+  position: relative;
+}
+.bucket-details .summary {
+  display: flex;
+  align-items: center;
+}
+.bucket-details a.editlink {
+}
+table.props {
+  margin: 1rem 0;
+}
+table.props td,
+table.props th {
+  border: 0;
+}
+
+.progress-bar {
+  display: inline-block;
+  width: 10rem;
+  height: 12px;
+  border-radius: 1000px;
+  overflow: hidden;
+  border: 2px solid var(--blue);
+}
+.progress-bar .bar {
+  height: 12px;
+  max-width: 100%;
+  min-width: 0%;
+  transition: width 0.3s;
+  background-color: var(--blue);
 }

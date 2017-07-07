@@ -4,7 +4,7 @@ import * as cx from 'classnames';
 
 export function ensureUTCMoment(x:Timestamp):moment.Moment {
   if (moment.isMoment(x)) {
-    return x.utc()
+    return x.utc().clone()
   } else {
     return moment.utc(x)
   }
@@ -38,6 +38,9 @@ export class Date extends React.Component<DateProps, any> {
       mom = value;
     }
     let display = mom.local().format(format);
+    if (!mom.isValid()) {
+      display = '';
+    }
     let cls = cx(className, 'date');
     return <span className={cls} {...rest}>{display}</span>
   }
