@@ -244,13 +244,13 @@ class BucketKindDetails extends React.Component<{
       if (bucket.goal) {
         percent = Math.floor(balance / bucket.goal * 100);
       }
-      summary = [
+      summary = <div className="goal-summary">
         <div className="progress-bar">
           <div className="bar" style={{width: `${percent}%`}} />
-        </div>,
-        <Money value={bucket.goal} />,
-        <Date value={bucket.end_date} />,
-      ];
+        </div>
+        <Money value={bucket.goal} />
+        <Date value={bucket.end_date} />
+      </div>;
     }
     let edit_table;
     if (edit_rows.length) {
@@ -259,13 +259,12 @@ class BucketKindDetails extends React.Component<{
     return <div className="bucket-details">
       <div className="summary">
         {summary}
-        <a className="editlink subtle fa fa-pencil" onClick={this.toggleEdit}/>
+        <a className="editlink subtle fa fa-gear" onClick={this.toggleEdit}/>
       </div>
       {edit_table}
     </div>
   }
   toggleEdit = () => {
-    console.log('toggle edit');
     this.setState({open: !this.state.open})
   }
 }
@@ -356,7 +355,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right"><Money value={computed.deposit} hidezero />{computed.deposit ? '/mo' : ''}</td>
-      <td>
+      <td className="bucket-details-wrap">
         <BucketKindDetails
           bucket={bucket}
           balance={balance} />

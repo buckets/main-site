@@ -585,12 +585,17 @@ button[disabled]:hover {
 }
 
 /* Bucket goal details */
+.bucket-details-wrap {
+  padding: .5rem;
+  vertical-align: middle;
+}
 .bucket-details {
   position: relative;
 }
 .bucket-details .summary {
   display: flex;
   align-items: center;
+  font-size: .8rem;
 }
 .bucket-details a.editlink {
 }
@@ -600,6 +605,14 @@ table.props {
 table.props td,
 table.props th {
   border: 0;
+}
+.goal-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.goal-summary > * {
+  margin: 0.2rem .5rem;
 }
 
 .progress-bar {
