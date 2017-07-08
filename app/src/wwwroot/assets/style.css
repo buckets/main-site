@@ -336,10 +336,6 @@ table.ledger td.noborder,
 table.ledger th.noborder {
   border: 0px solid transparent;
 }
-table.ledger td:empty,
-table.ledger th:empty {
-  border: none;
-}
 table.ledger tr.group-row td {
   border: none;
   padding-top: 1rem;

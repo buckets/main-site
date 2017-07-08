@@ -138,7 +138,11 @@ export class BucketStore {
       asof)
   }
   async listTransactions(args:{
-    bucket_id: number,
+    bucket_id?: number,
+    posted?:{
+      onOrAfter?:Timestamp,
+      before?:Timestamp,
+    },
   }):Promise<Transaction[]> {
     let where_parts:string[] = [];
     let params:any = {};
@@ -148,6 +152,18 @@ export class BucketStore {
       if (args.bucket_id !== undefined) {
         where_parts.push('bucket_id = $bucket_id');
         params['$bucket_id'] = args.bucket_id;
+      }
+
+      // posted range
+      if (args.posted) {
+        if (args.posted.onOrAfter) {
+          where_parts.push('posted >= $onOrAfter');
+          params['$onOrAfter'] = ts2db(args.posted.onOrAfter);
+        }
+        if (args.posted.before) {
+          where_parts.push('posted < $before');
+          params['$before'] = ts2db(args.posted.before);
+        }
       }
     }
 

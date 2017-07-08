@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment'
-import {Route, Link, WithRouting} from './routing'
+import { Switch, Route, Link, WithRouting } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
 import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
 import {Balances} from '../models/balances'
@@ -80,39 +80,49 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       doPendingButton = <button disabled>Deposit/Withdraw</button>;
     }
     return (
-      <div className="rows">
-        <div className="subheader">
-          <div>
-            <button onClick={this.addBucket}>Create bucket</button>
-            <button onClick={this.addGroup}>Create group</button>
+      <Switch>
+        <Route path="/<int:id>">
+          <div className="panes">
+            <div className="padded">
+              <WithRouting func={(routing) => {
+                let bucket = appstate.buckets[routing.params.id];
+                let balance = appstate.bucket_balances[bucket.id];
+                return (<BucketView
+                  bucket={bucket}
+                  balance={balance}
+                  appstate={appstate}
+                  transactions={_.values(appstate.btransactions)
+                    .filter(trans => trans.bucket_id === bucket.id)} />);
+              }} />
+            </div>
           </div>
-          <div className="group">
-            {rainleft}
-            {doPendingButton}
+        </Route>
+        <Route path="">
+          <div className="rows">
+            <div className="subheader">
+              <div>
+                <button onClick={this.addBucket}>Create bucket</button>
+                <button onClick={this.addGroup}>Create group</button>
+              </div>
+              <div className="group">
+                {rainleft}
+                {doPendingButton}
+              </div>
+            </div>
+            <div className="panes">
+              <div className="padded">
+                <GroupedBucketList
+                  buckets={_.values(appstate.buckets)}
+                  balances={appstate.bucket_balances}
+                  groups={_.values(appstate.groups)}
+                  onPendingChanged={this.pendingChanged}
+                  pending={pending}
+                  posting_date={appstate.defaultPostingDate} />
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="panes">
-          <div className="padded">
-            <GroupedBucketList
-              buckets={_.values(appstate.buckets)}
-              balances={appstate.bucket_balances}
-              groups={_.values(appstate.groups)}
-              onPendingChanged={this.pendingChanged}
-              pending={pending}
-              posting_date={appstate.defaultPostingDate} />
-          </div>
-          <Route path="/<int:id>">
-            <WithRouting func={(routing) => {
-              let bucket = appstate.buckets[routing.params.id];
-              let balance = appstate.bucket_balances[bucket.id];
-              return (<BucketView
-                bucket={bucket}
-                balance={balance}
-                appstate={appstate} />);
-            }} />
-          </Route>
-        </div>
-      </div>);
+        </Route>
+      </Switch>);
   }
   addBucket = () => {
     manager.store.buckets.add({name: 'New Bucket'})
@@ -133,7 +143,6 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     return {to_deposit, to_withdraw};
   }
   doPending = async () => {
-    console.log('doPending', this.state.pending);
     let { to_deposit, to_withdraw } = this.getPending();
     let transfer = (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0));
     _.map(this.state.pending, (amount, bucket_id) => {
@@ -185,13 +194,13 @@ class BucketKindDetails extends React.Component<{
       if (bucket.kind === 'deposit') {
         edit_rows.push(
         <tr>
-          <td>Deposit</td>
+          <td>Monthly deposit:</td>
           <td>
             <MoneyInput
               value={bucket.deposit}
               onChange={_.debounce(val => {
                 manager.store.buckets.update(bucket.id, {deposit: val});
-              }, 250)}/>
+              }, 250)}/>/mo
           </td>
         </tr>);
       } else if (bucket.kind === 'goal') {
@@ -232,7 +241,7 @@ class BucketKindDetails extends React.Component<{
                 value={bucket.deposit}
                 onChange={_.debounce(val => {
                   manager.store.buckets.update(bucket.id, {deposit: val});
-                }, 250)} />
+                }, 250)} /> /mo
             </td>
           </tr>
         ])
@@ -243,13 +252,16 @@ class BucketKindDetails extends React.Component<{
       let percent = 0;
       if (bucket.goal) {
         percent = Math.floor(balance / bucket.goal * 100);
+        if (percent < 0) {
+          percent = 0;
+        }
       }
       summary = <div className="goal-summary">
         <div className="progress-bar">
           <div className="bar" style={{width: `${percent}%`}} />
         </div>
         <Money value={bucket.goal} />
-        <Date value={bucket.end_date} />
+        <Date value={bucket.end_date} format="MMM YYYY" />
       </div>;
     }
     let edit_table;
@@ -305,7 +317,6 @@ class BucketRow extends React.Component<BucketRowProps, {
       today: posting_date,
       balance: balance,
     })
-    console.log('computed', computed, bucket.deposit, bucket.goal, bucket.end_date);
     return <tr
       key={bucket.id}
       onDragOver={this.onDragOver}
@@ -623,36 +634,20 @@ interface BucketViewProps {
   bucket: Bucket;
   balance: number;
   appstate: AppState;
-}
-export class BucketView extends React.Component<BucketViewProps, {
   transactions: Transaction[];
-}> {
+}
+export class BucketView extends React.Component<BucketViewProps, {}> {
   constructor(props) {
     super(props)
-    this.state = {
-      transactions: [],
-    }
-    this.refreshTransactions();
-  }
-  async refreshTransactions(props?:BucketViewProps) {
-    props = props || this.props;
-    let dr = props.appstate.viewDateRange;
-    console.log('fetching transactions', dr.before.format(), dr.onOrAfter.format());
-    let trans = await manager.store.buckets.listTransactions({
-      bucket_id: props.bucket.id,
-      // posted: {
-      //   before: dr.before,
-      //   onOrAfter: dr.onOrAfter,
-      // }
-    })
-    this.setState({transactions: trans});
-  }
-  componentWillReceiveProps(nextProps, nextState) {
-    this.refreshTransactions(nextProps);
   }
   render() {
-    let { bucket, balance } = this.props;
+    let { bucket, balance, transactions, appstate } = this.props;
     return (<div className="padded" key={bucket.id}>
+      <Link
+        relative
+        to=".."
+        className="subtle"
+        ><span className="fa fa-arrow-left"></span></Link>
       <h1>
         <ColorPicker
         value={bucket.color}
@@ -670,10 +665,47 @@ export class BucketView extends React.Component<BucketViewProps, {
       </h1>
       Balance: $<Money value={balance} />
       <hr/>
+      <TransactionList
+        transactions={transactions}
+        appstate={appstate} />
     </div>)
   }
 }
 
+
+class TransactionList extends React.Component<{
+  transactions: Transaction[];
+  appstate: AppState;
+}, {}> {
+  render() {
+    let { transactions, appstate } = this.props;
+    let rows = transactions.map(trans => {
+      let account_name;
+      if (trans.account_trans_id) {
+        account_name = appstate.accounts[trans.account_trans_id].name;
+      }
+      return <tr key={trans.id}>
+        <td className="nobr"><Date value={trans.posted} /></td>
+        <td>{trans.memo}</td>
+        <td><Money value={trans.amount} /></td>
+        <td>{trans.transfer ? 'Transfer' : ''} {account_name}</td>
+      </tr>
+    })
+    return <table className="ledger">
+      <thead>
+        <tr>
+          <th>Posted</th>
+          <th>Memo</th>
+          <th>Amount</th>
+          <th>Misc</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows}
+      </tbody>
+    </table>
+  }
+}
 
 export class BucketStyles extends React.Component<{buckets: Bucket[]}, {}> {
   render() {

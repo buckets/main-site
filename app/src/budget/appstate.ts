@@ -166,14 +166,27 @@ export class StateManager extends EventEmitter {
       }
     } else if (isObj(ATrans, obj)) {
       let dr = this.appstate.viewDateRange;
-      if (isBetween(obj.posted, dr.onOrAfter, dr.before)) {
-        if (ev.event === 'update') {
-          this.appstate.transactions[obj.id] = obj;
-          changed = true;
-        } else if (ev.event === 'delete') {
-          delete this.appstate.transactions[obj.id];
+      let inrange = isBetween(obj.posted, dr.onOrAfter, dr.before)
+      if (!inrange || ev.event === 'delete') {
+        if (this.appstate.transactions[obj.id]) {
+          delete this.appstate.transactions[obj.id];  
           changed = true;
         }
+      } else if (ev.event === 'update') {
+        this.appstate.transactions[obj.id] = obj;
+        changed = true;
+      }
+    } else if (isObj(BTrans, obj)) {
+      let dr = this.appstate.viewDateRange;
+      let inrange = isBetween(obj.posted, dr.onOrAfter, dr.before)
+      if (!inrange || ev.event === 'delete') {
+        if (this.appstate.btransactions[obj.id]) {
+          delete this.appstate.btransactions[obj.id];  
+          changed = true;
+        }
+      } else if (ev.event === 'update') {
+        this.appstate.btransactions[obj.id] = obj;
+        changed = true;
       }
     }
     if (changed) {
@@ -198,6 +211,7 @@ export class StateManager extends EventEmitter {
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
       this.fetchTransactions(),
+      this.fetchBucketTransactions(),
     ])
     this.recomputeTotals();
     return this;
@@ -258,6 +272,21 @@ export class StateManager extends EventEmitter {
         this.appstate.transactions = {};
         transactions.forEach(trans => {
           this.appstate.transactions[trans.id] = trans;
+        })
+      })
+  }
+  fetchBucketTransactions() {
+    let range = this.appstate.viewDateRange;
+    return this.store.buckets.listTransactions({
+      posted: {
+        onOrAfter: range.onOrAfter,
+        before: range.before,
+      }
+    })
+      .then(transactions => {
+        this.appstate.btransactions = {};
+        transactions.forEach(trans => {
+          this.appstate.btransactions[trans.id] = trans;
         })
       })
   }

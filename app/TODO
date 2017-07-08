@@ -5,3 +5,6 @@
  ☐ Import OFX
  ☐ SimpleFIN
  ☐ Signal uncategorized transactions (with a count).
+ ☐ Goals
+   ☐ When changing 1 of three inputs, undo one of the inputs
+     ☐ Or just make 3 different types of bucket
