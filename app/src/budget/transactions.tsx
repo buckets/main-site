@@ -48,12 +48,11 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
       'id',
     ])
     .map(trans => {
-      console.log('trans', trans);
       return <tr key={trans.id}>
         <td className="nobr"><Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
-        <td><Money value={trans.amount} /></td>
+        <td className="right"><Money value={trans.amount} /></td>
         <td><Categorizer
           transaction={trans}
           appstate={appstate} /></td>
@@ -143,7 +142,9 @@ class CreateTransRow extends React.Component<{
           value = undefined;
         }
         account_cell = <td>
-          <select value={value}>
+          <select value={value} onChange={(ev) => {
+            this.setState({account_id: parseInt(ev.target.value) || null})
+          }}>
             <option></option>
             {_.values(appstate.accounts).map(acc => {
               return <option key={acc.id} value={acc.id}>{acc.name}</option>
@@ -153,7 +154,7 @@ class CreateTransRow extends React.Component<{
       }
     }
     return (
-      <tr>
+      <tr className="transact-row">
         <td>
           <DateInput
             value={this.state.posted}
@@ -176,7 +177,7 @@ class CreateTransRow extends React.Component<{
             }}
           />
         </td>
-        <td>
+        <td className="right">
           <MoneyInput
             value={this.state.amount}
             onChange={(amount) => {
@@ -189,7 +190,7 @@ class CreateTransRow extends React.Component<{
             }}
           />
         </td>
-        <td>
+        <td className="center">
           <button onClick={this.doTransaction}>{transact_label}</button>
         </td>
       </tr>

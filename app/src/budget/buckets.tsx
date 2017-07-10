@@ -177,7 +177,7 @@ class BucketKindDetails extends React.Component<{
     let edit_rows = [];
     if (this.state.open) {
       edit_rows.push(
-      <tr>
+      <tr key="bucket-type">
         <td>Bucket type:</td>
         <td>
           <select
@@ -193,7 +193,7 @@ class BucketKindDetails extends React.Component<{
       </tr>)
       if (bucket.kind === 'deposit') {
         edit_rows.push(
-        <tr>
+        <tr key="deposit">
           <td>Monthly deposit:</td>
           <td>
             <MoneyInput
@@ -211,7 +211,7 @@ class BucketKindDetails extends React.Component<{
         let year = dt.year();
         let mon = dt.month() + 1;
         edit_rows = edit_rows.concat([
-          <tr>
+          <tr key="goal">
             <td>Goal:</td>
             <td>
               <MoneyInput
@@ -221,7 +221,7 @@ class BucketKindDetails extends React.Component<{
                 }, 250)} />
             </td>
           </tr>,
-          <tr>
+          <tr key="end_date">
             <td>Target date:</td>
             <td>
               <MonthSelector
@@ -234,7 +234,7 @@ class BucketKindDetails extends React.Component<{
                 }} />
             </td>
           </tr>,
-          <tr>
+          <tr key="deposit">
             <td>Monthly deposit:</td>
             <td>
               <MoneyInput
@@ -355,7 +355,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right">{balance_el}</td>
-      <td className="center">
+      <td className="left">
         <MoneyInput
           value={pending || null}
           onChange={(val) => {
@@ -499,10 +499,10 @@ class GroupRow extends React.Component<{
         /></td>
       </tr>
       <tr>
-        <th className="border"></th>
+        <th className="nopad noborder"></th>
         <th>Bucket</th>
         <th>Balance</th>
-        <th className="center">Transact</th>
+        <th className="left">Transact</th>
         <th>Rain</th>
         <th>Details</th>
         <th></th>

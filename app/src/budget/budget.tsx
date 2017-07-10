@@ -6,6 +6,7 @@ import {Renderer} from './render'
 import {AccountsPage} from './accounts'
 import {BucketsPage, BucketStyles} from './buckets'
 import {TransactionPage} from './transactions'
+import { ConnectionsPage } from './connections'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing'
@@ -53,6 +54,22 @@ export async function start(base_element, room) {
   }
 }
 
+class Navbar extends React.Component<{}, {}> {
+  render() {
+    return (
+      <div className="nav">
+        <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
+        <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent">Transactions</Link>
+        <Link relative to="/buckets" exactMatchClass="selected" matchClass="selected-parent">Buckets</Link>
+        <Route path="/buckets">
+          <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
+        </Route>
+        <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
+        <Link relative to="/connections" exactMatchClass="selected" matchClass="selected">Connections</Link>
+      </div>)
+  }
+}
+
 interface ApplicationProps {
   path: string;
   setPath: (x:string)=>void;
@@ -80,19 +97,7 @@ class Application extends React.Component<ApplicationProps, any> {
               return null;
             }} />
             <div className="app">
-              <div className="nav">
-                <div>
-                  <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
-                  <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent">Transactions</Link>
-                  <Link relative to="/buckets" exactMatchClass="selected" matchClass="selected-parent">Buckets</Link>
-                  <Route path="/buckets">
-                    <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
-                  </Route>
-                  <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
-                </div>
-                <div>
-                </div>
-              </div>
+              <Navbar />
               <div className="content">
                 <header>
                   <div className="totals">
@@ -137,6 +142,9 @@ class Application extends React.Component<ApplicationProps, any> {
                   </Route>
                   <Route path="/transactions">
                     <TransactionPage appstate={appstate} />
+                  </Route>
+                  <Route path="/connections">
+                    <ConnectionsPage appstate={appstate} />
                   </Route>
                 </div>
               </div>

@@ -1,11 +1,9 @@
 import * as React from 'react'
 import * as _ from 'lodash'
-import * as moment from 'moment'
 import {Balances} from '../models/balances'
 import {Account, Transaction} from '../models/account'
 import {Route, Link, WithRouting} from './routing'
-import {Money, MoneyInput} from '../money'
-import {Date, DateInput} from '../time'
+import {Money} from '../money'
 import {TransactionList} from './transactions'
 import {DebouncedInput} from '../input';
 import { manager, AppState } from './appstate';
@@ -20,7 +18,6 @@ export class AccountList extends React.Component<AccountListProps,any> {
     let accounts = this.props.accounts
     .map((account:Account) => {
       return (<tr key={account.id}>
-          <td><Link relative to={`/${account.id}`}>edit</Link></td>
           <td><DebouncedInput
             blendin
             value={account.name}
@@ -30,14 +27,15 @@ export class AccountList extends React.Component<AccountListProps,any> {
             }}
           /></td>
           <td><Money value={balances[account.id]} /></td>
+          <td><Link relative to={`/${account.id}`} className="subtle">more</Link></td>
         </tr>);
     })
     return (<table className="ledger">
       <thead>
         <tr>
-          <th></th>
           <th>Account</th>
           <th>Balance</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -53,35 +51,7 @@ interface AccountViewProps {
   balance: number;
   appstate: AppState;
 }
-export class AccountView extends React.Component<AccountViewProps, {
-  deposit_amount: number;
-  posted_date: null|moment.Moment;
-}> {
-  constructor(props) {
-    super(props)
-    this.state = {
-      deposit_amount: 0,
-      posted_date: null,
-    }
-  }
-  stateFromProps(props:AccountViewProps) {
-    let newstate:any = {}
-    if (this.state.posted_date) {
-      let dft_posting = props.appstate.defaultPostingDate;
-      if (dft_posting.year() !== this.state.posted_date.year()
-          || dft_posting.month() !== this.state.posted_date.month()) {
-        newstate.posted_date = null;
-      }
-    }
-    this.setState(newstate);
-  }
-  componentWillReceiveProps(nextProps, nextState) {
-    this.stateFromProps(nextProps);
-  }
-  get postedDate() {
-    let val = this.state.posted_date || this.props.appstate.defaultPostingDate;
-    return val;
-  }
+export class AccountView extends React.Component<AccountViewProps, {}> {
   render() {
     let { account, balance } = this.props;
     return (<div className="padded" key={account.id}>
@@ -96,33 +66,6 @@ export class AccountView extends React.Component<AccountViewProps, {
         />
       </h1>
       Balance: $<Money value={balance} />
-      <hr/>
-      <div>
-        <MoneyInput
-          value={this.state.deposit_amount}
-          onChange={(amount) => {
-            this.setState({deposit_amount: amount})
-          }} />
-      </div>
-      <DateInput
-        value={this.postedDate}
-        onChange={(newposteddate) => {
-          this.setState({posted_date: newposteddate})
-        }} />
-      <Date value={this.postedDate} />
-      <br/>
-      <button
-        onClick={() => {
-          manager.store.accounts.transact({
-            account_id: account.id,
-            amount: this.state.deposit_amount,
-            memo: 'test',
-            posted: this.postedDate
-          })
-          .then(newtrans => {
-          })
-        }}>Transact</button>
-       <hr/>
        <TransactionList
          transactions={this.props.transactions}
          appstate={this.props.appstate}

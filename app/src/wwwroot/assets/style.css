@@ -330,7 +330,7 @@ table.ledger td {
   border: 1px solid var(--lightest-grey);
   padding: 1px 5px;
   text-align: left;
-  vertical-align: top;
+  vertical-align: center;
 }
 table.ledger td.noborder,
 table.ledger th.noborder {
@@ -358,6 +358,10 @@ tr.group-row .group-name {
   font-size: 1.25rem;
 }
 
+table.ledger tr.transact-row td {
+  border: 0;
+  padding: 8px 0;
+}
 
 
 /* Money */
@@ -372,14 +376,14 @@ tr.group-row .group-name {
 .money-input input {
   max-width: 100px;
   min-width: 50px;
-  border: 1px solid var(--lighter-grey);
-  border-radius: 300px;
-  padding: 0 5px 1px;
+  /*border: 1px solid var(--lighter-grey);
+  border-radius: 3px;
+  padding: 2px 5px;*/
 }
 .money-input input:focus {
-  outline: none;
+  /*outline: none;
   border-color: var(--blue);
-  background-color: var(--highlighter);
+  background-color: var(--highlighter);*/
 }
 .money-input .computed-value {
 }
@@ -553,7 +557,7 @@ button {
   border: 1px solid var(--lighter-grey);
   background-color: var(--lightest-grey);
   color: var(--darker-darkblue);
-  border-radius: 300px;
+  border-radius: 3px;
   margin: 0 2px;
   cursor: pointer;
 }
