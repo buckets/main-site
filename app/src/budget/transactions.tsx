@@ -3,8 +3,8 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import {manager, AppState} from './appstate'
-import {Category, Transaction} from '../models/account'
-import {Date, ensureUTCMoment} from '../time'
+import {Account, Category, Transaction} from '../models/account'
+import {Date, DateInput, ensureUTCMoment, Timestamp} from '../time'
 import {Money, MoneyInput} from '../money'
 
 
@@ -13,12 +13,22 @@ interface TransactionPageProps {
 }
 export class TransactionPage extends React.Component<TransactionPageProps, {}> {
   render() {
-    return <div className="page">
-      <TransactionList
-        appstate={this.props.appstate}
-        transactions={_.values(this.props.appstate.transactions)}
-      />
-    </div>
+    return (
+    <div className="rows">
+      <div className="subheader">
+        <div>
+          <button>Do nothing</button>
+        </div>
+      </div>
+      <div className="panes">
+        <div className="padded">
+          <TransactionList
+            appstate={this.props.appstate}
+            transactions={_.values(this.props.appstate.transactions)}
+          />
+        </div>
+      </div>
+    </div>);
   }
 }
 
@@ -26,11 +36,11 @@ interface TransactionListProps {
   transactions: Transaction[];
   appstate: AppState;
   hideAccount?: boolean;
+  account?: Account;
 }
 export class TransactionList extends React.Component<TransactionListProps, any> {
   render() {
-    console.log('TransactionList render', this.props.transactions)
-    let { appstate } = this.props;
+    let { appstate, account } = this.props;
     let hideAccount = this.props.hideAccount || false;
     let elems = _.sortBy(this.props.transactions, [
       item => -ensureUTCMoment(item.posted).unix(),
@@ -38,6 +48,7 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
       'id',
     ])
     .map(trans => {
+      console.log('trans', trans);
       return <tr key={trans.id}>
         <td className="nobr"><Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
@@ -59,9 +70,130 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
         </tr>
       </thead>
       <tbody>
+        <CreateTransRow
+          hideAccount={hideAccount}
+          account={account}
+          appstate={appstate} />
         {elems}
       </tbody>
     </table>
+  }
+}
+
+class CreateTransRow extends React.Component<{
+  account?: Account;
+  hideAccount?: boolean;
+  appstate: AppState
+}, {
+  amount: number;
+  memo: string;
+  posted: Timestamp;
+  account_id: number;
+}> {
+  private memo_elem = null;
+  private amount_elem = null;
+  constructor(props) {
+    super(props);
+    this.state = {
+      amount: 0,
+      memo: '',
+      posted: props.appstate.defaultPostingDate,
+      account_id: props.account ? props.account.id : null,
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.account) {
+      this.setState({
+        account_id: nextProps.account.id,
+      })
+    }
+  }
+  doTransaction = () => {
+    if (this.state.amount) {
+      manager.store.accounts.transact({
+        account_id: this.state.account_id,
+        amount: this.state.amount,
+        memo: this.state.memo,
+        posted: this.state.posted,
+      })
+      this.setState({
+        amount: 0,
+        memo: '',
+      }, () => {
+        this.memo_elem.focus();
+      })
+    }
+  }
+  render() {
+    let { account, hideAccount, appstate } = this.props;
+    let account_cell;
+    let transact_label = 'Deposit';
+    if (this.state.amount < 0) {
+      transact_label = 'Withdraw';
+    }
+    if (!hideAccount) {
+      // show accounts
+      if (account) {
+        account_cell = <td>
+          {account.name}
+        </td>
+      } else {
+        let value = this.state.account_id;
+        if (value === null) {
+          value = undefined;
+        }
+        account_cell = <td>
+          <select value={value}>
+            <option></option>
+            {_.values(appstate.accounts).map(acc => {
+              return <option key={acc.id} value={acc.id}>{acc.name}</option>
+            })}
+          </select>
+        </td>
+      }
+    }
+    return (
+      <tr>
+        <td>
+          <DateInput
+            value={this.state.posted}
+            onChange={(new_posting_date) => {
+              this.setState({posted: new_posting_date});
+            }} />
+        </td>
+        {account_cell}
+        <td>
+          <input
+            type="text"
+            value={this.state.memo}
+            onChange={(ev) => {
+              this.setState({memo: ev.target.value})
+            }}
+            ref={(elem) => {
+              if (elem) {
+                this.memo_elem = elem;  
+              }
+            }}
+          />
+        </td>
+        <td>
+          <MoneyInput
+            value={this.state.amount}
+            onChange={(amount) => {
+              this.setState({amount: amount})
+            }}
+            ref={(elem) => {
+              if (elem) {
+                this.amount_elem = elem;
+              }
+            }}
+          />
+        </td>
+        <td>
+          <button onClick={this.doTransaction}>{transact_label}</button>
+        </td>
+      </tr>
+      )
   }
 }
 

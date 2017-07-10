@@ -126,6 +126,7 @@ export class AccountView extends React.Component<AccountViewProps, {
        <TransactionList
          transactions={this.props.transactions}
          appstate={this.props.appstate}
+         account={account}
          hideAccount
        />
     </div>)

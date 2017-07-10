@@ -68,6 +68,9 @@ export class AccountStore {
     if (args.posted) {
       data.posted = ts2db(args.posted)
     }
+    if (args.account_id === null) {
+      throw new Error('You must provide an account');
+    }
     let trans = await this.store.createObject(Transaction, data);
     let account = await this.store.getObject(Account, args.account_id);
     this.store.publishObject('update', account);

@@ -1,6 +1,6 @@
 import {test} from 'tap'
 import {isObj} from '../store';
-import {getStore} from './account.test'
+import { getStore } from './testutil';
 import {Failure} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
 import {Transaction as ATrans} from './account';

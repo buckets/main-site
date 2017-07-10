@@ -112,6 +112,9 @@ export class BucketStore {
     if (args.posted) {
       data.posted = ts2db(args.posted)
     }
+    if (args.bucket_id === null) {
+      throw new Error('You must provide a bucket');
+    }
     let trans = await this.store.createObject(Transaction, data);
     let bucket = await this.store.getObject(Bucket, args.bucket_id);
     this.store.publishObject('update', bucket);

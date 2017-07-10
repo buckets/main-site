@@ -1,21 +1,7 @@
-import {ObjectEvent, isObj} from '../store';
-import {DBStore} from '../mainprocess/dbstore';
+import {isObj} from '../store';
 import {Account, Transaction} from './account';
 import {test} from 'tap';
-
-//-----------------------------
-// Utilities
-//-----------------------------
-
-export async function getStore():Promise<{store:DBStore, events:ObjectEvent<any>[]}> {
-  let store = new DBStore(':memory:');
-  let events = [];
-  await store.open();
-  store.data.on('obj', message => {
-    events.push(message as ObjectEvent<any>);
-  })
-  return {store, events}
-}
+import { getStore } from './testutil';
 
 //-----------------------------
 // Tests
@@ -102,6 +88,22 @@ test('transact', async (t) => {
   }
   let new_account = ev1.obj as Account
   t.equal(new_account.balance, 800);
+})
+
+test('transact, null account', async t => {
+  let { store, events } = await getStore();
+  events.length = 0;
+  console.log('before');
+  try {
+    await store.accounts.transact({
+      account_id: null,
+      amount: 500,
+      memo: 'hello'});
+    t.fail('Should have throw up');
+  } catch(err) {
+    t.pass('threw an error for a null account');
+  }
+  console.log('after');
 })
 
 test('balances', async (t) => {

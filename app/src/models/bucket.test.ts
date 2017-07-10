@@ -1,5 +1,5 @@
 import {isObj} from '../store';
-import {getStore} from './account.test'
+import { getStore } from './testutil';
 import {test} from 'tap'
 import {Bucket} from './bucket';
 
