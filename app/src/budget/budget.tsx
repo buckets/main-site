@@ -9,9 +9,14 @@ import {TransactionPage} from './transactions'
 import { ConnectionsPage } from './connections'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
-import {Router, Route, Link, Switch, Redirect, CurrentPath, WithRouting} from './routing'
+import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
+import { ToastDisplay } from './toast'
 
 import { manager, AppState } from './appstate'
+
+export function setPath(x:string) {
+  window.location.hash = '#' + x;
+}
 
 export async function start(base_element, room) {
   let store = new RPCRendererStore(room);
@@ -33,9 +38,6 @@ export async function start(base_element, room) {
   window.addEventListener('hashchange', () => {
     renderer.doUpdate();
   }, false);
-  let setPath = (x:string) => {
-    window.location.hash = '#' + x;
-  }
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
@@ -85,11 +87,7 @@ class Application extends React.Component<ApplicationProps, any> {
         setPath={this.props.setPath}
         >
         <BucketStyles buckets={_.values(appstate.buckets)} />
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          right: 0,
-        }}>Current path: <CurrentPath /></div>
+        <ToastDisplay />
         <Switch>
           <Route path="/y<int:year>m<int:month>">
             <WithRouting func={({params}) => {
@@ -152,7 +150,9 @@ class Application extends React.Component<ApplicationProps, any> {
           </Route>
           <WithRouting func={(routing) => {
             let dft_path = routing.fullpath || '/accounts';
-            return (<Redirect to={`/y${today.year()}m${today.month()+1}${dft_path}`} />)
+            let year = appstate.year || today.year();
+            let month = appstate.month || today.month()+1
+            return (<Redirect to={`/y${year}m${month}${dft_path}`} />)
           }} />
         </Switch>
       </Router>);

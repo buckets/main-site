@@ -7,6 +7,7 @@ import {Money} from '../money'
 import {TransactionList} from './transactions'
 import {DebouncedInput} from '../input';
 import { manager, AppState } from './appstate';
+import { setPath } from './budget';
 
 interface AccountListProps {
   accounts: Account[];
@@ -85,7 +86,10 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
     return (
       <div className="rows">
         <div className="subheader">
-          <button onClick={this.addAccount}>Create account</button>
+          <div>
+            <button onClick={this.addAccount}>Create account</button>
+            <button onClick={this.createConnection}>Connect to bank</button>
+          </div>
         </div>
         <div className="panes">
           <div className="padded">
@@ -110,5 +114,8 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   }
   addAccount = () => {
     manager.store.accounts.add('Savings');
+  }
+  createConnection = () => {
+    setPath('/connections')
   }
 }

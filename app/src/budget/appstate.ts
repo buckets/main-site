@@ -5,6 +5,7 @@ import {EventEmitter} from 'events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import {Account, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
+import {Connection} from '../models/simplefin'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 
@@ -23,6 +24,9 @@ interface IAppState {
   };
   btransactions: {
     [k: number]: BTrans;
+  };
+  connections: {
+    [k: number]: Connection;
   };
   account_balances: Balances;
   bucket_balances: Balances;
@@ -47,6 +51,7 @@ export class AppState implements IAppState, IComputedAppState {
   groups = {};
   transactions = {};
   btransactions = {};
+  connections = {};
   account_balances = {};
   bucket_balances = {};
   month = null;
@@ -188,6 +193,14 @@ export class StateManager extends EventEmitter {
         this.appstate.btransactions[obj.id] = obj;
         changed = true;
       }
+    } else if (isObj(Connection, obj)) {
+      if (ev.event === 'update') {
+        this.appstate.connections[obj.id] = obj;
+        changed = true;
+      } else if (ev.event === 'delete') {
+        delete this.appstate.connections[obj.id];
+        changed = true;
+      }
     }
     if (changed) {
       this.recomputeTotals();
@@ -212,6 +225,7 @@ export class StateManager extends EventEmitter {
       this.fetchBucketBalances(),
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
+      this.fetchConnections(),
     ])
     this.recomputeTotals();
     return this;
@@ -289,6 +303,15 @@ export class StateManager extends EventEmitter {
           this.appstate.btransactions[trans.id] = trans;
         })
       })
+  }
+  fetchConnections() {
+    return this.store.connections.listConnections()
+    .then(connections => {
+      this.appstate.connections = {};
+      connections.forEach(obj => {
+        this.appstate.connections[obj.id] = obj;
+      })
+    })
   }
 }
 

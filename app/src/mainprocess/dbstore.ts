@@ -5,8 +5,9 @@ import * as log from 'electron-log'
 import {IStore, DataEventEmitter, ObjectEventType, ObjectEvent, IObject, IObjectClass} from '../store'
 import {APP_ROOT} from './globals'
 
-import {BucketStore} from '../models/bucket'
-import {AccountStore} from '../models/account'
+import { BucketStore } from '../models/bucket'
+import { AccountStore } from '../models/account'
+import { SimpleFINStore } from '../models/simplefin'
 
 
 //--------------------------------------------------------------------------------
@@ -23,10 +24,12 @@ export class DBStore implements IStore {
 
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
+  readonly connections:SimpleFINStore;
   constructor(private filename:string) {
     this.data = new DataEventEmitter();
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
+    this.connections = new SimpleFINStore(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})

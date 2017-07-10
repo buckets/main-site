@@ -112,5 +112,11 @@ CREATE TABLE account_mapping (
     account_hash TEXT,
     FOREIGN KEY(account_id) REFERENCES account(id)
 );
+CREATE TABLE unknown_account (
+    id INTEGER PRIMARY KEY,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description TEXT,
+    account_hash TEXT
+);
 
 -- Down

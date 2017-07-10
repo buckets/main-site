@@ -1,9 +1,10 @@
 import * as log from 'electron-log'
 import * as URL from 'url'
-import {IStore, DataEventEmitter, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
-import {ipcMain, ipcRenderer, webContents} from 'electron'
-import {BucketStore, Group, Bucket, Transaction as BucketTransaction} from './models/bucket'
-import {AccountStore, Account, Transaction as AccountTransaction} from './models/account'
+import { IStore, DataEventEmitter, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
+import { ipcMain, ipcRenderer, webContents} from 'electron'
+import { BucketStore, Group, Bucket, Transaction as BucketTransaction} from './models/bucket'
+import { AccountStore, Account, Transaction as AccountTransaction} from './models/account'
+import { SimpleFINStore, Connection } from './models/simplefin'
 
 //--------------------------------------------------------------------------------
 // serializing
@@ -15,6 +16,7 @@ const OBJECT_CLASSES = [
   Bucket,
   BucketTransaction,
   Group,
+  Connection,
 ]
 let TABLE2CLASS = {};
 OBJECT_CLASSES.forEach(cls => {
@@ -96,11 +98,13 @@ export class RPCRendererStore implements IStore {
   public data:DataEventEmitter;
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
+  readonly connections:SimpleFINStore;
   constructor(private room:string) {
     this.data = new DataEventEmitter();
     ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
+    this.connections = new SimpleFINStore(this);
   }
   get channel() {
     return `rpc-${this.room}`;

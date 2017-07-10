@@ -1,7 +1,8 @@
 import {EventEmitter} from 'events'
 import {} from 'bluebird'
-import {BucketStore} from './models/bucket'
-import {AccountStore} from './models/account'
+import { BucketStore } from './models/bucket'
+import { AccountStore } from './models/account'
+import { SimpleFINStore } from './models/simplefin'
 
 //--------------------------------------------------------------------------------
 // objects
@@ -36,6 +37,7 @@ export interface IStore {
   // model-specific stuff
   accounts:AccountStore;
   buckets:BucketStore;
+  connections:SimpleFINStore;
 }
 
 //--------------------------------------------------------------------------------
