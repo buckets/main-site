@@ -43,14 +43,14 @@ test('update bucket', async (t) => {
 
   let b2 = await store.buckets.update(b1.id, {
     name: 'Foobar',
-    kind: 'goal',
+    kind: 'goal-deposit',
     ranking: 'h',
     kicked: true,
     notes: 'some notes',
     group_id: 5,
   })
   t.equal(b2.name, 'Foobar')
-  t.equal(b2.kind, 'goal')
+  t.equal(b2.kind, 'goal-deposit')
   t.equal(b2.ranking, 'h')
   t.equal(b2.kicked, true)
   t.equal(b2.notes, 'some notes')

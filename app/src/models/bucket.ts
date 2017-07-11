@@ -1,5 +1,4 @@
 import * as moment from 'moment'
-import * as _ from 'lodash'
 import { IObject, IStore} from '../store'
 import { ensureUTCMoment, ts2db, Timestamp } from '../time'
 import { Balances, computeBalances } from './balances'
@@ -9,7 +8,9 @@ import { DEFAULT_COLORS } from '../color'
 export type BucketKind =
   ''
   | 'deposit'
-  | 'goal';
+  | 'goal-deposit'
+  | 'goal-date'
+  | 'deposit-date';
 
 export class Bucket implements IObject {
   static table_name: string = 'bucket';
@@ -287,7 +288,7 @@ interface ComputeArgs {
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs);
 export function computeBucketData(kind:'', b:Bucket);
 export function computeBucketData(kind:'deposit', b:Bucket);
-export function computeBucketData(kind:'goal', b:Bucket, args:ComputeArgs);
+export function computeBucketData(kind:'goal-deposit'|'goal-date'|'deposit-date', b:Bucket, args:ComputeArgs);
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):{
   deposit: number;
   goal: number;
@@ -298,37 +299,47 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
     goal: 0,
     end_date: null,
   };
-  if (b.kind === 'deposit') {
-    ret.deposit = b.deposit;
-  } else if (b.kind === 'goal') {
-    let today = args.today !== null ? ensureUTCMoment(args.today) : moment.utc();
-    let balance = args.balance !== null ? args.balance : b.balance;
-    if (!_.isNil(b.goal) && b.deposit) {
+  let today, balance;
+  if (args) {
+    today = args.today !== null ? ensureUTCMoment(args.today) : moment.utc();
+    balance = args.balance !== null ? args.balance : b.balance;
+  }
+  switch (b.kind) {
+    case 'deposit': {
+      ret.deposit = b.deposit;
+      break;
+    }
+    case 'goal-deposit': {
       Object.assign(ret, {
         goal: b.goal,
         deposit: b.deposit,
         end_date: computeGoalEndDate(balance, b.goal, b.deposit, today),
       })
-    } else if (!_.isNil(b.goal) && b.end_date) {
+      break;
+    }
+    case 'goal-date': {
       Object.assign(ret, {
         goal: b.goal,
         deposit: computeGoalDeposit(balance, b.goal, b.end_date, today),
         end_date: ensureUTCMoment(b.end_date),
       })
-    } else if (b.deposit && b.end_date) {
+      break;
+    }
+    case 'deposit-date': {
       Object.assign(ret, {
         goal: computeGoal(balance, b.deposit, b.end_date, today),
         deposit: b.deposit,
         end_date: ensureUTCMoment(b.end_date),
       })
-    } else {
+      break;
+    }
+    default: {
       Object.assign(ret, {
         goal: b.goal || 0,
         deposit: b.deposit || 0,
         end_date: b.end_date || null,
       })
     }
-    
   }
   return ret;
 }

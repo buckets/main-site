@@ -3,6 +3,23 @@ import * as cx from 'classnames'
 import * as _ from 'lodash'
 import * as moment from 'moment'
 
+
+export function onKeys(mapping:object):((ev)=>void) {
+  let actual_mapping = {};
+  _.each(mapping, (val, key) => {
+    key.split(',').forEach(keypart => {
+      actual_mapping[keypart] = val;
+    })
+  })
+  return (ev) => {
+    let handler = actual_mapping[ev.key];
+    if (handler) {
+      return handler(ev);
+    }
+  }
+}
+
+
 interface TextInputProps {
   value: string|number|null;
   onChange: (newval)=>void;

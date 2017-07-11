@@ -350,6 +350,7 @@ a.subtle:hover {
 
 table.ledger {
   border-collapse: collapse;
+  border-spacing: 0 0;
 }
 table.ledger th,
 table.ledger td {
@@ -456,6 +457,7 @@ table.ledger tr.action-row td {
 .totals {
   padding: 0.5rem 1rem;
   display: flex;
+  color: var(--darker-darkblue);
 }
 .totals total {
   display: flex;
@@ -482,6 +484,14 @@ table.ledger tr.action-row td {
 
 .totals flow {
 
+}
+
+permonth {
+  font-size: .8rem;
+}
+permonth:after {
+  opacity: 0.5;
+  content: '/mo';
 }
 
 /* ColorPicker */
@@ -617,24 +627,46 @@ button[disabled]:hover {
 .ledger td.bucket-details-wrap,
 .bucket-details-wrap {
   padding: 0;
-  vertical-align: center;
+  margin: 0;
 }
 .bucket-details {
-  position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 1.5rem;
+  min-width: 100%;
 }
 .bucket-details .summary {
+  min-width: 100%;
+  min-height: 1.5rem;
   display: flex;
-  flex-shrink: 1;
+  flex-shrink: 0;
+  flex-grow: 1;
   align-items: center;
+  justify-content: space-between;
   font-size: .8rem;
 }
-.bucket-details a.editlink {
+.bucket-details .summary a.editlink {
+  display: flex;
+  color: var(--grey);
+  background-color: var(--lightest-grey);
+  align-self: stretch;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  padding: 0 .4rem;
+}
+.bucket-details.open .summary a.editlink {
+  background-color: white;
+}
+.bucket-details .summary a.editlink:hover {
+  background-color: var(--yellow);
+  color: var(--darkblue);
+  cursor: pointer;
 }
 .bucket-details .details {
   padding: 1rem;
   background-color: var(--lightest-grey);
+  border-top: 1px dashed var(--lightest-grey);
 }
 table.props {
 }
@@ -654,19 +686,23 @@ table.props th {
 .progress-bar {
   display: inline-block;
   width: 10rem;
-  height: 12px;
+  height: 14px;
   border-radius: 1000px;
   overflow: hidden;
   border: 2px solid var(--blue);
 }
 .progress-bar .bar {
-  height: 12px;
+  color: white;
+  text-align: right;
+  padding-right: 5px;
+  height: 14px;
+  font-size: 10px;
+  line-height: 10px;
   max-width: 100%;
   min-width: 0%;
   transition: width 0.3s;
   background-color: var(--blue);
 }
-
 
 .dialog {
   border: 6px solid var(--blue);

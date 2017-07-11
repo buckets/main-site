@@ -7,7 +7,7 @@ import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../mo
 import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
-import { DebouncedInput, MonthSelector } from '../input'
+import { onKeys, DebouncedInput, MonthSelector } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 
@@ -160,9 +160,30 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   }
 }
 
+class ProgressBar extends React.Component<{
+  percent:number;
+  color?:string;
+},{}> {
+  render() {
+    let { percent, color } = this.props;
+    let outerStyle:any = {};
+    let innerStyle:any = {
+      width: `${percent}%`,
+    }
+    if (color) {
+      outerStyle.borderColor = color;
+      innerStyle.backgroundColor = color;
+    }
+    return <div className="progress-bar" style={outerStyle}>
+      <div className="bar" style={innerStyle}>{percent}%</div>
+    </div>
+  }
+}
+
 class BucketKindDetails extends React.Component<{
   bucket: Bucket;
   balance: number;
+  posting_date: Timestamp;
 }, {
   open: boolean;
 }> {
@@ -172,9 +193,61 @@ class BucketKindDetails extends React.Component<{
       open: false,
     }
   }
+  goalRow() {
+    let { bucket } = this.props;
+    return <tr key="goal">
+      <td>Goal:</td>
+      <td>
+        <MoneyInput
+          value={bucket.goal}
+          onChange={_.debounce(val => {
+            manager.store.buckets.update(bucket.id, {goal: val});
+          }, 250)} />
+      </td>
+    </tr>
+  }
+  targetDateRow() {
+    let { bucket } = this.props;
+    let dt = ensureUTCMoment(bucket.end_date);
+    if (!dt || !dt.isValid()) {
+      dt = moment.utc();
+    }
+    let year = dt.year();
+    let mon = dt.month() + 1;
+    return <tr key="end_date">
+      <td>Target date:</td>
+      <td>
+        <MonthSelector
+          year={year}
+          month={mon}
+          onChange={(year, month) => {
+            let ms = ('0' + month);
+            let newmonth = moment(`${year}-${ms.substr(ms.length-2)}-01`);
+            manager.store.buckets.update(bucket.id, {end_date: ts2db(newmonth)})
+          }} />
+      </td>
+    </tr>
+  }
+  depositRow() {
+    let { bucket } = this.props;
+    return <tr key="deposit">
+      <td>Monthly deposit:</td>
+      <td>
+        <MoneyInput
+          value={bucket.deposit}
+          onChange={_.debounce(val => {
+            manager.store.buckets.update(bucket.id, {deposit: val});
+          }, 250)} /><permonth/>
+      </td>
+    </tr>
+  }
   render() {
-    let { bucket, balance } = this.props;
+    let { bucket, balance, posting_date } = this.props;
     let edit_rows = [];
+    let computed = computeBucketData(bucket.kind, bucket, {
+      today: posting_date,
+      balance: balance,
+    })
     if (this.state.open) {
       edit_rows.push(
       <tr key="bucket-type">
@@ -187,82 +260,76 @@ class BucketKindDetails extends React.Component<{
             }}>
             <option value="">Plain old bucket</option>
             <option value="deposit">Recurring expense</option>
-            <option value="goal">Saving up</option>
+            <option value="goal-date">Save X by Y date</option>
+            <option value="goal-deposit">Save X by depositing AMT/mo</option>
+            <option value="deposit-date">Save AMT/mo until Y date</option>
           </select>
         </td>
       </tr>)
-      if (bucket.kind === 'deposit') {
-        edit_rows.push(
-        <tr key="deposit">
-          <td>Monthly deposit:</td>
-          <td>
-            <MoneyInput
-              value={bucket.deposit}
-              onChange={_.debounce(val => {
-                manager.store.buckets.update(bucket.id, {deposit: val});
-              }, 250)}/>/mo
-          </td>
-        </tr>);
-      } else if (bucket.kind === 'goal') {
-        let dt = ensureUTCMoment(bucket.end_date);
-        if (!dt || !dt.isValid()) {
-          dt = moment.utc();
+      switch (bucket.kind) {
+        case 'deposit': {
+          edit_rows.push(this.depositRow())
+          break;  
         }
-        let year = dt.year();
-        let mon = dt.month() + 1;
-        edit_rows = edit_rows.concat([
-          <tr key="goal">
-            <td>Goal:</td>
-            <td>
-              <MoneyInput
-                value={bucket.goal}
-                onChange={_.debounce(val => {
-                  manager.store.buckets.update(bucket.id, {goal: val});
-                }, 250)} />
-            </td>
-          </tr>,
-          <tr key="end_date">
-            <td>Target date:</td>
-            <td>
-              <MonthSelector
-                year={year}
-                month={mon}
-                onChange={(year, month) => {
-                  let ms = ('0' + month);
-                  let newmonth = moment(`${year}-${ms.substr(ms.length-2)}-01`);
-                  manager.store.buckets.update(bucket.id, {end_date: ts2db(newmonth)})
-                }} />
-            </td>
-          </tr>,
-          <tr key="deposit">
-            <td>Monthly deposit:</td>
-            <td>
-              <MoneyInput
-                value={bucket.deposit}
-                onChange={_.debounce(val => {
-                  manager.store.buckets.update(bucket.id, {deposit: val});
-                }, 250)} /> /mo
-            </td>
-          </tr>
-        ])
+        case 'goal-deposit': {
+          edit_rows.push(this.goalRow())
+          edit_rows.push(this.depositRow())
+          edit_rows.push(<tr key="end-date">
+              <td>Goal completion:</td>
+              <td>
+                <Date value={computed.end_date} format="MMM YYYY" />
+              </td>
+            </tr>)
+          break;
+        }
+        case 'goal-date': {
+          edit_rows.push(this.goalRow())
+          edit_rows.push(this.targetDateRow())
+          edit_rows.push(<tr key="end-date">
+              <td>Required deposit:</td>
+              <td>
+                <Money value={computed.deposit} /><permonth />
+              </td>
+            </tr>)
+          break;
+        }
+        case 'deposit-date': {
+          edit_rows.push(this.depositRow())
+          edit_rows.push(this.targetDateRow())
+          edit_rows.push(<tr key="goal">
+              <td>
+                Ending amount:
+              </td>
+              <td>
+                <Money value={computed.goal} />
+              </td>
+            </tr>)
+          break;
+        }
       }
     }
-    let summary;
-    if (bucket.kind === 'goal') {
+    
+    let summary = <span/>;
+    if (bucket.kind === 'goal-deposit' || bucket.kind === 'goal-date' || bucket.kind === 'deposit-date') {
       let percent = 0;
-      if (bucket.goal) {
-        percent = Math.floor(balance / bucket.goal * 100);
+      if (computed.goal) {
+        percent = Math.floor(balance / computed.goal * 100);
         if (percent < 0) {
           percent = 0;
         }
       }
-      summary = <div className="goal-summary">
-        <div className="progress-bar">
-          <div className="bar" style={{width: `${percent}%`}} />
+      if (computed.goal === 0) {
+        summary = <div className="goal-summary">
+          <span>Goal: 0</span>
+          <Date value={computed.end_date} format="MMM YYYY" />
         </div>
-        <Money value={bucket.goal} />
-        <Date value={bucket.end_date} format="MMM YYYY" />
-      </div>;
+      } else {
+        summary = <div className="goal-summary">
+          <ProgressBar percent={percent} color={bucket.color} />
+          <span>Goal: <Money value={computed.goal} /></span>
+          <Date value={computed.end_date} format="MMM YYYY" />
+        </div>;
+      }
     }
     let details;
     if (edit_rows.length) {
@@ -270,10 +337,10 @@ class BucketKindDetails extends React.Component<{
         <table className="props"><tbody>{edit_rows}</tbody></table>
       </div>;
     }
-    return <div className="bucket-details">
+    return <div className={cx("bucket-details", {open: this.state.open})}>
       <div className="summary">
         {summary}
-        <a className="editlink subtle fa fa-gear" onClick={this.toggleEdit}/>
+        <a className="editlink" onClick={this.toggleEdit}><span className={cx("fa", {'fa-gear':!this.state.open, 'fa-close':this.state.open})} /></a>
       </div>
       {details}
     </div>
@@ -301,6 +368,17 @@ class BucketRow extends React.Component<BucketRowProps, {
       isDragging: false,
       underDrag: false,
       dropHalf: 'top',
+    }
+  }
+  doPending = async () => {
+    let { pending, bucket, posting_date, onPendingChanged } = this.props;
+    if (pending) {
+      await manager.store.buckets.transact({
+        bucket_id: bucket.id,
+        amount: pending,
+        posted: posting_date,
+      })
+      onPendingChanged({[bucket.id]: 0});
     }
   }
   render() {
@@ -365,15 +443,25 @@ class BucketRow extends React.Component<BucketRowProps, {
               onPendingChanged({[bucket.id]: val});
             }
           }}
+          onKeyDown={onKeys({
+            Enter: () => {
+              this.doPending();
+            },
+            ArrowUp: () => {
+              console.log('up');
+            },
+            ArrowDown: () => {
+              console.log('down');
+            },
+          })}
         />
       </td>
-      <td className="right"><Money value={computed.deposit} hidezero />{computed.deposit ? '/mo' : ''}</td>
-      <td className="bucket-details-wrap">
-        <BucketKindDetails
+      <td className="right"><Money value={computed.deposit} hidezero />{computed.deposit ? <permonth/> : ''}</td>
+      <td className="nopad bucket-details-wrap"><BucketKindDetails
           bucket={bucket}
-          balance={balance} />
-      </td>
-      <td className="nobr">
+          balance={balance}
+          posting_date={posting_date} /></td>
+      <td>
         <Link relative to={`/${bucket.id}`} className="subtle">more</Link>
       </td>
     </tr>
@@ -505,7 +593,7 @@ class GroupRow extends React.Component<{
         <th>Bucket</th>
         <th>Balance</th>
         <th className="left">Transact</th>
-        <th>Rain</th>
+        <th><span className="fa fa-tint"/> Rain</th>
         <th>Details</th>
         <th></th>
       </tr>
@@ -691,7 +779,10 @@ class TransactionList extends React.Component<{
     let rows = transactions.map(trans => {
       let account_name;
       if (trans.account_trans_id) {
-        account_name = appstate.accounts[trans.account_trans_id].name;
+        let account_id = appstate.transactions[trans.account_trans_id].account_id;
+        if (account_id) {
+          account_name = appstate.accounts[account_id].name;
+        }
       }
       return <tr key={trans.id}>
         <td className="nobr"><Date value={trans.posted} /></td>

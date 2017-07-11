@@ -111,8 +111,8 @@ class Application extends React.Component<ApplicationProps, any> {
                 <header>
                   <div className="totals">
                     <total>
-                      <name>Rain</name>
-                      <amount>💧<Money value={appstate.rain} /></amount>
+                      <name><span className="fa fa-tint" /> Rain</name>
+                      <amount><Money value={appstate.rain} /></amount>
                     </total>
                     <total className="section-start">
                       <name>Income</name>
@@ -127,6 +127,10 @@ class Application extends React.Component<ApplicationProps, any> {
                     <total>
                       <name>Month's {appstate.gain >= 0 ? 'Gain' : 'Loss'}</name>
                       <amount><Money value={appstate.gain} /></amount>
+                    </total>
+                    <total className="section-start">
+                      <name>In the bank</name>
+                      <amount><Money value={appstate.account_total_balance} /></amount>
                     </total>
                   </div>
                   <div>
