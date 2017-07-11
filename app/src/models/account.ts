@@ -59,6 +59,7 @@ export class AccountStore {
     amount:number,
     memo:string,
     posted?:Timestamp,
+    fi_id?:string,
   }):Promise<Transaction> {
     let data:any = {
       account_id: args.account_id,
@@ -71,11 +72,57 @@ export class AccountStore {
     if (args.account_id === null) {
       throw new Error('You must provide an account');
     }
+    if (args.fi_id) {
+      data.fi_id = args.fi_id;
+    }
     let trans = await this.store.createObject(Transaction, data);
     let account = await this.store.getObject(Account, args.account_id);
     this.store.publishObject('update', account);
     return trans;
   }
+
+  async importTransaction(args: {
+    account_id:number,
+    amount:number,
+    memo:string,
+    posted:Timestamp,
+    fi_id:string,
+  }):Promise<Transaction> {
+    let rows = await this.store.query(`SELECT id
+      FROM account_transaction
+      WHERE
+        account_id = $account_id
+        AND fi_id = $fi_id LIMIT 1`, {
+          $account_id: args.account_id,
+          $fi_id: args.fi_id,
+        })
+    if (rows.length) {
+      // Update existing
+      let existing_id:number = rows[0].id;
+      let ret = await this.store.updateObject(Transaction, existing_id, {
+        account_id: args.account_id,
+        amount: args.amount,
+        memo: args.memo,
+        posted: ts2db(args.posted),
+        fi_id: args.fi_id,
+      })
+      this.store.getObject(Account, args.account_id)
+      .then(account => {
+        this.store.publishObject('update', account);  
+      })
+      return ret;
+    } else {
+      // Create new transaction
+      return this.store.accounts.transact({
+        account_id: args.account_id,
+        amount: args.amount,
+        posted: args.posted,
+        memo: args.memo,
+        fi_id: args.fi_id,
+      })
+    }
+  }
+
   async deleteTransactions(transaction_ids:number[]) {
     let affected_account_ids = new Set();
 

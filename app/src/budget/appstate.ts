@@ -5,7 +5,7 @@ import {EventEmitter} from 'events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import {Account, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
-import {Connection} from '../models/simplefin'
+import { Connection, UnknownAccount } from '../models/simplefin'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 
@@ -28,6 +28,9 @@ interface IAppState {
   connections: {
     [k: number]: Connection;
   };
+  unknown_accounts: {
+    [k: number]: UnknownAccount;
+  }
   account_balances: Balances;
   bucket_balances: Balances;
   month: number;
@@ -54,6 +57,7 @@ export class AppState implements IAppState, IComputedAppState {
   connections = {};
   account_balances = {};
   bucket_balances = {};
+  unknown_accounts = {};
   month = null;
   year = null;
 
@@ -132,6 +136,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
 export class StateManager extends EventEmitter {
   public store:IStore;
   public appstate:AppState;
+  private queue: ObjectEvent<any>[] = [];
   constructor() {
     super()
     this.appstate = new AppState();
@@ -141,33 +146,34 @@ export class StateManager extends EventEmitter {
     this.store = store;
   }
   async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
+    this.queue.push(ev);
+    return this.tick();
+  }
+  async tick():Promise<AppState> {
+    if (!this.queue.length) {
+      return this.appstate;
+    }
+    let ev = this.queue.shift();
     let obj = ev.obj;
-    let changed = false;
     if (isObj(Account, obj)) {
       if (ev.event === 'update') {
         this.appstate.accounts[obj.id] = obj;
         await this.fetchAccountBalances();
-        changed = true;
       } else if (ev.event === 'delete') {
         delete this.appstate.accounts[obj.id];
-        changed = true;
       }
     } else if (isObj(Bucket, obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
         await this.fetchBucketBalances();
-        changed = true;
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
-        changed = true;
       }
     } else if (isObj(Group, obj)) {
       if (ev.event === 'update') {
         this.appstate.groups[obj.id] = obj;
-        changed = true;
       } else if (ev.event === 'delete') {
         delete this.appstate.groups[obj.id];
-        changed = true;
       }
     } else if (isObj(ATrans, obj)) {
       let dr = this.appstate.viewDateRange;
@@ -175,11 +181,9 @@ export class StateManager extends EventEmitter {
       if (!inrange || ev.event === 'delete') {
         if (this.appstate.transactions[obj.id]) {
           delete this.appstate.transactions[obj.id];  
-          changed = true;
         }
       } else if (ev.event === 'update') {
         this.appstate.transactions[obj.id] = obj;
-        changed = true;
       }
     } else if (isObj(BTrans, obj)) {
       let dr = this.appstate.viewDateRange;
@@ -187,29 +191,35 @@ export class StateManager extends EventEmitter {
       if (!inrange || ev.event === 'delete') {
         if (this.appstate.btransactions[obj.id]) {
           delete this.appstate.btransactions[obj.id];  
-          changed = true;
         }
       } else if (ev.event === 'update') {
         this.appstate.btransactions[obj.id] = obj;
-        changed = true;
       }
     } else if (isObj(Connection, obj)) {
       if (ev.event === 'update') {
         this.appstate.connections[obj.id] = obj;
-        changed = true;
       } else if (ev.event === 'delete') {
         delete this.appstate.connections[obj.id];
-        changed = true;
+      }
+    } else if (isObj(UnknownAccount, obj)) {
+      if (ev.event === 'update') {
+        this.appstate.unknown_accounts[obj.id] = obj;
+      } else if (ev.event === 'delete') {
+        delete this.appstate.unknown_accounts[obj.id];
       }
     }
-    if (changed) {
-      this.recomputeTotals();
-      this.emit('change', this.appstate);
-    }
+    this.signalChange();
     return this.appstate;
   }
+  
+  signalChange = _.debounce(() => {
+    this.recomputeTotals();
+    this.emit('change', this.appstate);
+  }, 100, {leading: true, trailing: true});
+
   async setDate(year:number, month:number):Promise<any> {
     if (this.appstate.year !== year || this.appstate.month !== month) {
+      console.log('setDate change');
       this.appstate.year = year;
       this.appstate.month = month;
       await this.refresh();
@@ -217,6 +227,7 @@ export class StateManager extends EventEmitter {
     }
   }
   async refresh():Promise<any> {
+    console.log('refresh');
     await Promise.all([
       this.fetchAllAccounts(),
       this.fetchAllBuckets(),
@@ -226,6 +237,7 @@ export class StateManager extends EventEmitter {
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
       this.fetchConnections(),
+      this.fetchUnknownAccounts(),
     ])
     this.recomputeTotals();
     return this;
@@ -310,6 +322,15 @@ export class StateManager extends EventEmitter {
       this.appstate.connections = {};
       connections.forEach(obj => {
         this.appstate.connections[obj.id] = obj;
+      })
+    })
+  }
+  fetchUnknownAccounts() {
+    return this.store.listObjects(UnknownAccount)
+    .then(accounts => {
+      this.appstate.unknown_accounts = {};
+      accounts.forEach(obj => {
+        this.appstate.unknown_accounts[obj.id] = obj;
       })
     })
   }

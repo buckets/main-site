@@ -163,6 +163,10 @@ h1 {
   font-weight: 800;
   color: var(--darkblue);
 }
+h2 {
+  font-weight: 400;
+  color: var(--darkblue);
+}
 
 
 

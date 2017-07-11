@@ -4,7 +4,7 @@ import { IStore, DataEventEmitter, IObject, IObjectClass, ObjectEvent, ObjectEve
 import { ipcMain, ipcRenderer, webContents} from 'electron'
 import { BucketStore, Group, Bucket, Transaction as BucketTransaction} from './models/bucket'
 import { AccountStore, Account, Transaction as AccountTransaction} from './models/account'
-import { SimpleFINStore, Connection } from './models/simplefin'
+import { SimpleFINStore, Connection, UnknownAccount, AccountMapping } from './models/simplefin'
 
 //--------------------------------------------------------------------------------
 // serializing
@@ -17,6 +17,8 @@ const OBJECT_CLASSES = [
   BucketTransaction,
   Group,
   Connection,
+  UnknownAccount,
+  AccountMapping,
 ]
 let TABLE2CLASS = {};
 OBJECT_CLASSES.forEach(cls => {
