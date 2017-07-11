@@ -2,6 +2,7 @@
  ☐ Ability to delete transactions in UI
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
+ ☐ Up/Down in bucket transact should go to the next/prev transact input
  ☐ Kick buckets
  ☐ Import CSV
  ☐ Import OFX

@@ -75,7 +75,7 @@ export class ConnectionsPage extends React.Component<{
       <div className="rows">
         <div className="subheader">
           <div>
-            <button onClick={this.syncTransactions} disabled={!conns}>Sync <span className="fa fa-sync"/></button>
+            <button onClick={this.syncTransactions} disabled={!conns}><span className="fa fa-refresh"/> Sync</button>
             <button onClick={this.startConnecting}>Connect to bank</button>
           </div>
           <div>

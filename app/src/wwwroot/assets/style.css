@@ -384,7 +384,7 @@ tr.group-row .group-name {
   font-size: 1.25rem;
 }
 
-table.ledger tr.transact-row td {
+table.ledger tr.action-row td {
   border: 0;
   padding: 8px 0;
 }
@@ -614,22 +614,29 @@ button[disabled]:hover {
 }
 
 /* Bucket goal details */
+.ledger td.bucket-details-wrap,
 .bucket-details-wrap {
-  padding: .5rem;
-  vertical-align: middle;
+  padding: 0;
+  vertical-align: center;
 }
 .bucket-details {
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 .bucket-details .summary {
   display: flex;
+  flex-shrink: 1;
   align-items: center;
   font-size: .8rem;
 }
 .bucket-details a.editlink {
 }
+.bucket-details .details {
+  padding: 1rem;
+  background-color: var(--lightest-grey);
+}
 table.props {
-  margin: 1rem 0;
 }
 table.props td,
 table.props th {

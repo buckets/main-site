@@ -154,7 +154,7 @@ class CreateTransRow extends React.Component<{
       }
     }
     return (
-      <tr className="transact-row">
+      <tr className="action-row">
         <td>
           <DateInput
             value={this.state.posted}

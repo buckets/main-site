@@ -101,8 +101,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
           <div className="rows">
             <div className="subheader">
               <div>
-                <button onClick={this.addBucket}>Create bucket</button>
-                <button onClick={this.addGroup}>Create group</button>
+                <button onClick={this.addBucket}>New bucket</button>
+                <button onClick={this.addGroup}>New group</button>
               </div>
               <div className="group">
                 {rainleft}
@@ -264,16 +264,18 @@ class BucketKindDetails extends React.Component<{
         <Date value={bucket.end_date} format="MMM YYYY" />
       </div>;
     }
-    let edit_table;
+    let details;
     if (edit_rows.length) {
-      edit_table = <table className="props"><tbody>{edit_rows}</tbody></table>;
+      details = <div className="details">
+        <table className="props"><tbody>{edit_rows}</tbody></table>
+      </div>;
     }
     return <div className="bucket-details">
       <div className="summary">
         {summary}
         <a className="editlink subtle fa fa-gear" onClick={this.toggleEdit}/>
       </div>
-      {edit_table}
+      {details}
     </div>
   }
   toggleEdit = () => {
@@ -508,7 +510,14 @@ class GroupRow extends React.Component<{
         <th></th>
       </tr>
       {bucket_rows}
+      <tr className="action-row">
+        <td colSpan={6}></td>
+        <td><button onClick={this.createBucket}>New bucket</button></td>
+      </tr>
     </tbody>);
+  }
+  createBucket = () => {
+    manager.store.buckets.add({name: 'New Bucket', group_id: this.props.group.id})
   }
   //----------------------------------
   // Draggable

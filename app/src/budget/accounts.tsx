@@ -87,7 +87,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
       <div className="rows">
         <div className="subheader">
           <div>
-            <button onClick={this.addAccount}>Create account</button>
+            <button onClick={this.addAccount}>New account</button>
             <button onClick={this.createConnection}>Connect to bank</button>
           </div>
         </div>
