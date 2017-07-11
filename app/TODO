@@ -5,9 +5,12 @@
  ☐ Kick buckets
  ☐ Import CSV
  ☐ Import OFX
- ☐ SimpleFIN
- ☐ Signal uncategorized transactions (with a count).
  ☐ Goals
    ☐ When changing 1 of three inputs, undo one of the inputs
      ☐ Or just make 3 different types of bucket
  ☐ Just make routing.tsx global instead of using react's context system
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+Archive:
+ ✔ Signal uncategorized transactions (with a count). @done (17-07-11 12:26)
+ ✔ SimpleFIN @done (17-07-11 12:05)

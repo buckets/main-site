@@ -70,7 +70,9 @@ button {
   border-radius: 0 3px 3px 0;
   text-decoration: none;
   color: rgba(255,255,255,0.8);
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .app .nav a.sub {
   font-size: 1rem;
@@ -88,6 +90,25 @@ button {
 .app .nav a.selected-parent:hover {
   background-color: rgba(0, 0, 0, 0.6);
 }
+
+/* Badges */
+.badge {
+  color: white;
+  display: inline-block;
+  padding: .1rem .7rem;
+  border-radius: 3000px;
+  background-color: var(--blue);
+  font-size: .8rem;
+}
+.app .nav a .badge {
+  margin-right: -0.5rem;
+}
+.app .nav a.selected .badge {
+  color: var(--darker-teal);
+  background-color: white;
+}
+/* End of badges */
+
 
 .app .content {
   flex-grow: 1;

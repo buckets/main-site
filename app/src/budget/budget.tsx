@@ -56,18 +56,29 @@ export async function start(base_element, room) {
   }
 }
 
-class Navbar extends React.Component<{}, {}> {
+class Navbar extends React.Component<{
+  appstate: AppState;
+}, {}> {
   render() {
+    let { appstate } = this.props;
+    let connections_badge;
+    if (appstate.num_unknowns) {
+      connections_badge = <div className="badge">{appstate.num_unknowns}</div>
+    }
+    let transactions_badge;
+    if (appstate.num_uncategorized_trans) {
+      transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
+    }
     return (
       <div className="nav">
         <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
-        <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent">Transactions</Link>
+        <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
         <Link relative to="/buckets" exactMatchClass="selected" matchClass="selected-parent">Buckets</Link>
         <Route path="/buckets">
           <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
         </Route>
         <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
-        <Link relative to="/connections" exactMatchClass="selected" matchClass="selected">Connections</Link>
+        <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
       </div>)
   }
 }
@@ -95,7 +106,7 @@ class Application extends React.Component<ApplicationProps, any> {
               return null;
             }} />
             <div className="app">
-              <Navbar />
+              <Navbar appstate={appstate} />
               <div className="content">
                 <header>
                   <div className="totals">

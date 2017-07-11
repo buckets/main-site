@@ -46,6 +46,9 @@ interface IComputedAppState {
   income: number;
   expenses: number;
   gain: number;
+
+  num_unknowns: number;
+  num_uncategorized_trans: number;
 }
 
 export class AppState implements IAppState, IComputedAppState {
@@ -69,6 +72,9 @@ export class AppState implements IAppState, IComputedAppState {
   income: number = 0;
   expenses: number = 0;
   gain: number = 0;
+
+  num_unknowns: number = 0;
+  num_uncategorized_trans: number = 0;
 
   get defaultPostingDate() {
     let today = moment();
@@ -103,6 +109,12 @@ function computeTotals(appstate:AppState):IComputedAppState {
   let expenses = 0;
   let transfers_in = 0;
   let transfers_out = 0;
+  let trans_with_buckets = {};
+  _.values(appstate.btransactions)
+  .forEach((btrans:BTrans) => {
+    trans_with_buckets[btrans.account_trans_id] = true;
+  })
+  let num_uncategorized_trans = 0;
   _.values(appstate.transactions)
   .forEach((trans:ATrans) => {
     if (trans.general_cat === 'transfer') {
@@ -117,10 +129,14 @@ function computeTotals(appstate:AppState):IComputedAppState {
       } else {
         expenses += trans.amount;
       }
+      if (!trans.general_cat && !trans_with_buckets[trans.id]) {
+        num_uncategorized_trans += 1;
+      }
     }
   })
   let rain = account_total_balance - bucket_total_balance;
   let gain = income + expenses;
+  let num_unknowns = _.values(appstate.unknown_accounts).length;
   return {
     bucket_total_balance,
     account_total_balance,
@@ -130,6 +146,8 @@ function computeTotals(appstate:AppState):IComputedAppState {
     income,
     expenses,
     gain,
+    num_unknowns,
+    num_uncategorized_trans,
   };
 }
 
