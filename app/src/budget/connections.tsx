@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import { shell } from 'electron'
-import { makeToast } from './toast'
+import { makeToast, makeToastDuring } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
@@ -111,9 +111,9 @@ export class ConnectionsPage extends React.Component<{
     return this.syncTransactions();
   }
   syncTransactions = async () => {
-    let ret = await manager.store.connections.sync();
-    makeToast('Transaction sync complete')
-    return ret;
+    await makeToastDuring('Syncing...', () => {
+      return manager.store.connections.sync();
+    }, 'Sync complete!')
   }
 }
 

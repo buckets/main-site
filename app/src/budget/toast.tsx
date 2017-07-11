@@ -9,19 +9,29 @@ class Toast {
   public className?: string;
   public id: number;
   static IDS: number = 0;
-  constructor() {
+  constructor(private toaster:Toaster) {
     this.id = Toast.IDS++;
   }
+  close() {
+    this.toaster.removeToast(this);
+  }
+  start() {
+    setTimeout(() => {
+      this.toaster.removeToast(this);
+    }, this.duration);
+  }
+}
+
+interface ToastArgs {
+  duration?:number;
+  className?:string;
 }
 
 class Toaster {
   private toasts: Toast[] = [];
   public displays: ToastDisplay[] = [];
-  makeToast(message:string, args?:{
-    duration?:number,
-    className?: string,
-  }) {
-    let toast = new Toast();
+  makeToast(message:string, args?:ToastArgs, no_start?:boolean):Toast {
+    let toast = new Toast(this);
     toast.message = message;
     if (args) {
       if (args.duration) {
@@ -32,20 +42,41 @@ class Toaster {
       }
     }
     this.toasts.push(toast);
+    this.updateDisplays();
+    if (!no_start) {
+      toast.start();
+    }
+    return toast;
+  }
+  private updateDisplays() {
     this.displays.forEach(display => {
       display.setState({toasts: this.toasts});
     })
-    setTimeout(() => {
-      this.toasts.splice(this.toasts.indexOf(toast), 1);
-      this.displays.forEach(display => {
-        display.setState({toasts: this.toasts});
-      })
-    }, toast.duration);
+  }
+  removeToast(toast:Toast) {
+    this.toasts.splice(this.toasts.indexOf(toast), 1);
+    this.updateDisplays();
+  }
+  async makeToastDuring(message:string, func, done_message?:string, args?:ToastArgs) {
+    let toast = this.makeToast(message, args, true);
+    try {
+      return await func();
+    } catch(err) {
+      throw err;
+    } finally {
+      if (done_message) {
+        toast.message = done_message;
+        toast.start();
+      } else {
+        this.removeToast(toast);  
+      }
+    }
   }
 }
 
 const TOASTER = new Toaster();
 export const makeToast = TOASTER.makeToast.bind(TOASTER);
+export const makeToastDuring = TOASTER.makeToastDuring.bind(TOASTER);
 
 
 export class ToastDisplay extends React.Component<any, {toasts: Toast[]}> {
