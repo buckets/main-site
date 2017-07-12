@@ -160,7 +160,7 @@ export class BucketStore {
   async balances(asof?:Timestamp):Promise<Balances> {
     return computeBalances(this.store,
       'bucket', 'bucket_transaction', 'bucket_id',
-      asof)
+      asof, 'a.kicked <> 1')
   }
   async listTransactions(args:{
     bucket_id?: number,

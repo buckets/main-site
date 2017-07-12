@@ -12,10 +12,16 @@ export async function computeBalances(
   account_table:string,
   transaction_table:string,
   join_column:string,
-  asof?:Timestamp):Promise<Balances> {
+  asof?:Timestamp,
+  where?:string):Promise<Balances> {
   if (!asof) {
     // get the balance as of tomorrow
     asof = moment.utc().add(1, 'day')
+  }
+  if (where) {
+    where = `WHERE ${where}`;
+  } else {
+    where = '';
   }
   let sql = `
     SELECT
@@ -25,8 +31,10 @@ export async function computeBalances(
       left join ${sanitizeDbFieldName(transaction_table)} as t
         on a.id = t.${sanitizeDbFieldName(join_column)}
            AND t.posted >= $asof
+    ${where}
     GROUP BY 1
   `;
+  console.log('computeBalances', sql);
   let params = {
     $asof: ts2db(asof),
   }

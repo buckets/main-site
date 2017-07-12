@@ -40,9 +40,42 @@ interface PendingAmounts {
 export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
   render() {
     let { appstate } = this.props;
+    let rows = appstate.kicked_buckets
+      .map(bucket => {
+        return <tr key={bucket.id}>
+          <td>{bucket.name}</td>
+          <td><button onClick={() => {
+            manager.store.buckets.unkick(bucket.id);
+          }}>Un-kick</button></td>
+          <td>
+            <Link relative to={`../${bucket.id}`} className="subtle">more</Link>
+          </td>
+        </tr>
+      })
+    let body;
+    if (rows.length === 0) {
+      body = <div>You haven't kicked the bucket yet...</div>
+    } else {
+      body = (
+      <div>
+        <h1>Kicked buckets</h1>
+        <table className="ledger">
+          <thead>
+            <tr>
+              <th>Bucket</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
+        </table>
+      </div>);
+    }
     return <div className="panes">
       <div className="padded">
-        Kicked buckets
+        {body}
       </div>
     </div>
   }
@@ -92,20 +125,16 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     return (
       <Switch>
         <Route path="/<int:id>">
-          <div className="panes">
-            <div className="padded">
-              <WithRouting func={(routing) => {
-                let bucket = appstate.buckets[routing.params.id];
-                let balance = appstate.bucket_balances[bucket.id];
-                return (<BucketView
-                  bucket={bucket}
-                  balance={balance}
-                  appstate={appstate}
-                  transactions={_.values(appstate.btransactions)
-                    .filter(trans => trans.bucket_id === bucket.id)} />);
-              }} />
-            </div>
-          </div>
+          <WithRouting func={(routing) => {
+            let bucket = appstate.buckets[routing.params.id];
+            let balance = appstate.bucket_balances[bucket.id];
+            return (<BucketView
+              bucket={bucket}
+              balance={balance}
+              appstate={appstate}
+              transactions={_.values(appstate.btransactions)
+                .filter(trans => trans.bucket_id === bucket.id)} />);
+          }} />
         </Route>
         <Route path="">
           <div className="rows">
@@ -122,7 +151,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
             <div className="panes">
               <div className="padded">
                 <GroupedBucketList
-                  buckets={_.values(appstate.buckets)}
+                  buckets={appstate.unkicked_buckets}
                   balances={appstate.bucket_balances}
                   groups={_.values(appstate.groups)}
                   onPendingChanged={this.pendingChanged}
@@ -749,33 +778,63 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
   }
   render() {
     let { bucket, balance, transactions, appstate } = this.props;
-    return (<div className="padded" key={bucket.id}>
-      <Link
-        relative
-        to=".."
-        className="subtle"
-        ><span className="fa fa-arrow-left"></span></Link>
-      <h1>
-        <ColorPicker
-        value={bucket.color}
-        onChange={(val) => {
-          manager.store.buckets.update(bucket.id, {color: val})
-        }} />
-        <DebouncedInput
-          blendin
-          value={bucket.name}
-          placeholder="no name"
-          onChange={(val) => {
-            manager.store.buckets.update(bucket.id, {name: val});
-          }}
-        />
-      </h1>
-      Balance: $<Money value={balance} />
-      <hr/>
-      <TransactionList
-        transactions={transactions}
-        appstate={appstate} />
-    </div>)
+    let kick_button;
+    let kicked_ribbon;
+    if (bucket.kicked) {
+      kicked_ribbon = <div className="kicked-ribbon">Kicked</div>
+      kick_button = <button
+        onClick={() => {
+          manager.store.buckets.unkick(bucket.id);
+        }}>Un-kick the bucket</button>
+    } else {
+      kick_button = <button
+        className="delete"
+        onClick={() => {
+          manager.store.buckets.kick(bucket.id);
+        }}>Kick the bucket</button>
+    }
+    
+
+    return (
+      <div className="rows">
+        <div className="subheader">
+          <div>
+            <Link
+              relative
+              to=".."
+              className="back-button"
+              ><span className="fa fa-arrow-left"></span></Link>
+          </div>
+          <div>
+            {kick_button}
+          </div>
+        </div>
+        {kicked_ribbon}
+        <div className="panes">
+          <div className="padded">
+            <h1>
+              <ColorPicker
+              value={bucket.color}
+              onChange={(val) => {
+                manager.store.buckets.update(bucket.id, {color: val})
+              }} />
+              <DebouncedInput
+                blendin
+                value={bucket.name}
+                placeholder="no name"
+                onChange={(val) => {
+                  manager.store.buckets.update(bucket.id, {name: val});
+                }}
+              />
+            </h1>
+            Balance: $<Money value={balance} />
+            <hr/>
+            <TransactionList
+              transactions={transactions}
+              appstate={appstate} />
+          </div>
+        </div>
+      </div>)
   }
 }
 

@@ -49,6 +49,9 @@ interface IComputedAppState {
 
   num_unknowns: number;
   num_uncategorized_trans: number;
+
+  unkicked_buckets: Bucket[];
+  kicked_buckets: Bucket[];
 }
 
 export class AppState implements IAppState, IComputedAppState {
@@ -75,6 +78,9 @@ export class AppState implements IAppState, IComputedAppState {
 
   num_unknowns: number = 0;
   num_uncategorized_trans: number = 0;
+
+  unkicked_buckets: Bucket[] = [];
+  kicked_buckets: Bucket[] = [];
 
   get defaultPostingDate() {
     let today = moment();
@@ -137,6 +143,16 @@ function computeTotals(appstate:AppState):IComputedAppState {
   let rain = account_total_balance - bucket_total_balance;
   let gain = income + expenses;
   let num_unknowns = _.values(appstate.unknown_accounts).length;
+
+  let kicked_buckets = [];
+  let unkicked_buckets = [];
+  _.values(appstate.buckets).forEach(bucket => {
+    if (bucket.kicked) {
+      kicked_buckets.push(bucket);
+    } else {
+      unkicked_buckets.push(bucket);
+    }
+  })
   return {
     bucket_total_balance,
     account_total_balance,
@@ -148,6 +164,8 @@ function computeTotals(appstate:AppState):IComputedAppState {
     gain,
     num_unknowns,
     num_uncategorized_trans,
+    kicked_buckets,
+    unkicked_buckets,
   };
 }
 

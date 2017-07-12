@@ -347,6 +347,10 @@ a.subtle {
 a.subtle:hover {
   color: var(--blue);
 }
+a.back-button {
+  font-size: 1rem;
+  color: var(--grey);
+}
 
 table.ledger {
   border-collapse: collapse;
@@ -602,6 +606,11 @@ button.primary {
   color: white;
   border-color: var(--darker-blue);
 }
+button.delete {
+  background-color: var(--red);
+  color: white;
+  border-color: var(--darker-red);
+}
 button:hover {
   background-color: var(--yellow);
   border-color: var(--yellow);
@@ -621,6 +630,15 @@ button[disabled]:hover {
   background-color: var(--lightest-grey);
   border-color: var(--lighter-grey);
   cursor: initial;
+}
+
+
+/* Buckets */
+.kicked-ribbon {
+  background-color: var(--red);
+  color: white;
+  font-weight: bold;
+  padding: .5rem 1rem;
 }
 
 /* Bucket goal details */
