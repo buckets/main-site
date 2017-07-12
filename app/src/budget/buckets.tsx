@@ -37,6 +37,16 @@ interface PendingAmounts {
   [k:number]: number;
 }
 
+export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
+  render() {
+    let { appstate } = this.props;
+    return <div className="panes">
+      <div className="padded">
+        Kicked buckets
+      </div>
+    </div>
+  }
+}
 
 interface BucketsPageProps {
   appstate: AppState;

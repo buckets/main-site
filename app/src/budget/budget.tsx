@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
-import {BucketsPage, BucketStyles} from './buckets'
+import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
 import { ConnectionsPage } from './connections'
 import {Money} from '../money'
@@ -69,11 +69,15 @@ class Navbar extends React.Component<{
     if (appstate.num_uncategorized_trans) {
       transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
     }
+    let buckets_badge;
+    if (!appstate.num_uncategorized_trans && appstate.rain) {
+      buckets_badge = <div className="badge"><span className="fa fa-tint"/></div>
+    }
     return (
       <div className="nav">
         <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
         <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
-        <Link relative to="/buckets" exactMatchClass="selected" matchClass="selected-parent">Buckets</Link>
+        <Link relative to="/buckets" exactMatchClass="selected"><span>Buckets</span>{buckets_badge}</Link>
         <Route path="/buckets">
           <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
         </Route>
@@ -129,7 +133,7 @@ class Application extends React.Component<ApplicationProps, any> {
                       <amount><Money value={appstate.gain} /></amount>
                     </total>
                     <total className="section-start">
-                      <name>In the bank</name>
+                      <name>in the bank</name>
                       <amount><Money value={appstate.account_total_balance} /></amount>
                     </total>
                   </div>
@@ -147,18 +151,23 @@ class Application extends React.Component<ApplicationProps, any> {
                   </div>
                 </header>
                 <div className="page">
-                  <Route path="/accounts">
-                    <AccountsPage appstate={appstate} />
-                  </Route>
-                  <Route path="/buckets">
-                    <BucketsPage appstate={appstate} />
-                  </Route>
-                  <Route path="/transactions">
-                    <TransactionPage appstate={appstate} />
-                  </Route>
-                  <Route path="/connections">
-                    <ConnectionsPage appstate={appstate} />
-                  </Route>
+                  <Switch>
+                    <Route path="/accounts">
+                      <AccountsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/buckets/kicked">
+                      <KickedBucketsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/buckets">
+                      <BucketsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/transactions">
+                      <TransactionPage appstate={appstate} />
+                    </Route>
+                    <Route path="/connections">
+                      <ConnectionsPage appstate={appstate} />
+                    </Route>
+                  </Switch>
                 </div>
               </div>
             </div>
