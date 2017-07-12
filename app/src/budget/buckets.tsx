@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment'
-import { Switch, Route, Link, WithRouting } from './routing'
+import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
 import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
 import {Balances} from '../models/balances'
@@ -10,6 +10,7 @@ import { Money, MoneyInput } from '../money'
 import { onKeys, DebouncedInput, MonthSelector } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
+import { makeToast } from './toast'
 
 const NOGROUP = -1;
 
@@ -127,6 +128,9 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         <Route path="/<int:id>">
           <WithRouting func={(routing) => {
             let bucket = appstate.buckets[routing.params.id];
+            if (!bucket) {
+              return <Redirect to='/buckets' />;
+            }
             let balance = appstate.bucket_balances[bucket.id];
             return (<BucketView
               bucket={bucket}
@@ -300,8 +304,8 @@ class BucketKindDetails extends React.Component<{
             <option value="">Plain old bucket</option>
             <option value="deposit">Recurring expense</option>
             <option value="goal-date">Save X by Y date</option>
-            <option value="goal-deposit">Save X by depositing AMT/mo</option>
-            <option value="deposit-date">Save AMT/mo until Y date</option>
+            <option value="goal-deposit">Save X by depositing Z/mo</option>
+            <option value="deposit-date">Save Z/mo until Y date</option>
           </select>
         </td>
       </tr>)
@@ -790,7 +794,13 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       kick_button = <button
         className="delete"
         onClick={() => {
-          manager.store.buckets.kick(bucket.id);
+          manager.store.buckets.kick(bucket.id)
+          .then(new_bucket => {
+            if (!new_bucket.kicked) {
+              // it was deleted
+              makeToast('Bucket deleted completely');
+            }
+          })
         }}>Kick the bucket</button>
     }
     

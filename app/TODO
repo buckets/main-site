@@ -1,11 +1,9 @@
  ☐ Add indexes
- ✔ Enter deposits on buckets form @done (17-07-11 17:00)
  ☐ Ability to delete transactions in UI
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
  ☐ Sort categorize buckets dropdown
- ☐ Kick buckets
  ☐ Import CSV
  ☐ Import OFX
  ☐ Just make routing.tsx global instead of using react's context system
@@ -16,6 +14,8 @@
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Kick buckets @done (17-07-11 22:11)
+ ✔ Enter deposits on buckets form @done (17-07-11 17:00)
  ✔ When changing 1 of three inputs, undo one of the inputs @done (17-07-11 16:43)
  ✔ Or just make 3 different types of bucket @done (17-07-11 16:43)
  ✔ Goals @done (17-07-11 16:43)

@@ -34,7 +34,6 @@ export async function computeBalances(
     ${where}
     GROUP BY 1
   `;
-  console.log('computeBalances', sql);
   let params = {
     $asof: ts2db(asof),
   }
