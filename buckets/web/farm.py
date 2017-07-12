@@ -1,13 +1,17 @@
 from datetime import datetime, date, timedelta
 
+import os
+import tempfile
+
 from flask import Blueprint, g, render_template, url_for, redirect
-from flask import request, flash, make_response, abort
+from flask import request, flash, make_response, abort, send_file
 
 from buckets.authz import NotAuthorized
 from buckets.budget import BudgetManagement
 from buckets.web.util import toJson, is_pin_expired, bump_pin_expiration
 from buckets.web.util import ask_for_pin, get_pin_expiration
 from buckets.web.util import require_csrf
+from buckets.export import exportSqlite
 
 import structlog
 logger = structlog.get_logger()
@@ -262,6 +266,12 @@ def reports():
         account_summary=account_summary,
         bucket_summary=bucket_summary)
 
+@blue.route('/export')
+def export():
+    tmpdir = tempfile.mkdtemp()
+    filename = os.path.join(tmpdir, 'budget.buckets')
+    exportSqlite(g.conn, g.farm_id, filename)
+    return send_file(filename, as_attachment=True, attachment_filename='budget.buckets')
 
 #-----------------------------------------------------------------------
 # api
