@@ -94,6 +94,27 @@ export class BucketStore {
   async update(bucket_id:number, data:Partial<Bucket>):Promise<Bucket> {
     return this.store.updateObject(Bucket, bucket_id, data);
   }
+  async kick(bucket_id:number):Promise<Bucket> {
+    let transactions = await this.store.query(
+      `SELECT id
+      FROM bucket_transaction
+      WHERE
+        bucket_id=$bucket_id
+      LIMIT 1`,
+      {$bucket_id: bucket_id})
+    if (transactions.length) {
+      // bucket has been used
+      return this.update(bucket_id, {kicked: true});
+    } else {
+      // bucket is unused
+      let old_bucket = await this.get(bucket_id);
+      await this.store.deleteObject(Bucket, bucket_id);
+      return old_bucket;
+    }
+  }
+  async unkick(bucket_id:number):Promise<Bucket> {
+    return this.update(bucket_id, {kicked: false});
+  }
 
   async transact(args:{
     bucket_id: number,

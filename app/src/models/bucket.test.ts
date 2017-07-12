@@ -140,6 +140,43 @@ test('balances', async (t) => {
   })
 })
 
+test('kick used bucket', async t => {
+  let { store, events } = await getStore()
+  let bucket = await store.buckets.add({name: 'Grocery'});
+  await store.buckets.transact({
+    bucket_id: bucket.id,
+    amount: 750,
+    memo: 'hey',
+  })
+  events.length = 0;
+
+  await store.buckets.kick(bucket.id);
+  t.equal(events.length, 1);
+  t.equal(events[0].event, 'update')
+  let new_bucket = await store.buckets.get(bucket.id);
+  t.same(events[0].obj, new_bucket);
+  t.equal(new_bucket.kicked, true);
+
+  events.length = 0;
+  await store.buckets.unkick(bucket.id);
+  t.equal(events.length, 1);
+  t.equal(events[0].event, 'update');
+  new_bucket = await store.buckets.get(bucket.id);
+  t.same(events[0].obj, new_bucket);
+  t.equal(new_bucket.kicked, false);
+})
+
+test('kick new bucket', async t => {
+  let { store, events } = await getStore()
+  let bucket = await store.buckets.add({name: 'Grocery'});
+  events.length = 0;
+
+  await store.buckets.kick(bucket.id);
+  t.equal(events.length, 1);
+  t.equal(events[0].event, 'delete')
+  t.same(events[0].obj, bucket);
+})
+
 test('deleteTransactions', async (t) => {
   let { store, events } = await getStore()
   let bucket = await store.buckets.add({name: 'Grocery'});
