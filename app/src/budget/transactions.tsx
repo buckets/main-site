@@ -2,9 +2,10 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import * as moment from 'moment'
 import {manager, AppState} from './appstate'
 import {Account, Category, Transaction} from '../models/account'
-import {Date, DateInput, ensureUTCMoment, Timestamp} from '../time'
+import {Date, DateInput, ensureUTCMoment} from '../time'
 import {Money, MoneyInput} from '../money'
 
 
@@ -24,10 +25,8 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     }
   }
   componentWillReceiveProps(nextProps:TransactionPageProps) {
-    console.log('TransactionPage props', nextProps.appstate.uncategorized_trans.length);
     if (this.state.show_subset) {
       // we're in a filtering mood
-      console.log("we're in a filtering mood");
       if (this.state.subset.length) {
         let sample = this.state.subset[0];
         if (!nextProps.appstate.transactions[sample]) {
@@ -56,14 +55,12 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
   }
   freezeShownTransactions(props) {
     let subset = props.appstate.uncategorized_trans.map(t=>t.id);
-    console.log('freezing to', subset);
     this.setState({
       show_subset: true,
       subset: subset,
     })
   }
   render() {
-    console.log('TransactionPage render');
     let transactions;
     let { appstate } = this.props;
     if (this.state.show_subset) {
@@ -151,7 +148,7 @@ class CreateTransRow extends React.Component<{
 }, {
   amount: number;
   memo: string;
-  posted: Timestamp;
+  posted: moment.Moment;
   account_id: number;
 }> {
   private memo_elem = null;
@@ -161,7 +158,7 @@ class CreateTransRow extends React.Component<{
     this.state = {
       amount: 0,
       memo: '',
-      posted: props.appstate.defaultPostingDate,
+      posted: ensureUTCMoment(props.appstate.defaultPostingDate),
       account_id: props.account ? props.account.id : null,
     }
   }
@@ -169,6 +166,13 @@ class CreateTransRow extends React.Component<{
     if (nextProps.account) {
       this.setState({
         account_id: nextProps.account.id,
+      })
+    }
+    let pd = nextProps.appstate.defaultPostingDate;
+    if (pd.month() !== this.state.posted.month()
+      || pd.year() !== this.state.posted.year()) {
+      this.setState({
+        posted: pd,
       })
     }
   }

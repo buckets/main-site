@@ -1,19 +1,13 @@
 Need:
- ✔ Add indexes @done (17-07-13 13:43)
  ☐ Ability to delete transactions in UI
- ✔ Sort categorize buckets dropdown @done (17-07-13 13:41)
  ☐ DRM
- ✔ Download buckets file @done (17-07-13 13:02)
  ☐ Delete groups
  ☐ Make sure simplefin sync always goes back far enough
  ☐ If simplefin sync fails, show an error
  ☐ There needs to be a way to submit bugs
  ☐ There needs to be a way to submit log files
- ✔ Show only uncategorized transactions filter @done (17-07-13 15:10)
  ☐ Format categorizing thing better
- ☐ Show Rain needed per month
  ☐ Make it rain
- ☐ Transaction entry Posted date doesn't change with date
 
 Want:
  ☐ Import OFX
@@ -30,6 +24,12 @@ Want:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Transaction entry Posted date doesn't change with date @done (17-07-13 16:35) @project(Need)
+ ✔ Show Rain needed per month @done (17-07-13 16:35) @project(Need)
+ ✔ Show only uncategorized transactions filter @done (17-07-13 15:10) @project(Need)
+ ✔ Add indexes @done (17-07-13 13:43) @project(Need)
+ ✔ Sort categorize buckets dropdown @done (17-07-13 13:41) @project(Need)
+ ✔ Download buckets file @done (17-07-13 13:02) @project(Need)
  ✔ Kick buckets @done (17-07-11 22:11)
  ✔ Enter deposits on buckets form @done (17-07-11 17:00)
  ✔ When changing 1 of three inputs, undo one of the inputs @done (17-07-11 16:43)
