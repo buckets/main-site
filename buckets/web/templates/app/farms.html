@@ -43,6 +43,12 @@
     {% endif %}
     </div>
   </div>
+  <div class="pair">
+    <div class="label">Export</div>
+    <div class="value">
+      <a href="{{ url_for('farm.export', farm_id=farm.id) }}">Download budget.buckets</a>
+    </div>
+  </div>
 </div>
 {% endfor %}
 
