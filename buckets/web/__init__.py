@@ -76,7 +76,13 @@ def configureApp(engine, flask_secret_key,
     else:
         logger.info('Stripe: PRODUCTION')
     stripe.api_key = stripe_api_key
-    BillingManagement(None, stripe).sync_plans_with_stripe()
+    try:
+        BillingManagement(None, stripe).sync_plans_with_stripe()
+    except Exception as e:
+        if debug:
+            logger.error(e)
+        else:
+            raise
     logger.info('Stripe: billing plans synched')
 
     structlog.configure(
