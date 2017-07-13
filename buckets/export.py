@@ -160,7 +160,7 @@ def exportSqlite(engine, farm_id, sqlite_filename):
         .where(AccountMapping.c.farm_id == farm_id))
     for mapping in r.fetchall():
         conn.execute('''
-        INSERT INTO simplefin_connection
+        INSERT INTO account_mapping
         (id, created, account_id, account_hash)
         VALUES (?, ?, ?, ?)
         ''', (
