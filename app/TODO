@@ -1,7 +1,7 @@
 Need:
  ☐ Add indexes
  ☐ Ability to delete transactions in UI
- ☐ Sort categorize buckets dropdown
+ ✔ Sort categorize buckets dropdown @done (17-07-13 13:41)
  ☐ DRM
  ✔ Download buckets file @done (17-07-13 13:02)
  ☐ Delete groups
@@ -22,6 +22,7 @@ Want:
  ☐ Just make routing.tsx global instead of using react's context system
  ☐ Delete accounts
  ☐ Show only debt buckets
+ ☐ Show Income/expenses average over the last 3 months
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:

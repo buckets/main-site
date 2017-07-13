@@ -86,7 +86,6 @@ class Navbar extends React.Component<{
           <Route path="/buckets">
             <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
           </Route>
-          <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
         </div>
         <div>
@@ -138,7 +137,7 @@ class Application extends React.Component<ApplicationProps, any> {
                     </total>
                     <inter-total>=</inter-total>
                     <total>
-                      <name>Month's {appstate.gain >= 0 ? 'Gain' : 'Loss'}</name>
+                      <name>Month's {appstate.gain >= 0 ? 'gain' : 'loss'}</name>
                       <amount><Money value={appstate.gain} /></amount>
                     </total>
                     <total className="section-start">

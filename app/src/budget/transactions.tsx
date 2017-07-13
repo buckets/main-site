@@ -291,7 +291,7 @@ class Categorizer extends React.Component<CategorizerProps, {
   }
   renderOpen() {
     let { transaction, appstate } = this.props;
-    let bucket_options = _.values(appstate.buckets)
+    let bucket_options = _.sortBy(appstate.unkicked_buckets, [bucket=>bucket.name.toLowerCase()])
       .map(bucket => {
         return <option key={bucket.id} value={bucket.id}>{bucket.name}</option>
       })

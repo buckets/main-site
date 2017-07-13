@@ -59,7 +59,6 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
     } else {
       body = (
       <div>
-        <h1>Kicked buckets</h1>
         <table className="ledger">
           <thead>
             <tr>
@@ -124,12 +123,21 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       doPendingButton = <button disabled>Deposit/Withdraw</button>;
     }
 
-    let self_debt_amount = appstate.unkicked_buckets
-      .map(bucket => {
+    let self_debt_amount = 0;
+    let total_rain_needed = 0;
+    appstate.unkicked_buckets
+      .forEach(bucket => {
         let bal = appstate.bucket_balances[bucket.id];
-        return bal < 0 ? bal : 0
+        if (bal < 0) {
+          self_debt_amount += bal;
+        }
+        let computed = computeBucketData(bucket.kind, bucket, {
+          today: appstate.defaultPostingDate,
+          balance: bal,
+        })
+        total_rain_needed += computed.deposit;
       })
-      .reduce((a,b) => a+b, 0)
+
     let self_debt;
     if (self_debt_amount) {
       self_debt = <div className="labeled-number">
@@ -161,6 +169,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               <div className="group">
                 <button onClick={this.addBucket}>New bucket</button>
                 <button onClick={this.addGroup}>New group</button>
+                <div className="labeled-number">
+                  <div className="label">Rain<permonth/></div>
+                  <div className="value"><Money value={total_rain_needed} /></div>
+                </div>
                 {self_debt}
               </div>
               <div className="group">
@@ -405,7 +417,7 @@ class BucketKindDetails extends React.Component<{
     return <div className={cx("bucket-details", {open: this.state.open})}>
       <div className="summary">
         {summary}
-        <a className="editlink" onClick={this.toggleEdit}><span className={cx("fa", {'fa-gear':!this.state.open, 'fa-close':this.state.open})} /></a>
+        <a className="editlink" onClick={this.toggleEdit}><span className={cx("fa", {'fa-gear':!this.state.open, 'fa-check':this.state.open})} /></a>
       </div>
       {details}
     </div>
