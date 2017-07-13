@@ -111,9 +111,13 @@ export class ConnectionsPage extends React.Component<{
     return this.syncTransactions();
   }
   syncTransactions = async () => {
-    await makeToastDuring('Syncing...', () => {
+    await makeToastDuring({
+      message: 'Syncing...',
+      success: 'Sync complete!',
+      error: 'Error doing sync',
+    }, () => {
       return manager.store.connections.sync();
-    }, 'Sync complete!')
+    })
   }
 }
 

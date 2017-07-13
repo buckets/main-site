@@ -27,6 +27,15 @@ interface ToastArgs {
   className?:string;
 }
 
+interface MultiMessage {
+  message: string;
+  error?: string;
+  success?: string;
+}
+export function isMultiMessage(obj): obj is MultiMessage {
+  return obj.error !== undefined || obj.success !== undefined;
+}
+
 class Toaster {
   private toasts: Toast[] = [];
   public displays: ToastDisplay[] = [];
@@ -57,19 +66,39 @@ class Toaster {
     this.toasts.splice(this.toasts.indexOf(toast), 1);
     this.updateDisplays();
   }
-  async makeToastDuring(message:string, func, done_message?:string, args?:ToastArgs) {
-    let toast = this.makeToast(message, args, true);
+  async makeToastDuring(message:string|MultiMessage, func, args?:ToastArgs) {
+    let msg:string;
+    let success:string;
+    let error:string;
+    if (isMultiMessage(message)) {
+      msg = message.message;
+      success = message.success;
+      error = message.error;
+    } else {
+      msg = message;
+    }
+    let toast = this.makeToast(msg, args, true);
     try {
-      return await func();
-    } catch(err) {
-      throw err;
-    } finally {
-      if (done_message) {
-        toast.message = done_message;
+      let ret = await func();
+      if (success) {
+        toast.message = success;
+        toast.className = 'success';
         toast.start();
+        this.updateDisplays();
       } else {
         this.removeToast(toast);  
       }
+      return ret;
+    } catch(err) {
+      if (error) {
+        toast.message = error;
+        toast.className = 'error';
+        toast.start();
+        this.updateDisplays();
+      } else {
+        this.removeToast(toast);
+      }
+      throw err;
     }
   }
 }
