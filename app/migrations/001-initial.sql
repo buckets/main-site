@@ -23,6 +23,11 @@ CREATE TABLE account_transaction (
     FOREIGN KEY(account_id) REFERENCES account(id)
 );
 
+CREATE INDEX account_transaction_posted
+    ON account_transaction(posted);
+CREATE INDEX account_transaction_fi_id
+    ON account_transaction(fi_id);
+
 CREATE TRIGGER update_account_balance_insert
     AFTER INSERT ON account_transaction
     BEGIN
@@ -78,6 +83,11 @@ CREATE TABLE bucket_transaction (
     transfer TINYINT DEFAULT 0,
     FOREIGN KEY(bucket_id) REFERENCES bucket(id)
 );
+
+CREATE INDEX bucket_transaction_posted
+    ON bucket_transaction(posted);
+CREATE INDEX bucket_transaction_account_trans_id
+    ON bucket_transaction(account_trans_id);
 
 CREATE TRIGGER update_bucket_balance_insert
     AFTER INSERT ON bucket_transaction
