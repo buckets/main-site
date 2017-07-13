@@ -1,5 +1,5 @@
 Need:
- ☐ Add indexes
+ ✔ Add indexes @done (17-07-13 13:43)
  ☐ Ability to delete transactions in UI
  ✔ Sort categorize buckets dropdown @done (17-07-13 13:41)
  ☐ DRM
@@ -12,6 +12,7 @@ Need:
  ☐ Show only uncategorized transactions filter
  ☐ Format categorizing thing better
  ☐ Show Rain needed per month
+ ☐ Make it rain
 
 Want:
  ☐ Import OFX
