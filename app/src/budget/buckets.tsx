@@ -123,6 +123,21 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     } else {
       doPendingButton = <button disabled>Deposit/Withdraw</button>;
     }
+
+    let self_debt_amount = appstate.unkicked_buckets
+      .map(bucket => {
+        let bal = appstate.bucket_balances[bucket.id];
+        return bal < 0 ? bal : 0
+      })
+      .reduce((a,b) => a+b, 0)
+    let self_debt;
+    if (self_debt_amount) {
+      self_debt = <div className="labeled-number">
+        <div className="label">Self debt</div>
+        <div className="value"><Money value={self_debt_amount} /></div>
+      </div>
+    }
+        
     return (
       <Switch>
         <Route path="/<int:id>">
@@ -143,9 +158,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         <Route path="">
           <div className="rows">
             <div className="subheader">
-              <div>
+              <div className="group">
                 <button onClick={this.addBucket}>New bucket</button>
                 <button onClick={this.addGroup}>New group</button>
+                {self_debt}
               </div>
               <div className="group">
                 {rainleft}
@@ -217,8 +233,14 @@ class ProgressBar extends React.Component<{
       outerStyle.borderColor = color;
       innerStyle.backgroundColor = color;
     }
-    return <div className="progress-bar" style={outerStyle}>
-      <div className="bar" style={innerStyle}>{percent}%</div>
+    let label = `${percent}%`
+    return <div className={cx("progress-bar", {
+          overhalf: percent >= 50,
+          complete: percent >= 100,
+        })} style={outerStyle}>
+      <div className="bar" style={innerStyle}>
+        <div className="label">{label}</div>
+      </div>
     </div>
   }
 }

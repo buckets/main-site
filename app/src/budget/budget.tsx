@@ -1,6 +1,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
-import * as _ from 'lodash';
+import * as _ from 'lodash'
+import * as cx from 'classnames'
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
@@ -71,7 +72,10 @@ class Navbar extends React.Component<{
     }
     let buckets_badge;
     if (!appstate.num_uncategorized_trans && appstate.rain) {
-      buckets_badge = <div className="badge"><span className="fa fa-tint"/></div>
+      let cls = cx('badge', {
+        'red': appstate.rain < 0,
+      })
+      buckets_badge = <div className={cls}><span className="fa fa-tint"/></div>
     }
     return (
       <div className="nav">
