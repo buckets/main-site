@@ -61,6 +61,9 @@ button {
   color: rgba(255,255,255,0.8);
   padding: 1rem 1rem 1rem 0;
   min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .app .nav a {
   font-size: 1.1rem;
@@ -89,6 +92,25 @@ button {
 .app .nav a.selected-parent,
 .app .nav a.selected-parent:hover {
   background-color: rgba(0, 0, 0, 0.6);
+}
+
+.trial-ribbon {
+  position: fixed;
+  font-weight: bold;
+  color: black;
+  transform: rotateZ(-45deg);
+  transform-origin: bottom right;
+  background: var(--yellow);
+  width: 15rem;
+  text-align: center;
+  padding: .25rem;
+  bottom: 7.5rem;
+  right: -3rem;
+  font-size: .7rem;
+  transition: opacity 0.2s;
+}
+.trial-ribbon:hover {
+  opacity: 0.2;
 }
 
 /* Badges */

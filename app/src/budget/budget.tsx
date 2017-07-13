@@ -75,14 +75,18 @@ class Navbar extends React.Component<{
     }
     return (
       <div className="nav">
-        <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
-        <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
-        <Link relative to="/buckets" exactMatchClass="selected"><span>Buckets</span>{buckets_badge}</Link>
-        <Route path="/buckets">
-          <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
-        </Route>
-        <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
-        <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
+        <div>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent">Accounts</Link>
+          <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
+          <Link relative to="/buckets" exactMatchClass="selected"><span>Buckets</span>{buckets_badge}</Link>
+          <Route path="/buckets">
+            <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
+          </Route>
+          <Link relative to="/reports" exactMatchClass="selected" matchClass="selected-parent">Reports</Link>
+          <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
+        </div>
+        <div>
+        </div>
       </div>)
   }
 }
@@ -103,6 +107,7 @@ class Application extends React.Component<ApplicationProps, any> {
         >
         <BucketStyles buckets={_.values(appstate.buckets)} />
         <ToastDisplay />
+        <div className="trial-ribbon">TRIAL VERSION</div>
         <Switch>
           <Route path="/y<int:year>m<int:month>">
             <WithRouting func={({params}) => {
