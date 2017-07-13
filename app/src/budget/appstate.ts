@@ -49,6 +49,7 @@ interface IComputedAppState {
 
   num_unknowns: number;
   num_uncategorized_trans: number;
+  uncategorized_trans: ATrans[];
 
   unkicked_buckets: Bucket[];
   kicked_buckets: Bucket[];
@@ -78,6 +79,7 @@ export class AppState implements IAppState, IComputedAppState {
 
   num_unknowns: number = 0;
   num_uncategorized_trans: number = 0;
+  uncategorized_trans: ATrans[] = [];
 
   unkicked_buckets: Bucket[] = [];
   kicked_buckets: Bucket[] = [];
@@ -120,6 +122,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
   .forEach((btrans:BTrans) => {
     trans_with_buckets[btrans.account_trans_id] = true;
   })
+  let uncategorized_trans = [];
   let num_uncategorized_trans = 0;
   _.values(appstate.transactions)
   .forEach((trans:ATrans) => {
@@ -137,6 +140,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
       }
       if (!trans.general_cat && !trans_with_buckets[trans.id]) {
         num_uncategorized_trans += 1;
+        uncategorized_trans.push(trans);
       }
     }
   })
@@ -164,6 +168,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     gain,
     num_unknowns,
     num_uncategorized_trans,
+    uncategorized_trans,
     kicked_buckets,
     unkicked_buckets,
   };
@@ -279,9 +284,10 @@ export class StateManager extends EventEmitter {
     return this;
   }
   recomputeTotals() {
-    console.log('recomputeTotals');
+    console.log('recomputeTotals', this.appstate.uncategorized_trans.length);
     let totals = computeTotals(this.appstate);
     Object.assign(this.appstate, totals);
+    console.log('recomputeTotals', this.appstate.uncategorized_trans.length);
   }
   fetchAllAccounts() {
     return this.store.accounts.list()

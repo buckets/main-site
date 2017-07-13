@@ -10,21 +10,86 @@ import {Money, MoneyInput} from '../money'
 
 interface TransactionPageProps {
   appstate: AppState;
+
 }
-export class TransactionPage extends React.Component<TransactionPageProps, {}> {
+export class TransactionPage extends React.Component<TransactionPageProps, {
+  show_subset: boolean;
+  subset: number[];
+}> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      show_subset: false,
+      subset: [],
+    }
+  }
+  componentWillReceiveProps(nextProps:TransactionPageProps) {
+    console.log('TransactionPage props', nextProps.appstate.uncategorized_trans.length);
+    if (this.state.show_subset) {
+      // we're in a filtering mood
+      console.log("we're in a filtering mood");
+      if (this.state.subset.length) {
+        let sample = this.state.subset[0];
+        if (!nextProps.appstate.transactions[sample]) {
+          // we have a different set of transactions
+          this.freezeShownTransactions(nextProps);
+        }
+      } else {
+        // we're filtering but there's nothing in the list
+        this.freezeShownTransactions(nextProps);
+      }
+    }
+  }
+  showUncategorized = (ev) => {
+    // the showcategorized button was pressed
+    let show_uncategorized = ev.target.checked;
+    if (show_uncategorized) {
+      // only show the categorized
+      this.freezeShownTransactions(this.props);
+    } else {
+      // show all
+      this.setState({
+        show_subset: false,
+        subset: [],
+      })
+    }
+  }
+  freezeShownTransactions(props) {
+    let subset = props.appstate.uncategorized_trans.map(t=>t.id);
+    console.log('freezing to', subset);
+    this.setState({
+      show_subset: true,
+      subset: subset,
+    })
+  }
   render() {
+    console.log('TransactionPage render');
+    let transactions;
+    let { appstate } = this.props;
+    if (this.state.show_subset) {
+      transactions = this.state.subset
+        .map(id => appstate.transactions[id])
+        .filter(x => x);
+    } else {
+      transactions = _.values(appstate.transactions);
+    }
     return (
     <div className="rows">
       <div className="subheader">
-        <div>
-          <button>Do nothing</button>
+        <div className="group">
+          <div className="control">
+            <input
+              type="checkbox"
+              checked={this.state.show_subset} 
+              onChange={this.showUncategorized} /> Show uncategorized
+          </div>
         </div>
       </div>
       <div className="panes">
         <div className="padded">
           <TransactionList
-            appstate={this.props.appstate}
-            transactions={_.values(this.props.appstate.transactions)}
+            appstate={appstate}
+            transactions={transactions}
           />
         </div>
       </div>

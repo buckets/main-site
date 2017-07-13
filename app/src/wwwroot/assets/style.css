@@ -177,8 +177,17 @@ button {
   display: flex;
   align-items: center;
 }
-.subheader > div {
-  margin: 0 2px;
+.subheader > div,
+.subheader .group > div {
+  margin: 0 .5rem;
+}
+.subheader > div:first-child,
+.subheader .group > div:first-child {
+  margin-left: 0;
+}
+.subheader > div:last-child,
+.subheader .group > div:last-child {
+  margin-right: 0;
 }
 
 .panes {
@@ -519,11 +528,10 @@ table.ledger tr.action-row td {
 }
 .labeled-number .label {
   order: 2;
-  font-size: .8rem;
 }
 .labeled-number .value {
   order: 1;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 

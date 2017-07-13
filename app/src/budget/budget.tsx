@@ -29,7 +29,6 @@ export async function start(base_element, room) {
   // watch for changes
   store.data.on('obj', async (data) => {
     await manager.processEvent(data);
-    // return renderer.doUpdate();
   })
   manager.on('change', () => {
     renderer.doUpdate();
