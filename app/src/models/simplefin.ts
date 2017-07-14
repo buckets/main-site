@@ -99,8 +99,15 @@ export class SimpleFINStore {
   async sync():Promise<any> {
     let connections = await this.listConnections();
     let promises = connections.map(async conn => {
-      console.log('syncing conn', conn);
-      let accountset = await this.client.fetchAccounts(conn.access_token);
+      let since;
+      if (conn.last_used) {
+        // go 10 days prior to last fetch
+        since = ensureUTCMoment(conn.last_used).subtract(10, 'days');
+      } else {
+        since = ensureUTCMoment(moment()).subtract(90, 'days');
+      }
+      let got_data = false;
+      let accountset = await this.client.fetchAccounts(conn.access_token, since);
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
@@ -109,6 +116,7 @@ export class SimpleFINStore {
         if (rows.length) {
           let account_id = rows[0].account_id;
           account.transactions.map(trans => {
+            got_data = true;
             return this.store.accounts.importTransaction({
               account_id,
               amount: parseStringAmount(trans.amount),
@@ -129,9 +137,11 @@ export class SimpleFINStore {
           }
         }
       }))
-      return this.store.updateObject(Connection, conn.id, {
-        last_used: ts2db(moment())
-      })
+      if (got_data) {
+        return this.store.updateObject(Connection, conn.id, {
+          last_used: ts2db(moment())
+        })
+      }
     })
     return Promise.all(promises);
   }
