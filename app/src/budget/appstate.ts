@@ -260,7 +260,6 @@ export class StateManager extends EventEmitter {
 
   async setDate(year:number, month:number):Promise<any> {
     if (this.appstate.year !== year || this.appstate.month !== month) {
-      console.log('setDate change');
       this.appstate.year = year;
       this.appstate.month = month;
       await this.refresh();
@@ -268,7 +267,6 @@ export class StateManager extends EventEmitter {
     }
   }
   async refresh():Promise<any> {
-    console.log('refresh');
     await Promise.all([
       this.fetchAllAccounts(),
       this.fetchAllBuckets(),
@@ -284,10 +282,8 @@ export class StateManager extends EventEmitter {
     return this;
   }
   recomputeTotals() {
-    console.log('recomputeTotals', this.appstate.uncategorized_trans.length);
     let totals = computeTotals(this.appstate);
     Object.assign(this.appstate, totals);
-    console.log('recomputeTotals', this.appstate.uncategorized_trans.length);
   }
   fetchAllAccounts() {
     return this.store.accounts.list()

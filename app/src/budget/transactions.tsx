@@ -16,12 +16,14 @@ interface TransactionPageProps {
 export class TransactionPage extends React.Component<TransactionPageProps, {
   show_subset: boolean;
   subset: number[];
+  selected: Set<number>;
 }> {
   constructor(props) {
     super(props)
     this.state = {
       show_subset: false,
       subset: [],
+      selected: new Set<number>(),
     }
   }
   componentWillReceiveProps(nextProps:TransactionPageProps) {
@@ -60,9 +62,17 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
       subset: subset,
     })
   }
+  deleteSelected = (ev) => {
+    console.log('deleting', this.state.selected);
+    manager.store.accounts.deleteTransactions([...this.state.selected])
+    this.setState({
+      selected: new Set(),
+    })
+  }
   render() {
     let transactions;
     let { appstate } = this.props;
+    let { selected } = this.state;
     if (this.state.show_subset) {
       transactions = this.state.subset
         .map(id => appstate.transactions[id])
@@ -70,10 +80,18 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     } else {
       transactions = _.values(appstate.transactions);
     }
+    let delete_label = 'Delete selected';
+    if (selected.size) {
+      delete_label = `Delete seleced (${selected.size})`;
+    }
     return (
     <div className="rows">
       <div className="subheader">
         <div className="group">
+          <button
+            className="delete"
+            disabled={!selected.size}
+            onClick={this.deleteSelected}>{delete_label}</button>  
           <div className="control">
             <input
               type="checkbox"
@@ -87,6 +105,12 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
           <TransactionList
             appstate={appstate}
             transactions={transactions}
+            selected={selected}
+            onSelectChange={selected => {
+              this.setState({
+                selected: new Set(selected),
+              })
+            }}
           />
         </div>
       </div>
@@ -99,10 +123,12 @@ interface TransactionListProps {
   appstate: AppState;
   hideAccount?: boolean;
   account?: Account;
+  selected?: Set<number>;
+  onSelectChange?: (selected:Set<number>)=>any;
 }
-export class TransactionList extends React.Component<TransactionListProps, any> {
+export class TransactionList extends React.Component<TransactionListProps, {}> {
   render() {
-    let { appstate, account } = this.props;
+    let { appstate, account, selected, onSelectChange } = this.props;
     let hideAccount = this.props.hideAccount || false;
     let elems = _.sortBy(this.props.transactions, [
       item => -ensureUTCMoment(item.posted).unix(),
@@ -110,7 +136,28 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
       'id',
     ])
     .map(trans => {
+      let select_cell;
+      if (onSelectChange) {
+        select_cell = <td>
+          <input
+            type="checkbox"
+            checked={selected.has(trans.id)}
+            onChange={ev => {
+              let newset = new Set(selected)
+              if (ev.target.checked) {
+                newset.add(trans.id);
+              } else {
+                newset.delete(trans.id);
+              }
+              this.setState({
+                selected: newset,
+              })
+              onSelectChange(newset);
+            }} />
+        </td>
+      }
       return <tr key={trans.id}>
+        {select_cell}
         <td className="nobr"><Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
@@ -123,6 +170,7 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
     return <table className="ledger">
       <thead>
         <tr>
+          {onSelectChange ? <th></th> : null}
           <th className="nobr">Posted</th>
           {hideAccount ? null : <th>Account</th>}
           <th>Memo</th>
@@ -134,7 +182,8 @@ export class TransactionList extends React.Component<TransactionListProps, any> 
         <CreateTransRow
           hideAccount={hideAccount}
           account={account}
-          appstate={appstate} />
+          appstate={appstate}
+          showSelectCol={!!onSelectChange} />
         {elems}
       </tbody>
     </table>
@@ -145,6 +194,7 @@ class CreateTransRow extends React.Component<{
   account?: Account;
   hideAccount?: boolean;
   appstate: AppState
+  showSelectCol?: boolean;
 }, {
   amount: number;
   memo: string;
@@ -193,7 +243,7 @@ class CreateTransRow extends React.Component<{
     }
   }
   render() {
-    let { account, hideAccount, appstate } = this.props;
+    let { account, hideAccount, appstate, showSelectCol } = this.props;
     let account_cell;
     let transact_label = 'Deposit';
     if (this.state.amount < 0) {
@@ -224,6 +274,7 @@ class CreateTransRow extends React.Component<{
     }
     return (
       <tr className="action-row">
+        {showSelectCol ? <td></td> : null}
         <td>
           <DateInput
             value={this.state.posted}
