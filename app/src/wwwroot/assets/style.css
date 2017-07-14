@@ -684,23 +684,27 @@ button.makeitrain {
   background: linear-gradient(45deg, var(--blue) 0%, var(--teal) 100%);
   color: white;
   border-color: var(--darker-blue);
-  box-shadow: 0px 0px 34px 2px var(--yellow)
+  transition: transform .1s;
 }
 button.makeitrain:hover {
   animation: glow .5s infinite alternate ease-in-out;
 }
+button.makeitrain:active {
+  transform: scale(.8);
+}
 button.makeitrain[disabled] {
-  background-color: var(--lightest-grey);
+  background: var(--lightest-grey);
   border-color: var(--lighter-grey);
   color: var(--darker-darkblue);
   cursor: initial;
+  animation: none;
 }
 @keyframes glow {
   0% {
-    box-shadow: 0px 0px 34px 2px var(--yellow)
+    box-shadow: 0px 0px 0px 0px var(--yellow)
   }
   100% {
-    box-shadow: 0px 0px 50px 10px var(--yellow);
+    box-shadow: 0px 0px 34px 2px var(--yellow)
   }
 
 }

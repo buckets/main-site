@@ -206,7 +206,23 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     manager.store.buckets.addGroup({name: 'New Group'})
   }
   makeItRain = () => {
-    console.log('rain!');
+    let { appstate } = this.props;
+    let left = appstate.rain;
+    let pending = {};
+    getGroupedBuckets(appstate.unkicked_buckets, _.values(appstate.groups))
+    .forEach(item => {
+      let { buckets } = item;
+      buckets.forEach(bucket => {
+        let computed = computeBucketData(bucket.kind, bucket, {
+          today: appstate.defaultPostingDate,
+          balance: appstate.bucket_balances[bucket.id],
+        })
+        let amount = computed.deposit < left ? computed.deposit : left;
+        left -= amount;
+        pending[bucket.id] = amount;
+      })
+    })
+    this.setState({pending: pending});
   }
   getPending = () => {
     let to_deposit = 0;
@@ -773,32 +789,34 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { buckets, balances, pending, posting_date } = this.props;
+    let { balances, pending, posting_date } = this.props;
     pending = pending || {};
-    let grouped_buckets = {};
-    buckets.forEach(bucket => {
-      let group_id = bucket.group_id || NOGROUP;
-      if (!grouped_buckets[group_id]) {
-        grouped_buckets[group_id] = [];
-      }
-      grouped_buckets[group_id].push(bucket);
-    })
-    let groups = this.props.groups.slice();
 
-    // if there are ungrouped buckets
-    if (grouped_buckets[NOGROUP]) {
-      groups.push({
-        id: NOGROUP,
-        name: 'Misc',
-        ranking: 'z',
-      } as Group)
-    }
-    let group_elems = _.sortBy(groups, ['ranking', 'name'])
-      .map((group:Group) => {
+    // let grouped_buckets = {};
+    // buckets.forEach(bucket => {
+    //   let group_id = bucket.group_id || NOGROUP;
+    //   if (!grouped_buckets[group_id]) {
+    //     grouped_buckets[group_id] = [];
+    //   }
+    //   grouped_buckets[group_id].push(bucket);
+    // })
+    // let groups = this.props.groups.slice();
+
+    // // if there are ungrouped buckets
+    // if (grouped_buckets[NOGROUP]) {
+    //   groups.push({
+    //     id: NOGROUP,
+    //     name: 'Misc',
+    //     ranking: 'z',
+    //   } as Group)
+    // }
+    let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
+      .map((item) => {
+        let { group, buckets } = item;
         return <GroupRow
           key={group.id}
           group={group}
-          buckets={grouped_buckets[group.id] || []}
+          buckets={buckets}
           balances={balances}
           onPendingChanged={this.pendingChanged}
           pending={pending}
@@ -808,7 +826,37 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
       {group_elems}
     </table>
   }
+}
 
+function getGroupedBuckets(buckets:Bucket[], groups:Group[]) {
+  let group_copy = groups.slice();
+  let group2buckets = {};
+  buckets.forEach(bucket => {
+    let group_id = bucket.group_id || NOGROUP;
+    if (!group2buckets[group_id]) {
+      group2buckets[group_id] = [];
+    }
+    group2buckets[group_id].push(bucket);
+  })
+
+  // if there are ungrouped buckets
+  if (group2buckets[NOGROUP]) {
+    group_copy.push({
+      id: NOGROUP,
+      name: 'Misc',
+      ranking: 'z',
+    } as Group)
+  }
+
+  return _(group_copy)
+  .sortBy(['ranking', 'name', 'id'])
+  .map(group => {
+    return {
+      group: group,
+      buckets: _.sortBy(group2buckets[group.id] || [], ['ranking', 'name', 'id']),
+    }
+  })
+  .value()
 }
 
 interface BucketViewProps {

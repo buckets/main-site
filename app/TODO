@@ -1,6 +1,7 @@
 Need:
  ☐ Ability to delete transactions in UI
  ☐ DRM
+   ☐ Including making a way to pay for it.
  ☐ Delete groups
  ☐ Make sure simplefin sync always goes back far enough
  ☐ There needs to be a way to submit bugs
@@ -20,6 +21,8 @@ Want:
  ☐ Delete accounts
  ☐ Show only debt buckets
  ☐ Show Income/expenses average over the last 3 months
+ ☐ A pop up calculator
+ ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
