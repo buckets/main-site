@@ -1,15 +1,19 @@
 Need:
  ☐ DRM
    ☐ Including making a way to pay for it.
- ☐ Delete groups
+ ☐ Format categorizing thing better
+   ☐ When you click to categorize, focus on the first dropdown
  ☐ Make sure simplefin sync always goes back far enough
+   ☐ Actually, why not make it sync the month you're currently looking at and the previous month?
    The code is in, I just need the Internet to test it.
  ☐ There needs to be a way to submit bugs
  ☐ There needs to be a way to submit log files
- ☐ Format categorizing thing better
+ ☐ Command-F to find on page
+ 
 
 Want:
  ☐ Import OFX
+ ☐ Delete groups
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
@@ -21,6 +25,7 @@ Want:
  ☐ Show only debt buckets
  ☐ Show Income/expenses average over the last 3 months
  ☐ A pop up calculator
+ ☐ Alert that there's uncategorized transactions in previous months.
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
