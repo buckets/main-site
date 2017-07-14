@@ -67,7 +67,7 @@ class Toaster {
     this.toasts.splice(this.toasts.indexOf(toast), 1);
     this.updateDisplays();
   }
-  async makeToastDuring(message:string|MultiMessage, func, args?:ToastArgs) {
+  async makeToastDuring<T>(message:string|MultiMessage, func:((...args)=>T|Promise<T>), args?:ToastArgs):Promise<T> {
     let msg:string;
     let success:MessageOrFunc;
     let error:MessageOrFunc;

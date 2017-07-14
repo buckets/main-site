@@ -100,14 +100,16 @@ export class SimpleFINStore {
   async sync(since?:moment.Moment, enddate?:moment.Moment):Promise<{
     transactions: Transaction[],
     unknowns: UnknownAccount[],
+    errors: string[],
   }> {
     let connections = await this.listConnections();
     let transaction_promises = [];
     let unknowns = [];
+    let errors = [];
     let promises = connections.map(async conn => {
       let got_data = false;
       let accountset = await this.client.fetchAccounts(conn.access_token, since, enddate);
-
+      errors = errors.concat(accountset.errors);
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
@@ -151,6 +153,7 @@ export class SimpleFINStore {
     return {
       transactions,
       unknowns,
+      errors,
     }
   }
   computeHash(org:SFIN.Organization, account_id:string):string {
