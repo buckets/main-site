@@ -26,11 +26,12 @@ interface ToastArgs {
   duration?:number;
   className?:string;
 }
+type MessageOrFunc = string | ((x:any)=>string);
 
 interface MultiMessage {
   message: string;
-  error?: string;
-  success?: string;
+  error?: MessageOrFunc;
+  success?: MessageOrFunc;
 }
 export function isMultiMessage(obj): obj is MultiMessage {
   return obj.error !== undefined || obj.success !== undefined;
@@ -68,8 +69,8 @@ class Toaster {
   }
   async makeToastDuring(message:string|MultiMessage, func, args?:ToastArgs) {
     let msg:string;
-    let success:string;
-    let error:string;
+    let success:MessageOrFunc;
+    let error:MessageOrFunc;
     if (isMultiMessage(message)) {
       msg = message.message;
       success = message.success;
@@ -81,7 +82,11 @@ class Toaster {
     try {
       let ret = await func();
       if (success) {
-        toast.message = success;
+        if (typeof success === 'string') {
+          toast.message = success;
+        } else {
+          toast.message = success(ret);
+        }
         toast.className = 'success';
         toast.start();
         this.updateDisplays();
@@ -91,7 +96,11 @@ class Toaster {
       return ret;
     } catch(err) {
       if (error) {
-        toast.message = error;
+        if (typeof error === 'string') {
+          toast.message = error;
+        } else {
+          toast.message = error(err);
+        }
         toast.className = 'error';
         toast.start();
         this.updateDisplays();

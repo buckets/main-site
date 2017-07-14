@@ -5,6 +5,7 @@ import { IObject, IStore } from '../store'
 import * as crypto from 'crypto'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
+import { Transaction } from './account'
 
 export class Connection implements IObject {
   static table_name: string = 'simplefin_connection'
@@ -96,18 +97,17 @@ export class SimpleFINStore {
   async listConnections():Promise<Connection[]> {
     return this.store.listObjects(Connection);
   }
-  async sync():Promise<any> {
+  async sync(since?:moment.Moment, enddate?:moment.Moment):Promise<{
+    transactions: Transaction[],
+    unknowns: UnknownAccount[],
+  }> {
     let connections = await this.listConnections();
+    let transaction_promises = [];
+    let unknowns = [];
     let promises = connections.map(async conn => {
-      let since;
-      if (conn.last_used) {
-        // go 10 days prior to last fetch
-        since = ensureUTCMoment(conn.last_used).subtract(10, 'days');
-      } else {
-        since = ensureUTCMoment(moment()).subtract(90, 'days');
-      }
       let got_data = false;
-      let accountset = await this.client.fetchAccounts(conn.access_token, since);
+      let accountset = await this.client.fetchAccounts(conn.access_token, since, enddate);
+
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
@@ -115,23 +115,26 @@ export class SimpleFINStore {
           WHERE account_hash=$hash`, {$hash: hash})
         if (rows.length) {
           let account_id = rows[0].account_id;
-          account.transactions.map(trans => {
-            got_data = true;
-            return this.store.accounts.importTransaction({
-              account_id,
-              amount: parseStringAmount(trans.amount),
-              memo: trans.description,
-              posted: parseTimestamp(trans.posted),
-              fi_id: trans.id,
+          account.transactions
+          .map(trans => {
+              got_data = true;
+              return this.store.accounts.importTransaction({
+                account_id,
+                amount: parseStringAmount(trans.amount),
+                memo: trans.description,
+                posted: parseTimestamp(trans.posted),
+                fi_id: trans.id,
+              })
             })
-          })
+          .forEach(p => { transaction_promises.push(p) });
         } else {
           // no matching account
           try {
-            await this.store.createObject(UnknownAccount, {
+            let unknown = await this.store.createObject(UnknownAccount, {
               description: `${account.org.name || account.org.domain} ${account.name}`,
               account_hash: hash,
-            })  
+            })
+            unknowns.push(unknown);
           } catch(err) {
             log.warn(err);
           }
@@ -143,7 +146,12 @@ export class SimpleFINStore {
         })
       }
     })
-    return Promise.all(promises);
+    await Promise.all(promises);
+    let transactions = await Promise.all(transaction_promises);
+    return {
+      transactions,
+      unknowns,
+    }
   }
   computeHash(org:SFIN.Organization, account_id:string):string {
     return hashStrings([org.name || org.domain, account_id]);
@@ -192,7 +200,7 @@ class SimpleFINClient {
     }
     return access_url;
   }
-  async fetchAccounts(access_url:string, since?:Timestamp):Promise<SFIN.AccountSet> {
+  async fetchAccounts(access_url:string, since?:Timestamp, enddate?:Timestamp):Promise<SFIN.AccountSet> {
     let result;
     let uri = `${access_url}/accounts`;
     try {
@@ -201,6 +209,12 @@ class SimpleFINClient {
         since = ensureUTCMoment(since);
         options.qs = {
           'start-date': since.unix(),
+        }
+      }
+      if (enddate) {
+        enddate = ensureUTCMoment(enddate);
+        options.qs = {
+          'end-date': enddate.unix(),
         }
       }
       result = await req(options);

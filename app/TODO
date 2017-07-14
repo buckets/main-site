@@ -3,9 +3,6 @@ Need:
    ☐ Including making a way to pay for it.
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
- ☐ Make sure simplefin sync always goes back far enough
-   ☐ Actually, why not make it sync the month you're currently looking at and the previous month?
-   The code is in, I just need the Internet to test it.
  ☐ There needs to be a way to submit bugs
  ☐ There needs to be a way to submit log files
  ☐ Command-F to find on page
@@ -30,6 +27,9 @@ Want:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Make sure simplefin sync always goes back far enough @done (17-07-14 10:03) @project(Need)
+ ✔ Actually, why not make it sync the month you're currently looking at and the previous month? @done (17-07-14 10:03) @project(Need)
+  The code is in, I just need the Internet to test it.
  ✔ Ability to delete transactions in UI @done (17-07-13 21:14) @project(Need)
  ✔ Make it rain @done (17-07-13 20:50) @project(Need)
  ✔ If simplefin sync fails, show an error @done (17-07-13 16:47) @project(Need)

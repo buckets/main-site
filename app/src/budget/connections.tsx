@@ -111,12 +111,15 @@ export class ConnectionsPage extends React.Component<{
     return this.syncTransactions();
   }
   syncTransactions = async () => {
+    let range = this.props.appstate.viewDateRange;
+    let since = range.onOrAfter.subtract(1, 'month');
+    let enddate = range.before.add(10, 'days');
     await makeToastDuring({
       message: 'Syncing...',
-      success: 'Sync complete!',
+      success: (x=>{return `Synced ${x.transactions.length} transactions!`}),
       error: 'Error doing sync',
     }, () => {
-      return manager.store.connections.sync();
+      return manager.store.connections.sync(since, enddate);
     })
   }
 }
