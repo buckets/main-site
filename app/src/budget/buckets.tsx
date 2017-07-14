@@ -167,6 +167,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
           <div className="rows">
             <div className="subheader">
               <div className="group">
+                <button
+                  onClick={this.makeItRain}
+                  disabled={appstate.rain<=0}
+                  className="makeitrain">Make it rain! <span className="fa fa-tint"/></button>
                 <button onClick={this.addBucket}>New bucket</button>
                 <button onClick={this.addGroup}>New group</button>
                 <div className="labeled-number">
@@ -200,6 +204,9 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   }
   addGroup = () => {
     manager.store.buckets.addGroup({name: 'New Group'})
+  }
+  makeItRain = () => {
+    console.log('rain!');
   }
   getPending = () => {
     let to_deposit = 0;
