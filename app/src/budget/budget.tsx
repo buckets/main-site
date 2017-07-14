@@ -12,6 +12,7 @@ import {Money} from '../money'
 import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
+import { listenForFinding } from './finding'
 
 import { manager, AppState } from './appstate'
 
@@ -33,6 +34,9 @@ export async function start(base_element, room) {
   manager.on('change', () => {
     renderer.doUpdate();
   })
+
+  // watch for find commands
+  listenForFinding();
 
   // routing
   window.addEventListener('hashchange', () => {

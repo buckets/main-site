@@ -1,5 +1,6 @@
 import {app, Menu} from 'electron';
 import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files';
+import {startFindInPage, findNext, findPrev} from './finding'
 
 let FileMenu = {
   label: 'File',
@@ -38,7 +39,29 @@ let EditMenu = {
     {role: 'paste'},
     {role: 'pasteandmatchstyle'},
     {role: 'delete'},
-    {role: 'selectall'}
+    {role: 'selectall'},
+    {type: 'separator'},
+    {
+      label: 'Find...',
+      accelerator: 'CmdOrCtrl+F',
+      click() {
+        startFindInPage();
+      }
+    },
+    {
+      label: 'Find Next',
+      accelerator: 'CmdOrCtrl+G',
+      click() {
+        findNext();
+      }
+    },
+    {
+      label: 'Find Previous',
+      accelerator: 'CmdOrCtrl+Shift+G',
+      click() {
+        findPrev();
+      }
+    }
   ]
 };
 let ViewMenu = {
