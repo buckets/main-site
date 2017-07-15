@@ -12,7 +12,7 @@ import {Money} from '../money'
 import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
-import { listenForFinding } from './finding'
+import { FinderDisplay } from './finding'
 
 import { manager, AppState } from './appstate'
 
@@ -36,7 +36,7 @@ export async function start(base_element, room) {
   })
 
   // watch for find commands
-  listenForFinding();
+  FinderDisplay.start();
 
   // routing
   window.addEventListener('hashchange', () => {
@@ -113,6 +113,7 @@ class Application extends React.Component<ApplicationProps, any> {
         >
         <BucketStyles buckets={_.values(appstate.buckets)} />
         <ToastDisplay />
+        <FinderDisplay />
         <div className="trial-ribbon">TRIAL VERSION</div>
         <Switch>
           <Route path="/y<int:year>m<int:month>">

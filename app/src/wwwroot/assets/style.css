@@ -879,3 +879,53 @@ table.props th {
   right: -100%;
   opacity: 0;
 }
+
+
+/* Text search */
+.text-finder {
+  position: fixed;
+  top: 0;
+  right: 11rem;
+  background-color: white;
+  padding: .5rem;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  border: 1px solid var(--lighter-grey);
+  border-width: 0 1px 1px;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 0 9px -3px;
+}
+.text-finder button {
+  background: none;
+  border: none;
+  padding: 0 .5rem;
+}
+.text-finder button:hover {
+  background: var(--yellow);
+}
+.text-finder .matchcount-wrap {
+  position: relative;
+  width: 0;
+}
+.text-finder .matchcount {
+  position: absolute;
+  right: .4rem;
+  top: 1px;
+  color: var(--grey);
+  font-size: .8rem;
+  width: 4rem;
+  display: flex;
+  justify-content: flex-end;
+  height: 100%;
+}
+.text-finder input {
+  padding-right: 4.1rem;
+  width: 10rem;
+  border: 1px solid var(--grey);
+  border-radius: 3px;
+}
+.text-finder input:focus {
+  outline: none;
+  border-color: var(--blue);
+}
