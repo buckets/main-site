@@ -1,6 +1,7 @@
 import {app, Menu} from 'electron';
 import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files';
 import {startFindInPage, findNext, findPrev} from './finding'
+import { isRegistered, openBuyPage, promptForLicense } from './drm'
 
 let FileMenu = {
   label: 'File',
@@ -85,23 +86,46 @@ let WindowMenu = {
     {role: 'close'}
   ]
 };
+
 let HelpMenu = {
   role: 'help',
   submenu: [
     {
       label: 'Learn More',
       click () { require('electron').shell.openExternal('https://www.bucketsisbetter.com') }
-    }
-  ]
+    },
+  ],
 };
 
 let template:any[] = [
   FileMenu,
   EditMenu,
   ViewMenu,
-  WindowMenu,
-  HelpMenu,
-]
+  WindowMenu, 
+];
+
+if (!isRegistered()) {
+  let RegisterMenu = {
+    label: 'Trial Version',
+    submenu: [
+      {
+        label: 'Purchase Full Version...',
+        click() {
+          openBuyPage();
+        },
+      },
+      {
+        label: 'Enter License...',
+        click() {
+          promptForLicense();
+        },
+      }
+    ]
+  }
+  template.push(RegisterMenu);
+}
+
+template.push(HelpMenu);
 
 if (process.platform === 'darwin') {
   // Buckets Menu

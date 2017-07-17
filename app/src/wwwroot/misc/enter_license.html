@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Enter Buckets License</title>
+  <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/style.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
+  <style type="text/css">
+    html {
+      height: 100%;
+    }
+  </style>
+  <style type="text/css">
+  .license {
+    padding: 1rem;
+  }
+  button {
+    margin-left: 0;
+  }
+  textarea {
+    width: 100%;
+    height: 6rem;
+    font-family: monospace;
+    padding: 1rem;
+    font-size: 1rem;
+    box-shadow: inset 0 0 13px -2px var(--grey);
+    border: 1px solid var(--lighter-grey);
+    border-radius: 3px;
+  }
+  </style>
+</head>
+<body>
+  <div class="license">
+    <p>
+      Please enter your Buckets License (obtained from www.bucketsisbetter.com) here:
+    </p>
+    <div>
+      <textarea></textarea>
+    </div>
+    <p>
+      <button>Submit</button>
+    </p>
+  </div>
+<script>
+const {enterLicense} = require(require('path').resolve('./src/mainprocess/drm.js'));
+console.log('enterLicense', enterLicense);
+</script>
+</body>
+</html>

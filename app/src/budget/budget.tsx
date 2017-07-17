@@ -13,6 +13,7 @@ import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
+import { isRegistered, openBuyPage } from '../mainprocess/drm'
 
 import { manager, AppState } from './appstate'
 
@@ -65,6 +66,15 @@ class Navbar extends React.Component<{
 }, {}> {
   render() {
     let { appstate } = this.props;
+    let trial_version = (
+      <a
+        className="trial-version"
+        onClick={openBuyPage}>Trial Version
+      </a>
+    )
+    if (isRegistered()) {
+      trial_version = null;
+    }
     let connections_badge;
     if (appstate.num_unknowns) {
       connections_badge = <div className="badge">{appstate.num_unknowns}</div>
@@ -92,6 +102,7 @@ class Navbar extends React.Component<{
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
         </div>
         <div>
+          {trial_version}
         </div>
       </div>)
   }
@@ -114,7 +125,6 @@ class Application extends React.Component<ApplicationProps, any> {
         <BucketStyles buckets={_.values(appstate.buckets)} />
         <ToastDisplay />
         <FinderDisplay />
-        <div className="trial-ribbon">TRIAL VERSION</div>
         <Switch>
           <Route path="/y<int:year>m<int:month>">
             <WithRouting func={({params}) => {
