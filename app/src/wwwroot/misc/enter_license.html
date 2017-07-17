@@ -19,13 +19,21 @@
   }
   textarea {
     width: 100%;
-    height: 6rem;
+    height: 10rem;
     font-family: monospace;
     padding: 1rem;
     font-size: 1rem;
-    box-shadow: inset 0 0 13px -2px var(--grey);
+    box-shadow: inset 0 0 7px -2px var(--grey);
     border: 1px solid var(--lighter-grey);
     border-radius: 3px;
+    background-color: var(--lightest-grey);
+    color: black;
+  }
+  #error {
+    color: var(--red);
+  }
+  #status {
+    color: var(--blue);
   }
   </style>
 </head>
@@ -35,15 +43,43 @@
       Please enter your Buckets License (obtained from www.bucketsisbetter.com) here:
     </p>
     <div>
-      <textarea></textarea>
+      <textarea id="license-input"></textarea>
     </div>
     <p>
-      <button>Submit</button>
+      <div id="error">&nbsp;</div>
+      <div id="status">&nbsp;</div>
+      <button id="submit-button">Submit</button>
     </p>
   </div>
 <script>
-const {enterLicense} = require(require('path').resolve('./src/mainprocess/drm.js'));
-console.log('enterLicense', enterLicense);
+const app = require('electron').remote.app;
+const path = require('path');
+const {enterLicense} = require(path.resolve('./src/mainprocess/drm.js'));
+const log = require('electron-log');
+let state = 'init';
+let textarea_box = document.getElementById('license-input');
+let button = document.getElementById('submit-button');
+let error_div = document.getElementById('error');
+let status_div = document.getElementById('status');
+button.addEventListener('click', () => {
+  if (state === 'init') {
+    status_div.innerHTML = '&nbsp;';
+    error_div.innerHTML = '&nbsp;';
+    try {
+      enterLicense(textarea_box.value);
+      state = 'success';
+      status_div.innerHTML = 'Success!';
+      button.innerHTML = 'Restart Buckets';
+    } catch(err) {
+      log.error(`Error entering license: ${err}`);
+      error_div.innerHTML = 'Invalid license';
+      textarea_box.value = '';
+    }
+  } else if (state === 'success') {
+    app.relaunch();
+    app.quit();
+  }
+}, false);
 </script>
 </body>
 </html>

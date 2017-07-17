@@ -97,15 +97,7 @@ let HelpMenu = {
   ],
 };
 
-let template:any[] = [
-  FileMenu,
-  EditMenu,
-  ViewMenu,
-  WindowMenu, 
-];
-
-if (!isRegistered()) {
-  let RegisterMenu = {
+let RegisterMenu = {
     label: 'Trial Version',
     submenu: [
       {
@@ -122,14 +114,20 @@ if (!isRegistered()) {
       }
     ]
   }
-  template.push(RegisterMenu);
-}
 
-template.push(HelpMenu);
+let template:any[] = [
+  FileMenu,
+  EditMenu,
+  ViewMenu,
+  WindowMenu, 
+  HelpMenu,
+];
+
+let preMenus = [];
 
 if (process.platform === 'darwin') {
   // Buckets Menu
-  template.unshift({
+  preMenus.push({
     label: app.getName(),
     submenu: [
       {role: 'about'},
@@ -160,6 +158,21 @@ if (process.platform === 'darwin') {
     {type: 'separator'},
     {role: 'front'}
   ]
+}
+
+export function adjustTrialMenu() {
+  template = [
+    ...preMenus,
+    FileMenu,
+    EditMenu,
+    ViewMenu,
+    WindowMenu,
+  ]
+  if (!isRegistered()) {
+    template.push(RegisterMenu);
+  }
+  template.push(HelpMenu);
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 export const menu = Menu.buildFromTemplate(template)

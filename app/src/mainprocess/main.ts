@@ -1,12 +1,12 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, Menu, session, protocol} from 'electron'
+import {app, session, protocol} from 'electron'
 import * as log from 'electron-log'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url';
 import * as Path from 'path';
-import {menu} from './menu';
+import {adjustTrialMenu} from './menu';
 import {BudgetFile} from './files';
 import {APP_ROOT} from './globals';
 
@@ -37,7 +37,7 @@ app.on('ready', () => {
 
 app.on('ready', function() {
   // Create the Menu
-  Menu.setApplicationMenu(menu);
+  adjustTrialMenu();
 
   // Temporary window just to nab focus
   // new BrowserWindow({width: 400, height: 300});
