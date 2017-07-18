@@ -1,0 +1,5 @@
+Main Text Font: BebasNeue 
+Slogan Text Font: Arvo Regular 
+Monogram Text Font: Bambu 
+Color HEX: #2eaef1 
+Color HSL: 39 99.6078431373 50.1960784314 
