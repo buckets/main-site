@@ -64,9 +64,17 @@
       }
     ],
     "files": [
-      "src/**/*",
-      "!*.ts",
-      "!*.tsx"
+      "!*.sh",
+      "!.taprc",
+      "!buckets.sublime-*",
+      "!mocha.opts",
+      "!README.md",
+      "!TODO",
+      "!tsconfig.json",
+      "!watchtest.js",
+      "!**/*.ts",
+      "!**/*.tsx",
+      "!coverage${/*}"
     ]
   },
   "devDependencies": {
