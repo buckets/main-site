@@ -13,11 +13,13 @@
 </head>
 <body>
   <div id="root">Loading...</div>
-  <script>
+<script>
 const hostname = window.location.hostname;
-const {start} = require(require('path').resolve('./src/wwwroot/budget/index.js'));
+let {remote} = require('electron');
+let path = require('path');
+let appPath = remote.app.getAppPath();
+const { start } = require(path.resolve(appPath, './src/wwwroot/budget/index.js'));
 start(document.getElementById('root'), hostname);
-
-  </script>
+</script>
 </body>
 </html>
