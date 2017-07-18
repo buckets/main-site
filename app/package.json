@@ -53,6 +53,11 @@
         "owner": "buckets",
         "repo": "application"
       }
+    ],
+    "files": [
+      "src/**/*",
+      "!*.ts",
+      "!*.tsx"
     ]
   },
   "devDependencies": {
