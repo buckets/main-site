@@ -13,7 +13,7 @@ import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
-import { isRegistered, openBuyPage } from '../mainprocess/drm'
+import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
 
 import { manager, AppState } from './appstate'
 
@@ -69,7 +69,10 @@ class Navbar extends React.Component<{
     let trial_version = (
       <a
         className="trial-version"
-        onClick={openBuyPage}>Trial Version
+        onClick={() => {
+          openBuyPage();
+          promptForLicense();
+        }}>Trial Version
       </a>
     )
     if (isRegistered()) {

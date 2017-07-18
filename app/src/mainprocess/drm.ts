@@ -1,21 +1,17 @@
 import * as Path from 'path'
-import { app, remote, shell, BrowserWindow } from 'electron'
+import { app, remote, shell, BrowserWindow, dialog } from 'electron'
 import { APP_ROOT } from './globals'
 import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 
 let ISREGISTERED = null;
 export function isRegistered():boolean {
-  console.log('isRegistered()')
   if (ISREGISTERED === null) {
-    console.log('it is null');
     try {
       let contents = fs.readFileSync(licenseFilePath(), {encoding:'utf8'});
-      console.log('read cert');
       verifyLicense(contents);
       ISREGISTERED = true;
     } catch(err) {
-      console.log('err', err);
       ISREGISTERED = false;
     }
   }
@@ -32,15 +28,13 @@ suffix;
 let win:Electron.BrowserWindow = null;
 
 export function promptForLicense() {
-  console.log('promptForLicense');
   if (win) {
     win.focus();
     return;
   } else {
-    console.log('new window');
     win = new BrowserWindow({
-      width: 500,
-      height: 350,
+      width: 460,
+      height: 400,
       show: false,
     });
     win.once('ready-to-show', () => {
@@ -62,23 +56,57 @@ function licenseFilePath() {
   return Path.join(userdatapath, 'license.jwt');
 }
 
+function unformatLicense(text:string):string {
+  return text
+    .replace('------------- START LICENSE ---------------', '')
+    .replace('------------- END LICENSE -----------------', '')
+    .replace(' ', '')
+    .replace(/\n/, '')
+    .trim()
+}
+
 export function enterLicense(license:string) {
-  verifyLicense(license);
+  verifyLicense(unformatLicense(license));
   fs.writeFileSync(licenseFilePath(), license.trim(), {encoding:'utf8'});
   ISREGISTERED = true;
 }
 
 export function nag() {
   if (!isRegistered()) {
-    console.log('nag');
+    dialog.showMessageBox({
+      title: 'Unregistered Version',
+      message: `Hello! Thanks for trying out Buckets.
+
+This is an unregistered trial version, and although the trial is untimed,
+a license must be purchased for continued use.
+
+Would you like to purchase a license now?`,
+      buttons: [
+        'Cancel',
+        'Purchase',
+      ],
+      defaultId: 1,
+    }, (indexClicked) => {
+      if (indexClicked === 1) {
+        // purchase
+        promptForLicense();
+        openBuyPage();
+      } else {
+        // cancel
+        eventuallyNag(60);
+      }
+    })
+    return true;
+  } else {
+    return false;
   }
 }
 
-export function eventuallyNag() {
+export function eventuallyNag(minutes:number=10) {
   if (!isRegistered()) {
     setTimeout(() => {
       nag();
-    }, 15 * 60 * 1000)
+    }, minutes * 60 * 1000)
   }
 }
 
@@ -99,7 +127,7 @@ worth it to steal?  See for yourself at https://www.bucketsisbetter.com/
 
 Thanks,
 
-Matt Haggard (the author)`;
+Matt (the author)`;
 
 const PUBKEY = `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnvWhNTROSduI+j2QsePY

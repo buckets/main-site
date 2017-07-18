@@ -16,37 +16,42 @@
   }
   button {
     margin-left: 0;
+    margin-right: 0;
+  }
+  .textareaholder {
+    width: 100%;
   }
   textarea {
-    width: 100%;
-    height: 10rem;
+    box-sizing: border-box;
     font-family: monospace;
     padding: 1rem;
-    font-size: 1rem;
+    margin: 0 auto;
     box-shadow: inset 0 0 7px -2px var(--grey);
     border: 1px solid var(--lighter-grey);
     border-radius: 3px;
     background-color: var(--lightest-grey);
+    font-size: 1rem;
+    text-align: left;
     color: black;
-  }
-  #error {
-    color: var(--red);
   }
   #status {
     color: var(--blue);
+    padding: 0 0 1rem;
+  }
+  #status.error {
+    color: var(--red);
   }
   </style>
 </head>
 <body>
   <div class="license">
     <p>
-      Please enter your Buckets License (obtained from www.bucketsisbetter.com) here:
+      Please enter your Buckets License below.  Don't have a license?  <a href="#" id="clicktobuy">Click here to purchase one.</a>
     </p>
-    <div>
-      <textarea id="license-input"></textarea>
+    <div class="textareaholder">
+      <textarea id="license-input" cols="43" rows="10" placeholder="------------- START LICENSE ---------------xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx   xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx  ------------- END LICENSE -----------------"></textarea>
     </div>
     <p>
-      <div id="error">&nbsp;</div>
       <div id="status">&nbsp;</div>
       <button id="submit-button">Submit</button>
     </p>
@@ -54,17 +59,22 @@
 <script>
 const app = require('electron').remote.app;
 const path = require('path');
-const {enterLicense} = require(path.resolve('./src/mainprocess/drm.js'));
+const {enterLicense, openBuyPage} = require(path.resolve('./src/mainprocess/drm.js'));
 const log = require('electron-log');
 let state = 'init';
 let textarea_box = document.getElementById('license-input');
 let button = document.getElementById('submit-button');
-let error_div = document.getElementById('error');
 let status_div = document.getElementById('status');
+let clicktobuy = document.getElementById('clicktobuy');
+clicktobuy.addEventListener('click', (ev) => {
+  openBuyPage();
+  ev.preventDefault();
+  return false;
+}, false)
 button.addEventListener('click', () => {
   if (state === 'init') {
     status_div.innerHTML = '&nbsp;';
-    error_div.innerHTML = '&nbsp;';
+    status_div.classList.remove('error');
     try {
       enterLicense(textarea_box.value);
       state = 'success';
@@ -72,8 +82,8 @@ button.addEventListener('click', () => {
       button.innerHTML = 'Restart Buckets';
     } catch(err) {
       log.error(`Error entering license: ${err}`);
-      error_div.innerHTML = 'Invalid license';
-      textarea_box.value = '';
+      status_div.innerHTML = 'Invalid license';
+      status_div.classList.add('error');
     }
   } else if (state === 'success') {
     app.relaunch();

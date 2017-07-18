@@ -13,10 +13,21 @@ def createLicense(name, email, private_key):
     }, private_key, algorithm='RS256')
 
 
+def chunk(thing, length):
+    return [thing[0+i:length+i] for i in range(0, len(thing)+1, length)]
+
+def formatLicense(text):
+    chunks = chunk(text, 10)
+    rows = chunk(chunks, 4)
+    formatted = '\n'.join([' '.join(row) for row in rows])
+    return ('------------- START LICENSE ---------------\n'
+            '{0}\n'
+            '------------- END LICENSE -----------------').format(formatted)
+
+
 if __name__ == '__main__':
     priv_key = os.environ['BUCKETS_LICENSE_KEY']
-    print(priv_key)
     name = raw_input('name? ')
     email = raw_input('email? ')
     license = createLicense(name, email, priv_key)
-    print(license)
+    print(formatLicense(license))

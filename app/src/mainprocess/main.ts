@@ -4,11 +4,12 @@
 import {app, session, protocol} from 'electron'
 import * as log from 'electron-log'
 import {autoUpdater} from 'electron-updater'
-import * as URL from 'url';
-import * as Path from 'path';
-import {adjustTrialMenu} from './menu';
-import {BudgetFile} from './files';
-import {APP_ROOT} from './globals';
+import * as URL from 'url'
+import * as Path from 'path'
+import { adjustTrialMenu } from './menu'
+import {BudgetFile} from './files'
+import {APP_ROOT} from './globals'
+import { isRegistered, eventuallyNag } from './drm'
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
@@ -38,6 +39,11 @@ app.on('ready', () => {
 app.on('ready', function() {
   // Create the Menu
   adjustTrialMenu();
+
+  // Nag screen
+  if (!isRegistered()) {
+    eventuallyNag();
+  }
 
   // Temporary window just to nab focus
   // new BrowserWindow({width: 400, height: 300});
