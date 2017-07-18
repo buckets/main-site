@@ -1,9 +1,13 @@
 {
   "name": "Buckets",
   "version": "1.0.0-dev",
+  "homepage": "https://www.bucketsisbetter.com",
   "main": "src/mainprocess/main.js",
   "description": "Buckets Family Budgeting",
-  "author": "Matt Haggard",
+  "author": {
+    "name": "Buckets",
+    "email": "hello@bucketsisbetter.com"
+  },
   "scripts": {
     "start": "electron .",
     "test": "./test.sh"
@@ -46,6 +50,11 @@
     },
     "nsis": {
       "perMachine": true
+    },
+    "linux": {
+      "target": [
+        "tar.gz"
+      ]
     },
     "publish": [
       {
