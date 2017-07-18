@@ -1,6 +1,6 @@
 {
   "name": "Buckets",
-  "version": "0.0.1",
+  "version": "1.0.0-dev",
   "main": "src/mainprocess/main.js",
   "description": "Buckets Family Budgeting",
   "author": "Matt Haggard",
@@ -16,6 +16,7 @@
     "adm-zip": "0.4.7",
     "bluebird": "3.5.0",
     "classnames": "2.2.5",
+    "electron-is": "^2.4.0",
     "electron-log": "2.2.6",
     "electron-updater": "2.1.2",
     "jsonwebtoken": "7.4.1",
@@ -35,7 +36,7 @@
     "uuid": "^3.0.1"
   },
   "build": {
-    "appId": "com.github.buckets.app",
+    "appId": "com.github.buckets.application",
     "mac": {
       "category": "your.app.category.type",
       "target": [
@@ -45,7 +46,14 @@
     },
     "nsis": {
       "perMachine": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "buckets",
+        "repo": "application"
+      }
+    ]
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.5",

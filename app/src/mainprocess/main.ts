@@ -3,6 +3,7 @@
 
 import {app, session, protocol} from 'electron'
 import * as log from 'electron-log'
+import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
@@ -10,10 +11,12 @@ import { adjustTrialMenu } from './menu'
 import {BudgetFile} from './files'
 import {APP_ROOT} from './globals'
 import { isRegistered, eventuallyNag } from './drm'
+import { checkForUpdates } from './updater'
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.info('App starting...');
+
 
 // Make accessing '/' access the expected place
 protocol.registerStandardSchemes(['buckets'])
@@ -43,6 +46,10 @@ app.on('ready', function() {
   // Nag screen
   if (!isRegistered()) {
     eventuallyNag();
+  }
+
+  if (!electron_is.dev()) {
+    checkForUpdates()
   }
 
   // Temporary window just to nab focus

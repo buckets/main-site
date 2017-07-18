@@ -883,6 +883,13 @@ electron-is-dev@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-0.1.2.tgz#8a1043e32b3a1da1c3f553dce28ce764246167e3"
 
+electron-is@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/electron-is/-/electron-is-2.4.0.tgz#69f65607d7d264ea0a476d552190aa2b01865f52"
+  dependencies:
+    electron-is-dev "^0.1.2"
+    semver "^5.3.0"
+
 electron-log@2.2.6:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/electron-log/-/electron-log-2.2.6.tgz#ccfa3e09b39f321468c90a642701380a34079f1a"
