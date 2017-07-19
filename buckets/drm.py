@@ -8,6 +8,12 @@ def createLicense(email, private_key):
     """
     Create an application license
     """
+    prefix = '-----BEGIN RSA PRIVATE KEY-----'
+    suffix = '-----END RSA PRIVATE KEY-----'
+    private_key = private_key.replace(prefix, '')
+    private_key = private_key.replace(suffix, '')
+    private_key = private_key.strip().replace(' ', '\n')
+    private_key = '{prefix}\n{private_key}\n{suffix}'.format(**locals())
     return jwt.encode({
         'iat': int(time.time()),
         'email': email,

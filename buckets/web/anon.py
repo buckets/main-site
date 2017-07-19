@@ -104,6 +104,12 @@ def signout():
     return redirect('/')
 
 
+PRIVATE_KEY = os.environ.get('BUCKETS_LICENSE_KEY')
+if not PRIVATE_KEY:
+    if 'OPENSHIFT_DATA_DIR' in os.environ:
+        with open(os.path.join(os.getenv('OPENSHIFT_DATA_DIR'), 'BUCKETS_LICENSE_KEY')) as fh:
+            PRIVATE_KEY = fh.read()
+
 #----------------------------------------------------
 # application
 #----------------------------------------------------
@@ -121,7 +127,7 @@ def buy():
         try:
             license = formatLicense(createLicense(
                 email=email,
-                private_key=os.environ['BUCKETS_LICENSE_KEY']))
+                private_key=PRIVATE_KEY))
         except Exception as e:
             flash('Error generating license.  Your card was not charged.', 'error')
             raise
