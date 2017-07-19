@@ -116,8 +116,8 @@ export class ConnectionsPage extends React.Component<{
     let enddate = range.before.add(10, 'days');
     console.log('since', since.format(), enddate.format());
     let result = await makeToastDuring({
-      message: 'Syncing...',
-      success: (x=>{return `Synced ${x.transactions.length} transactions!`}),
+      message: `Syncing from ${since.format("ll")} to ${enddate.format("ll")}...`,
+      success: (x=>{return `Synced ${x.transactions.length} transactions (${since.format("ll")} to ${enddate.format("ll")})`}),
       error: 'Error doing sync',
     }, () => {
       return manager.store.connections.sync(since, enddate);

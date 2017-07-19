@@ -1,12 +1,9 @@
 Need:
- ☐ DRM
-   ☐ Including making a way to pay for it.
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
  ☐ There needs to be a way to submit bugs
  ☐ There needs to be a way to submit log files
- ☐ When syncing, display what dates you're attempting to sync between, like "Syncing transactions for May 1 - Jun 30, 2017"
- ✔ Command-F to find on page @done (17-07-15 19:16)
+ ☐ Allow for goals with no deposit amount.
  
 
 Want:
@@ -28,6 +25,10 @@ Want:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ When syncing, display what dates you're attempting to sync between, like "Syncing transactions for May 1 - Jun 30, 2017" @done (17-07-19 16:26) @project(Need)
+ ✔ Including making a way to pay for it. @done (17-07-19 16:16) @project(Need)
+ ✔ DRM @done (17-07-19 16:16) @project(Need)
+ ✔ Command-F to find on page @done (17-07-15 19:16) @project(Need)
  ✔ Make sure simplefin sync always goes back far enough @done (17-07-14 10:03) @project(Need)
  ✔ Actually, why not make it sync the month you're currently looking at and the previous month? @done (17-07-14 10:03) @project(Need)
   The code is in, I just need the Internet to test it.
