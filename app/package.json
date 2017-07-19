@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "electron .",
-    "test": "./test.sh"
+    "test": "./test.sh",
+    "postinstall": "install-app-deps"
   },
   "dependencies": {
     "@types/mathjs": "0.0.34",
