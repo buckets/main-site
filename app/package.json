@@ -69,17 +69,19 @@
       }
     ],
     "files": [
+      "!.dockerignore",
+      "!**/*.ts",
+      "!**/*.tsx",
       "!*.sh",
       "!.taprc",
       "!buckets.sublime-*",
+      "!coverage${/*}",
+      "!dev${/*}",
       "!mocha.opts",
       "!README.md",
       "!TODO",
       "!tsconfig.json",
-      "!watchtest.js",
-      "!**/*.ts",
-      "!**/*.tsx",
-      "!coverage${/*}"
+      "!watchtest.js"
     ]
   },
   "devDependencies": {
