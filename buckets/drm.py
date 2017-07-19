@@ -2,12 +2,14 @@
 from __future__ import print_function
 from jose import jwt
 import os
+import time
 
 def createLicense(email, private_key):
     """
     Create an application license
     """
     return jwt.encode({
+        'iat': int(time.time()),
         'email': email,
     }, private_key, algorithm='RS256')
 

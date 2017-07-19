@@ -27,3 +27,4 @@ services:
       STRIPE_API_KEY:
       STRIPE_PUBLIC_KEY:
       SENTRY_DSN:
+      BUCKETS_LICENSE_KEY:

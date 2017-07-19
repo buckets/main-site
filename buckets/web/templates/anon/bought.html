@@ -2,16 +2,46 @@
 
 {% block navlinks %}{% endblock %}
 
+{% block extrahead %}
+<style>
+pre.license {
+  font-family: monospace;
+  border: 1px solid lightgrey;
+  padding: 1rem;
+  border-radius: 4px;
+  display: inline-block;
+  box-shadow: inset 0 1px 4px lightgrey;
+  margin: 1rem auto;
+}
+</style>
+{% endblock extrahead %}
+
 {% block content %}
 <div class="wrap spaced">
-    <p>
-        Thank you for your purchase!  Within the next few minutes, you should receive an email with your license.  If you don't, please contact me at hello@bucketsisbetter.com
-    </p>
-    <p>
-        Happy Budgeting!
-    </p>
-    <p>
-        - Matt
-    </p>
+  <p>Thank you for purchasing Buckets!</p>
+
+  <p>Below is your Buckets v1 License.  You should also receive an email with this information.  To use the license:</p>
+
+  <ol>
+    <li>Open the Buckets application (download at <a href="https://www.bucketsisbetter.com" target="_blank">www.bucketsisbetter.com</a>)</li>
+    <li>Click the "Trial Version" menu</li>
+    <li>Click "Enter License..."</li>
+    <li>Copy and paste the following license into the box</li>
+    <li>Click the button</li>
+  </ol>
+
+  <pre class="license">{{license}}</pre>
+
+  <p>
+    This license may be used on any number of computers belonging to you and your immediate family members living in your home.
+  </p>
+
+  <p>
+    Happy budgeting!
+  </p>
+
+  <p>
+    - Matt
+  </p>
 </div>
 {% endblock content %}

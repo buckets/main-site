@@ -1,4 +1,5 @@
 import * as Path from 'path'
+import * as log from 'electron-log'
 import { app, remote, shell, BrowserWindow, dialog } from 'electron'
 import { APP_ROOT } from './globals'
 import * as jwt from 'jsonwebtoken';
@@ -9,7 +10,7 @@ export function isRegistered():boolean {
   if (ISREGISTERED === null) {
     try {
       let contents = fs.readFileSync(licenseFilePath(), {encoding:'utf8'});
-      verifyLicense(contents);
+      verifyLicense(unformatLicense(contents));
       ISREGISTERED = true;
     } catch(err) {
       ISREGISTERED = false;
@@ -61,13 +62,16 @@ function unformatLicense(text:string):string {
     .replace('------------- START LICENSE ---------------', '')
     .replace('------------- END LICENSE -----------------', '')
     .replace(' ', '')
-    .replace(/\n/, '')
+    .replace(/[\n\s]+/g, '')
     .trim()
 }
 
 export function enterLicense(license:string) {
-  verifyLicense(unformatLicense(license));
-  fs.writeFileSync(licenseFilePath(), license.trim(), {encoding:'utf8'});
+  let unformatted = unformatLicense(license);
+  verifyLicense(unformatted);
+  let filepath = licenseFilePath();
+  fs.writeFileSync(filepath, license.trim(), {encoding:'utf8'});
+  log.info('Wrote license to', filepath);
   ISREGISTERED = true;
 }
 
@@ -111,7 +115,7 @@ export function eventuallyNag(minutes:number=10) {
 }
 
 function verifyLicense(license:string) {
-  jwt.verify(license.trim(), PUBKEY, {
+  jwt.verify(license, PUBKEY, {
     algorithms: ['RS256'],
   });
 }

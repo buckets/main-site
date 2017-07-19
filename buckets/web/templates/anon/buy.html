@@ -8,13 +8,18 @@
         <form action="/buy" method="POST">
           <script
             src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-image="{{ url_for('static', filename='img/main_logo.png') }}"
             data-key="{{ config.STRIPE_PUBLIC_KEY }}"
             data-amount="2000"
             data-name="Buckets"
-            data-panel-label="Panel Pay $20"
-            data-label="Label Pay $20"
-            data-description="Family budget app"
-            data-locale="auto">
+            data-label="Purchase License"
+            data-description="Family budgeting app"
+            data-zip-code="true"
+            data-billing-address="false"
+            data-locale="auto"
+            data-allow-remember-me="false"
+            data-bitcoin="true"
+          >
           </script>
         </form>
     </div>

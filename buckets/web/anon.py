@@ -112,6 +112,10 @@ def buy():
     if request.method == 'POST':
         token = request.form['stripeToken']
         email = request.form['stripeEmail']
+        token_type = request.form.get('stripeTokenType')
+        print('token type', token_type)
+        import sys
+        sys.stdout.flush()
 
         # generate the license
         try:
@@ -131,7 +135,10 @@ def buy():
                 statement_descriptor='Buckets Budgeting App',
                 receipt_email=email,
                 source=token)
-            flash('Your card was charged.')
+            if token_type == 'source_bitcoin':
+                flash('We got your bitcoins.')
+            else:
+                flash('Your card was charged.')
 
         except stripe.error.CardError as e:
             flash(e.message, 'error')
@@ -145,7 +152,7 @@ def buy():
                 subject='Buckets v1 License',
                 body='''Thank you for purchasing Buckets!
 
-Here is your Buckets v1 License.  To use it:
+Below is your Buckets v1 License.  To use it:
 
 1. Open the Buckets application (download at www.bucketsisbetter.com)
 2. Click the "Trial Version" menu
@@ -158,19 +165,15 @@ Here is your Buckets v1 License.  To use it:
 This license may be used on any number of computers belonging to you
 and your immediate family members living in your home.
 
-Again, thank you for you purchase!  I'm happy to help you with Buckets,
-(and to hear your complaints) so don't hesitate to reach out.
+Happy budgeting!
 
 - Matt
 '''.format(license=license))
         except Exception as e:
             flash("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error')
             raise
-        return redirect(url_for('.bought'))
+        return render_template('anon/bought.html', license=license)
 
 
     return render_template('anon/buy.html')
 
-@blue.route('/bought', methods=['GET'])
-def bought():
-    return render_template('anon/bought.html')
