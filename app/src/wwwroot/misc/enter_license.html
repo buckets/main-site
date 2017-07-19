@@ -57,13 +57,22 @@
     </p>
   </div>
 <script>
-const app = require('electron').remote.app;
-const {remote} = require('electron');
-const Path = require('path');
-const appPath = remote.app.getAppPath();
-const log = require('electron-log');
+const req = function() {
+  const {remote} = require('electron');
+  const Path = require('path');
+  const appPath = remote.app.getAppPath();
+  return (module) => {
+    if (module.startsWith('.') || module.startsWith('/')) {
+      return require(Path.resolve(appPath, module))
+    } else {
+      return require(module);
+    }
+  }
+}();
 
-const { enterLicense, openBuyPage } = require(Path.resolve(appPath, './src/mainprocess/drm.js'));
+const app = req('electron').remote.app;
+const log = req('electron-log');
+const { enterLicense, openBuyPage } = req('./src/mainprocess/drm.js');
 let state = 'init';
 let textarea_box = document.getElementById('license-input');
 let button = document.getElementById('submit-button');

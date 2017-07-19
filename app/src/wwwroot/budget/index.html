@@ -14,11 +14,21 @@
 <body>
   <div id="root">Loading...</div>
 <script>
+const req = function() {
+  const {remote} = require('electron');
+  const Path = require('path');
+  const appPath = remote.app.getAppPath();
+  return (module) => {
+    if (module.startsWith('.') || module.startsWith('/')) {
+      return require(Path.resolve(appPath, module))
+    } else {
+      return require(module);
+    }
+  }
+}();
+
 const hostname = window.location.hostname;
-let {remote} = require('electron');
-let path = require('path');
-let appPath = remote.app.getAppPath();
-const { start } = require(path.resolve(appPath, './src/wwwroot/budget/index.js'));
+const { start } = req('./src/wwwroot/budget/index.js');
 start(document.getElementById('root'), hostname);
 </script>
 </body>
