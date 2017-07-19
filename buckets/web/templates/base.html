@@ -22,6 +22,7 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   {% block myscripts %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+  {% block body %}
   <div id="about-to-expire">This window has been sitting idle for a while. To protect your information, you will soon be signed out.</div>
   {% block preheader %}{% endblock %}
   <div class="flash-messages">
@@ -110,5 +111,6 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   update_pin_expiration_notice();
   </script>
   {% endif %}
+  {% endblock body %}
 </body>
 </html>

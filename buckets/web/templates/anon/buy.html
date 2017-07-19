@@ -1,0 +1,31 @@
+{% extends 'base2.html' %}
+
+{% block navlinks %}{% endblock %}
+
+{% block content %}
+<div class="wrap spaced">
+    <div style="text-align: center;">
+        <form action="/buy" method="POST">
+          <script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="{{ config.STRIPE_PUBLIC_KEY }}"
+            data-amount="2000"
+            data-name="Buckets"
+            data-panel-label="Panel Pay $20"
+            data-label="Label Pay $20"
+            data-description="Family budget app"
+            data-locale="auto">
+          </script>
+        </form>
+    </div>
+    <p>
+        For a one-time $20 payment, you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.
+    </p>
+    <p>
+        If you've lost your license, email me at hello@bucketsisbetter.com
+    </p>
+    <p>
+        - Matt
+    </p>
+</div>
+{% endblock content %}

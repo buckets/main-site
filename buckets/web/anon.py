@@ -1,5 +1,7 @@
 import structlog
 import time
+import stripe
+import os
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, session, flash, g
@@ -10,6 +12,7 @@ from buckets.billing import BillingManagement
 from buckets.error import NotFound, DuplicateRegistration, BadValue
 from buckets.web.util import bump_pin_expiration, clear_pin_expiration
 from buckets.web.util import run_async
+from buckets.drm import createLicense, formatLicense
 
 blue = Blueprint('anon', __name__)
 
@@ -100,3 +103,74 @@ def signout():
     flash('You have been completely signed out')
     return redirect('/')
 
+
+#----------------------------------------------------
+# application
+#----------------------------------------------------
+@blue.route('/buy', methods=['GET', 'POST'])
+def buy():
+    if request.method == 'POST':
+        token = request.form['stripeToken']
+        email = request.form['stripeEmail']
+
+        # generate the license
+        try:
+            license = formatLicense(createLicense(
+                email=email,
+                private_key=os.environ['BUCKETS_LICENSE_KEY']))
+        except Exception as e:
+            flash('Error generating license.  Your card was not charged.', 'error')
+            raise
+
+        # charge the card
+        try:
+            stripe.Charge.create(
+                amount=2000,
+                currency='usd',
+                description='Buckets v1 License',
+                statement_descriptor='Buckets Budgeting App',
+                receipt_email=email,
+                source=token)
+            flash('Your card was charged.')
+
+        except stripe.error.CardError as e:
+            flash(e.message, 'error')
+        except Exception as e:
+            raise
+
+        # email the license
+        try:
+            current_app.mailer.sendPlain(email,
+                ('Buckets', 'hello@bucketsisbetter.com'),
+                subject='Buckets v1 License',
+                body='''Thank you for purchasing Buckets!
+
+Here is your Buckets v1 License.  To use it:
+
+1. Open the Buckets application (download at www.bucketsisbetter.com)
+2. Click the "Trial Version" menu
+3. Click "Enter License..."
+4. Copy and paste the following license into the box
+5. Click the button
+
+{license}
+
+This license may be used on any number of computers belonging to you
+and your immediate family members living in your home.
+
+Again, thank you for you purchase!  I'm happy to help you with Buckets,
+(and to hear your complaints) so don't hesitate to reach out.
+
+- Matt
+'''.format(license=license))
+        except Exception as e:
+            flash("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error')
+            raise
+        return redirect(url_for('.bought'))
+
+
+    return render_template('anon/buy.html')
+
+@blue.route('/bought', methods=['GET'])
+def bought():
+    return render_template('anon/bought.html')

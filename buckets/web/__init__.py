@@ -76,6 +76,7 @@ def configureApp(engine, flask_secret_key,
     else:
         logger.info('Stripe: PRODUCTION')
     stripe.api_key = stripe_api_key
+    stripe.api_version = '2016-07-06'
     try:
         BillingManagement(None, stripe).sync_plans_with_stripe()
     except Exception as e:

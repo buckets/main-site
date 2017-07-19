@@ -49,8 +49,6 @@ class BillingManagement(object):
     def __init__(self, engine, stripe):
         self.engine = engine
         self.stripe = stripe
-        if stripe:
-            stripe.api_version = '2016-07-06'
 
     def sync_plans_with_stripe(self):
         """
