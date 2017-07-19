@@ -59,5 +59,7 @@ app.on('ready', function() {
   BudgetFile.openFile('/tmp/test.buckets');
 });
 app.on('window-all-closed', () => {
-  app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });

@@ -58,9 +58,12 @@
   </div>
 <script>
 const app = require('electron').remote.app;
-const path = require('path');
-const {enterLicense, openBuyPage} = require(path.resolve('./src/mainprocess/drm.js'));
+const {remote} = require('electron');
+const Path = require('path');
+const appPath = remote.app.getAppPath();
 const log = require('electron-log');
+
+const { enterLicense, openBuyPage } = require(Path.resolve(appPath, './src/mainprocess/drm.js'));
 let state = 'init';
 let textarea_box = document.getElementById('license-input');
 let button = document.getElementById('submit-button');
