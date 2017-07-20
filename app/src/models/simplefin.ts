@@ -93,7 +93,7 @@ export function sleep(milliseconds:number):Promise<any> {
 
 
 export class Syncer extends EventEmitter {
-  private time_range:number = 1;
+  private time_range:number = 7;
   private time_unit:string = 'day';
   private delay = 1000;
   private max_delay = 60 * 1000;
@@ -242,7 +242,6 @@ export class SimpleFINStore {
     let promises = connections.map(async conn => {
       let got_data = false;
       let accountset = await this.client.fetchAccounts(conn.access_token, since, enddate);
-      log.info('accountset', accountset);
       errors = errors.concat(accountset.errors);
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id

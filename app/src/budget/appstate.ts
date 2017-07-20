@@ -195,18 +195,15 @@ export class StateManager extends EventEmitter {
 
     store.connections.syncer
     .on('start', ({sync_start, sync_end}) => {
-      console.log('syncing started', sync_start.format(), sync_end.format());
       makeToast(`Syncing transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')}`);
       this.appstate.syncing = true;
       this.signalChange();
     })
     .on('fetching-range', ({start, end}) => {
-      console.log('working on range', start.format(), end.format());
-      this.appstate.sync_message = start.format('ll');
+      this.appstate.sync_message = `week of ${start.format('ll')}`;
       this.signalChange();
     })
     .on('done', ({sync_start, sync_end, trans_count, errors, cancelled}) => {
-      console.log('sync done', trans_count, errors);
       if (cancelled) {
         makeToast(`Synced ${trans_count} transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')} before being cancelled.`)
       } else {

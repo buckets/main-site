@@ -1,11 +1,24 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import * as moment from 'moment'
 import { shell } from 'electron'
 import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
+
+
+function startDefaultSync(appstate:AppState) {
+  let range = appstate.viewDateRange;
+  let since = range.onOrAfter.subtract(7, 'days');
+  let enddate = range.before.add(7, 'days');
+  let tomorrow = moment.utc().add(1, 'day')
+  if (enddate.isAfter(tomorrow)) {
+    enddate = tomorrow;
+  }
+  manager.store.connections.syncer.start(since, enddate);
+}
 
 
 export class SyncWidget extends React.Component<{
@@ -29,10 +42,7 @@ export class SyncWidget extends React.Component<{
         href="#"
         onClick={ev => {
           ev.preventDefault();
-          let range = appstate.viewDateRange;
-          let since = range.onOrAfter.subtract(7, 'days');
-          let enddate = range.before.add(7, 'days');
-          manager.store.connections.syncer.start(since, enddate);
+          startDefaultSync(appstate);
           return false;
         }}>
         <span>
@@ -121,7 +131,7 @@ export class ConnectionsPage extends React.Component<{
                 if (appstate.syncing) {
                   manager.store.connections.syncer.stop();
                 } else {
-                  this.syncTransactions();
+                  startDefaultSync(appstate);
                 }
               }}
               disabled={!conns}><span className={cx("fa fa-refresh", {
@@ -159,13 +169,7 @@ export class ConnectionsPage extends React.Component<{
       connecting: false,
     })
     makeToast('Connection saved!');
-    return this.syncTransactions();
-  }
-  syncTransactions = async () => {
-    let range = this.props.appstate.viewDateRange;
-    let since = range.onOrAfter.subtract(7, 'days');
-    let enddate = range.before.add(7, 'days');
-    manager.store.connections.syncer.start(since, enddate);
+    return startDefaultSync(this.props.appstate);
   }
 }
 

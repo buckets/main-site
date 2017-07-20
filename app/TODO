@@ -8,7 +8,6 @@ Need:
    ☐ Double click to open
    ☐ Icon
  ☐ Only nag if the window is focused
- ☐ Add gentle-on-the-servers syncing (so keep track of dates that have been synced) that is faster than the current one.
  
 
 Want:
@@ -21,6 +20,7 @@ Want:
  ☐ Import CSV
  ☐ Export CSV
  ☐ Open Recent Files...
+ ☐ Automatically sync so the users don't have to
  ☐ Mark transactions as having come from import or not
    ☐ Make imported not editable, maybe?  No, probably not.
  ☐ Just make routing.tsx global instead of using react's context system
