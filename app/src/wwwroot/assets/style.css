@@ -924,3 +924,12 @@ table.props th {
   outline: none;
   border-color: var(--blue);
 }
+
+
+.sync-widget {
+
+}
+.sync-widget .details {
+  font-size: .8rem;
+  padding-left: 2rem;
+}

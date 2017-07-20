@@ -7,7 +7,7 @@ import {Renderer} from './render'
 import {AccountsPage} from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
-import { ConnectionsPage } from './connections'
+import { ConnectionsPage, SyncWidget } from './connections'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
@@ -105,6 +105,7 @@ class Navbar extends React.Component<{
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
         </div>
         <div>
+          <SyncWidget appstate={appstate} />
           {trial_version}
         </div>
       </div>)

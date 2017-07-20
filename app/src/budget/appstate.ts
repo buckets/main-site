@@ -8,6 +8,7 @@ import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
+import { makeToast } from './toast'
 
 interface IAppState {
   accounts: {
@@ -35,6 +36,9 @@ interface IAppState {
   bucket_balances: Balances;
   month: number;
   year: number;
+
+  syncing: boolean;
+  sync_message: string;
 }
 
 interface IComputedAppState {
@@ -83,6 +87,9 @@ export class AppState implements IAppState, IComputedAppState {
 
   unkicked_buckets: Bucket[] = [];
   kicked_buckets: Bucket[] = [];
+
+  syncing:boolean = false;
+  sync_message:string = '';
 
   get defaultPostingDate() {
     let today = moment();
@@ -185,6 +192,32 @@ export class StateManager extends EventEmitter {
   }
   setStore(store: IStore) {
     this.store = store;
+
+    store.connections.syncer
+    .on('start', ({sync_start, sync_end}) => {
+      console.log('syncing started', sync_start.format(), sync_end.format());
+      makeToast(`Syncing transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')}`);
+      this.appstate.syncing = true;
+      this.signalChange();
+    })
+    .on('fetching-range', ({start, end}) => {
+      console.log('working on range', start.format(), end.format());
+      this.appstate.sync_message = start.format('ll');
+      this.signalChange();
+    })
+    .on('done', ({sync_start, sync_end, trans_count, errors, cancelled}) => {
+      console.log('sync done', trans_count, errors);
+      if (cancelled) {
+        makeToast(`Synced ${trans_count} transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')} before being cancelled.`)
+      } else {
+        makeToast(`Synced ${trans_count} transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')}`);
+      }
+      errors.forEach(err => {
+        makeToast(err, {className:'error'});
+      })
+      this.appstate.syncing = false;
+      this.signalChange();
+    })
   }
   async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
     this.queue.push(ev);

@@ -1,10 +1,51 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import * as cx from 'classnames'
 import { shell } from 'electron'
-import { makeToast, makeToastDuring } from './toast'
+import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
+
+
+export class SyncWidget extends React.Component<{
+  appstate: AppState;
+}, {}> {
+  render() {
+    let label = 'Sync';
+    let { appstate } = this.props;
+    let { syncing, sync_message } = appstate;
+    let details;
+    if (syncing) {
+      label = 'Syncing...';
+      if (sync_message) {
+        details = <div className="details">
+          {sync_message}
+        </div>
+      }
+    }
+    return <div className="sync-widget">
+      <a
+        href="#"
+        onClick={ev => {
+          ev.preventDefault();
+          let range = appstate.viewDateRange;
+          let since = range.onOrAfter.subtract(7, 'days');
+          let enddate = range.before.add(7, 'days');
+          manager.store.connections.syncer.start(since, enddate);
+          return false;
+        }}>
+        <span>
+          <span
+            className={cx("fa fa-refresh", {
+              'fa-spin': syncing,
+            })}/> {label}
+        </span>
+      </a>
+      {details}
+    </div>
+  }
+}
 
 export class ConnectionsPage extends React.Component<{
   appstate: AppState;
@@ -75,7 +116,17 @@ export class ConnectionsPage extends React.Component<{
       <div className="rows">
         <div className="subheader">
           <div>
-            <button onClick={this.syncTransactions} disabled={!conns}><span className="fa fa-refresh"/> Sync</button>
+            <button
+              onClick={() => {
+                if (appstate.syncing) {
+                  manager.store.connections.syncer.stop();
+                } else {
+                  this.syncTransactions();
+                }
+              }}
+              disabled={!conns}><span className={cx("fa fa-refresh", {
+                'fa-spin': appstate.syncing,
+              })}/> {appstate.syncing ? 'Cancel sync' : 'Sync'}</button>
             <button onClick={this.startConnecting}>Connect to bank</button>
           </div>
           <div>
@@ -112,22 +163,9 @@ export class ConnectionsPage extends React.Component<{
   }
   syncTransactions = async () => {
     let range = this.props.appstate.viewDateRange;
-    let since = range.onOrAfter.subtract(1, 'month');
-    let enddate = range.before.add(10, 'days');
-    console.log('since', since.format(), enddate.format());
-    let result = await makeToastDuring({
-      message: `Syncing from ${since.format("ll")} to ${enddate.format("ll")}...`,
-      success: (x=>{return `Synced ${x.transactions.length} transactions (${since.format("ll")} to ${enddate.format("ll")})`}),
-      error: 'Error doing sync',
-    }, () => {
-      return manager.store.connections.marchingSync(since, enddate);
-    })
-    console.log('result', result);
-    if (result.errors) {
-      result.errors.forEach(err => {
-        makeToast(err, {className: 'error'})
-      });
-    }
+    let since = range.onOrAfter.subtract(7, 'days');
+    let enddate = range.before.add(7, 'days');
+    manager.store.connections.syncer.start(since, enddate);
   }
 }
 
