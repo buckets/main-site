@@ -7,7 +7,6 @@ Need:
  ☐ Associate .buckets extension
    ☐ Double click to open
    ☐ Icon
- ☐ Only nag if the window is focused
  
 
 Want:
@@ -21,20 +20,21 @@ Want:
  ☐ Export CSV
  ☐ Open Recent Files...
  ☐ Automatically sync so the users don't have to
- ☐ Mark transactions as having come from import or not
-   ☐ Make imported not editable, maybe?  No, probably not.
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
    ☐ Or redirect.
- ☐ Delete accounts
+ ☐ Delete (retire) accounts
  ☐ Show only debt buckets
  ☐ Show Income/expenses average over the last 3 months
- ☐ A pop up calculator
+ ☐ Add a pop up calculator
  ☐ Alert that there's uncategorized transactions in previous months.
+ ☐ Only nag if the window is focused
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Mark transactions as having come from import or not @done (17-07-20 15:42) @project(Want)
+ ✔ Make imported not editable, maybe?  No, probably not. @done (17-07-20 15:42) @project(Want)
  ✔ When syncing, display what dates you're attempting to sync between, like "Syncing transactions for May 1 - Jun 30, 2017" @done (17-07-19 16:26) @project(Need)
  ✔ Including making a way to pay for it. @done (17-07-19 16:16) @project(Need)
  ✔ DRM @done (17-07-19 16:16) @project(Need)

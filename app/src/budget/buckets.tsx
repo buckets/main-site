@@ -11,17 +11,9 @@ import { onKeys, DebouncedInput, MonthSelector } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 import { makeToast } from './toast'
+import { pageY } from '../position'
 
 const NOGROUP = -1;
-
-function pageY(elem):number {
-  let result = elem.offsetTop;
-  while (elem.offsetParent) {
-    elem = elem.offsetParent;
-    result += elem.offsetTop;
-  }
-  return result;
-}
 
 function overTopOrBottom(ev):'top'|'bottom' {
   let yoffset = ev.pageY - pageY(ev.currentTarget);

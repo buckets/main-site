@@ -454,6 +454,17 @@ table.ledger tr.action-row td {
   font-weight: bold;
 }
 
+/* Transactions */
+.fa.from-fi {
+  color: var(--lighter-grey);
+}
+.fa.from-fi:hover {
+  color: var(--yellow);
+}
+.transaction-list td,
+.transaction-list th {
+  max-width: 40%;
+}
 /* Categories */
 .categorizer {
 
@@ -672,6 +683,7 @@ button[disabled]:hover {
   border-color: var(--lighter-grey);
   cursor: initial;
 }
+
 
 
 /* Rain */
@@ -932,4 +944,47 @@ table.props th {
 .sync-widget .details {
   font-size: .8rem;
   padding-left: 2rem;
+}
+
+
+/* tooltip */
+.help {
+  display: inline-block;
+}
+.help .note-wrap {
+  position: relative;
+  display: inline-block;
+  height: 0;
+  width: 0;
+}
+.help .note-wrap .note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--blackish);
+  color: white;
+  padding: .3rem .5rem;
+  border-radius: 2px;
+  box-shadow: 1px 1px 5px var(--grey);
+  user-select: none;
+  pointer-events: none;
+  font-size: .8rem;
+}
+.tooltip {
+  opacity: 0;
+  position: fixed;
+  top: 100px;
+  left: 100px;
+  background-color: var(--blackish);
+  color: white;
+  padding: .3rem .5rem;
+  border-radius: 2px;
+  box-shadow: 1px 1px 5px var(--grey);
+  user-select: none;
+  pointer-events: none;
+  font-size: .8rem;
+  transition: opacity .2s;
+}
+.tooltip.showing {
+  opacity: 1;
 }

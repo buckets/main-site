@@ -93,6 +93,10 @@ class Navbar extends React.Component<{
       })
       buckets_badge = <div className={cls}><span className="fa fa-tint"/></div>
     }
+    let sync_widget;
+    if (_.values(appstate.connections).length) {
+      sync_widget = <SyncWidget appstate={appstate} />
+    }
     return (
       <div className="nav">
         <div>
@@ -105,7 +109,7 @@ class Navbar extends React.Component<{
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
         </div>
         <div>
-          <SyncWidget appstate={appstate} />
+          {sync_widget}
           {trial_version}
         </div>
       </div>)

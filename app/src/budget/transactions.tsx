@@ -7,6 +7,7 @@ import {manager, AppState} from './appstate'
 import {Account, Category, Transaction} from '../models/account'
 import {Date, DateInput, ensureUTCMoment} from '../time'
 import {Money, MoneyInput} from '../money'
+import { Help } from '../tooltip'
 
 
 interface TransactionPageProps {
@@ -156,9 +157,13 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
             }} />
         </td>
       }
+      let source_icon;
+      if (trans.fi_id) {
+        source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>This symbol means the transaction came from an import/sync</Help>
+      }
       return <tr key={trans.id}>
         {select_cell}
-        <td className="nobr"><Date value={trans.posted} /></td>
+        <td className="nobr">{source_icon}<Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
@@ -167,7 +172,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           appstate={appstate} /></td>
       </tr>
     })
-    return <table className="ledger">
+    return <table className="ledger transaction-list">
       <thead>
         <tr>
           {onSelectChange ? <th></th> : null}

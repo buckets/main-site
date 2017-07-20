@@ -106,7 +106,7 @@ Would you like to purchase a license now?`,
   }
 }
 
-export function eventuallyNag(minutes:number=10) {
+export function eventuallyNag(minutes:number=15) {
   if (!isRegistered()) {
     setTimeout(() => {
       nag();
