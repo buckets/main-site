@@ -9,6 +9,7 @@ if [ -z "$GH_TOKEN" ]; then
 fi
 
 # This will build, package and upload the app to GitHub.
+tsc
 
 # macOS
 node_modules/.bin/build --mac -p always

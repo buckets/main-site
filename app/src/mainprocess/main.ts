@@ -40,15 +40,16 @@ app.on('ready', () => {
 
 // A file was double-clicked
 let openfirst;
-app.on('open-file', function(event, path) {
-  if (app.isReady()) {
-    BudgetFile.openFile(path);
-  } else {
-    openfirst = path;
-  }
-  event.preventDefault();
+app.on('will-finish-launching', () => {
+  app.on('open-file', function(event, path) {
+    if (app.isReady()) {
+      BudgetFile.openFile(path);
+    } else {
+      openfirst = path;
+    }
+    event.preventDefault();
+  })  
 })
-
 
 app.on('ready', function() {
   // Create the Menu
@@ -69,7 +70,7 @@ app.on('ready', function() {
   // For now, open a standard file for testing
   if (openfirst) {
     BudgetFile.openFile(openfirst);
-  } else {
+  } else if (process.env.DEBUG) {
     BudgetFile.openFile('/tmp/test.buckets');  
   }
 });
