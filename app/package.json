@@ -61,6 +61,13 @@
         "deb"
       ]
     },
+    "fileAssociations": [
+      {
+        "ext": "buckets",
+        "role": "Editor",
+        "icon": "build/doc.icns"
+      }
+    ],
     "publish": [
       {
         "provider": "github",

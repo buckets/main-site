@@ -38,6 +38,17 @@ app.on('ready', () => {
   })
 })
 
+// A file was double-clicked
+let openfirst;
+app.on('open-file', function(event, path) {
+  if (app.isReady()) {
+    BudgetFile.openFile(path);
+  } else {
+    openfirst = path;
+  }
+  event.preventDefault();
+})
+
 
 app.on('ready', function() {
   // Create the Menu
@@ -56,7 +67,11 @@ app.on('ready', function() {
   // new BrowserWindow({width: 400, height: 300});
 
   // For now, open a standard file for testing
-  BudgetFile.openFile('/tmp/test.buckets');
+  if (openfirst) {
+    BudgetFile.openFile(openfirst);
+  } else {
+    BudgetFile.openFile('/tmp/test.buckets');  
+  }
 });
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
