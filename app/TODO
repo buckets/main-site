@@ -4,15 +4,25 @@ Need:
  ☐ There needs to be a way to submit bugs
  ☐ There needs to be a way to submit log files
  ☐ Allow for goals with no deposit amount.
+ ☐ Associate .buckets extension
+   ☐ Double click to open
+   ☐ Icon
+ ☐ Only nag if the window is focused
+ ☐ Add gentle-on-the-servers syncing (so keep track of dates that have been synced) that is faster than the current one.
  
 
 Want:
  ☐ Import OFX
  ☐ Delete groups
+ ☐ Label buckets window so you know which file is which
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
  ☐ Import CSV
+ ☐ Export CSV
+ ☐ Open Recent Files...
+ ☐ Mark transactions as having come from import or not
+   ☐ Make imported not editable, maybe?  No, probably not.
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
    ☐ Or redirect.

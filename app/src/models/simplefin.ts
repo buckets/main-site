@@ -82,6 +82,14 @@ export function parseTimestamp(x:number):moment.Moment {
   return moment.unix(x);
 }
 
+function sleep(milliseconds:number):Promise<any> {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(null);
+    }, milliseconds);
+  })
+}
+
 
 export class SimpleFINStore {
   private client:SimpleFINClient;
@@ -97,7 +105,46 @@ export class SimpleFINStore {
   async listConnections():Promise<Connection[]> {
     return this.store.listObjects(Connection);
   }
-  async sync(since?:moment.Moment, enddate?:moment.Moment):Promise<{
+  async marchingSync(since:moment.Moment, enddate:moment.Moment):Promise<{
+    transactions: Transaction[],
+    unknowns: UnknownAccount[],
+    errors: string[],
+  }> {
+    let transactions:Transaction[] = [];
+    let unknowns:UnknownAccount[] = [];
+    let errors:string[] = [];
+    let delay = 3000;
+    let err_delay = 30 * 1000;
+    since = ensureUTCMoment(since);
+    enddate = ensureUTCMoment(enddate);
+    let window_start = since.clone();
+    let window_end = since.clone().add(1, 'day');
+    if (window_end.isAfter(enddate)) {
+      window_end = enddate;
+    }
+    while (window_end.isSameOrBefore(enddate)) {
+      log.info(`fetching ${window_start.format()} to ${window_end.format()}`);
+      try {
+        let result = await this.sync(window_start, window_end)  
+        transactions = transactions.concat(result.transactions)
+        unknowns = unknowns.concat(result.unknowns);
+        errors = errors.concat(result.errors);
+      } catch(err) {
+        log.info(`Error while syncing; sleeping for ${err_delay}: ${err}`)
+        await sleep(err_delay);
+        continue;
+      }
+      await sleep(delay);
+      window_start.add(1, 'day');
+      window_end.add(1, 'day');
+    }
+    return {
+      transactions,
+      unknowns,
+      errors,
+    }
+  }
+  async sync(since:moment.Moment, enddate:moment.Moment):Promise<{
     transactions: Transaction[],
     unknowns: UnknownAccount[],
     errors: string[],
@@ -203,23 +250,15 @@ class SimpleFINClient {
     }
     return access_url;
   }
-  async fetchAccounts(access_url:string, since?:Timestamp, enddate?:Timestamp):Promise<SFIN.AccountSet> {
+  async fetchAccounts(access_url:string, since:Timestamp, enddate:Timestamp):Promise<SFIN.AccountSet> {
     let result;
     let uri = `${access_url}/accounts`;
     try {
-      let options:req.Options = {uri};
-      if (since) {
-        since = ensureUTCMoment(since);
-        options.qs = {
-          'start-date': since.unix(),
-        }
-      }
-      if (enddate) {
-        enddate = ensureUTCMoment(enddate);
-        options.qs = {
-          'end-date': enddate.unix(),
-        }
-      }
+      let options:req.Options = {uri, qs: {}};
+      since = ensureUTCMoment(since);
+      enddate = ensureUTCMoment(enddate);
+      options.qs['start-date'] = since.unix();
+      options.qs['end-date'] = enddate.unix();
       result = await req(options);
     } catch(err) {
       log.error(err);
@@ -240,7 +279,7 @@ if (require.main === module) {
     let client = new SimpleFINClient();
     let token = await client.consumeToken('aHR0cHM6Ly9icmlkZ2Uuc2ltcGxlZmluLm9yZy9zaW1wbGVmaW4vY2xhaW0vZGVtbw==')
     console.log('token', token);
-    let data = await client.fetchAccounts(token);
+    let data = await client.fetchAccounts(token, moment().subtract(30, 'days'), moment().add(1, 'day'));
     console.log('data', data);
   }
   test()

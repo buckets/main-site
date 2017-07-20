@@ -120,7 +120,7 @@ export class ConnectionsPage extends React.Component<{
       success: (x=>{return `Synced ${x.transactions.length} transactions (${since.format("ll")} to ${enddate.format("ll")})`}),
       error: 'Error doing sync',
     }, () => {
-      return manager.store.connections.sync(since, enddate);
+      return manager.store.connections.marchingSync(since, enddate);
     })
     console.log('result', result);
     if (result.errors) {
