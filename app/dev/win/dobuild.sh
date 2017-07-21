@@ -9,24 +9,42 @@ fi
 
 WIN_USER='IEUser'
 WIN_PASS='Passw0rd!'
+ADMIN_USER='Administrator'
+ADMIN_PASS='admin'
 THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
 VMNAME=${2:-$(${THISDIR}/winvm.sh name)}
+NODE_BIN_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-win-x64.zip"
+NODE_ZIP="node-v8.2.1-win-x64.zip"
+YARN_MSI_URL="https://yarnpkg.com/latest.msi"
+NODE_MSI_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-x86.msi"
 
 echo "BUILD_DIR=$BUILD_DIR"
 echo "SCRIPT_DIR=$THISDIR"
 echo "VMNAME=$VMNAME"
 
-${THISDIR}/winvm.sh up "$VMNAME"
+${THISDIR}/winvm.sh create "$VMNAME"
+${THISDIR}/winvm.sh stop "$VMNAME"
+
+TMPDIR="${THISDIR}/tmp"
+mkdir -p "$TMPDIR"
 
 SHARE_NAME="project"
-
-
 echo "Sharing $BUILD_DIR as $SHARE_NAME"
-# vboxmanage sharedfolder remove "$VMNAME" \
-#     --name "$SHARE_NAME" || echo 'Warning: failed to remove old share'
-# vboxmanage sharedfolder add "$VMNAME" \
-#     --name "$SHARE_NAME" \
-#     --hostpath "$BUILD_DIR"
+
+mkshare() {
+    vboxmanage sharedfolder add "$VMNAME" \
+        --name "$SHARE_NAME" \
+        --hostpath "$BUILD_DIR"
+}
+OUTPUT="$(mkshare 2>&1)"
+if echo "$OUTPUT" | grep 'already exists'; then
+    echo "Removing existing share"
+    vboxmanage sharedfolder remove "$VMNAME" \
+        --name "$SHARE_NAME"
+    mkshare
+fi
+
+${THISDIR}/winvm.sh up "$VMNAME"
 
 guestcontrol() {
     vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $*
@@ -34,13 +52,75 @@ guestcontrol() {
 cmd() {
     vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
 }
-run() {
-    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- $*
+admincmd() {
+    vboxmanage guestcontrol "$VMNAME" run --username "$ADMIN_USER" --password "$ADMIN_PASS" -- cmd.exe /c $*
 }
-set -x
+
+
 cmd echo hello
-cmd net use x: /delete || echo 'Warning: Failed to unmount'
-cmd net use x: "\\\\vboxsvr\\${SHARE_NAME}"
-cmd dir 'x:\'
-# guestcontrol copyto --recursive --target-directory '/foobar/' "${BUILD_DIR}"
+
+echo
+echo "Getting shared directory..."
+while true; do
+    set +e
+    echo "net use ..."
+    OUTPUT="$(cmd net use x: "\\\\vboxsvr\\${SHARE_NAME}" 2>&1)"
+    echo $OUTPUT
+    if echo "$OUTPUT" | grep "local device name is already in use"; then
+        echo 'unmounting x:'
+        cmd net use x: /delete
+    elif echo "$OUTPUT" | grep "The network name cannot be found"; then
+        echo 'sleeping'
+        sleep 1
+    elif echo "$OUTPUT" | grep "completed successfully"; then
+        echo 'OK'
+        break
+    else
+        echo "Unknown response: $OUTPUT"
+        exit 1
+    fi
+done
+
+
+set -e
+
+echo
+echo "Getting nodejs ready"
+if [ ! -e "${TMPDIR}/nodejs/node.exe" ]; then
+    if [ ! -e "${TMPDIR}/node.zip" ]; then
+        curl "${NODE_BIN_URL}" -o "${TMPDIR}/node.zip"
+        mkdir -p "${TMPDIR}/nodeextract"
+        unzip "${TMPDIR}/node.zip" -d "${TMPDIR}/nodeextract/"
+        rm -r "${TMPDIR}/nodejs" || echo 'Does not exist'
+        mv "${TMPDIR}/nodeextract/$(ls ${TMPDIR}/nodeextract/)" "${TMPDIR}/nodejs"
+        rmdir "${TMPDIR}/nodeextract"
+    fi
+fi
+
+echo
+echo "Getting node.msi"
+if [ ! -e "${TMPDIR}/node.msi" ]; then
+    curl -L "${NODE_MSI_URL}" -o "${TMPDIR}/node.msi"
+fi
+
+echo
+echo "Getting yarn.msi"
+if [ ! -e "${TMPDIR}/yarn.msi" ]; then
+    curl -L "${YARN_MSI_URL}" -o "${TMPDIR}/yarn.msi"
+fi
+
+echo
+echo "Installing node and yarn..."
+guestcontrol mkdir '/foobar/'
+cmd 'copy x:\dev\win\win_installnode.bat c:\foobar\win_installnode.bat'
+admincmd 'c:\foobar\win_installnode.bat'
+
+echo
+echo "Build the app..."
+cmd 'x:\dev\win\win_build.bat'
+# cmd "net use x: \\\\vboxsvr\\${SHARE_NAME} ; wmic logicaldisk get name"
+# cmd 'x:\dev\win\win_installnode.bat'
+
+# guestcontrol mkdir '/foobar/'
+# guestcontrol copyto --follow --target-directory '/foobar/' "${BUILD_DIR}"
 # cmd dir 'C:\foobar\'

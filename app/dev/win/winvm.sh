@@ -12,6 +12,9 @@ OVA_PATH="${ISO_DIR}/${OVA_FILENAME}"
 ZIP_FILENAME="IE11.Win7.For.Windows.VirtualBox.zip"
 ZIP_PATH="${ISO_DIR}/${ZIP_FILENAME}"
 
+YARN_MSI_URL="https://yarnpkg.com/latest.msi"
+NODE_MSI_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-x86.msi"
+
 GUEST_ADDITIONS_ISO=${GUEST_ADDITIONS_ISO:-/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso}
 HOST_ONLY_NETWORK="vboxnet0"
 
@@ -52,8 +55,6 @@ do_destroy() {
 do_create() {
     if vboxmanage showvminfo "$VMNAME" >/dev/null 2>/dev/null; then
         echo "$VMNAME already exists"
-        echo "To delete it, do"
-        echo "  $0 destroy"
     else
         if [ ! -e "$OVA_PATH" ]; then
             echo "Need to get $OVA_PATH"
@@ -70,16 +71,16 @@ do_create() {
 
         echo "Importing ${OVA_FILENAME} -> ${VMNAME}"
         vboxmanage import "$OVA_PATH" --vsys 0 --vmname "$VMNAME"
-
-        ensure_off
-
-        # Configure network
-        vboxmanage modifyvm "$VMNAME" \
-            --nic2 hostonly \
-            --hostonlyadapter2 "$HOST_ONLY_NETWORK"
-
-        make_snapshot genesis
     fi
+    # ensure_off
+
+    # # Configure network
+    # vboxmanage modifyvm "$VMNAME" \
+    #     --nic2 hostonly \
+    #     --hostonlyadapter2 "$HOST_ONLY_NETWORK"
+
+    ensure_snapshot genesis
+    ensure_snapshot admin genesis 
 }
 
 do_start() {
@@ -105,7 +106,7 @@ ensure_off() {
     i="0"
     while ! vboxmanage showvminfo "$VMNAME" | grep "powered off"; do
         let i="$i + 1"
-        if [ "$i" -eq 120 ]; then
+        if [ "$i" -eq 30 ]; then
             vboxmanage controlvm "$VMNAME" poweroff
         fi
         sleep 1
@@ -126,7 +127,7 @@ ensure_booted() {
     done
 }
 
-make_snapshot() {
+ensure_snapshot() {
     SNAPNAME=$1
     BASE_SNAPSHOT=$2
     if vboxmanage snapshot "$VMNAME" showvminfo "$SNAPNAME" >/dev/null 2>/dev/null; then
@@ -134,12 +135,14 @@ make_snapshot() {
     else
         if [ ! -z "$BASE_SNAPSHOT" ]; then
             echo "Restoring to $BASE_SNAPSHOT"
+            ensure_off
             vboxmanage snapshot "$VMNAME" restore "$BASE_SNAPSHOT"
         fi
+        echo
         echo "Creating $SNAPNAME snapshot..."
 
         vboxmanage startvm "$VMNAME" --type headless
-        if ! make_snapshot_${SNAPNAME}; then
+        if ! snapshot_${SNAPNAME}; then
             echo "Error making snapshot :("
             exit 1
         fi
@@ -147,11 +150,46 @@ make_snapshot() {
         ensure_off
         vboxmanage snapshot "$VMNAME" \
             take "$SNAPNAME"
+        echo "Created $SNAPNAME snapshot"
+        echo
     fi
 }
 
-make_snapshot_genesis() {
+snapshot_genesis() {
     echo "Doing nothing for the genesis snapshot :)"
+}
+
+snapshot_admin() {
+    ensure_booted
+    echo
+    echo "Please set the Administrator's password to 'admin' using the GUI"
+    echo "1. Click Start"
+    echo "2. Right click 'Computer'"
+    echo "3. Click 'Manage'"
+    echo "4. Expand 'Local Users and Groups'"
+    echo "5. Click 'Users' folder"
+    echo "6. Right click 'Administrator'"
+    echo "7. Click 'Set Password...'"
+    echo
+    echo "    set the password to 'admin'"
+    echo
+    echo "Also enable the user:"
+    echo "1. Right click 'Administrator'"
+    echo "2. Click 'Properties'"
+    echo "3. Uncheck 'Account is disabled'"
+    echo "4. Click 'OK'"
+
+    while true; do
+        if vboxmanage guestcontrol "$VMNAME" --username Administrator --password 'admin' run cmd.exe /c echo hey 2>/dev/null | grep hey; then
+            break
+        fi
+        sleep 2;
+    done
+}
+
+share_directory() {
+    HOST_DIR=$1
+
 }
 
 do_${CMD}

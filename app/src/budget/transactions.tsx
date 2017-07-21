@@ -333,7 +333,6 @@ class Categorizer extends React.Component<CategorizerProps, {
   open: boolean;
   did_focus: boolean;
 }> {
-  private first_select = null;
   constructor(props) {
     super(props)
     this.state = {
