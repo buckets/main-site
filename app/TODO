@@ -4,9 +4,6 @@ Need:
  ☐ There needs to be a way to submit bugs
  ☐ There needs to be a way to submit log files
  ☐ Allow for goals with no deposit amount.
- ✔ Associate .buckets extension @done (17-07-20 20:52)
-   ✔ Double click to open @done (17-07-20 20:52)
-   ✔ Icon @done (17-07-20 20:52)
  
 
 Want:
@@ -33,6 +30,9 @@ Want:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Icon @done (17-07-20 20:52) @project(Need)
+ ✔ Double click to open @done (17-07-20 20:52) @project(Need)
+ ✔ Associate .buckets extension @done (17-07-20 20:52) @project(Need)
  ✔ Mark transactions as having come from import or not @done (17-07-20 15:42) @project(Want)
  ✔ Make imported not editable, maybe?  No, probably not. @done (17-07-20 15:42) @project(Want)
  ✔ When syncing, display what dates you're attempting to sync between, like "Syncing transactions for May 1 - Jun 30, 2017" @done (17-07-19 16:26) @project(Need)

@@ -372,6 +372,7 @@ a.subtle {
   color: var(--lighter-grey);
   text-decoration: none;
   transform: color 0.2s;
+  cursor: pointer;
 }
 a.subtle:hover {
   color: var(--blue);
@@ -496,6 +497,43 @@ table.ledger tr.action-row td {
   margin: 0;
 }
 
+.categorizer.open {
+  padding: .5rem;
+}
+.categorizer .delete-button {
+  display: flex;
+  color: var(--grey);
+  background-color: var(--lightest-grey);
+  align-self: stretch;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  padding: 0 .4rem;
+
+}
+.categorizer .bucket-buttons {
+  padding-bottom: .5rem;
+  padding-top: .5rem;
+  display: flex;
+  justify-content: space-between;
+}
+.categorizer .bucket-buttons button {
+  flex-basis: 50%;
+  flex-grow: 1;
+}
+.categorizer .general-cat-buttons {
+  border-top: 1px solid var(--lighter-grey);
+  padding-top: .5rem;
+  display: flex;
+  justify-content: space-between;
+}
+.categorizer .general-cat-buttons button {
+  flex-basis: 50%;
+  background-color: white;
+}
+.categorizer .general-cat-buttons button:hover {
+  background-color: var(--yellow);
+}
 
 /* Top total tags */
 .totals {
@@ -665,6 +703,7 @@ button {
   border-radius: 3px;
   margin: 0 2px;
   cursor: pointer;
+  white-space: nowrap;
 }
 button.primary {
   background-color: var(--blue);

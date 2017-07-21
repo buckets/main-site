@@ -447,23 +447,24 @@ class Categorizer extends React.Component<CategorizerProps, {
             })
           }}
         />
-        <button
+        <a
+          className="subtle"
           onClick={() => {
             this.setState({
               clean_cats: this.cleanCats(transaction, cats, idx, 'delete'),
             })
-          }}>x</button>
+          }}><span className="fa fa-close" /></a>
       </div>
     })
     return <div className="categorizer open">
       {elems}
-      <div>
-        <button onClick={this.generalCat('income')}>Income</button>
-        <button onClick={this.generalCat('transfer')}>Transfer</button>
-      </div>
-      <div>
+      <div className="bucket-buttons">
         <button onClick={this.closeCategorizer}>Cancel</button>
         <button onClick={this.saveChanges}>Save</button>
+      </div>
+      <div className="general-cat-buttons">
+        {transaction.amount >= 0 ? <button onClick={this.generalCat('income')}>💰 Income</button> : null}
+        <button onClick={this.generalCat('transfer')}>⇄ Transfer</button>
       </div>
     </div>
   }
