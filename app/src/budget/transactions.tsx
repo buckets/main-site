@@ -331,13 +331,16 @@ class Categorizer extends React.Component<CategorizerProps, {
   categories: Category[];
   clean_cats: Category[];
   open: boolean;
+  did_focus: boolean;
 }> {
+  private first_select = null;
   constructor(props) {
     super(props)
     this.state = {
       categories: [],
       clean_cats: [],
       open: false,
+      did_focus: false,
     }
     this.refreshCategories(this.props)
   }
@@ -354,7 +357,7 @@ class Categorizer extends React.Component<CategorizerProps, {
     })
   }
   openCategorizer = () => {
-    this.setState({open: true})
+    this.setState({open: true, did_focus: false})
   }
   closeCategorizer = () => {
     this.setState({open: false})
@@ -425,6 +428,12 @@ class Categorizer extends React.Component<CategorizerProps, {
       return <div className="category" key={idx}>
         <select
           value={cat.bucket_id || ''}
+          ref={elem => {
+            if (elem && idx === 0 && !this.state.did_focus) {
+              elem.focus();
+              this.setState({did_focus: true});
+            }
+          }}
           onChange={ev => {
             this.setState({
               clean_cats: this.cleanCats(transaction, cats, idx, {

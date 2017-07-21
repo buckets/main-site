@@ -366,6 +366,9 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
 }
 
 function computeGoalEndDate(balance:number, goal:number, deposit:number, today:Timestamp):Timestamp {
+  if (!deposit) {
+    return null;
+  }
   let units = Math.ceil((goal - balance) / deposit) - 1;
   let dt = ensureUTCMoment(today);
   return dt.add(units, 'month').startOf('month');

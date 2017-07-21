@@ -1,12 +1,12 @@
 Need:
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
- ☐ Allow for goals with no deposit amount.
  
 
 Want:
  ☐ Import OFX
  ☐ Delete groups
+ ☐ Timeout syncing (like if there's no internet connection)
  ☐ Label window so you know which file is which
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
@@ -27,9 +27,11 @@ Want:
  ☐ Chat for help
  ☐ Make sure logs roll
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
+ ☐ Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Categorizer component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Allow for goals with no deposit amount. @done (17-07-20 21:44) @project(Need)
  ✔ There needs to be a way to submit bugs @done (17-07-20 21:33) @project(Need)
  ✔ There needs to be a way to submit log files @done (17-07-20 21:26) @project(Need)
  ✔ Icon @done (17-07-20 20:52) @project(Need)

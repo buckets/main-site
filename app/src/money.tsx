@@ -135,6 +135,9 @@ export class Money extends React.Component<MoneyProps, {
     })
   }
   step(timestamp) {
+    if (!this.state.animating) {
+      return;
+    }
     let progress;
     if (!this.state.start_time) {
       this.setState({
@@ -171,6 +174,11 @@ export class Money extends React.Component<MoneyProps, {
     if (!nextProps.noanimate && nextProps.value !== this.props.value) {
       this.animateToNewValue(nextProps.value);
     }
+  }
+  componentWillUnmount() {
+    this.setState({
+      animating: false,
+    })
   }
   render() {
     let { value, className, hidezero, noanimate, nocolor, symbol, ...rest } = this.props;

@@ -369,7 +369,7 @@ class BucketKindDetails extends React.Component<{
           edit_rows.push(<tr key="end-date">
               <td>Goal completion:</td>
               <td>
-                <Date value={computed.end_date} format="MMM YYYY" />
+                {computed.end_date ? <Date value={computed.end_date} format="MMM YYYY" /> : "some day..."}
               </td>
             </tr>)
           break;
