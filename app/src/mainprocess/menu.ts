@@ -1,5 +1,6 @@
-import {app, Menu} from 'electron';
-import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files';
+import { shell, app, Menu } from 'electron'
+import * as log from 'electron-log'
+import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 
@@ -92,8 +93,20 @@ let HelpMenu = {
   submenu: [
     {
       label: 'Learn More',
-      click () { require('electron').shell.openExternal('https://www.bucketsisbetter.com') }
+      click () { shell.openExternal('https://www.bucketsisbetter.com') }
     },
+    {
+      label: 'Show Log Files...',
+      click() {
+        shell.showItemInFolder(log.transports.file.file);
+      }
+    },
+    {
+      label: 'Report Bug...',
+      click() {
+        shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
+      }
+    }
   ],
 };
 

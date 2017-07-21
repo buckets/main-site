@@ -1,15 +1,13 @@
 Need:
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
- ☐ There needs to be a way to submit bugs
- ☐ There needs to be a way to submit log files
  ☐ Allow for goals with no deposit amount.
  
 
 Want:
  ☐ Import OFX
  ☐ Delete groups
- ☐ Label buckets window so you know which file is which
+ ☐ Label window so you know which file is which
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
@@ -26,10 +24,14 @@ Want:
  ☐ Add a pop up calculator
  ☐ Alert that there's uncategorized transactions in previous months.
  ☐ Only nag if the window is focused
+ ☐ Chat for help
+ ☐ Make sure logs roll
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ There needs to be a way to submit bugs @done (17-07-20 21:33) @project(Need)
+ ✔ There needs to be a way to submit log files @done (17-07-20 21:26) @project(Need)
  ✔ Icon @done (17-07-20 20:52) @project(Need)
  ✔ Double click to open @done (17-07-20 20:52) @project(Need)
  ✔ Associate .buckets extension @done (17-07-20 20:52) @project(Need)
