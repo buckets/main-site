@@ -3,7 +3,7 @@
 set -e
 
 CMD=${1:-usage}
-VMNAME=${2:-win7ie11}
+VMNAME=${2:-win7ie11v2}
 
 ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win7.For.Windows.VirtualBox.zip"
 ISO_DIR=${ISO_DIR:-${HOME}/iso}
@@ -22,10 +22,21 @@ do_usage() {
     cat <<EOF
 Usage:
 
-    $0 create    -- create the $VMNAME vm
-    $0 stop      -- stop $VMNAME vm
-    $0 destroy   -- destroy $VMNAME vm
+    $0 help     -- see this help.  See?
+    $0 create   -- create $VMNAME vm
+    $0 start    -- start $VMNAME vm
+    $0 stop     -- stop $VMNAME vm
+    $0 destroy  -- destroy $VMNAME vm
+    $0 up       -- create and start $VMNAME vm
+    $0 name     -- get $VMNAME
 EOF
+}
+do_help() {
+    do_usage
+}
+
+do_name() {
+    echo $VMNAME
 }
 
 do_stop() {
@@ -60,13 +71,6 @@ do_create() {
         echo "Importing ${OVA_FILENAME} -> ${VMNAME}"
         vboxmanage import "$OVA_PATH" --vsys 0 --vmname "$VMNAME"
 
-        ensure_booted
-
-        vboxmanage guestcontrol win7ie11 updateadditions \
-            --source /Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso \
-            --verbose \
-            --wait-start
-
         ensure_off
 
         # Configure network
@@ -78,6 +82,22 @@ do_create() {
     fi
 }
 
+do_start() {
+    vboxmanage startvm "$VMNAME" --type headless
+}
+
+do_up() {
+    do_create
+    ensure_booted
+}
+
+cmd() {
+    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
+}
+run() {
+    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- $*
+}
+
 ensure_off() {
     if ! vboxmanage showvminfo "$VMNAME" | grep "powered off"; then
         vboxmanage controlvm "$VMNAME" acpipowerbutton
@@ -85,7 +105,7 @@ ensure_off() {
     i="0"
     while ! vboxmanage showvminfo "$VMNAME" | grep "powered off"; do
         let i="$i + 1"
-        if [ "$i" -eq 60 ]; then
+        if [ "$i" -eq 120 ]; then
             vboxmanage controlvm "$VMNAME" poweroff
         fi
         sleep 1
@@ -93,15 +113,15 @@ ensure_off() {
 }
 
 ensure_booted() {
-    if ! vboxmanage showvminfo "$VMNAME" | grep "running"; then
+    if ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; then
         vboxmanage startvm "$VMNAME" --type headless
     fi
-    while ! vboxmanage showvminfo "$VMNAME" | grep "running"; do
+    while ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; do
         sleep 1
     done
 
     # wait for guest additions to be started
-    while ! vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS!" -- cmd.exe /c echo hello | grep "hello"; do
+    while ! cmd echo hello 2>/dev/null | grep "hello" >/dev/null; do
         sleep 1
     done
 }
