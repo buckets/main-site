@@ -2,7 +2,7 @@ c:
 cd \
 md cache
 copy x:\package.json c:\cache\
-copy x:\yank.lock c:\cache\
+copy x:\yarn.lock c:\cache\
 cd \cache
 yarn
 
