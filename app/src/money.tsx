@@ -192,6 +192,15 @@ export class Money extends React.Component<MoneyProps, {
         display = symbol_display + display;
       }
     }
+    let parts = display.split(decimal_sep, 2);
+    let display_components = [];
+    if (parts.length === 2) {
+      display_components.push(<span className="dollar" key="dollar">{parts[0]}</span>)
+      display_components.push(<span className="decimal" key="decimal">{decimal_sep}</span>);
+      display_components.push(<span className="cents" key="cents">{parts[1]}</span>)
+    } else {
+      display_components.push(<span className="dollar" key="dollar">{display}</span>)
+    }
     return (<span className={cx(
       className, {
         number: !nocolor,
@@ -199,7 +208,7 @@ export class Money extends React.Component<MoneyProps, {
         animating: this.state.animating,
         up: this.state.animating && going_up,
         down: this.state.animating && !going_up,
-      })} {...rest}>{display}</span>);
+      })} {...rest}>{display_components}</span>);
   }
 
 }

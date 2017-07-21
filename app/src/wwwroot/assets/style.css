@@ -517,6 +517,19 @@ table.ledger tr.action-row td {
   font-size: 1.5rem;
   text-align: left;
 }
+.totals total amount .number {
+  display: inline-flex;
+  align-items: flex-start;
+}
+.totals total amount .decimal {
+  display: none;
+}
+.totals total amount .cents {
+  font-size: .8rem;
+  padding-left: .1rem;
+  padding-top: .2rem;
+}
+
 .totals total.section-start {
   border-left: 1px solid var(--lighter-grey);
   padding-left: 2rem;
