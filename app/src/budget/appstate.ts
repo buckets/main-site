@@ -9,6 +9,7 @@ import { Connection, UnknownAccount } from '../models/simplefin'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 import { makeToast } from './toast'
+import { FileImportState, FileImportManager } from './importing'
 
 interface IAppState {
   accounts: {
@@ -39,6 +40,8 @@ interface IAppState {
 
   syncing: boolean;
   sync_message: string;
+
+  fileimport: FileImportState;
 }
 
 interface IComputedAppState {
@@ -90,6 +93,8 @@ export class AppState implements IAppState, IComputedAppState {
 
   syncing:boolean = false;
   sync_message:string = '';
+
+  fileimport:FileImportState = new FileImportState();
 
   get defaultPostingDate() {
     let today = moment();
@@ -185,10 +190,12 @@ export class StateManager extends EventEmitter {
   public store:IStore;
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
+  readonly fileimport:FileImportManager;
   constructor() {
     super()
     this.appstate = new AppState();
     this.store = null;
+    this.fileimport = new FileImportManager(this);
   }
   setStore(store: IStore) {
     this.store = store;

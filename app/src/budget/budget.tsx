@@ -14,6 +14,7 @@ import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
+import { TransactionImportPage } from './importing'
 
 import { manager, AppState } from './appstate'
 
@@ -107,6 +108,7 @@ class Navbar extends React.Component<{
             <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
           </Route>
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
+          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent">File Import</Link>
         </div>
         <div>
           {sync_widget}
@@ -196,6 +198,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/connections">
                       <ConnectionsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/import">
+                      <TransactionImportPage appstate={appstate} />
                     </Route>
                   </Switch>
                 </div>
