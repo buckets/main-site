@@ -3,7 +3,6 @@ import * as fs from 'fs-extra-promise'
 import { remote } from 'electron'
 import { AppState, StateManager, manager } from './appstate'
 import { setPath } from './budget';
-import { parse as parseOFX } from 'ofx-js';
 
 export class FileImportState {
 
@@ -33,8 +32,8 @@ export class FileImportManager {
     console.log(data);
 
     // try ofx
-    let parsed = await parseOFX(data);
-    console.log('parsed', parsed);
+    // let parsed = await parseOFX(data);
+    // console.log('parsed', parsed);
     
   }
 }
