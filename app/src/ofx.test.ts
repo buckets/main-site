@@ -212,3 +212,96 @@ NEWFILEUID:NONE
   t.equal(t0.fi_id, '0000760')
   t.equal(t0.posted.format(), moment.utc({y:2016, M:4-1, d:30, h:12}).format())
 })
+
+test('sample3', async t => {
+  let data = `
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+<OFX>
+<SIGNONMSGSRSV1>
+<SONRS>
+<STATUS>
+<CODE>0
+<SEVERITY>INFO
+</STATUS>
+<DTSERVER>20160509120000[0:GMT]
+<LANGUAGE>ENG
+<FI>
+<ORG>ISC
+<FID>10898
+</FI>
+<INTU.BID>11111
+</SONRS>
+</SIGNONMSGSRSV1>
+<CREDITCARDMSGSRSV1>
+<CCSTMTTRNRS>
+<TRNUID>1
+<STATUS>
+<CODE>0
+<SEVERITY>INFO
+<MESSAGE>Success
+</STATUS>
+<CCSTMTRS>
+<CURDEF>USD
+<CCACCTFROM>
+<ACCTID>11111111111111111
+</CCACCTFROM>
+<BANKTRANLIST>
+<DTSTART>20160430120000[0:GMT]
+<DTEND>20160508120000[0:GMT]
+<STMTTRN>
+<TRNTYPE>DEBIT
+<DTPOSTED>20160501120000[0:GMT]
+<TRNAMT>-12.99
+<FITID>2016050124224436122105002709067
+<NAME>ETSY SELLER FEES
+</STMTTRN>
+<STMTTRN>
+<TRNTYPE>DEBIT
+<DTPOSTED>20160506120000[0:GMT]
+<TRNAMT>-36.22
+<FITID>2016050624445006126100312436287
+<NAME>BARNES &amp; NOBLE #2626
+</STMTTRN>
+</BANKTRANLIST>
+<LEDGERBAL>
+<BALAMT>-1180.98
+<DTASOF>20160509120000[0:GMT]
+</LEDGERBAL>
+<AVAILBAL>
+<BALAMT>17797.30
+<DTASOF>20160509120000[0:GMT]
+</AVAILBAL>
+</CCSTMTRS>
+</CCSTMTTRNRS>
+</CREDITCARDMSGSRSV1>
+</OFX>
+`
+  let transactions = await ofx2importable(data);
+  t.equal(transactions.length, 2)
+
+  let t0 = transactions[0];
+  t.notEqual(t0.account_label, null)
+  t.ok(t0.account_label.indexOf('11111111111111111') !== -1, "Should have account number");
+  t.ok(t0.account_label.indexOf('ISC') !== -1, "Should have bank");
+  
+  t.equal(t0.currency, 'USD')
+  t.equal(t0.amount, -1299)
+  t.equal(t0.memo, 'ETSY SELLER FEES')
+  t.equal(t0.fi_id, '2016050124224436122105002709067')
+  t.equal(t0.posted.format(), moment.utc({y:2016, M:5-1, d:1, h:12}).format())
+
+  let t1 = transactions[1];
+  t.equal(t1.currency, 'USD')
+  t.equal(t1.amount, -3622)
+  t.equal(t1.memo, 'BARNES & NOBLE #2626')
+  t.equal(t1.fi_id, '2016050624445006126100312436287')
+  t.equal(t1.posted.format(), moment.utc({y:2016, M:5-1, d:6, h:12}).format())
+})

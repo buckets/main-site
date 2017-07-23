@@ -2,15 +2,8 @@ import * as _ from 'lodash'
 import * as moment from 'moment'
 import { parse as parseOFX } from 'ofx-js'
 import { decimal2cents } from './money'
+import { ImportableTrans } from './budget/importing'
 
-interface ImportableTrans {
-  account_label: string;
-  amount:number;
-  memo:string;
-  posted:moment.Moment;
-  fi_id?:string;
-  currency?:string;
-}
 
 let formats = [
   'YYYYMMDDHHmmss.SSS',
@@ -33,15 +26,40 @@ export async function ofx2importable(ofx:string):Promise<ImportableTrans[]> {
   }
   let currency;
   let account_description = '';
-  let statement = parsed.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS;
-  if (statement.CURDEF) {
-    currency = statement.CURDEF;
+  let statement;
+  let tranlist;
+  if (parsed.OFX.BANKMSGSRSV1) {
+    // bank account
+    statement = parsed.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS;
+    if (statement.CURDEF) {
+      currency = statement.CURDEF;
+    }
+    if (statement.BANKACCTFROM) {
+      let acc = statement.BANKACCTFROM;
+      account_description = `${acc.ACCTTYPE} (${acc.ACCTID})`;
+    }
+    tranlist = statement.BANKTRANLIST;
+  } else if (parsed.OFX.CREDITCARDMSGSRSV1) {
+    // credit card
+    statement = parsed.OFX.CREDITCARDMSGSRSV1.CCSTMTTRNRS.CCSTMTRS;
+    if (statement.CURDEF) {
+      currency = statement.CURDEF;
+    }
+    if (statement.CCACCTFROM) {
+      let acc = statement.CCACCTFROM;
+      let parts = [];
+      if (acc.ACCTTYPE) {
+        parts.push(acc.ACCTTYPE)
+      }
+      if (acc.ACCTID) {
+        parts.push(acc.ACCTID);
+      }
+      account_description = parts.join(' ');
+    }
+    tranlist = statement.BANKTRANLIST;
   }
-  if (statement.BANKACCTFROM) {
-    let acc = statement.BANKACCTFROM;
-    account_description = `${acc.ACCTTYPE} (${acc.ACCTID})`;
-  }
-  if (statement.BANKTRANLIST) {
+  
+  if (tranlist) {
     let transactions;
     if (_.isArray(statement.BANKTRANLIST.STMTTRN)) {
       transactions = statement.BANKTRANLIST.STMTTRN;

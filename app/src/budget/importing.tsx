@@ -1,8 +1,19 @@
 import * as React from 'react'
 import * as fs from 'fs-extra-promise'
+import * as moment from 'moment'
 import { remote } from 'electron'
 import { AppState, StateManager, manager } from './appstate'
 import { setPath } from './budget';
+import { ofx2importable } from '../ofx'
+
+export interface ImportableTrans {
+  account_label: string;
+  amount:number;
+  memo:string;
+  posted:moment.Moment;
+  fi_id?:string;
+  currency?:string;
+}
 
 export class FileImportState {
 
@@ -29,9 +40,10 @@ export class FileImportManager {
   async openFile(path) {
     console.log('opening file', path);
     let data = await fs.readFileAsync(path, {encoding:'utf8'});
-    console.log(data);
 
     // try ofx
+    let parsed = await ofx2importable(data);
+    console.log('parsed', parsed);
     // let parsed = await parseOFX(data);
     // console.log('parsed', parsed);
     
