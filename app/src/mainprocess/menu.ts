@@ -1,4 +1,4 @@
-import { shell, app, Menu } from 'electron'
+import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
 import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
@@ -26,6 +26,15 @@ let FileMenu = {
       accelerator: 'CmdOrCtrl+O',
       click() {
         openDialog();
+      }
+    },
+    {type: 'separator'},
+    {
+      label: 'File Import...',
+      accelerator: 'CmdOrCtrl+I',
+      click() {
+        let win = BrowserWindow.getFocusedWindow();
+        win.webContents.send('start-file-import');
       }
     }
   ],

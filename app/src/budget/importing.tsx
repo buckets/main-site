@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as fs from 'fs-extra-promise'
 import * as moment from 'moment'
-import { remote } from 'electron'
+import { remote, ipcRenderer } from 'electron'
 import { AppState, StateManager, manager } from './appstate'
 import { setPath } from './budget';
 import { ofx2importable } from '../ofx'
@@ -21,6 +21,9 @@ export class FileImportState {
 
 export class FileImportManager {
   constructor(public manager:StateManager) {
+    ipcRenderer.on('start-file-import', () => {
+      this.openFileDialog();
+    })
   }
   openFileDialog() {
     console.log('openFileDialog');
@@ -35,6 +38,7 @@ export class FileImportManager {
           this.openFile(path);
         })
       }
+      setPath('/import');
     })
   }
   async openFile(path) {
@@ -44,6 +48,11 @@ export class FileImportManager {
     // try ofx
     let parsed = await ofx2importable(data);
     console.log('parsed', parsed);
+
+    Matt, now add the parsed data to FileImportState in such a
+    way that you can match up the account and add it.
+    Perhaps UnknownAccount needs to have a 'From Connections' or
+    'From File Import' designation.
     // let parsed = await parseOFX(data);
     // console.log('parsed', parsed);
     
