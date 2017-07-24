@@ -13,10 +13,6 @@ ADMIN_USER='Administrator'
 ADMIN_PASS='admin'
 THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
 VMNAME=${2:-$(${THISDIR}/winvm.sh name)}
-NODE_BIN_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-win-x64.zip"
-NODE_ZIP="node-v8.2.1-win-x64.zip"
-YARN_MSI_URL="https://yarnpkg.com/latest.msi"
-NODE_MSI_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-x86.msi"
 
 echo "BUILD_DIR=$BUILD_DIR"
 echo "SCRIPT_DIR=$THISDIR"
@@ -83,37 +79,6 @@ done
 
 
 set -e
-
-echo
-echo "Getting nodejs ready"
-if [ ! -e "${TMPDIR}/nodejs/node.exe" ]; then
-    if [ ! -e "${TMPDIR}/node.zip" ]; then
-        curl "${NODE_BIN_URL}" -o "${TMPDIR}/node.zip"
-        mkdir -p "${TMPDIR}/nodeextract"
-        unzip "${TMPDIR}/node.zip" -d "${TMPDIR}/nodeextract/"
-        rm -r "${TMPDIR}/nodejs" || echo 'Does not exist'
-        mv "${TMPDIR}/nodeextract/$(ls ${TMPDIR}/nodeextract/)" "${TMPDIR}/nodejs"
-        rmdir "${TMPDIR}/nodeextract"
-    fi
-fi
-
-echo
-echo "Getting node.msi"
-if [ ! -e "${TMPDIR}/node.msi" ]; then
-    curl -L "${NODE_MSI_URL}" -o "${TMPDIR}/node.msi"
-fi
-
-echo
-echo "Getting yarn.msi"
-if [ ! -e "${TMPDIR}/yarn.msi" ]; then
-    curl -L "${YARN_MSI_URL}" -o "${TMPDIR}/yarn.msi"
-fi
-
-echo
-echo "Installing node and yarn..."
-guestcontrol mkdir '/foobar/'
-cmd 'copy x:\dev\win\win_installnode.bat c:\foobar\win_installnode.bat'
-admincmd 'c:\foobar\win_installnode.bat'
 
 echo
 echo "Build the app..."

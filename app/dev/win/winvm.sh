@@ -5,6 +5,8 @@ set -e
 CMD=${1:-usage}
 VMNAME=${2:-win7ie11v2}
 
+THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
+
 ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win7.For.Windows.VirtualBox.zip"
 ISO_DIR=${ISO_DIR:-${HOME}/iso}
 OVA_FILENAME="Win7.ova"
@@ -20,6 +22,11 @@ HOST_ONLY_NETWORK="vboxnet0"
 
 WIN_USER='IEUser'
 WIN_PASS='Passw0rd!'
+ADMIN_USER='Administrator'
+ADMIN_PASS='admin'
+
+RESOURCE_DIR="${THISDIR}/tmp"
+mkdir -p "$RESOURCE_DIR"
 
 do_usage() {
     cat <<EOF
@@ -80,7 +87,8 @@ do_create() {
     #     --hostonlyadapter2 "$HOST_ONLY_NETWORK"
 
     ensure_snapshot genesis
-    ensure_snapshot admin genesis 
+    ensure_snapshot admin genesis
+    ensure_snapshot node admin
 }
 
 do_start() {
@@ -92,11 +100,21 @@ do_up() {
     ensure_booted
 }
 
+guestcontrol() {
+    set -e
+    vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $*
+}
 cmd() {
+    set -e
     vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
 }
 run() {
+    set -e
     vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- $*
+}
+admincmd() {
+    set -e
+    vboxmanage guestcontrol "$VMNAME" run --username "$ADMIN_USER" --password "$ADMIN_PASS" -- cmd.exe /c $*
 }
 
 ensure_off() {
@@ -162,7 +180,7 @@ snapshot_genesis() {
 snapshot_admin() {
     ensure_booted
     echo
-    echo "Please set the Administrator's password to 'admin' using the GUI"
+    echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
     echo "1. Click Start"
     echo "2. Right click 'Computer'"
     echo "3. Click 'Manage'"
@@ -185,6 +203,81 @@ snapshot_admin() {
         fi
         sleep 2;
     done
+}
+
+ensure_shared_folder() {
+    SHARE_NAME=$1
+    HOST_DIR=$2
+    if [ -z "$SHARE_NAME" ] || [ -z "$HOST_DIR" ]; then
+        echo "Error: Must provide SHARE_NAME HOST_DIR to ensure_shared_folder"
+        exit 1
+    fi
+    
+    ensure_off
+    
+    mkshare() {
+        vboxmanage sharedfolder add "$VMNAME" \
+            --name "$SHARE_NAME" \
+            --hostpath "$HOST_DIR"
+    }
+    OUTPUT="$(mkshare 2>&1)"
+    if echo "$OUTPUT" | grep 'already exists'; then
+        echo "Removing existing share"
+        vboxmanage sharedfolder remove "$VMNAME" \
+            --name "$SHARE_NAME"
+        mkshare
+    fi
+    
+    ensure_booted
+
+    echo "Sharing local directory ${HOST_DIR} as \\\\vboxsvr\\${SHARE_NAME}"
+    while true; do
+        set +e
+        echo "net use ..."
+        OUTPUT="$(cmd net use x: "\\\\vboxsvr\\${SHARE_NAME}" 2>&1)"
+        echo $OUTPUT
+        if echo "$OUTPUT" | grep "local device name is already in use"; then
+            echo 'unmounting x:'
+            cmd net use x: /delete
+        elif echo "$OUTPUT" | grep "The network name cannot be found"; then
+            echo 'sleeping'
+            sleep 1
+        elif echo "$OUTPUT" | grep "completed successfully"; then
+            echo 'OK'
+            break
+        else
+            echo "Unknown response: $OUTPUT"
+            exit 1
+        fi
+    done
+}
+
+snapshot_node() {
+    echo "Installing node and yarn"
+    set -e
+
+    if [ ! -e "${RESOURCE_DIR}/node.msi" ]; then
+        echo "Fetching node.msi"
+        curl -L "${NODE_MSI_URL}" -o "${RESOURCE_DIR}/node.msi"
+    fi
+    if [ ! -e "${RESOURCE_DIR}/yarn.msi" ]; then
+        echo "Fetching yarn.msi"
+        curl -L "${YARN_MSI_URL}" -o "${RESOURCE_DIR}/yarn.msi"
+    fi
+
+    ensure_shared_folder project "$THISDIR"
+
+    echo
+    echo "Installing node and yarn..."
+    guestcontrol mkdir '/foobar/'
+    cmd 'xcopy x:\ c:\foobar\ /s /f'
+    admincmd 'c:\foobar\win_installnode.bat'
+    cmd 'node --version'
+    cmd 'yarn --version'
+    cmd 'npm --version'
+    admincmd 'npm install --global --production windows-build-tools'
+    cmd 'npm config get python'
+    echo "Node installed"
 }
 
 share_directory() {
