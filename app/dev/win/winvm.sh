@@ -3,15 +3,30 @@
 set -e
 
 CMD=${1:-usage}
-VMNAME=${2:-win7ie11v2}
+
 
 THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
 
-ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win7.For.Windows.VirtualBox.zip"
+# # Windows 10
+# VMNAME=${2:-win10builder}
+# ISO_URL="https://az792536.vo.msecnd.net/vms/VMBuild_20170320/VirtualBox/MSEdge/MSEdge.Win10.RS2.VirtualBox.zip"
+# OVA_FILENAME="Win10.ova"
+# ZIP_FILENAME="Win10.VirtualBox.zip"
+
+# # Windows 8
+VMNAME=${2:-win8builder}
+ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win8.1.For.Windows.VirtualBox.zip"
+OVA_FILENAME="Win8.ova"
+ZIP_FILENAME="Win8.VirtualBox.zip"
+
+# Windows 7
+# VMNAME=${2:-win7builder}
+# ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE10/Windows/IE10.Win7.For.Windows.VirtualBox.zip"
+# OVA_FILENAME="Win7.ova"
+# ZIP_FILENAME="Win7.VirtualBox.zip"
+
 ISO_DIR=${ISO_DIR:-${HOME}/iso}
-OVA_FILENAME="Win7.ova"
 OVA_PATH="${ISO_DIR}/${OVA_FILENAME}"
-ZIP_FILENAME="IE11.Win7.For.Windows.VirtualBox.zip"
 ZIP_PATH="${ISO_DIR}/${ZIP_FILENAME}"
 
 YARN_MSI_URL="https://yarnpkg.com/latest.msi"
@@ -72,7 +87,7 @@ do_create() {
             TMPDIR="/tmp/${OVA_PATH}"
             mkdir -p "$TMPDIR"
             unzip "$ZIP_PATH" -d "$TMPDIR"
-            mv "${TMPDIR}/*.ova" "$OVA_PATH"
+            mv "${TMPDIR}"/*.ova "$OVA_PATH"
             rmdir "$TMPDIR"
         fi
 
@@ -114,7 +129,9 @@ run() {
 }
 admincmd() {
     set -e
-    vboxmanage guestcontrol "$VMNAME" run --username "$ADMIN_USER" --password "$ADMIN_PASS" -- cmd.exe /c $*
+    vboxmanage guestcontrol "$VMNAME" run \
+        --username "$ADMIN_USER" --password "$ADMIN_PASS" \
+        -- cmd.exe /c $*
 }
 
 ensure_off() {
@@ -178,6 +195,7 @@ snapshot_genesis() {
 }
 
 snapshot_admin() {
+    echo "starting admin snapshot"
     ensure_booted
     echo
     echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
@@ -269,14 +287,21 @@ snapshot_node() {
 
     echo
     echo "Installing node and yarn..."
-    guestcontrol mkdir '/foobar/'
-    cmd 'xcopy x:\ c:\foobar\ /s /f'
-    admincmd 'c:\foobar\win_installnode.bat'
-    cmd 'node --version'
-    cmd 'yarn --version'
-    cmd 'npm --version'
-    admincmd 'npm install --global --production windows-build-tools'
-    cmd 'npm config get python'
+    guestcontrol mkdir '/nodeinstallers/'
+    cmd 'xcopy x:\ c:\nodeinstallers\ /s /f'
+    admincmd 'c:\nodeinstallers\win_installnode.bat'
+    admincmd 'c:\nodeinstallers\win_installbuildtools.bat'
+    admincmd 'c:\nodeinstallers\win_installbuildtools_post.bat'
+    cmd 'npm config set msvs_version 2015'
+    cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
+    echo "node: $(cmd 'node --version')"
+    echo "yarn: $(cmd 'yarn --version')"
+    echo "npm: $(cmd 'npm --version')"
+    echo
+    echo
+    echo "npm config:"
+    cmd 'npm config list'
+    echo
     echo "Node installed"
 }
 
