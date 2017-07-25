@@ -94,12 +94,6 @@ do_create() {
         echo "Importing ${OVA_FILENAME} -> ${VMNAME}"
         vboxmanage import "$OVA_PATH" --vsys 0 --vmname "$VMNAME"
     fi
-    # ensure_off
-
-    # # Configure network
-    # vboxmanage modifyvm "$VMNAME" \
-    #     --nic2 hostonly \
-    #     --hostonlyadapter2 "$HOST_ONLY_NETWORK"
 
     ensure_snapshot genesis
     ensure_snapshot admin genesis
@@ -113,6 +107,10 @@ do_start() {
 do_up() {
     do_create
     ensure_booted
+}
+
+do_restore() {
+    restore_to "${1:-node}"
 }
 
 guestcontrol() {
@@ -162,6 +160,13 @@ ensure_booted() {
     done
 }
 
+restore_to() (
+    SNAPNAME=$1
+    echo "Restoring to $SNAPNAME"
+    ensure_off
+    vboxmanage snapshot "$VMNAME" restore "$SNAPNAME"
+)
+
 ensure_snapshot() {
     SNAPNAME=$1
     BASE_SNAPSHOT=$2
@@ -169,9 +174,7 @@ ensure_snapshot() {
         echo "$SNAPNAME snapshot already exists"
     else
         if [ ! -z "$BASE_SNAPSHOT" ]; then
-            echo "Restoring to $BASE_SNAPSHOT"
-            ensure_off
-            vboxmanage snapshot "$VMNAME" restore "$BASE_SNAPSHOT"
+            restore_to "$BASE_SNAPSHOT"
         fi
         echo
         echo "Creating $SNAPNAME snapshot..."
@@ -292,6 +295,7 @@ snapshot_node() {
     admincmd 'c:\nodeinstallers\win_installnode.bat'
     admincmd 'c:\nodeinstallers\win_installbuildtools.bat'
     admincmd 'c:\nodeinstallers\win_installbuildtools_post.bat'
+    cmd 'npm install -g node-gyp'
     cmd 'npm config set msvs_version 2015'
     cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
     echo "node: $(cmd 'node --version')"

@@ -19,6 +19,7 @@ echo "SCRIPT_DIR=$THISDIR"
 echo "VMNAME=$VMNAME"
 
 ${THISDIR}/winvm.sh create "$VMNAME"
+${THISDIR}/winvm.sh restore
 ${THISDIR}/winvm.sh stop "$VMNAME"
 
 TMPDIR="${THISDIR}/tmp"
@@ -82,6 +83,7 @@ set -e
 
 echo
 echo "Build the app..."
+set -x
 cmd 'x:\dev\win\win_build.bat'
 # cmd "net use x: \\\\vboxsvr\\${SHARE_NAME} ; wmic logicaldisk get name"
 # cmd 'x:\dev\win\win_installnode.bat'

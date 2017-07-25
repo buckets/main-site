@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "electron .",
+    "compile": "tsc",
     "test": "./test.sh",
     "postinstall": "install-app-deps"
   },
