@@ -90,10 +90,9 @@ set -e
 
 h1 "Building the app..."
 set -x
-cmd 'x:\dev\win\win_build.bat'
 vboxmanage guestcontrol "$VMNAME" \
     -vvvv run \
     --username "$WIN_USER" --password "$WIN_PASS" \
     --putenv GH_TOKEN="$GH_TOKEN" \
-    -- cmd.exe /c $*
+    -- cmd.exe /c 'x:\dev\win\win_build.bat'
 
