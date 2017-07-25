@@ -14,6 +14,14 @@ ADMIN_PASS='admin'
 THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
 VMNAME=${2:-$(${THISDIR}/winvm.sh name)}
 
+h1() {
+    echo
+    echo $*
+    echo "==========================================================="
+}
+
+h1 start
+
 echo "BUILD_DIR=$BUILD_DIR"
 echo "SCRIPT_DIR=$THISDIR"
 echo "VMNAME=$VMNAME"
@@ -26,7 +34,7 @@ TMPDIR="${THISDIR}/tmp"
 mkdir -p "$TMPDIR"
 
 SHARE_NAME="project"
-echo "Sharing $BUILD_DIR as $SHARE_NAME"
+h1 "Sharing $BUILD_DIR as $SHARE_NAME"
 
 mkshare() {
     vboxmanage sharedfolder add "$VMNAME" \
@@ -53,11 +61,10 @@ admincmd() {
     vboxmanage guestcontrol "$VMNAME" run --username "$ADMIN_USER" --password "$ADMIN_PASS" -- cmd.exe /c $*
 }
 
-
+h1 "Testing guestcontrol access"
 cmd echo hello
 
-echo
-echo "Getting shared directory..."
+h1 "Mounting shared directory"
 while true; do
     set +e
     echo "net use ..."
@@ -81,8 +88,7 @@ done
 
 set -e
 
-echo
-echo "Build the app..."
+h1 "Building the app..."
 set -x
 cmd 'x:\dev\win\win_build.bat'
 # cmd "net use x: \\\\vboxsvr\\${SHARE_NAME} ; wmic logicaldisk get name"

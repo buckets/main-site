@@ -9,8 +9,9 @@ set NODE_PATH=c:\cache\node_modules
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
 set
-yarn --no-emoji --no-progress --silent
-type yarnlog.log
+call npm install -g node-gyp
+echo Gonna yarn now
+yarn
 
 x:
 yarn compile

@@ -1,1 +1,1 @@
-npm --add-python-to-path install --global --production windows-build-tools > somelog.log
+call npm install --global --production windows-build-tools >NUL

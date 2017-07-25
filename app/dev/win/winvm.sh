@@ -43,6 +43,15 @@ ADMIN_PASS='admin'
 RESOURCE_DIR="${THISDIR}/tmp"
 mkdir -p "$RESOURCE_DIR"
 
+LOGPREFIX=""
+
+log() {
+    echo "$LOGPREFIX" $*
+}
+setlogprefix() {
+    LOGPREFIX="$1"
+}
+
 do_usage() {
     cat <<EOF
 Usage:
@@ -75,6 +84,7 @@ do_destroy() {
 
 
 do_create() {
+    setlogprefix "[do_create]"
     if vboxmanage showvminfo "$VMNAME" >/dev/null 2>/dev/null; then
         echo "$VMNAME already exists"
     else
@@ -98,6 +108,7 @@ do_create() {
     ensure_snapshot genesis
     ensure_snapshot admin genesis
     ensure_snapshot node admin
+    ensure_snapshot buildtools node
 }
 
 do_start() {
@@ -105,12 +116,13 @@ do_start() {
 }
 
 do_up() {
+    setlogprefix "[do_up]"
     do_create
     ensure_booted
 }
 
 do_restore() {
-    restore_to "${1:-node}"
+    restore_to "${1:-buildtools}"
 }
 
 guestcontrol() {
@@ -133,11 +145,11 @@ admincmd() {
 }
 
 ensure_off() {
-    if ! vboxmanage showvminfo "$VMNAME" | grep "powered off"; then
+    if ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | grep "powered off" > /dev/null; then
         vboxmanage controlvm "$VMNAME" acpipowerbutton
     fi
     i="0"
-    while ! vboxmanage showvminfo "$VMNAME" | grep "powered off"; do
+    while ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | grep "powered off" > /dev/null; do
         let i="$i + 1"
         if [ "$i" -eq 30 ]; then
             vboxmanage controlvm "$VMNAME" poweroff
@@ -162,34 +174,36 @@ ensure_booted() {
 
 restore_to() (
     SNAPNAME=$1
+    setlogprefix "[restore_to $SNAPNAME]"
     echo "Restoring to $SNAPNAME"
     ensure_off
-    vboxmanage snapshot "$VMNAME" restore "$SNAPNAME"
+    vboxmanage snapshot "$VMNAME" restore "$SNAPNAME" 
 )
 
 ensure_snapshot() {
     SNAPNAME=$1
     BASE_SNAPSHOT=$2
+    setlogprefix "[snapshot ${SNAPNAME}]"
     if vboxmanage snapshot "$VMNAME" showvminfo "$SNAPNAME" >/dev/null 2>/dev/null; then
-        echo "$SNAPNAME snapshot already exists"
+        log "$SNAPNAME snapshot already exists"
     else
         if [ ! -z "$BASE_SNAPSHOT" ]; then
             restore_to "$BASE_SNAPSHOT"
         fi
-        echo
-        echo "Creating $SNAPNAME snapshot..."
+        log
+        log "Creating $SNAPNAME snapshot..."
 
         vboxmanage startvm "$VMNAME" --type headless
         if ! snapshot_${SNAPNAME}; then
-            echo "Error making snapshot :("
+            log "Error making snapshot :("
             exit 1
         fi
-        echo "Turning off machine..."
+        log "Turning off machine..."
         ensure_off
         vboxmanage snapshot "$VMNAME" \
             take "$SNAPNAME"
-        echo "Created $SNAPNAME snapshot"
-        echo
+        log "Created $SNAPNAME snapshot"
+        log
     fi
 }
 
@@ -291,13 +305,8 @@ snapshot_node() {
     echo
     echo "Installing node and yarn..."
     guestcontrol mkdir '/nodeinstallers/'
-    cmd 'xcopy x:\ c:\nodeinstallers\ /s /f'
+    cmd 'xcopy x:\ c:\nodeinstallers\ /s /f /Y'
     admincmd 'c:\nodeinstallers\win_installnode.bat'
-    admincmd 'c:\nodeinstallers\win_installbuildtools.bat'
-    admincmd 'c:\nodeinstallers\win_installbuildtools_post.bat'
-    cmd 'npm install -g node-gyp'
-    cmd 'npm config set msvs_version 2015'
-    cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
     echo "node: $(cmd 'node --version')"
     echo "yarn: $(cmd 'yarn --version')"
     echo "npm: $(cmd 'npm --version')"
@@ -307,6 +316,22 @@ snapshot_node() {
     cmd 'npm config list'
     echo
     echo "Node installed"
+}
+
+snapshot_buildtools() {
+    echo
+    echo "Installing build tools..."
+    ensure_shared_folder project "$THISDIR"
+
+    cmd 'xcopy x:\ c:\nodeinstallers\ /s /f /Y'
+    admincmd 'c:\nodeinstallers\win_installbuildtools.bat'
+    admincmd 'c:\nodeinstallers\win_installbuildtools_post.bat'
+    cmd 'npm config set msvs_version 2015'
+    cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
+    cmd 'npm install -g node-gyp'
+    cmd 'set'
+    echo
+    echo "Build tools installed"
 }
 
 share_directory() {
