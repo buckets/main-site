@@ -12,7 +12,7 @@
     "start": "electron .",
     "compile": "tsc",
     "test": "./test.sh",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "install-app-deps"
   },
   "dependencies": {
     "@types/mathjs": "0.0.34",

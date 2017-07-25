@@ -1,7 +1,7 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, session, protocol} from 'electron'
+import {app, session, protocol, BrowserWindow} from 'electron'
 import * as log from 'electron-log'
 import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
@@ -72,6 +72,8 @@ app.on('ready', function() {
     BudgetFile.openFile(openfirst);
   } else if (process.env.DEBUG) {
     BudgetFile.openFile('/tmp/test.buckets');  
+  } else {
+    openWizard();
   }
 });
 app.on('window-all-closed', () => {
@@ -79,3 +81,32 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+
+let default_win:Electron.BrowserWindow;
+function openWizard() {
+  if (default_win) {
+    default_win.focus();
+    return;
+  }
+  default_win = new BrowserWindow({
+    width: 400,
+    height: 400,
+    show: false,
+  });
+  default_win.once('ready-to-show', () => {
+    default_win.show();
+  })
+
+  let path = Path.join(APP_ROOT, 'src/wwwroot/misc/wizard.html');
+  path = `file://${path}`
+  default_win.loadURL(path);
+  default_win.on('close', ev => {
+    default_win = null;
+  })
+}
+export function closeWizard() {
+  if (default_win) {
+    default_win.close();
+  }
+}
