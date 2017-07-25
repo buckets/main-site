@@ -12,8 +12,9 @@ setx PYTHON C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
 setx PATH "%PATH%;C:\Users\IEUser\.windows-build-tools\python27"
 set
-call npm install -g node-gyp && call yarn && echo done
+cmd /c npm install -g node-gyp
+cmd /c yarn --non-interactive --ignore-scripts
 
 x:
-call yarn compile
+cmd /c yarn compile
 c:\cache\node_modules\.bin\build --win

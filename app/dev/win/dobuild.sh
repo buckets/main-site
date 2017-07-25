@@ -55,7 +55,7 @@ guestcontrol() {
     vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $*
 }
 cmd() {
-    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
+    vboxmanage guestcontrol "$VMNAME" -vvvv run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
 }
 admincmd() {
     vboxmanage guestcontrol "$VMNAME" run --username "$ADMIN_USER" --password "$ADMIN_PASS" -- cmd.exe /c $*
