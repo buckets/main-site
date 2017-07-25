@@ -55,7 +55,7 @@ guestcontrol() {
     vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $*
 }
 cmd() {
-    vboxmanage guestcontrol "$VMNAME" -vvvv run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
+    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
 }
 admincmd() {
     vboxmanage guestcontrol "$VMNAME" run --username "$ADMIN_USER" --password "$ADMIN_PASS" -- cmd.exe /c $*
@@ -91,9 +91,9 @@ set -e
 h1 "Building the app..."
 set -x
 cmd 'x:\dev\win\win_build.bat'
-# cmd "net use x: \\\\vboxsvr\\${SHARE_NAME} ; wmic logicaldisk get name"
-# cmd 'x:\dev\win\win_installnode.bat'
+vboxmanage guestcontrol "$VMNAME" \
+    -vvvv run \
+    --username "$WIN_USER" --password "$WIN_PASS" \
+    --putenv GH_TOKEN="$GH_TOKEN" \
+    -- cmd.exe /c $*
 
-# guestcontrol mkdir '/foobar/'
-# guestcontrol copyto --follow --target-directory '/foobar/' "${BUILD_DIR}"
-# cmd dir 'C:\foobar\'

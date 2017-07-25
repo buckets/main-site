@@ -16,3 +16,6 @@ node_modules/.bin/build --mac -p always
 
 # linux
 dev/linux_build.sh
+
+# windows
+dev/win/dobuild.sh "$(pwd)"
