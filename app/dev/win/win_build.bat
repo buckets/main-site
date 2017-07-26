@@ -13,4 +13,5 @@ set
 cmd /c npm install -g node-gyp
 cmd /c yarn --non-interactive --ignore-scripts
 cmd /c yarn compile
-
+cmd /c c:\app\node_modules\.bin\build --win
+xcopy c:\app\dist\ x:\dist /s /Y 

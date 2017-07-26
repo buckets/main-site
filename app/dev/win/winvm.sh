@@ -62,6 +62,8 @@ Usage:
     $0 destroy      -- destroy $VMNAME vm
     $0 up           -- create and start $VMNAME vm
     $0 build DIR    -- build an electron app at DIR
+    $0 rebuild DIR  -- rebuild an electron app at DIR
+                       that has already been built
     $0 publish DIR  -- publish an electron app at DIR
     $0 name         -- get $VMNAME
 EOF
@@ -132,9 +134,19 @@ do_build() {
         echo "You must specify the APPDIR"
         exit 1
     fi
-    do_create
+    do_up
     ensure_shared_folder project "$APPDIR"
     cmd 'c:\builder\win_build.bat'
+}
+
+do_rebuild() {
+    APPDIR=$1
+    if [ -z "$APPDIR" ]; then
+        echo "You must specify the APPDIR"
+        exit 1
+    fi
+    do_up
+    cmd 'c:\builder\win_build.bat'   
 }
 
 do_publish() {

@@ -18,4 +18,4 @@ node_modules/.bin/build --mac -p always
 dev/linux_build.sh
 
 # windows
-dev/win/dobuild.sh "$(pwd)"
+dev/win/winvm.sh publish "$(pwd)"
