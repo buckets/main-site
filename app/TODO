@@ -1,11 +1,14 @@
 Need:
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
- ☐ On Windows, always have at least one window open (so that you can actually use the app)
  
 
 Want:
  ☐ Import OFX
+ ☐ Improve nagging
+   ☐ Only nag after the app has been installed for a month
+   ☐ Only nag once after 
+   ☐ Create a "Buckets License" bucket for trial version
  ☐ Delete groups
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Label window so you know which file is which
@@ -20,7 +23,7 @@ Want:
    ☐ And make it so that you don't have to render in order to get the year/month
    ☐ Or redirect.
  ☐ Delete (retire) accounts
- ☐ Show only debt buckets
+ ☐ Show only debt buckets filter
  ☐ Show Income/expenses average over the last 3 months
  ☐ Add a pop up calculator
  ☐ Alert that there's uncategorized transactions in previous months.
@@ -32,6 +35,7 @@ Want:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ On Windows, always have at least one window open (so that you can actually use the app) @done (17-07-25 20:59) @project(Need)
  ✔ Allow for goals with no deposit amount. @done (17-07-20 21:44) @project(Need)
  ✔ There needs to be a way to submit bugs @done (17-07-20 21:33) @project(Need)
  ✔ There needs to be a way to submit log files @done (17-07-20 21:26) @project(Need)
