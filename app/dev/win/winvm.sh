@@ -4,7 +4,6 @@ set -e
 
 CMD=${1:-usage}
 
-
 THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
 
 # # Windows 10
@@ -14,7 +13,7 @@ THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.ar
 # ZIP_FILENAME="Win10.VirtualBox.zip"
 
 # # Windows 8
-VMNAME=${2:-win8builder}
+VMNAME=${VMNAME:-win8builder}
 ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win8.1.For.Windows.VirtualBox.zip"
 OVA_FILENAME="Win8.ova"
 ZIP_FILENAME="Win8.VirtualBox.zip"
@@ -56,13 +55,15 @@ do_usage() {
     cat <<EOF
 Usage:
 
-    $0 help     -- see this help.  See?
-    $0 create   -- create $VMNAME vm
-    $0 start    -- start $VMNAME vm
-    $0 stop     -- stop $VMNAME vm
-    $0 destroy  -- destroy $VMNAME vm
-    $0 up       -- create and start $VMNAME vm
-    $0 name     -- get $VMNAME
+    $0 help         -- see this help.  See?
+    $0 create       -- create $VMNAME vm
+    $0 start        -- start $VMNAME vm
+    $0 stop         -- stop $VMNAME vm
+    $0 destroy      -- destroy $VMNAME vm
+    $0 up           -- create and start $VMNAME vm
+    $0 build DIR    -- build an electron app at DIR
+    $0 publish DIR  -- publish an electron app at DIR
+    $0 name         -- get $VMNAME
 EOF
 }
 do_help() {
@@ -123,6 +124,27 @@ do_up() {
 
 do_restore() {
     restore_to "${1:-buildtools}"
+}
+
+do_build() {
+    APPDIR=$1
+    if [ -z "$APPDIR" ]; then
+        echo "You must specify the APPDIR"
+        exit 1
+    fi
+    do_create
+    ensure_shared_folder project "$APPDIR"
+    cmd 'c:\builder\win_build.bat'
+}
+
+do_publish() {
+    APPDIR=$1
+    if [ -z "$APPDIR" ]; then
+        echo "You must specify the APPDIR"
+        exit 1
+    fi
+    do_build "$APPDIR"
+    cmd 'c:\builder\win_publish.bat'
 }
 
 guestcontrol() {
@@ -304,9 +326,9 @@ snapshot_node() {
 
     echo
     echo "Installing node and yarn..."
-    guestcontrol mkdir '/nodeinstallers/'
-    cmd 'xcopy x:\ c:\nodeinstallers\ /s /f /Y'
-    admincmd 'c:\nodeinstallers\win_installnode.bat'
+    guestcontrol mkdir '/builder/'
+    cmd 'xcopy x:\ c:\builder\ /s /f /Y'
+    admincmd 'c:\builder\win_installnode.bat'
     echo "node: $(cmd 'node --version')"
     echo "yarn: $(cmd 'yarn --version')"
     echo "npm: $(cmd 'npm --version')"
@@ -323,9 +345,9 @@ snapshot_buildtools() {
     echo "Installing build tools..."
     ensure_shared_folder project "$THISDIR"
 
-    cmd 'xcopy x:\ c:\nodeinstallers\ /s /f /Y'
-    admincmd 'c:\nodeinstallers\win_installbuildtools.bat'
-    admincmd 'c:\nodeinstallers\win_installbuildtools_post.bat'
+    cmd 'xcopy x:\ c:\builder\ /s /f /Y'
+    admincmd 'c:\builder\win_installbuildtools.bat'
+    admincmd 'c:\builder\win_installbuildtools_post.bat'
     cmd 'npm config set msvs_version 2015'
     cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
     cmd 'npm install -g node-gyp'
@@ -339,4 +361,4 @@ share_directory() {
 
 }
 
-do_${CMD}
+do_${CMD} "${@:2}"
