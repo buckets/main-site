@@ -11,19 +11,113 @@
     margin: 0;
     padding: 0;
     height: 100%;
+    width: 100%;
     background-color: var(--logoblue);
     overflow: hidden;
   }
+  * {
+    box-sizing: border-box;
+  }
   body {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
-    .logo {
-      height: 100%;
-      text-align: center;
-    }
+  .close-button {
+    padding: .3rem 1rem;
+    font-size: 2rem;
+    color: white;
+    opacity: .7;
+    position: fixed;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+  }
+  .close-button:hover {
+    opacity: 1;
+  }
+  .logo-holder {
+    padding: 1rem;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+  }
+  .logo {
+    width: 80%;
+    text-align: center;
+  }
+  .content {
+    background-color: var(--darkblue);
+    flex-grow: 1;
+    flex-basis: 50%;
+  }
+  .section {
+    padding: 1rem 0;
+    margin: 0rem 2rem;
+    text-align: left;
+  }
+  .overline {
+    border-top: 1px solid rgba(255,255,255, 0.2);
+  }
+  a {
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    font-size: 1rem;
+    text-overflow: clip;
+    overflow: hidden;
+    display: block;
+    border-radius: 3px;
+    padding: .5rem;
+    margin: .5rem 0;
+    color: white;
+    background: var(--darker-darkblue);
+  }
+  a:hover {
+    opacity: 1;
+    cursor: pointer;
+    background-color: var(--yellow);
+    color: var(--darker-darkblue);
+  }
   </style>
 </head>
 <body>
-  <img class="logo" src="../assets/img/logo.png">
+  <div class="logo-holder">
+    <img class="logo" src="../assets/img/logo.png">
+  </div>
+  <div class="close-button" id="close-button">
+    &times;
+  </div>
+  <div class="content">
+    <div class="section">
+      <a href="#" id="new-budget">New budget</a>
+    </div>
+    <!-- <div class="section overline">
+      <a>~/Documents/mybudget.buckets</a>
+      <a>~/Documents/myother.buckets</a>
+    </div> -->
+  </div>
+  <script>
+  const req = function() {
+    const {remote} = require('electron');
+    const Path = require('path');
+    const appPath = remote.app.getAppPath();
+    return (module) => {
+      if (module.startsWith('.') || module.startsWith('/')) {
+        return require(Path.resolve(appPath, module))
+      } else {
+        return require(module);
+      }
+    }
+  }();
+
+  const { remote, ipcRenderer } = req('electron');
+  document.getElementById('close-button').addEventListener('click', () => {
+    remote.getCurrentWindow().close();
+  }, false)
+  document.getElementById('new-budget').addEventListener('click', () => {
+    ipcRenderer.send('new-budget');
+  }, false);
+  </script>
 </body>
 </html>

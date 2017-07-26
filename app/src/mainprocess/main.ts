@@ -8,7 +8,7 @@ import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
 import { adjustTrialMenu } from './menu'
-import {BudgetFile} from './files'
+import { BudgetFile, watchForEvents } from './files'
 import {APP_ROOT} from './globals'
 import { isRegistered, eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
@@ -81,6 +81,12 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    openWizard();
+  }
+})
+watchForEvents(app);
 
 
 let default_win:Electron.BrowserWindow;
@@ -90,9 +96,11 @@ function openWizard() {
     return;
   }
   default_win = new BrowserWindow({
-    width: 400,
-    height: 400,
+    width: 300,
+    height: 600,
     show: false,
+    center: true,
+    frame: false,
   });
   default_win.once('ready-to-show', () => {
     default_win.show();

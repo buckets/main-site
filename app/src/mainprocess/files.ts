@@ -1,5 +1,5 @@
 import * as log from 'electron-log'
-import {dialog, BrowserWindow} from 'electron';
+import { ipcMain, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
@@ -115,5 +115,11 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
     }, (filename) => {
       resolve(BudgetFile.openFile(filename));
     })
+  })
+}
+
+export function watchForEvents(app:Electron.App) {
+  ipcMain.on('new-budget', () => {
+    newBudgetFileDialog();
   })
 }
