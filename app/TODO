@@ -1,8 +1,5 @@
 Announce pre v1.0.0:
  ☐ Fix Windows
-   ✔ Path issue (buckets://UUID/budget/index.html#/y2017m7C:\y2017m7\accounts) @done (17-07-27 10:14)
-   ✔ Wizard close button not pressable @done (17-07-27 10:14)
-   ✔ There needs to be a line on the top of the header @done (17-07-27 10:14)
    ☐ Double-click budget file should open file
  ☐ Improve nagging
    ☐ Only nag after the app has been installed for a month
@@ -15,9 +12,7 @@ v1.0.0:
    ☐ When you click to categorize, focus on the first dropdown
  ☐ Import OFX
  ☐ Timeout syncing (like if there's no internet connection)
- ☐ Open Recent Files...
  ☐ Make sure logs roll
- ☐ Add "Open File..." to Wizard
  
 
 Backlog:
@@ -43,6 +38,11 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Open Recent Files... @done (17-07-27 12:21) @project(v1.0.0)
+ ✔ Add "Open File..." to Wizard @done (17-07-27 12:21) @project(v1.0.0)
+ ✔ Wizard close button not pressable @done (17-07-27 10:14) @project(Announce pre v1.0.0)
+ ✔ There needs to be a line on the top of the header @done (17-07-27 10:14) @project(Announce pre v1.0.0)
+ ✔ Path issue (buckets://UUID/budget/index.html#/y2017m7C:\y2017m7\accounts) @done (17-07-27 10:14) @project(Announce pre v1.0.0)
  ✔ On Windows, always have at least one window open (so that you can actually use the app) @done (17-07-25 20:59) @project(Need)
  ✔ Allow for goals with no deposit amount. @done (17-07-20 21:44) @project(Need)
  ✔ There needs to be a way to submit bugs @done (17-07-20 21:33) @project(Need)
