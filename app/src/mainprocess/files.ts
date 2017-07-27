@@ -5,6 +5,7 @@ import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
 import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
+import { addRecentFile } from './persistent'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -30,6 +31,8 @@ export class BudgetFile {
   }
   async start() {
     log.debug('start', this.filename);
+
+    addRecentFile(this.filename);
 
     // connect to database
     await this.store.open();
@@ -120,7 +123,10 @@ export function watchForEvents(app:Electron.App) {
   ipcMain.on('new-budget', () => {
     newBudgetFileDialog();
   })
-  ipcMain.on('open-file', () => {
+  ipcMain.on('open-file-dialog', () => {
     openDialog();
+  })
+  ipcMain.on('open-file', (ev, path) => {
+    BudgetFile.openFile(path);
   })
 }

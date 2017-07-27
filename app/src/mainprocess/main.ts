@@ -7,7 +7,7 @@ import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
-import { adjustTrialMenu } from './menu'
+import { updateMenu } from './menu'
 import { BudgetFile, watchForEvents } from './files'
 import {APP_ROOT} from './globals'
 import { isRegistered, eventuallyNag } from './drm'
@@ -39,24 +39,28 @@ app.on('ready', () => {
 })
 
 // A file was double-clicked
-let openfirst;
+let openfirst:string[] = [];
 app.on('will-finish-launching', () => {
   app.on('open-file', function(event, path) {
     if (app.isReady()) {
       BudgetFile.openFile(path);
     } else {
-      openfirst = path;
+      openfirst.push(path);
     }
     event.preventDefault();
   })
 })
 if (electron_is.windows()) {
-  log.info('process.argv', process.argv);
+  process.argv.forEach(arg => {
+    if (arg.endsWith('.buckets')) {
+      openfirst.push(arg);
+    }
+  })
 }
 
 app.on('ready', function() {
   // Create the Menu
-  adjustTrialMenu();
+  updateMenu();
 
   // Nag screen
   if (!isRegistered()) {
@@ -71,8 +75,10 @@ app.on('ready', function() {
   // new BrowserWindow({width: 400, height: 300});
 
   // For now, open a standard file for testing
-  if (openfirst) {
-    BudgetFile.openFile(openfirst);
+  if (openfirst.length) {
+    while (openfirst.length) {
+      BudgetFile.openFile(openfirst.shift());  
+    }
   } else if (process.env.DEBUG) {
     BudgetFile.openFile('/tmp/test.buckets');  
   } else {
@@ -105,7 +111,7 @@ function openWizard() {
   }
   wiz_win = new BrowserWindow({
     width: 250,
-    height: 550,
+    height: 600,
     show: false,
     center: true,
     frame: false,

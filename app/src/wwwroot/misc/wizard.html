@@ -78,6 +78,9 @@
     color: white;
     text-align: center;
   }
+  .section.recents {
+    flex-grow: 1;
+  }
   .section {
     padding: 1rem 0;
     margin: 0rem 2rem;
@@ -86,7 +89,7 @@
   .overline {
     border-top: 1px solid rgba(255,255,255, 0.2);
   }
-  a {
+  a.button {
     text-decoration: none;
     text-align: center;
     font-size: 1rem;
@@ -99,11 +102,50 @@
     color: var(--darker-darkblue);
     background: rgba(255,255,255,1);
   }
-  a:hover {
+  a.button:hover {
     opacity: 1;
     cursor: pointer;
     background-color: var(--yellow);
     color: var(--darker-darkblue);
+  }
+  a.document {
+    text-decoration: none;
+    text-align: left;
+    font-size: 1rem;
+    text-overflow: ellipsis initial;
+    overflow: hidden;
+    display: block;
+    padding: .25rem;
+    margin: .25rem -0.25rem;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+
+    display: flex;
+    align-items: center;
+  }
+  a.document img {
+    height: 2rem;
+    width: 2rem;
+    flex-basis: 2rem;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-right: .2rem;
+  }
+  a.document .guts {
+    display: flex;
+    flex-direction: column;
+  }
+  a.document .title {
+
+  }
+  
+  a.document .details {
+    font-size: .7rem;
+    opacity: 0.4;
+  }
+  a.document:hover {
+    background-color: rgba(255,255,255,0.1);
   }
   </style>
 </head>
@@ -120,13 +162,11 @@
   
   <div class="content">
     <div class="section">
-      <a href="#" id="new-budget">New Budget...</a>
-      <a href="#" id="open-file">Open Budget...</a>
+      <a class="button" href="#" id="new-budget">New Budget...</a>
+      <a class="button" href="#" id="open-file-dialog">Open Budget...</a>
     </div>
-    <!-- <div class="section overline">
-      <a>~/Documents/mybudget.buckets</a>
-      <a>~/Documents/myother.buckets</a>
-    </div> -->
+    <div class="section overline recents" id="recent-list">
+    </div>
     <div class="section copyright">
       <span class="fa fa-copyright"></span> Buckets, LLC
     </div>
@@ -145,15 +185,52 @@
     }
   }();
 
+  const Path = require('path');
   const { remote, ipcRenderer } = req('electron');
+  const { getRecentFiles } = req('./src/mainprocess/persistent')
   document.getElementById('close-button').addEventListener('click', () => {
     remote.getCurrentWindow().close();
   }, false)
   document.getElementById('new-budget').addEventListener('click', () => {
     ipcRenderer.send('new-budget');
   }, false);
-  document.getElementById('open-file').addEventListener('click', () => {
-    ipcRenderer.send('open-file');
+  document.getElementById('open-file-dialog').addEventListener('click', () => {
+    ipcRenderer.send('open-file-dialog');
+  })
+  let recent_list = document.getElementById('recent-list');
+  getRecentFiles()
+  .then(recentFiles => {
+    recentFiles.forEach(path => {
+      let parsed = Path.parse(path);
+      let a = document.createElement('a');
+      a.setAttribute('href', '#');
+      a.classList.add('document');
+      a.addEventListener('click', (ev) => {
+        ipcRenderer.send('open-file', path);
+        ev.preventDefault();
+        return false;
+      }, false);
+
+      let icon = document.createElement('img');
+      icon.src = '../assets/img/doc_icon.png';
+      a.appendChild(icon);
+
+      let guts = document.createElement('div');
+      guts.classList.add('guts');
+      a.appendChild(guts);
+
+      let title = document.createElement('span');
+      title.classList.add('title');
+      title.innerText = parsed.name;
+      guts.appendChild(title);
+
+      let details = document.createElement('span');
+      details.classList.add('details');
+      details.innerText = parsed.dir;
+      guts.appendChild(details);
+
+      recent_list.appendChild(a);
+    })
   })
   </script>
 </body>
