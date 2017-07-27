@@ -96,8 +96,8 @@ function openWizard() {
     return;
   }
   default_win = new BrowserWindow({
-    width: 300,
-    height: 600,
+    width: 250,
+    height: 550,
     show: false,
     center: true,
     frame: false,
