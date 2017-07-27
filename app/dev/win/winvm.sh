@@ -4,7 +4,11 @@ set -e
 
 CMD=${1:-usage}
 
-THISDIR=$(python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$0");
+abspath() (
+    python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$1"
+)
+
+THISDIR=$(abspath "$0")
 
 # # Windows 10
 # VMNAME=${2:-win10builder}
@@ -134,6 +138,7 @@ do_build() {
         echo "You must specify the APPDIR"
         exit 1
     fi
+    APPDIR=$(abspath "$APPDIR")
     do_up
     ensure_shared_folder project "$APPDIR"
     cmd 'c:\builder\win_build.bat'
@@ -145,6 +150,7 @@ do_rebuild() {
         echo "You must specify the APPDIR"
         exit 1
     fi
+    APPDIR=$(abspath "$APPDIR")
     do_up
     cmd 'c:\builder\win_build.bat'   
 }
@@ -155,6 +161,7 @@ do_publish() {
         echo "You must specify the APPDIR"
         exit 1
     fi
+    APPDIR=$(abspath "$APPDIR")
     do_build "$APPDIR"
     cmd 'c:\builder\win_publish.bat'
 }
