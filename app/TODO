@@ -1,26 +1,30 @@
-Need:
- ☐ Format categorizing thing better
-   ☐ When you click to categorize, focus on the first dropdown
+Announce pre v1.0.0:
  ☐ Fix Windows
    ☐ Path issue (buckets://UUID/budget/index.html#/y2017m7C:\y2017m7\accounts)
    ☐ Wizard close button not pressable
- 
-
-Want:
- ☐ Import OFX
  ☐ Improve nagging
    ☐ Only nag after the app has been installed for a month
    ☐ Only nag once after 
    ☐ Create a "Buckets License" bucket for trial version
- ☐ Delete groups
+   ☐ Only nag if the window is focused
+
+v1.0.0:
+ ☐ Format categorizing thing better
+   ☐ When you click to categorize, focus on the first dropdown
+ ☐ Import OFX
  ☐ Timeout syncing (like if there's no internet connection)
+ ☐ Open Recent Files...
+ ☐ Make sure logs roll
+ 
+
+Backlog:
+ ☐ Delete groups
  ☐ Label window so you know which file is which
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
  ☐ Import CSV
  ☐ Export CSV
- ☐ Open Recent Files...
  ☐ Automatically sync so the users don't have to
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
@@ -30,9 +34,7 @@ Want:
  ☐ Show Income/expenses average over the last 3 months
  ☐ Add a pop up calculator
  ☐ Alert that there's uncategorized transactions in previous months.
- ☐ Only nag if the window is focused
  ☐ Chat for help
- ☐ Make sure logs roll
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
  ☐ Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Categorizer component.
 
