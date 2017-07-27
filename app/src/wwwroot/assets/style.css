@@ -145,6 +145,9 @@ button {
   border-bottom: 1px solid var(--lighter-grey);;
   flex-shrink: 0;
 }
+.os-windows .app .content header {
+  border-top: 1px solid var(--lighter-grey);
+}
 .app .content .page {
   flex-grow: 1;
   flex-basis: 1px;

@@ -3,6 +3,7 @@
 set -e
 
 CMD=${1:-usage}
+VMOSTYPE=${VMOSTYPE:-win8}
 
 abspath() (
     python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$1"
@@ -10,23 +11,20 @@ abspath() (
 
 THISDIR=$(abspath "$0")
 
-# # Windows 10
-# VMNAME=${2:-win10builder}
-# ISO_URL="https://az792536.vo.msecnd.net/vms/VMBuild_20170320/VirtualBox/MSEdge/MSEdge.Win10.RS2.VirtualBox.zip"
-# OVA_FILENAME="Win10.ova"
-# ZIP_FILENAME="Win10.VirtualBox.zip"
-
-# # Windows 8
-VMNAME=${VMNAME:-win8builder}
-ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win8.1.For.Windows.VirtualBox.zip"
-OVA_FILENAME="Win8.ova"
-ZIP_FILENAME="Win8.VirtualBox.zip"
-
-# Windows 7
-# VMNAME=${2:-win7builder}
-# ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE10/Windows/IE10.Win7.For.Windows.VirtualBox.zip"
-# OVA_FILENAME="Win7.ova"
-# ZIP_FILENAME="Win7.VirtualBox.zip"
+if [ "$VMOSTYPE" == "win10" ]; then
+    VMNAME=${VMNAME:-win10builder}
+    ISO_URL="https://az792536.vo.msecnd.net/vms/VMBuild_20170320/VirtualBox/MSEdge/MSEdge.Win10.RS2.VirtualBox.zip"
+    OVA_FILENAME="Win10.ova"
+    ZIP_FILENAME="Win10.VirtualBox.zip"
+elif [ "$VMOSTYPE" == "win8" ]; then
+    VMNAME=${VMNAME:-win8builder}
+    ISO_URL="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win8.1.For.Windows.VirtualBox.zip"
+    OVA_FILENAME="Win8.ova"
+    ZIP_FILENAME="Win8.VirtualBox.zip"
+else
+    echo "Unknown VMOSTYPE: $VMOSTYPE"
+    exit 1
+fi
 
 ISO_DIR=${ISO_DIR:-${HOME}/iso}
 OVA_PATH="${ISO_DIR}/${OVA_FILENAME}"
@@ -133,37 +131,25 @@ do_restore() {
 }
 
 do_build() {
-    APPDIR=$1
-    if [ -z "$APPDIR" ]; then
-        echo "You must specify the APPDIR"
-        exit 1
-    fi
+    APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_up
     ensure_shared_folder project "$APPDIR"
-    cmd 'c:\builder\win_build.bat'
+    echo | cmd 'c:\builder\win_build.bat'
 }
 
 do_rebuild() {
-    APPDIR=$1
-    if [ -z "$APPDIR" ]; then
-        echo "You must specify the APPDIR"
-        exit 1
-    fi
+    APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_up
-    cmd 'c:\builder\win_build.bat'   
+    echo | cmd 'c:\builder\win_build.bat'   
 }
 
 do_publish() {
-    APPDIR=$1
-    if [ -z "$APPDIR" ]; then
-        echo "You must specify the APPDIR"
-        exit 1
-    fi
+    APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_build "$APPDIR"
-    cmd 'c:\builder\win_publish.bat'
+    echo | cmd 'c:\builder\win_build.bat publish'
 }
 
 guestcontrol() {
@@ -172,11 +158,16 @@ guestcontrol() {
 }
 cmd() {
     set -e
-    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- cmd.exe /c $*
+    vboxmanage guestcontrol "$VMNAME" run \
+        --username "$WIN_USER" --password "$WIN_PASS" \
+        -- cmd.exe /c $*
 }
-run() {
+nohangcmd() {
     set -e
-    vboxmanage guestcontrol "$VMNAME" run --username "$WIN_USER" --password "$WIN_PASS" -- $*
+    vboxmanage guestcontrol "$VMNAME" run \
+        --username "$WIN_USER" --password "$WIN_PASS" \
+        --no-wait-stdout --no-wait-stderr \
+        -- cmd.exe /c $*
 }
 admincmd() {
     set -e

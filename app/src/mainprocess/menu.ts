@@ -15,14 +15,14 @@ let FileMenu = {
       }
     },
     {
-      label: 'New Budget',
+      label: 'New Budget...',
       accelerator: 'CmdOrCtrl+Shift+N',
       click() {
         newBudgetFileDialog();
       }
     },
     {
-      label: 'Open...',
+      label: 'Open Budget...',
       accelerator: 'CmdOrCtrl+O',
       click() {
         openDialog();

@@ -1,7 +1,9 @@
 Announce pre v1.0.0:
  ☐ Fix Windows
-   ☐ Path issue (buckets://UUID/budget/index.html#/y2017m7C:\y2017m7\accounts)
-   ☐ Wizard close button not pressable
+   ✔ Path issue (buckets://UUID/budget/index.html#/y2017m7C:\y2017m7\accounts) @done (17-07-27 10:14)
+   ✔ Wizard close button not pressable @done (17-07-27 10:14)
+   ✔ There needs to be a line on the top of the header @done (17-07-27 10:14)
+   ☐ Double-click budget file should open file
  ☐ Improve nagging
    ☐ Only nag after the app has been installed for a month
    ☐ Only nag once after 

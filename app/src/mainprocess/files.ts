@@ -5,7 +5,6 @@ import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
 import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
-import { closeWizard } from './main';
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -39,7 +38,6 @@ export class BudgetFile {
 
     // open default windows
     this.openDefaultWindows();
-    closeWizard();
     return this;
   }
   async stop() {
@@ -121,5 +119,8 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
 export function watchForEvents(app:Electron.App) {
   ipcMain.on('new-budget', () => {
     newBudgetFileDialog();
+  })
+  ipcMain.on('open-file', () => {
+    openDialog();
   })
 }

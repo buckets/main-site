@@ -120,7 +120,8 @@
   
   <div class="content">
     <div class="section">
-      <a href="#" id="new-budget">New budget</a>
+      <a href="#" id="new-budget">New Budget...</a>
+      <a href="#" id="open-file">Open Budget...</a>
     </div>
     <!-- <div class="section overline">
       <a>~/Documents/mybudget.buckets</a>
@@ -151,6 +152,9 @@
   document.getElementById('new-budget').addEventListener('click', () => {
     ipcRenderer.send('new-budget');
   }, false);
+  document.getElementById('open-file').addEventListener('click', () => {
+    ipcRenderer.send('open-file');
+  })
   </script>
 </body>
 </html>

@@ -48,8 +48,11 @@ app.on('will-finish-launching', () => {
       openfirst = path;
     }
     event.preventDefault();
-  })  
+  })
 })
+if (electron_is.windows()) {
+  log.info('process.argv', process.argv);
+}
 
 app.on('ready', function() {
   // Create the Menu
@@ -86,35 +89,40 @@ app.on('activate', () => {
     openWizard();
   }
 })
+app.on('browser-window-created', (ev, win) => {
+  if (win !== wiz_win) {
+    closeWizard();
+  }
+})
 watchForEvents(app);
 
 
-let default_win:Electron.BrowserWindow;
+let wiz_win:Electron.BrowserWindow;
 function openWizard() {
-  if (default_win) {
-    default_win.focus();
+  if (wiz_win) {
+    wiz_win.focus();
     return;
   }
-  default_win = new BrowserWindow({
+  wiz_win = new BrowserWindow({
     width: 250,
     height: 550,
     show: false,
     center: true,
     frame: false,
   });
-  default_win.once('ready-to-show', () => {
-    default_win.show();
+  wiz_win.once('ready-to-show', () => {
+    wiz_win.show();
   })
 
   let path = Path.join(APP_ROOT, 'src/wwwroot/misc/wizard.html');
   path = `file://${path}`
-  default_win.loadURL(path);
-  default_win.on('close', ev => {
-    default_win = null;
+  wiz_win.loadURL(path);
+  wiz_win.on('close', ev => {
+    wiz_win = null;
   })
 }
 export function closeWizard() {
-  if (default_win) {
-    default_win.close();
+  if (wiz_win) {
+    wiz_win.close();
   }
 }
