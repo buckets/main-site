@@ -1,6 +1,9 @@
 Announce pre v1.0.0:
  ☐ Fix Windows
    ☐ Double-click budget file should open file
+   ☐ Top bar doesn't update
+   ☐ Money input doesn't seem to update right
+   ☐ What's going on?
  ☐ Improve nagging
    ☐ Only nag after the app has been installed for a month
    ☐ Only nag once after 
