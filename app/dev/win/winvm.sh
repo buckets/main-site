@@ -152,6 +152,13 @@ do_publish() {
     echo | cmd 'c:\builder\win_build.bat publish'
 }
 
+do_dev() {
+    APPDIR=${1:-.}
+    APPDIR=$(abspath "$APPDIR")
+    do_up
+    echo | cmd 'c:\builder\win_build.bat dev'
+}
+
 guestcontrol() {
     set -e
     vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $*

@@ -13,7 +13,7 @@ fi
 
 TAG="buckets/linuxbuilder"
 echo "BUILDING..."
-docker build --file dev/linuxbuilder.Dockerfile -t $TAG .
+docker build --file dev/linux/linuxbuilder.Dockerfile -t $TAG .
 
 echo
 echo "RUNNING electron build..."

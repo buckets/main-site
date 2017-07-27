@@ -14,7 +14,11 @@ cmd /c yarn compile
 IF "%1"=="publish" (
     cmd /c c:\app\node_modules\.bin\build --win -p always >c:\app\dist\build.log
 ) ELSE (
-    cmd /c c:\app\node_modules\.bin\build --win >c:\app\dist\build.log
+    IF "%1"=="dev" (
+        cmd /c yarn start
+    ) ELSE (
+        cmd /c c:\app\node_modules\.bin\build --win >c:\app\dist\build.log
+    )
 )
 
 xcopy c:\app\dist x:\dist /s /Y 
