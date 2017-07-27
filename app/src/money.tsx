@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as cx from 'classnames';
 import * as math from 'mathjs';
 
+const ANIMATION_ENABLED = false;
 const _groupregex = new RegExp(',', "g");
 function fancyEval(x:string) {
   x = x.replace(_groupregex, '');
@@ -123,6 +124,9 @@ export class Money extends React.Component<MoneyProps, {
       anim_show_decimal: false,
     }
   }
+  toString() {
+    return `<Money value=${this.props.value} />`
+  }
   animateToNewValue(newval:number, duration:number=200) {
     let anim_show_decimal = !!(newval % 100) || !!(this.props.value % 100);
     this.setState({
@@ -171,7 +175,8 @@ export class Money extends React.Component<MoneyProps, {
     }
   }
   componentWillReceiveProps(nextProps:MoneyProps) {
-    if (!nextProps.noanimate && nextProps.value !== this.props.value) {
+    console.log(this.toString(), 'willReceiveProps', nextProps);
+    if (ANIMATION_ENABLED && !nextProps.noanimate && nextProps.value !== this.props.value) {
       this.animateToNewValue(nextProps.value);
     }
   }
@@ -183,7 +188,7 @@ export class Money extends React.Component<MoneyProps, {
   render() {
     let { value, className, hidezero, noanimate, nocolor, symbol, ...rest } = this.props;
     let going_up = true;
-    if (!noanimate) {
+    if (ANIMATION_ENABLED && !noanimate) {
       // animating
       going_up = value > this.state.current_value;
       value = this.state.current_value;

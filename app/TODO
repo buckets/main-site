@@ -1,9 +1,10 @@
 Announce pre v1.0.0:
  ☐ Fix Windows
-   ☐ Double-click budget file should open file
+   ✔ Double-click budget file should open file @done (17-07-27 16:45)
    ☐ Top bar doesn't update
    ☐ Money input doesn't seem to update right
    ☐ What's going on?
+   ☐ Animation doesn't work on linux or windows (or maybe it's the slow VM)
  ☐ Improve nagging
    ☐ Only nag after the app has been installed for a month
    ☐ Only nag once after 

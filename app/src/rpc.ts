@@ -117,11 +117,11 @@ export class RPCRendererStore implements IStore {
       method: method,
       params: args,
     }
-    // log.debug('CLIENT CALL', msg);
+    // log.debug('CLIENT CALL', msg.id, method);
     // console.trace();
     return new Promise((resolve, reject) => {
       ipcRenderer.once(`rpc-reply-${msg.id}`, (event, reply:RPCReply) => {
-        // log.debug('CLIENT RECV', reply);
+        // log.debug('CLIENT RECV', msg.id, method, reply.ok);
         if (reply.ok) {
           resolve(reply.value);
         } else {
