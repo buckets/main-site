@@ -1,6 +1,7 @@
 Announce pre v1.0.0:
  ☐ Have a web page for downloading
- ☐ Fix goal-deposit calcuation
+ ☐ Fix the typo in the screenshot
+ ✔ Fix goal-deposit calcuation @done (17-07-28 13:49)
     Right now, for goal=40, deposit=5, balance=25 when this month is Jul 2017, it predicts I'll reach the goal in Aug 2017 but it should be
     in Sep 2017
 
