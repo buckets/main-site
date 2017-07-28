@@ -77,14 +77,20 @@
     opacity: .5;
     color: white;
     text-align: center;
+    flex-shrink: 0;
+    padding: 1rem 0;
   }
   .section.recents {
     flex-grow: 1;
   }
   .section {
-    padding: 1rem 0;
+    padding: 1rem 0 0rem;
     margin: 0rem 2rem;
     text-align: left;
+  }
+  .section .label {
+    color: white;
+    margin-bottom: .75rem;
   }
   .overline {
     border-top: 1px solid rgba(255,255,255, 0.2);
@@ -166,7 +172,8 @@
       <a class="button" href="#" id="new-budget">New Budget...</a>
       <a class="button" href="#" id="open-file-dialog">Open Budget...</a>
     </div>
-    <div class="section overline recents" id="recent-list">
+    <div class="section recents" id="recent-list">
+      <div class="label">Recently used</div>
     </div>
     <div class="section copyright">
       <span class="fa fa-copyright"></span> Buckets, LLC
@@ -201,7 +208,7 @@
   let recent_list = document.getElementById('recent-list');
   getRecentFiles()
   .then(recentFiles => {
-    recentFiles.forEach(path => {
+    recentFiles.slice(0,4).forEach(path => {
       let parsed = Path.parse(path);
       let a = document.createElement('a');
       a.setAttribute('href', '#');

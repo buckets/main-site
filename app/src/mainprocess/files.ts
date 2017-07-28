@@ -103,7 +103,9 @@ export function openDialog() {
     ],
   }, (paths) => {
     if (paths) {
-      BudgetFile.openFile(paths[0]);
+      paths.forEach(path => {
+        BudgetFile.openFile(path);
+      })
     }
   })
 }
@@ -112,16 +114,24 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
       title: 'Buckets Budget Filename',
-      defaultPath: 'mybudget.buckets',
+      defaultPath: 'My Budget.buckets',
     }, (filename) => {
-      resolve(BudgetFile.openFile(filename));
+      if (filename) {
+        resolve(BudgetFile.openFile(filename));  
+      } else {
+        reject(new Error('No file chosen'));
+      }
     })
   })
 }
 
 export function watchForEvents(app:Electron.App) {
-  ipcMain.on('new-budget', () => {
-    newBudgetFileDialog();
+  ipcMain.on('new-budget', async () => {
+    try {
+      await newBudgetFileDialog()
+    } catch(err) {
+
+    }
   })
   ipcMain.on('open-file-dialog', () => {
     openDialog();
