@@ -1,15 +1,10 @@
 Announce pre v1.0.0:
- ☐ Fix Windows
-   ✔ Double-click budget file should open file @done (17-07-27 16:45)
-   ☐ Top bar doesn't update
-   ☐ Money input doesn't seem to update right
-   ☐ What's going on?
-   ☐ Animation doesn't work on linux or windows (or maybe it's the slow VM)
  ☐ Improve nagging
-   ☐ Only nag after the app has been installed for a month
-   ☐ Only nag once after 
+   ✔ Only nag after the app has been installed for a month @done (17-07-27 21:43)
+   ✔ Only nag once after @done (17-07-27 21:37)
    ☐ Create a "Buckets License" bucket for trial version
    ☐ Only nag if the window is focused
+ ☐ Have a web page for downloading
 
 v1.0.0:
  ☐ Format categorizing thing better
@@ -42,6 +37,12 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ What's going on? @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Top bar doesn't update @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Money input doesn't seem to update right @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Fix Windows @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Animation doesn't work on linux or windows (or maybe it's the slow VM) @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Double-click budget file should open file @done (17-07-27 16:45) @project(Announce pre v1.0.0)
  ✔ Open Recent Files... @done (17-07-27 12:21) @project(v1.0.0)
  ✔ Add "Open File..." to Wizard @done (17-07-27 12:21) @project(v1.0.0)
  ✔ Wizard close button not pressable @done (17-07-27 10:14) @project(Announce pre v1.0.0)

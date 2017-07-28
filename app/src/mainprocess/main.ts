@@ -10,7 +10,7 @@ import * as Path from 'path'
 import { updateMenu } from './menu'
 import { BudgetFile, watchForEvents } from './files'
 import {APP_ROOT} from './globals'
-import { isRegistered, eventuallyNag } from './drm'
+import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 
 autoUpdater.logger = log;
@@ -63,9 +63,7 @@ app.on('ready', function() {
   updateMenu();
 
   // Nag screen
-  if (!isRegistered()) {
-    eventuallyNag();
-  }
+  eventuallyNag();
 
   if (!electron_is.dev()) {
     checkForUpdates()

@@ -2,10 +2,12 @@ import { app, remote, ipcMain, ipcRenderer } from 'electron'
 import * as electron_is from 'electron-is'
 import * as Path from 'path'
 import * as fs from 'fs'
+import * as log from 'electron-log'
 import { updateMenu } from './menu'
 
 interface PersistentState {
   recentFiles: string[];
+  firstUseDate: string;
 }
 
 function stateFilename() {
@@ -13,16 +15,25 @@ function stateFilename() {
   return Path.join(real_app.getPath('userData'), 'state.json');
 }
 
-async function readState():Promise<PersistentState> {
+export async function readState():Promise<PersistentState> {
   let p = new Promise<PersistentState>((resolve, reject) => {
     fs.readFile(stateFilename(), 'utf8', (err, data) => {
       let result:PersistentState;
       if (err) {
         result = {
           recentFiles: [],
+          firstUseDate: null,
         }
       } else {
-        result = JSON.parse(data) as PersistentState;
+        try {
+          result = JSON.parse(data) as PersistentState;  
+        } catch(err) {
+          log.error(`Broken state: ${data}`)
+          result = {
+            recentFiles: [],
+            firstUseDate: null,
+          }
+        }
       }
       resolve(result);
     });
@@ -30,7 +41,30 @@ async function readState():Promise<PersistentState> {
   return p;
 }
 
-export async function modifyState(func:(state:PersistentState)=>(Promise<PersistentState>|PersistentState)):Promise<PersistentState> {
+function serialize<T>(func:(...args)=>(T|Promise<T>)):(...args)=>Promise<T> {
+  let queue = [];
+  let running = false;
+  return (...args) => {
+    return new Promise(async (resolve, reject) => {
+      queue.push({args, resolve, reject})
+      if (running) {
+        return;
+      }
+      running = true;
+      while (queue.length) {
+        let call = queue.shift();
+        try {
+          call.resolve(await func(...call.args));
+        } catch(err) {
+          call.reject(err);
+        }
+      }
+      running = false;
+    })
+  }
+}
+
+async function _modifyState(func:(state:PersistentState)=>(Promise<PersistentState>|PersistentState)):Promise<PersistentState> {
   let state = await readState();
   let new_state = await func(state);
   if (electron_is.renderer()) {
@@ -47,6 +81,8 @@ export async function modifyState(func:(state:PersistentState)=>(Promise<Persist
     })
   }
 }
+export let modifyState = serialize(_modifyState);
+
 
 export async function getRecentFiles():Promise<string[]> {
   return (await readState()).recentFiles;
