@@ -367,8 +367,8 @@ snapshot_buildtools() {
     ensure_shared_folder project "$THISDIR"
 
     cmd 'xcopy x:\ c:\builder\ /s /f /Y'
-    admincmd 'c:\builder\win_installbuildtools.bat'
-    admincmd 'c:\builder\win_installbuildtools_post.bat'
+    echo | admincmd 'c:\builder\win_installbuildtools.bat'
+    echo | admincmd 'c:\builder\win_installbuildtools_post.bat'
     cmd 'npm config set msvs_version 2015'
     cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
     cmd 'npm install -g node-gyp'
