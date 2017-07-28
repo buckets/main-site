@@ -1,4 +1,4 @@
-import {IObject, IStore} from '../store';
+import {IObject, registerClass, IStore} from '../store';
 import {Timestamp, ts2db} from '../time';
 import {Balances, computeBalances} from './balances';
 
@@ -21,6 +21,8 @@ export class Account implements IObject {
   balance: number;
   currency: string;
 }
+registerClass(Account);
+
 export class Transaction implements IObject {
   static table_name: string = 'account_transaction';
   id: number;
@@ -33,6 +35,8 @@ export class Transaction implements IObject {
   fi_id: string;
   general_cat: GeneralCatType;
 }
+registerClass(Transaction);
+
 export interface Category {
   bucket_id: number;
   amount: number;

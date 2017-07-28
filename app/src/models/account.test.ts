@@ -93,7 +93,6 @@ test('transact', async (t) => {
 test('transact, null account', async t => {
   let { store, events } = await getStore();
   events.length = 0;
-  console.log('before');
   try {
     await store.accounts.transact({
       account_id: null,
@@ -103,7 +102,6 @@ test('transact, null account', async t => {
   } catch(err) {
     t.pass('threw an error for a null account');
   }
-  console.log('after');
 })
 
 test('balances', async (t) => {

@@ -64,7 +64,6 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     })
   }
   deleteSelected = (ev) => {
-    console.log('deleting', this.state.selected);
     manager.store.accounts.deleteTransactions([...this.state.selected])
     this.setState({
       selected: new Set(),

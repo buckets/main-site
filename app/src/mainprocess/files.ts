@@ -26,7 +26,7 @@ export class BudgetFile {
   constructor(filename?:string) {
     this.id = uuid();
     this.filename = filename || '';
-    this.store = new DBStore(filename);
+    this.store = new DBStore(filename, true);
     BudgetFile.REGISTRY[this.id] = this;
   }
   async start() {

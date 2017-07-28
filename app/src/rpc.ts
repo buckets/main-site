@@ -1,29 +1,14 @@
 import * as log from 'electron-log'
 import * as URL from 'url'
-import { IStore, DataEventEmitter, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
+import { IStore, DataEventEmitter, TABLE2CLASS, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
 import { ipcMain, ipcRenderer, webContents} from 'electron'
-import { BucketStore, Group, Bucket, Transaction as BucketTransaction} from './models/bucket'
-import { AccountStore, Account, Transaction as AccountTransaction} from './models/account'
-import { SimpleFINStore, Connection, UnknownAccount, AccountMapping } from './models/simplefin'
+import { BucketStore } from './models/bucket';
+import { AccountStore } from './models/account';
+import { SimpleFINStore } from './models/simplefin';
 
 //--------------------------------------------------------------------------------
 // serializing
 //--------------------------------------------------------------------------------
-// I don't love having to register all classes here...
-const OBJECT_CLASSES = [
-  Account,
-  AccountTransaction,
-  Bucket,
-  BucketTransaction,
-  Group,
-  Connection,
-  UnknownAccount,
-  AccountMapping,
-]
-let TABLE2CLASS = {};
-OBJECT_CLASSES.forEach(cls => {
-  TABLE2CLASS[cls.table_name] = cls;
-})
 interface SerializedObjectClass {
   _buckets_serialized_object_class: string;
 }

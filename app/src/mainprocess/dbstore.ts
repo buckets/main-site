@@ -68,7 +68,7 @@ export class DBStore implements IStore {
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
-  constructor(private filename:string) {
+  constructor(private filename:string, private doTrialWork:boolean=false) {
     this.data = new DataEventEmitter();
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
@@ -87,11 +87,13 @@ export class DBStore implements IStore {
       throw err;
     }
 
-    try {
-      await ensureBucketsLicenseBucket(this);  
-    } catch(err) {
-      log.error('Error adding buckets license bucket');
-      log.error(err.stack);
+    if (this.doTrialWork) {
+      try {
+        await ensureBucketsLicenseBucket(this);  
+      } catch(err) {
+        log.error('Error adding buckets license bucket');
+        log.error(err.stack);
+      }
     }
     
     return this;

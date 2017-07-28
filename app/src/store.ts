@@ -7,6 +7,7 @@ import { SimpleFINStore } from './models/simplefin'
 //--------------------------------------------------------------------------------
 // objects
 //--------------------------------------------------------------------------------
+export let TABLE2CLASS = {};
 export interface IObject {
   id:number;
   created: string;
@@ -19,6 +20,9 @@ export interface IObjectClass<T> {
 }
 export function isObj<T extends IObject>(cls: IObjectClass<T>, obj: IObject): obj is T {
   return obj._type === cls.table_name;
+}
+export function registerClass(cls:IObjectClass<any>) {
+  TABLE2CLASS[cls.table_name] = cls;
 }
 
 //--------------------------------------------------------------------------------
