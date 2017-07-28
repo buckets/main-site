@@ -1,10 +1,8 @@
 Announce pre v1.0.0:
- ☐ Improve nagging
-   ✔ Only nag after the app has been installed for a month @done (17-07-27 21:43)
-   ✔ Only nag once after @done (17-07-27 21:37)
-   ☐ Create a "Buckets License" bucket for trial version
-   ☐ Only nag if the window is focused
  ☐ Have a web page for downloading
+ ☐ Fix goal-deposit calcuation
+    Right now, for goal=40, deposit=5, balance=25 when this month is Jul 2017, it predicts I'll reach the goal in Aug 2017 but it should be
+    in Sep 2017
 
 v1.0.0:
  ☐ Format categorizing thing better
@@ -37,6 +35,9 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Create a "Buckets License" bucket for trial version @done (17-07-27 22:14) @project(Announce pre v1.0.0)
+ ✔ Only nag after the app has been installed for a month @done (17-07-27 21:43) @project(Announce pre v1.0.0)
+ ✔ Only nag once after @done (17-07-27 21:37) @project(Announce pre v1.0.0)
  ✔ What's going on? @done (17-07-27 21:22) @project(Announce pre v1.0.0)
  ✔ Top bar doesn't update @done (17-07-27 21:22) @project(Announce pre v1.0.0)
  ✔ Money input doesn't seem to update right @done (17-07-27 21:22) @project(Announce pre v1.0.0)

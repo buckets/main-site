@@ -9,6 +9,53 @@ import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
 import { SimpleFINStore } from '../models/simplefin'
 
+import { isRegistered } from './drm'
+
+export class NotFound extends Error {
+  toString() {
+    return `NotFound: ${this.message}`;
+  }
+}
+
+async function ensureBucketsLicenseBucket(store:DBStore) {
+  if (! await isRegistered()) {
+    // Make sure there's a Buckets License bucket
+    let license_bucket;
+    try {
+      license_bucket = await store.buckets.get(-1);  
+    } catch(e) {
+      console.log('error', e);
+      if (e instanceof NotFound) {
+        console.log('instanceof NotFound');
+        license_bucket = await store.buckets.add({
+          name: 'Buckets License',
+        })
+        console.log('added bucket', license_bucket);
+        await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
+          $id: license_bucket.id
+        })
+      } else {
+        console.log('throwing');
+        throw e;
+      }
+    }
+    let groups = await store.buckets.listGroups();
+    let group_id = null;
+    if (groups.length) {
+      group_id = groups[0].id;
+    }
+    await store.buckets.update(-1, {
+      kind: 'goal-deposit',
+      goal: 4000,
+      deposit: 500,
+      kicked: false,
+      name: 'Buckets License',
+      ranking: 'b',
+      color: 'rgba(52, 152, 219,1.0)',
+      group_id: group_id,
+    })
+  }
+}
 
 //--------------------------------------------------------------------------------
 // DBStore
@@ -43,6 +90,14 @@ export class DBStore implements IStore {
       log.error(err.stack);
       throw err;
     }
+
+    try {
+      await ensureBucketsLicenseBucket(this);  
+    } catch(err) {
+      log.error('Error adding buckets license bucket');
+      log.error(err.stack);
+    }
+    
     return this;
   }
   get db():sqlite.Database {
@@ -84,9 +139,12 @@ export class DBStore implements IStore {
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
     WHERE id=$id`;
-    let ret = this.db.get(sql, {$id: id});
+    let ret = await this.db.get(sql, {$id: id});
+    if (ret === undefined) {
+      throw new NotFound(`${cls.table_name} ${id}`);
+    }
     if (cls.fromdb !== undefined) {
-      ret.then(cls.fromdb);
+      ret = cls.fromdb(ret);
     }
     return ret;
   }
