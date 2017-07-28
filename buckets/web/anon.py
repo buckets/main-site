@@ -113,6 +113,10 @@ if not PRIVATE_KEY:
 #----------------------------------------------------
 # application
 #----------------------------------------------------
+@blue.route('/index', methods=['GET'])
+def indexv2():
+    return render_template('anon/index_v2.html')
+
 @blue.route('/buy', methods=['GET', 'POST'])
 def buy():
     if request.method == 'POST':

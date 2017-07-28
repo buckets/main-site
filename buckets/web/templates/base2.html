@@ -45,6 +45,10 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
+  .wrap.large {
+    width: 60rem;
+    margin: 0 auto;
+  }
   .flashes {
     width: 30rem;
     margin: 0 auto;
@@ -62,6 +66,26 @@
   .flashes .message.error {
     color: red;
     border-color: red;
+  }
+  .callout {
+    font-size: 1.25rem;
+    line-height: 2rem;
+  }
+  .callout em {
+    color: rgba(26, 188, 156,1.0);
+    font-size: 1.75rem;
+    font-style: normal;
+    font-weight: bold;
+  }
+  .callout.para {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .copyright {
+    margin: 0 auto;
+    width: 20rem;
+    padding: 3rem;
+    text-align: center;
   }
   </style>
   <script src="/static/js/vend/raven-2.3.0.min.js"></script>
@@ -86,5 +110,9 @@
   </div>
 
   {% block content %}{% endblock %}
+
+  <div class="copyright">
+    &copy; Buckets, LLC.
+  </div>
 </body>
 </html>

@@ -501,9 +501,9 @@ class Categorizer extends React.Component<CategorizerProps, {
           <div className="name">
             {bucketName(cat)}
           </div>
-          <div className="amount">
+          {cats.length === 1 ? null : <div className="amount">
             <Money nocolor value={cat.amount} />
-          </div>
+          </div>}
         </a>
       })
       guts = <div>{categories}</div>

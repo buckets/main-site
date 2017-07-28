@@ -24,18 +24,14 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
     try {
       license_bucket = await store.buckets.get(-1);  
     } catch(e) {
-      console.log('error', e);
       if (e instanceof NotFound) {
-        console.log('instanceof NotFound');
         license_bucket = await store.buckets.add({
           name: 'Buckets License',
         })
-        console.log('added bucket', license_bucket);
         await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
           $id: license_bucket.id
         })
       } else {
-        console.log('throwing');
         throw e;
       }
     }
