@@ -89,7 +89,7 @@ do_destroy() {
 
 
 do_create() {
-    setlogprefix "[do_create]"
+    echo "do_create"
     if vboxmanage showvminfo "$VMNAME" >/dev/null 2>/dev/null; then
         echo "$VMNAME already exists"
     else
@@ -121,6 +121,7 @@ do_start() {
 }
 
 do_up() {
+    echo "do_up"
     setlogprefix "[do_up]"
     do_create
     ensure_booted
@@ -131,6 +132,7 @@ do_restore() {
 }
 
 do_build() {
+    echo "do_build"
     APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_up
@@ -139,6 +141,7 @@ do_build() {
 }
 
 do_rebuild() {
+    echo "do_rebuild"
     APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_up
@@ -146,6 +149,7 @@ do_rebuild() {
 }
 
 do_publish() {
+    echo "do_publish"
     APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_build "$APPDIR"

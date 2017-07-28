@@ -33,6 +33,15 @@ img.main-shot {
   flex-basis: 25%;
   flex-grow: 4;
 }
+.price-section {
+  text-align: center;
+}
+.price {
+  font-size: 3rem;
+}
+.strikeout {
+  text-decoration: line-through;
+}
 </style>
 {% endblock %}
 
@@ -80,6 +89,12 @@ img.main-shot {
   </div>
 </div>
 <div class="wrap">
+
+  <div class="callout para">
+    Buckets costs <em>$20.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.
+    <span class="highlight">This is the special introductory price.  In 2018 it will cost $40.</span>
+  </div>
+
   <div class="callout para">
     Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  <em>Ever wonder who's combing through your cloud-stored transaction history?</em>  With Buckets, your personal data stays on your computer.
   </div>
@@ -89,12 +104,8 @@ img.main-shot {
   </div>
 
   <div class="callout para">
-    
-  </div>
-
-  <div class="callout para">
     Buckets is <em>not free.</em>
-    <br/>...wait, how is that a benefit?  Everything has a cost.  And if you're not paying with money, you're paying in other ways.  Consider the costs of free services&mdash;is it worth it?
+    <br/>...wait, how is that a benefit?  Everything has a cost.  And if you're not paying with money, you're paying in other ways.  Consider the cost of a free service&mdash;is it worth it?
   </div>
 
   <div class="callout para">
@@ -102,7 +113,7 @@ img.main-shot {
   </div>
 
   <div class="callout para">
-    <em>Ready to buy?</em>    <a href="{{ url_for('.buy') }}">Buy it today for a one-time $20 payment.</a>
+    <em>Ready to buy?</em>  <a href="{{ url_for('.buy') }}">Buy it today for a one-time $20 payment.</a>
   </div>
 
   <!-- Begin MailChimp Signup Form -->
