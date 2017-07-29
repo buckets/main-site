@@ -3,6 +3,7 @@ c:
 cd \
 md app
 md app\dist
+net use x: \\vboxsvr\project
 xcopy x:\ c:\app /s /Y /EXCLUDE:C:\builder\copyexclude.txt
 cd \app
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe

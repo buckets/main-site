@@ -3,7 +3,7 @@
 set -e
 
 CMD=${1:-usage}
-VMOSTYPE=${VMOSTYPE:-win8}
+VMOSTYPE=${VMOSTYPE:-win10}
 
 abspath() (
     python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$1"
@@ -111,9 +111,44 @@ do_create() {
     fi
 
     ensure_snapshot genesis
-    ensure_snapshot admin genesis
+    ensure_snapshot guestadditions genesis
+    ensure_snapshot admin guestadditions
     ensure_snapshot node admin
     ensure_snapshot buildtools node
+}
+
+do_cmd() {
+    set -x
+    cmd $@
+}
+do_admincmd() {
+    set -x
+    admincmd $@
+}
+
+rununtiloutput() {
+    SIGNAL="$1"
+    CMD="${@:2}"
+    FIFO=/var/tmp/winvm.stdout.fifo
+    [ -e "$FIFO" ] && rm "$FIFO"
+    mkfifo "$FIFO"
+    $CMD >"$FIFO" &
+    p="$!"
+    echo "pid: $p"
+    while true
+    do
+        if read line; then
+            echo "$line"
+            if echo "$line" | grep "$SIGNAL"; then
+                kill $p
+                break
+            fi
+        else
+            break
+        fi
+    done <"$FIFO"
+    echo "done"
+    rm "$FIFO"
 }
 
 do_start() {
@@ -165,26 +200,27 @@ do_dev() {
 
 guestcontrol() {
     set -e
-    vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $*
+    vboxmanage guestcontrol "$VMNAME" --username "$WIN_USER" --password "$WIN_PASS" $@
 }
 cmd() {
     set -e
     vboxmanage guestcontrol "$VMNAME" run \
         --username "$WIN_USER" --password "$WIN_PASS" \
-        -- cmd.exe /c $*
+        --unquoted-args \
+        -- cmd.exe /c $@
 }
 nohangcmd() {
     set -e
     vboxmanage guestcontrol "$VMNAME" run \
         --username "$WIN_USER" --password "$WIN_PASS" \
         --no-wait-stdout --no-wait-stderr \
-        -- cmd.exe /c $*
+        -- cmd.exe /c $@
 }
 admincmd() {
     set -e
     vboxmanage guestcontrol "$VMNAME" run \
         --username "$ADMIN_USER" --password "$ADMIN_PASS" \
-        -- cmd.exe /c $*
+        -- cmd.exe /c $@
 }
 
 ensure_off() {
@@ -194,20 +230,24 @@ ensure_off() {
     i="0"
     while ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | grep "powered off" > /dev/null; do
         let i="$i + 1"
-        if [ "$i" -eq 30 ]; then
+        if [ "$i" -eq 15 ]; then
             vboxmanage controlvm "$VMNAME" poweroff
         fi
         sleep 1
     done
 }
 
-ensure_booted() {
+ensure_on() {
     if ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; then
         vboxmanage startvm "$VMNAME" --type headless
     fi
     while ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; do
         sleep 1
     done
+}
+
+ensure_booted() {
+    ensure_on
 
     # wait for guest additions to be started
     while ! cmd echo hello 2>/dev/null | grep "hello" >/dev/null; do
@@ -254,9 +294,15 @@ snapshot_genesis() {
     echo "Doing nothing for the genesis snapshot :)"
 }
 
+snapshot_guestadditions() {
+    ensure_up
+    echo "Please install guest additions"
+    ensure_booted
+}
+
 snapshot_admin() {
     echo "starting admin snapshot"
-    ensure_booted
+    ensure_up
     echo
     echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
     echo "1. Click Start"
@@ -311,8 +357,9 @@ ensure_shared_folder() {
     echo "Sharing local directory ${HOST_DIR} as \\\\vboxsvr\\${SHARE_NAME}"
     while true; do
         set +e
-        echo "net use ..."
+        set -x
         OUTPUT="$(cmd net use x: "\\\\vboxsvr\\${SHARE_NAME}" 2>&1)"
+        set +x
         echo $OUTPUT
         if echo "$OUTPUT" | grep "local device name is already in use"; then
             echo 'unmounting x:'
@@ -322,7 +369,11 @@ ensure_shared_folder() {
             sleep 1
         elif echo "$OUTPUT" | grep "completed successfully"; then
             echo 'OK'
-            break
+            if ! cmd net use | grep -i 'x:'; then
+                sleep 1
+            else
+                break
+            fi
         else
             echo "Unknown response: $OUTPUT"
             exit 1
@@ -330,10 +381,17 @@ ensure_shared_folder() {
     done
 }
 
-snapshot_node() {
-    echo "Installing node and yarn"
-    set -e
+ensure_mount() {
+    NAME="$1"
+    MOUNT=${2:-x}
+    while ! cmd net use | grep -i 'x:'; do
+        cmd net use $MOUNT: "\\\\vboxsvr\\${NAME}"
+        sleep 1
+    done
+}
 
+snapshot_node() {
+    set -e
     if [ ! -e "${RESOURCE_DIR}/node.msi" ]; then
         echo "Fetching node.msi"
         curl -L "${NODE_MSI_URL}" -o "${RESOURCE_DIR}/node.msi"
@@ -343,12 +401,19 @@ snapshot_node() {
         curl -L "${YARN_MSI_URL}" -o "${RESOURCE_DIR}/yarn.msi"
     fi
 
-    ensure_shared_folder project "$THISDIR"
+    echo
+    echo "Ensuring shared folder..."
+    ensure_shared_folder buildshare "$THISDIR"
 
     echo
     echo "Installing node and yarn..."
-    guestcontrol mkdir '/builder/'
-    cmd 'xcopy x:\ c:\builder\ /s /f /Y'
+    ensure_mount buildshare x
+    cmd 'md c:\builder'
+    cmd 'echo net use x: \\vboxsvr\buildshare > c:\builder\bootstrap.bat'
+    cmd 'echo xcopy x:\ c:\builder\ /s /f /Y >> c:\builder\bootstrap.bat'
+    cmd 'type c:\builder\bootstrap.bat'
+
+    cmd 'c:\builder\bootstrap.bat'
     admincmd 'c:\builder\win_installnode.bat'
     echo "node: $(cmd 'node --version')"
     echo "yarn: $(cmd 'yarn --version')"
@@ -364,11 +429,13 @@ snapshot_node() {
 snapshot_buildtools() {
     echo
     echo "Installing build tools..."
-    ensure_shared_folder project "$THISDIR"
+    ensure_shared_folder buildshare "$THISDIR"
 
-    cmd 'xcopy x:\ c:\builder\ /s /f /Y'
-    echo | admincmd 'c:\builder\win_installbuildtools.bat'
-    echo | admincmd 'c:\builder\win_installbuildtools_post.bat'
+    ensure_mount buildshare x
+    cmd 'c:\builder\bootstrap.bat'
+    rununtiloutput OKOKOK admincmd 'c:\builder\win_installbuildtools.bat'
+    echo "about to run another command"
+    sleep 1
     cmd 'npm config set msvs_version 2015'
     cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
     cmd 'npm install -g node-gyp'
