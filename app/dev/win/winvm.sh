@@ -295,14 +295,14 @@ snapshot_genesis() {
 }
 
 snapshot_guestadditions() {
-    ensure_up
+    ensure_on
     echo "Please install guest additions"
     ensure_booted
 }
 
 snapshot_admin() {
     echo "starting admin snapshot"
-    ensure_up
+    ensure_on
     echo
     echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
     echo "1. Click Start"
