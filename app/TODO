@@ -1,11 +1,11 @@
 Announce pre v1.0.0:
  ☐ Fix the typo in the screenshot
- ☐ When importing from OFX files or CSV, let people set the balance
 
 v1.0.0:
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
  ☐ Import OFX
+   ☐ When importing from OFX files or CSV, let people set the balance
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Make sure logs roll
  
