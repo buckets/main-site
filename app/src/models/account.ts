@@ -19,6 +19,7 @@ export class Account implements IObject {
   readonly _type: string = Account.table_name;
   name: string;
   balance: number;
+  import_balance: number;
   currency: string;
 }
 registerClass(Account);
@@ -54,7 +55,11 @@ export class AccountStore {
       currency: 'USD',
     });
   }
-  async update(account_id:number, data:{name?:string, balance?:number}):Promise<any> {
+  async update(account_id:number, data:{
+      name?:string,
+      balance?:number,
+      import_balance?:number,
+  }):Promise<any> {
     return this.store.updateObject(Account, account_id, data);
   }
   // posted is a UTC time
@@ -83,6 +88,16 @@ export class AccountStore {
     let account = await this.store.getObject(Account, args.account_id);
     this.store.publishObject('update', account);
     return trans;
+  }
+
+  async hasTransactions(account_id:number):Promise<boolean> {
+    let rows = await this.store.query(`SELECT id FROM account_transaction
+      WHERE
+        account_id = $account_id
+      LIMIT 1`, {
+          $account_id: account_id,
+        })
+    return rows.length !== 0;
   }
 
   async importTransaction(args: {

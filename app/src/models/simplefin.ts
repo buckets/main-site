@@ -255,6 +255,7 @@ export class SimpleFINStore {
           WHERE account_hash=$hash`, {$hash: hash})
         if (rows.length) {
           let account_id = rows[0].account_id;
+          let has_transactions = await this.store.accounts.hasTransactions(account_id);
           account.transactions
           .map(trans => {
               got_data = true;
@@ -267,6 +268,15 @@ export class SimpleFINStore {
               })
             })
           .forEach(p => { transaction_promises.push(p) });
+          let balance_update_data:any = {
+            import_balance: parseStringAmount(account.balance),
+          }
+          if (!has_transactions) {
+            balance_update_data.balance = balance_update_data.import_balance;
+          }
+          this.store.accounts.update(account_id, {
+            import_balance: parseStringAmount(account.balance),
+          })
         } else {
           // no matching account
           try {

@@ -132,6 +132,17 @@ button {
 /* End of badges */
 
 
+.fieldlist {
+  padding: 1rem 0;
+}
+
+/* Alert */
+.alert {
+  color: var(--orange);
+  display: inline-block;
+  padding: 0 .25rem;
+}
+
 .app .content {
   flex-grow: 1;
   display: flex;

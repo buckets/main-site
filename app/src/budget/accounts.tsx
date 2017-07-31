@@ -8,6 +8,12 @@ import {TransactionList} from './transactions'
 import { DebouncedInput, debounceChange} from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
+import { Help } from '../tooltip'
+import { Date } from '../time'
+
+function getImportBalance(account:Account, balance:number):number {
+  return account.import_balance - (account.balance - balance);
+}
 
 interface AccountListProps {
   accounts: Account[];
@@ -18,6 +24,14 @@ export class AccountList extends React.Component<AccountListProps,any> {
     let balances = this.props.balances;
     let accounts = this.props.accounts
     .map((account:Account) => {
+      let import_balance = getImportBalance(account, balances[account.id]);
+      let import_balance_note;
+      if (import_balance !== balances[account.id]) {
+        import_balance_note = <Help icon={<div className="alert">
+          <span className="fa fa-exclamation-triangle" />
+        </div>}>Balance doesn't match last imported/synced value.</Help>
+
+      }
       return (<tr key={account.id}>
           <td><DebouncedInput
             blendin
@@ -27,7 +41,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
               manager.store.accounts.update(account.id, {name: val});
             }}
           /></td>
-          <td><Money value={balances[account.id]} /></td>
+          <td><Money value={balances[account.id]} /> {import_balance_note}</td>
           <td><Link relative to={`/${account.id}`} className="subtle">more</Link></td>
         </tr>);
     })
@@ -54,7 +68,17 @@ interface AccountViewProps {
 }
 export class AccountView extends React.Component<AccountViewProps, {}> {
   render() {
-    let { account, balance } = this.props;
+    let { account, balance, appstate } = this.props;
+    let import_balance = getImportBalance(account, balance);
+    let import_balance_field;
+    if (import_balance !== balance) {
+      import_balance_field = <div>
+        <div className="alert">
+          <span className="fa fa-exclamation-triangle" />
+        </div>
+        Expected balance: <Money value={import_balance} /> (obtained from import/sync)
+      </div>
+    }
     return (<div className="padded" key={account.id}>
       <h1>
         <DebouncedInput
@@ -66,17 +90,22 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
           }}
         />
       </h1>
-      Balance: $<MoneyInput
-        value={balance}
-        onChange={debounceChange(val => {
-          manager.store.accounts.update(account.id, {balance: val});
-        })}/>
-       <TransactionList
-         transactions={this.props.transactions}
-         appstate={this.props.appstate}
-         account={account}
-         hideAccount
-       />
+      <div className="fieldlist">
+        <div>
+          Balance: <MoneyInput
+          value={balance}
+          onChange={debounceChange(val => {
+            manager.store.accounts.update(account.id, {balance: val});
+          })}/> (as of <Date value={appstate.defaultPostingDate} />)
+        </div>
+        {import_balance_field}
+      </div>
+      <TransactionList
+        transactions={this.props.transactions}
+        appstate={this.props.appstate}
+        account={account}
+        hideAccount
+      />
     </div>)
   }
 }
