@@ -1,5 +1,6 @@
 Announce pre v1.0.0:
  ☐ Fix the typo in the screenshot
+ ☐ Log when you're NOT going to update (because it's dev)
 
 v1.0.0:
  ☐ Format categorizing thing better
