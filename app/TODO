@@ -1,6 +1,5 @@
 Announce pre v1.0.0:
  ☐ Fix the typo in the screenshot
- ☐ When importing transactions the first time set the right balance
  ☐ When importing from OFX files or CSV, let people set the balance
 
 v1.0.0:
@@ -34,6 +33,7 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ When importing transactions the first time set the right balance @done (17-07-31 17:04) @project(Announce pre v1.0.0)
  ✔ Let people adjust an account's balance @done (17-07-31 16:24) @project(Announce pre v1.0.0)
  ✔ Have a web page for downloading @done (17-07-31 16:07) @project(Announce pre v1.0.0)
  ✔ Fix goal-deposit calcuation @done (17-07-28 13:49) @project(Announce pre v1.0.0)
