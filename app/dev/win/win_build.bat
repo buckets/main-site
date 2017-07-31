@@ -4,7 +4,7 @@ cd \
 md app
 md app\dist
 net use y: \\vboxsvr\project
-xcopy y:\ c:\app /s /Y /EXCLUDE:C:\builder\copyexclude.txt
+xcopy y:\ c:\app /F /I /s /Y /EXCLUDE:C:\builder\copyexclude.txt
 cd \app
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
@@ -22,4 +22,4 @@ IF "%1"=="publish" (
     )
 )
 
-xcopy c:\app\dist y:\dist /s /Y 
+xcopy c:\app\dist y:\dist /F /I /s /Y 

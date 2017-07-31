@@ -6,10 +6,10 @@ CMD=${1:-usage}
 VMOSTYPE=${VMOSTYPE:-win10}
 
 abspath() (
-    python -c 'import os,sys; print os.path.abspath(os.path.dirname(sys.argv[1]))' "$1"
+    python -c 'import os,sys; print os.path.abspath(sys.argv[1])' "$1"
 )
 
-THISDIR=$(abspath "$0")
+THISDIR=$(abspath "$(dirname "$0")")
 
 if [ "$VMOSTYPE" == "win10" ]; then
     VMNAME=${VMNAME:-win10builder}
@@ -169,9 +169,9 @@ do_restore() {
 }
 
 do_build() {
-    echo "do_build"
     APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
+    echo "do_build $APPDIR"
     do_up
     ensure_shared_folder project "$APPDIR" y
     ensure_mount project y
@@ -188,10 +188,18 @@ do_rebuild() {
 
 do_publish() {
     echo "do_publish"
+    if [ -z "$GH_TOKEN" ]; then
+        echo "Set GH_TOKEN"
+        exit 1
+    fi
     APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_build "$APPDIR"
-    echo | cmd 'c:\builder\win_build.bat publish'
+    echo | vboxmanage guestcontrol "$VMNAME" run \
+        --username "$WIN_USER" --password "$WIN_PASS" \
+        --putenv GH_TOKEN="$GH_TOKEN" \
+        --unquoted-args \
+        -- cmd.exe /c 'c:\builder\win_build.bat' publish
 }
 
 do_dev() {
