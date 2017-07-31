@@ -22,4 +22,4 @@ IF "%1"=="publish" (
     )
 )
 
-rem xcopy c:\app\dist y:\dist /s /Y 
+xcopy c:\app\dist y:\dist /s /Y 
