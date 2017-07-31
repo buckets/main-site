@@ -3,9 +3,9 @@ import * as _ from 'lodash'
 import {Balances} from '../models/balances'
 import {Account, Transaction} from '../models/account'
 import {Route, Link, WithRouting} from './routing'
-import {Money} from '../money'
+import { Money, MoneyInput } from '../money'
 import {TransactionList} from './transactions'
-import {DebouncedInput} from '../input';
+import { DebouncedInput, debounceChange} from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 
@@ -66,7 +66,11 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
           }}
         />
       </h1>
-      Balance: $<Money value={balance} />
+      Balance: $<MoneyInput
+        value={balance}
+        onChange={debounceChange(val => {
+          manager.store.accounts.update(account.id, {balance: val});
+        })}/>
        <TransactionList
          transactions={this.props.transactions}
          appstate={this.props.appstate}

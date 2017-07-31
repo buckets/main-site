@@ -1,9 +1,7 @@
 Announce pre v1.0.0:
- ☐ Have a web page for downloading
  ☐ Fix the typo in the screenshot
- ✔ Fix goal-deposit calcuation @done (17-07-28 13:49)
-    Right now, for goal=40, deposit=5, balance=25 when this month is Jul 2017, it predicts I'll reach the goal in Aug 2017 but it should be
-    in Sep 2017
+ ☐ When importing transactions the first time set the right balance
+ ☐ When importing from OFX files or CSV, let people set the balance
 
 v1.0.0:
  ☐ Format categorizing thing better
@@ -36,6 +34,11 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Let people adjust an account's balance @done (17-07-31 16:24) @project(Announce pre v1.0.0)
+ ✔ Have a web page for downloading @done (17-07-31 16:07) @project(Announce pre v1.0.0)
+ ✔ Fix goal-deposit calcuation @done (17-07-28 13:49) @project(Announce pre v1.0.0)
+  Right now, for goal=40, deposit=5, balance=25 when this month is Jul 2017, it predicts I'll reach the goal in Aug 2017 but it should be
+  in Sep 2017
  ✔ Create a "Buckets License" bucket for trial version @done (17-07-27 22:14) @project(Announce pre v1.0.0)
  ✔ Only nag after the app has been installed for a month @done (17-07-27 21:43) @project(Announce pre v1.0.0)
  ✔ Only nag once after @done (17-07-27 21:37) @project(Announce pre v1.0.0)

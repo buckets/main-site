@@ -54,7 +54,7 @@ export class AccountStore {
       currency: 'USD',
     });
   }
-  async update(account_id:number, data:{name:string}):Promise<any> {
+  async update(account_id:number, data:{name?:string, balance?:number}):Promise<any> {
     return this.store.updateObject(Account, account_id, data);
   }
   // posted is a UTC time
