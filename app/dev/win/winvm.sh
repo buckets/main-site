@@ -32,6 +32,7 @@ ZIP_PATH="${ISO_DIR}/${ZIP_FILENAME}"
 
 YARN_MSI_URL="https://yarnpkg.com/latest.msi"
 NODE_MSI_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-x86.msi"
+NCAT_URL="http://nmap.org/dist/ncat-portable-5.59BETA1.zip"
 
 GUEST_ADDITIONS_ISO=${GUEST_ADDITIONS_ISO:-/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso}
 HOST_ONLY_NETWORK="vboxnet0"
@@ -113,7 +114,8 @@ do_create() {
     ensure_snapshot genesis
     ensure_snapshot guestadditions genesis
     ensure_snapshot admin guestadditions
-    ensure_snapshot node admin
+    ensure_snapshot ncat admin
+    ensure_snapshot node ncat
     ensure_snapshot buildtools node
 }
 
@@ -171,7 +173,8 @@ do_build() {
     APPDIR=${1:-.}
     APPDIR=$(abspath "$APPDIR")
     do_up
-    ensure_shared_folder project "$APPDIR"
+    ensure_shared_folder project "$APPDIR" y
+    ensure_mount project y
     echo | cmd 'c:\builder\win_build.bat'
 }
 
@@ -332,6 +335,7 @@ snapshot_admin() {
 ensure_shared_folder() {
     SHARE_NAME=$1
     HOST_DIR=$2
+    DEV="${3:-x}"
     if [ -z "$SHARE_NAME" ] || [ -z "$HOST_DIR" ]; then
         echo "Error: Must provide SHARE_NAME HOST_DIR to ensure_shared_folder"
         exit 1
@@ -358,18 +362,21 @@ ensure_shared_folder() {
     while true; do
         set +e
         set -x
-        OUTPUT="$(cmd net use x: "\\\\vboxsvr\\${SHARE_NAME}" 2>&1)"
+        OUTPUT="$(cmd net use ${DEV}: "\\\\vboxsvr\\${SHARE_NAME}" 2>&1)"
         set +x
         echo $OUTPUT
         if echo "$OUTPUT" | grep "local device name is already in use"; then
-            echo 'unmounting x:'
-            cmd net use x: /delete
+            echo "unmounting ${DEV}:"
+            cmd net use ${DEV}: /delete
+        elif echo "$OUTPUT" | grep "has a remembered connection"; then
+            echo "unmounting ${DEV}:"
+            cmd net use ${DEV}: /delete
         elif echo "$OUTPUT" | grep "The network name cannot be found"; then
             echo 'sleeping'
             sleep 1
         elif echo "$OUTPUT" | grep "completed successfully"; then
             echo 'OK'
-            if ! cmd net use | grep -i 'x:'; then
+            if ! cmd net use | grep -i "${DEV}:"; then
                 sleep 1
             else
                 break
@@ -383,11 +390,41 @@ ensure_shared_folder() {
 
 ensure_mount() {
     NAME="$1"
-    MOUNT=${2:-x}
-    while ! cmd net use | grep -i 'x:'; do
-        cmd net use $MOUNT: "\\\\vboxsvr\\${NAME}"
+    DEV=${2:-x}
+    while ! cmd net use | grep -i "${DEV}:"; do
+        cmd net use ${DEV}: "\\\\vboxsvr\\${NAME}"
         sleep 1
     done
+}
+
+
+snapshot_ncat() {
+    set -e
+    echo "Installing ncat"
+    if [ ! -e "${RESOURCE_DIR}/ncat.exe" ]; then
+        echo "No ncat.exe"
+        ZIP_PATH="${RESOURCE_DIR}/ncat.zip"
+        if [ ! -e "$ZIP_PATH" ]; then
+            echo "Fetching ncat.zip"
+            curl -L "${NCAT_URL}" -o "$ZIP_PATH"
+        fi
+        unzip "$ZIP_PATH" -d "$RESOURCE_DIR"
+        mv "${RESOURCE_DIR}/ncat-portable-5.59BETA1/ncat.exe" "$RESOURCE_DIR"
+        rm -r "${RESOURCE_DIR}/ncat-portable-5.59BETA1"
+    fi
+
+    echo
+    echo "Ensuring shared folder..."
+    ensure_shared_folder buildshare "$THISDIR"
+
+    echo
+    echo "Installing ncat..."
+    ensure_mount buildshare x
+    cmd 'md c:\builder'
+    cmd 'echo net use x: \\vboxsvr\buildshare > c:\builder\bootstrap.bat'
+    cmd 'echo xcopy x:\tmp\ncat.exe c:\windows\system32\ >> c:\builder\bootstrap.bat'
+    cmd 'type c:\builder\bootstrap.bat'
+    admincmd 'c:\builder\bootstrap.bat'
 }
 
 snapshot_node() {
@@ -432,16 +469,22 @@ snapshot_buildtools() {
     ensure_shared_folder buildshare "$THISDIR"
 
     ensure_mount buildshare x
+    set -x
     cmd 'c:\builder\bootstrap.bat'
-    rununtiloutput OKOKOK admincmd 'c:\builder\win_installbuildtools.bat'
-    echo "about to run another command"
-    sleep 1
+    admincmd 'c:\builder\win_installbuildtools.bat'
     cmd 'npm config set msvs_version 2015'
     cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
     cmd 'npm install -g node-gyp'
     cmd 'set'
+    set +x
     echo
     echo "Build tools installed"
+
+    # unshare folder
+    cmd 'net use x: /delete'
+    ensure_off
+    vboxmanage sharedfolder remove "$VMNAME" \
+            --name "buildshare"
 }
 
 share_directory() {
