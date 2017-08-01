@@ -438,7 +438,9 @@ class Categorizer extends React.Component<CategorizerProps, {
               value={_.isNil(cat.bucket_id) ? '' : cat.bucket_id}
               ref={elem => {
                 if (elem && idx === 0 && !this.state.did_focus) {
-                  elem.focus();
+                  setTimeout(() => {
+                    elem.focus();
+                  }, 0);
                   this.setState({did_focus: true});
                 }
               }}
