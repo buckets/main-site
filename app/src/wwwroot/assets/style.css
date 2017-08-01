@@ -376,14 +376,10 @@ h2 {
   background-color: transparent;
   color: inherit;
   transition: color 0.2s, border-bottom-color 0.2s;
-  sborder-bottom: 3px solid transparent;
-  sborder-top: 3px solid transparent;
 }
 .money-input.ctx-matching-input input:focus,
 .ctx-matching-input:focus {
   outline: none;
-  sborder-bottom-color: var(--blue);
-  background-color: rgb(255,250,205);
 }
 
 a.subtle {
@@ -480,7 +476,7 @@ table.ledger tr:hover .drophandle {
 .money-input .computed-value:before {
   content: '=';
   padding: 0 4px 0 7px;
-  color: var(--grey);
+  opacity: 0.5;
   font-weight: bold;
 }
 
@@ -527,17 +523,23 @@ table.ledger tr:hover .drophandle {
 }
 
 .categorizer.open {
+  padding: .5rem 0;
+}
+.categorizer .tag.open {
+  border-radius: 4px;
+}
+.categorizer .tag.open .name {
   padding: .5rem;
 }
-.categorizer .delete-button {
+.categorizer .category {
   display: flex;
-  color: var(--grey);
-  background-color: var(--lightest-grey);
-  align-self: stretch;
-  justify-content: center;
   align-items: center;
-  font-size: 1rem;
-  padding: 0 .4rem;
+}
+.categorizer .delete-button {
+  font-size: 2rem;
+  padding: 0 .5rem;
+  position: relative;
+  top: -3px;
 
 }
 .categorizer .bucket-buttons {

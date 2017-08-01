@@ -8,6 +8,7 @@ import {Account, Category, Transaction} from '../models/account'
 import {Date, DateInput, ensureUTCMoment} from '../time'
 import {Money, MoneyInput} from '../money'
 import { Help } from '../tooltip'
+import { onKeys } from '../input'
 
 
 interface TransactionPageProps {
@@ -429,44 +430,61 @@ class Categorizer extends React.Component<CategorizerProps, {
       })
     let cats = this.state.clean_cats;
     let elems = cats.map((cat, idx) => {
+      let className = cx('tag', 'open', !_.isNil(cat.bucket_id) ? `custom-bucket-style-${cat.bucket_id}` : '');
       return <div className="category" key={idx}>
-        <select
-          value={cat.bucket_id || ''}
-          ref={elem => {
-            if (elem && idx === 0 && !this.state.did_focus) {
-              elem.focus();
-              this.setState({did_focus: true});
-            }
-          }}
-          onChange={ev => {
-            this.setState({
-              clean_cats: this.cleanCats(transaction, cats, idx, {
-                bucket_id: parseInt(ev.target.value) || null,
-                amount: cat.amount,
-              }),
-            })
-          }}>
-          <option></option>
-          {bucket_options}
-        </select>
-        <MoneyInput
-          value={Math.abs(cat.amount)}
-          onChange={val => {
-            this.setState({
-              clean_cats: this.cleanCats(transaction, cats, idx, {
-                bucket_id: cat.bucket_id,
-                amount: Math.abs(val),
-              }),
-            })
-          }}
-        />
+        <div className={className}>
+          <div className="name">
+            <select
+              value={_.isNil(cat.bucket_id) ? '' : cat.bucket_id}
+              ref={elem => {
+                if (elem && idx === 0 && !this.state.did_focus) {
+                  elem.focus();
+                  this.setState({did_focus: true});
+                }
+              }}
+              onKeyPress={onKeys({
+                Enter: () => {
+                  this.saveChanges();
+                },
+              })}
+              onChange={ev => {
+                let bucket_id = ev.target.value ? parseInt(ev.target.value) : null;
+                this.setState({
+                  clean_cats: this.cleanCats(transaction, cats, idx, {
+                    bucket_id: bucket_id,
+                    amount: cat.amount,
+                  }),
+                })
+              }}>
+              <option></option>
+              {bucket_options}
+            </select>
+          </div>
+          <MoneyInput
+            value={Math.abs(cat.amount)}
+            className="amount ctx-matching-input"
+            onChange={val => {
+              this.setState({
+                clean_cats: this.cleanCats(transaction, cats, idx, {
+                  bucket_id: cat.bucket_id,
+                  amount: Math.abs(val),
+                }),
+              })
+            }}
+            onKeyPress={onKeys({
+              Enter: () => {
+                this.saveChanges();
+              },
+            })}
+          />
+        </div>
         <a
-          className="subtle"
+          className="subtle delete-button"
           onClick={() => {
             this.setState({
               clean_cats: this.cleanCats(transaction, cats, idx, 'delete'),
             })
-          }}><span className="fa fa-close" /></a>
+          }}>&times;</a>
       </div>
     })
     return <div className="categorizer open">
