@@ -1,4 +1,4 @@
-Announce pre v1.0.0:
+MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 v1.0.0:
  ☐ Format categorizing thing better
@@ -7,7 +7,7 @@ v1.0.0:
    ☐ When importing from OFX files or CSV, let people set the balance
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Make sure logs roll
- ☐ Create a workable CHANGELOG
+ ✔ Create a workable CHANGELOG @done (17-08-01 11:25)
  ✔ When you delete an account transaction, it should delete and linked bucket transactions, too @done (17-08-01 11:10)
  
 
