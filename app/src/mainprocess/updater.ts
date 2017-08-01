@@ -4,6 +4,7 @@ import { autoUpdater } from 'electron-updater'
 
 export function checkForUpdates() {
   let DO_UPDATE = false;
+  autoUpdater.autoDownload = false;
   autoUpdater.on('checking-for-update', () => {
     log.info('checking for updates...');
   })
@@ -25,6 +26,7 @@ export function checkForUpdates() {
     }, (indexClicked) => {
       if (indexClicked === 1) {
         // Download and restart
+        autoUpdater.downloadUpdate()
         DO_UPDATE = true;
       }
     })
@@ -37,4 +39,5 @@ export function checkForUpdates() {
       autoUpdater.quitAndInstall();
     }
   });
+  autoUpdater.checkForUpdates();
 }

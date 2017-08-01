@@ -66,7 +66,10 @@ app.on('ready', function() {
   eventuallyNag();
 
   if (!electron_is.dev()) {
+    log.info('Checking for updates...');
     checkForUpdates()
+  } else {
+    log.info('Not checking for updates in DEV mode.');
   }
 
   // Temporary window just to nab focus
