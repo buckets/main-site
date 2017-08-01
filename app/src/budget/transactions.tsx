@@ -383,6 +383,12 @@ class Categorizer extends React.Component<CategorizerProps, {
       this.setState({open: false})
     }
   }
+  // Clean categories
+  // trans: Account Transaction being categorized
+  // categories: A list of Categorys
+  // idx: The anchor index
+  // replacement: Either the category that will replace
+  //   the deleted
   cleanCats(trans:Transaction, categories:Category[],
       idx?:number, replacement?:Category|'delete'):Category[] {
     let left = Math.abs(trans.amount);
@@ -400,6 +406,10 @@ class Categorizer extends React.Component<CategorizerProps, {
         amount = left
       }
       left -= amount;
+      if (left && i === (categories.length-1) && i !== idx) {
+        amount += left;
+        left = 0;
+      }
       return {
         bucket_id: cat.bucket_id,
         amount: amount * sign,

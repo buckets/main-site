@@ -6,7 +6,6 @@ v1.0.0:
 
 Backlog:
  ☐ Delete groups
- ☐ When categorizing, if you type the following at the end of the number: `-`, `1`, `bkspace`, `1` it will make two tag spots, when you really just want one
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
  ☐ Label window so you know which file is which
  ☐ When you create a new bucket, focus on that new bucket
@@ -29,6 +28,7 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ When categorizing, if you type the following at the end of the number: `-`, `1`, `bkspace`, `1` it will make two tag spots, when you really just want one @done (17-08-01 16:47) @project(Backlog)
  ✔ When you click to categorize, focus on the first dropdown @done (17-08-01 16:36) @project(v1.0.0)
  ✔ Pressing Enter should save the categorization @done (17-08-01 16:36) @project(v1.0.0)
  ✔ Format categorizing thing better @done (17-08-01 16:36) @project(v1.0.0)
