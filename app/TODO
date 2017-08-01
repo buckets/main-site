@@ -21,6 +21,7 @@ Backlog:
  ☐ Show only debt buckets filter
  ☐ Show Income/expenses average over the last 3 months
  ☐ Add a pop up calculator
+   ☐ Should it be a separate window or built in to the screen?
  ☐ Alert that there's uncategorized transactions in previous months.
  ☐ Chat for help
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
