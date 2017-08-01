@@ -1,11 +1,7 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 v1.0.0:
- ☐ Format categorizing thing better
-   ☐ When you click to categorize, focus on the first dropdown
-   ☐ Pressing Enter should save the categorization
  ☐ Timeout syncing (like if there's no internet connection)
- ✔ Make sure logs roll @done (17-08-01 14:44)
  
 
 Backlog:
@@ -33,6 +29,10 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ When you click to categorize, focus on the first dropdown @done (17-08-01 16:36) @project(v1.0.0)
+ ✔ Pressing Enter should save the categorization @done (17-08-01 16:36) @project(v1.0.0)
+ ✔ Format categorizing thing better @done (17-08-01 16:36) @project(v1.0.0)
+ ✔ Make sure logs roll @done (17-08-01 14:44) @project(v1.0.0)
  ✔ When importing from OFX files or CSV, let people set the balance @done (17-08-01 14:43) @project(v1.0.0)
  ✔ Import OFX @done (17-08-01 14:43) @project(v1.0.0)
  ✔ Create a workable CHANGELOG @done (17-08-01 11:25) @project(v1.0.0)
