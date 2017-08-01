@@ -49,10 +49,11 @@ export class FileImportManager {
     let parsed = await ofx2importable(data);
     console.log('parsed', parsed);
 
-    Matt, now add the parsed data to FileImportState in such a
-    way that you can match up the account and add it.
-    Perhaps UnknownAccount needs to have a 'From Connections' or
-    'From File Import' designation.
+    // Matt, now add the parsed data to FileImportState in such a
+    // way that you can match up the account and add it.
+    // Perhaps UnknownAccount needs to have a 'From Connections' or
+    // 'From File Import' designation.
+    
     // let parsed = await parseOFX(data);
     // console.log('parsed', parsed);
     

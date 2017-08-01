@@ -5,6 +5,26 @@ import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
 
+function recursiveMap(menuitems:Electron.MenuItem[], func) {
+  menuitems.forEach(item => {
+    func(item);
+    if ((item as any).submenu !== undefined && (item as any).submenu) {
+      recursiveMap((item as any).submenu.items as Electron.MenuItem[], func);
+    }
+  })
+}
+
+export async function updateEnabled(isbudget:boolean) {
+  recursiveMap(Menu.getApplicationMenu().items, item => {
+    if (item.id) {
+      let labels = item.id.split(' ');
+      if (labels.indexOf('only4budgets') !== -1) {
+        item.enabled = isbudget;  
+      }
+    }
+  })
+}
+
 export async function updateMenu() {
   let recent_files = await getRecentFiles();
   let FileMenu = {
@@ -39,14 +59,16 @@ export async function updateMenu() {
       {type: 'separator'},
       {
         label: 'Duplicate Window',
+        id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
         click() {
           newBudgetWindow();
-        }
+        },
       },
       {type: 'separator'},
       {
         label: 'File Import...',
+        id: 'only4budgets import',
         accelerator: 'CmdOrCtrl+I',
         click() {
           let win = BrowserWindow.getFocusedWindow();

@@ -7,7 +7,7 @@ import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
-import { updateMenu } from './menu'
+import { updateMenu, updateEnabled } from './menu'
 import { BudgetFile, watchForEvents } from './files'
 import {APP_ROOT} from './globals'
 import { eventuallyNag } from './drm'
@@ -96,6 +96,15 @@ app.on('activate', () => {
 app.on('browser-window-created', (ev, win) => {
   if (win !== wiz_win) {
     closeWizard();
+  }
+})
+app.on('browser-window-focus', (ev, win) => {
+  if (win.webContents.getURL().startsWith('buckets://')) {
+    // budget window
+    updateEnabled(true);
+  } else {
+    // non-budget window
+    updateEnabled(false);
   }
 })
 watchForEvents(app);
