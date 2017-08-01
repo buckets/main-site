@@ -9,6 +9,13 @@ export function ensureUTCMoment(x:Timestamp):moment.Moment {
     return moment.utc(x)
   }
 }
+export function ensureLocalMoment(x:Timestamp):moment.Moment {
+  if (moment.isMoment(x)) {
+    return x.local().clone()
+  } else {
+    return moment(x)
+  } 
+}
 export function ts2db(x:Timestamp):string {
   return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
 }

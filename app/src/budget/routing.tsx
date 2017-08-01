@@ -295,9 +295,9 @@ export class Switch extends _Routable<any, any> {
 function computeLinkPath(props:LinkProps, context:IRoutingContext) {
   let path = props.to;
   if (props.relative === true) {
-    path = Path.resolve(Path.join(context.routing.linking_root + '/', path));
+    path = Path.posix.resolve(Path.posix.join(context.routing.linking_root + '/', path));
   } else if (props.relative === 'current') {
-    path = Path.resolve(Path.join(context.routing.fullpath + '/', path));
+    path = Path.posix.resolve(Path.posix.join(context.routing.fullpath + '/', path));
   }
   return path;
 }

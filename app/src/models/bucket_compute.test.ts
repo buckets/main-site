@@ -23,7 +23,13 @@ test('goal and deposit', async t => {
   let computed = computeBucketData(b.kind, b, {today: '2000-01-01', balance: 0})
   t.equal(computed.deposit, 1)
   t.equal(computed.goal, 12)
-  t.equal(computed.end_date.format('L'), moment('2000-12-01').format('L'))
+  t.equal(computed.end_date.format('L'), moment('2001-01-01').format('L'))
+})
+
+test('goal-deposit 2', async t => {
+  let b = mkBucket({kind: 'goal-deposit', goal:4000, deposit:500})
+  let computed = computeBucketData(b.kind, b, {today: '2017-07-28', balance: 2500})
+  t.equal(computed.end_date.format('L'), moment('2017-10-01').format('L'))
 })
 
 test('goal and end date', async t => {

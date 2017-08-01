@@ -1,7 +1,7 @@
 import * as req from 'request-promise'
 import * as log from 'electron-log';
 import * as moment from 'moment'
-import { IObject, IStore } from '../store'
+import { IObject, IStore, registerClass } from '../store'
 import * as crypto from 'crypto'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
@@ -17,6 +17,8 @@ export class Connection implements IObject {
   access_token: string;
   last_used: string;
 }
+registerClass(Connection);
+
 export class UnknownAccount implements IObject {
   static table_name: string = 'unknown_account'
   id: number;
@@ -26,6 +28,8 @@ export class UnknownAccount implements IObject {
   description: string;
   account_hash: string;
 }
+registerClass(UnknownAccount);
+
 export class AccountMapping implements IObject {
   static table_name: string = 'account_mapping'
   id: number;
@@ -35,6 +39,7 @@ export class AccountMapping implements IObject {
   account_id: number;
   account_hash: string;
 }
+registerClass(AccountMapping);
 
 export declare namespace SFIN {
   export interface AccountSet {
@@ -250,6 +255,7 @@ export class SimpleFINStore {
           WHERE account_hash=$hash`, {$hash: hash})
         if (rows.length) {
           let account_id = rows[0].account_id;
+          let has_transactions = await this.store.accounts.hasTransactions(account_id);
           account.transactions
           .map(trans => {
               got_data = true;
@@ -262,6 +268,15 @@ export class SimpleFINStore {
               })
             })
           .forEach(p => { transaction_promises.push(p) });
+          let balance_update_data:any = {
+            import_balance: parseStringAmount(account.balance),
+          }
+          if (!has_transactions) {
+            balance_update_data.balance = balance_update_data.import_balance;
+          }
+          this.store.accounts.update(account_id, {
+            import_balance: parseStringAmount(account.balance),
+          })
         } else {
           // no matching account
           try {

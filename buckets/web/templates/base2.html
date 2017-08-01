@@ -45,6 +45,10 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
+  .wrap.large {
+    width: 60rem;
+    margin: 0 auto;
+  }
   .flashes {
     width: 30rem;
     margin: 0 auto;
@@ -62,6 +66,33 @@
   .flashes .message.error {
     color: red;
     border-color: red;
+  }
+  .callout {
+    font-size: 1.25rem;
+    line-height: 2rem;
+  }
+  .callout em {
+    color: rgba(26, 188, 156,1.0);
+    font-size: 1.75rem;
+    font-style: normal;
+    font-weight: bold;
+  }
+  .callout.para {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  footer {
+    display: flex;
+    border: 1px solid lightgrey;
+    border-width: 1px 0 0;
+    margin-top: 2rem;
+    padding-top: 2rem;
+  }
+  footer > div {
+    flex-basis: 50%;
+    padding: 1rem 0;
+    text-align: left;
+    line-height: 1.5rem;
   }
   </style>
   <script src="/static/js/vend/raven-2.3.0.min.js"></script>
@@ -86,5 +117,21 @@
   </div>
 
   {% block content %}{% endblock %}
+
+  <div class="wrap">
+    <footer>
+      <div>
+        <div>Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
+        </div>
+        <div><a href="mailto:hello@bucketsisbetter.com">hello@bucketsisbetter.com</a>
+        </div>
+        <div>&copy; Buckets, LLC.</div>
+      </div>
+      <div>
+        
+        
+      </div>
+    </footer>
+  </div>
 </body>
 </html>

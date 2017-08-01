@@ -1,36 +1,63 @@
-Need:
+MAKE SURE YOU ADD TO changes/{type}-{name}.md
+
+v1.0.0:
  ☐ Format categorizing thing better
    ☐ When you click to categorize, focus on the first dropdown
+ ☐ Import OFX
+   ☐ When importing from OFX files or CSV, let people set the balance
+ ☐ Timeout syncing (like if there's no internet connection)
+ ☐ Make sure logs roll
+ ✔ Create a workable CHANGELOG @done (17-08-01 11:25)
+ ✔ When you delete an account transaction, it should delete and linked bucket transactions, too @done (17-08-01 11:10)
  
 
-Want:
- ☐ Import OFX
+Backlog:
  ☐ Delete groups
- ☐ Timeout syncing (like if there's no internet connection)
  ☐ Label window so you know which file is which
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
  ☐ Import CSV
  ☐ Export CSV
- ☐ Open Recent Files...
  ☐ Automatically sync so the users don't have to
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
    ☐ Or redirect.
  ☐ Delete (retire) accounts
- ☐ Show only debt buckets
+ ☐ Show only debt buckets filter
  ☐ Show Income/expenses average over the last 3 months
  ☐ Add a pop up calculator
  ☐ Alert that there's uncategorized transactions in previous months.
- ☐ Only nag if the window is focused
  ☐ Chat for help
- ☐ Make sure logs roll
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
  ☐ Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Categorizer component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Fix the typo in the screenshot @done (17-08-01 10:27) @project(Announce pre v1.0.0)
+ ✔ Log when you're NOT going to update (because it's dev) @done (17-08-01 09:36) @project(Announce pre v1.0.0)
+ ✔ Fix rain @done (17-08-01 09:15) @project(Announce pre v1.0.0)
+ ✔ When importing transactions the first time set the right balance @done (17-07-31 17:04) @project(Announce pre v1.0.0)
+ ✔ Let people adjust an account's balance @done (17-07-31 16:24) @project(Announce pre v1.0.0)
+ ✔ Have a web page for downloading @done (17-07-31 16:07) @project(Announce pre v1.0.0)
+ ✔ Fix goal-deposit calcuation @done (17-07-28 13:49) @project(Announce pre v1.0.0)
+  Right now, for goal=40, deposit=5, balance=25 when this month is Jul 2017, it predicts I'll reach the goal in Aug 2017 but it should be
+  in Sep 2017
+ ✔ Create a "Buckets License" bucket for trial version @done (17-07-27 22:14) @project(Announce pre v1.0.0)
+ ✔ Only nag after the app has been installed for a month @done (17-07-27 21:43) @project(Announce pre v1.0.0)
+ ✔ Only nag once after @done (17-07-27 21:37) @project(Announce pre v1.0.0)
+ ✔ What's going on? @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Top bar doesn't update @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Money input doesn't seem to update right @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Fix Windows @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Animation doesn't work on linux or windows (or maybe it's the slow VM) @done (17-07-27 21:22) @project(Announce pre v1.0.0)
+ ✔ Double-click budget file should open file @done (17-07-27 16:45) @project(Announce pre v1.0.0)
+ ✔ Open Recent Files... @done (17-07-27 12:21) @project(v1.0.0)
+ ✔ Add "Open File..." to Wizard @done (17-07-27 12:21) @project(v1.0.0)
+ ✔ Wizard close button not pressable @done (17-07-27 10:14) @project(Announce pre v1.0.0)
+ ✔ There needs to be a line on the top of the header @done (17-07-27 10:14) @project(Announce pre v1.0.0)
+ ✔ Path issue (buckets://UUID/budget/index.html#/y2017m7C:\y2017m7\accounts) @done (17-07-27 10:14) @project(Announce pre v1.0.0)
+ ✔ On Windows, always have at least one window open (so that you can actually use the app) @done (17-07-25 20:59) @project(Need)
  ✔ Allow for goals with no deposit amount. @done (17-07-20 21:44) @project(Need)
  ✔ There needs to be a way to submit bugs @done (17-07-20 21:33) @project(Need)
  ✔ There needs to be a way to submit log files @done (17-07-20 21:26) @project(Need)

@@ -17,7 +17,7 @@ from buckets.drm import createLicense, formatLicense
 blue = Blueprint('anon', __name__)
 
 @blue.route('/home')
-def index():
+def home():
     return render_template('anon/index.html',
         plans=BillingManagement.PLANS)
 
@@ -113,6 +113,10 @@ if not PRIVATE_KEY:
 #----------------------------------------------------
 # application
 #----------------------------------------------------
+@blue.route('/index', methods=['GET'])
+def index():
+    return render_template('anon/index_v2.html')
+
 @blue.route('/buy', methods=['GET', 'POST'])
 def buy():
     if request.method == 'POST':

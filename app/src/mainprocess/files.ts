@@ -1,10 +1,11 @@
 import * as log from 'electron-log'
-import {dialog, BrowserWindow} from 'electron';
+import { ipcMain, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
 import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
+import { addRecentFile } from './persistent'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -25,11 +26,13 @@ export class BudgetFile {
   constructor(filename?:string) {
     this.id = uuid();
     this.filename = filename || '';
-    this.store = new DBStore(filename);
+    this.store = new DBStore(filename, true);
     BudgetFile.REGISTRY[this.id] = this;
   }
   async start() {
     log.debug('start', this.filename);
+
+    addRecentFile(this.filename);
 
     // connect to database
     await this.store.open();
@@ -100,7 +103,9 @@ export function openDialog() {
     ],
   }, (paths) => {
     if (paths) {
-      BudgetFile.openFile(paths[0]);
+      paths.forEach(path => {
+        BudgetFile.openFile(path);
+      })
     }
   })
 }
@@ -109,9 +114,29 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
       title: 'Buckets Budget Filename',
-      defaultPath: 'mybudget.buckets',
+      defaultPath: 'My Budget.buckets',
     }, (filename) => {
-      resolve(BudgetFile.openFile(filename));
+      if (filename) {
+        resolve(BudgetFile.openFile(filename));  
+      } else {
+        reject(new Error('No file chosen'));
+      }
     })
+  })
+}
+
+export function watchForEvents(app:Electron.App) {
+  ipcMain.on('new-budget', async () => {
+    try {
+      await newBudgetFileDialog()
+    } catch(err) {
+
+    }
+  })
+  ipcMain.on('open-file-dialog', () => {
+    openDialog();
+  })
+  ipcMain.on('open-file', (ev, path) => {
+    BudgetFile.openFile(path);
   })
 }

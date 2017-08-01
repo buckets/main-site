@@ -1,16 +1,16 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, session, protocol} from 'electron'
+import {app, session, protocol, BrowserWindow} from 'electron'
 import * as log from 'electron-log'
 import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
-import { adjustTrialMenu } from './menu'
-import {BudgetFile} from './files'
+import { updateMenu } from './menu'
+import { BudgetFile, watchForEvents } from './files'
 import {APP_ROOT} from './globals'
-import { isRegistered, eventuallyNag } from './drm'
+import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 
 autoUpdater.logger = log;
@@ -39,39 +39,48 @@ app.on('ready', () => {
 })
 
 // A file was double-clicked
-let openfirst;
+let openfirst:string[] = [];
 app.on('will-finish-launching', () => {
   app.on('open-file', function(event, path) {
     if (app.isReady()) {
       BudgetFile.openFile(path);
     } else {
-      openfirst = path;
+      openfirst.push(path);
     }
     event.preventDefault();
-  })  
+  })
 })
+if (electron_is.windows()) {
+  process.argv.forEach(arg => {
+    if (arg.endsWith('.buckets')) {
+      openfirst.push(arg);
+    }
+  })
+}
 
 app.on('ready', function() {
   // Create the Menu
-  adjustTrialMenu();
+  updateMenu();
 
   // Nag screen
-  if (!isRegistered()) {
-    eventuallyNag();
-  }
+  eventuallyNag();
 
   if (!electron_is.dev()) {
+    log.info('Checking for updates...');
     checkForUpdates()
+  } else {
+    log.info('Not checking for updates in DEV mode.');
   }
 
-  // Temporary window just to nab focus
-  // new BrowserWindow({width: 400, height: 300});
-
   // For now, open a standard file for testing
-  if (openfirst) {
-    BudgetFile.openFile(openfirst);
+  if (openfirst.length) {
+    while (openfirst.length) {
+      BudgetFile.openFile(openfirst.shift());  
+    }
   } else if (process.env.DEBUG) {
     BudgetFile.openFile('/tmp/test.buckets');  
+  } else {
+    openWizard();
   }
 });
 app.on('window-all-closed', () => {
@@ -79,3 +88,45 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    openWizard();
+  }
+})
+app.on('browser-window-created', (ev, win) => {
+  if (win !== wiz_win) {
+    closeWizard();
+  }
+})
+watchForEvents(app);
+
+
+let wiz_win:Electron.BrowserWindow;
+function openWizard() {
+  if (wiz_win) {
+    wiz_win.focus();
+    return;
+  }
+  wiz_win = new BrowserWindow({
+    width: 250,
+    height: 600,
+    show: false,
+    center: true,
+    frame: false,
+  });
+  wiz_win.once('ready-to-show', () => {
+    wiz_win.show();
+  })
+
+  let path = Path.join(APP_ROOT, 'src/wwwroot/misc/wizard.html');
+  path = `file://${path}`
+  wiz_win.loadURL(path);
+  wiz_win.on('close', ev => {
+    wiz_win = null;
+  })
+}
+export function closeWizard() {
+  if (wiz_win) {
+    wiz_win.close();
+  }
+}

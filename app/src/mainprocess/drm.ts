@@ -2,8 +2,10 @@ import * as Path from 'path'
 import * as log from 'electron-log'
 import { app, remote, shell, BrowserWindow, dialog } from 'electron'
 import { APP_ROOT } from './globals'
-import * as jwt from 'jsonwebtoken';
-import * as fs from 'fs';
+import * as jwt from 'jsonwebtoken'
+import * as fs from 'fs'
+import * as moment from 'moment'
+import { readState, modifyState } from './persistent'
 
 let ISREGISTERED = null;
 export function isRegistered():boolean {
@@ -95,9 +97,6 @@ Would you like to purchase a license now?`,
         // purchase
         promptForLicense();
         openBuyPage();
-      } else {
-        // cancel
-        eventuallyNag(60);
       }
     })
     return true;
@@ -106,11 +105,26 @@ Would you like to purchase a license now?`,
   }
 }
 
-export function eventuallyNag(minutes:number=15) {
+export async function eventuallyNag() {
+  let state = await readState();
+  if (!state.firstUseDate) {
+    state = await modifyState(s => {
+      s.firstUseDate = moment.utc().format();
+      return s;
+    })
+  }
   if (!isRegistered()) {
-    setTimeout(() => {
-      nag();
-    }, minutes * 60 * 1000)
+    // only nag after they've used it a while
+    let today = moment.utc();
+    let first_use = moment.utc(state.firstUseDate);
+    let nag_threshold = first_use.clone().add(6, 'months');
+    if (today.isSameOrAfter(nag_threshold)) {
+      setTimeout(() => {
+        nag();
+      }, 5 * 60 * 1000)
+    } else {
+      log.info('Will nag starting', nag_threshold.format());
+    }
   }
 }
 

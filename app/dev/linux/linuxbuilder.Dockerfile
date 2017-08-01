@@ -15,4 +15,4 @@ RUN yarn
 
 WORKDIR /code
 
-CMD dev/docker_linux_build.sh
+CMD dev/linux/docker_linux_build.sh

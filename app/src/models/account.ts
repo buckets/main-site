@@ -1,4 +1,4 @@
-import {IObject, IStore} from '../store';
+import {IObject, registerClass, IStore} from '../store';
 import {Timestamp, ts2db} from '../time';
 import {Balances, computeBalances} from './balances';
 
@@ -19,8 +19,11 @@ export class Account implements IObject {
   readonly _type: string = Account.table_name;
   name: string;
   balance: number;
+  import_balance: number;
   currency: string;
 }
+registerClass(Account);
+
 export class Transaction implements IObject {
   static table_name: string = 'account_transaction';
   id: number;
@@ -33,6 +36,8 @@ export class Transaction implements IObject {
   fi_id: string;
   general_cat: GeneralCatType;
 }
+registerClass(Transaction);
+
 export interface Category {
   bucket_id: number;
   amount: number;
@@ -50,7 +55,11 @@ export class AccountStore {
       currency: 'USD',
     });
   }
-  async update(account_id:number, data:{name:string}):Promise<any> {
+  async update(account_id:number, data:{
+      name?:string,
+      balance?:number,
+      import_balance?:number,
+  }):Promise<any> {
     return this.store.updateObject(Account, account_id, data);
   }
   // posted is a UTC time
@@ -79,6 +88,16 @@ export class AccountStore {
     let account = await this.store.getObject(Account, args.account_id);
     this.store.publishObject('update', account);
     return trans;
+  }
+
+  async hasTransactions(account_id:number):Promise<boolean> {
+    let rows = await this.store.query(`SELECT id FROM account_transaction
+      WHERE
+        account_id = $account_id
+      LIMIT 1`, {
+          $account_id: account_id,
+        })
+    return rows.length !== 0;
   }
 
   async importTransaction(args: {
@@ -125,17 +144,39 @@ export class AccountStore {
 
   async deleteTransactions(transaction_ids:number[]) {
     let affected_account_ids = new Set();
+    let affected_bucket_ids = new Set();
+    let deleted_btrans = [];
 
     // This could be optimized later
     await Promise.all(transaction_ids.map(async (transid) => {
       let trans = await this.store.getObject(Transaction, transid);
       affected_account_ids.add(trans.account_id)
+      let btrans_list = await this.store.buckets.listTransactions({
+        account_trans_id: transid,
+      })
+      btrans_list.forEach(btrans => {
+        deleted_btrans.push(btrans);
+        affected_bucket_ids.add(btrans.bucket_id);  
+      })
       await this.store.deleteObject(Transaction, transid);
     }));
+
+    // publish changed accounts
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
       let account = await this.store.getObject(Account, account_id);
       this.store.publishObject('update', account);
     }));
+
+    // publish deleted bucket transactions
+    await Promise.all(deleted_btrans.map(btrans => {
+      return this.store.publishObject('delete', btrans);
+    }));
+
+    // publish changed buckets
+    await Promise.all(Array.from(affected_bucket_ids).map(async bucket_id => {
+      let bucket = await this.store.buckets.get(bucket_id);
+      this.store.publishObject('update', bucket);
+    }))
   }
   // asof is a UTC time
   async balances(asof?:Timestamp):Promise<Balances> {

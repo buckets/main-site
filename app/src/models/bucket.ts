@@ -1,6 +1,6 @@
 import * as moment from 'moment'
-import { IObject, IStore} from '../store'
-import { ensureUTCMoment, ts2db, Timestamp } from '../time'
+import { IObject, IStore, registerClass } from '../store'
+import { ensureLocalMoment, ts2db, Timestamp } from '../time'
 import { Balances, computeBalances } from './balances'
 import { rankBetween } from '../ranking'
 import { DEFAULT_COLORS } from '../color'
@@ -36,6 +36,8 @@ export class Bucket implements IObject {
     return obj;
   }
 }
+registerClass(Bucket);
+
 export class Transaction implements IObject {
   static table_name: string = 'bucket_transaction';
   id: number;
@@ -55,6 +57,8 @@ export class Transaction implements IObject {
     return obj;
   }
 }
+registerClass(Transaction);
+
 export class Group implements IObject {
   static table_name: string = 'bucket_group';
   id: number;
@@ -63,6 +67,7 @@ export class Group implements IObject {
   name: string;
   ranking: string;
 }
+registerClass(Group);
 
 
 export class BucketStore {
@@ -164,6 +169,7 @@ export class BucketStore {
   }
   async listTransactions(args:{
     bucket_id?: number,
+    account_trans_id?: number,
     posted?:{
       onOrAfter?:Timestamp,
       before?:Timestamp,
@@ -177,6 +183,12 @@ export class BucketStore {
       if (args.bucket_id !== undefined) {
         where_parts.push('bucket_id = $bucket_id');
         params['$bucket_id'] = args.bucket_id;
+      }
+
+      // account trans
+      if (args.account_trans_id !== undefined) {
+        where_parts.push('account_trans_id = $account_trans_id');
+        params.$account_trans_id = args.account_trans_id;
       }
 
       // posted range
@@ -322,7 +334,7 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
   };
   let today, balance;
   if (args) {
-    today = args.today !== null ? ensureUTCMoment(args.today) : moment.utc();
+    today = args.today !== null ? ensureLocalMoment(args.today) : moment.utc();
     balance = args.balance !== null ? args.balance : b.balance;
   }
   switch (b.kind) {
@@ -342,7 +354,7 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
       Object.assign(ret, {
         goal: b.goal,
         deposit: computeGoalDeposit(balance, b.goal, b.end_date, today),
-        end_date: ensureUTCMoment(b.end_date),
+        end_date: ensureLocalMoment(b.end_date),
       })
       break;
     }
@@ -350,7 +362,7 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
       Object.assign(ret, {
         goal: computeGoal(balance, b.deposit, b.end_date, today),
         deposit: b.deposit,
-        end_date: ensureUTCMoment(b.end_date),
+        end_date: ensureLocalMoment(b.end_date),
       })
       break;
     }
@@ -369,13 +381,13 @@ function computeGoalEndDate(balance:number, goal:number, deposit:number, today:T
   if (!deposit) {
     return null;
   }
-  let units = Math.ceil((goal - balance) / deposit) - 1;
-  let dt = ensureUTCMoment(today);
+  let units = Math.ceil((goal - balance) / deposit);
+  let dt = ensureLocalMoment(today);
   return dt.add(units, 'month').startOf('month');
 }
 function computeGoalDeposit(balance:number, goal:number, end_date:Timestamp, today:Timestamp):number {
-  let s = ensureUTCMoment(today);
-  let e = ensureUTCMoment(end_date);
+  let s = ensureLocalMoment(today);
+  let e = ensureLocalMoment(end_date);
   let diff = e.diff(s, 'month') + 1;
   let left = goal - balance;
   left = left <= 0 ? 0 : left;
@@ -388,8 +400,8 @@ function computeGoalDeposit(balance:number, goal:number, end_date:Timestamp, tod
   }
 }
 function computeGoal(balance:number, deposit:number, end_date:Timestamp, today:Timestamp):number {
-  let s = ensureUTCMoment(today);
-  let e = ensureUTCMoment(end_date);
+  let s = ensureLocalMoment(today);
+  let e = ensureLocalMoment(end_date);
   let diff = e.diff(s, 'month') + 1;
   if (diff > 0) {
     // there's time

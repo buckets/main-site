@@ -1,188 +1,202 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
-import {openDialog, newBudgetFileDialog, newBudgetWindow} from './files'
+import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
+import { getRecentFiles } from './persistent'
 
-let FileMenu = {
-  label: 'File',
-  submenu: [
-    {
-      label: 'New Window',
-      accelerator: 'CmdOrCtrl+N',
-      click() {
-        newBudgetWindow();
-      }
-    },
-    {
-      label: 'New Budget',
-      accelerator: 'CmdOrCtrl+Shift+N',
-      click() {
-        newBudgetFileDialog();
-      }
-    },
-    {
-      label: 'Open...',
-      accelerator: 'CmdOrCtrl+O',
-      click() {
-        openDialog();
-      }
-    },
-    {type: 'separator'},
-    {
-      label: 'File Import...',
-      accelerator: 'CmdOrCtrl+I',
-      click() {
-        let win = BrowserWindow.getFocusedWindow();
-        win.webContents.send('start-file-import');
-      }
-    }
-  ],
-};
-let EditMenu = {
-  label: 'Edit',
-  submenu: [
-    {role: 'undo'},
-    {role: 'redo'},
-    {type: 'separator'},
-    {role: 'cut'},
-    {role: 'copy'},
-    {role: 'paste'},
-    {role: 'pasteandmatchstyle'},
-    {role: 'delete'},
-    {role: 'selectall'},
-    {type: 'separator'},
-    {
-      label: 'Find...',
-      accelerator: 'CmdOrCtrl+F',
-      click() {
-        startFindInPage();
-      }
-    },
-    {
-      label: 'Find Next',
-      accelerator: 'CmdOrCtrl+G',
-      click() {
-        findNext();
-      }
-    },
-    {
-      label: 'Find Previous',
-      accelerator: 'CmdOrCtrl+Shift+G',
-      click() {
-        findPrev();
-      }
-    }
-  ]
-};
-let ViewMenu = {
-  label: 'View',
-  submenu: [
-    {role: 'reload'},
-    {role: 'forcereload'},
-    {role: 'toggledevtools'},
-    {type: 'separator'},
-    {role: 'resetzoom'},
-    {role: 'zoomin'},
-    {role: 'zoomout'},
-    {type: 'separator'},
-    {role: 'togglefullscreen'}
-  ]
-};
-let WindowMenu = {
-  role: 'window',
-  submenu: [
-    {role: 'minimize'},
-    {role: 'close'}
-  ]
-};
-
-let HelpMenu = {
-  role: 'help',
-  submenu: [
-    {
-      label: 'Learn More',
-      click () { shell.openExternal('https://www.bucketsisbetter.com') }
-    },
-    {
-      label: 'Show Log Files...',
-      click() {
-        shell.showItemInFolder(log.transports.file.file);
-      }
-    },
-    {
-      label: 'Report Bug...',
-      click() {
-        shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
-      }
-    }
-  ],
-};
-
-let RegisterMenu = {
-    label: 'Trial Version',
+export async function updateMenu() {
+  let recent_files = await getRecentFiles();
+  let FileMenu = {
+    label: 'File',
     submenu: [
       {
-        label: 'Purchase Full Version...',
+        label: 'New Budget...',
+        accelerator: 'CmdOrCtrl+Shift+N',
         click() {
-          openBuyPage();
-        },
+          newBudgetFileDialog();
+        }
       },
       {
-        label: 'Enter License...',
+        label: 'Open Budget...',
+        accelerator: 'CmdOrCtrl+O',
         click() {
-          promptForLicense();
-        },
+          openDialog();
+        }
+      },
+      {
+        label: 'Open Recent',
+        enabled: recent_files.length !== 0,
+        submenu: recent_files.map(path => {
+          return {
+            label: path,
+            click() {
+              BudgetFile.openFile(path);
+            }
+          }
+        })
+      },
+      {type: 'separator'},
+      {
+        label: 'Duplicate Window',
+        accelerator: 'CmdOrCtrl+N',
+        click() {
+          newBudgetWindow();
+        }
+      },
+      {type: 'separator'},
+      {
+        label: 'File Import...',
+        accelerator: 'CmdOrCtrl+I',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          win.webContents.send('start-file-import');
+        }
+      },
+    ],
+  };
+  let EditMenu = {
+    label: 'Edit',
+    submenu: [
+      {role: 'undo'},
+      {role: 'redo'},
+      {type: 'separator'},
+      {role: 'cut'},
+      {role: 'copy'},
+      {role: 'paste'},
+      {role: 'pasteandmatchstyle'},
+      {role: 'delete'},
+      {role: 'selectall'},
+      {type: 'separator'},
+      {
+        label: 'Find...',
+        accelerator: 'CmdOrCtrl+F',
+        click() {
+          startFindInPage();
+        }
+      },
+      {
+        label: 'Find Next',
+        accelerator: 'CmdOrCtrl+G',
+        click() {
+          findNext();
+        }
+      },
+      {
+        label: 'Find Previous',
+        accelerator: 'CmdOrCtrl+Shift+G',
+        click() {
+          findPrev();
+        }
       }
     ]
-  }
-
-let template:any[] = [
-  FileMenu,
-  EditMenu,
-  ViewMenu,
-  WindowMenu, 
-  HelpMenu,
-];
-
-let preMenus = [];
-
-if (process.platform === 'darwin') {
-  // Buckets Menu
-  preMenus.push({
-    label: app.getName(),
+  };
+  let ViewMenu = {
+    label: 'View',
     submenu: [
-      {role: 'about'},
+      {role: 'reload'},
+      {role: 'forcereload'},
+      {role: 'toggledevtools'},
       {type: 'separator'},
-      {role: 'services', submenu: []},
+      {role: 'resetzoom'},
+      {role: 'zoomin'},
+      {role: 'zoomout'},
       {type: 'separator'},
-      {role: 'hide'},
-      {role: 'hideothers'},
-      {role: 'unhide'},
-      {type: 'separator'},
-      {role: 'quit'}
+      {role: 'togglefullscreen'}
     ]
-  })
-  EditMenu.submenu.push(
-    {type: 'separator'},
-    <any>{
-      label: 'Speech',
+  };
+  let WindowMenu = {
+    role: 'window',
+    submenu: [
+      {role: 'minimize'},
+      {role: 'close'}
+    ]
+  };
+
+  let HelpMenu = {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click () { shell.openExternal('https://www.bucketsisbetter.com') }
+      },
+      {
+        label: 'Show Log Files...',
+        click() {
+          shell.showItemInFolder(log.transports.file.file);
+        }
+      },
+      {
+        label: 'Report Bug...',
+        click() {
+          shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
+        }
+      }
+    ],
+  };
+
+  let RegisterMenu = {
+      label: 'Trial Version',
       submenu: [
-        {role: 'startspeaking'},
-        {role: 'stopspeaking'}
+        {
+          label: 'Purchase Full Version...',
+          click() {
+            openBuyPage();
+          },
+        },
+        {
+          label: 'Enter License...',
+          click() {
+            promptForLicense();
+          },
+        }
       ]
     }
-  )
-  WindowMenu.submenu = <any>[
-    {role: 'close'},
-    {role: 'minimize'},
-    {role: 'zoom'},
-    {type: 'separator'},
-    {role: 'front'}
-  ]
-}
 
-export function adjustTrialMenu() {
+  let template:any[] = [
+    FileMenu,
+    EditMenu,
+    ViewMenu,
+    WindowMenu, 
+    HelpMenu,
+  ];
+
+  let preMenus = [];
+
+  if (process.platform === 'darwin') {
+    // Buckets Menu
+    preMenus.push({
+      label: app.getName(),
+      submenu: [
+        {role: 'about'},
+        {type: 'separator'},
+        {role: 'services', submenu: []},
+        {type: 'separator'},
+        {role: 'hide'},
+        {role: 'hideothers'},
+        {role: 'unhide'},
+        {type: 'separator'},
+        {role: 'quit'}
+      ]
+    })
+    EditMenu.submenu.push(
+      {type: 'separator'},
+      <any>{
+        label: 'Speech',
+        submenu: [
+          {role: 'startspeaking'},
+          {role: 'stopspeaking'}
+        ]
+      }
+    )
+    WindowMenu.submenu = <any>[
+      {role: 'close'},
+      {role: 'minimize'},
+      {role: 'zoom'},
+      {type: 'separator'},
+      {role: 'front'}
+    ]
+  }
   template = [
     ...preMenus,
     FileMenu,
@@ -196,5 +210,3 @@ export function adjustTrialMenu() {
   template.push(HelpMenu);
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
-
-export const menu = Menu.buildFromTemplate(template)

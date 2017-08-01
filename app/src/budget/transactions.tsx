@@ -64,7 +64,6 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     })
   }
   deleteSelected = (ev) => {
-    console.log('deleting', this.state.selected);
     manager.store.accounts.deleteTransactions([...this.state.selected])
     this.setState({
       selected: new Set(),
@@ -501,9 +500,9 @@ class Categorizer extends React.Component<CategorizerProps, {
           <div className="name">
             {bucketName(cat)}
           </div>
-          <div className="amount">
+          {cats.length === 1 ? null : <div className="amount">
             <Money nocolor value={cat.amount} />
-          </div>
+          </div>}
         </a>
       })
       guts = <div>{categories}</div>

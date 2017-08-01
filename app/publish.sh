@@ -15,4 +15,7 @@ tsc
 node_modules/.bin/build --mac -p always
 
 # linux
-dev/linux_build.sh
+dev/linux/linux_build.sh publish
+
+# windows
+dev/win/winvm.sh publish "$(pwd)"

@@ -53,6 +53,11 @@ export class TextInput extends React.Component<TextInputProps, {
   }
 }
 
+export function debounceChange(func:(...args)=>any) {
+  return _.debounce(func, 250, {leading: false, trailing: true});
+}
+
+
 interface DebouncedInputProps {
   value: any;
   onChange: (newval:any)=>void;
@@ -81,9 +86,9 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
       })
     }
   }
-  emitChange = _.debounce(() => {
+  emitChange = debounceChange(() => {
     this.props.onChange(this.state.value);
-  }, 250, {leading: false, trailing: true});
+  })
   render() {
     let { value, onChange, className, blendin, ...rest } = this.props;
     className = cx(className, {
