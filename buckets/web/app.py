@@ -22,7 +22,7 @@ def dont_require_pin(f):
 @blue.before_request
 def checkauth():
     if not g.user:
-        return redirect('/')
+        return redirect('/home')
     endpoint = request.endpoint.split('.')[-1]
     if endpoint in _no_pin_required:
         pass
