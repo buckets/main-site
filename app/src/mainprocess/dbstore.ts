@@ -10,6 +10,7 @@ import { AccountStore } from '../models/account'
 import { SimpleFINStore } from '../models/simplefin'
 
 import { isRegistered } from './drm'
+import { rankBetween } from '../ranking'
 
 export class NotFound extends Error {
   toString() {
@@ -40,13 +41,28 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
     if (groups.length) {
       group_id = groups[0].id;
     }
+    let rows = await store.query(`
+      SELECT id, ranking
+      FROM bucket
+      WHERE group_id=$group_id
+      ORDER BY ranking
+      LIMIT 1
+      `, {$group_id: group_id});
+    let ranking = 'b';
+    if (rows.length) {
+      let first_bucket = rows[0];
+      if (first_bucket.id !== -1) {
+        // There's a bucket in front
+        ranking = rankBetween('a', first_bucket.ranking);
+      }
+    }
     await store.buckets.update(-1, {
       kind: 'goal-deposit',
       goal: 4000,
       deposit: 500,
       kicked: false,
       name: 'Buckets License',
-      ranking: 'b',
+      ranking: ranking,
       color: 'rgba(52, 152, 219,1.0)',
       group_id: group_id,
     })
