@@ -72,9 +72,6 @@ app.on('ready', function() {
     log.info('Not checking for updates in DEV mode.');
   }
 
-  // Temporary window just to nab focus
-  // new BrowserWindow({width: 400, height: 300});
-
   // For now, open a standard file for testing
   if (openfirst.length) {
     while (openfirst.length) {

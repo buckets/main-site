@@ -9,6 +9,7 @@ v1.0.0:
    ☐ When importing from OFX files or CSV, let people set the balance
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Make sure logs roll
+ ☐ Create a workable CHANGELOG
  
 
 Backlog:
