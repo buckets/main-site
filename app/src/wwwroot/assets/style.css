@@ -9,6 +9,8 @@ body {
 :root {
   --logoblue: rgba(34, 173, 244, 1.0);
 
+  --hover-highlight-color: rgba(241, 196, 15, 0.1);
+
   --blue: rgba(52, 152, 219,1.0);
   --purple: rgba(155, 89, 182,1.0);
   --red: rgba(231, 76, 60,1.0);
@@ -439,6 +441,17 @@ table.ledger tr.action-row td {
   border: 0;
   padding: 8px 0;
 }
+
+table.ledger tr:hover td {
+  background-color: var(--hover-highlight-color);
+}
+table.ledger tr.action-row:hover td {
+  background-color: initial;
+}
+table.ledger tr:hover .drophandle {
+  color: var(--grey);
+}
+
 
 
 /* Money */
