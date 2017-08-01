@@ -8,6 +8,7 @@ v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Make sure logs roll
  ☐ Create a workable CHANGELOG
+ ✔ When you delete an account transaction, it should delete and linked bucket transactions, too @done (17-08-01 11:10)
  
 
 Backlog:

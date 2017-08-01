@@ -169,6 +169,7 @@ export class BucketStore {
   }
   async listTransactions(args:{
     bucket_id?: number,
+    account_trans_id?: number,
     posted?:{
       onOrAfter?:Timestamp,
       before?:Timestamp,
@@ -182,6 +183,12 @@ export class BucketStore {
       if (args.bucket_id !== undefined) {
         where_parts.push('bucket_id = $bucket_id');
         params['$bucket_id'] = args.bucket_id;
+      }
+
+      // account trans
+      if (args.account_trans_id !== undefined) {
+        where_parts.push('account_trans_id = $account_trans_id');
+        params.$account_trans_id = args.account_trans_id;
       }
 
       // posted range

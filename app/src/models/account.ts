@@ -144,17 +144,39 @@ export class AccountStore {
 
   async deleteTransactions(transaction_ids:number[]) {
     let affected_account_ids = new Set();
+    let affected_bucket_ids = new Set();
+    let deleted_btrans = [];
 
     // This could be optimized later
     await Promise.all(transaction_ids.map(async (transid) => {
       let trans = await this.store.getObject(Transaction, transid);
       affected_account_ids.add(trans.account_id)
+      let btrans_list = await this.store.buckets.listTransactions({
+        account_trans_id: transid,
+      })
+      btrans_list.forEach(btrans => {
+        deleted_btrans.push(btrans);
+        affected_bucket_ids.add(btrans.bucket_id);  
+      })
       await this.store.deleteObject(Transaction, transid);
     }));
+
+    // publish changed accounts
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
       let account = await this.store.getObject(Account, account_id);
       this.store.publishObject('update', account);
     }));
+
+    // publish deleted bucket transactions
+    await Promise.all(deleted_btrans.map(btrans => {
+      return this.store.publishObject('delete', btrans);
+    }));
+
+    // publish changed buckets
+    await Promise.all(Array.from(affected_bucket_ids).map(async bucket_id => {
+      let bucket = await this.store.buckets.get(bucket_id);
+      this.store.publishObject('update', bucket);
+    }))
   }
   // asof is a UTC time
   async balances(asof?:Timestamp):Promise<Balances> {

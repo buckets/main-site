@@ -1,5 +1,6 @@
 import {isObj} from '../store';
 import {Account, Transaction} from './account';
+import {Bucket, Transaction as BTrans} from './bucket';
 import {test} from 'tap';
 import { getStore } from './testutil';
 
@@ -175,6 +176,46 @@ test('deleteTransactions', async (t) => {
   t.ok(isObj(Account, aev.obj))
   let new_a = aev.obj as Account;
   t.equal(new_a.balance, 0, "Should return the balance to 0")
+})
+
+test('deleteTransactions linked bucket transactions', async t => {
+  let { store, events } = await getStore()
+  let a = await store.accounts.add('Checking');
+  let b = await store.buckets.add({name: 'MyBucket'});
+  let tr = await store.accounts.transact({
+    account_id: a.id,
+    amount: 750,
+    memo: 'hey',
+  })
+  await store.accounts.categorize(tr.id, [{
+    bucket_id: b.id,
+    amount: 750,
+  }])
+  events.length = 0;
+
+  await store.accounts.deleteTransactions([tr.id]);
+
+  t.equal(events.length, 4);
+  let [tev, aev, btev, bev] = events;
+  
+  // transaction event
+  t.equal(tev.event, 'delete');
+  t.same(tev.obj, tr);
+
+  // account event
+  t.equal(aev.event, 'update');
+  t.ok(isObj(Account, aev.obj));
+  t.equal((aev.obj as Account).balance, 0);
+
+  // bucket transaction event
+  t.equal(btev.event, 'delete');
+  t.ok(isObj(BTrans, btev.obj));
+
+  // bucket event
+  t.equal(bev.event, 'update');
+  t.ok(isObj(Bucket, bev.obj));
+  let bucket = bev.obj as Bucket;
+  t.equal(bucket.balance, 0);
 })
 
 test('listTransactions', async (t) => {
