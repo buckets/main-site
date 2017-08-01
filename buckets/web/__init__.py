@@ -177,10 +177,7 @@ def robots_txt():
 
 @f.route('/')
 def root():
-    if g.user:
-        return redirect(url_for('app.index'))
-    else:
-        return redirect(url_for('anon.index'))
+    return redirect(url_for('anon.index'))
 
 @f.route('/error')
 def err():
