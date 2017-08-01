@@ -83,6 +83,10 @@ class Navbar extends React.Component<{
     if (appstate.num_unknowns) {
       connections_badge = <div className="badge">{appstate.num_unknowns}</div>
     }
+    let fileimport_badge;
+    if (appstate.fileimport.pending_imports.length) {
+      fileimport_badge = <div className="badge">{appstate.fileimport.pending_imports.length}</div>
+    }
     let transactions_badge;
     if (appstate.num_uncategorized_trans) {
       transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
@@ -108,7 +112,7 @@ class Navbar extends React.Component<{
             <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
           </Route>
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
-          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent">File Import</Link>
+          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>File Import</span>{fileimport_badge}</Link>
         </div>
         <div>
           {sync_widget}

@@ -71,7 +71,7 @@ export declare namespace SFIN {
   }
 }
 
-function hashStrings(strings:string[]):string {
+export function hashStrings(strings:string[]):string {
   let ret = crypto.createHash('sha256');
   strings.forEach(s => {
     let hash = crypto.createHash('sha256');
@@ -196,45 +196,6 @@ export class SimpleFINStore {
   async listConnections():Promise<Connection[]> {
     return this.store.listObjects(Connection);
   }
-  // async marchingSync(since:moment.Moment, enddate:moment.Moment):Promise<{
-  //   transactions: Transaction[],
-  //   unknowns: UnknownAccount[],
-  //   errors: string[],
-  // }> {
-  //   let transactions:Transaction[] = [];
-  //   let unknowns:UnknownAccount[] = [];
-  //   let errors:string[] = [];
-  //   let delay = 3000;
-  //   let err_delay = 30 * 1000;
-  //   since = ensureUTCMoment(since);
-  //   enddate = ensureUTCMoment(enddate);
-  //   let window_start = since.clone();
-  //   let window_end = since.clone().add(1, 'day');
-  //   if (window_end.isAfter(enddate)) {
-  //     window_end = enddate;
-  //   }
-  //   while (window_end.isSameOrBefore(enddate)) {
-  //     log.info(`fetching ${window_start.format()} to ${window_end.format()}`);
-  //     try {
-  //       let result = await this.sync(window_start, window_end)  
-  //       transactions = transactions.concat(result.transactions)
-  //       unknowns = unknowns.concat(result.unknowns);
-  //       errors = errors.concat(result.errors);
-  //     } catch(err) {
-  //       log.info(`Error while syncing; sleeping for ${err_delay}: ${err}`)
-  //       await sleep(err_delay);
-  //       continue;
-  //     }
-  //     await sleep(delay);
-  //     window_start.add(1, 'day');
-  //     window_end.add(1, 'day');
-  //   }
-  //   return {
-  //     transactions,
-  //     unknowns,
-  //     errors,
-  //   }
-  // }
   async _sync(since:moment.Moment, enddate:moment.Moment):Promise<{
     transactions: Transaction[],
     unknowns: UnknownAccount[],
@@ -307,20 +268,24 @@ export class SimpleFINStore {
   computeHash(org:SFIN.Organization, account_id:string):string {
     return hashStrings([org.name || org.domain, account_id]);
   }
-  async linkAccountToHash(hash:string, account_id:number) {
-    await this.store.createObject(AccountMapping, {
-      account_id: account_id,
-      account_hash: hash,
-    })
-    let unknowns = await this.store.listObjects(UnknownAccount, {
-      where: 'account_hash = $account_hash',
-      params: { $account_hash: hash },
-    })
-    let promises = unknowns.map(unknown => {
-      return this.store.deleteObject(UnknownAccount, unknown.id)
-    })
-    await Promise.all(promises);
+  linkAccountToHash(hash:string, account_id:number) {
+    return linkAccountToHash(this.store, hash, account_id);
   }
+}
+
+export async function linkAccountToHash(store:IStore, hash:string, account_id:number) {
+  await store.createObject(AccountMapping, {
+    account_id: account_id,
+    account_hash: hash,
+  })
+  let unknowns = await store.listObjects(UnknownAccount, {
+    where: 'account_hash = $account_hash',
+    params: { $account_hash: hash },
+  })
+  let promises = unknowns.map(unknown => {
+    return this.store.deleteObject(UnknownAccount, unknown.id)
+  })
+  await Promise.all(promises);
 }
 
 class SimpleFinError extends Error {

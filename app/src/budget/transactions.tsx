@@ -89,6 +89,12 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
       <div className="subheader">
         <div className="group">
           <button
+            onClick={ev => {
+              manager.fileimport.openFileDialog();
+            }}>
+            Import from file
+          </button>
+          <button
             className="delete"
             disabled={!selected.size}
             onClick={this.deleteSelected}>{delete_label}</button>  
