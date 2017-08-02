@@ -28,6 +28,8 @@ ap.add_argument('--stripe-public-key',
     default=os.environ.get('STRIPE_PUBLIC_KEY', ''))
 ap.add_argument('--sentry-dsn',
     default=os.environ.get('SENTRY_DSN', ''))
+ap.add_argument('--release-url',
+    default='https://api.github.com/repos/buckets/application/releases/latest')
 ap.add_argument('--reg-delay',
     type=int,
     default=3,
@@ -59,7 +61,8 @@ app = configureApp(
     registration_delay=args.reg_delay,
     stripe_api_key=args.stripe_api_key,
     stripe_public_key=args.stripe_public_key,
-    sentry_dsn=args.sentry_dsn)
+    sentry_dsn=args.sentry_dsn,
+    release_url=args.release_url)
 
 if __name__ == '__main__':
     threaded = not not args.debug
