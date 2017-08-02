@@ -1,1 +1,0 @@
-Categorizing is cleaner now
