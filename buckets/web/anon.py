@@ -20,22 +20,24 @@ blue = Blueprint('anon', __name__)
 
 _latest_version = None
 _latest_version_lastfetch = None
-_latest_version_lifespan = 60 * 60 * 24
+_latest_version_lifespan = 60 * 60 * 1
 def getLatestReleaseVersion():
     global _latest_version, _latest_version_lastfetch
     now = time.time()
-    if _latest_version:
-        if now > (_latest_version_lastfetch + _latest_version_lifespan):
-            # too old
-            _latest_version = None
-            _latest_version_lastfetch = None
+    if _latest_version_lastfetch and now < (_latest_version_lastfetch + _latest_version_lifespan):
+        return _latest_version
 
-    if not _latest_version:
-        url = current_app.config.get('RELEASE_URL', None)
-        if not url:
-            return None
-        r = requests.get(url)
-        print repr(r.text)
+    url = current_app.config.get('RELEASE_URL', None)
+    if not url:
+        return None
+
+    try:
+        r = requests.get(url, timeout=5)
+        _latest_version = r.json()['tag_name'].strip('v')
+    except:
+        _latest_version = None
+    _latest_version_lastfetch = now
+    return _latest_version
 
 
 @blue.route('/home')
@@ -138,7 +140,6 @@ if not PRIVATE_KEY:
 @blue.route('/index', methods=['GET'])
 def index():
     latest_version = getLatestReleaseVersion()
-    print latest_version
     return render_template('anon/index_v2.html',
         latest_version=latest_version)
 
@@ -148,9 +149,6 @@ def buy():
         token = request.form['stripeToken']
         email = request.form['stripeEmail']
         token_type = request.form.get('stripeTokenType')
-        print('token type', token_type)
-        import sys
-        sys.stdout.flush()
 
         # generate the license
         try:

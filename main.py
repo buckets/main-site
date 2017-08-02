@@ -29,7 +29,7 @@ ap.add_argument('--stripe-public-key',
 ap.add_argument('--sentry-dsn',
     default=os.environ.get('SENTRY_DSN', ''))
 ap.add_argument('--release-url',
-    default='https://github.com/buckets/application/releases/latest')
+    default='https://api.github.com/repos/buckets/application/releases/latest')
 ap.add_argument('--reg-delay',
     type=int,
     default=3,
