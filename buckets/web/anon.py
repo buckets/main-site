@@ -35,6 +35,8 @@ def getLatestReleaseVersion():
         r = requests.get(url, timeout=5)
         _latest_version = r.json()['tag_name'].strip('v')
     except:
+        import traceback
+        traceback.print_exc()
         _latest_version = None
     _latest_version_lastfetch = now
     return _latest_version
