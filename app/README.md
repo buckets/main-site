@@ -22,7 +22,8 @@ You should add change snippets to `changes/{fix,break,new,feature,refactor,info,
 
 1. Preview changes with `dev/changelog/combine_changes.sh`
 2. Update the version in `package.json`
-3. Run `/dev/changelog/updatechangelog.sh`
+3. Run `dev/changelog/updatechangelog.sh`
 4. Publish with `./publish.sh`
-5. Copy the the new CHANGELOG.md parts to GitHub and release when ready.
+5. Copy up the new `CHANGELOG.md` with `dev/changelog/publishchangelog.py`
+6. Manually release on the GitHub website.
 
