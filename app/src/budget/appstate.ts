@@ -55,6 +55,7 @@ interface IComputedAppState {
   gain: number;
 
   num_unknowns: number;
+  unmatched_account_balances: number;
   num_uncategorized_trans: number;
   uncategorized_trans: ATrans[];
 
@@ -85,6 +86,7 @@ export class AppState implements IAppState, IComputedAppState {
   gain: number = 0;
 
   num_unknowns: number = 0;
+  unmatched_account_balances: number = 0;
   num_uncategorized_trans: number = 0;
   uncategorized_trans: ATrans[] = [];
 
@@ -169,6 +171,12 @@ function computeTotals(appstate:AppState):IComputedAppState {
       unkicked_buckets.push(bucket);
     }
   })
+  let unmatched_account_balances = 0;
+  _.values(appstate.accounts).forEach((account:Account) => {
+    if (account.import_balance !== account.balance) {
+      unmatched_account_balances += 1;
+    }
+  })
   return {
     bucket_total_balance,
     account_total_balance,
@@ -183,6 +191,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     uncategorized_trans,
     kicked_buckets,
     unkicked_buckets,
+    unmatched_account_balances,
   };
 }
 
