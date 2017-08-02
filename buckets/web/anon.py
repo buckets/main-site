@@ -29,8 +29,10 @@ def getLatestReleaseVersion():
 
     url = current_app.config.get('RELEASE_URL', None)
     if not url:
+        logger.info('No RELEASE_URL')
         return None
 
+    logger.info('Trying url', url=url)
     try:
         r = requests.get(url, timeout=5)
         _latest_version = r.json()['tag_name'].strip('v')
@@ -39,6 +41,7 @@ def getLatestReleaseVersion():
         traceback.print_exc()
         _latest_version = None
     _latest_version_lastfetch = now
+    logger.info('latest_version', _latest_version=_latest_version)
     return _latest_version
 
 
