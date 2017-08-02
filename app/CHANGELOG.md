@@ -2,6 +2,8 @@
 
 ## v0.11.0
 
+- **FIX:** Style fixes and extra tooltip helps
+
 - **FIX:** Some menu items are disabled/enabled now when the context justifies it.
 
 - **FIX:** Fixed bug where categorizing with math would sometimes make too many rows
