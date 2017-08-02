@@ -918,7 +918,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
                 }}
               />
             </h1>
-            Balance: $<Money value={balance} />
+            Balance: <Money value={balance} />
             <hr/>
             <TransactionList
               transactions={transactions}
@@ -946,7 +946,7 @@ class TransactionList extends React.Component<{
       }
       return <tr key={trans.id}>
         <td className="nobr"><Date value={trans.posted} /></td>
-        <td>{trans.memo}</td>
+        <td style={{width:'40%'}}>{trans.memo}</td>
         <td><Money value={trans.amount} /></td>
         <td>{trans.transfer ? 'Transfer' : ''} {account_name}</td>
       </tr>

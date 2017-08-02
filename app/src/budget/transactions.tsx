@@ -184,7 +184,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           {onSelectChange ? <th></th> : null}
           <th className="nobr">Posted</th>
           {hideAccount ? null : <th>Account</th>}
-          <th>Memo</th>
+          <th style={{width: '40%'}}>Memo</th>
           <th>Amount</th>
           <th>Category</th>
         </tr>

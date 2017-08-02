@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import {Balances} from '../models/balances'
-import {Account, Transaction} from '../models/account'
+import { Account, Transaction, expectedBalance } from '../models/account'
 import {Route, Link, WithRouting} from './routing'
 import { Money, MoneyInput } from '../money'
 import {TransactionList} from './transactions'
@@ -12,7 +12,7 @@ import { Help } from '../tooltip'
 import { Date } from '../time'
 
 function getImportBalance(account:Account, balance:number):number {
-  return account.import_balance - (account.balance - balance);
+  return expectedBalance(account) - (account.balance - balance);
 }
 
 interface AccountListProps {

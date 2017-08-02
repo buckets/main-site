@@ -438,7 +438,7 @@ table.ledger tr.action-row td {
   padding: 8px 0;
 }
 
-table.ledger tr:hover td {
+table.ledger > tbody > tr:hover > td {
   background-color: var(--hover-highlight-color);
 }
 table.ledger tr.action-row:hover td {
@@ -1034,17 +1034,20 @@ table.props th {
 /* tooltip */
 .help {
   display: inline-block;
+  cursor: help;
 }
 .help .note-wrap {
   position: relative;
   display: inline-block;
   height: 0;
   width: 0;
+  z-index: 3;
 }
 .help .note-wrap .note {
   position: absolute;
   top: 0;
   left: 0;
+  min-width: 10rem;
   background-color: var(--blackish);
   color: white;
   padding: .3rem .5rem;

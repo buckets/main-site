@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 
 import {EventEmitter} from 'events'
 import {isObj, ObjectEvent, IStore} from '../store'
-import {Account, Transaction as ATrans} from '../models/account'
+import { Account, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import {isBetween} from '../time'
@@ -173,7 +173,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
   })
   let unmatched_account_balances = 0;
   _.values(appstate.accounts).forEach((account:Account) => {
-    if (account.import_balance !== account.balance) {
+    if (expectedBalance(account) !== account.balance) {
       unmatched_account_balances += 1;
     }
   })

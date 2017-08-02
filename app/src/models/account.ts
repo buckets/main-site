@@ -43,6 +43,14 @@ export interface Category {
   amount: number;
 }
 
+export function expectedBalance(a:Account):number {
+  if (a.import_balance === null) {
+    return a.balance;
+  } else {
+    return a.import_balance;
+  }
+}
+
 export class AccountStore {
   public store:IStore;
   constructor(store:IStore) {

@@ -15,6 +15,7 @@ import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
 import { TransactionImportPage } from './importing'
+import { Help } from '../tooltip'
 
 import { manager, AppState } from './appstate'
 
@@ -88,7 +89,6 @@ class Navbar extends React.Component<{
       fileimport_badge = <div className="badge">{appstate.fileimport.pending_imports.length}</div>
     }
     let accounts_badge;
-    console.log('appstate', appstate.unmatched_account_balances);
     if (appstate.unmatched_account_balances) {
       accounts_badge = <div className="badge">{appstate.unmatched_account_balances}</div>
     }
@@ -156,7 +156,7 @@ class Application extends React.Component<ApplicationProps, any> {
                 <header>
                   <div className="totals">
                     <total>
-                      <name><span className="fa fa-tint" /> Rain</name>
+                      <name><Help icon={<span><span className="fa fa-tint" /> Rain</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
                       <amount><Money value={appstate.rain} /></amount>
                     </total>
                     <total className="section-start">
