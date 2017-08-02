@@ -35,8 +35,7 @@ def configureApp(engine, flask_secret_key,
         stripe_public_key,
         sentry_dsn,
         debug=False,
-        registration_delay=3,
-        release_url=''):
+        registration_delay=3):
     sentry.init_app(f, dsn=sentry_dsn)
 
     f._engine = engine
@@ -44,8 +43,7 @@ def configureApp(engine, flask_secret_key,
         DEBUG=debug,
         SECRET_KEY=flask_secret_key,
         REGISTRATION_DELAY=registration_delay,
-        STRIPE_PUBLIC_KEY=stripe_public_key,
-        RELEASE_URL=release_url)
+        STRIPE_PUBLIC_KEY=stripe_public_key)
 
     GLOBAL_CSRF.secret = flask_secret_key
 

@@ -27,12 +27,7 @@ def getLatestReleaseVersion():
     if _latest_version_lastfetch and now < (_latest_version_lastfetch + _latest_version_lifespan):
         return _latest_version
 
-    url = current_app.config.get('RELEASE_URL', None)
-    if not url:
-        logger.info('No RELEASE_URL')
-        return None
-
-    logger.info('Trying url', url=url)
+    url = 'https://api.github.com/repos/buckets/application/releases/latest'
     try:
         r = requests.get(url, timeout=5)
         _latest_version = r.json()['tag_name'].strip('v')
