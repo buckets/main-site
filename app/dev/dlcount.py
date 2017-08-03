@@ -32,10 +32,13 @@ for release in releases[:number]:
         elif asset_name.endswith('.deb'):
             key = 'linux'
         dlcount[key] += asset['download_count']
-    print('{version} tot={total} win={win} mac={mac} linux={linux} other={other}'.format(
+    total = sum(dlcount.values())
+    parts = []
+    for k in sorted(dlcount):
+        v = dlcount[k]
+        if v:
+            parts.append('{k}={v}'.format(**locals()))
+    print('{version} tot={total} {parts}'.format(
         version=name,
-        win=dlcount['win'],
-        mac=dlcount['mac'],
-        linux=dlcount['linux'],
-        other=dlcount['other'],
-        total=sum(dlcount.values())))
+        total=total,
+        parts=' '.join(parts)))
