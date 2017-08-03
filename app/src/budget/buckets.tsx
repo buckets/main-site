@@ -132,11 +132,13 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       })
 
     let self_debt;
+    let show_nodebt_balance = false;
     if (self_debt_amount) {
       self_debt = <Help icon={<div className="labeled-number">
         <div className="label">Self debt</div>
         <div className="value"><Money value={self_debt_amount} /></div>
       </div>}>Amount of money over-allocated in buckets.</Help>
+      show_nodebt_balance = true;
     }
         
     return (
@@ -182,6 +184,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                 <GroupedBucketList
                   buckets={appstate.unkicked_buckets}
                   balances={appstate.bucket_balances}
+                  nodebt_balances={appstate.nodebt_balances}
+                  show_nodebt_balance={show_nodebt_balance}
                   groups={_.values(appstate.groups)}
                   onPendingChanged={this.pendingChanged}
                   pending={pending}
@@ -446,6 +450,8 @@ class BucketKindDetails extends React.Component<{
 interface BucketRowProps {
   bucket: Bucket;
   balance: number;
+  nodebt_balance: number;
+  show_nodebt_balance?: boolean;
   posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
@@ -475,13 +481,13 @@ class BucketRow extends React.Component<BucketRowProps, {
     }
   }
   render() {
-    let { posting_date, bucket, balance, onPendingChanged, pending } = this.props;
+    let { posting_date, bucket, balance, nodebt_balance, show_nodebt_balance, onPendingChanged, pending } = this.props;
     let balance_el;
     if (pending) {
       balance_el = <span>
-        <Money key="bal" value={balance} className="strikeout" />
+        <Money value={balance} className="strikeout" />
         <span className="fa fa-long-arrow-right change-arrow" />
-        <Money key="pend" value={balance + pending} />
+        <Money value={balance + pending} />
       </span>
     } else {
       balance_el = <Money value={balance} />
@@ -528,6 +534,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right">{balance_el}</td>
+      {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} /></td> : null }
       <td className="left">
         <MoneyInput
           value={pending || null}
@@ -617,6 +624,8 @@ class GroupRow extends React.Component<{
   group: Group;
   buckets: Bucket[];
   balances: Balances;
+  nodebt_balances: Balances;
+  show_nodebt_balance: boolean;
   posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
@@ -634,7 +643,7 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, balances, onPendingChanged, pending, posting_date } = this.props;
+    let { buckets, group, balances, nodebt_balances, show_nodebt_balance, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
@@ -642,6 +651,8 @@ class GroupRow extends React.Component<{
         key={bucket.id}
         bucket={bucket}
         balance={balances[bucket.id]}
+        nodebt_balance={nodebt_balances[bucket.id]}
+        show_nodebt_balance={show_nodebt_balance}
         onPendingChanged={onPendingChanged}
         pending={pending[bucket.id]}
         posting_date={posting_date} />
@@ -684,9 +695,10 @@ class GroupRow extends React.Component<{
       <tr>
         <th className="nopad noborder"></th>
         <th>Bucket</th>
-        <th>Balance</th>
+        <th className="right">Balance</th>
+        {show_nodebt_balance ? <th className="right">Effective <Help>This would be the balance if no buckets were in debt</Help></th> : null}
         <th className="left">Transact</th>
-        <th><span className="fa fa-tint"/> Rain</th>
+        <th className="right"><span className="fa fa-tint"/> Rain</th>
         <th>Details</th>
         <th></th>
       </tr>
@@ -768,6 +780,8 @@ interface GroupedBucketListProps {
   groups: Group[];
   buckets: Bucket[];
   balances: Balances;
+  nodebt_balances: Balances;
+  show_nodebt_balance: boolean;
   posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
@@ -782,27 +796,9 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { balances, pending, posting_date } = this.props;
+    let { balances, nodebt_balances, show_nodebt_balance, pending, posting_date } = this.props;
     pending = pending || {};
 
-    // let grouped_buckets = {};
-    // buckets.forEach(bucket => {
-    //   let group_id = bucket.group_id || NOGROUP;
-    //   if (!grouped_buckets[group_id]) {
-    //     grouped_buckets[group_id] = [];
-    //   }
-    //   grouped_buckets[group_id].push(bucket);
-    // })
-    // let groups = this.props.groups.slice();
-
-    // // if there are ungrouped buckets
-    // if (grouped_buckets[NOGROUP]) {
-    //   groups.push({
-    //     id: NOGROUP,
-    //     name: 'Misc',
-    //     ranking: 'z',
-    //   } as Group)
-    // }
     let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
       .map((item) => {
         let { group, buckets } = item;
@@ -811,6 +807,8 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           group={group}
           buckets={buckets}
           balances={balances}
+          nodebt_balances={nodebt_balances}
+          show_nodebt_balance={show_nodebt_balance}
           onPendingChanged={this.pendingChanged}
           pending={pending}
           posting_date={posting_date} />

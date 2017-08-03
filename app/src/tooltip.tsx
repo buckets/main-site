@@ -2,7 +2,9 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { pageCoords, dimensions } from './position'
 
-export class Help extends React.Component<{icon:any}, {
+export class Help extends React.Component<{
+  icon?:any;
+}, {
   showing: boolean;
 }> {
   constructor(props) {
@@ -18,7 +20,7 @@ export class Help extends React.Component<{icon:any}, {
         <div className="note">{this.props.children}</div>
       </div>
     }
-    let icon = this.props.icon ? this.props.icon : '?';
+    let icon = this.props.icon ? this.props.icon : <span className="fa fa-question-circle"></span>;
     return <div className="help"
       onMouseEnter={() => {
         this.setState({showing: true});

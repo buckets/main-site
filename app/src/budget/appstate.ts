@@ -53,6 +53,7 @@ interface IComputedAppState {
   income: number;
   expenses: number;
   gain: number;
+  nodebt_balances: Balances;
 
   num_unknowns: number;
   unmatched_account_balances: number;
@@ -72,6 +73,7 @@ export class AppState implements IAppState, IComputedAppState {
   connections = {};
   account_balances = {};
   bucket_balances = {};
+  nodebt_balances = {};
   unknown_accounts = {};
   month = null;
   year = null;
@@ -123,8 +125,20 @@ export class AppState implements IAppState, IComputedAppState {
 }
 
 function computeTotals(appstate:AppState):IComputedAppState {
-  let bucket_total_balance = _.values(appstate.bucket_balances)
-    .reduce((a,b) => a+b, 0);
+  let bucket_neg_balance = 0;
+  let bucket_pos_balance = 0;
+  _.values(appstate.bucket_balances)
+    .forEach(bal => {
+      if (bal <= 0) {
+        bucket_neg_balance += bal;
+      } else {
+        bucket_pos_balance += bal;
+      }
+    })
+  let bucket_total_balance = bucket_pos_balance + bucket_neg_balance;
+  console.log('pos bal', bucket_pos_balance);
+  console.log('neg bal', bucket_neg_balance);
+  console.log('tot bal', bucket_total_balance);
   let account_total_balance = _.values(appstate.account_balances)
     .reduce((a,b) => a+b, 0);
   let income = 0;
@@ -164,11 +178,20 @@ function computeTotals(appstate:AppState):IComputedAppState {
 
   let kicked_buckets = [];
   let unkicked_buckets = [];
+  let nodebt_balances = {};
   _.values(appstate.buckets).forEach(bucket => {
     if (bucket.kicked) {
       kicked_buckets.push(bucket);
     } else {
       unkicked_buckets.push(bucket);
+      let bal = appstate.bucket_balances[bucket.id];
+      if (bal <= 0) {
+        // negative
+        nodebt_balances[bucket.id] = 0;
+      } else {
+        // positive
+        nodebt_balances[bucket.id] = (bal / bucket_pos_balance) * bucket_total_balance;
+      }
     }
   })
   let unmatched_account_balances = 0;
@@ -192,6 +215,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     kicked_buckets,
     unkicked_buckets,
     unmatched_account_balances,
+    nodebt_balances,
   };
 }
 

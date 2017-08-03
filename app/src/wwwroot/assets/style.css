@@ -425,8 +425,8 @@ table.ledger th {
   border-bottom: 1px solid var(--lighter-grey);
   color: var(--lighter-grey);
   font-weight: normal;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  /*padding-left: 1rem;
+  padding-right: 1rem;*/
 }
 
 tr.group-row .group-name {
