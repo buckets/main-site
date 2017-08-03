@@ -2,8 +2,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { I18nextProvider, Trans} from 'react-i18next'
-import { i18n } from '../i18n'
+import { TX } from '../i18n'
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
@@ -112,7 +111,7 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span><Trans i18nKey="accounts-label">Accounts</Trans></span>{accounts_badge}</Link>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span><TX>Accounts</TX></span>{accounts_badge}</Link>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>Buckets</span>{buckets_badge}</Link>
           <Route path="/buckets">
@@ -139,95 +138,93 @@ class Application extends React.Component<ApplicationProps, any> {
     let today = moment();
     let { appstate } = this.props;
     return (
-      <I18nextProvider i18n={i18n}>
-        <Router
-          path={this.props.path}
-          setPath={this.props.setPath}
-          >
-          <BucketStyles buckets={_.values(appstate.buckets)} />
-          <ToastDisplay />
-          <FinderDisplay />
-          <Switch>
-            <Route path="/y<int:year>m<int:month>">
-              <WithRouting func={({params}) => {
-                manager.setDate(params.year, params.month);
-                return null;
-              }} />
-              <div className="app">
-                <Navbar appstate={appstate} />
-                <div className="content">
-                  <header>
-                    <div className="totals">
-                      <total>
-                        <name><Help icon={<span><span className="fa fa-tint" /> Rain</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
-                        <amount><Money value={appstate.rain} /></amount>
-                      </total>
-                      <total className="section-start">
-                        <name>Income</name>
-                        <amount><Money value={appstate.income} /></amount>
-                      </total>
-                      <inter-total>-</inter-total>
-                      <total>
-                        <name>Expenses</name>
-                        <amount><Money className="negative" value={Math.abs(appstate.expenses)} /></amount>
-                      </total>
-                      <inter-total>=</inter-total>
-                      <total>
-                        <name>Month's {appstate.gain >= 0 ? 'gain' : 'loss'}</name>
-                        <amount><Money value={appstate.gain} /></amount>
-                      </total>
-                      <total className="section-start">
-                        <name>in the bank</name>
-                        <amount><Money value={appstate.account_total_balance} /></amount>
-                      </total>
-                    </div>
-                    <div>
-                      <WithRouting func={(routing) => {
-                        return (<MonthSelector
-                          className="big"
-                          month={routing.params.month}
-                          year={routing.params.year}
-                          onChange={(year, month) => {
-                            routing.setPath(`/y${year}m${month}${routing.rest}`);
-                          }}
-                        />);
-                      }} />
-                    </div>
-                  </header>
-                  <div className="page">
-                    <Switch>
-                      <Route path="/accounts">
-                        <AccountsPage appstate={appstate} />
-                      </Route>
-                      <Route path="/buckets/kicked">
-                        <KickedBucketsPage appstate={appstate} />
-                      </Route>
-                      <Route path="/buckets">
-                        <BucketsPage appstate={appstate} />
-                      </Route>
-                      <Route path="/transactions">
-                        <TransactionPage appstate={appstate} />
-                      </Route>
-                      <Route path="/connections">
-                        <ConnectionsPage appstate={appstate} />
-                      </Route>
-                      <Route path="/import">
-                        <TransactionImportPage appstate={appstate} />
-                      </Route>
-                    </Switch>
+      <Router
+        path={this.props.path}
+        setPath={this.props.setPath}
+        >
+        <BucketStyles buckets={_.values(appstate.buckets)} />
+        <ToastDisplay />
+        <FinderDisplay />
+        <Switch>
+          <Route path="/y<int:year>m<int:month>">
+            <WithRouting func={({params}) => {
+              manager.setDate(params.year, params.month);
+              return null;
+            }} />
+            <div className="app">
+              <Navbar appstate={appstate} />
+              <div className="content">
+                <header>
+                  <div className="totals">
+                    <total>
+                      <name><Help icon={<span><span className="fa fa-tint" /> Rain</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
+                      <amount><Money value={appstate.rain} /></amount>
+                    </total>
+                    <total className="section-start">
+                      <name>Income</name>
+                      <amount><Money value={appstate.income} /></amount>
+                    </total>
+                    <inter-total>-</inter-total>
+                    <total>
+                      <name>Expenses</name>
+                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} /></amount>
+                    </total>
+                    <inter-total>=</inter-total>
+                    <total>
+                      <name>Month's {appstate.gain >= 0 ? 'gain' : 'loss'}</name>
+                      <amount><Money value={appstate.gain} /></amount>
+                    </total>
+                    <total className="section-start">
+                      <name>in the bank</name>
+                      <amount><Money value={appstate.account_total_balance} /></amount>
+                    </total>
                   </div>
+                  <div>
+                    <WithRouting func={(routing) => {
+                      return (<MonthSelector
+                        className="big"
+                        month={routing.params.month}
+                        year={routing.params.year}
+                        onChange={(year, month) => {
+                          routing.setPath(`/y${year}m${month}${routing.rest}`);
+                        }}
+                      />);
+                    }} />
+                  </div>
+                </header>
+                <div className="page">
+                  <Switch>
+                    <Route path="/accounts">
+                      <AccountsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/buckets/kicked">
+                      <KickedBucketsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/buckets">
+                      <BucketsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/transactions">
+                      <TransactionPage appstate={appstate} />
+                    </Route>
+                    <Route path="/connections">
+                      <ConnectionsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/import">
+                      <TransactionImportPage appstate={appstate} />
+                    </Route>
+                  </Switch>
                 </div>
               </div>
-            </Route>
-            <WithRouting func={(routing) => {
-              let dft_path = routing.fullpath || '/accounts';
-              let year = appstate.year || today.year();
-              let month = appstate.month || today.month()+1
-              return (<Redirect to={`/y${year}m${month}${dft_path}`} />)
-            }} />
-          </Switch>
-        </Router>
-      </I18nextProvider>);
+            </div>
+          </Route>
+          <WithRouting func={(routing) => {
+            let dft_path = routing.fullpath || '/accounts';
+            let year = appstate.year || today.year();
+            let month = appstate.month || today.month()+1
+            return (<Redirect to={`/y${year}m${month}${dft_path}`} />)
+          }} />
+        </Switch>
+      </Router>);
   }
 }
 
