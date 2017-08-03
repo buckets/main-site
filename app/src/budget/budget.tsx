@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import { tx } from '../i18n'
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
@@ -74,7 +75,7 @@ class Navbar extends React.Component<{
         onClick={() => {
           openBuyPage();
           promptForLicense();
-        }}>Trial Version
+        }}>{tx._.labels.TrialVersion}
       </a>
     )
     if (isRegistered()) {
@@ -110,14 +111,14 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>Accounts</span>{accounts_badge}</Link>
-          <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
-          <Link relative to="/buckets" exactMatchClass="selected"><span>Buckets</span>{buckets_badge}</Link>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Accounts}</span>{accounts_badge}</Link>
+          <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Transactions}</span>{transactions_badge}</Link>
+          <Link relative to="/buckets" exactMatchClass="selected"><span>{tx._.nav.Buckets}</span>{buckets_badge}</Link>
           <Route path="/buckets">
-            <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
+            <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">{tx._.nav.Kicked}</Link>
           </Route>
-          <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
-          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>File Import</span>{fileimport_badge}</Link>
+          <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>{tx._.nav.Connections}</span>{connections_badge}</Link>
+          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Import}</span>{fileimport_badge}</Link>
         </div>
         <div>
           {sync_widget}
@@ -156,7 +157,7 @@ class Application extends React.Component<ApplicationProps, any> {
                 <header>
                   <div className="totals">
                     <total>
-                      <name><Help icon={<span><span className="fa fa-tint" /> Rain</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
+                      <name><Help icon={<span><span className="fa fa-tint" /> {tx._.labels.Rain}</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
                       <amount><Money value={appstate.rain} /></amount>
                     </total>
                     <total className="section-start">

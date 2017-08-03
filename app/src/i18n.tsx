@@ -1,13 +1,40 @@
 import * as log from 'electron-log'
 
-interface IMessages {
-  ['New Budget...']: string;
-  ['Open Budget...']: string;
-  ['Open Recent']: string;
-  ['Duplicate Window']: string;
-  ['Import Transactions...']: string;
-  ['Chat...']: string;
+export interface IMessages {
+  labels: {
+    TrialVersion: string,
+    Rain: string,
+  },
+  nav: {
+    Accounts: string,
+    Transactions: string,
+    Buckets: string,
+    Kicked: string,
+    Connections: string,
+    Import: string,
+  },
+  menu: {
+    file: {
+      label: string,
+      NewBudget: string,
+      OpenBudget: string,
+      OpenRecent: string,
+      DuplicateWindow: string,
+      ImportTransactions: string,
+    },
+    register: {
+      PurchaseFullVersion: string,
+      EnterLicense: string,
+    },
+    help: {
+      LearnMore: string,
+      ShowLogFiles: string,
+      ReportBug: string,
+      Chat: string,
+    },
+  }
 }
+
 interface ILangPack {
   name: string;
   messages: IMessages;
@@ -38,8 +65,8 @@ class TranslationContext {
       };
     })
   }
-  _(x:(keyof IMessages)):string {
-    return this.packs[this._locale].messages[x];
+  get _():IMessages {
+    return this.packs[this._locale].messages;
   }
 }
 
@@ -47,25 +74,81 @@ const messages:{[k:string]:ILangPack} = {
   en: {
     name: 'English',
     messages: {
-      'New Budget...': 'New Budget...',
-      'Open Budget...': 'Open Budget...',
-      'Open Recent': 'Open Recent',
-      'Duplicate Window': 'Duplicate Window',
-      'Import Transactions...': 'Import Transactions...',
-      'Chat...': 'Chat...',
+      labels: {
+        TrialVersion: 'Trial Version',
+        Rain: 'Rain',
+      },
+      nav: {
+        Accounts: 'Accounts',
+        Transactions: 'Transactions',
+        Buckets: 'Buckets',
+        Kicked: 'Kicked',
+        Connections: 'Connections',
+        Import: 'Import',
+      },
+      menu: {
+        file: {
+          label: 'File',
+          NewBudget: 'New Budget...',
+          OpenBudget: 'Open Budget...',
+          OpenRecent: 'Open Recent',
+          DuplicateWindow: 'Duplicate Window',
+          ImportTransactions: 'Import Transactions...',
+        },
+        register: {
+          PurchaseFullVersion: 'Purchase Full Version...',
+          EnterLicense: 'Enter License...',
+        },
+        help: {
+          LearnMore: 'Learn More',
+          ShowLogFiles: 'Show Log Files...',
+          ReportBug: 'Report Bug...',
+          Chat: 'Chat...',
+        }
+      }
     }
   },
   es: {
     name: 'Español',
     messages: {
-      'New Budget...': 'Presupuesto Nuevo...',
-      'Open Budget...': 'Abrir Presupuesto...',
-      'Open Recent': 'Abrir Lo Recientemente',
-      'Duplicate Window': 'Duplicar la Ventana',
-      'Import Transactions...': 'Importar Transacciones...',
-      'Chat...': 'Charlar...',
+      labels: {
+        TrialVersion: 'Versión de Prueba',
+        Rain: 'Lluvia'
+      },
+      nav: {
+        Accounts: 'Cuentas',
+        Transactions: 'Transacciones',
+        Buckets: 'Cubos',
+        Kicked: 'Echados',
+        Connections: 'Conexiones',
+        Import: 'Importar',
+      },
+      menu: {
+        file: {
+          label: 'Archivo',
+          NewBudget: 'Presupuesto nuevo...',
+          OpenBudget: 'Abrir presupuesto...',
+          OpenRecent: 'Abrir lo recientemente',
+          DuplicateWindow: 'Duplicar la ventana',
+          ImportTransactions: 'Importar transacciones...',
+        },
+        register: {
+          PurchaseFullVersion: 'Comprar las versión completa...',
+          EnterLicense: 'Entrar licencia...',
+        },
+        help: {
+          LearnMore: 'Aprende más',
+          ShowLogFiles: 'Mostrar archivos de registro',
+          ReportBug: 'Reportar un error',
+          Chat: 'Charlar...',
+        }
+      }
     }
   },
 }
 
 export const tx = new TranslationContext(messages);
+
+if (process.env.LANG) {
+  tx.setLocale(process.env.LANG);
+}

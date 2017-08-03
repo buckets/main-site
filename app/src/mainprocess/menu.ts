@@ -29,24 +29,24 @@ export async function updateEnabled(isbudget:boolean) {
 export async function updateMenu() {
   let recent_files = await getRecentFiles();
   let FileMenu = {
-    label: 'File',
+    label: tx._.menu.file.label,
     submenu: [
       {
-        label: tx._('New Budget...'),
+        label: tx._.menu.file.NewBudget,
         accelerator: 'CmdOrCtrl+Shift+N',
         click() {
           newBudgetFileDialog();
         }
       },
       {
-        label: tx._('Open Budget...'),
+        label: tx._.menu.file.OpenBudget,
         accelerator: 'CmdOrCtrl+O',
         click() {
           openDialog();
         }
       },
       {
-        label: tx._('Open Recent'),
+        label: tx._.menu.file.OpenRecent,
         enabled: recent_files.length !== 0,
         submenu: recent_files.map(path => {
           return {
@@ -59,7 +59,7 @@ export async function updateMenu() {
       },
       {type: 'separator'},
       {
-        label: tx._('Duplicate Window'),
+        label: tx._.menu.file.DuplicateWindow,
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
         click() {
@@ -68,7 +68,7 @@ export async function updateMenu() {
       },
       {type: 'separator'},
       {
-        label: tx._('Import Transactions...'),
+        label: tx._.menu.file.ImportTransactions,
         id: 'only4budgets import',
         accelerator: 'CmdOrCtrl+I',
         click() {
@@ -140,23 +140,23 @@ export async function updateMenu() {
     role: 'help',
     submenu: [
       {
-        label: 'Learn More',
+        label: tx._.menu.help.LearnMore,
         click () { shell.openExternal('https://www.bucketsisbetter.com') }
       },
       {
-        label: 'Show Log Files...',
+        label: tx._.menu.help.ShowLogFiles,
         click() {
           shell.showItemInFolder(log.transports.file.file);
         }
       },
       {
-        label: 'Report Bug...',
+        label: tx._.menu.help.ReportBug,
         click() {
           shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
         }
       },
       {
-        label: tx._('Chat...'),
+        label: tx._.menu.help.Chat,
         click() {
           shell.openExternal('https://www.bucketsisbetter.com/chat');
         }
@@ -165,16 +165,16 @@ export async function updateMenu() {
   };
 
   let RegisterMenu = {
-      label: 'Trial Version',
+      label: tx._.labels.TrialVersion,
       submenu: [
         {
-          label: 'Purchase Full Version...',
+          label: tx._.menu.register.PurchaseFullVersion,
           click() {
             openBuyPage();
           },
         },
         {
-          label: 'Enter License...',
+          label: tx._.menu.register.EnterLicense,
           click() {
             promptForLicense();
           },
