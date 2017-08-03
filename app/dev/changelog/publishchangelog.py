@@ -10,7 +10,6 @@ project_root = os.path.join(os.path.dirname(__file__), '../..')
 changelog_filename = os.path.join(project_root, 'CHANGELOG.md')
 
 # Get block of text
-tag_name = None
 captured = []
 with open(changelog_filename, 'rb') as fh:
     state = 'init'
@@ -19,7 +18,6 @@ with open(changelog_filename, 'rb') as fh:
         if line.startswith('#'):
             if state == 'init':
                 state = 'capturing'
-                tag_name = line.split()[1]
             elif state == 'capturing':
                 break
         if state == 'capturing':
@@ -40,7 +38,12 @@ if not latest_release['draft']:
 # Update the contents
 r = requests.patch('https://api.github.com/repos/buckets/application/releases/{0}'.format(latest_id),
     data=json.dumps({
+        'tag_name': latest_release['tag_name'],
+        'target_commitish': latest_release['target_commitish'],
+        'name': latest_release['name'],
         'body': block,
+        'draft': True,
+        'prerelease': False,
     }), auth=(GH_USER, GH_TOKEN))
 if not r.ok:
     raise Exception(r.text)
