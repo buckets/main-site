@@ -15,13 +15,6 @@
     "postinstall": "install-app-deps"
   },
   "dependencies": {
-    "@types/fs-extra": "^4.0.0",
-    "@types/fs-extra-promise": "^1.0.2",
-    "@types/mathjs": "0.0.34",
-    "@types/prop-types": "15.5.1",
-    "@types/react-addons-css-transition-group": "15.0.3",
-    "@types/request-promise": "^4.1.36",
-    "adm-zip": "0.4.7",
     "bluebird": "3.5.0",
     "classnames": "2.2.5",
     "electron-is": "^2.4.0",
@@ -43,7 +36,6 @@
     "request-promise": "4.2.1",
     "sqlite": "2.8.0",
     "tmp": "0.0.31",
-    "typescript": "2.3.4",
     "uuid": "^3.0.1"
   },
   "build": {
@@ -101,11 +93,17 @@
     "@types/bluebird": "^3.5.5",
     "@types/chai": "^4.0.0",
     "@types/electron-builder": "2.8.0",
+    "@types/fs-extra": "^4.0.0",
+    "@types/fs-extra-promise": "^1.0.2",
     "@types/jsonwebtoken": "^7.2.2",
+    "@types/mathjs": "^0.0.34",
     "@types/mocha": "^2.2.41",
+    "@types/prop-types": "^15.5.1",
     "@types/react": "15.0.29",
+    "@types/react-addons-css-transition-group": "^15.0.3",
     "@types/react-dom": "15.5.0",
     "@types/request": "^0.0.45",
+    "@types/request-promise": "^4.1.36",
     "@types/uuid": "^3.0.0",
     "asar": "^0.13.0",
     "chai": "4.0.2",
@@ -115,6 +113,7 @@
     "mocha": "3.4.2",
     "tap": "^10.7.0",
     "ts-node": "3.0.6",
+    "typescript": "2.3.4",
     "watch": "^1.0.2"
   }
 }

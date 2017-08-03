@@ -143,6 +143,10 @@ def index():
     return render_template('anon/index_v2.html',
         latest_version=latest_version)
 
+@blue.route('/chat', methods=['GET'])
+def chat():
+    return redirect('https://tawk.to/chat/59835f8ed1385b2b2e285765/default/?$_tawk_popout=true')
+
 @blue.route('/buy', methods=['GET', 'POST'])
 def buy():
     if request.method == 'POST':

@@ -153,6 +153,12 @@ export async function updateMenu() {
         click() {
           shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
         }
+      },
+      {
+        label: 'Chat...',
+        click() {
+          shell.openExternal('https://www.bucketsisbetter.com/chat');
+        }
       }
     ],
   };
