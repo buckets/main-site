@@ -12,6 +12,7 @@ import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
+import { Help } from '../tooltip'
 
 const NOGROUP = -1;
 
@@ -132,10 +133,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
 
     let self_debt;
     if (self_debt_amount) {
-      self_debt = <div className="labeled-number">
+      self_debt = <Help icon={<div className="labeled-number">
         <div className="label">Self debt</div>
         <div className="value"><Money value={self_debt_amount} /></div>
-      </div>
+      </div>}>Amount of money over-allocated in buckets.</Help>
     }
         
     return (
@@ -165,10 +166,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   className="makeitrain">Make it rain! <span className="fa fa-tint"/></button>
                 <button onClick={this.addBucket}>New bucket</button>
                 <button onClick={this.addGroup}>New group</button>
-                <div className="labeled-number">
+                <Help icon={<div className="labeled-number">
                   <div className="label">Rain<permonth/></div>
                   <div className="value"><Money value={total_rain_needed} /></div>
-                </div>
+                </div>}>Total amount your buckets expect each month.</Help>
                 {self_debt}
               </div>
               <div className="group">

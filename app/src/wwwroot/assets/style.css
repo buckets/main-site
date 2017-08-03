@@ -1038,9 +1038,11 @@ table.props th {
 }
 .help .note-wrap {
   position: relative;
-  display: inline-block;
+  display: inline;
   height: 0;
   width: 0;
+  margin: 0;
+  padding: 0;
   z-index: 3;
 }
 .help .note-wrap .note {
