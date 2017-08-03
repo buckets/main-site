@@ -12,12 +12,17 @@ import { BudgetFile, watchForEvents } from './files'
 import {APP_ROOT} from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
+import { tx } from '../i18n'
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
 log.info('App starting...');
 
+// Language
+if (process.env.LANG) {
+  tx.setLocale(process.env.LANG);
+}
 
 // Make accessing '/' access the expected place
 protocol.registerStandardSchemes(['buckets'])

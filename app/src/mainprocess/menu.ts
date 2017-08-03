@@ -4,6 +4,7 @@ import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './fi
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
+import { tx } from '../i18n'
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -31,21 +32,21 @@ export async function updateMenu() {
     label: 'File',
     submenu: [
       {
-        label: 'New Budget...',
+        label: tx._('New Budget...'),
         accelerator: 'CmdOrCtrl+Shift+N',
         click() {
           newBudgetFileDialog();
         }
       },
       {
-        label: 'Open Budget...',
+        label: tx._('Open Budget...'),
         accelerator: 'CmdOrCtrl+O',
         click() {
           openDialog();
         }
       },
       {
-        label: 'Open Recent',
+        label: tx._('Open Recent'),
         enabled: recent_files.length !== 0,
         submenu: recent_files.map(path => {
           return {
@@ -58,7 +59,7 @@ export async function updateMenu() {
       },
       {type: 'separator'},
       {
-        label: 'Duplicate Window',
+        label: tx._('Duplicate Window'),
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
         click() {
@@ -67,7 +68,7 @@ export async function updateMenu() {
       },
       {type: 'separator'},
       {
-        label: 'File Import...',
+        label: tx._('Import Transactions...'),
         id: 'only4budgets import',
         accelerator: 'CmdOrCtrl+I',
         click() {
@@ -155,7 +156,7 @@ export async function updateMenu() {
         }
       },
       {
-        label: 'Chat...',
+        label: tx._('Chat...'),
         click() {
           shell.openExternal('https://www.bucketsisbetter.com/chat');
         }

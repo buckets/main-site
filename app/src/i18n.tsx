@@ -1,53 +1,71 @@
-import * as React from 'react'
+import * as log from 'electron-log'
 
-let TEXTS = {};
-let CURRENT_LOCALE = 'en';
-
-export function setTexts(locale:string, texts:object) {
-  TEXTS[locale] = texts;
+interface IMessages {
+  ['New Budget...']: string;
+  ['Open Budget...']: string;
+  ['Open Recent']: string;
+  ['Duplicate Window']: string;
+  ['Import Transactions...']: string;
+  ['Chat...']: string;
 }
-export function setLocale(locale:string) {
-  CURRENT_LOCALE = locale;
-  INSTANCES.forEach(i => {
-    i.setState({locale});
-  })
-}
-
-let INSTANCES:Set<TX> = new Set();
-
-export function tx(text:string) {
-  TEXTS[CURRENT_LOCALE]
+interface ILangPack {
+  name: string;
+  messages: IMessages;
 }
 
-export class TX extends React.Component<any,{
-  locale: string;
-}> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      locale: CURRENT_LOCALE,
+class TranslationContext {
+  private _locale:string = 'en';
+
+  constructor(private packs:{[k:string]:ILangPack}) {
+  }
+
+  get locale() {
+    return this._locale
+  }
+  setLocale(x:string) {
+    if (this.packs[x] !== undefined) {
+      this._locale = x;  
+    } else {
+      log.warn(`Not setting lang to unknown: ${x}`)
     }
-  }
-  componentWillMount() {
-    INSTANCES.add(this);
-  }
-  componentWillUnmount() {
-    INSTANCES.delete(this);
-  }
-  render() {
-    console.log('children', this.props.children);
-    let children = React.Children.toArray(this.props.children);
-    console.log('children', children);
-    for (var i = 0; i < children.length; i++) {
-      let elem = children[i];
-      if (typeof elem === 'string') {
-        console.log('string');
-        return <spanelem;
-      } else if (!React.isValidElement(elem)) {
-        continue;
-      }
 
-    }
-    return <span>{this.props.children}</span>;
+  }
+  languages() {
+    return Object.keys(this.packs).map(key => {
+      return {
+        locale: key,
+        name: this.packs[key].name,
+      };
+    })
+  }
+  _(x:(keyof IMessages)):string {
+    return this.packs[this._locale].messages[x];
   }
 }
+
+const messages:{[k:string]:ILangPack} = {
+  en: {
+    name: 'English',
+    messages: {
+      'New Budget...': 'New Budget...',
+      'Open Budget...': 'Open Budget...',
+      'Open Recent': 'Open Recent',
+      'Duplicate Window': 'Duplicate Window',
+      'Import Transactions...': 'Import Transactions...',
+      'Chat...': 'Chat...',
+    }
+  },
+  es: {
+    name: 'Español',
+    messages: {
+      'New Budget...': 'Presupuesto Nuevo...',
+      'Open Budget...': 'Abrir Presupuesto...',
+      'Open Recent': 'Abrir Lo Recientemente',
+      'Duplicate Window': 'Duplicar la Ventana',
+      'Import Transactions...': 'Importar Transacciones...',
+      'Chat...': 'Charlar...',
+    }
+  },
+}
+
+export const tx = new TranslationContext(messages);
