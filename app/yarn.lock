@@ -56,6 +56,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/i18next@*":
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/@types/i18next/-/i18next-8.4.1.tgz#8aebc08c757167105d1fefa8fbd1b89942e5f40e"
+
 "@types/jsonwebtoken@^7.2.2":
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-7.2.2.tgz#9a433e7d7b5afed4deb63e9742b18a671f2e312f"
@@ -95,6 +99,13 @@
   version "15.5.0"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-15.5.0.tgz#7f4fb9613d4051141773242f7b6b5f1a46b34bd9"
   dependencies:
+    "@types/react" "*"
+
+"@types/react-i18next@^4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@types/react-i18next/-/react-i18next-4.6.0.tgz#511b8f7871b81947db27b59b320bc65287f6c920"
+  dependencies:
+    "@types/i18next" "*"
     "@types/react" "*"
 
 "@types/react@*", "@types/react@15.0.29":
@@ -1465,6 +1476,10 @@ hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
 
+hoist-non-react-statics@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
+
 home-path@^1.0.1:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/home-path/-/home-path-1.0.5.tgz#788b29815b12d53bacf575648476e6f9041d133f"
@@ -1480,6 +1495,10 @@ http-signature@~1.1.0:
     assert-plus "^0.2.0"
     jsprim "^1.2.2"
     sshpk "^1.7.0"
+
+i18next@8.4.3:
+  version "8.4.3"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-8.4.3.tgz#36b6ff516c4f992010eedcce24a36c4609e8c7dc"
 
 iconv-lite@~0.4.13:
   version "0.4.18"
@@ -2654,6 +2673,12 @@ react-dom@15.6.1:
     loose-envify "^1.1.0"
     object-assign "^4.1.0"
     prop-types "^15.5.10"
+
+react-i18next@4.7.0:
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/react-i18next/-/react-i18next-4.7.0.tgz#1ba1ac72c7438ff0eba23d5c11616eb4d0b23e87"
+  dependencies:
+    hoist-non-react-statics "1.2.0"
 
 react-transition-group@^1.2.0:
   version "1.2.0"
