@@ -1,4 +1,5 @@
 import * as log from 'electron-log'
+import * as Path from 'path'
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
@@ -54,10 +55,12 @@ export class BudgetFile {
   }
   openWindow(path:string) {
     log.debug('opening window to', path);
+    const parsed = Path.parse(this.filename);
     let win = new BrowserWindow({
       width: 1200,
       height: 900,
       show: false,
+      title: `Buckets - ${parsed.name}`,
     });
     win.once('ready-to-show', () => {
       win.show();

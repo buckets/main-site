@@ -136,9 +136,6 @@ function computeTotals(appstate:AppState):IComputedAppState {
       }
     })
   let bucket_total_balance = bucket_pos_balance + bucket_neg_balance;
-  console.log('pos bal', bucket_pos_balance);
-  console.log('neg bal', bucket_neg_balance);
-  console.log('tot bal', bucket_total_balance);
   let account_total_balance = _.values(appstate.account_balances)
     .reduce((a,b) => a+b, 0);
   let income = 0;
