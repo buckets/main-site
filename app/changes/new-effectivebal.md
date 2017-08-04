@@ -1,1 +1,0 @@
-Added *Effective Balance* column to buckets for when there are buckets in debt (so you don't think you have more money than you do).

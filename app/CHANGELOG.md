@@ -1,5 +1,16 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
 
+## v0.12.0
+
+- NEW: Now you can get instant help with the 'Chat...' option in the Help menu.
+
+- NEW: Added *Effective Balance* column to buckets for when there are buckets in debt (so you don't think you have more money than you do).
+
+- NEW: Windows are labeled with the filename now
+
+- NEW: Linux installs will now be notified of updates, too
+
+
 ## v0.11.0
 
 - **FIX:** Style fixes and extra tooltip helps
