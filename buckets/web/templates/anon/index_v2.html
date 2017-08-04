@@ -111,18 +111,36 @@ img.main-shot {
     <em>Ready to buy?</em>  <a href="{{ url_for('.buy') }}">Buy it today for a one-time $20 payment.</a>
   </div>
 
-  <!-- Begin MailChimp Signup Form -->
+</div>
+
+<!-- Begin MailChimp Signup Form -->
 <link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
 <style type="text/css">
-  #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }
+  #mc_embed_signup{
+    background: #fff;
+    clear: left;
+    background-image: url(/static/img/airmail_med.jpg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 531px;
+    padding: 0rem 2rem;
+    margin: 1rem auto;
+  }
   #mc_embed_signup form {
     padding: 1rem 0;
+  }
+  #mc_embed_signup .mc-field-group {
+    margin-left: 40%;
+    width: 50%;
+  }
+  #mc_embed_signup #mc-embedded-subscribe {
+    margin-left: 40%;
   }
 </style>
 <div id="mc_embed_signup">
 <form action="//bucketsisbetter.us8.list-manage.com/subscribe/post?u=bc109895c8df246ae54ad4d71&amp;id=0960a6d05e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
     <div id="mc_embed_signup_scroll">
-  <h2>Subscribe to the Buckets Newsletter</h2>
+  <h2>Subscribe to the Never-More-Than-Monthly, Unsubscribe-Whenever Buckets Newsletter</h2>
 <div class="mc-field-group">
   <label for="mce-EMAIL">Email Address </label>
   <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
@@ -143,19 +161,4 @@ img.main-shot {
 
 <!--End mc_embed_signup-->
 
-<div style="padding: 1rem;
-    border: 1px solid lightgrey;
-    margin: 1rem 0;
-    border-radius: 3px;
-    background-image: url(/static/img/bucketongrass-med.png);
-    background-size: cover;
-    background-position: 0px 3px;
-    background-repeat: no-repeat;
-    text-align: center;
-    height: 141px;
-    background-color: lightgrey;">
-Looking for the old Buckets web app?  <a href="{{ url_for('app.index') }}">Sign in here</a>
-</div>
-
-</div>
 {% endblock content %}
