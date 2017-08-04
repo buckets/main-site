@@ -8,6 +8,7 @@ import {AccountsPage} from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
 import { ConnectionsPage, SyncWidget } from './connections'
+import { ReportsPage } from './reports'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
@@ -116,6 +117,7 @@ class Navbar extends React.Component<{
           <Route path="/buckets">
             <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">Kicked</Link>
           </Route>
+          <Link relative to="/reports" exactMatchClass="selected" matchClass="selected"><span>Reports</span></Link>
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>File Import</span>{fileimport_badge}</Link>
         </div>
@@ -204,6 +206,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/transactions">
                       <TransactionPage appstate={appstate} />
+                    </Route>
+                    <Route path="/reports">
+                      <ReportsPage appstate={appstate} />
                     </Route>
                     <Route path="/connections">
                       <ConnectionsPage appstate={appstate} />

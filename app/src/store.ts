@@ -3,6 +3,7 @@ import {} from 'bluebird'
 import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
+import { ReportStore } from './models/reports'
 
 //--------------------------------------------------------------------------------
 // objects
@@ -42,6 +43,7 @@ export interface IStore {
   accounts:AccountStore;
   buckets:BucketStore;
   connections:SimpleFINStore;
+  reports:ReportStore;
 }
 
 //--------------------------------------------------------------------------------

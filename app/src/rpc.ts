@@ -5,6 +5,7 @@ import { ipcMain, ipcRenderer, webContents} from 'electron'
 import { BucketStore } from './models/bucket';
 import { AccountStore } from './models/account';
 import { SimpleFINStore } from './models/simplefin';
+import { ReportStore } from './models/reports';
 
 //--------------------------------------------------------------------------------
 // serializing
@@ -86,12 +87,14 @@ export class RPCRendererStore implements IStore {
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
+  readonly reports:ReportStore;
   constructor(private room:string) {
     this.data = new DataEventEmitter();
     ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
+    this.reports = new ReportStore(this);
   }
   get channel() {
     return `rpc-${this.room}`;

@@ -8,6 +8,7 @@ import {APP_ROOT} from './globals'
 import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
 import { SimpleFINStore } from '../models/simplefin'
+import { ReportStore } from '../models/reports'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
@@ -84,11 +85,13 @@ export class DBStore implements IStore {
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
+  readonly reports:ReportStore;
   constructor(private filename:string, private doTrialWork:boolean=false) {
     this.data = new DataEventEmitter();
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
+    this.reports = new ReportStore(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})
