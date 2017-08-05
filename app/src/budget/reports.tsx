@@ -5,6 +5,7 @@ import * as V from 'victory'
 
 import { cents2decimal } from '../money'
 import { IntervalSummary } from '../models/reports'
+import { COLORS } from '../color'
 
 
 export class ReportsPage extends React.Component<{
@@ -17,18 +18,28 @@ export class ReportsPage extends React.Component<{
     this.state = {
       intervalsummary: [],
     }
+    this.computeState(props);
+  }
+  computeState(props) {
+    let appstate:AppState = props.appstate;
+    let adate = appstate.viewDateRange.onOrAfter.clone().startOf('year');
     manager.store.reports.incomeAndExpenses({
-      start: moment.utc().startOf('year'),
-      end: moment.utc().startOf('year').add(1, 'year'),
+      start: adate,
+      end: adate.clone().add(1, 'year'),
     })
     .then(result => {
       console.log('result', result);
       this.setState({intervalsummary: result})
     })
   }
+  componentWillReceiveProps(nextProps) {
+    this.computeState(nextProps);
+  }
   render() {
+    let tickValues = [];
     let data = this.state.intervalsummary
     .map((range, idx) => {
+      tickValues.push(range.start.format('MMM'));
       return {
         month: range.start.format('MMM'),
         income: range.income,
@@ -46,6 +57,11 @@ export class ReportsPage extends React.Component<{
             domainPadding={80}
           >
             <V.VictoryAxis
+              tickValues={tickValues}
+              tickFormat={x => {
+                console.log('x', x);
+                return x
+              }}
             />
             <V.VictoryAxis
               dependentAxis
@@ -53,15 +69,21 @@ export class ReportsPage extends React.Component<{
             />
             <V.VictoryGroup
               offset={10}
-              colorScale={"warm"}
+              colorScale={[COLORS.red, COLORS.darker_green]}
             >
               <V.VictoryBar
-                style={{fill:"rgba(231, 76, 60,1.0)"}}
                 data={data}
+                style={
+                  {data: {fill: COLORS.red}}
+                }
                 x="month"
                 y="expenses" />
               <V.VictoryBar
                 data={data}
+                className="income"
+                style={
+                  {data: {fill: COLORS.darker_green}}
+                }
                 x="month"
                 y="income" />
             </V.VictoryGroup>

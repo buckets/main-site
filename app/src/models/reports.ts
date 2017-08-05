@@ -78,7 +78,8 @@ export class ReportStore {
           SUM(amount) as expenses
         FROM account_transaction
         WHERE
-          general_cat=''
+          (general_cat is null
+           OR general_cat = '')
           AND posted >= $start
           AND posted < $end
           AND amount <= 0

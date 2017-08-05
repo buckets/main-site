@@ -1,24 +1,27 @@
+import * as _ from 'lodash'
 import * as React from 'react'
 import * as cx from 'classnames'
 
-export const DEFAULT_COLORS = [
-  'rgba(52, 152, 219,1.0)', // blue
-  'rgba(41, 128, 185,1.0)', // darker-blue
-  'rgba(26, 188, 156,1.0)', // teal
-  'rgba(22, 160, 133,1.0)', // darker-teal
-  'rgba(46, 204, 113,1.0)', // green
-  'rgba(39, 174, 96,1.0)', // darker-green
-  'rgba(231, 76, 60,1.0)', // red
-  'rgba(192, 57, 43,1.0)', // darker-red
-  'rgba(230, 126, 34,1.0)', // orange
-  'rgba(211, 84, 0,1.0)', // darker-orange
-  'rgba(241, 196, 15,1.0)', // yellow
-  'rgba(243, 156, 18,1.0)', // darker-yellow
-  'rgba(155, 89, 182,1.0)', // purple
-  'rgba(142, 68, 173,1.0)', // darker-purple
-  'rgba(52, 73, 94,1.0)', // darkblue
-  'rgba(44, 62, 80,1.0)', // darker-darkblue
-]
+export const COLORS = {
+  'blue': 'rgba(52, 152, 219,1.0)', 
+  'darker_blue': 'rgba(41, 128, 185,1.0)', 
+  'teal': 'rgba(26, 188, 156,1.0)', 
+  'darker_teal': 'rgba(22, 160, 133,1.0)', 
+  'green': 'rgba(46, 204, 113,1.0)', 
+  'darker_green': 'rgba(39, 174, 96,1.0)', 
+  'red': 'rgba(231, 76, 60,1.0)', 
+  'darker_red': 'rgba(192, 57, 43,1.0)', 
+  'orange': 'rgba(230, 126, 34,1.0)', 
+  'darker_orange': 'rgba(211, 84, 0,1.0)', 
+  'yellow': 'rgba(241, 196, 15,1.0)', 
+  'darker_yellow': 'rgba(243, 156, 18,1.0)', 
+  'purple': 'rgba(155, 89, 182,1.0)', 
+  'darker_purple': 'rgba(142, 68, 173,1.0)', 
+  'darkblue': 'rgba(52, 73, 94,1.0)', 
+  'darker_darkblue': 'rgba(44, 62, 80,1.0)', 
+}
+
+export const DEFAULT_COLORS = _.values(COLORS)
 
 export class ColorPicker extends React.Component<{
   value: string;
