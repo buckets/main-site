@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as moment from 'moment'
 import { IStore } from '../store'
 import { ts2db } from '../time'
@@ -6,6 +7,7 @@ interface AccountIESummary {
   account_id: number;
   income: number;
   expenses: number;
+  end_balance: number;
 }
 
 export interface IntervalSummary {
@@ -13,6 +15,7 @@ export interface IntervalSummary {
   end: moment.Moment,
   income: number,
   expenses: number,
+  end_balance: number,
   accounts: {
     [k:number]: AccountIESummary;
   }
@@ -29,6 +32,16 @@ export class ReportStore {
     end: moment.Moment,
     unit?: string,
   }) {
+    function ensurePresent(accounts:{[k:number]:AccountIESummary}, account_id:number) {
+      if (accounts[account_id] === undefined) {
+        accounts[account_id] = {
+          income: 0,
+          expenses: 0,
+          end_balance: 0,
+          account_id: account_id
+        }
+      }
+    }
     let ret:IntervalSummary[] = [];
     console.log('incomeAndExpenses', args);
     args.unit = args.unit || 'month';
@@ -42,6 +55,7 @@ export class ReportStore {
         accounts: {},
         income: 0,
         expenses: 0,
+        end_balance: 0,
       }
       
       // income
@@ -60,13 +74,7 @@ export class ReportStore {
         $end: ts2db(er),
       })
       rows.forEach(row => {
-        if (item.accounts[row.account_id] === undefined) {
-          item.accounts[row.account_id] = {
-            income: 0,
-            expenses: 0,
-            account_id: row.account_id
-          }
-        }
+        ensurePresent(item.accounts, row.account_id);
         item.accounts[row.account_id].income = row.total;
         item.income += row.total;
       })
@@ -89,15 +97,17 @@ export class ReportStore {
         $end: ts2db(er),
       })
       rows.forEach(row => {
-        if (item.accounts[row.account_id] === undefined) {
-          item.accounts[row.account_id] = {
-            income: 0,
-            expenses: 0,
-            account_id: row.account_id
-          }
-        }
+        ensurePresent(item.accounts, row.account_id);
         item.accounts[row.account_id].expenses = row.expenses;
         item.expenses += row.expenses;
+      })
+
+      // balance
+      let end_balances = await this.store.accounts.balances(er);
+      _.each(end_balances, (balance, account_id) => {
+        ensurePresent(item.accounts, account_id);
+        item.accounts[account_id].end_balance = balance;
+        item.end_balance += balance;
       })
       ret.push(item);
       p = er;
