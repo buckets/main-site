@@ -106,6 +106,7 @@
     "@types/request": "^0.0.45",
     "@types/request-promise": "^4.1.36",
     "@types/uuid": "^3.0.0",
+    "@types/victory": "^0.9.10",
     "asar": "^0.13.0",
     "chai": "4.0.2",
     "electron": "1.6.10",

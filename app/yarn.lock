@@ -121,6 +121,12 @@
   dependencies:
     "@types/node" "*"
 
+"@types/victory@^0.9.10":
+  version "0.9.10"
+  resolved "https://registry.yarnpkg.com/@types/victory/-/victory-0.9.10.tgz#9069a6d4a975db2148f13b7c3c5e9407e613156d"
+  dependencies:
+    "@types/react" "*"
+
 abbrev@1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.0.tgz#d0554c2256636e2f56e7c2e5ad183f859428d81f"

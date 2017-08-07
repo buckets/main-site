@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import * as React from 'react'
 import * as cx from 'classnames'
 
@@ -19,9 +18,32 @@ export const COLORS = {
   'darker_purple': 'rgba(142, 68, 173,1.0)', 
   'darkblue': 'rgba(52, 73, 94,1.0)', 
   'darker_darkblue': 'rgba(44, 62, 80,1.0)', 
+
+  'lightest_grey': 'rgba(236, 240, 241,1.0)',
+  'lighter_grey': 'rgba(189, 195, 199,1.0)',
+  'grey': 'rgba(149, 165, 166,1.0)',
+  'darker_grey': 'rgba(127, 140, 141,1.0)',
+  'blackish': 'rgba(37, 35, 35, 1.0)',
 }
 
-export const DEFAULT_COLORS = _.values(COLORS)
+export const DEFAULT_COLORS = [
+  'blue',
+  'darker_blue',
+  'teal',
+  'darker_teal',
+  'green',
+  'darker_green',
+  'red',
+  'darker_red',
+  'orange',
+  'darker_orange',
+  'yellow',
+  'darker_yellow',
+  'purple',
+  'darker_purple',
+  'darkblue',
+  'darker_darkblue',
+].map(k => COLORS[k]);
 
 export class ColorPicker extends React.Component<{
   value: string;
