@@ -162,10 +162,16 @@ export class BucketStore {
     }));
   }
 
-  async balances(asof?:Timestamp):Promise<Balances> {
+  async balances(asof?:Timestamp, bucket_id?:number):Promise<Balances> {
+    let where = 'a.kicked <> 1'
+    let params = {};
+    if (bucket_id !== undefined) {
+      where += ' AND a.id = $bucket_id'
+      params = {$bucket_id: bucket_id}
+    }
     return computeBalances(this.store,
       'bucket', 'bucket_transaction', 'bucket_id',
-      asof, 'a.kicked <> 1')
+      asof, where, params)
   }
   async listTransactions(args:{
     bucket_id?: number,

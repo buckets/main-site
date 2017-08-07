@@ -2,17 +2,19 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment'
+import * as V from 'victory'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
 import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
 import {Balances} from '../models/balances'
-import { Money, MoneyInput } from '../money'
+import { Money, MoneyInput, cents2decimal } from '../money'
 import { onKeys, DebouncedInput, MonthSelector } from '../input'
 import { manager, AppState } from './appstate'
-import { ColorPicker } from '../color'
+import { COLORS, ColorPicker } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
+import { AccountIntervalSummary } from '../models/reports'
 
 const NOGROUP = -1;
 
@@ -856,9 +858,30 @@ interface BucketViewProps {
   appstate: AppState;
   transactions: Transaction[];
 }
-export class BucketView extends React.Component<BucketViewProps, {}> {
+export class BucketView extends React.Component<BucketViewProps, {
+  history: AccountIntervalSummary[], 
+}> {
   constructor(props) {
     super(props)
+    this.state = {
+      history: [],
+    }
+    this.computeState(props)
+  }
+  componentWillReceiveProps(nextProps) {
+    this.computeState(nextProps);
+  }
+  computeState(props) {
+    let appstate:AppState = props.appstate;
+    let adate = appstate.viewDateRange.before.clone();
+    manager.store.reports.bucketHistory({
+      bucket_id: props.bucket.id,
+      start: adate.clone().subtract(12, 'months'),
+      end: adate,
+    })
+    .then(result => {
+      this.setState({history: result})
+    })  
   }
   render() {
     let { bucket, balance, transactions, appstate } = this.props;
@@ -884,6 +907,67 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
         }}>Kick the bucket</button>
     }
     
+    // balance chart
+    // let tickValues = [];
+    // let min_bal = 0;
+    // let max_bal = 10;
+    // let balance_chart_data = this.state.history.map(snapshot => {
+    //   tickValues.push(snapshot.start.unix());
+    //   min_bal = Math.min(min_bal, snapshot.end_balance);
+    //   max_bal = Math.max(max_bal, snapshot.end_balance);
+
+    //   return {
+    //     month: snapshot.start.unix(),
+    //     balance: snapshot.end_balance,
+    //   }
+    // })
+    // let balance_chart = (
+    //   <V.VictoryChart
+    //     height={200}
+    //     width={800}
+    //     domain={{
+    //       y: [min_bal * 1.2, max_bal * 1.2],
+    //     }}
+    //     >
+    //       <V.VictoryAxis
+    //         standalone={false}
+    //         tickValues={tickValues}
+    //         tickFormat={x => {
+    //           return moment.unix(x).format('MMM YYYY');
+    //         }}
+    //         style={{
+    //           grid: {
+    //             stroke: 'rgba(236, 240, 241,1.0)',
+    //             strokeWidth: 2,
+    //           }
+    //         }}
+    //       />
+    //       <V.VictoryAxis
+    //         dependentAxis
+    //         tickFormat={x => cents2decimal(x)}
+    //         style={{
+    //           grid: {
+    //             stroke: 'rgba(236, 240, 241,1.0)',
+    //             strokeWidth: 2,
+    //           }
+    //         }}
+    //       />
+    //       <V.VictoryArea
+    //         data={balance_chart_data}
+    //         x="month"
+    //         y="balance"
+    //         interpolation="catmullRom"
+    //         style={
+    //           {
+    //             data: {
+    //               stroke: COLORS.blue,
+    //               fill: 'rgba(52, 152, 219, 0.2)',
+    //             }
+    //           }
+    //         }
+    //       />
+    //   </V.VictoryChart>)
+
 
     return (
       <div className="rows">

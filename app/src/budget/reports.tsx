@@ -11,29 +11,25 @@ import { COLORS } from '../color'
 export class ReportsPage extends React.Component<{
   appstate: AppState;
 }, {
-  computing: number;
   intervalsummary: IntervalSummary[];
 }> {
   constructor(props) {
     super(props);
     this.state = {
-      computing: 0,
       intervalsummary: [],
     }
     this.computeState(props);
   }
   computeState(props) {
-    this.setState({computing: this.state.computing+1}, () => {
-      let appstate:AppState = props.appstate;
-      let adate = appstate.viewDateRange.before.clone();
-      manager.store.reports.incomeAndExpenses({
-        start: adate.clone().subtract(12, 'months'),
-        end: adate,
-      })
-      .then(result => {
-        this.setState({computing: this.state.computing-1, intervalsummary: result})
-      })  
+    let appstate:AppState = props.appstate;
+    let adate = appstate.viewDateRange.before.clone();
+    manager.store.reports.incomeAndExpenses({
+      start: adate.clone().subtract(12, 'months'),
+      end: adate,
     })
+    .then(result => {
+      this.setState({intervalsummary: result})
+    })  
   }
   formatMonthLabel(x:number, i:number):string {
     let val = moment.unix(x);
@@ -48,16 +44,7 @@ export class ReportsPage extends React.Component<{
   componentWillReceiveProps(nextProps) {
     this.computeState(nextProps);
   }
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextState.computing === 0) {
-      return true;
-    }
-    return false;
-  }
   render() {
-    if (this.state.computing) {
-      return null;
-    }
     let tickValues = [];
     let max_y = 1000;
     let max_bal = 1000;

@@ -3,6 +3,14 @@ import * as moment from 'moment'
 import { IStore } from '../store'
 import { ts2db } from '../time'
 
+export interface AccountIntervalSummary {
+  start: moment.Moment;
+  end: moment.Moment;
+  end_balance: number;
+  income: number;
+  expenses: number;
+}
+
 interface AccountIESummary {
   account_id: number;
   income: number;
@@ -21,6 +29,32 @@ export interface IntervalSummary {
   }
 }
 
+
+interface Interval {
+  start: moment.Moment,
+  end: moment.Moment,
+}
+
+function splitInterval(args: {
+  start: moment.Moment,
+  end: moment.Moment,
+  unit?: string,
+  step?: number,
+}):Interval[] {
+  let ret = [];
+  args.unit = args.unit || 'month';
+  args.step = args.step || 1
+  let p = args.start.clone()
+  while (p.isSameOrBefore(args.end)) {
+    let er = p.clone().add(<any>args.step, args.unit);
+    ret.push({
+      start: p.clone(),
+      end: er.clone(),
+    })
+    p = er;
+  }
+  return ret;
+}
 
 
 export class ReportStore {
@@ -42,15 +76,10 @@ export class ReportStore {
         }
       }
     }
-    let ret:IntervalSummary[] = [];
-    args.unit = args.unit || 'month';
-    let p = args.start.clone()
-    while (p.isBefore(args.end)) {
-      let er = p.clone().add(<any>1, args.unit);
-
+    let promises = splitInterval({start:args.start, end:args.end, unit:args.unit}).map(async range => {
       let item:IntervalSummary = {
-        start: p.clone(),
-        end: er.clone(),
+        start: range.start.clone(),
+        end: range.end.clone(),
         accounts: {},
         income: 0,
         expenses: 0,
@@ -69,8 +98,8 @@ export class ReportStore {
           AND posted < $end
         GROUP BY
           account_id`, {
-        $start: ts2db(p),
-        $end: ts2db(er),
+        $start: ts2db(range.start),
+        $end: ts2db(range.end),
       })
       rows.forEach(row => {
         ensurePresent(item.accounts, row.account_id);
@@ -92,8 +121,8 @@ export class ReportStore {
           AND amount <= 0
         GROUP BY
           account_id`, {
-        $start: ts2db(p),
-        $end: ts2db(er),
+        $start: ts2db(range.start),
+        $end: ts2db(range.end),
       })
       rows.forEach(row => {
         ensurePresent(item.accounts, row.account_id);
@@ -102,16 +131,77 @@ export class ReportStore {
       })
 
       // balance
-      let end_balances = await this.store.accounts.balances(er);
+      let end_balances = await this.store.accounts.balances(range.end);
       _.each(end_balances, (balance, account_id) => {
         ensurePresent(item.accounts, account_id);
         item.accounts[account_id].end_balance = balance;
         item.end_balance += balance;
       })
-      ret.push(item);
-      p = er;
-    }
-    return ret;
+      return item;
+    });
+    return Promise.all(promises);
+  }
+
+  async bucketHistory(args:{
+    bucket_id: number,
+    start: moment.Moment,
+    end: moment.Moment,
+    unit?: string,
+  }):Promise<AccountIntervalSummary[]> {
+    return Promise.all(splitInterval({
+      start: args.start,
+      end: args.end,
+      unit: args.unit,
+    }).map(async range => {
+      // income
+      let rows = await this.store.query(`
+        SELECT
+          SUM(amount) as income
+        FROM
+          bucket_transaction
+        WHERE
+          (transfer = 0 OR transfer is null)
+          AND posted >= $start
+          AND posted < $end
+          AND amount > 0
+          AND bucket_id=$bucket_id
+        `, {
+          $bucket_id: args.bucket_id,
+          $start: ts2db(range.start),
+          $end: ts2db(range.end),
+        })
+      let income = rows[0].expenses;
+
+      // expenses
+      rows = await this.store.query(`
+        SELECT
+          SUM(amount) as expenses
+        FROM
+          bucket_transaction
+        WHERE
+          (transfer = 0 OR transfer is null)
+          AND posted >= $start
+          AND posted < $end
+          AND amount <= 0
+          AND bucket_id=$bucket_id
+        `, {
+          $bucket_id: args.bucket_id,
+          $start: ts2db(range.start),
+          $end: ts2db(range.end),
+        })
+      let expenses = rows[0].expenses;
+
+      // end_balance
+      let bals = await this.store.buckets.balances(range.end, args.bucket_id);
+
+      return {
+        start: range.start,
+        end: range.end,
+        end_balance: bals[args.bucket_id],
+        income,
+        expenses,
+      }
+    }))
   }
 }
 

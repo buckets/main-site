@@ -13,7 +13,9 @@ export async function computeBalances(
   transaction_table:string,
   join_column:string,
   asof?:Timestamp,
-  where?:string):Promise<Balances> {
+  where?:string,
+  params?:object):Promise<Balances> {
+  let prm:any = params || {};
   if (!asof) {
     // get the balance as of tomorrow
     asof = moment.utc().add(1, 'day')
@@ -34,10 +36,8 @@ export async function computeBalances(
     ${where}
     GROUP BY 1
   `;
-  let params = {
-    $asof: ts2db(asof),
-  }
-  let rows = await store.query(sql, params);
+  prm.$asof = ts2db(asof);
+  let rows = await store.query(sql, prm);
   let ret:Balances = {};
   rows.forEach(row => {
     ret[row.id] = row.balance;
