@@ -1,3 +1,4 @@
+import * as moment from 'moment'
 import * as React from 'react'
 import { manager, AppState } from './appstate'
 import * as V from 'victory'
@@ -10,41 +11,65 @@ import { COLORS } from '../color'
 export class ReportsPage extends React.Component<{
   appstate: AppState;
 }, {
+  computing: number;
   intervalsummary: IntervalSummary[];
 }> {
   constructor(props) {
     super(props);
     this.state = {
+      computing: 0,
       intervalsummary: [],
     }
     this.computeState(props);
   }
   computeState(props) {
-    let appstate:AppState = props.appstate;
-    let adate = appstate.viewDateRange.before.clone();
-    manager.store.reports.incomeAndExpenses({
-      start: adate.clone().subtract(12, 'months'),
-      end: adate,
+    this.setState({computing: this.state.computing+1}, () => {
+      let appstate:AppState = props.appstate;
+      let adate = appstate.viewDateRange.before.clone();
+      manager.store.reports.incomeAndExpenses({
+        start: adate.clone().subtract(12, 'months'),
+        end: adate,
+      })
+      .then(result => {
+        this.setState({computing: this.state.computing-1, intervalsummary: result})
+      })  
     })
-    .then(result => {
-      this.setState({intervalsummary: result})
-    })
+  }
+  formatMonthLabel(x:number, i:number):string {
+    let val = moment.unix(x);
+    let display;
+    if (i === 0 || val.month() === 0) {
+      display = val.format('MMM YYYY');
+    } else {
+      display = val.format('MMM');
+    }
+    return display;
   }
   componentWillReceiveProps(nextProps) {
     this.computeState(nextProps);
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextState.computing === 0) {
+      return true;
+    }
+    return false;
+  }
   render() {
+    if (this.state.computing) {
+      return null;
+    }
     let tickValues = [];
     let max_y = 1000;
     let max_bal = 1000;
     let data = this.state.intervalsummary
     .map((range, idx) => {
-      tickValues.push(range.start.format('MMM'));
+      let month = range.start.unix();
+      tickValues.push(month);
       let net = range.income + range.expenses;
       max_y = Math.max(max_y, range.income, Math.abs(range.expenses))
       max_bal = Math.max(max_bal, range.end_balance);
       return {
-        month: range.start.format('MMM'),
+        month: month,
         income: range.income,
         expenses: Math.abs(range.expenses),
         end_balance: range.end_balance,
@@ -54,6 +79,7 @@ export class ReportsPage extends React.Component<{
     return <div className="panes">
       <div className="padded">
         <section>
+          <h2>Balance</h2>
           <V.VictoryChart
               domain={{y: [0, max_bal * 1.25]}}
               height={200}
@@ -62,9 +88,7 @@ export class ReportsPage extends React.Component<{
               <V.VictoryAxis
                 standalone={false}
                 tickValues={tickValues}
-                tickFormat={x => {
-                  return x;
-                }}
+                tickFormat={this.formatMonthLabel.bind(this)}
                 style={{
                   grid: {
                     stroke: 'rgba(236, 240, 241,1.0)',
@@ -97,7 +121,7 @@ export class ReportsPage extends React.Component<{
                 y="end_balance" />
           </V.VictoryChart>
 
-
+          <h2>Income/Expenses</h2>
           <V.VictoryChart
             domain={{y: [0, max_y * 1.25]}}
             height={300}
@@ -106,9 +130,7 @@ export class ReportsPage extends React.Component<{
             <V.VictoryAxis
               standalone={false}
               tickValues={tickValues}
-              tickFormat={x => {
-                return x;
-              }}
+              tickFormat={this.formatMonthLabel.bind(this)}
               style={{
                 grid: {
                   stroke: 'rgba(236, 240, 241,1.0)',
@@ -143,7 +165,6 @@ export class ReportsPage extends React.Component<{
                 return tick.income;
               }}
               y0={(tick) => {
-                console.log('y0 tick', tick);
                 return tick.expenses;
               }}
             />
@@ -175,9 +196,13 @@ export class ReportsPage extends React.Component<{
               y="income" />
             
           </V.VictoryChart>
+
+          
           
         </section>
       </div>
     </div>
   }
 }
+
+

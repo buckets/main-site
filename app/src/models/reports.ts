@@ -43,7 +43,6 @@ export class ReportStore {
       }
     }
     let ret:IntervalSummary[] = [];
-    console.log('incomeAndExpenses', args);
     args.unit = args.unit || 'month';
     let p = args.start.clone()
     while (p.isBefore(args.end)) {
