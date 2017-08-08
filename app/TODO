@@ -14,6 +14,11 @@ Backlog:
  ☐ Import CSV
  ☐ Export CSV
  ☐ Automatically sync so the users don't have to
+ ☐ Analysis
+   ☐ Annual expenses, income, gain/loss
+   ☐ Chart of balance for past several years
+   ☐ Chart of gain/loss for past several years
+ ☐ Goal chart
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
    ☐ Or redirect.
@@ -23,7 +28,7 @@ Backlog:
  ☐ Add a pop up calculator
    ☐ Should it be a separate window or built in to the screen?
  ☐ Alert that there's uncategorized transactions in previous months.
- ☐ Chat for help
+ ✔ Chat for help @done (17-08-08 11:44)
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
  ☐ Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Categorizer component.
 

@@ -215,6 +215,7 @@ export class Money extends React.Component<MoneyProps, {
       display_components.push(<span className="dollar" key="dollar">{display}</span>)
     }
     return (<span className={cx(
+      'money',
       className, {
         number: !nocolor,
         negative: value < 0 && !nocolor,

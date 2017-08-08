@@ -2,19 +2,17 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment'
-import * as V from 'victory'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
 import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
 import {Balances} from '../models/balances'
-import { Money, MoneyInput, cents2decimal } from '../money'
+import { Money, MoneyInput } from '../money'
 import { onKeys, DebouncedInput, MonthSelector } from '../input'
 import { manager, AppState } from './appstate'
-import { COLORS, ColorPicker } from '../color'
+import { ColorPicker } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
-import { AccountIntervalSummary } from '../models/reports'
 
 const NOGROUP = -1;
 
@@ -858,30 +856,9 @@ interface BucketViewProps {
   appstate: AppState;
   transactions: Transaction[];
 }
-export class BucketView extends React.Component<BucketViewProps, {
-  history: AccountIntervalSummary[], 
-}> {
+export class BucketView extends React.Component<BucketViewProps, {}> {
   constructor(props) {
     super(props)
-    this.state = {
-      history: [],
-    }
-    this.computeState(props)
-  }
-  componentWillReceiveProps(nextProps) {
-    this.computeState(nextProps);
-  }
-  computeState(props) {
-    let appstate:AppState = props.appstate;
-    let adate = appstate.viewDateRange.before.clone();
-    manager.store.reports.bucketHistory({
-      bucket_id: props.bucket.id,
-      start: adate.clone().subtract(12, 'months'),
-      end: adate,
-    })
-    .then(result => {
-      this.setState({history: result})
-    })  
   }
   render() {
     let { bucket, balance, transactions, appstate } = this.props;

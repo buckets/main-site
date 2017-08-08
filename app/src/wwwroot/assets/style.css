@@ -362,6 +362,27 @@ h2 {
   color: var(--darker-red);
 }
 
+.money.big {
+  font-size: 1.5rem;
+
+}
+.money.smallcents.number {
+  display: inline-flex;
+  align-items: flex-start;
+}
+.money.smallcents .dollar {
+
+}
+.money.smallcents .decimal {
+  display: none;
+}
+.money.smallcents .cents {
+  font-size: 50%;
+  padding-left: .1rem;
+  padding-top: 4%;
+}
+
+
 .money-input.ctx-matching-input input,
 .ctx-matching-input {
   border: none;
@@ -399,6 +420,9 @@ a.back-button {
 table.ledger {
   border-collapse: collapse;
   border-spacing: 0 0;
+}
+table.ledger.full-width {
+  width: 100%;
 }
 table.ledger th,
 table.ledger td {
@@ -1076,4 +1100,21 @@ table.props th {
 }
 .tooltip.showing {
   opacity: 1;
+}
+
+/*https://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js*/
+.svg-container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  min-height: 1rem;
+  spadding-bottom: 100%;
+  vertical-align: top;
+  overflow: hidden;
+}
+.svg-content {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
