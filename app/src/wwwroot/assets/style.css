@@ -417,12 +417,15 @@ a.back-button {
   color: var(--grey);
 }
 
+
+table.full-width {
+  width: 100%;
+}
+
+
 table.ledger {
   border-collapse: collapse;
   border-spacing: 0 0;
-}
-table.ledger.full-width {
-  width: 100%;
 }
 table.ledger th,
 table.ledger td {
@@ -472,6 +475,30 @@ table.ledger tr:hover .drophandle {
   color: var(--grey);
 }
 
+
+table tr.hover:hover td,
+table tr.hover:hover th {
+  background-color: var(--hover-highlight-color);
+}
+
+table.summary {
+  border-collapse: collapse;
+}
+table.summary td, 
+table.summary th {
+  padding: .5rem 0rem;
+}
+table.summary thead th {
+  border-bottom: 1px solid var(--lighter-grey);
+}
+table.summary th.side {
+  border-right: 1px solid var(--lighter-grey);
+  text-align: right;
+  padding-right: 1rem;
+}
+table.summary th.side-total {
+  border-left: 1px solid var(--lighter-grey);
+}
 
 
 /* Money */

@@ -45,6 +45,19 @@ export const DEFAULT_COLORS = [
   'darker_darkblue',
 ].map(k => COLORS[k]);
 
+export function opacity(rgba:string, opacity:number) {
+  let parts = rgba.split(',');
+  if (parts.length === 4) {
+    // rgba
+    parts[3] = `${opacity})`;
+  } else {
+    // rgb
+    parts[2] = parts[2].trim().substr(0, parts[2].length-1)
+    parts.push(`${opacity})`);
+  }
+  return parts.join(',');
+}
+
 export class ColorPicker extends React.Component<{
   value: string;
   onChange: (val:string)=>any;
