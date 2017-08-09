@@ -7,17 +7,12 @@ v1.0.0:
 Backlog:
  ☐ Delete groups
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
- ✔ Label window so you know which file is which @done (17-08-04 12:40)
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
  ☐ Import CSV
  ☐ Export CSV
  ☐ Automatically sync so the users don't have to
- ☐ Analysis
-   ☐ Annual expenses, income, gain/loss
-   ☐ Chart of balance for past several years
-   ☐ Chart of gain/loss for past several years
  ☐ Goal chart
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
@@ -28,12 +23,17 @@ Backlog:
  ☐ Add a pop up calculator
    ☐ Should it be a separate window or built in to the screen?
  ☐ Alert that there's uncategorized transactions in previous months.
- ✔ Chat for help @done (17-08-08 11:44)
  ☐ I think this warning happens when a Money is animating and then disappears. Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Money component.
  ☐ Warning: setState(...): Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the Categorizer component.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Chart of gain/loss for past several years @done (17-08-09 13:59) @project(Backlog)
+ ✔ Chart of balance for past several years @done (17-08-09 13:59) @project(Backlog)
+ ✔ Annual expenses, income, gain/loss @done (17-08-09 13:59) @project(Backlog)
+ ✔ Analysis @done (17-08-09 13:59) @project(Backlog)
+ ✔ Chat for help @done (17-08-08 11:44) @project(Backlog)
+ ✔ Label window so you know which file is which @done (17-08-04 12:40) @project(Backlog)
  ✔ When categorizing, if you type the following at the end of the number: `-`, `1`, `bkspace`, `1` it will make two tag spots, when you really just want one @done (17-08-01 16:47) @project(Backlog)
  ✔ When you click to categorize, focus on the first dropdown @done (17-08-01 16:36) @project(v1.0.0)
  ✔ Pressing Enter should save the categorization @done (17-08-01 16:36) @project(v1.0.0)

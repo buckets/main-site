@@ -110,6 +110,7 @@ a:hover {
   /*font-weight: bold;*/
   color: black;
   background: var(--yellow);
+  margin-top: .5rem;
   /*border-radius: 0 3px 3px 0;*/
   /*text-align: center;*/
   /*padding: .5rem;*/
