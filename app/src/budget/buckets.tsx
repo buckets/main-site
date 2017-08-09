@@ -13,6 +13,7 @@ import { ColorPicker } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
+import { BucketGoalChart } from '../charts/goalchart'
 
 const NOGROUP = -1;
 
@@ -883,68 +884,14 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
           })
         }}>Kick the bucket</button>
     }
-    
-    // balance chart
-    // let tickValues = [];
-    // let min_bal = 0;
-    // let max_bal = 10;
-    // let balance_chart_data = this.state.history.map(snapshot => {
-    //   tickValues.push(snapshot.start.unix());
-    //   min_bal = Math.min(min_bal, snapshot.end_balance);
-    //   max_bal = Math.max(max_bal, snapshot.end_balance);
 
-    //   return {
-    //     month: snapshot.start.unix(),
-    //     balance: snapshot.end_balance,
-    //   }
-    // })
-    // let balance_chart = (
-    //   <V.VictoryChart
-    //     height={200}
-    //     width={800}
-    //     domain={{
-    //       y: [min_bal * 1.2, max_bal * 1.2],
-    //     }}
-    //     >
-    //       <V.VictoryAxis
-    //         standalone={false}
-    //         tickValues={tickValues}
-    //         tickFormat={x => {
-    //           return moment.unix(x).format('MMM YYYY');
-    //         }}
-    //         style={{
-    //           grid: {
-    //             stroke: 'rgba(236, 240, 241,1.0)',
-    //             strokeWidth: 2,
-    //           }
-    //         }}
-    //       />
-    //       <V.VictoryAxis
-    //         dependentAxis
-    //         tickFormat={x => cents2decimal(x)}
-    //         style={{
-    //           grid: {
-    //             stroke: 'rgba(236, 240, 241,1.0)',
-    //             strokeWidth: 2,
-    //           }
-    //         }}
-    //       />
-    //       <V.VictoryArea
-    //         data={balance_chart_data}
-    //         x="month"
-    //         y="balance"
-    //         interpolation="catmullRom"
-    //         style={
-    //           {
-    //             data: {
-    //               stroke: COLORS.blue,
-    //               fill: 'rgba(52, 152, 219, 0.2)',
-    //             }
-    //           }
-    //         }
-    //       />
-    //   </V.VictoryChart>)
-
+    let chart;
+    if (bucket.kind === 'goal-date' || bucket.kind === 'goal-deposit' || bucket.kind === 'deposit-date') {
+      chart = <BucketGoalChart
+        appstate={appstate}
+        bucket_id={bucket.id}
+      />
+    }
 
     return (
       <div className="rows">
@@ -979,6 +926,8 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               />
             </h1>
             Balance: <Money value={balance} />
+            <hr/>
+            {chart}
             <hr/>
             <TransactionList
               transactions={transactions}

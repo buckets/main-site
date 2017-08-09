@@ -14,6 +14,8 @@ import { Transaction as ATrans } from '../models/account'
 import { chunkTime, IncomeExpenseSum, Interval } from '../models/reports'
 import { TransactionList } from './transactions'
 
+import { SizeAwareDiv } from '../charts/util'
+
 export class ReportsPage extends React.Component<{
   appstate: AppState;
 }, {}> {
@@ -492,42 +494,3 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
 }
 
 
-export class SizeAwareDiv extends React.Component<{
-  guts: (args:{width:number, height:number})=>JSX.Element;
-  [x:string]: any;
-}, {
-  height: number;
-  width: number;
-}> {
-  private elem:HTMLElement;
-  constructor(props) {
-    super(props);
-    this.state = {
-      height: 0,
-      width: 0,
-    }
-  }
-  recomputeState() {
-    let bounds = d3.select(this.elem).node().getBoundingClientRect();
-    this.setState({
-      height: bounds.height || 0,
-      width: bounds.width,
-    })
-  }
-  componentDidMount() {
-    this.recomputeState();
-    window.addEventListener('resize', this.windowResized, false);
-  }
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.windowResized);
-  }
-  windowResized = () => {
-    this.recomputeState();
-  }
-  render() {
-    let { guts, ...rest } = this.props;
-    return <div ref={elem => this.elem = elem} {...rest}>
-      {guts(this.state)}
-    </div>
-  }
-}
