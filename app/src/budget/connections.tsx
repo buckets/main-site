@@ -47,7 +47,7 @@ export class SyncWidget extends React.Component<{
         }}>
         <span>
           <span
-            className={cx("fa fa-refresh", {
+            className={cx("fa fa-refresh fa-fw", {
               'fa-spin': syncing,
             })}/> {label}
         </span>

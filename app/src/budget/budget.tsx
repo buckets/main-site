@@ -1,3 +1,4 @@
+import { shell } from 'electron'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
@@ -123,6 +124,11 @@ class Navbar extends React.Component<{
         </div>
         <div>
           {sync_widget}
+          <a href="#" onClick={(ev) => {
+            ev.preventDefault();
+            shell.openExternal('https://www.bucketsisbetter.com/chat');
+            return false;
+          }}><span><span className="fa fa-fw fa-comment"></span> Chat with Matt</span></a>
           {trial_version}
         </div>
       </div>)
