@@ -54,6 +54,14 @@ button {
 }
 
 
+a {
+  text-decoration: none;
+  color: var(--blue);
+}
+a:hover {
+  text-decoration: underline;
+}
+
 .app {
   display: flex;
   height: 100vh;

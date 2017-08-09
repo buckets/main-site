@@ -11,7 +11,7 @@ import { COLORS, opacity } from '../color'
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
 import { Transaction as ATrans } from '../models/account'
-import { chunkTime, IncomeExpenseSum } from '../models/reports'
+import { chunkTime, IncomeExpenseSum, Interval } from '../models/reports'
 import { TransactionList } from './transactions'
 
 export class ReportsPage extends React.Component<{
@@ -22,8 +22,22 @@ export class ReportsPage extends React.Component<{
   }
   render() {
     let { appstate } = this.props;
-    let yearend = appstate.viewDateRange.before.clone().endOf('year');
-    let multiyearstart = yearend.clone().subtract(4, 'years');
+
+    let year_end = appstate.viewDateRange.before.clone().endOf('year');
+    let year_intervals = chunkTime({
+      start: year_end.clone().subtract(4, 'years').startOf('year'),
+      end: year_end,
+      unit: 'year',
+      step: 1,
+    });
+
+    let month_end = appstate.viewDateRange.before.clone().subtract(1, 'day');
+    let month_intervals = chunkTime({
+      start: month_end.clone().subtract(4, 'months').startOf('month'),
+      end: month_end,
+      unit: 'month',
+      step: 1,
+    })
     
     return <div className="panes">
       <div className="padded">
@@ -40,9 +54,22 @@ export class ReportsPage extends React.Component<{
             }} />
           </Route>
           <Route path="">
+            <h2>Month to Month</h2>
             <CashFlowComparison
-              start={multiyearstart}
-              end={yearend}
+              intervals={month_intervals}
+              columnFormatter={(x:Interval, idx:number) => {
+                if (idx === 0) {
+                  return x.start.format('MMM YYYY');
+                } else {
+                  return x.start.format('MMM');
+                }
+              }}
+            />
+
+            <h2>Year to Year</h2>
+            <CashFlowComparison
+              intervals={year_intervals}
+              columnFormatter={(x:Interval) => x.start.format('YYYY')}
             />
           </Route>
         </Switch>
@@ -112,8 +139,8 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
 
 
 interface CashFlowComparisonProps {
-  start: moment.Moment;
-  end: moment.Moment;
+  intervals: Interval[];
+  columnFormatter: (x:Interval, i?:number)=>string;
 }
 export class CashFlowComparison extends React.Component<CashFlowComparisonProps, {
   data: IncomeExpenseSum[];
@@ -129,18 +156,11 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
     this.recomputeState(nextProps);
   }
   async recomputeState(props:CashFlowComparisonProps) {
-    let { start, end } = props;
-    let summaries = await Promise.all(chunkTime({
-      start: start,
-      end: end,
-      unit: 'year',
-      step: 1,
-    }).map(interval => {
-      let year_begin = interval.start.clone().local().startOf('year');
-      let year_end = year_begin.clone().add(1, 'year');
+    let { intervals } = props;
+    let summaries = await Promise.all(intervals.map(interval => {
       return manager.store.reports.incomeAndExpenses({
-        start: year_begin,
-        end: year_end,
+        start: interval.start,
+        end: interval.end,
       })  
     }))
     this.setState({data: summaries});
@@ -149,6 +169,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
     if (!this.state.data.length) {
       return null;
     }
+    let { columnFormatter } = this.props;
     let min_val = null;
     let max_val = null;
     let min_bal = null;
@@ -157,7 +178,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
     let max_net = null;
     let net_transfer_total = 0;
     let gain_loss_total = 0;
-    let years = this.state.data.map(item => {
+    let labels = this.state.data.map((item, idx) => {
       let this_min = Math.min(item.income, Math.abs(item.expenses));
       let this_max = Math.max(item.income, Math.abs(item.expenses));
       min_val = min_val === null ? this_min : Math.min(this_min, min_val);
@@ -168,14 +189,14 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
       max_net = max_net === null ? item.income + item.expenses : Math.max(max_net, item.income + item.expenses);
       gain_loss_total += item.income + item.expenses;
       net_transfer_total += item.net_transfer;
-      return item.interval.start.format('YYYY');
+      return columnFormatter(item.interval, idx);
     });
     let complete_data = this.state.data.slice(0, this.state.data.length-1);
     return <table className="summary full-width" >
       <thead>
         <tr>
           <th></th>
-          {years.map(year => <th key={year} className="center">{year}</th>)}
+          {labels.map(label => <th key={label} className="center">{label}</th>)}
           <th></th>
         </tr>
       </thead>
@@ -203,10 +224,10 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
           </th>
         </tr>
         {net_transfer_total ? <tr className="hover">
-          <th className="side">Net Transfers <Help>Net transfers should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.</Help></th>
+          <th className="side">Net Transfers <Help>Net transfers are the sum total of all transactions marked as a transfer.  It should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.</Help></th>
           {this.state.data.map((item, i) => {
             return <td key={i} className="center">
-              <Link relative to={`/transfers/${item.interval.start.format('YYYY')}`}><Money className=" smallcents" value={item.net_transfer}/></Link>
+              {item.net_transfer ? <Link relative to={`/transfers/${item.interval.start.format('YYYY')}`}><Money className=" smallcents" value={item.net_transfer}/></Link> : "-"}
             </td>
           })}
           <th className="side-total">
@@ -256,35 +277,39 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
                 .y0(y(0))
                 .curve(d3shape.curveMonotoneX);
 
+              let randomID = Math.random().toString();
+              let mkid = (x:string) => {
+                return `${x}-${randomID}`;
+              }
 
               let income_curve = income_area(this.state.data);
               let expense_curve = expense_area(this.state.data);
 
               return <svg preserveAspectRatio="xMidYMid meet" viewBox={`${-Math.floor(dims.width/(2*this.state.data.length))} 0 ${dims.width} ${dims.height}`}>
                 <defs>
-                  <path id="income-curve" d={income_curve} />
-                  <path id="expense-curve" d={expense_curve} />
+                  <path id={mkid("income-curve")} d={income_curve} />
+                  <path id={mkid("expense-curve")} d={expense_curve} />
                 </defs>
 
-                <mask id="income-mask">
+                <mask id={mkid("income-mask")}>
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                  <use xlinkHref="#expense-curve" fill="black" />
+                  <use xlinkHref={mkid("#expense-curve")} fill="black" />
                 </mask>
-                <mask id="expense-mask">
+                <mask id={mkid("expense-mask")}>
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                  <use xlinkHref="#income-curve" fill="black" />
+                  <use xlinkHref={mkid("#income-curve")} fill="black" />
                 </mask>
-                <mask id="inner-curve">
+                <mask id={mkid("inner-curve")}>
                   <rect x="0" y="0" width="100%" height="100%" fill="white" />
                   <use
-                    xlinkHref="#income-curve"
+                    xlinkHref={mkid("#income-curve")}
                     fill="black"
-                    mask="url(#income-mask)"
+                    mask={`url(${mkid("#income-mask")})`}
                   />
                   <use
-                    xlinkHref="#expense-curve"
+                    xlinkHref={mkid("#expense-curve")}
                     fill="black"
-                    mask="url(#expense-mask)"
+                    mask={`url(${mkid("#expense-mask")})`}
                   />
                 </mask>
 
@@ -294,21 +319,21 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
 
                   
                   <use
-                    xlinkHref="#expense-curve"
+                    xlinkHref={mkid("#expense-curve")}
                     fill={opacity(COLORS.red, 0.25)}
-                    mask="url(#expense-mask)"
+                    mask={`url(${mkid("#expense-mask")})`}
                   />
                   <use
-                    xlinkHref="#income-curve"
+                    xlinkHref={mkid("#income-curve")}
                     fill={opacity(COLORS.green, 0.25)}
-                    mask="url(#income-mask)"
+                    mask={`url(${mkid("#income-mask")})`}
                   />
 
                   <path d={expense_line(this.state.data)} fill="transparent" stroke={COLORS.red} strokeWidth={2} />
                   {expense_points.map((point, i) => {
                     return <g key={i}>
                       <circle
-                        mask="url(#inner-curve)"
+                        mask={`url(${mkid("#inner-curve")})`}
                         r={3}
                         cx={point.x}
                         cy={point.y}
@@ -321,7 +346,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
                   {income_points.map((point, i) => {
                     return <g key={i}>
                       <circle
-                        mask="url(#inner-curve)"
+                        mask={`url(${mkid("#inner-curve")})`}
                         r={3}
                         cx={point.x}
                         cy={point.y}

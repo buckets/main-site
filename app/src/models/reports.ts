@@ -11,7 +11,7 @@ export interface IncomeExpenseSum {
   net_transfer: number;
 }
 
-interface Interval {
+export interface Interval {
   start: moment.Moment,
   end: moment.Moment,
 }
