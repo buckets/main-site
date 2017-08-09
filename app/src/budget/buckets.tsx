@@ -888,6 +888,13 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
     let chart;
     if (bucket.kind === 'goal-date' || bucket.kind === 'goal-deposit' || bucket.kind === 'deposit-date') {
       chart = <BucketGoalChart
+        divProps={{
+          style: {
+            width: '50%',
+            height: '10rem',
+            padding: '1rem',
+          }
+        }}
         appstate={appstate}
         bucket_id={bucket.id}
       />
