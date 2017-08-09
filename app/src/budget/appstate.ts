@@ -255,6 +255,7 @@ export class StateManager extends EventEmitter {
   }
   async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
     this.queue.push(ev);
+    this.emit('obj', ev);
     return this.tick();
   }
   async tick():Promise<AppState> {

@@ -1,12 +1,18 @@
 import * as moment from 'moment'
+import * as _ from 'lodash'
 import * as React from 'react'
 import { manager, AppState } from './appstate'
-import { Money, cents2decimal } from '../money'
+import { ObjectEvent, isObj } from '../store'
+import { Money } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
 
+import { Help } from '../tooltip'
+import { Link, Route, Switch, WithRouting } from './routing'
+import { Transaction as ATrans } from '../models/account'
 import { chunkTime, IncomeExpenseSum } from '../models/reports'
+import { TransactionList } from './transactions'
 
 export class ReportsPage extends React.Component<{
   appstate: AppState;
@@ -16,35 +22,91 @@ export class ReportsPage extends React.Component<{
   }
   render() {
     let { appstate } = this.props;
-    // let tickValues = [];
-    // let max_y = 1000;
-    // let max_bal = 1000;
-    // let data = this.state.intervalsummary
-    // .map((range, idx) => {
-    //   let month = range.start.unix();
-    //   tickValues.push(month);
-    //   let net = range.income + range.expenses;
-    //   max_y = Math.max(max_y, range.income, Math.abs(range.expenses))
-    //   max_bal = Math.max(max_bal, range.end_balance);
-    //   return {
-    //     month: month,
-    //     income: range.income,
-    //     expenses: Math.abs(range.expenses),
-    //     end_balance: range.end_balance,
-    //     net,
-    //   }
-    // })
     let yearend = appstate.viewDateRange.before.clone().endOf('year');
     let multiyearstart = yearend.clone().subtract(4, 'years');
     
     return <div className="panes">
       <div className="padded">
-        <CashFlowComparison
-          start={multiyearstart}
-          end={yearend}
-        />
+        <Switch>
+          <Route path="/transfers/<int:txyear>">
+            <WithRouting func={(routing) => {
+              let start = moment({year: routing.params.txyear, month: 0, day: 1});
+              let end = start.clone().add(1, 'year');
+              return (<TransferTransactions
+                appstate={appstate}
+                start={start}
+                end={end}
+                />)
+            }} />
+          </Route>
+          <Route path="">
+            <CashFlowComparison
+              start={multiyearstart}
+              end={yearend}
+            />
+          </Route>
+        </Switch>
       </div>
     </div>
+  }
+}
+
+interface TransferTransactionsProps {
+  start: moment.Moment;
+  end: moment.Moment;
+  appstate: AppState;
+}
+class TransferTransactions extends React.Component<TransferTransactionsProps, {
+  transactions: ATrans[];
+}> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      transactions: [],
+    }
+    this.recomputeState(props);
+    manager.addListener('obj', this.processEvent)
+  }
+  async recomputeState(props:TransferTransactionsProps) {
+    console.log('recomputeState', props);
+    let current = this.props;
+    console.log('current', current);
+    if (current.start.isSame(props.start) && current.end.isSame(props.end) && this.state.transactions.length) {
+      // don't update
+      return;
+    }
+    let { start, end } = props;
+    let transactions = await manager.store.accounts.listTransactions({
+      posted: {
+        onOrAfter: start,
+        before: end,
+      },
+      countedAsTransfer: true,
+    })
+    this.setState({transactions: transactions});
+  }
+  processEvent = (ev:ObjectEvent<any>) => {
+    if (isObj(ATrans, ev.obj)) {
+      for (let i = 0; i < this.state.transactions.length; i++) {
+        let trans = this.state.transactions[i];
+        if (trans.id === ev.obj.id) {
+          let newtransactions = _.cloneDeep(this.state.transactions);
+          newtransactions.splice(i, 1, ev.obj);
+          this.setState({transactions: newtransactions})
+          break;
+        }
+      }
+    }
+  }
+  componentWillUnmount() {
+    manager.removeListener('obj', this.processEvent);
+  }
+  render() {
+    return <TransactionList
+      transactions={this.state.transactions}
+      appstate={this.props.appstate}
+      noCreate
+    />
   }
 }
 
@@ -93,6 +155,8 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
     let max_bal = null;
     let min_net = null;
     let max_net = null;
+    let net_transfer_total = 0;
+    let gain_loss_total = 0;
     let years = this.state.data.map(item => {
       let this_min = Math.min(item.income, Math.abs(item.expenses));
       let this_max = Math.max(item.income, Math.abs(item.expenses));
@@ -102,6 +166,8 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
       max_bal = max_bal === null ? item.end_balance : Math.max(item.end_balance, max_bal);
       min_net = min_net === null ? item.income + item.expenses : Math.min(min_net, item.income + item.expenses);
       max_net = max_net === null ? item.income + item.expenses : Math.max(max_net, item.income + item.expenses);
+      gain_loss_total += item.income + item.expenses;
+      net_transfer_total += item.net_transfer;
       return item.interval.start.format('YYYY');
     });
     let complete_data = this.state.data.slice(0, this.state.data.length-1);
@@ -136,6 +202,17 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
             Avg: <Money className="smallcents" value={d3.mean(complete_data, item => item.expenses)} />
           </th>
         </tr>
+        {net_transfer_total ? <tr className="hover">
+          <th className="side">Net Transfers <Help>Net transfers should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.</Help></th>
+          {this.state.data.map((item, i) => {
+            return <td key={i} className="center">
+              <Link relative to={`/transfers/${item.interval.start.format('YYYY')}`}><Money className=" smallcents" value={item.net_transfer}/></Link>
+            </td>
+          })}
+          <th className="side-total">
+            Tot: <Money className="smallcents" value={net_transfer_total} />
+          </th>
+        </tr> : null }
         <tr>
           <th className="side"></th>
           <td colSpan={this.state.data.length}>
@@ -267,11 +344,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
             </td>
           })}
           <th className="side-total">
-            <Money className="smallcents" value={(() => {
-              let first = this.state.data[0];
-              let last = this.state.data[this.state.data.length-1];
-              return last.end_balance - first.end_balance;
-            })()} />
+            Tot: <Money className="smallcents" value={gain_loss_total} />
           </th>
         </tr>
         <tr>
@@ -433,128 +506,3 @@ export class SizeAwareDiv extends React.Component<{
     </div>
   }
 }
-
-
-
-// <section>
-//           <h2>Balance</h2>
-//           <V.VictoryChart
-//               domain={{y: [0, max_bal * 1.25]}}
-//               height={200}
-//               width={800}
-//             >
-//               <V.VictoryAxis
-//                 standalone={false}
-//                 tickValues={tickValues}
-//                 tickFormat={this.formatMonthLabel.bind(this)}
-//                 style={{
-//                   grid: {
-//                     stroke: 'rgba(236, 240, 241,1.0)',
-//                     strokeWidth: 2,
-//                   }
-//                 }}
-//               />
-//               <V.VictoryAxis
-//                 dependentAxis
-//                 tickFormat={x => cents2decimal(x)}
-//                 style={{
-//                   grid: {
-//                     stroke: 'rgba(236, 240, 241,1.0)',
-//                     strokeWidth: 2,
-//                   }
-//                 }}
-//               />
-//               <V.VictoryArea
-//                 data={data}
-//                 interpolation="catmullRom"
-//                 style={
-//                   {
-//                     data: {
-//                       stroke: COLORS.blue,
-//                       fill: 'rgba(52, 152, 219, 0.2)',
-//                     }
-//                   }
-//                 }
-//                 x="month"
-//                 y="end_balance" />
-//           </V.VictoryChart>
-
-//           <h2>Income/Expenses</h2>
-//           <V.VictoryChart
-//             domain={{y: [0, max_y * 1.25]}}
-//             height={300}
-//             width={800}
-//           >
-//             <V.VictoryAxis
-//               standalone={false}
-//               tickValues={tickValues}
-//               tickFormat={this.formatMonthLabel.bind(this)}
-//               style={{
-//                 grid: {
-//                   stroke: 'rgba(236, 240, 241,1.0)',
-//                   strokeWidth: 2,
-//                 }
-//               }}
-//             />
-//             <V.VictoryAxis
-//               dependentAxis
-//               tickFormat={x => cents2decimal(x)}
-//               style={{
-//                 grid: {
-//                   stroke: 'rgba(236, 240, 241,1.0)',
-//                   strokeWidth: 2,
-//                 }
-//               }}
-//             />
-//             <V.VictoryArea
-//               data={data}
-//               interpolation="catmullRom"
-//               style={
-//                 {
-//                   data: {
-//                     // fill: 'rgba(46, 204, 113,0.1)',
-//                     // fill: 'rgba(231, 76, 60, 0.1)',
-//                     fill: '#ffffff',
-//                   }
-//                 }
-//               }
-//               x="month"
-//               y={tick => {
-//                 return tick.income;
-//               }}
-//               y0={(tick) => {
-//                 return tick.expenses;
-//               }}
-//             />
-//             <V.VictoryArea
-//               data={data}
-//               interpolation="catmullRom"
-//               style={
-//                 {
-//                   data: {
-//                     stroke: COLORS.red,
-//                     fill: 'rgba(231, 76, 60, 0.4)',
-//                   }
-//                 }
-//               }
-//               x="month"
-//               y="expenses" />
-//             <V.VictoryArea
-//               data={data}
-//               interpolation="catmullRom"
-//               style={
-//                 {
-//                   data: {
-//                     stroke: COLORS.darker_green,
-//                     fill: 'rgba(46, 204, 113,0.4)',
-//                   }
-//                 }
-//               }
-//               x="month"
-//               y="income" />
-            
-//           </V.VictoryChart>
-
-          
-          
-//         </section>

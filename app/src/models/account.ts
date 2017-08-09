@@ -201,6 +201,7 @@ export class AccountStore {
       onOrAfter?:Timestamp,
       before?:Timestamp,
     },
+    countedAsTransfer?: boolean,
   }):Promise<Transaction[]> {
     let where_parts:string[] = [];
     let params:any = {};
@@ -222,6 +223,33 @@ export class AccountStore {
           where_parts.push('posted < $before');
           params['$before'] = ts2db(args.posted.before);
         }
+      }
+
+      // transfer
+      if (args.countedAsTransfer) {
+        if (!args.posted || !args.posted.onOrAfter || !args.posted.before) {
+          throw new Error('Must supply posted contraint for countedAsTransfer query');
+        }
+        where_parts.push(`id not in (
+          SELECT
+            id
+          FROM account_transaction
+          WHERE
+            coalesce(general_cat, '') <> 'transfer'
+            AND posted >= $onOrAfter
+            AND posted < $before
+            AND amount > 0
+        )`)
+        where_parts.push(`id not in (
+          SELECT
+            id
+          FROM account_transaction
+          WHERE
+            coalesce(general_cat, '') <> 'transfer'
+            AND posted >= $onOrAfter
+            AND posted < $before
+            AND amount <= 0
+        )`)
       }
     }
 

@@ -1109,6 +1109,7 @@ table.props th {
   user-select: none;
   pointer-events: none;
   font-size: .8rem;
+  text-align: left;
 }
 .tooltip {
   opacity: 0;
@@ -1124,6 +1125,7 @@ table.props th {
   pointer-events: none;
   font-size: .8rem;
   transition: opacity .2s;
+  text-align: left;
 }
 .tooltip.showing {
   opacity: 1;

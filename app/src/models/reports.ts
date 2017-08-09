@@ -8,6 +8,7 @@ export interface IncomeExpenseSum {
   end_balance: number;
   income: number;
   expenses: number;
+  net_transfer: number;
 }
 
 interface Interval {
@@ -54,6 +55,7 @@ export class ReportStore {
       income: 0,
       expenses: 0,
       end_balance: 0,
+      net_transfer: 0,
     }
     
     // income
@@ -62,9 +64,10 @@ export class ReportStore {
         SUM(amount) as income
       FROM account_transaction
       WHERE
-        general_cat='income'
+        coalesce(general_cat, '') <> 'transfer'
         AND posted >= $start
-        AND posted < $end`, {
+        AND posted < $end
+        AND amount > 0`, {
       $start: ts2db(start),
       $end: ts2db(end),
     })
@@ -76,8 +79,7 @@ export class ReportStore {
         SUM(amount) as expenses
       FROM account_transaction
       WHERE
-        (general_cat is null
-         OR general_cat = '')
+        coalesce(general_cat, '') <> 'transfer'
         AND posted >= $start
         AND posted < $end
         AND amount <= 0`, {
@@ -85,6 +87,19 @@ export class ReportStore {
       $end: ts2db(end),
     })
     item.expenses = rows[0].expenses
+
+    // transfers
+    rows = await this.store.query(`
+      SELECT
+        SUM(amount) as total
+      FROM account_transaction
+      WHERE
+        posted >= $start
+        AND posted < $end`, {
+      $start: ts2db(start),
+      $end: ts2db(end),
+    })
+    item.net_transfer = rows[0].total - item.income - item.expenses;
 
     // balance
     let end_balances = await this.store.accounts.balances(end);
