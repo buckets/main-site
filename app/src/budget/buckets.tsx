@@ -896,7 +896,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
           }
         }}
         appstate={appstate}
-        bucket_id={bucket.id}
+        bucket_ids={[bucket.id]}
       />
     }
 
