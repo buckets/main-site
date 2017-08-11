@@ -890,6 +890,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       chart = <BucketGoalChart
         divProps={{
           style: {
+            float: 'right',
             width: '50%',
             height: '10rem',
             padding: '1rem',
@@ -917,6 +918,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
         {kicked_ribbon}
         <div className="panes">
           <div className="padded">
+            {chart}
             <h1>
               <ColorPicker
               value={bucket.color}
@@ -933,8 +935,6 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               />
             </h1>
             Balance: <Money value={balance} />
-            <hr/>
-            {chart}
             <hr/>
             <TransactionList
               transactions={transactions}

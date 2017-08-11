@@ -1,5 +1,19 @@
 import * as React from 'react'
 import * as d3 from 'd3'
+import { COLORS } from '../color'
+
+
+export const CHART_STYLES = {
+  axis: {
+    stroke: COLORS.lighter_grey,
+    strokeWidth: 1,
+  },
+  tracer: {
+    stroke: COLORS.lighter_grey,
+    strokeWidth: 1,
+    strokeDasharray: "5, 5",
+  }
+}
 
 interface Dims {
   height: number;
