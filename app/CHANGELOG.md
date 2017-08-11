@@ -1,5 +1,12 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
 
+## v0.13.0
+
+- NEW: Added a new 'Analysis' section with helpful month-to-month and year-to-year charts
+
+- NEW: Added *Chat with Matt* navigation item
+
+
 ## v0.12.0
 
 - NEW: Now you can get instant help with the 'Chat...' option in the Help menu.
