@@ -2,7 +2,7 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
- ☐ Bug: When you update the balance of an account in a month other than the current one, it does goofy things
+ ✔ Bug: When you update the balance of an account in a month other than the current one, it does goofy things @done (17-08-15 10:41)
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Sign the code
 

@@ -5,7 +5,6 @@ import { shell, app, dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
 export function checkForUpdates() {
-  let DO_UPDATE = false;
   autoUpdater.autoDownload = false;
   autoUpdater.on('checking-for-update', () => {
     log.info('checking for updates...');
@@ -18,18 +17,17 @@ export function checkForUpdates() {
     let new_version = info.version;
     dialog.showMessageBox({
       title: 'Update Available',
-      message: 'An update is available for Buckets',
-      detail: `Current version: ${app.getVersion()}\nNew version: ${new_version}`,
+      message: `Version ${new_version} of Buckets is available.`,
+      detail: `After downloading the update you will be prompted before it is installed to allow you to finish your work.`,
       buttons: [
         'Later',
-        'Download, Update and Restart',
+        'Download Update',
       ],
       defaultId: 0,
     }, (indexClicked) => {
       if (indexClicked === 1) {
         // Download and restart
         autoUpdater.downloadUpdate()
-        DO_UPDATE = true;
       }
     })
   })
@@ -37,9 +35,27 @@ export function checkForUpdates() {
     log.error(err);
   })
   autoUpdater.on('update-downloaded', (info) => {
-    if (DO_UPDATE) {
-      autoUpdater.quitAndInstall();
-    }
+    log.info('update downloaded', info);
+    dialog.showMessageBox({
+      title: 'Update Downloaded',
+      message: 'The update is downloaded.  When do you want to quit Buckets and install it?',
+      buttons: [
+        'Later, After I Quit',
+        'Now',
+      ],
+      defaultId: 1,
+    }, (indexClicked) => {
+      if (indexClicked === 1) {
+        // Do it now
+        autoUpdater.quitAndInstall();
+      } else {
+        // Do it later
+        app.once('before-quit', ev => {
+          ev.preventDefault();
+          autoUpdater.quitAndInstall();
+        })
+      }
+    })
   });
 
   if (electron_is.linux()) {
@@ -84,8 +100,7 @@ export async function linux_checkForUpdates() {
   if (new_version && current_version !== new_version) {
     dialog.showMessageBox({
       title: 'Update Available',
-      message: 'An update is available for Buckets',
-      detail: `Current version: ${current_version}\nNew version: ${new_version}`,
+      message: `Version ${new_version} of Buckets is available.`,
       buttons: [
         'Later',
         'Download',
