@@ -94,8 +94,13 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
         <div>
           Balance: <MoneyInput
           value={balance}
-          onChange={debounceChange(val => {
-            manager.store.accounts.update(account.id, {balance: val});
+          onChange={debounceChange(this_months_balance => {
+            let diff = account.balance - balance;
+
+            let computed_balance = this_months_balance + diff;
+            console.log('entered:', this_months_balance);
+            console.log('computed:', computed_balance);
+            manager.store.accounts.update(account.id, {balance: computed_balance});
           })}/> (as of <Date value={appstate.defaultPostingDate} />)
         </div>
         {import_balance_field}

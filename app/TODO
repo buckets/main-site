@@ -2,10 +2,13 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
- 
+ ☐ Bug: When you update the balance of an account in a month other than the current one, it does goofy things
+ ☐ Bug: Why do account balances get out of sync so often?
+ ☐ Sign the code
 
 Backlog:
  ☐ Delete groups
+ ☐ How much do we spend out of each bucket on average? (it would be nice to see all buckets at the same time).
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
