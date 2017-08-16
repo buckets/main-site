@@ -44,7 +44,7 @@ export class SizeAwareDiv extends React.Component<{
   }
   componentDidMount() {
     this.recomputeState();
-    window.addEventListener('resize', this.windowResized, false);
+    window.addEventListener('resize', this.windowResized, {passive:true} as any);
   }
   componentWillUnmount() {
     window.removeEventListener('resize', this.windowResized);
