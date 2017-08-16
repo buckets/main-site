@@ -1,7 +1,3 @@
-{%- macro navlink(arg) -%}
-{% set href = url_for(arg, **kwargs) %}
-href="{{ href }}" class="{{ 'active' if href == request.path }}"
-{%- endmacro -%}
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,23 +5,106 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-  <script>
-  function afterEl(anchor) {
-    var elem = document.createElement('div');
-    anchor.parentNode.insertBefore(elem, anchor.nextSibling);
-    return elem;
-  }
-  </script>
   {% block extrahead %}{% endblock %}
-  {% block vendorscripts %}{% endblock %}
+  <style>
+  .hero {
+    background-color: #2eaef1;
+    text-align: center;
+    padding: 2rem 0 5rem;
+  }
+  .hero img {
+    width: 18rem;
+  }
+  .hero.mini {
+    padding: 2rem;
+  }
+  .hero.mini img {
+    width: 10rem;
+  }
+  a.buttonish {
+    font-size: 1.25rem;
+    text-decoration: none;
+    border: 1px solid #2eaef1;
+    background-color: #2eaef1;
+    color: white;
+    border-radius: 4px;
+    display: inline-block;
+    padding: .5rem 1rem;
+    text-align: center;
+  }
+  a.buttonish:hover {
+    background-color: rgba(241, 196, 15,1.0);
+    color: white;
+    border-color: rgba(241, 196, 15,1.0);
+  }
+  .wrap {
+    width: 30rem;
+    margin: 0 auto;
+  }
+  .wrap.spaced {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .wrap.large {
+    width: 60rem;
+    margin: 0 auto;
+  }
+  .flashes {
+    width: 30rem;
+    margin: 0 auto;
+  }
+  .flashes .message {
+    border: 2px solid #2eaef1;
+    color: #2eaef1;
+    border-radius: 3px;
+    padding: .5rem;
+    margin: .5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: top;
+  }
+  .flashes .message.error {
+    color: red;
+    border-color: red;
+  }
+  .callout {
+    font-size: 1.25rem;
+    line-height: 2rem;
+  }
+  .callout em {
+    color: rgba(26, 188, 156,1.0);
+    font-size: 1.75rem;
+    font-style: normal;
+    font-weight: bold;
+  }
+  .callout.para {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  footer {
+    display: flex;
+    border: 1px solid lightgrey;
+    border-width: 1px 0 0;
+    margin-top: 2rem;
+    padding-top: 2rem;
+  }
+  footer > div {
+    flex-basis: 50%;
+    padding: 1rem 0;
+    text-align: left;
+    line-height: 1.5rem;
+  }
+  </style>
   <script src="/static/js/vend/raven-2.3.0.min.js"></script>
-  {% block myscripts %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
-  {% block body %}
-  <div id="about-to-expire">This window has been sitting idle for a while. To protect your information, you will soon be signed out.</div>
-  {% block preheader %}{% endblock %}
-  <div class="flash-messages">
+<body>
+  {% block header %}
+  <div class="hero mini">
+    <a href="/"><img src="/static/img/logo.svg" border="0"/></a>
+  </div>
+  {% endblock %}
+
+  <div class="flashes">
   {% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
       {% for category, message in messages %}
@@ -36,81 +115,39 @@ href="{{ href }}" class="{{ 'active' if href == request.path }}"
     {% endif %}
   {% endwith %}
   </div>
-  <div class="body-wrap">
-    {% block header %}
-    <header>
-      <div class="navlinks">
-      {% block navlinks %}
-      <a href="/" class="logo">Home</a>
-      {% endblock %}
-      </div>
-      <div class="navlinks">
-        {% if g.user %}
-        <a href="{{ url_for('app.farms') }}">{{ g.user.name }}</a>
-        {% block afteruserlinks %}{% endblock %}
-        {% block signoutlink %}
-        {% if g.pin_valid %}
-          <a href="{{ url_for('app.maybe_signout') }}">Sign out</a>
-        {% else %}
-          <a href="{{ url_for('anon.signout') }}">Sign out harder</a>
-        {% endif %}
-        {% endblock %}
-        {% endif %}
-      </div>
-    </header>
-    {% endblock %}
 
-    {%- block subheader -%}{%- endblock -%}
+  {% block content %}{% endblock %}
 
-    {% block pre_content %}{% endblock %}
-    <div class="main-content {% block content_class %}{% endblock %}">
-      {%- block content -%}{%- endblock -%}
-    </div>
-    {% block post_content %}{% endblock %}
-    {% block footer %}<footer></footer>{% endblock %}
+  <div class="wrap">
+    <footer>
+      <div>
+        <div>Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
+        </div>
+        <div><a href="mailto:hello@bucketsisbetter.com">hello@bucketsisbetter.com</a>
+        </div>
+        <div>&copy; Buckets, LLC.</div>
+      </div>
+      <div>
+        
+        
+      </div>
+    </footer>
   </div>
 
-  {% if g.user_id %}
-  <script>
-  window.csrf_token = '{{ create_csrf(g.user_id) }}';
+  {% block chat %}
+  <!--Start of Tawk.to Script-->
+  <script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/59835f8ed1385b2b2e285765/default';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
   </script>
-  {% endif %}
-
-  {% if g.pin_valid %}
-  <script>
-  localStorage.setItem('pin_expiration', '{{ g.pin_expiration }}');
-  window.addEventListener('storage', function(ev) {
-    update_pin_expiration_notice();
-  }, false);
-  window.update_pin_expiration = function(newval) {
-    localStorage.setItem('pin_expiration', '' + newval);
-    update_pin_expiration_notice();
-  }
-  var expiration_check_interval = 20 * 1000;
-  function update_pin_expiration_notice() {
-    var pin_expiration = parseInt(localStorage.getItem('pin_expiration', '0'));
-    var threshold = 5 * 60;
-    var now = Date.now() / 1000.0;
-    var time_left = pin_expiration - now;
-    if (time_left <= 0) {
-      // expired
-      window.location.reload();
-    } else if (time_left <= threshold) {
-      // about to expire
-      document.getElementById('about-to-expire').setAttribute('class', 'showing');
-      if ((time_left * 1000) < expiration_check_interval) {
-        setTimeout(update_pin_expiration_notice, (time_left * 1000) + 2000);
-      }
-    } else {
-      document.getElementById('about-to-expire').setAttribute('class', '');
-    }
-  }
-  setInterval(function() {
-    update_pin_expiration_notice();
-  }, expiration_check_interval);
-  update_pin_expiration_notice();
-  </script>
-  {% endif %}
-  {% endblock body %}
+  <!--End of Tawk.to Script-->
+  {% endblock chat %}
 </body>
 </html>
