@@ -33,7 +33,7 @@ export class MatcherMaster {
   };
   makeMatcher(pattern:string, opts?:{exact:boolean}):IMatcher {
     opts = opts || {exact: false};
-    let parts = pattern.split(RE_PARAM);
+    let parts = ['^', ...pattern.split(RE_PARAM)];
     let variables = [];
     let regexp = new RegExp(parts.map((part:string) => {
       if (part.startsWith('<') && part.endsWith('>')) {

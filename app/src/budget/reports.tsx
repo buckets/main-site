@@ -55,6 +55,9 @@ export class ReportsPage extends React.Component<{
                 />)
             }} />
           </Route>
+          <Route path="/buckets">
+            Buckets
+          </Route>
           <Route path="">
             <h2>Month to Month</h2>
             <CashFlowComparison
