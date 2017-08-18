@@ -1,5 +1,14 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
 
+## v0.14.0
+
+- **FIX:** When updating an account balance in a month that isn't the current month, it now does the right thing.
+
+- **FIX:** Removed the mystery of what's going on during update download/install.
+
+- NEW: Added a bucket expense analysis section.
+
+
 ## v0.13.0
 
 - NEW: Added a new 'Analysis' section with helpful month-to-month and year-to-year charts
