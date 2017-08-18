@@ -108,5 +108,29 @@ export class ReportStore {
     })
     return item;
   }
+
+  async bucketExpenses(args:{
+    start: moment.Moment,
+    end: moment.Moment,
+    bucket_id: number,
+  }):Promise<number> {
+    let { start, end } = args;
+    // expense
+    let rows = await this.store.query(`
+      SELECT
+        SUM(amount) as expenses
+      FROM bucket_transaction
+      WHERE
+        coalesce(transfer, 0) = 0
+        AND posted >= $start
+        AND posted < $end
+        AND amount <= 0
+        AND bucket_id = $bucket_id`, {
+      $start: ts2db(start),
+      $end: ts2db(end),
+      $bucket_id: args.bucket_id,
+    })
+    return rows[0].expenses;
+  }
 }
 

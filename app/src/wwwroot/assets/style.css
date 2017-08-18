@@ -361,6 +361,12 @@ h2 {
 .number.negative {
   color: var(--red);
 }
+.number.bad {
+  color: var(--red);
+}
+.number.good {
+  color: var(--green);
+}
 .number.animating {
   transform: scale(1.1);
   opacity: 0.7;

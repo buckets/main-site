@@ -1,6 +1,7 @@
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as React from 'react'
+import * as cx from 'classnames'
 import { manager, AppState } from './appstate'
 import { ObjectEvent, isObj } from '../store'
 import { Money } from '../money'
@@ -11,6 +12,7 @@ import { COLORS, opacity } from '../color'
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
 import { Transaction as ATrans } from '../models/account'
+import { Bucket, computeBucketData } from '../models/bucket'
 import { chunkTime, IncomeExpenseSum, Interval } from '../models/reports'
 import { TransactionList } from './transactions'
 
@@ -56,7 +58,9 @@ export class ReportsPage extends React.Component<{
             }} />
           </Route>
           <Route path="/buckets">
-            Buckets
+            <BucketExpenseSummary
+              appstate={appstate}
+            />
           </Route>
           <Route path="">
             <h2>Month to Month</h2>
@@ -100,9 +104,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
     manager.addListener('obj', this.processEvent)
   }
   async recomputeState(props:TransferTransactionsProps) {
-    console.log('recomputeState', props);
     let current = this.props;
-    console.log('current', current);
     if (current.start.isSame(props.start) && current.end.isSame(props.end) && this.state.transactions.length) {
       // don't update
       return;
@@ -496,4 +498,126 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
   }
 }
 
+
+interface BucketExpenseSummaryProps {
+  appstate: AppState;
+}
+class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, any> {
+  constructor(props) {
+    super(props)
+    this.state = {
+
+    }
+  }
+  render() {
+    let { appstate } = this.props;
+    let end_date = appstate.viewDateRange.onOrAfter;
+    let rows = appstate.unkicked_buckets
+    .filter(bucket => {
+      return bucket.kind === 'deposit';
+    })
+    .map(bucket => {
+      return <BucketExpenseSummaryRow
+        key={bucket.id}
+        bucket={bucket}
+        end_date={end_date}
+        balance={appstate.bucket_balances[bucket.id]}
+      />
+    })
+    return <div>
+      <h2>Average Expenses</h2>
+      <table className="summary full-width">
+        <thead>
+          <tr>
+            <th className="left">Bucket</th>
+            <th>Budgeted</th>
+            <th>Prior 12 months</th>
+            <th>Prior 3 months</th>
+            <th>Last month</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+interface BucketExpenseSummaryRowProps {
+  bucket: Bucket;
+  end_date: moment.Moment;
+  balance: number;
+}
+class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {
+  last12: number;
+  last3: number;
+  last: number;
+}> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      last12: null,
+      last3: null,
+      last: null,
+    }
+    this.recomputeState(props);
+  }
+  async recomputeState(props:BucketExpenseSummaryRowProps) {
+    let { end_date } = props;
+    let months = await Promise.all(chunkTime({
+      start: end_date.clone().subtract(12, 'months'),
+      end: end_date,
+      unit: 'month',
+      step: 1
+    }).map(interval => {
+      return manager.store.reports.bucketExpenses({
+        bucket_id: props.bucket.id,
+        start: interval.start,
+        end: interval.end,
+      })
+    }));
+    function getAvg(slice:number[]):number {
+      return Math.ceil(slice.reduce((a,b)=> {
+        return (a||0) + (b||0);
+      }, 0) / slice.length);
+    }
+
+    let last12 = Math.abs(getAvg(months));
+    let last3 = Math.abs(getAvg(months.slice(9)));
+    let last = Math.abs(getAvg([months[months.length-1]]));
+    this.setState({
+      last12,
+      last3,
+      last,
+    })
+  }
+  componentWillReceiveProps(nextProps) {
+    this.recomputeState(nextProps);
+  }
+  render() {
+    let { bucket, end_date, balance } = this.props;
+    // let { last12, last3, last } = this.state;
+    let computed = computeBucketData(bucket.kind, bucket, {
+      today: end_date.clone().add(1, 'day'),
+      balance: balance,
+    })
+    function makeComparison(amount) {
+      if (amount === 0) {
+        return '-';
+      }
+      return <Money value={amount} className={cx({
+        bad: amount > computed.deposit,
+        good: amount < computed.deposit,
+      })} />
+    }
+    return <tr className="hover">
+      <th className="side">{bucket.name}</th>
+      <td className="center"><Money value={computed.deposit} /></td>
+      <td className="center">{makeComparison(this.state.last12)}</td>
+      <td className="center">{makeComparison(this.state.last3)}</td>
+      <td className="center">{makeComparison(this.state.last)}</td>
+    </tr>
+  }
+}
 
