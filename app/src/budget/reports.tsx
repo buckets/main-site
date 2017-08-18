@@ -8,6 +8,7 @@ import { Money } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
+import { Date } from '../time'
 
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
@@ -533,7 +534,9 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
             <th>Budgeted</th>
             <th>Prior 12 months</th>
             <th>Prior 3 months</th>
-            <th>Last month</th>
+            <th><Date
+              value={end_date.clone().subtract(1, 'day')}
+              format="MMM YYYY" /></th>
           </tr>
         </thead>
         <tbody>
@@ -606,9 +609,13 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       if (amount === 0) {
         return '-';
       }
+      let diff = computed.deposit - amount;
+      let percent = diff / computed.deposit;
       return <Money value={amount} className={cx({
-        bad: amount > computed.deposit,
-        good: amount < computed.deposit,
+        bad: percent < -0.05,
+        good: percent > 0.05,
+        // reallybad: percent < -0.4,
+        // reallygood: percent > 0.4,
       })} />
     }
     return <tr className="hover">

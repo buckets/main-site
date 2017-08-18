@@ -364,8 +364,16 @@ h2 {
 .number.bad {
   color: var(--red);
 }
+.number.reallybad {
+  color: white;
+  background-color: var(--red);
+}
 .number.good {
   color: var(--green);
+}
+.number.reallygood {
+  color: white;
+  background-color: var(--green);
 }
 .number.animating {
   transform: scale(1.1);
