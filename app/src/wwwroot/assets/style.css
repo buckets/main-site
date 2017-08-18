@@ -361,20 +361,6 @@ h2 {
 .number.negative {
   color: var(--red);
 }
-.number.bad {
-  color: var(--red);
-}
-.number.reallybad {
-  color: white;
-  background-color: var(--red);
-}
-.number.good {
-  color: var(--green);
-}
-.number.reallygood {
-  color: white;
-  background-color: var(--green);
-}
 .number.animating {
   transform: scale(1.1);
   opacity: 0.7;
@@ -403,6 +389,29 @@ h2 {
   font-size: 50%;
   padding-left: .1rem;
   padding-top: 4%;
+}
+
+
+.incdeclabel {
+  padding-left: .5rem;
+  font-size: 75%;
+}
+.nominal {
+  color: var(--lighter-grey);
+}
+.bad {
+  color: var(--red);
+}
+.reallybad {
+  color: white;
+  background-color: var(--red);
+}
+.good {
+  color: var(--green);
+}
+.reallygood {
+  color: white;
+  background-color: var(--green);
 }
 
 
@@ -514,13 +523,17 @@ table.summary th {
 table.summary thead th {
   border-bottom: 1px solid var(--lighter-grey);
 }
-table.summary th.side {
+table.summary th.side,
+table.summary td.side {
   border-right: 1px solid var(--lighter-grey);
   text-align: right;
   padding-right: 1rem;
 }
 table.summary th.side-total {
   border-left: 1px solid var(--lighter-grey);
+}
+table.summary td.border-right {
+  border-right: 1px solid var(--lighter-grey);
 }
 
 

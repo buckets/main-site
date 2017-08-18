@@ -531,10 +531,10 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
         <thead>
           <tr>
             <th className="left">Bucket</th>
-            <th>Budgeted</th>
-            <th>Prior 12 months</th>
-            <th>Prior 3 months</th>
-            <th><Date
+            <th className="right">Budgeted</th>
+            <th className="center" colSpan={3}>Prior 12 months</th>
+            <th className="center" colSpan={3}>Prior 3 months</th>
+            <th className="center" colSpan={3}><Date
               value={end_date.clone().subtract(1, 'day')}
               format="MMM YYYY" /></th>
           </tr>
@@ -607,23 +607,46 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
     })
     function makeComparison(amount) {
       if (amount === 0) {
-        return '-';
+        return [
+          <td className="right">-</td>,
+          <td></td>,
+          <td className="side"></td>,
+        ];
       }
+      let incdeclabel;
+      let incdecamt;
+
       let diff = computed.deposit - amount;
       let percent = diff / computed.deposit;
-      return <Money value={amount} className={cx({
+      let cls = cx('incdeclabel', 'nominal', {
         bad: percent < -0.05,
         good: percent > 0.05,
         // reallybad: percent < -0.4,
         // reallygood: percent > 0.4,
-      })} />
+      })
+      incdecamt = <span className={cls}><Money value={diff} /></span>;
+      if (percent < 0) {
+        incdeclabel = <span className={cls}>&#x25B2;{Math.abs(Math.ceil(percent*100))}%</span>
+      } else if (percent > 0) {
+        incdeclabel = <span className={cls}>&#x25BC;{Math.abs(Math.ceil(percent*100))}%</span>
+      }
+      return [<td className="right">
+        <Money value={amount} />
+      </td>,
+      <td className="right">
+        {incdeclabel}
+      </td>,
+      <td className="side">
+        {incdecamt}
+      </td>,
+      ]
     }
     return <tr className="hover">
       <th className="side">{bucket.name}</th>
-      <td className="center"><Money value={computed.deposit} /></td>
-      <td className="center">{makeComparison(this.state.last12)}</td>
-      <td className="center">{makeComparison(this.state.last3)}</td>
-      <td className="center">{makeComparison(this.state.last)}</td>
+      <td className="side"><Money value={computed.deposit} /></td>
+      {makeComparison(this.state.last12)}
+      {makeComparison(this.state.last3)}
+      {makeComparison(this.state.last)}
     </tr>
   }
 }
