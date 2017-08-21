@@ -161,6 +161,15 @@ export class BucketStore {
       this.store.publishObject('update', account);
     }));
   }
+  async updateTransaction(transid:number, data:Partial<Transaction>):Promise<Transaction> {
+    let trans = await this.store.getObject(Transaction, transid);
+    let affected_bucket_id = trans.bucket_id;
+    let new_trans = await this.store.updateObject(Transaction, transid, data);
+    let new_bucket = await this.store.getObject(Bucket, affected_bucket_id);
+    this.store.publishObject('update', new_trans);
+    this.store.publishObject('update', new_bucket);
+    return new_trans;
+  }
 
   async balances(asof?:Timestamp, bucket_id?:number):Promise<Balances> {
     let where = 'a.kicked <> 1'

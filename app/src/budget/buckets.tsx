@@ -964,7 +964,17 @@ class TransactionList extends React.Component<{
         <td className="nobr"><Date value={trans.posted} /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
         <td><Money value={trans.amount} /></td>
-        <td>{trans.transfer ? 'Transfer' : ''} {account_name}</td>
+        <td className="center">
+          <input
+            type="checkbox"
+            checked={trans.transfer}
+            onChange={(ev) => {
+              manager.store.buckets.updateTransaction(trans.id, {
+                transfer: ev.target.checked,
+              })
+            }}/>
+        </td>
+        <td>{account_name}</td>
       </tr>
     })
     return <table className="ledger">
@@ -973,6 +983,7 @@ class TransactionList extends React.Component<{
           <th>Posted</th>
           <th>Memo</th>
           <th>Amount</th>
+          <th>Transfer <Help>A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.</Help></th>
           <th>Misc</th>
         </tr>
       </thead>
