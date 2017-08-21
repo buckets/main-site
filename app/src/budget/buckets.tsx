@@ -14,6 +14,7 @@ import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
 import { BucketGoalChart } from '../charts/goalchart'
+import { BucketExpenseChart } from '../charts/depositchart'
 
 const NOGROUP = -1;
 
@@ -898,6 +899,19 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
         }}
         appstate={appstate}
         bucket_ids={[bucket.id]}
+      />
+    } else if (bucket.kind === 'deposit') {
+      chart = <BucketExpenseChart
+        divProps={{
+          style: {
+            float: 'right',
+            width: '50%',
+            height: '10rem',
+            padding: '1rem',
+          }
+        }}
+        appstate={appstate}
+        bucket_id={bucket.id}
       />
     }
 

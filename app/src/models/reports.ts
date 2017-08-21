@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as moment from 'moment'
 import { IStore } from '../store'
-import { ts2db } from '../time'
+import { ts2db, Interval } from '../time'
 
 export interface IncomeExpenseSum {
   interval: Interval;
@@ -9,32 +9,6 @@ export interface IncomeExpenseSum {
   income: number;
   expenses: number;
   net_transfer: number;
-}
-
-export interface Interval {
-  start: moment.Moment,
-  end: moment.Moment,
-}
-
-export function chunkTime(args: {
-  start: moment.Moment,
-  end: moment.Moment,
-  unit?: string,
-  step?: number,
-}):Interval[] {
-  let ret = [];
-  args.unit = args.unit || 'month';
-  args.step = args.step || 1
-  let p = args.start.clone()
-  while (p.isSameOrBefore(args.end)) {
-    let er = p.clone().add(<any>args.step, args.unit);
-    ret.push({
-      start: p.clone(),
-      end: er.clone(),
-    })
-    p = er;
-  }
-  return ret;
 }
 
 

@@ -87,3 +87,29 @@ export class DateInput extends React.Component<DateInputProps, {value:moment.Mom
     this.props.onChange(newval)
   }
 }
+
+export interface Interval {
+  start: moment.Moment,
+  end: moment.Moment,
+}
+
+export function chunkTime(args: {
+  start: moment.Moment,
+  end: moment.Moment,
+  unit?: string,
+  step?: number,
+}):Interval[] {
+  let ret = [];
+  args.unit = args.unit || 'month';
+  args.step = args.step || 1
+  let p = args.start.clone()
+  while (p.isSameOrBefore(args.end)) {
+    let er = p.clone().add(args.step as any, args.unit);
+    ret.push({
+      start: p.clone(),
+      end: er.clone(),
+    })
+    p = er;
+  }
+  return ret;
+}
