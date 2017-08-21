@@ -58,13 +58,13 @@ export class ReportsPage extends React.Component<{
                 />)
             }} />
           </Route>
-          <Route path="/buckets">
+          <Route path="/recurring-expenses">
             <BucketExpenseSummary
               appstate={appstate}
             />
           </Route>
           <Route path="">
-            <h2>Month to Month</h2>
+            <h2 className="center">Month to Month</h2>
             <CashFlowComparison
               intervals={month_intervals}
               columnFormatter={(x:Interval, idx:number) => {
@@ -76,7 +76,7 @@ export class ReportsPage extends React.Component<{
               }}
             />
 
-            <h2>Year to Year</h2>
+            <h2 className="center">Year to Year</h2>
             <CashFlowComparison
               intervals={year_intervals}
               columnFormatter={(x:Interval) => x.start.format('YYYY')}
@@ -526,7 +526,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
       />
     })
     return <div>
-      <h2>Average Expenses</h2>
+      <h2 className="center">Recurring Expenses</h2>
       <table className="summary full-width">
         <thead>
           <tr>
@@ -568,8 +568,13 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
   }
   async recomputeState(props:BucketExpenseSummaryRowProps) {
     let { end_date } = props;
+    let earliestTrans = await manager.store.buckets.earliestTransaction(props.bucket.id);
+    let start = end_date.clone().subtract(12, 'months');
+    if (start.isBefore(earliestTrans)) {
+      start = earliestTrans.clone().startOf('month');
+    }
     let months = await Promise.all(chunkTime({
-      start: end_date.clone().subtract(12, 'months'),
+      start: start,
       end: end_date,
       unit: 'month',
       step: 1
@@ -585,15 +590,16 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
         return (a||0) + (b||0);
       }, 0) / slice.length);
     }
-
-    let last12 = Math.abs(getAvg(months));
-    let last3 = Math.abs(getAvg(months.slice(9)));
-    let last = Math.abs(getAvg([months[months.length-1]]));
-    this.setState({
-      last12,
-      last3,
-      last,
-    })
+    if (months.length) {
+      let last12 = Math.abs(getAvg(months));
+      let last3 = Math.abs(getAvg(months.slice(-3)));
+      let last = Math.abs(getAvg([months[months.length-1]]));
+      this.setState({
+        last12,
+        last3,
+        last,
+      })
+    }
   }
   componentWillReceiveProps(nextProps) {
     this.recomputeState(nextProps);
@@ -605,12 +611,12 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
-    function makeComparison(amount) {
+    function makeComparison(amount, label:string) {
       if (amount === 0) {
         return [
-          <td className="right">-</td>,
-          <td></td>,
-          <td className="side"></td>,
+          <td className="right" key={`${label}-amount`}>-</td>,
+          <td key={`${label}-percent`}></td>,
+          <td className="side" key={`${label}-incamount`}></td>,
         ];
       }
       let incdeclabel;
@@ -619,8 +625,8 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       let diff = computed.deposit - amount;
       let percent = diff / computed.deposit;
       let cls = cx('incdeclabel', 'nominal', {
-        bad: percent < -0.05,
-        good: percent > 0.05,
+        bad: percent < 0,
+        good: percent > 0,
         // reallybad: percent < -0.4,
         // reallygood: percent > 0.4,
       })
@@ -630,13 +636,13 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       } else if (percent > 0) {
         incdeclabel = <span className={cls}>&#x25BC;{Math.abs(Math.ceil(percent*100))}%</span>
       }
-      return [<td className="right">
+      return [<td className="right" key={`${label}-amount`}>
         <Money value={amount} />
       </td>,
-      <td className="right">
+      <td className="right" key={`${label}-percent`}>
         {incdeclabel}
       </td>,
-      <td className="side">
+      <td className="side" key={`${label}-incamount`}>
         {incdecamt}
       </td>,
       ]
@@ -644,9 +650,9 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
     return <tr className="hover">
       <th className="side">{bucket.name}</th>
       <td className="side"><Money value={computed.deposit} /></td>
-      {makeComparison(this.state.last12)}
-      {makeComparison(this.state.last3)}
-      {makeComparison(this.state.last)}
+      {makeComparison(this.state.last12, 'last12')}
+      {makeComparison(this.state.last3, 'last3')}
+      {makeComparison(this.state.last, 'last')}
     </tr>
   }
 }

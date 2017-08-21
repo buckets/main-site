@@ -120,6 +120,21 @@ export class BucketStore {
   async unkick(bucket_id:number):Promise<Bucket> {
     return this.update(bucket_id, {kicked: false});
   }
+  async earliestTransaction(bucket_id:number):Promise<moment.Moment> {
+    let rows = await this.store.query(`
+      SELECT min(posted) as d FROM bucket_transaction
+      WHERE bucket_id=$bucket_id`, {
+        $bucket_id: bucket_id,
+      });
+    if (!rows.length) {
+      rows = await this.store.query(`
+        SELECT created as d FROM bucket
+        WHERE id=$bucket_id`, {
+          $bucket_id: bucket_id,
+        });
+    }
+    return moment.utc(rows[0].d);
+  }
 
   async transact(args:{
     bucket_id: number,

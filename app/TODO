@@ -1,14 +1,23 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
+Bugs:
+  ☐ Pressing Cmd+N when there's no window throws an error
+
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
- ✔ Bug: When you update the balance of an account in a month other than the current one, it does goofy things @done (17-08-15 10:41)
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Sign the code
+ ☐ Encrypt simplefin connection stuff
+ ☐ Regular expense chart
+ ☐ Bucket analysis -- only go back as far as there are transactions
 
 Videos:
-  ☐ Doing the monthly budget
   ☐ Creating a budget
+  ☐ "Doing" the budget (categorize, make it rain, adjust)
+  ☐ Entering transactions
+    ☐ SimpleFIN
+    ☐ Manually
+    ☐ File import
   ☐ Every field is a calculator
   ☐ Goal buckets
   ☐ Monthly expense buckets
@@ -16,8 +25,6 @@ Videos:
   ☐ Going into debt to yourself
 
 Backlog:
- ☐ Delete groups
- ☐ How much do we spend out of each bucket on average? (it would be nice to see all buckets at the same time).
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
@@ -25,13 +32,11 @@ Backlog:
  ☐ Import CSV
  ☐ Export CSV
  ☐ Automatically sync so the users don't have to
- ☐ Goal chart
  ☐ Just make routing.tsx global instead of using react's context system
    ☐ And make it so that you don't have to render in order to get the year/month
    ☐ Or redirect.
  ☐ Delete (retire) accounts
  ☐ Show only debt buckets filter
- ☐ Show Income/expenses average over the last 3 months
  ☐ Add a pop up calculator
    ☐ Should it be a separate window or built in to the screen?
  ☐ Alert that there's uncategorized transactions in previous months.
@@ -40,6 +45,10 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Show Income/expenses average over the last 3 months @done (17-08-21 10:16) @project(Backlog)
+ ✔ How much do we spend out of each bucket on average? (it would be nice to see all buckets at the same time). @done (17-08-21 10:15) @project(Backlog)
+ ✔ Goal chart @done (17-08-21 10:15) @project(Backlog)
+ ✔ Bug: When you update the balance of an account in a month other than the current one, it does goofy things @done (17-08-15 10:41) @project(v1.0.0)
  ✔ Chart of gain/loss for past several years @done (17-08-09 13:59) @project(Backlog)
  ✔ Chart of balance for past several years @done (17-08-09 13:59) @project(Backlog)
  ✔ Annual expenses, income, gain/loss @done (17-08-09 13:59) @project(Backlog)

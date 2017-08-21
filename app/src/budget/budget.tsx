@@ -121,7 +121,7 @@ class Navbar extends React.Component<{
           <Link relative to="/analysis" exactMatchClass="selected"><span>Analysis</span></Link>
           <Route path="/analysis">
             <div>
-              <Link relative to="/buckets" className="sub" exactMatchClass="selected">Buckets</Link>
+              <Link relative to="/recurring-expenses" className="sub" exactMatchClass="selected">Recurring Expenses</Link>
             </div>
           </Route>
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>Connections</span>{connections_badge}</Link>
