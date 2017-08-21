@@ -92,7 +92,13 @@ export class BudgetFile {
 
 export function newBudgetWindow() {
   let win = BrowserWindow.getFocusedWindow();
+  if (!win) {
+    return;
+  }
   let bf = WIN2FILE[win.id];
+  if (!bf) {
+    return;
+  }
   let url = win.webContents.getURL();
   let parsed = URL.parse(url);
   bf.openWindow(`${parsed.pathname}${parsed.hash}`);

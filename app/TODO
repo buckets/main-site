@@ -1,7 +1,6 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
-  ☐ Pressing Cmd+N when there's no window throws an error
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
@@ -45,6 +44,7 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Pressing Cmd+N when there's no window throws an error @done (17-08-21 12:50) @project(Bugs)
  ✔ Show Income/expenses average over the last 3 months @done (17-08-21 10:16) @project(Backlog)
  ✔ How much do we spend out of each bucket on average? (it would be nice to see all buckets at the same time). @done (17-08-21 10:15) @project(Backlog)
  ✔ Goal chart @done (17-08-21 10:15) @project(Backlog)
