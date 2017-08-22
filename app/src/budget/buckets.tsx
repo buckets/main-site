@@ -13,7 +13,6 @@ import { ColorPicker } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
-import { BucketGoalChart } from '../charts/goalchart'
 import { BucketBalanceChart } from '../charts/balancechart'
 
 const NOGROUP = -1;
@@ -887,33 +886,18 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
     }
 
     let chart;
-    if (bucket.kind === 'goal-date' || bucket.kind === 'goal-deposit' || bucket.kind === 'deposit-date') {
-      chart = <BucketGoalChart
-        divProps={{
-          style: {
-            float: 'right',
-            width: '50%',
-            height: '10rem',
-            padding: '1rem',
-          }
-        }}
-        appstate={appstate}
-        bucket_ids={[bucket.id]}
-      />
-    } else if (bucket.kind === 'deposit' || !bucket.kind) {
-      chart = <BucketBalanceChart
-        divProps={{
-          style: {
-            float: 'right',
-            width: '50%',
-            height: '10rem',
-            padding: '1rem',
-          }
-        }}
-        appstate={appstate}
-        bucket_id={bucket.id}
-      />
-    }
+    chart = <BucketBalanceChart
+      divProps={{
+        style: {
+          float: 'right',
+          width: '50%',
+          height: '10rem',
+          padding: '1rem',
+        }
+      }}
+      appstate={appstate}
+      bucket_id={bucket.id}
+    />
 
     return (
       <div className="rows">

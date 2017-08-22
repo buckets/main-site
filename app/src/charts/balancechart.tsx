@@ -6,7 +6,7 @@ import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
 import { COLORS, opacity } from '../color'
 import { cents2decimal } from '../money'
-import { Transaction } from '../models/bucket'
+import { Transaction, computeBucketData } from '../models/bucket'
 import { tsfromdb } from '../time'
 
 
@@ -47,6 +47,10 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
     }
 
     let bucket = appstate.buckets[bucket_id];
+    let computed = computeBucketData(bucket.kind, bucket, {
+      today: moment.utc(),
+      balance: bucket.balance,
+    })
 
     let startTime = tsfromdb(transactions[transactions.length-1].posted).valueOf();
     let endTime = tsfromdb(transactions[0].posted).valueOf();
@@ -69,6 +73,57 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
     
     return <SizeAwareDiv {...divProps}
       guts={dims => {
+
+        let extra = () => {
+          return null;
+        };
+
+        if (bucket.kind === 'goal-date' || bucket.kind === 'goal-deposit' || bucket.kind === 'deposit-date') {
+          lowval = Math.min(lowval, computed.goal);
+          highval = Math.max(highval, computed.goal);
+          if (computed.end_date && computed.end_date.isAfter(endTime)) {
+            endTime = computed.end_date.valueOf();
+          }
+          extra = () => {
+            let last = balancehistory[0];
+            let end_date = computed.end_date;
+            if (!end_date) {
+              end_date = moment.utc();
+            }
+            let goal_x = x(end_date.valueOf());
+            let goal_y = y(computed.goal);
+            return <g>
+              
+              <line
+                x1={x(last.date.valueOf())}
+                y1={y(last.balance)}
+                x2={goal_x}
+                y2={goal_y}
+                style={CHART_STYLES.forecastLine}
+              />
+              <circle
+                r={5}
+                fill={bucket.color}
+                cx={goal_x}
+                cy={goal_y}
+              />
+              <circle
+                r={3}
+                fill={COLORS.blackish}
+                cx={x(last.date.valueOf())}
+                cy={y(last.balance)}
+              />
+              <text
+                x={x(last.date.valueOf())}
+                y={y(last.balance)}
+                dy={15}
+                style={CHART_STYLES.axislabel}
+                textAnchor={x(last.date.valueOf()) > dims.width/2 ? "end" : "start"}
+              >{cents2decimal(last.balance)}</text>
+            </g>
+          }
+        }
+
         let x = d3.scaleTime()
           .domain([startTime, endTime])
           .range([10, dims.width-10]);
@@ -194,6 +249,8 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
               fill="transparent"
               d={balance_line(balancehistory)} />
           </g>
+
+          {extra()}
 
         </svg>
       }}/>
