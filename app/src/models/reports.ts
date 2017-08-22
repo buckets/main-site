@@ -11,7 +11,6 @@ export interface IncomeExpenseSum {
   net_transfer: number;
 }
 
-
 export class ReportStore {
   constructor(private store:IStore) {
 

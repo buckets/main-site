@@ -19,6 +19,9 @@ export function ensureLocalMoment(x:Timestamp):moment.Moment {
 export function ts2db(x:Timestamp):string {
   return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
 }
+export function tsfromdb(x:Timestamp):moment.Moment {
+  return ensureUTCMoment(x);
+}
 
 export function isBetween(x:Timestamp, start:Timestamp, end:Timestamp):boolean {
   x = ensureUTCMoment(x)
