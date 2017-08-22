@@ -12,7 +12,19 @@ export const CHART_STYLES = {
     stroke: COLORS.lighter_grey,
     strokeWidth: 1,
     strokeDasharray: "5, 5",
-  }
+  },
+  axislabel: {
+    fill: COLORS.lighter_grey,
+    fontSize: '75%',
+  },
+  tick: {
+    stroke: COLORS.lighter_grey,
+    strokeWidth: 1,
+  },
+  ticklabel: {
+    fill: COLORS.lighter_grey,
+    fontSize: '75%',
+  },
 }
 
 interface Dims {
