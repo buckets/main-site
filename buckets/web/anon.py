@@ -1,7 +1,6 @@
 import structlog
 import time
 import stripe
-import os
 import requests
 logger = structlog.get_logger()
 
@@ -36,11 +35,11 @@ def getLatestReleaseVersion():
     return _latest_version
 
 
-PRIVATE_KEY = os.environ.get('BUCKETS_LICENSE_KEY')
-if not PRIVATE_KEY:
-    if 'OPENSHIFT_DATA_DIR' in os.environ:
-        with open(os.path.join(os.getenv('OPENSHIFT_DATA_DIR'), 'BUCKETS_LICENSE_KEY')) as fh:
-            PRIVATE_KEY = fh.read()
+# PRIVATE_KEY = os.environ.get('BUCKETS_LICENSE_KEY')
+# if not PRIVATE_KEY:
+#     if 'OPENSHIFT_DATA_DIR' in os.environ:
+#         with open(os.path.join(os.getenv('OPENSHIFT_DATA_DIR'), 'BUCKETS_LICENSE_KEY')) as fh:
+#             PRIVATE_KEY = fh.read()
 
 #----------------------------------------------------
 # application
@@ -66,7 +65,7 @@ def buy():
         try:
             license = formatLicense(createLicense(
                 email=email,
-                private_key=PRIVATE_KEY))
+                private_key=current_app.config['BUCKETS_LICENSE_KEY']))
         except Exception as e:
             flash('Error generating license.  Your card was not charged.', 'error')
             raise

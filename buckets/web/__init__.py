@@ -21,13 +21,16 @@ def configureApp(flask_secret_key,
         stripe_api_key,
         stripe_public_key,
         sentry_dsn,
+        buckets_license_key,
         debug=False):
     sentry.init_app(f, dsn=sentry_dsn)
 
     f.config.update(
         DEBUG=debug,
         SECRET_KEY=flask_secret_key,
-        STRIPE_PUBLIC_KEY=stripe_public_key)
+        STRIPE_PUBLIC_KEY=stripe_public_key,
+        BUCKETS_LICENSE_KEY=buckets_license_key,
+    )
 
     if debug:
         logger.info('Flask: debug')
