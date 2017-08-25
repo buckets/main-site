@@ -151,8 +151,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               return <Redirect to='/buckets' />;
             }
             let balance = appstate.bucket_balances[bucket.id];
+            let rainfall = appstate.rainfall[bucket.id];
             return (<BucketView
               bucket={bucket}
+              rainfall={rainfall}
               balance={balance}
               appstate={appstate}
               transactions={_.values(appstate.btransactions)
@@ -250,6 +252,53 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   }
   pendingChanged = (changed:PendingAmounts) => {
     this.setState({pending: Object.assign(this.state.pending, changed)});
+  }
+}
+
+class ProgressBubble extends React.Component<{
+  percent:number;
+  color?:string;
+  width?:string;
+  height?:string;
+  className?:string;
+}, {}> {
+  render() {
+    let { percent, color, width, height, className } = this.props;
+    let outerStyle:any = {};
+    let innerStyle:any = {};
+    let fill_amount = 0;
+    if (isNaN(percent)) {
+      percent = 0;
+    }
+    if (percent < 90) {
+      fill_amount = percent;
+    } else if (percent >= 100) {
+      fill_amount = 100;
+    } else {
+      // between 90-100%
+      fill_amount = 90;
+    }
+    innerStyle.height = `${fill_amount}%`;
+    if (width) {
+      outerStyle.width = width;
+    }
+    if (height) {
+      outerStyle.height = height;
+    }
+    if (color) {
+      outerStyle.borderColor = color;
+      innerStyle.backgroundColor = color;
+    }
+    return <div
+      className={cx("progress-bubble", className, {
+        full: percent >= 100,
+        empty: percent <= 0,
+      })}
+      style={outerStyle}>
+      <div
+        className="bubble-fill"
+        style={innerStyle}></div>
+    </div>
   }
 }
 
@@ -504,6 +553,15 @@ class BucketRow extends React.Component<BucketRowProps, {
       balance: balance,
     })
 
+    let rainfall_indicator;
+    if (computed.deposit) {
+      let percent = rainfall/computed.deposit*100;
+      rainfall_indicator = <Help
+        icon={<ProgressBubble percent={percent} />}>
+        Rainfall received this month: <Money value={rainfall}/> ({Math.floor(percent)}%)
+      </Help>
+    }
+
     return <tr
       key={bucket.id}
       onDragOver={this.onDragOver}
@@ -565,8 +623,8 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right">
-        {computed.deposit ? <ProgressBar width="25px" percent={rainfall/computed.deposit*100} /> : null}
         <Money value={computed.deposit} hidezero />{computed.deposit ? <permonth/> : ''}
+        {rainfall_indicator}
       </td>
       <td className="nopad bucket-details-wrap"><BucketKindDetails
           bucket={bucket}
@@ -663,7 +721,7 @@ class GroupRow extends React.Component<{
         key={bucket.id}
         bucket={bucket}
         balance={balances[bucket.id]}
-        rainfall={rainfall[bucket.id]}
+        rainfall={rainfall[bucket.id] || 0}
         nodebt_balance={nodebt_balances[bucket.id]}
         show_nodebt_balance={show_nodebt_balance}
         onPendingChanged={onPendingChanged}
@@ -711,7 +769,7 @@ class GroupRow extends React.Component<{
         <th className="right">Balance</th>
         {show_nodebt_balance ? <th className="right">Effective <Help>This would be the balance if no buckets were in debt</Help></th> : null}
         <th className="left">Transact</th>
-        <th className="right"><span className="fa fa-tint"/> Rain</th>
+        <th className="right"><span className="fa fa-tint"/> Rain <Help>This is how much money these buckets want each month.  The little box indicates how much they have received.</Help></th>
         <th>Details</th>
         <th></th>
       </tr>
@@ -868,6 +926,7 @@ function getGroupedBuckets(buckets:Bucket[], groups:Group[]) {
 interface BucketViewProps {
   bucket: Bucket;
   balance: number;
+  rainfall: number;
   appstate: AppState;
   transactions: Transaction[];
 }
@@ -876,7 +935,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
     super(props)
   }
   render() {
-    let { bucket, balance, transactions, appstate } = this.props;
+    let { bucket, balance, rainfall, transactions, appstate } = this.props;
     let kick_button;
     let kicked_ribbon;
     if (bucket.kicked) {
@@ -946,7 +1005,8 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
                 }}
               />
             </h1>
-            Balance: <Money value={balance} />
+            <div>Balance: <Money value={balance} /></div>
+            <div>Rainfall: <Money value={rainfall} /></div>
             <hr/>
             <TransactionList
               transactions={transactions}

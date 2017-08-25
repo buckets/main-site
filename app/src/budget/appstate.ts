@@ -276,7 +276,10 @@ export class StateManager extends EventEmitter {
     } else if (isObj(Bucket, obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
-        await this.fetchBucketBalances();
+        await Promise.all([
+          this.fetchBucketBalances(),
+          this.fetchRainfall(),
+        ]);
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
       }
@@ -400,7 +403,6 @@ export class StateManager extends EventEmitter {
       this.appstate.viewDateRange.onOrAfter,
       this.appstate.viewDateRange.before)
       .then(rainfall => {
-        console.log('rainfall', rainfall);
         this.appstate.rainfall = rainfall;
       })
   }
