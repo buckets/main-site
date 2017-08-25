@@ -6,6 +6,8 @@ logger = structlog.get_logger()
 from flask import Flask, g, request
 from flask import render_template
 
+from flask_sslify import SSLify
+
 from raven.contrib.flask import Sentry
 
 from buckets.mailing import PostmarkMailer, NoMailer
@@ -13,6 +15,7 @@ from buckets.web.util import structlog_context, sentry_context
 from buckets.web.util import send_warnings_to_sentry
 
 f = Flask(__name__)
+SSLify(f)
 
 sentry = Sentry()
 
