@@ -35,6 +35,7 @@ interface IAppState {
   }
   account_balances: Balances;
   bucket_balances: Balances;
+  rainfall: Balances;
   month: number;
   year: number;
 
@@ -73,6 +74,7 @@ export class AppState implements IAppState, IComputedAppState {
   connections = {};
   account_balances = {};
   bucket_balances = {};
+  rainfall = {};
   nodebt_balances = {};
   unknown_accounts = {};
   month = null;
@@ -341,6 +343,7 @@ export class StateManager extends EventEmitter {
       this.fetchAllGroups(),
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
+      this.fetchRainfall(),
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
       this.fetchConnections(),
@@ -391,6 +394,15 @@ export class StateManager extends EventEmitter {
       .then(balances => {
         this.appstate.bucket_balances = balances;
       })  
+  }
+  fetchRainfall() {
+    return this.store.buckets.rainfall(
+      this.appstate.viewDateRange.onOrAfter,
+      this.appstate.viewDateRange.before)
+      .then(rainfall => {
+        console.log('rainfall', rainfall);
+        this.appstate.rainfall = rainfall;
+      })
   }
   fetchTransactions() {
     let range = this.appstate.viewDateRange;
