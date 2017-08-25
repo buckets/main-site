@@ -1,5 +1,16 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
 
+## v0.15.0
+
+- **FIX:** Fixed bug where 'Duplicate Window' would sometimes throw an error.
+
+- **FIX:** Recurring expense report doesn't report false information for newly-made buckets anymore
+
+- NEW: Added new charts to bucket information pages
+
+- NEW: You can now explicitly mark bucket transactions as transfers
+
+
 ## v0.14.0
 
 - **FIX:** When updating an account balance in a month that isn't the current month, it now does the right thing.
