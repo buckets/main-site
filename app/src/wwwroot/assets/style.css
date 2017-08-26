@@ -10,6 +10,8 @@ body {
   --logoblue: rgba(34, 173, 244, 1.0);
 
   --hover-highlight-color: rgba(241, 196, 15, 0.1);
+  --faint-blue: rgba(52, 152, 219, 0.25);
+  --faint-green: rgba(46, 204, 113, 0.25);
 
   --blue: rgba(52, 152, 219,1.0);
   --purple: rgba(155, 89, 182,1.0);
@@ -994,6 +996,34 @@ table.props th {
   right: 0;
 }
 
+.progress-bubble {
+  width: .75rem;
+  height: .75rem;
+  margin-left: 3px;
+  margin-right: 3px;
+  border: 1px solid var(--blue);
+  border-radius: 2px;
+  display: inline-flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+.progress-bubble .bubble-fill {
+  width: 100%;
+  background-color: var(--blue);
+  border-top: 1px solid var(--blue);
+  transition: height 0.2s;
+}
+.progress-bubble.empty .bubble-fill {
+  border-top-width: 0;
+}
+.progress-bubble.full {
+  border-color: var(--green);
+}
+.progress-bubble.full .bubble-fill {
+  border-top-width: 0;
+  background-color: var(--faint-green);
+}
+
 .dialog {
   border: 6px solid var(--blue);
   border-radius: 20px;
@@ -1144,7 +1174,6 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  font-size: .8rem;
   text-align: left;
 }
 .tooltip {
@@ -1159,7 +1188,6 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  font-size: .8rem;
   transition: opacity .2s;
   text-align: left;
 }

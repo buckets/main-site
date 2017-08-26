@@ -35,6 +35,7 @@ interface IAppState {
   }
   account_balances: Balances;
   bucket_balances: Balances;
+  rainfall: Balances;
   month: number;
   year: number;
 
@@ -73,6 +74,7 @@ export class AppState implements IAppState, IComputedAppState {
   connections = {};
   account_balances = {};
   bucket_balances = {};
+  rainfall = {};
   nodebt_balances = {};
   unknown_accounts = {};
   month = null;
@@ -274,7 +276,10 @@ export class StateManager extends EventEmitter {
     } else if (isObj(Bucket, obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
-        await this.fetchBucketBalances();
+        await Promise.all([
+          this.fetchBucketBalances(),
+          this.fetchRainfall(),
+        ]);
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
       }
@@ -341,6 +346,7 @@ export class StateManager extends EventEmitter {
       this.fetchAllGroups(),
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
+      this.fetchRainfall(),
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
       this.fetchConnections(),
@@ -391,6 +397,14 @@ export class StateManager extends EventEmitter {
       .then(balances => {
         this.appstate.bucket_balances = balances;
       })  
+  }
+  fetchRainfall() {
+    return this.store.buckets.rainfall(
+      this.appstate.viewDateRange.onOrAfter,
+      this.appstate.viewDateRange.before)
+      .then(rainfall => {
+        this.appstate.rainfall = rainfall;
+      })
   }
   fetchTransactions() {
     let range = this.appstate.viewDateRange;

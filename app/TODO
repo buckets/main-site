@@ -1,6 +1,7 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
+ ☐ If you make a new file in / it won't open or respond or fail or anything.
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
@@ -9,6 +10,7 @@ v1.0.0:
  ☐ Encrypt simplefin connection stuff
  ☐ Regular expense chart
  ☐ Bucket analysis -- only go back as far as there are transactions
+ ☐ Remove "Test Toast" button :)
 
 Videos:
   ☐ Creating a budget
