@@ -210,8 +210,8 @@ export class BucketStore {
       WHERE
         posted >= $onOrAfter
         AND posted < $before
-        AND (transfer IS NULL
-          OR transfer = 0)
+        --AND (transfer IS NULL
+        --  OR transfer = 0)
         AND account_trans_id IS NULL
         --AND amount >= 0
       GROUP BY
