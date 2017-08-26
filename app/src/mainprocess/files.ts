@@ -7,6 +7,7 @@ import {DBStore} from './dbstore';
 import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
+import { reportErrorToUser } from '../errors'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -33,12 +34,21 @@ export class BudgetFile {
   async start() {
     log.debug('start', this.filename);
 
-    addRecentFile(this.filename);
-
     // connect to database
-    await this.store.open();
+    try {
+      await this.store.open();  
+    } catch(err) {
+      log.error(`Error opening file: ${this.filename}`);
+      log.error(err.stack);
+      reportErrorToUser(`Unable to open the file: ${this.filename}`, {err});
+      return;
+    }
+    
     this.rpc_store = new RPCMainStore(this.store, this.id);
     await this.rpc_store.start();
+
+    // mark it as having been opened
+    addRecentFile(this.filename);
 
     // open default windows
     this.openDefaultWindows();

@@ -4,6 +4,7 @@ import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './fi
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
+import { reportBug } from '../errors'
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -151,7 +152,7 @@ export async function updateMenu() {
       {
         label: 'Report Bug...',
         click() {
-          shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
+          reportBug();
         }
       },
       {
