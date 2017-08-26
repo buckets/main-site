@@ -218,7 +218,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
           today: appstate.defaultPostingDate,
           balance: appstate.bucket_balances[bucket.id],
         })
-        let amount = computed.deposit < left ? computed.deposit : left;
+        let rainfall = appstate.rainfall[bucket.id] || 0;
+        let ask = computed.deposit - rainfall;
+        ask = ask < 0 ? 0 : ask;
+        let amount = ask < left ? ask : left;
         left -= amount;
         pending[bucket.id] = amount;
       })
@@ -270,13 +273,13 @@ class ProgressBubble extends React.Component<{
     if (isNaN(percent)) {
       percent = 0;
     }
-    if (percent < 90) {
+    if (percent < 80) {
       fill_amount = percent;
     } else if (percent >= 100) {
       fill_amount = 100;
     } else {
-      // between 90-100%
-      fill_amount = 90;
+      // between 80-100%
+      fill_amount = 80;
     }
     innerStyle.height = `${fill_amount}%`;
     if (width) {
@@ -557,7 +560,7 @@ class BucketRow extends React.Component<BucketRowProps, {
     if (computed.deposit) {
       let percent = rainfall/computed.deposit*100;
       rainfall_indicator = <Help
-        icon={<ProgressBubble percent={percent} />}>
+        icon={<ProgressBubble height="1rem" percent={percent} />}>
         Rainfall received this month: <Money value={rainfall}/> ({Math.floor(percent)}%)
       </Help>
     }

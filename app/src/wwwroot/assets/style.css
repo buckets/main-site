@@ -1009,7 +1009,7 @@ table.props th {
 }
 .progress-bubble .bubble-fill {
   width: 100%;
-  background-color: var(--faint-blue);
+  background-color: var(--blue);
   border-top: 1px solid var(--blue);
   transition: height 0.2s;
 }
@@ -1174,7 +1174,6 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  font-size: .8rem;
   text-align: left;
 }
 .tooltip {
@@ -1189,7 +1188,6 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  font-size: .8rem;
   transition: opacity .2s;
   text-align: left;
 }
