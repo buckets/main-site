@@ -1,15 +1,12 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
- ✔ If you make a new file in / it won't open or respond or fail or anything. @done (17-08-25 22:38)
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Sign the code
  ☐ Encrypt simplefin connection stuff
- ✔ Regular expense chart @done (17-08-25 22:11)
- ☐ Bucket analysis -- only go back as far as there are transactions
  ☐ Remove "Test Toast" button :)
 
 Videos:
@@ -34,9 +31,6 @@ Backlog:
  ☐ Import CSV
  ☐ Export CSV
  ☐ Automatically sync so the users don't have to
- ☐ Just make routing.tsx global instead of using react's context system
-   ☐ And make it so that you don't have to render in order to get the year/month
-   ☐ Or redirect.
  ☐ Delete (retire) accounts
  ☐ Show only debt buckets filter
  ☐ Add a pop up calculator
@@ -47,6 +41,9 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Bucket analysis -- only go back as far as there are transactions @done (17-08-25 22:40) @project(v1.0.0)
+ ✔ If you make a new file in / it won't open or respond or fail or anything. @done (17-08-25 22:38) @project(Bugs)
+ ✔ Regular expense chart @done (17-08-25 22:11) @project(v1.0.0)
  ✔ Pressing Cmd+N when there's no window throws an error @done (17-08-21 12:50) @project(Bugs)
  ✔ Show Income/expenses average over the last 3 months @done (17-08-21 10:16) @project(Backlog)
  ✔ How much do we spend out of each bucket on average? (it would be nice to see all buckets at the same time). @done (17-08-21 10:15) @project(Backlog)
