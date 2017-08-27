@@ -222,6 +222,7 @@ export class StateManager extends EventEmitter {
   public store:IStore;
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
+  private posttick: Set<string> = new Set();
   readonly fileimport:FileImportManager;
   constructor() {
     super()
@@ -269,17 +270,15 @@ export class StateManager extends EventEmitter {
     if (isObj(Account, obj)) {
       if (ev.event === 'update') {
         this.appstate.accounts[obj.id] = obj;
-        await this.fetchAccountBalances();
+        this.posttick.add('fetchAccountBalances');
       } else if (ev.event === 'delete') {
         delete this.appstate.accounts[obj.id];
       }
     } else if (isObj(Bucket, obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
-        await Promise.all([
-          this.fetchBucketBalances(),
-          this.fetchRainfall(),
-        ]);
+        this.posttick.add('fetchBucketBalances');
+        this.posttick.add('fetchRainfall');
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
       }
@@ -326,10 +325,15 @@ export class StateManager extends EventEmitter {
     return this.appstate;
   }
   
-  signalChange = _.debounce(() => {
+  signalChange = _.debounce(async () => {
     this.recomputeTotals();
+    let posttick = Array.from(this.posttick.values());
+    this.posttick.clear();
+    await Promise.all(posttick.map(funcname => {
+      return this[funcname]();
+    }));
     this.emit('change', this.appstate);
-  }, 100, {leading: true, trailing: true});
+  }, 50, {leading: true, trailing: true});
 
   async setDate(year:number, month:number):Promise<any> {
     if (this.appstate.year !== year || this.appstate.month !== month) {

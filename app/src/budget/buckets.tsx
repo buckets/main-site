@@ -603,7 +603,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right">{balance_el}</td>
-      {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} /></td> : null }
+      {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} noanimate /></td> : null }
       <td className="left">
         <MoneyInput
           value={pending || null}
