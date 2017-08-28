@@ -1,61 +1,85 @@
 import * as log from 'electron-log'
 import * as electron_is from 'electron-is'
 import * as https from 'https'
-import { shell, app, dialog } from 'electron'
+import * as Path from 'path'
+import { shell, app, dialog, BrowserWindow, ipcMain } from 'electron'
+import { APP_ROOT } from './globals'
 import { autoUpdater } from 'electron-updater'
+
+let win:Electron.BrowserWindow;
 
 export function checkForUpdates() {
   autoUpdater.autoDownload = false;
   autoUpdater.on('checking-for-update', () => {
     log.info('checking for updates...');
+    setUpdateWindowStatus({
+      state: 'checking',
+      new_version: null,
+      releaseNotes: null,
+    })
   })
   autoUpdater.on('update-not-available', info => {
     log.info('update not available', info);
+    setUpdateWindowStatus({
+      state: 'not-available',
+    })
   })
   autoUpdater.on('update-available', (info) => {
     log.info('update available', info);
     let new_version = info.version;
-    dialog.showMessageBox({
-      title: 'Update Available',
-      message: `Version ${new_version} of Buckets is available.`,
-      detail: `After downloading the update you will be prompted before it is installed to allow you to finish your work.`,
-      buttons: [
-        'Later',
-        'Download Update',
-      ],
-      defaultId: 0,
-    }, (indexClicked) => {
-      if (indexClicked === 1) {
-        // Download and restart
-        autoUpdater.downloadUpdate()
-      }
-    })
+    setUpdateWindowStatus({
+      state: 'update-available',
+      new_version: new_version,
+      releaseNotes: info.releaseNotes,
+    }, true)
+    // dialog.showMessageBox({
+    //   title: 'Update Available',
+    //   message: `Version ${new_version} of Buckets is available.`,
+    //   detail: `After downloading the update you will be prompted before it is installed to allow you to finish your work.`,
+    //   buttons: [
+    //     'Later',
+    //     'Download Update',
+    //   ],
+    //   defaultId: 0,
+    // }, (indexClicked) => {
+    //   if (indexClicked === 1) {
+    //     // Download and restart
+    //     autoUpdater.downloadUpdate()
+    //   }
+    // })
   })
   autoUpdater.on('error', (err) => {
     log.error(err);
+    setUpdateWindowStatus({
+      error: err,
+    }, true);
   })
   autoUpdater.on('update-downloaded', (info) => {
     log.info('update downloaded', info);
-    dialog.showMessageBox({
-      title: 'Update Downloaded',
-      message: 'The update is downloaded.  When do you want to quit Buckets and install it?',
-      buttons: [
-        'Later, After I Quit',
-        'Now',
-      ],
-      defaultId: 1,
-    }, (indexClicked) => {
-      if (indexClicked === 1) {
-        // Do it now
-        autoUpdater.quitAndInstall();
-      } else {
-        // Do it later
-        app.once('before-quit', ev => {
-          ev.preventDefault();
-          autoUpdater.quitAndInstall();
-        })
-      }
-    })
+    setUpdateWindowStatus({
+      state: 'downloaded'
+    }, true);
+
+    // dialog.showMessageBox({
+    //   title: 'Update Downloaded',
+    //   message: 'The update is downloaded.  When do you want to quit Buckets and install it?',
+    //   buttons: [
+    //     'Later, After I Quit',
+    //     'Now',
+    //   ],
+    //   defaultId: 1,
+    // }, (indexClicked) => {
+    //   if (indexClicked === 1) {
+    //     // Do it now
+    //     autoUpdater.quitAndInstall();
+    //   } else {
+    //     // Do it later
+    //     app.once('before-quit', ev => {
+    //       ev.preventDefault();
+    //       autoUpdater.quitAndInstall();
+    //     })
+    //   }
+    // })
   });
 
   if (electron_is.linux()) {
@@ -65,6 +89,73 @@ export function checkForUpdates() {
   }
 }
 
+interface IUpdateStatus {
+  current_version: string;
+  new_version: string;
+  releaseNotes: string;
+  error: string;
+  state: 'idle' | 'checking' | 'update-available' | 'not-available' | 'downloading' | 'downloaded';
+}
+let CURRENT_UPDATE_STATUS:IUpdateStatus = {
+  state: 'idle',
+  current_version: null,
+  new_version: null,
+  releaseNotes: null,
+  error: null,
+}
+export function setUpdateWindowStatus(status:Partial<IUpdateStatus>, ensureOpen:boolean=false) {
+  if (!CURRENT_UPDATE_STATUS.current_version) {
+    CURRENT_UPDATE_STATUS.current_version = `v${app.getVersion()}`;
+  }
+  Object.assign(CURRENT_UPDATE_STATUS, status);
+  if (ensureOpen) {
+    openUpdateWindow();
+  }
+  if (win) {
+    win.webContents.send('buckets:update-status', CURRENT_UPDATE_STATUS);
+  }
+}
+
+export function openUpdateWindow() {
+  if (win) {
+    win.focus();
+    return;
+  }
+  win = new BrowserWindow({
+    width: 350,
+    height: 150,
+    show: false,
+  });
+  win.once('ready-to-show', () => {
+    win.show();
+    setUpdateWindowStatus({});
+  });
+  win.on('close', ev => {
+    win = null;
+  });
+
+  let path = Path.join(APP_ROOT, 'src/wwwroot/misc/updates.html');
+  path = `file://${path}`
+  win.loadURL(path);
+}
+
+if (ipcMain) {
+  ipcMain.on('buckets:check-for-updates', () => {
+    log.info('check for updates clicked');
+    checkForUpdates();
+  })
+  ipcMain.on('buckets:download-update', () => {
+    log.info('download update clicked');
+    autoUpdater.downloadUpdate()
+    setUpdateWindowStatus({
+      state: 'downloading',
+    })
+  })
+  ipcMain.on('buckets:install-update', () => {
+    log.info('install update clicked');
+    autoUpdater.quitAndInstall();
+  })  
+}
 
 export async function linux_checkForUpdates() {
   let new_version = await new Promise((resolve, reject) => {

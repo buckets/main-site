@@ -5,6 +5,7 @@ import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
 import { reportBug } from '../errors'
+import { openUpdateWindow } from './updater'
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -198,6 +199,12 @@ export async function updateMenu() {
       label: app.getName(),
       submenu: [
         {role: 'about'},
+        {
+          label: 'Check For Updates...',
+          click() {
+            openUpdateWindow();
+          },
+        },
         {type: 'separator'},
         {role: 'services', submenu: []},
         {type: 'separator'},
