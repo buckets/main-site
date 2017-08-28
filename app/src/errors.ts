@@ -39,3 +39,16 @@ export function reportErrorToUser(text?:string, args?:{
     }
   })
 }
+
+export function displayError(text?:string, title?:string) {
+  dialog.showMessageBox({
+    title: title || 'Error',
+    message: text,
+    buttons: [
+      'OK',
+    ],
+    defaultId: 0,
+  }, () => {
+    
+  })
+}

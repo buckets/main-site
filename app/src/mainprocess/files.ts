@@ -1,5 +1,6 @@
 import * as log from 'electron-log'
 import * as Path from 'path'
+import * as fs from 'fs-extra-promise'
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
@@ -7,7 +8,7 @@ import {DBStore} from './dbstore';
 import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
-import { reportErrorToUser } from '../errors'
+import { reportErrorToUser, displayError } from '../errors'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -94,7 +95,14 @@ export class BudgetFile {
       this.windows.splice(idx, 1);
     })
   }
-  static openFile(filename:string):Promise<BudgetFile> {
+  static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
+    if (!create) {
+      // open, don't create
+      if (! await fs.existsAsync(filename)) {
+        displayError(`File does not exist: ${filename}`)
+        return;
+      }
+    }
     let bf = new BudgetFile(filename);
     return bf.start();
   }
@@ -136,7 +144,7 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
       defaultPath: 'My Budget.buckets',
     }, (filename) => {
       if (filename) {
-        resolve(BudgetFile.openFile(filename));  
+        resolve(BudgetFile.openFile(filename, true));  
       } else {
         reject(new Error('No file chosen'));
       }
