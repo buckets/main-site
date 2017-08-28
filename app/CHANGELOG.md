@@ -1,6 +1,9 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
 ## v0.15.0
 
+- **FIX:** If you try to open/create a file that's unreadable and error is displayed instead of failing silently
+
+
 - NEW: You can now click 'Make it Rain' as many times as you want.  Each bucket will only take what it needs *per month*
 
 
