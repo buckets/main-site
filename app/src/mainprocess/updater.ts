@@ -124,6 +124,8 @@ export function openUpdateWindow() {
   win = new BrowserWindow({
     width: 350,
     height: 150,
+    minWidth: 350,
+    minHeight: 150,
     show: false,
   });
   win.once('ready-to-show', () => {
