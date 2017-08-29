@@ -1,6 +1,7 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
+ ☐ Have the open/new dialog menus open to a good default location instead of /
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
