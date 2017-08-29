@@ -32,21 +32,6 @@ export function checkForUpdates() {
       new_version: new_version,
       releaseNotes: info.releaseNotes,
     }, true)
-    // dialog.showMessageBox({
-    //   title: 'Update Available',
-    //   message: `Version ${new_version} of Buckets is available.`,
-    //   detail: `After downloading the update you will be prompted before it is installed to allow you to finish your work.`,
-    //   buttons: [
-    //     'Later',
-    //     'Download Update',
-    //   ],
-    //   defaultId: 0,
-    // }, (indexClicked) => {
-    //   if (indexClicked === 1) {
-    //     // Download and restart
-    //     autoUpdater.downloadUpdate()
-    //   }
-    // })
   })
   autoUpdater.on('error', (err) => {
     log.error(err);
@@ -59,27 +44,6 @@ export function checkForUpdates() {
     setUpdateWindowStatus({
       state: 'downloaded'
     }, true);
-
-    // dialog.showMessageBox({
-    //   title: 'Update Downloaded',
-    //   message: 'The update is downloaded.  When do you want to quit Buckets and install it?',
-    //   buttons: [
-    //     'Later, After I Quit',
-    //     'Now',
-    //   ],
-    //   defaultId: 1,
-    // }, (indexClicked) => {
-    //   if (indexClicked === 1) {
-    //     // Do it now
-    //     autoUpdater.quitAndInstall();
-    //   } else {
-    //     // Do it later
-    //     app.once('before-quit', ev => {
-    //       ev.preventDefault();
-    //       autoUpdater.quitAndInstall();
-    //     })
-    //   }
-    // })
   });
 
   if (electron_is.linux()) {
