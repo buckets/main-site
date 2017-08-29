@@ -128,6 +128,7 @@ export class Syncer extends EventEmitter {
     if (this.running) {
       return;
     }
+    log.info(`Sync started from ${sync_start.format()} to ${sync_end.format()}`)
     this.please_stop = false;
     this.running = true;
     this.emit('start', {
@@ -153,16 +154,10 @@ export class Syncer extends EventEmitter {
           log.info(`SimpleFin error: ${err}`);
           errors.add(err);
         })
-        if (result.errors.length) {
-          this.incDelay();
-          await sleep(this.delay);
-          continue;
-        }
       } catch(err) {
-        log.info(`Server error while syncing; sleeping for ${this.delay}: ${err}`)
-        this.incDelay();
-        await sleep(this.delay);
-        continue;
+        log.info(`Server error while syncing.  Aborting: ${err}`)
+        errors.add('Sync failed');
+        break;
       }
       await sleep(this.delay);
       window_start.add(this.time_range as any, this.time_unit);

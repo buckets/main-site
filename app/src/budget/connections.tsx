@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import * as moment from 'moment'
 import { shell } from 'electron'
 import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
@@ -11,12 +10,8 @@ import { DateTime } from '../time'
 
 function startDefaultSync(appstate:AppState) {
   let range = appstate.viewDateRange;
-  let since = range.onOrAfter.subtract(7, 'days');
-  let enddate = range.before.add(7, 'days');
-  let tomorrow = moment.utc().add(1, 'day')
-  if (enddate.isAfter(tomorrow)) {
-    enddate = tomorrow;
-  }
+  let since = range.onOrAfter.clone();
+  let enddate = range.before.clone();
   manager.store.connections.syncer.start(since, enddate);
 }
 
