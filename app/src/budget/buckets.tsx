@@ -634,7 +634,7 @@ class BucketRow extends React.Component<BucketRowProps, {
           balance={balance}
           posting_date={posting_date} /></td>
       <td>
-        <Link relative to={`/${bucket.id}`} className="subtle">more</Link>
+        <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-bar-chart"></span></Link>
       </td>
     </tr>
   }

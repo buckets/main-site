@@ -155,6 +155,9 @@ a:hover {
   display: inline-block;
   padding: 0 .25rem;
 }
+.alert.info {
+  color: var(--blue);
+}
 
 .app .content {
   flex-grow: 1;

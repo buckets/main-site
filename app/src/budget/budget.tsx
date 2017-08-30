@@ -90,10 +90,10 @@ class Navbar extends React.Component<{
     if (appstate.fileimport.pending_imports.length) {
       fileimport_badge = <div className="badge">{appstate.fileimport.pending_imports.length}</div>
     }
-    let accounts_badge;
-    if (appstate.unmatched_account_balances) {
-      accounts_badge = <div className="badge">{appstate.unmatched_account_balances}</div>
-    }
+    // let accounts_badge;
+    // if (appstate.unmatched_account_balances) {
+    //   accounts_badge = <div className="badge">{appstate.unmatched_account_balances}</div>
+    // }
     let transactions_badge;
     if (appstate.num_uncategorized_trans) {
       transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
@@ -112,7 +112,7 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>Accounts</span>{accounts_badge}</Link>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>Accounts</span></Link>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>Transactions</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>Buckets</span>{buckets_badge}</Link>
           <Route path="/buckets">
