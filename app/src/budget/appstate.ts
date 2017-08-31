@@ -326,12 +326,12 @@ export class StateManager extends EventEmitter {
   }
   
   signalChange = _.debounce(async () => {
-    this.recomputeTotals();
     let posttick = Array.from(this.posttick.values());
     this.posttick.clear();
     await Promise.all(posttick.map(funcname => {
       return this[funcname]();
     }));
+    this.recomputeTotals();
     this.emit('change', this.appstate);
   }, 50, {leading: true, trailing: true});
 

@@ -2,6 +2,7 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
+ ☐ Turning a regular expense back to a normal bucket retains the deposit in rain
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
