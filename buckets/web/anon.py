@@ -5,7 +5,7 @@ import requests
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, flash
-from flask import redirect
+from flask import redirect, url_for
 from flask import current_app
 
 from buckets.drm import createLicense, formatLicense
@@ -53,6 +53,14 @@ def index():
 @blue.route('/chat', methods=['GET'])
 def chat():
     return redirect('https://tawk.to/chat/59835f8ed1385b2b2e285765/default/?$_tawk_popout=true')
+
+@blue.route('/gettingstarted', methods=['GET'])
+def gettingstarted():
+    return render_template('anon/gettingstarted.html')
+
+@blue.route('/help', methods=['GET'])
+def help():
+    return redirect(url_for('.gettingstarted'))
 
 @blue.route('/buy', methods=['GET', 'POST'])
 def buy():

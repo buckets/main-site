@@ -161,6 +161,12 @@ export async function updateMenu() {
         click() {
           shell.openExternal('https://www.bucketsisbetter.com/chat');
         }
+      },
+      {
+        label: 'Getting Started...',
+        click() {
+          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
+        }
       }
     ],
   };
