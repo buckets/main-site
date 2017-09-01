@@ -99,7 +99,7 @@ export class RPCRendererStore implements IStore {
   get channel() {
     return `rpc-${this.room}`;
   }
-  async callRemote(method, ...args) {
+  async callRemote<T>(method, ...args):Promise<T> {
     let msg:RPCMessage = {
       id: '' + this.next_msg_id++,
       method: method,
@@ -107,13 +107,13 @@ export class RPCRendererStore implements IStore {
     }
     // log.debug('CLIENT CALL', msg.id, method);
     // console.trace();
-    return new Promise((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       ipcRenderer.once(`rpc-reply-${msg.id}`, (event, reply:RPCReply) => {
         // log.debug('CLIENT RECV', msg.id, method, reply.ok);
         if (reply.ok) {
-          resolve(reply.value);
+          resolve(reply.value as T);
         } else {
-          reject(reply.value);
+          reject(reply.value as T);
         }
       });
       ipcRenderer.send(this.channel, msg);

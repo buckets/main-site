@@ -8,6 +8,10 @@ export interface IMessages {
     Transactions: string,
     Buckets: string,
     Kicked: string,
+    Analysis: string,
+    AnalysisSub: {
+      Recurring_Expenses: string,
+    }
     Connections: string,
     Import: string,
   },

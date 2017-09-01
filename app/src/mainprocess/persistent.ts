@@ -72,7 +72,7 @@ async function _modifyState(func:(state:PersistentState)=>(Promise<PersistentSta
     return new_state;
   } else {
     return new Promise<PersistentState>((resolve, reject) => {
-      fs.writeFile(stateFilename(), JSON.stringify(new_state), 'utf8', err => {
+      fs.writeFile(stateFilename(), JSON.stringify(new_state), 'utf8' as any, err => {
         if (err) {
           throw err;
         }

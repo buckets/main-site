@@ -12,6 +12,10 @@ export const pack:ILangPack = {
       Transactions: 'Transactions',
       Buckets: 'Buckets',
       Kicked: 'Kicked',
+      Analysis: 'Analysis',
+      AnalysisSub: {
+        Recurring_Expenses: 'Recurring Expenses',
+      },
       Connections: 'Connections',
       Import: 'Import',
     },
