@@ -27,9 +27,9 @@ export class AccountList extends React.Component<AccountListProps,any> {
       let import_balance = getImportBalance(account, balances[account.id]);
       let import_balance_note;
       if (import_balance !== balances[account.id]) {
-        import_balance_note = <Help icon={<div className="alert">
-          <span className="fa fa-exclamation-triangle" />
-        </div>}>Balance doesn't match last imported/synced value.</Help>
+        import_balance_note = <Help icon={<div className="alert info">
+          <span className="fa fa-exclamation-circle" />
+        </div>}>The most recent synced balance does not match the balance computed from transactions.  Click more for more information.</Help>
 
       }
       return (<tr key={account.id}>
@@ -41,7 +41,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
               manager.store.accounts.update(account.id, {name: val});
             }}
           /></td>
-          <td><Money value={balances[account.id]} /> {import_balance_note}</td>
+          <td>{import_balance_note}<Money value={balances[account.id]} /></td>
           <td><Link relative to={`/${account.id}`} className="subtle">more</Link></td>
         </tr>);
     })
@@ -73,10 +73,16 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
     let import_balance_field;
     if (import_balance !== balance) {
       import_balance_field = <div>
-        <div className="alert">
-          <span className="fa fa-exclamation-triangle" />
-        </div>
-        Expected balance: <Money value={import_balance} /> (obtained from import/sync)
+        Synced balance: <Money value={import_balance} />
+        <p>
+          <div className="alert info">
+            <span className="fa fa-exclamation-circle" />
+          </div>
+          The "Balance" above is this account's balance as of the latest entered transaction.
+          The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
+          &nbsp;Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
+          So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+        </p>
       </div>
     }
     return (<div className="padded" key={account.id}>
@@ -94,8 +100,13 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
         <div>
           Balance: <MoneyInput
           value={balance}
-          onChange={debounceChange(val => {
-            manager.store.accounts.update(account.id, {balance: val});
+          onChange={debounceChange(this_months_balance => {
+            let diff = account.balance - balance;
+
+            let computed_balance = this_months_balance + diff;
+            console.log('entered:', this_months_balance);
+            console.log('computed:', computed_balance);
+            manager.store.accounts.update(account.id, {balance: computed_balance});
           })}/> (as of <Date value={appstate.defaultPostingDate} />)
         </div>
         {import_balance_field}

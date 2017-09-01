@@ -128,6 +128,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
 interface TransactionListProps {
   transactions: Transaction[];
   appstate: AppState;
+  noCreate?: boolean;
   hideAccount?: boolean;
   account?: Account;
   selected?: Set<number>;
@@ -135,7 +136,7 @@ interface TransactionListProps {
 }
 export class TransactionList extends React.Component<TransactionListProps, {}> {
   render() {
-    let { appstate, account, selected, onSelectChange } = this.props;
+    let { appstate, account, selected, onSelectChange, noCreate } = this.props;
     let hideAccount = this.props.hideAccount || false;
     let elems = _.sortBy(this.props.transactions, [
       item => -ensureUTCMoment(item.posted).unix(),
@@ -190,11 +191,11 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
         </tr>
       </thead>
       <tbody>
-        <CreateTransRow
+        {noCreate ? null : <CreateTransRow
           hideAccount={hideAccount}
           account={account}
           appstate={appstate}
-          showSelectCol={!!onSelectChange} />
+          showSelectCol={!!onSelectChange} />}
         {elems}
       </tbody>
     </table>

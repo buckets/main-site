@@ -1,3 +1,4 @@
+import { shell } from 'electron'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
@@ -9,6 +10,7 @@ import {AccountsPage} from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
 import { ConnectionsPage, SyncWidget } from './connections'
+import { ReportsPage } from './reports'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
 import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
@@ -89,10 +91,10 @@ class Navbar extends React.Component<{
     if (appstate.fileimport.pending_imports.length) {
       fileimport_badge = <div className="badge">{appstate.fileimport.pending_imports.length}</div>
     }
-    let accounts_badge;
-    if (appstate.unmatched_account_balances) {
-      accounts_badge = <div className="badge">{appstate.unmatched_account_balances}</div>
-    }
+    // let accounts_badge;
+    // if (appstate.unmatched_account_balances) {
+    //   accounts_badge = <div className="badge">{appstate.unmatched_account_balances}</div>
+    // }
     let transactions_badge;
     if (appstate.num_uncategorized_trans) {
       transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
@@ -111,17 +113,28 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Accounts}</span>{accounts_badge}</Link>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Accounts}</span></Link>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Transactions}</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>{tx._.nav.Buckets}</span>{buckets_badge}</Link>
           <Route path="/buckets">
             <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">{tx._.nav.Kicked}</Link>
+          </Route>
+          <Link relative to="/analysis" exactMatchClass="selected"><span>{tx._.nav.Analysis}</span></Link>
+          <Route path="/analysis">
+            <div>
+              <Link relative to="/recurring-expenses" className="sub" exactMatchClass="selected">{tx._.nav.AnalysisSub.Recurring_Expenses}</Link>
+            </div>
           </Route>
           <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>{tx._.nav.Connections}</span>{connections_badge}</Link>
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Import}</span>{fileimport_badge}</Link>
         </div>
         <div>
           {sync_widget}
+          <a href="#" onClick={(ev) => {
+            ev.preventDefault();
+            shell.openExternal('https://www.bucketsisbetter.com/chat');
+            return false;
+          }}><span><span className="fa fa-fw fa-comment"></span> Chat with Matt</span></a>
           {trial_version}
         </div>
       </div>)
@@ -205,6 +218,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/transactions">
                       <TransactionPage appstate={appstate} />
+                    </Route>
+                    <Route path="/analysis">
+                      <ReportsPage appstate={appstate} />
                     </Route>
                     <Route path="/connections">
                       <ConnectionsPage appstate={appstate} />

@@ -120,6 +120,21 @@ export class BucketStore {
   async unkick(bucket_id:number):Promise<Bucket> {
     return this.update(bucket_id, {kicked: false});
   }
+  async earliestTransaction(bucket_id:number):Promise<moment.Moment> {
+    let rows = await this.store.query(`
+      SELECT min(posted) as d FROM bucket_transaction
+      WHERE bucket_id=$bucket_id`, {
+        $bucket_id: bucket_id,
+      });
+    if (!rows.length) {
+      rows = await this.store.query(`
+        SELECT created as d FROM bucket
+        WHERE id=$bucket_id`, {
+          $bucket_id: bucket_id,
+        });
+    }
+    return moment.utc(rows[0].d);
+  }
 
   async transact(args:{
     bucket_id: number,
@@ -161,12 +176,58 @@ export class BucketStore {
       this.store.publishObject('update', account);
     }));
   }
+  async updateTransaction(transid:number, data:Partial<Transaction>):Promise<Transaction> {
+    let trans = await this.store.getObject(Transaction, transid);
+    let affected_bucket_id = trans.bucket_id;
+    let new_trans = await this.store.updateObject(Transaction, transid, data);
+    let new_bucket = await this.store.getObject(Bucket, affected_bucket_id);
+    this.store.publishObject('update', new_trans);
+    this.store.publishObject('update', new_bucket);
+    return new_trans;
+  }
 
-  async balances(asof?:Timestamp):Promise<Balances> {
+  async balances(asof?:Timestamp, bucket_id?:number):Promise<Balances> {
+    let where = 'a.kicked <> 1'
+    let params = {};
+    if (bucket_id !== undefined) {
+      where += ' AND a.id = $bucket_id'
+      params = {$bucket_id: bucket_id}
+    }
     return computeBalances(this.store,
       'bucket', 'bucket_transaction', 'bucket_id',
-      asof, 'a.kicked <> 1')
+      asof, where, params)
   }
+
+  //
+  // Return how much rain each bucket has received in a given time period
+  async rainfall(onOrAfter:Timestamp, before:Timestamp):Promise<Balances> {
+    let rows = await this.store.query(`
+      SELECT
+        sum(amount) as rainfall,
+        bucket_id
+      FROM
+        bucket_transaction
+      WHERE
+        posted >= $onOrAfter
+        AND posted < $before
+        --AND (transfer IS NULL
+        --  OR transfer = 0)
+        AND account_trans_id IS NULL
+        --AND amount >= 0
+      GROUP BY
+        bucket_id
+      `, {
+        $onOrAfter: ts2db(onOrAfter),
+        $before: ts2db(before),
+      })
+    let ret = {};
+    rows.forEach(row => {
+      ret[row.bucket_id] = row.rainfall;
+    })
+    return ret;
+  }
+
+
   async listTransactions(args:{
     bucket_id?: number,
     account_trans_id?: number,
@@ -318,15 +379,16 @@ interface ComputeArgs {
   today: Timestamp;
   balance: number;
 }
+export interface IComputedData {
+  deposit: number;
+  goal: number;
+  end_date: moment.Moment;
+}
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs);
 export function computeBucketData(kind:'', b:Bucket);
 export function computeBucketData(kind:'deposit', b:Bucket);
 export function computeBucketData(kind:'goal-deposit'|'goal-date'|'deposit-date', b:Bucket, args:ComputeArgs);
-export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):{
-  deposit: number;
-  goal: number;
-  end_date: moment.Moment;
-} {
+export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):IComputedData {
   let ret = {
     deposit: 0,
     goal: 0,

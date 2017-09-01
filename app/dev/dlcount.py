@@ -2,6 +2,7 @@
 from __future__ import print_function
 import requests
 import os
+from collections import defaultdict
 
 
 GH_TOKEN = os.environ['GH_TOKEN']
@@ -14,28 +15,20 @@ r = requests.get('https://api.github.com/repos/buckets/application/releases',
 releases = r.json()
 for release in releases[:number]:
     name = release['name']
-    dlcount = {
-        'win': 0,
-        'mac': 0,
-        'linux': 0,
-        'other': 0,
-    }
+    dlcount = defaultdict(lambda:0)
     for asset in release['assets']:
         asset_name = asset['name']
-        key = 'other'
-        if 'mac' in asset_name:
-            key = 'mac'
-        elif asset_name.endswith('.dmg'):
-            key = 'mac'
-        elif asset_name.endswith('.exe'):
-            key = 'win'
-        elif asset_name.endswith('.deb'):
-            key = 'linux'
-        dlcount[key] += asset['download_count']
-    print('{version} tot={total} win={win} mac={mac} linux={linux} other={other}'.format(
+        if asset_name == 'latest-mac.yml':
+            continue
+        dlcount[asset_name] += asset['download_count']
+    total = sum(dlcount.values())
+    parts = []
+    for k in sorted(dlcount):
+        v = dlcount[k]
+        if v:
+            parts.append('{v} {k}'.format(**locals()))
+    print('\n{version} tot={total}'.format(
         version=name,
-        win=dlcount['win'],
-        mac=dlcount['mac'],
-        linux=dlcount['linux'],
-        other=dlcount['other'],
-        total=sum(dlcount.values())))
+        total=total))
+    for part in parts:
+        print('  {part}'.format(part=part))

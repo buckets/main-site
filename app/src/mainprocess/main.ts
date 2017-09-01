@@ -93,9 +93,30 @@ app.on('activate', () => {
     openWizard();
   }
 })
+function eventuallyGetURL(win:Electron.BrowserWindow):Promise<string> {
+  return new Promise((resolve, reject) => {
+    let url = win.webContents.getURL();
+    if (url) {
+      resolve(url);
+    } else {
+      win.webContents.once('did-navigate', () => {
+        url = win.webContents.getURL();
+        resolve(url);
+      })
+    }
+  });
+}
 app.on('browser-window-created', (ev, win) => {
   if (win !== wiz_win) {
-    closeWizard();
+    eventuallyGetURL(win)
+    .then(url => {
+      if (url.startsWith('buckets://')) {
+        // budget window
+        closeWizard();
+      } else {
+        // non-budget utility window
+      }
+    })
   }
 })
 app.on('browser-window-focus', (ev, win) => {

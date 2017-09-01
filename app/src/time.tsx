@@ -19,6 +19,9 @@ export function ensureLocalMoment(x:Timestamp):moment.Moment {
 export function ts2db(x:Timestamp):string {
   return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
 }
+export function tsfromdb(x:Timestamp):moment.Moment {
+  return ensureUTCMoment(x);
+}
 
 export function isBetween(x:Timestamp, start:Timestamp, end:Timestamp):boolean {
   x = ensureUTCMoment(x)
@@ -86,4 +89,30 @@ export class DateInput extends React.Component<DateInputProps, {value:moment.Mom
     this.setState({value: newval})
     this.props.onChange(newval)
   }
+}
+
+export interface Interval {
+  start: moment.Moment,
+  end: moment.Moment,
+}
+
+export function chunkTime(args: {
+  start: moment.Moment,
+  end: moment.Moment,
+  unit?: string,
+  step?: number,
+}):Interval[] {
+  let ret = [];
+  args.unit = args.unit || 'month';
+  args.step = args.step || 1
+  let p = args.start.clone()
+  while (p.isSameOrBefore(args.end)) {
+    let er = p.clone().add(args.step as any, args.unit);
+    ret.push({
+      start: p.clone(),
+      end: er.clone(),
+    })
+    p = er;
+  }
+  return ret;
 }

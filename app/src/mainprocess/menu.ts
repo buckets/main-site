@@ -5,6 +5,8 @@ import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
 import { tx } from '../i18n'
+import { reportBug } from '../errors'
+import { openUpdateWindow } from './updater'
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -152,13 +154,19 @@ export async function updateMenu() {
       {
         label: tx._.menu.help.ReportBug,
         click() {
-          shell.openExternal('mailto:hello@bucketsisbetter.com?subject=Bug%20Report');
+          reportBug();
         }
       },
       {
         label: tx._.menu.help.Chat,
         click() {
           shell.openExternal('https://www.bucketsisbetter.com/chat');
+        }
+      },
+      {
+        label: 'Getting Started...',
+        click() {
+          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
         }
       }
     ],
@@ -198,6 +206,12 @@ export async function updateMenu() {
       label: app.getName(),
       submenu: [
         {role: 'about'},
+        {
+          label: 'Check For Updates...',
+          click() {
+            openUpdateWindow();
+          },
+        },
         {type: 'separator'},
         {role: 'services', submenu: []},
         {type: 'separator'},

@@ -2,214 +2,167 @@
 
 {% block navlinks %}{% endblock %}
 
-{% block content %}
+{% block extrahead %}
 <style>
-@import 'https://fonts.googleapis.com/css?family=Gochi+Hand';
-.first-page {
-  min-height: 85vh;
+.buttonish.download {
+  margin: .5rem 0 0;
+  white-space: nowrap;
+  display: block;
 }
-.intro {
-  text-align: center;
-}
-.intro h1 {
-  font-size: 5rem;
-  margin-top: 0;
-  margin-bottom: 0;
-  font-family: "Gochi Hand";
-}
-.subtitle {
-  font-size: 1.5rem;
-}
-.tryitfree,
-.slogan-thingie {
-  border: 1px solid lightgrey;
-  border-width: 1px 0;
-  margin: 2rem;
+.download-section {
   padding: 1rem;
-}
-.signup {
-  display: flex;
-  justify-content: center;
-}
-.signup .item {
-  flex-basis: 1;
-  padding: 2rem;
-  margin: 1rem;
-  border: 0px solid lightgrey;
   border-radius: 3px;
-  background-color: white;
-  box-shadow: -2px 2px 11px 0px rgba(0,0,0,0.2);
-  transition: transform .5s;
-  overflow: hidden;
-}
-.signup .item h2 {
-  background-color: rgba(52, 152, 219,1.0);
-  color: white;
-  margin: -2rem -2rem 1rem;
-  padding: 1rem;
   text-align: center;
-  letter-spacing: 3px;
-  font-size: 2rem;
-  font-family: "Gochi Hand";
+  display: block;
+  width: 20rem;
 }
-.signup .item:first-child {
-  transform: rotateZ(-6deg) translateY(-70px);
-}
-.signup .item:last-child {
-  transform: rotateZ(7deg) translateX(5px) translateY(10px);
-}
-.signup .item.no-skew {
-  transform: none;
-}
-.pricing {
-  text-align: center;
-}
-.pricing .options {
+.side-by-side {
   display: flex;
-  justify-content: center;
-  margin: 1rem;
+  max-width: 100%;
 }
-.pricing .option {
-  flex-basis: 1;
-  padding: 2rem;
-  margin: 0rem;
-  color: rgba(52, 152, 219,1.0);
-  border-radius: 3px;
-  border: 1px solid lightgrey;
-  border-width: 0 0 0 1px;
+.main-shot-wrap {
+  flex-basis: 75%;
+  flex-grow: 6;
 }
-.pricing .option:first-child {
-  border-width: 0;
+img.main-shot {
+  max-width: 100%;
+  top: -20%;
+  position: relative;
 }
-.pricing .title {
-  color: black;
-  margin-bottom: 1rem;
-  margin-top: -.5rem;
+.intro-para {
+  flex-basis: 25%;
+  flex-grow: 4;
 }
-.pricing .amount {
-  font-size: 2rem;
-  display: inline;
-}
-.pricing .unit:before {
-  content: '/';
-}
-.pricing .unit {
-  display: inline-block;
-}
-.about {
+.price-section {
   text-align: center;
-  margin-top: 5rem;
 }
-.about p,
-.pricing p {
-  margin: 0 auto 2rem;
-  max-width: 25rem;
-  text-align: left;
+.price {
+  font-size: 3rem;
+}
+.strikeout {
+  text-decoration: line-through;
 }
 </style>
-<div class="first-page">
-  <div class="intro">
-    <h1>Buckets</h1>
-    <div class="subtitle">Better family budgeting.</div>
-    <div class="slogan-thingie">You'll probably look forward to doing your budget now :)</div>
-    <div class="logo-image" style="position: relative; margin-top: -3rem;">
-      <img src="/static/img/bucketongrass-med.png" style="width: 600px;">
-    </div>
-  </div>
-
-  <div class="signup">
-
-    <div class="item">
-      <h2>Sign in</h2>
-      <form method="post" action="{{ url_for('.signin') }}">
-        <div class="form">
-          <div class="pair">
-            <div class="label">Email address</div>
-            <div class="control"><input type="text" name="email" autofocus></div>
-          </div>
-          <div class="pair">
-            <div class="label"></div>
-            <div class="control"><button type="submit">Sign in</button></div>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <div class="item">
-      <h2>Register</h2>
-      <form method="post" action="{{ url_for('.register') }}">
-        <div class="form">
-          <div class="pair">
-            <div class="label">Name</div>
-            <div class="control">
-              <input type="text" name="name">
-            </div>
-          </div>
-          <div class="pair">
-            <div class="label">Email address</div>
-            <div class="control">
-              <input type="text" name="email">
-            </div>
-          </div>
-          <div class="pair">
-            <div class="label"></div>
-            <div class="control"><button type="submit">Register</button></div>
-          </div>
-        </div>
-      </form>
-    </div>
-
-  </div>
-
-</div>
-
-<div class="pricing">
-  <h2>Pricing</h2>
-
-  <div class="tryitfree">Try it free for 60 days.</div>
-
-  <div class="options">
-    <div class="option">
-      <div class="title">Monthly</div>
-      <div class="amount">${{ plans.monthly.amount|money }}</div>
-      <div class="unit">month</div>
-    </div>
-    <div class="option">
-      <div class="title">Yearly</div>
-      <div class="amount">${{ plans.yearly.amount|money }}</div>
-      <div class="unit">year</div>
-    </div>
-  </div>
-
-  <p>
-  At any time, you can switch from monthly to yearly or cancel your account.
-  </p>
-
-  <p>
-    Price is per family budget, so you and your spouse can sign in with individual email addresses, but only pay once.
-  </p>
-</div>
-
-<div class="about">
-  <h2>About Buckets</h2>
-
-  <p>
-    Buckets is a budgeting app made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a> for his family.  We have used Buckets for years and love how it helps us manage our money.  What used to take hours now only takes a few minutes each month.
-  </p>
-
-  <p>
-    It's simple.  It's inexpensive.  It's kind of fun :)
-  </p>
-
-  <p>
-    Buckets is more secure than most other budgeting apps because
-    you are not required to enter your bank account credentials.
-  </p>
-
-  <p>
-    &copy; 2016 Buckets
-  </p>
-</div>
-
-<div class="intentionally-left-blank" style="margin-bottom: 3in;"></div>
 {% endblock %}
+
+{% block header %}
+<div class="hero">
+  <img src="/static/img/logo.svg" />
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="large wrap spaced" style="margin-bottom: -5rem;">
+  <div class="side-by-side">
+    <div class="main-shot-wrap">
+      <img src="/static/img/shots/transactions.png" class="main-shot" />
+    </div>
+    <div class="intro-para">
+      <span class="callout">
+        Buckets makes budgeting <em>fast</em>, <em>simple</em> and <em>private.</em>
+      </span>
+    
+      <div class="download-section">
+        <a name="download"></a>
+        <span class="fa fa-download"></span> Download for:
+        <div>
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}.dmg{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+            <span class="fa fa-apple"></span>
+            macOS
+          </a>
+        </div>
+        <div>
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-Setup-{{ latest_version }}.exe{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+            <span class="fa fa-windows"></span>
+            Windows
+          </a>
+        </div>
+        <div>
+          <a class="buttonish download" href="https://github.com/buckets/application/releases/latest">
+            <span class="fa fa-linux"></span>
+            Linux
+          </a>
+        </div>
+      </div>  
+
+    </div>
+  </div>
+</div>
+<div class="wrap">
+
+  <div class="callout para">
+    Buckets costs <em>$20.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.
+    <span class="highlight">This is the special introductory price.  In 2018 it will cost $40.</span>
+  </div>
+
+  <div class="callout para">
+    Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  <em>Ever wonder who's combing through your cloud-stored transaction history?</em>  With Buckets, your personal data stays on your computer.
+  </div>
+
+  <div class="callout para">
+    Buckets is <em>affordable</em> with <em>no monthly fee.</em>  A single license may be used on all your computers and all the computers of family members living in your home.  You can afford to teach your kids how to budget now.
+  </div>
+
+  <div class="callout para">
+    Buckets is for <em>both of you.</em>  Ditch that old spreadsheet that only one of you knows how to use.  From now on, you can stay on the same financial page.
+  </div>
+
+  <div class="callout para">
+    Watch <em>helpful videos</em> to learn how to budget like a master <a href="{{ url_for('.gettingstarted') }}">here</a>.
+  </div>
+
+  <div class="callout para">
+    <em>Try the full app for free</em> and when you're ready, <a href="{{ url_for('.buy') }}">buy it today for a one-time $20 payment.</a>
+  </div>
+
+</div>
+
+<!-- Begin MailChimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+  #mc_embed_signup{
+    background: #fff;
+    clear: left;
+    background-image: url(/static/img/airmail_med.jpg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 531px;
+    padding: 0rem 2rem;
+    margin: 1rem auto;
+  }
+  #mc_embed_signup form {
+    padding: 1rem 0;
+  }
+  #mc_embed_signup .mc-field-group {
+    margin-left: 40%;
+    width: 50%;
+  }
+  #mc_embed_signup #mc-embedded-subscribe {
+    margin-left: 40%;
+  }
+</style>
+<div id="mc_embed_signup">
+<form action="//bucketsisbetter.us8.list-manage.com/subscribe/post?u=bc109895c8df246ae54ad4d71&amp;id=0960a6d05e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+    <div id="mc_embed_signup_scroll">
+  <h2>Subscribe to the Never-More-Than-Monthly, Unsubscribe-Whenever Buckets Newsletter</h2>
+<div class="mc-field-group">
+  <label for="mce-EMAIL">Email Address </label>
+  <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
+</div>
+<div class="mc-field-group">
+  <label for="mce-FNAME">First Name </label>
+  <input type="text" value="" name="FNAME" class="required" id="mce-FNAME">
+</div>
+  <div id="mce-responses" class="clear">
+    <div class="response" id="mce-error-response" style="display:none"></div>
+    <div class="response" id="mce-success-response" style="display:none"></div>
+  </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_bc109895c8df246ae54ad4d71_0960a6d05e" tabindex="-1" value=""></div>
+    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    </div>
+</form>
+</div>
+
+<!--End mc_embed_signup-->
+
+{% endblock content %}

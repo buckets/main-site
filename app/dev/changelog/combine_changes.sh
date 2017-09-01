@@ -16,23 +16,6 @@ listtype() {
 }
 
 #---------------------------------------------------------------
-# Version header
-#---------------------------------------------------------------
-version=$(cat "${thisdir}/../../package.json" | grep version | cut -d'"' -f4)
-echo >> _CHANGELOG.md
-if echo "$version" | egrep '^.*\.0\.0' > /dev/null; then
-    # major version
-    echo "# v${version}"
-elif echo "$version" | egrep '^.*\.*\.0' > /dev/null; then
-    # minor version
-    echo "## v${version}"
-else
-    # bugfix version
-    echo "### v${version}"
-fi
-echo
-
-#---------------------------------------------------------------
 # Change body
 #---------------------------------------------------------------
 

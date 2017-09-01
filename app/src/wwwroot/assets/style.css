@@ -10,6 +10,8 @@ body {
   --logoblue: rgba(34, 173, 244, 1.0);
 
   --hover-highlight-color: rgba(241, 196, 15, 0.1);
+  --faint-blue: rgba(52, 152, 219, 0.25);
+  --faint-green: rgba(46, 204, 113, 0.25);
 
   --blue: rgba(52, 152, 219,1.0);
   --purple: rgba(155, 89, 182,1.0);
@@ -53,6 +55,14 @@ button {
   text-align: center !important;
 }
 
+
+a {
+  text-decoration: none;
+  color: var(--blue);
+}
+a:hover {
+  text-decoration: underline;
+}
 
 .app {
   display: flex;
@@ -102,6 +112,7 @@ button {
   /*font-weight: bold;*/
   color: black;
   background: var(--yellow);
+  margin-top: .5rem;
   /*border-radius: 0 3px 3px 0;*/
   /*text-align: center;*/
   /*padding: .5rem;*/
@@ -143,6 +154,9 @@ button {
   color: var(--orange);
   display: inline-block;
   padding: 0 .25rem;
+}
+.alert.info {
+  color: var(--blue);
 }
 
 .app .content {
@@ -362,6 +376,50 @@ h2 {
   color: var(--darker-red);
 }
 
+.money.big {
+  font-size: 1.5rem;
+
+}
+.money.smallcents.number {
+  display: inline-flex;
+  align-items: flex-start;
+}
+.money.smallcents .dollar {
+
+}
+.money.smallcents .decimal {
+  display: none;
+}
+.money.smallcents .cents {
+  font-size: 50%;
+  padding-left: .1rem;
+  padding-top: 4%;
+}
+
+
+.incdeclabel {
+  padding-left: .5rem;
+  font-size: 75%;
+}
+.nominal {
+  color: var(--lighter-grey);
+}
+.bad {
+  color: var(--red);
+}
+.reallybad {
+  color: white;
+  background-color: var(--red);
+}
+.good {
+  color: var(--green);
+}
+.reallygood {
+  color: white;
+  background-color: var(--green);
+}
+
+
 .money-input.ctx-matching-input input,
 .ctx-matching-input {
   border: none;
@@ -396,6 +454,12 @@ a.back-button {
   color: var(--grey);
 }
 
+
+table.full-width {
+  width: 100%;
+}
+
+
 table.ledger {
   border-collapse: collapse;
   border-spacing: 0 0;
@@ -425,8 +489,8 @@ table.ledger th {
   border-bottom: 1px solid var(--lighter-grey);
   color: var(--lighter-grey);
   font-weight: normal;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  /*padding-left: 1rem;
+  padding-right: 1rem;*/
 }
 
 tr.group-row .group-name {
@@ -448,6 +512,34 @@ table.ledger tr:hover .drophandle {
   color: var(--grey);
 }
 
+
+table tr.hover:hover td,
+table tr.hover:hover th {
+  background-color: var(--hover-highlight-color);
+}
+
+table.summary {
+  border-collapse: collapse;
+}
+table.summary td, 
+table.summary th {
+  padding: .5rem 0rem;
+}
+table.summary thead th {
+  border-bottom: 1px solid var(--lighter-grey);
+}
+table.summary th.side,
+table.summary td.side {
+  border-right: 1px solid var(--lighter-grey);
+  text-align: right;
+  padding-right: 1rem;
+}
+table.summary th.side-total {
+  border-left: 1px solid var(--lighter-grey);
+}
+table.summary td.border-right {
+  border-right: 1px solid var(--lighter-grey);
+}
 
 
 /* Money */
@@ -907,6 +999,34 @@ table.props th {
   right: 0;
 }
 
+.progress-bubble {
+  width: .75rem;
+  height: .75rem;
+  margin-left: 3px;
+  margin-right: 3px;
+  border: 1px solid var(--blue);
+  border-radius: 2px;
+  display: inline-flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+.progress-bubble .bubble-fill {
+  width: 100%;
+  background-color: var(--blue);
+  border-top: 1px solid var(--blue);
+  transition: height 0.2s;
+}
+.progress-bubble.empty .bubble-fill {
+  border-top-width: 0;
+}
+.progress-bubble.full {
+  border-color: var(--green);
+}
+.progress-bubble.full .bubble-fill {
+  border-top-width: 0;
+  background-color: var(--faint-green);
+}
+
 .dialog {
   border: 6px solid var(--blue);
   border-radius: 20px;
@@ -1057,7 +1177,7 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  font-size: .8rem;
+  text-align: left;
 }
 .tooltip {
   opacity: 0;
@@ -1071,9 +1191,26 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  font-size: .8rem;
   transition: opacity .2s;
+  text-align: left;
 }
 .tooltip.showing {
   opacity: 1;
+}
+
+/*https://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js*/
+.svg-container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  min-height: 1rem;
+  spadding-bottom: 100%;
+  vertical-align: top;
+  overflow: hidden;
+}
+.svg-content {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }

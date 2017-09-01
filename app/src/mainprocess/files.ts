@@ -1,4 +1,6 @@
 import * as log from 'electron-log'
+import * as Path from 'path'
+import * as fs from 'fs-extra-promise'
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
@@ -6,6 +8,7 @@ import {DBStore} from './dbstore';
 import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
+import { reportErrorToUser, displayError } from '../errors'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -32,12 +35,21 @@ export class BudgetFile {
   async start() {
     log.debug('start', this.filename);
 
-    addRecentFile(this.filename);
-
     // connect to database
-    await this.store.open();
+    try {
+      await this.store.open();  
+    } catch(err) {
+      log.error(`Error opening file: ${this.filename}`);
+      log.error(err.stack);
+      reportErrorToUser(`Unable to open the file: ${this.filename}`, {err});
+      return;
+    }
+    
     this.rpc_store = new RPCMainStore(this.store, this.id);
     await this.rpc_store.start();
+
+    // mark it as having been opened
+    addRecentFile(this.filename);
 
     // open default windows
     this.openDefaultWindows();
@@ -54,10 +66,12 @@ export class BudgetFile {
   }
   openWindow(path:string) {
     log.debug('opening window to', path);
+    const parsed = Path.parse(this.filename);
     let win = new BrowserWindow({
       width: 1200,
       height: 900,
       show: false,
+      title: `Buckets - ${parsed.name}`,
     });
     win.once('ready-to-show', () => {
       win.show();
@@ -81,7 +95,14 @@ export class BudgetFile {
       this.windows.splice(idx, 1);
     })
   }
-  static openFile(filename:string):Promise<BudgetFile> {
+  static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
+    if (!create) {
+      // open, don't create
+      if (! await fs.existsAsync(filename)) {
+        displayError(`File does not exist: ${filename}`)
+        return;
+      }
+    }
     let bf = new BudgetFile(filename);
     return bf.start();
   }
@@ -89,7 +110,13 @@ export class BudgetFile {
 
 export function newBudgetWindow() {
   let win = BrowserWindow.getFocusedWindow();
+  if (!win) {
+    return;
+  }
   let bf = WIN2FILE[win.id];
+  if (!bf) {
+    return;
+  }
   let url = win.webContents.getURL();
   let parsed = URL.parse(url);
   bf.openWindow(`${parsed.pathname}${parsed.hash}`);
@@ -117,7 +144,7 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
       defaultPath: 'My Budget.buckets',
     }, (filename) => {
       if (filename) {
-        resolve(BudgetFile.openFile(filename));  
+        resolve(BudgetFile.openFile(filename, true));  
       } else {
         reject(new Error('No file chosen'));
       }

@@ -35,6 +35,7 @@ interface IAppState {
   }
   account_balances: Balances;
   bucket_balances: Balances;
+  rainfall: Balances;
   month: number;
   year: number;
 
@@ -53,6 +54,7 @@ interface IComputedAppState {
   income: number;
   expenses: number;
   gain: number;
+  nodebt_balances: Balances;
 
   num_unknowns: number;
   unmatched_account_balances: number;
@@ -72,6 +74,8 @@ export class AppState implements IAppState, IComputedAppState {
   connections = {};
   account_balances = {};
   bucket_balances = {};
+  rainfall = {};
+  nodebt_balances = {};
   unknown_accounts = {};
   month = null;
   year = null;
@@ -123,8 +127,17 @@ export class AppState implements IAppState, IComputedAppState {
 }
 
 function computeTotals(appstate:AppState):IComputedAppState {
-  let bucket_total_balance = _.values(appstate.bucket_balances)
-    .reduce((a,b) => a+b, 0);
+  let bucket_neg_balance = 0;
+  let bucket_pos_balance = 0;
+  _.values(appstate.bucket_balances)
+    .forEach(bal => {
+      if (bal <= 0) {
+        bucket_neg_balance += bal;
+      } else {
+        bucket_pos_balance += bal;
+      }
+    })
+  let bucket_total_balance = bucket_pos_balance + bucket_neg_balance;
   let account_total_balance = _.values(appstate.account_balances)
     .reduce((a,b) => a+b, 0);
   let income = 0;
@@ -164,11 +177,20 @@ function computeTotals(appstate:AppState):IComputedAppState {
 
   let kicked_buckets = [];
   let unkicked_buckets = [];
+  let nodebt_balances = {};
   _.values(appstate.buckets).forEach(bucket => {
     if (bucket.kicked) {
       kicked_buckets.push(bucket);
     } else {
       unkicked_buckets.push(bucket);
+      let bal = appstate.bucket_balances[bucket.id];
+      if (bal <= 0) {
+        // negative
+        nodebt_balances[bucket.id] = 0;
+      } else {
+        // positive
+        nodebt_balances[bucket.id] = (bal / bucket_pos_balance) * bucket_total_balance;
+      }
     }
   })
   let unmatched_account_balances = 0;
@@ -192,6 +214,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     kicked_buckets,
     unkicked_buckets,
     unmatched_account_balances,
+    nodebt_balances,
   };
 }
 
@@ -199,6 +222,7 @@ export class StateManager extends EventEmitter {
   public store:IStore;
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
+  private posttick: Set<string> = new Set();
   readonly fileimport:FileImportManager;
   constructor() {
     super()
@@ -234,6 +258,7 @@ export class StateManager extends EventEmitter {
   }
   async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
     this.queue.push(ev);
+    this.emit('obj', ev);
     return this.tick();
   }
   async tick():Promise<AppState> {
@@ -245,14 +270,15 @@ export class StateManager extends EventEmitter {
     if (isObj(Account, obj)) {
       if (ev.event === 'update') {
         this.appstate.accounts[obj.id] = obj;
-        await this.fetchAccountBalances();
+        this.posttick.add('fetchAccountBalances');
       } else if (ev.event === 'delete') {
         delete this.appstate.accounts[obj.id];
       }
     } else if (isObj(Bucket, obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
-        await this.fetchBucketBalances();
+        this.posttick.add('fetchBucketBalances');
+        this.posttick.add('fetchRainfall');
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
       }
@@ -299,10 +325,15 @@ export class StateManager extends EventEmitter {
     return this.appstate;
   }
   
-  signalChange = _.debounce(() => {
+  signalChange = _.debounce(async () => {
+    let posttick = Array.from(this.posttick.values());
+    this.posttick.clear();
+    await Promise.all(posttick.map(funcname => {
+      return this[funcname]();
+    }));
     this.recomputeTotals();
     this.emit('change', this.appstate);
-  }, 100, {leading: true, trailing: true});
+  }, 50, {leading: true, trailing: true});
 
   async setDate(year:number, month:number):Promise<any> {
     if (this.appstate.year !== year || this.appstate.month !== month) {
@@ -319,6 +350,7 @@ export class StateManager extends EventEmitter {
       this.fetchAllGroups(),
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
+      this.fetchRainfall(),
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
       this.fetchConnections(),
@@ -369,6 +401,14 @@ export class StateManager extends EventEmitter {
       .then(balances => {
         this.appstate.bucket_balances = balances;
       })  
+  }
+  fetchRainfall() {
+    return this.store.buckets.rainfall(
+      this.appstate.viewDateRange.onOrAfter,
+      this.appstate.viewDateRange.before)
+      .then(rainfall => {
+        this.appstate.rainfall = rainfall;
+      })
   }
   fetchTransactions() {
     let range = this.appstate.viewDateRange;
