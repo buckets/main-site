@@ -35,6 +35,9 @@ export interface IMessages {
       ReportBug: string,
       Chat: string,
     },
+  },
+  wizard: {
+    Recently_used: string,
   }
 }
 

@@ -169,11 +169,11 @@
   
   <div class="content">
     <div class="section">
-      <a class="button" href="#" id="new-budget">New Budget...</a>
-      <a class="button" href="#" id="open-file-dialog">Open Budget...</a>
+      <a class="button" href="#" id="new-budget" data-transid="menu.file.NewBudget">New Budget...</a>
+      <a class="button" href="#" id="open-file-dialog" data-transid="menu.file.OpenBudget">Open Budget...</a>
     </div>
     <div class="section recents" id="recent-list">
-      <div class="label">Recently used</div>
+      <div class="label" data-transid="wizard.Recently_used">Recently used</div>
     </div>
     <div class="section copyright">
       <span class="fa fa-copyright"></span> Buckets, LLC
@@ -193,13 +193,11 @@
     }
   }();
 
-  const Path = require('path');
-  const { remote, ipcRenderer } = req('electron');
   const { tx } = req('./src/i18n');
-  console.log('tx', tx);
+  tx.localizeThisPage();
 
-  document.getElementById('new-budget').innerText = tx._.menu.file.NewBudget;
-
+  const Path = req('path');
+  const { remote, ipcRenderer } = req('electron');
   const { getRecentFiles } = req('./src/mainprocess/persistent')
   document.getElementById('close-button').addEventListener('click', () => {
     remote.getCurrentWindow().close();

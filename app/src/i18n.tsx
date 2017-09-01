@@ -33,11 +33,28 @@ class TranslationContext {
   toString() {
     return `TranslationContext locale=${this._locale}`;
   }
+  localizeThisPage() {
+    Array.from(document.querySelectorAll('[data-transid]'))
+    .forEach((elem:HTMLElement) => {
+      try {
+        let trans_id = elem.getAttribute('data-transid');
+        let parts = trans_id.split('.');
+        let result:any = tx._;
+        parts.forEach(part => {
+          result = result[part];
+          if (result === undefined) {
+            throw new Error(`Unable to find translation for '${trans_id}'`);
+          }
+        })
+        elem.innerText = result;
+      } catch(err) {
+        console.warn('Localization error:', err, elem);
+      }
+    })
+  }
 }
 
-console.log('remote', remote);
 const env = remote ? remote.process.env : process.env;
-
 export const tx = new TranslationContext();
 if (env.LANG) {
   tx.setLocale(env.LANG);

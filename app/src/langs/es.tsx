@@ -40,5 +40,8 @@ export const pack:ILangPack = {
         Chat: 'Charlar...',
       },
     },
+    wizard: {
+      Recently_used: 'Los recientes',
+    }
   },
 }
