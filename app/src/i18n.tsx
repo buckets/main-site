@@ -1,4 +1,5 @@
 import * as log from 'electron-log'
+import { remote } from 'electron'
 
 import { IMessages, ILangPack } from './langs/spec'
 
@@ -29,11 +30,15 @@ class TranslationContext {
   get _():IMessages {
     return this.langpack.messages;
   }
+  toString() {
+    return `TranslationContext locale=${this._locale}`;
+  }
 }
 
+console.log('remote', remote);
+const env = remote ? remote.process.env : process.env;
+
 export const tx = new TranslationContext();
-console.log('process.env', process.env);
-console.log('packs', packs);
-if (process.env.LANG) {
-  tx.setLocale(process.env.LANG);
+if (env.LANG) {
+  tx.setLocale(env.LANG);
 }

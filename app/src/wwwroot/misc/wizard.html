@@ -195,6 +195,11 @@
 
   const Path = require('path');
   const { remote, ipcRenderer } = req('electron');
+  const { tx } = req('./src/i18n');
+  console.log('tx', tx);
+
+  document.getElementById('new-budget').innerText = tx._.menu.file.NewBudget;
+
   const { getRecentFiles } = req('./src/mainprocess/persistent')
   document.getElementById('close-button').addEventListener('click', () => {
     remote.getCurrentWindow().close();

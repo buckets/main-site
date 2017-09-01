@@ -18,6 +18,7 @@ export const pack:ILangPack = {
       },
       Connections: 'Conexiones',
       Import: 'Importar',
+      ChatWithMatt: 'Chat with Matt', // XXX
     },
     menu: {
       file: {
