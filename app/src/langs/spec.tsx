@@ -14,6 +14,7 @@ export interface IMessages {
     }
     Connections: string,
     Import: string,
+    ChatWithMatt: string,
   },
   menu: {
     file: {
