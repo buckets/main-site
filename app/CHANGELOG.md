@@ -1,4 +1,12 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.16.0
+
+- **FIX:** Got rid of scary balance-mismatch warnings that weren't actually actionable.  And a better explanation of what mismatches mean is included.
+
+- **FIX:** Now, when you sync transactions, it will only sync the current month
+
+- **FIX:** The update process is even *more* clear.
+
 ## v0.15.0
 
 - **FIX:** If you try to open/create a file that's unreadable and error is displayed instead of failing silently
