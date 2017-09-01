@@ -134,7 +134,7 @@ class Navbar extends React.Component<{
             ev.preventDefault();
             shell.openExternal('https://www.bucketsisbetter.com/chat');
             return false;
-          }}><span><span className="fa fa-fw fa-comment"></span> Chat with Matt</span></a>
+          }}><span><span className="fa fa-fw fa-comment"></span> {tx._.nav.ChatWithMatt}</span></a>
           {trial_version}
         </div>
       </div>)
