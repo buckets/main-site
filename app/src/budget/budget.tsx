@@ -77,7 +77,7 @@ class Navbar extends React.Component<{
         onClick={() => {
           openBuyPage();
           promptForLicense();
-        }}>{tx._.labels.TrialVersion}
+        }}>{tx.sss('labels.Trial Version', 'Trial Version')}
       </a>
     )
     if (isRegistered()) {

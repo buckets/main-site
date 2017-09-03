@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import { tx } from '../i18n'
 import {Balances} from '../models/balances'
 import { Account, Transaction, expectedBalance } from '../models/account'
 import {Route, Link, WithRouting} from './routing'
@@ -29,26 +30,26 @@ export class AccountList extends React.Component<AccountListProps,any> {
       if (import_balance !== balances[account.id]) {
         import_balance_note = <Help icon={<div className="alert info">
           <span className="fa fa-exclamation-circle" />
-        </div>}>The most recent synced balance does not match the balance computed from transactions.  Click more for more information.</Help>
+        </div>}>{tx.sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click more for more information.')}</Help>
 
       }
       return (<tr key={account.id}>
           <td><DebouncedInput
             blendin
             value={account.name}
-            placeholder="no name"
+            placeholder={tx.sss('accounts.name_placeholder', 'no name')}
             onChange={(val) => {
               manager.store.accounts.update(account.id, {name: val});
             }}
           /></td>
           <td>{import_balance_note}<Money value={balances[account.id]} /></td>
-          <td><Link relative to={`/${account.id}`} className="subtle">more</Link></td>
+          <td><Link relative to={`/${account.id}`} className="subtle">{tx.sss('accounts.more_link', 'more')}</Link></td>
         </tr>);
     })
     return (<table className="ledger">
       <thead>
         <tr>
-          <th>Account</th>
+          <th>{tx.sss('accounts.Account', 'Account')}</th>
           <th>Balance</th>
           <th></th>
         </tr>

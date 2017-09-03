@@ -30,6 +30,22 @@ class TranslationContext {
   get _():IMessages {
     return this.langpack.messages;
   }
+  sss<T>(key:keyof IMessages, dft:T):T {
+    let parts = key.split('.');
+    let result:any = tx._;
+    try {
+      parts.forEach(part => {
+        result = result[part];
+        if (result === undefined) {
+          throw new Error(`Unable to find translation for '${key}'`);
+        }
+      })
+    } catch(err) {
+      log.warn('Localization warning:', err);
+      result = dft;
+    }
+    return result;
+  }
   toString() {
     return `TranslationContext locale=${this._locale}`;
   }
@@ -38,15 +54,8 @@ class TranslationContext {
     .forEach((elem:HTMLElement) => {
       try {
         let trans_id = elem.getAttribute('data-transid');
-        let parts = trans_id.split('.');
-        let result:any = tx._;
-        parts.forEach(part => {
-          result = result[part];
-          if (result === undefined) {
-            throw new Error(`Unable to find translation for '${trans_id}'`);
-          }
-        })
-        elem.innerText = result;
+        let dft = elem.innerText;
+        elem.innerText = this.sss(trans_id, dft);
       } catch(err) {
         console.warn('Localization error:', err, elem);
       }

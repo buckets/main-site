@@ -3,45 +3,43 @@ import { ILangPack } from './spec';
 export const pack:ILangPack = {
   name: 'English',
   messages: {
-    labels: {
-      TrialVersion: 'Trial Version',
-      Rain: 'Rain',
-    },
-    nav: {
-      Accounts: 'Accounts',
-      Transactions: 'Transactions',
-      Buckets: 'Buckets',
-      Kicked: 'Kicked',
-      Analysis: 'Analysis',
-      AnalysisSub: {
-        Recurring_Expenses: 'Recurring Expenses',
-      },
-      Connections: 'Connections',
-      Import: 'Import',
-      ChatWithMatt: 'Chat with Matt',
-    },
-    menu: {
-      file: {
-        label: 'File',
-        NewBudget: 'New Budget...',
-        OpenBudget: 'Open Budget...',
-        OpenRecent: 'Open Recent',
-        DuplicateWindow: 'Duplicate Window',
-        ImportTransactions: 'Import Transactions...',
-      },
-      register: {
-        PurchaseFullVersion: 'Purchase Full Version...',
-        EnterLicense: 'Enter License...',
-      },
-      help: {
-        LearnMore: 'Learn More',
-        ShowLogFiles: 'Show Log Files...',
-        ReportBug: 'Report Bug...',
-        Chat: 'Chat...',
-      },
-    },
-    wizard: {
-      Recently_used: 'Recently used',
-    }
+    // Generic labels
+    'labels.Trial Version': 'Trial Version',
+    'labels.Rain': 'Rain',
+
+    // Nav bar
+    'nav.Accounts': 'Accounts',
+    'nav.Transactions': 'Transactions',
+    'nav.Buckets': 'Buckets',
+    'nav.Kicked': 'Kicked',
+    'nav.Analysis': 'Analysis',
+    'nav.Recurring Expenses': 'Recurring Expenses',
+    'nav.Connections': 'Connections',
+    'nav.Import': 'Import',
+    'nav.Chat with Matt': 'Chat with Matt',
+
+    // Menu items
+    'menu.file.label': 'File',
+    'menu.file.NewBudget': 'New Budget...',
+    'menu.file.OpenBudget': 'Open Budget...',
+    'menu.file.OpenRecent': 'Open Recent',
+    'menu.file.Duplicate Window': 'Duplicate Window',
+    'menu.file.ImportTransactions': 'Import transactions...',
+
+    'menu.register.PurchaseFullVersion': 'Purchase Full Version...',
+    'menu.register.EnterLicense': 'Enter License...',
+    
+    'menu.help.LearnMore': 'Learn More',
+    'menu.help.ShowLogFiles': 'Show Log Files...',
+    'menu.help.ReportBug': 'Report Bug...',
+    'menu.help.Chat': 'Chat...',
+    
+    // Wizard
+    'wizard.Recently used': 'Recently used',
+
+    // Accounts
+    "accounts.balance_mismatch_msg": 'The most recent synced balance does not match the balance computed from transactions.  Click more for more information.',
+    "accounts.name_placeholder": "no name",
+    "accounts.more_link": "more",
   },
 }
