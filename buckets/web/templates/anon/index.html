@@ -3,6 +3,25 @@
 {% block navlinks %}{% endblock %}
 
 {% block extrahead %}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Product",
+  "name": "Buckets",
+  "image": "https://www.bucketsisbetter.com/static/img/logo.svg",
+  "description": "Buckets is a private, personal finance app for family budgeting.",
+  "offers": {
+    "@type": "Offer",
+    "price": "20",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2018-02-01"
+  },
+  "brand": {
+    "@type": "Thing",
+    "name": "Buckets, LLC"
+  }
+}
+</script>
 <style>
 .buttonish.download {
   margin: .5rem 0 0;
@@ -104,7 +123,7 @@ img.main-shot {
   </div>
 
   <div class="callout para">
-    Buckets is for <em>both of you.</em>  Ditch that old spreadsheet that only one of you knows how to use.  From now on, you can stay on the same financial page.
+    Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget that only one of you knows how to use.  From now on, you can stay on the same financial page.
   </div>
 
   <div class="callout para">
