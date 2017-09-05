@@ -15,7 +15,7 @@ export interface IMessages {
   "Import": string;
   "Chat with Matt": string;
   "Rain": string;
-  "Delete selected": (ahoy:string)=>string;
+  "Delete selected": string;
   "transactions.delete": (size:number)=>string;
   "File": string;
   "New Budget...": string;
@@ -31,103 +31,144 @@ export interface IMessages {
   "Purchase Full Version...": string;
   "Enter License...": string;
   "Check For Updates...": string;
+  "menu.file.OpenBudget": string;
+  "wizard.Recently_used": string;
 }
 export const DEFAULTS:IMessages = {
 
   // src/budget/accounts.tsx line 32
-  "accounts.balance_mismatch_msg": "The most recent synced balance does not match the balance computed from transactions.  Click more for more information.", // TO TRANSLATE
+  // TO TRANSLATE
+  "accounts.balance_mismatch_msg": "The most recent synced balance does not match the balance computed from transactions.  Click more for more information.",
 
   // src/budget/accounts.tsx line 39
-  "accounts.name_placeholder": "no name", // TO TRANSLATE
+  // TO TRANSLATE
+  "accounts.name_placeholder": "no name",
 
   // src/budget/accounts.tsx line 45
-  "accounts.more_link": "more", // TO TRANSLATE
+  // TO TRANSLATE
+  "accounts.more_link": "more",
 
   // src/budget/accounts.tsx line 51
-  "accounts.Account": "Account", // TO TRANSLATE
+  // TO TRANSLATE
+  "accounts.Account": "Account",
 
+  // src/budget/budget.tsx line 79
   // src/mainprocess/menu.ts line 175
-  "Trial Version": "Trial Version", // TO TRANSLATE
+  // TO TRANSLATE
+  "Trial Version": "Trial Version",
 
   // src/budget/budget.tsx line 115
-  "Accounts": "Accounts", // TO TRANSLATE
+  // TO TRANSLATE
+  "Accounts": "Accounts",
 
   // src/budget/budget.tsx line 116
-  "Transactions": "Transactions", // TO TRANSLATE
+  // TO TRANSLATE
+  "Transactions": "Transactions",
 
   // src/budget/budget.tsx line 117
-  "Buckets": "Buckets", // TO TRANSLATE
+  // TO TRANSLATE
+  "Buckets": "Buckets",
 
   // src/budget/budget.tsx line 119
-  "Kicked": "Kicked", // TO TRANSLATE
+  // TO TRANSLATE
+  "Kicked": "Kicked",
 
   // src/budget/budget.tsx line 121
-  "Analysis": "Analysis", // TO TRANSLATE
+  // TO TRANSLATE
+  "Analysis": "Analysis",
 
   // src/budget/budget.tsx line 124
-  "Recurring Expenses": "Recurring Expenses", // TO TRANSLATE
+  // TO TRANSLATE
+  "Recurring Expenses": "Recurring Expenses",
 
   // src/budget/budget.tsx line 127
-  "Connections": "Connections", // TO TRANSLATE
+  // TO TRANSLATE
+  "Connections": "Connections",
 
   // src/budget/budget.tsx line 128
-  "Import": "Import", // TO TRANSLATE
+  // TO TRANSLATE
+  "Import": "Import",
 
   // src/budget/budget.tsx line 136
-  "Chat with Matt": "Chat with Matt", // TO TRANSLATE
+  // TO TRANSLATE
+  "Chat with Matt": "Chat with Matt",
 
   // src/budget/budget.tsx line 172
-  "Rain": "Rain", // TO TRANSLATE
+  // TO TRANSLATE
+  "Rain": "Rain",
 
   // src/budget/transactions.tsx line 84
-  "Delete selected":  function(ahoy:string):string {
-      return ahoy;
-    }, // TO TRANSLATE
+  // TO TRANSLATE
+  "Delete selected": "Delete selected",
 
-  // src/budget/transactions.tsx line 88
+  // src/budget/transactions.tsx line 86
+  // TO TRANSLATE
   "transactions.delete":  (size:number) => {
         return `Delete selected (${size})`
-      }, // TO TRANSLATE
+      },
 
   // src/mainprocess/menu.ts line 33
-  "File": "File", // TO TRANSLATE
+  // TO TRANSLATE
+  "File": "File",
 
   // src/mainprocess/menu.ts line 36
-  "New Budget...": "New Budget...", // TO TRANSLATE
+  // src/wwwroot/misc/wizard.html line 0
+  // TO TRANSLATE
+  "New Budget...": "New Budget...",
 
   // src/mainprocess/menu.ts line 43
-  "Open Budget...": "Open Budget...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Open Budget...": "Open Budget...",
 
   // src/mainprocess/menu.ts line 50
-  "Open Recent...": "Open Recent...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Open Recent...": "Open Recent...",
 
   // src/mainprocess/menu.ts line 63
-  "Duplicate Window": "Duplicate Window", // TO TRANSLATE
+  // TO TRANSLATE
+  "Duplicate Window": "Duplicate Window",
 
   // src/mainprocess/menu.ts line 72
-  "Import Transactions...": "Import Transactions...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Import Transactions...": "Import Transactions...",
 
   // src/mainprocess/menu.ts line 144
-  "Learn More": "Learn More", // TO TRANSLATE
+  // TO TRANSLATE
+  "Learn More": "Learn More",
 
   // src/mainprocess/menu.ts line 148
-  "Show Log Files...": "Show Log Files...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Show Log Files...": "Show Log Files...",
 
   // src/mainprocess/menu.ts line 154
-  "Report Bug...": "Report Bug...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Report Bug...": "Report Bug...",
 
   // src/mainprocess/menu.ts line 160
-  "Chat...": "Chat...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Chat...": "Chat...",
 
   // src/mainprocess/menu.ts line 166
-  "Getting Started...": "Getting Started...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Getting Started...": "Getting Started...",
 
   // src/mainprocess/menu.ts line 178
-  "Purchase Full Version...": "Purchase Full Version...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Purchase Full Version...": "Purchase Full Version...",
 
   // src/mainprocess/menu.ts line 184
-  "Enter License...": "Enter License...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Enter License...": "Enter License...",
 
   // src/mainprocess/menu.ts line 209
-  "Check For Updates...": "Check For Updates...", // TO TRANSLATE
+  // TO TRANSLATE
+  "Check For Updates...": "Check For Updates...",
+
+  // src/wwwroot/misc/wizard.html line 0
+  // TO TRANSLATE
+  "menu.file.OpenBudget": "Open Budget...",
+
+  // src/wwwroot/misc/wizard.html line 0
+  // TO TRANSLATE
+  "wizard.Recently_used": "Recently used",
 }

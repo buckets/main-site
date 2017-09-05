@@ -30,10 +30,10 @@ class TranslationContext {
   get _():IMessages {
     return this.langpack.messages;
   }
-  sss<T>(key:keyof IMessages, dft?:T):T|string {
+  sss<T>(key:keyof IMessages, dft?:T):T {
     if (dft === undefined && typeof key === 'string') {
       // The key is the string to translate.
-      return this._[key] || key;
+      return (this._[key] || key) as any;
     }
     let parts = key.split('.');
     let result:any = tx._;
@@ -54,10 +54,10 @@ class TranslationContext {
     return `TranslationContext locale=${this._locale}`;
   }
   localizeThisPage() {
-    Array.from(document.querySelectorAll('[data-transid]'))
+    Array.from(document.querySelectorAll('[data-translate]'))
     .forEach((elem:HTMLElement) => {
       try {
-        let trans_id = elem.getAttribute('data-transid');
+        let trans_id = elem.getAttribute('data-translate');
         let dft = elem.innerText;
         elem.innerText = this.sss(trans_id as any, dft);
       } catch(err) {

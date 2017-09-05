@@ -2,8 +2,9 @@ import { readFileSync, readdirSync, lstatSync } from 'fs'
 import * as Path from 'path'
 import * as ts from "typescript"
 import * as _ from 'lodash'
+import * as cheerio from 'cheerio'
 
-// XXX this doesn't actually work yet
+let ERRORS = [];
 
 function kindToTypeScriptIdentifier(x:ts.SyntaxKind):string {
   switch (x) {
@@ -34,8 +35,26 @@ interface IMessageSpec {
   [k:string]: IMessage;
 }
 
-function extractEnglish(src:ts.SourceFile) {
-  let ret:IMessageSpec = {};
+function formatSource(source:ISource):string {
+  return `${source.filename} line ${source.lineno}`
+}
+
+function mergeMessages(pot:IMessageSpec, entry:IMessage) {
+  let existing = pot[entry.key];
+  if (existing) {
+    // merge
+    if (existing.defaultValue === entry.defaultValue
+        && existing.interfaceValue === entry.interfaceValue) {
+      existing.sources = existing.sources.concat(entry.sources);
+    } else {
+      ERRORS.push(`Key '${entry.key}' used incompatibly in ${existing.sources.map(formatSource).join(', ')} and ${formatSource(entry.sources[0])}`);
+    }
+  } else {
+    pot[entry.key] = entry;  
+  }
+}
+
+function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
   function processNode(node: ts.Node) {
     let newitem:IMessage = null;
     switch (node.kind) {
@@ -114,23 +133,31 @@ function extractEnglish(src:ts.SourceFile) {
       }
     }
     if (newitem) {
-      let existing = ret[newitem.key];
-      if (existing) {
-        // merge
-        if (existing.defaultValue === newitem.defaultValue && existing.interfaceValue === newitem.interfaceValue) {
-          existing.sources = existing.sources.concat(newitem.sources);
-        } else {
-          console.warn(`Duplicate mismatching key: ${newitem.key}`);
-        }
-      } else {
-        ret[newitem.key] = newitem;  
-      }
+      mergeMessages(pot, newitem);
     }
     ts.forEachChild(node, processNode);
   }
   processNode(src);
-  return ret;
 }
+
+function extractMessagesFromHTML(pot:IMessageSpec, filename:string) {
+  let html = readFileSync(filename).toString()
+  let tree = cheerio.load(html);
+  tree('[data-translate]').each((i, elem) => {
+    let e = cheerio(elem);
+    let key = e.attr('data-translate');
+    let val = e.html();
+    if (!key) {
+      key = val;
+    }
+    mergeMessages(pot, {
+      key,
+      defaultValue: JSON.stringify(val),
+      interfaceValue: 'string',
+      sources: [{filename, lineno:0}],
+    });
+  })
+} 
 
 function walk(f:string):string[] {
   let stat = lstatSync(f);
@@ -151,10 +178,9 @@ let MSGS:IMessageSpec = {};
 walk(process.argv[2]).forEach(filename => {
   if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
     let fh = openFile(filename);
-    let d = extractEnglish(fh);
-    Object.assign(MSGS, d);
+    extractMessagesFromTS(MSGS, fh);
   } else if (filename.endsWith('.html')) {
-    console.warn("Warning: HTML processing isn't working yet", filename);
+    extractMessagesFromHTML(MSGS, filename);
   }  
 })
 
@@ -173,10 +199,16 @@ function displayDefaults(msgs:IMessageSpec) {
   lines.push('export const DEFAULTS:IMessages = {');
   _.each(msgs, (msg:IMessage) => {
     lines.push('');
-    msg.sources.forEach(source => {
-      lines.push(`  // ${source.filename} line ${source.lineno}`);
-    })
-    lines.push(`  ${JSON.stringify(msg.key)}: ${msg.defaultValue}, // TO TRANSLATE`);
+    // msg.sources.forEach(source => {
+    //   lines.push(`  // ${formatSource(source)}`);
+    // })
+    // lines.push(`  // TO TRANSLATE`);
+    lines.push(`
+  ${JSON.stringify(msg.key)}: {
+    value: ${msg.defaultValue},
+    translated: false,
+    sources: ${JSON.stringify(msg.sources.map(formatSource))},
+  },`);
   })
   lines.push('}');
   return lines.join('\n');
@@ -186,12 +218,9 @@ console.log('// Auto-generated file');
 console.log(displayInterface(MSGS));
 console.log(displayDefaults(MSGS));
 
-// _.each(data.interface, (v, k) => {
-//   console.log(k, v);
-// })
-// console.log
-// _.each(data.dft, (v, k) => {
-//   console.log(k, v);
-// })
-// console.log(JSON.stringify(data, null, 2));
-
+if (ERRORS.length) {
+  ERRORS.forEach(err => {
+    console.error(err);
+  })
+  process.exit(1)
+}

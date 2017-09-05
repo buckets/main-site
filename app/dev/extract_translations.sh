@@ -1,2 +1,2 @@
 #!/bin/sh
-node src/langs/extract_english.js src > src/langs/build.tsx
+node src/langutil/extract_messages.js src > src/langs/build.tsx

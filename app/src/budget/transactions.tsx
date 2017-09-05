@@ -82,9 +82,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     } else {
       transactions = _.values(appstate.transactions);
     }
-    let delete_label = sss('Delete selected', function(ahoy:string):string {
-      return ahoy;
-    });
+    let delete_label = sss('Delete selected');
     if (selected.size) {
       delete_label = sss('transactions.delete', (size:number) => {
         return `Delete selected (${size})`
