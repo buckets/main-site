@@ -20,27 +20,41 @@ function openFile(relpath:string):ts.SourceFile {
     ts.ScriptTarget.ES2016);
 }
 
+interface ISource {
+  filename: string;
+  lineno: number;
+}
+interface IMessage {
+  key: string;
+  defaultValue: string;
+  interfaceValue: string;
+  sources: ISource[];
+}
+interface IMessageSpec {
+  [k:string]: IMessage;
+}
+
 function extractEnglish(src:ts.SourceFile) {
-  let ret = {
-    interface: {},
-    dft: {},
-  };
-  let dft = ret.dft;
-  let iface = ret.interface;
-  src.getFullText()
+  let ret:IMessageSpec = {};
   function processNode(node: ts.Node) {
-    // console.log('processNode', node);
+    let newitem:IMessage = null;
     switch (node.kind) {
       case ts.SyntaxKind.CallExpression: {
-        // console.log('process node', node);
         let n:any = node;
-        // console.log('n escapedText', n.expression.escapedText);
+        let lineno = src.getLineAndCharacterOfPosition(n.pos).line;
+        let filename = src.fileName;
         if (n.expression && n.expression.escapedText === 'sss') {
           let args = n.arguments;
           if (args.length == 1) {
             let key = args[0].text;
-            dft[key] = JSON.stringify(key);
-            iface[key] = 'string';
+            newitem = {
+              key: key,
+              defaultValue: JSON.stringify(key),
+              interfaceValue: 'string',
+              sources: [{filename, lineno}],
+            }
+            // dft[key] = JSON.stringify(key);
+            // iface[key] = 'string';
           } else if (args.length == 2) {
             let key = args[0].text;
             let kind = args[1].kind;
@@ -53,7 +67,6 @@ function extractEnglish(src:ts.SourceFile) {
 
                 let param_types = [];
                 if (func.parameters) {
-                  // console.log('func.parameters', func.paremeters)
                   param_types = func.parameters.map(param => {
                     let type = param.type ? kindToTypeScriptIdentifier(param.type.kind) : 'any';
                     let name = param.name.escapedText;
@@ -61,27 +74,56 @@ function extractEnglish(src:ts.SourceFile) {
                   })
                 }
                 let snip = src.getFullText().slice(start, end);
-                // console.log(func);
-                iface[key] = `(${param_types.join(',')})=>string`;
-                dft[key] = snip;
+                newitem = {
+                  key,
+                  defaultValue: snip,
+                  interfaceValue: `(${param_types.join(',')})=>string`,
+                  sources: [{filename, lineno}],
+                }
                 break;
               }
               case ts.SyntaxKind.StringLiteral: {
-                dft[key] = JSON.stringify(args[1].text);
-                iface[key] = 'string';
+                newitem = {
+                  key,
+                  defaultValue: JSON.stringify(args[1].text),
+                  interfaceValue: 'string',
+                  sources: [{filename, lineno}],
+                }
                 break;
               }
               case ts.SyntaxKind.NumericLiteral: {
-                dft[key] = args[1].text;
-                iface[key] = 'number';
+                newitem = {
+                  key,
+                  defaultValue: args[1].text,
+                  interfaceValue: 'number',
+                  sources: [{filename, lineno}],
+                }
                 break;
               }
               default: {
-                iface[key] = 'any';
+                newitem = {
+                  key,
+                  defaultValue: key,
+                  interfaceValue: 'any',
+                  sources: [{filename, lineno}],
+                }
               }
             }
           }
         } 
+      }
+    }
+    if (newitem) {
+      let existing = ret[newitem.key];
+      if (existing) {
+        // merge
+        if (existing.defaultValue === newitem.defaultValue && existing.interfaceValue === newitem.interfaceValue) {
+          existing.sources = existing.sources.concat(newitem.sources);
+        } else {
+          console.warn(`Duplicate mismatching key: ${newitem.key}`);
+        }
+      } else {
+        ret[newitem.key] = newitem;  
       }
     }
     ts.forEachChild(node, processNode);
@@ -105,40 +147,42 @@ function walk(f:string):string[] {
   return ret;
 }
 
-let data = {
-  interface: {},
-  dft: {},
-}
+let MSGS:IMessageSpec = {};
 walk(process.argv[2]).forEach(filename => {
   if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
     let fh = openFile(filename);
     let d = extractEnglish(fh);
-    Object.assign(data.interface, d.interface);
-    Object.assign(data.dft, d.dft);  
+    Object.assign(MSGS, d);
   }  
 })
 
-function displayInterface(iface:object) {
+function displayInterface(msgs:IMessageSpec) {
   let lines = [];
   lines.push('{');
-  _.each(iface, (v, k) => {
-    lines.push(`  ${JSON.stringify(k)}: ${v};`);
+  _.each(msgs, (msg:IMessage) => {
+    lines.push(`  ${JSON.stringify(msg.key)}: ${msg.interfaceValue};`);
   })
   lines.push('}');
   return lines.join('\n');
 }
 
-function displayDefaults(dfts:object) {
+function displayDefaults(msgs:IMessageSpec) {
   let lines = [];
   lines.push('{');
-  _.each(dfts, (v, k) => {
-    lines.push(`  ${JSON.stringify(k)}: ${v},`);
+  _.each(msgs, (msg:IMessage) => {
+    lines.push('');
+    msg.sources.forEach(source => {
+      lines.push(`  // ${source.filename} line ${source.lineno}`);
+    })
+    lines.push(`  ${JSON.stringify(msg.key)}: ${msg.defaultValue},`);
   })
   lines.push('}');
   return lines.join('\n');
 }
-console.log(displayInterface(data.interface));
-console.log(displayDefaults(data.dft));
+
+console.log(displayInterface(MSGS));
+console.log(displayDefaults(MSGS));
+
 // _.each(data.interface, (v, k) => {
 //   console.log(k, v);
 // })
