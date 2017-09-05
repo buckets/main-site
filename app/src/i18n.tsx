@@ -30,7 +30,11 @@ class TranslationContext {
   get _():IMessages {
     return this.langpack.messages;
   }
-  sss<T>(key:keyof IMessages, dft:T):T {
+  sss<T>(key:keyof IMessages, dft?:T):T|string {
+    if (dft === undefined && typeof key === 'string') {
+      // The key is the string to translate.
+      return this._[key] || key;
+    }
     let parts = key.split('.');
     let result:any = tx._;
     try {
@@ -55,7 +59,7 @@ class TranslationContext {
       try {
         let trans_id = elem.getAttribute('data-transid');
         let dft = elem.innerText;
-        elem.innerText = this.sss(trans_id, dft);
+        elem.innerText = this.sss(trans_id as any, dft);
       } catch(err) {
         console.warn('Localization error:', err, elem);
       }
@@ -64,7 +68,8 @@ class TranslationContext {
 }
 
 const env = remote ? remote.process.env : process.env;
-export const tx = new TranslationContext();
+const tx = new TranslationContext();
+export const sss = tx.sss;
 if (env.LANG) {
   tx.setLocale(env.LANG);
 }

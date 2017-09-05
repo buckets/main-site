@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { tx } from '../i18n'
+import { sss } from '../i18n'
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
@@ -77,7 +77,7 @@ class Navbar extends React.Component<{
         onClick={() => {
           openBuyPage();
           promptForLicense();
-        }}>{tx.sss('labels.Trial Version', 'Trial Version')}
+        }}>{sss('Trial Version')}
       </a>
     )
     if (isRegistered()) {
@@ -113,20 +113,20 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Accounts}</span></Link>
-          <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Transactions}</span>{transactions_badge}</Link>
-          <Link relative to="/buckets" exactMatchClass="selected"><span>{tx._.nav.Buckets}</span>{buckets_badge}</Link>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Accounts')}}</span></Link>
+          <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Transactions')}</span>{transactions_badge}</Link>
+          <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets')}</span>{buckets_badge}</Link>
           <Route path="/buckets">
-            <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">{tx._.nav.Kicked}</Link>
+            <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Kicked')}</Link>
           </Route>
-          <Link relative to="/analysis" exactMatchClass="selected"><span>{tx._.nav.Analysis}</span></Link>
+          <Link relative to="/analysis" exactMatchClass="selected"><span>{sss('Analysis')}</span></Link>
           <Route path="/analysis">
             <div>
-              <Link relative to="/recurring-expenses" className="sub" exactMatchClass="selected">{tx._.nav.AnalysisSub.Recurring_Expenses}</Link>
+              <Link relative to="/recurring-expenses" className="sub" exactMatchClass="selected">{sss('Recurring Expenses')}</Link>
             </div>
           </Route>
-          <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>{tx._.nav.Connections}</span>{connections_badge}</Link>
-          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>{tx._.nav.Import}</span>{fileimport_badge}</Link>
+          <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>{sss('Connections')}</span>{connections_badge}</Link>
+          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Import')}</span>{fileimport_badge}</Link>
         </div>
         <div>
           {sync_widget}
@@ -134,7 +134,7 @@ class Navbar extends React.Component<{
             ev.preventDefault();
             shell.openExternal('https://www.bucketsisbetter.com/chat');
             return false;
-          }}><span><span className="fa fa-fw fa-comment"></span> {tx._.nav.ChatWithMatt}</span></a>
+          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt')}</span></a>
           {trial_version}
         </div>
       </div>)
@@ -170,7 +170,7 @@ class Application extends React.Component<ApplicationProps, any> {
                 <header>
                   <div className="totals">
                     <total>
-                      <name><Help icon={<span><span className="fa fa-tint" /> {tx._.labels.Rain}</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
+                      <name><Help icon={<span><span className="fa fa-tint" /> {sss('Rain')}</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
                       <amount><Money value={appstate.rain} /></amount>
                     </total>
                     <total className="section-start">

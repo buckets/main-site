@@ -4,7 +4,7 @@ import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './fi
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
-import { tx } from '../i18n'
+import { sss } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 
@@ -31,24 +31,24 @@ export async function updateEnabled(isbudget:boolean) {
 export async function updateMenu() {
   let recent_files = await getRecentFiles();
   let FileMenu = {
-    label: tx._.menu.file.label,
+    label: sss('File'),
     submenu: [
       {
-        label: tx._.menu.file.NewBudget,
+        label: sss('New Budget...'),
         accelerator: 'CmdOrCtrl+Shift+N',
         click() {
           newBudgetFileDialog();
         }
       },
       {
-        label: tx._.menu.file.OpenBudget,
+        label: sss('Open Budget...'),
         accelerator: 'CmdOrCtrl+O',
         click() {
           openDialog();
         }
       },
       {
-        label: tx._.menu.file.OpenRecent,
+        label: sss('Open Recent...'),
         enabled: recent_files.length !== 0,
         submenu: recent_files.map(path => {
           return {
@@ -61,7 +61,7 @@ export async function updateMenu() {
       },
       {type: 'separator'},
       {
-        label: tx._.menu.file.DuplicateWindow,
+        label: sss('Duplicate Window'),
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
         click() {
@@ -70,7 +70,7 @@ export async function updateMenu() {
       },
       {type: 'separator'},
       {
-        label: tx._.menu.file.ImportTransactions,
+        label: sss('Import Transactions...'),
         id: 'only4budgets import',
         accelerator: 'CmdOrCtrl+I',
         click() {
@@ -142,29 +142,29 @@ export async function updateMenu() {
     role: 'help',
     submenu: [
       {
-        label: tx._.menu.help.LearnMore,
+        label: sss('Learn More'),
         click () { shell.openExternal('https://www.bucketsisbetter.com') }
       },
       {
-        label: tx._.menu.help.ShowLogFiles,
+        label: sss('Show Log Files...'),
         click() {
           shell.showItemInFolder(log.transports.file.file);
         }
       },
       {
-        label: tx._.menu.help.ReportBug,
+        label: sss('Report Bug...'),
         click() {
           reportBug();
         }
       },
       {
-        label: tx._.menu.help.Chat,
+        label: sss('Chat...'),
         click() {
           shell.openExternal('https://www.bucketsisbetter.com/chat');
         }
       },
       {
-        label: 'Getting Started...',
+        label: sss('Getting Started...'),
         click() {
           shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
         }
@@ -173,16 +173,16 @@ export async function updateMenu() {
   };
 
   let RegisterMenu = {
-      label: tx._.labels.TrialVersion,
+      label: sss('Trial Version'),
       submenu: [
         {
-          label: tx._.menu.register.PurchaseFullVersion,
+          label: sss('Purchase Full Version...'),
           click() {
             openBuyPage();
           },
         },
         {
-          label: tx._.menu.register.EnterLicense,
+          label: sss('Enter License...'),
           click() {
             promptForLicense();
           },
@@ -207,7 +207,7 @@ export async function updateMenu() {
       submenu: [
         {role: 'about'},
         {
-          label: 'Check For Updates...',
+          label: sss('Check For Updates...'),
           click() {
             openUpdateWindow();
           },

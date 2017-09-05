@@ -9,6 +9,7 @@ import {Date, DateInput, ensureUTCMoment} from '../time'
 import {Money, MoneyInput} from '../money'
 import { Help } from '../tooltip'
 import { onKeys } from '../input'
+import { sss } from '../i18n'
 
 
 interface TransactionPageProps {
@@ -81,9 +82,13 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     } else {
       transactions = _.values(appstate.transactions);
     }
-    let delete_label = 'Delete selected';
+    let delete_label = sss('Delete selected', function(ahoy:string):string {
+      return ahoy;
+    });
     if (selected.size) {
-      delete_label = `Delete seleced (${selected.size})`;
+      delete_label = sss('transactions.delete', (size:number) => {
+        return `Delete selected (${size})`
+      })(selected.size);
     }
     return (
     <div className="rows">
