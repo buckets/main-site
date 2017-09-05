@@ -3,8 +3,15 @@ import * as Path from 'path'
 import * as ts from "typescript"
 import * as _ from 'lodash'
 import * as cheerio from 'cheerio'
+import * as crypto from 'crypto'
 
 let ERRORS = [];
+
+function hash(x:string):string {
+  let h = crypto.createHash('sha256');
+  h.update(x);
+  return h.digest('base64');
+}
 
 function kindToTypeScriptIdentifier(x:ts.SyntaxKind):string {
   switch (x) {
@@ -186,9 +193,15 @@ walk(process.argv[2]).forEach(filename => {
 
 function displayInterface(msgs:IMessageSpec) {
   let lines = [];
+  lines.push(`interface IMsg<T> {
+  val: T;
+  translated: boolean;
+  src: string[];
+  h: string;
+}`);
   lines.push('export interface IMessages {');
   _.each(msgs, (msg:IMessage) => {
-    lines.push(`  ${JSON.stringify(msg.key)}: ${msg.interfaceValue};`);
+    lines.push(`  ${JSON.stringify(msg.key)}: IMsg<${msg.interfaceValue}>;`);
   })
   lines.push('}');
   return lines.join('\n');
@@ -198,16 +211,11 @@ function displayDefaults(msgs:IMessageSpec) {
   let lines = [];
   lines.push('export const DEFAULTS:IMessages = {');
   _.each(msgs, (msg:IMessage) => {
-    lines.push('');
-    // msg.sources.forEach(source => {
-    //   lines.push(`  // ${formatSource(source)}`);
-    // })
-    // lines.push(`  // TO TRANSLATE`);
-    lines.push(`
-  ${JSON.stringify(msg.key)}: {
-    value: ${msg.defaultValue},
+    lines.push(`  ${JSON.stringify(msg.key)}: {
+    val: ${msg.defaultValue},
     translated: false,
-    sources: ${JSON.stringify(msg.sources.map(formatSource))},
+    src: ${JSON.stringify(msg.sources.map(formatSource))},
+    h: ${JSON.stringify(hash(msg.defaultValue))},
   },`);
   })
   lines.push('}');
