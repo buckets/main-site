@@ -153,12 +153,14 @@ walk(process.argv[2]).forEach(filename => {
     let fh = openFile(filename);
     let d = extractEnglish(fh);
     Object.assign(MSGS, d);
+  } else if (filename.endsWith('.html')) {
+    console.warn("Warning: HTML processing isn't working yet", filename);
   }  
 })
 
 function displayInterface(msgs:IMessageSpec) {
   let lines = [];
-  lines.push('{');
+  lines.push('export interface IMessages {');
   _.each(msgs, (msg:IMessage) => {
     lines.push(`  ${JSON.stringify(msg.key)}: ${msg.interfaceValue};`);
   })
@@ -168,18 +170,19 @@ function displayInterface(msgs:IMessageSpec) {
 
 function displayDefaults(msgs:IMessageSpec) {
   let lines = [];
-  lines.push('{');
+  lines.push('export const DEFAULTS:IMessages = {');
   _.each(msgs, (msg:IMessage) => {
     lines.push('');
     msg.sources.forEach(source => {
       lines.push(`  // ${source.filename} line ${source.lineno}`);
     })
-    lines.push(`  ${JSON.stringify(msg.key)}: ${msg.defaultValue},`);
+    lines.push(`  ${JSON.stringify(msg.key)}: ${msg.defaultValue}, // TO TRANSLATE`);
   })
   lines.push('}');
   return lines.join('\n');
 }
 
+console.log('// Auto-generated file');
 console.log(displayInterface(MSGS));
 console.log(displayDefaults(MSGS));
 
