@@ -99,7 +99,7 @@ function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
                     return `${name}:${type}`;
                   })
                 }
-                let snip = src.getFullText().slice(start, end);
+                let snip = src.getFullText().slice(start, end).trim();
                 newitem = {
                   key,
                   defaultValue: snip,
@@ -198,6 +198,7 @@ function displayInterface(msgs:IMessageSpec) {
   translated: boolean;
   src: string[];
   h: string;
+  changed?: boolean;
 }`);
   lines.push('export interface IMessages {');
   _.each(msgs, (msg:IMessage) => {

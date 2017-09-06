@@ -27,7 +27,7 @@ function getSrcValue(thing, src:ts.SourceFile):string {
   switch (thing.kind) {
     case ts.SyntaxKind.FunctionExpression:
     case ts.SyntaxKind.ArrowFunction: {
-      return src.getFullText().slice(thing.pos, thing.end);
+      return src.getFullText().slice(thing.pos, thing.end).trim();
     }
     case ts.SyntaxKind.StringLiteral: {
       return JSON.stringify(thing.text);
@@ -107,6 +107,7 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
       if (olditem.h !== newitem.h) {
         // it changed
         item['changed'] = true;
+        item['h'] = newitem.h;
         console.warn('ORIGINAL CHANGED', key);
       }
     } else {
@@ -118,7 +119,7 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
     val: ${item.val},
     translated: ${item.translated},
     src: ${item.src},
-    h: ${item.h},${item.changed ? '\n  changed: true,' : ''}
+    h: ${item.h},${item.changed ? '\n    changed: true,' : ''}
   },`);
   })
   return lines.join('\n');

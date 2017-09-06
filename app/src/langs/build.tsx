@@ -4,6 +4,7 @@ interface IMsg<T> {
   translated: boolean;
   src: string[];
   h: string;
+  changed?: boolean;
 }
 export interface IMessages {
   "accounts.balance_mismatch_msg": IMsg<string>;
@@ -137,12 +138,12 @@ export const DEFAULTS:IMessages = {
     h: "bsJ1Vyhm8h3AT4g3iLkWOso1mGTLsIFexh1ymwKankw=",
   },
   "transactions.delete": {
-    val:  (size:number) => {
+    val: (size:number) => {
         return `Delete selected (${size})`
       },
     translated: false,
     src: ["src/budget/transactions.tsx line 86"],
-    h: "9I1y+v4wGxif2E/dBi3pkzGHcIL5ZbGPV5ef7DG7MPY=",
+    h: "/u86qzz5nT6n9ZqcgDLwC0GHmjDy0cELJjSzjBAim5g=",
   },
   "File": {
     val: "File",

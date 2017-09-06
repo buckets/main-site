@@ -99,12 +99,12 @@ const messages:IMessages = {
     h: "bsJ1Vyhm8h3AT4g3iLkWOso1mGTLsIFexh1ymwKankw=",
   },
   "transactions.delete": {
-    val:         (size:number) => {
+    val: (size:number) => {
         return `Delete selected (${size})`
       },
     translated: false,
     src: ["src/budget/transactions.tsx line 86"],
-    h: "9I1y+v4wGxif2E/dBi3pkzGHcIL5ZbGPV5ef7DG7MPY=",
+    h: "/u86qzz5nT6n9ZqcgDLwC0GHmjDy0cELJjSzjBAim5g=",
   },
   "File": {
     val: "Archivo",
@@ -191,13 +191,12 @@ const messages:IMessages = {
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
   "Recently used": {
-    val: "Recently used",
+    val: "Recientes",
     translated: false,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
   },
 }
-
 export const pack:ILangPack = {
   name: 'español',
   messages
