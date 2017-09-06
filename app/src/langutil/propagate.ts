@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import * as ts from "typescript"
 import * as _ from 'lodash'
 
@@ -10,15 +10,16 @@ let tofile = process.argv[3];
 async function copyEm(fromfile, tofile) {
   let fromdata = openFile(fromfile);
   let newstate = readMessages(fromdata, 'DEFAULTS');
-  // console.log('new', newstate);
+
   let todata = openFile(tofile)
   let oldstate = readMessages(todata, 'messages');
-  // console.log('old', oldstate);
-  let merged = mergeMessages(oldstate, newstate);
-  // console.log('merged', merged);
-  console.log('const messages:IMessages = {');
-  console.log(merged);
-  console.log('}');
+  
+  let merged = mergeMessages(oldstate.items, newstate.items);
+
+  let guts = [oldstate.pre + 'messages:IMessages = {',
+  merged, '}'].join('\n');
+  writeFileSync(tofile, guts);
+  console.log('wrote', tofile);
 }
 
 function getSrcValue(thing, src:ts.SourceFile):string {
@@ -48,12 +49,17 @@ function getSrcValue(thing, src:ts.SourceFile):string {
 }
 
 function readMessages(src:ts.SourceFile, varname:string) {
+  let pre_string = null;
+  let post_string = null;
+  let full_text = src.getFullText();
   let items = {};
   function processNode(node: ts.Node) {
     switch (node.kind) {
       case ts.SyntaxKind.VariableDeclaration: {
         let n = node as any;
         if (n.name.escapedText === varname) {
+          pre_string = full_text.substr(0, node.pos);
+          post_string = full_text.substr(node.end);
           n.initializer.properties.forEach(prop => {
             let init = prop.initializer;
             let item = {
@@ -62,34 +68,12 @@ function readMessages(src:ts.SourceFile, varname:string) {
               src: [],
               orig: null,
             }
-            // console.log('init', init);
-            // console.log('props[0]', init.properties[0]);
-            // console.log('props[1]', init.properties[1]);
-            // console.log('props[2]', init.properties[2]);
             init.properties.forEach(subprop => {
               let key = subprop.name.escapedText;
               let ts_value = getSrcValue(subprop.initializer, src);
-              // console.log('subprop val', ts_value);
               item[key] = ts_value;
             })
             items[prop.name.text] = item;
-            // switch (init.kind) {
-            //   case ts.SyntaxKind.FunctionExpression:
-            //   case ts.SyntaxKind.ArrowFunction: {
-            //     console.log('init', init);
-            //     let snip = src.getFullText().slice(init.pos, init.end);
-            //     console.log('snip', snip);
-            //     items[prop.name.text] = snip;
-            //     break;
-            //   }
-            //   case ts.SyntaxKind.StringLiteral: {
-            //     items[prop.name.text] = JSON.stringify(prop.initializer.text);
-            //     break;
-            //   }
-            //   default: {
-            //     throw new Error(`Unknown value type: ${prop}`);
-            //   }
-            // }
           })
         }
         break;
@@ -98,7 +82,11 @@ function readMessages(src:ts.SourceFile, varname:string) {
     ts.forEachChild(node, processNode);
   }
   processNode(src);
-  return items;
+  return {
+    pre: pre_string,
+    post: post_string,
+    items: items,
+  }
 }
 
 function mergeMessages(oldstuff:object, newstuff:object):string {
@@ -118,10 +106,12 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
       if (olditem.h !== newitem.h) {
         // it changed
         item['changed'] = true;
+        console.log('ORIGINAL CHANGED', key);
       }
     } else {
       // new key to be translated
       item = newitem;
+      console.log('NEW', key);
     }
     lines.push(`  ${JSON.stringify(key)}: {
     val: ${item.val},
