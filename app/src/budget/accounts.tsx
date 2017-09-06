@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import { shell } from 'electron'
 import {Balances} from '../models/balances'
 import { Account, Transaction, expectedBalance } from '../models/account'
 import {Route, Link, WithRouting} from './routing'
@@ -127,6 +128,15 @@ interface AccountsPageProps {
 export class AccountsPage extends React.Component<AccountsPageProps, any> {
   render() {
     let { appstate } = this.props;
+    let getting_started;
+    let accounts_list = _.values(appstate.accounts);
+    if (!accounts_list.length) {
+      getting_started = <div className="notice">
+        First time using Buckets?  Check out the <a href="#" onClick={() => {
+          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
+        }}>Getting Started Videos.</a>
+      </div>
+    }
     return (
       <div className="rows">
         <div className="subheader">
@@ -135,10 +145,11 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
             <button onClick={this.createConnection}>Connect to bank</button>
           </div>
         </div>
+        {getting_started}
         <div className="panes">
           <div className="padded">
             <AccountList
-              accounts={_.values(appstate.accounts)}
+              accounts={accounts_list}
               balances={appstate.account_balances} />
           </div>
           <Route path="/<int:id>">

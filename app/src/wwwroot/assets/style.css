@@ -158,6 +158,11 @@ a:hover {
 .alert.info {
   color: var(--blue);
 }
+.notice {
+  padding: 1rem;
+  background-color: var(--highlighter);
+  display: block;
+}
 
 .app .content {
   flex-grow: 1;
