@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import * as moment from 'moment'
 import { sss } from '../i18n'
 import {Balances} from '../models/balances'
 import { Account, Transaction, expectedBalance } from '../models/account'
@@ -49,8 +50,8 @@ export class AccountList extends React.Component<AccountListProps,any> {
     return (<table className="ledger">
       <thead>
         <tr>
-          <th>{sss('accounts.Account', 'Account')}</th>
-          <th>Balance</th>
+          <th>{sss('Account')}</th>
+          <th>{sss('Balance')}</th>
           <th></th>
         </tr>
       </thead>
@@ -74,15 +75,18 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
     let import_balance_field;
     if (import_balance !== balance) {
       import_balance_field = <div>
-        Synced balance: <Money value={import_balance} />
+        {sss('Synced balance')}: <Money value={import_balance} />
         <p>
           <div className="alert info">
             <span className="fa fa-exclamation-circle" />
           </div>
-          The "Balance" above is this account's balance as of the latest entered transaction.
-          The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
-          &nbsp;Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
-          So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+          {sss('accounts.balance_mismatch_long_msg', () => {
+            return (<span>
+              The "Balance" above is this account's balance as of the latest entered transaction.
+              The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
+              Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
+              So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+          </span>)})()}
         </p>
       </div>
     }
@@ -91,7 +95,7 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
         <DebouncedInput
           blendin
           value={account.name}
-          placeholder="no name"
+          placeholder={sss('accounts.name_placeholder', 'no name')}
           onChange={(val) => {
             manager.store.accounts.update(account.id, {name: val});
           }}
@@ -99,16 +103,16 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
       </h1>
       <div className="fieldlist">
         <div>
-          Balance: <MoneyInput
+          {sss('Balance')}: <MoneyInput
           value={balance}
           onChange={debounceChange(this_months_balance => {
             let diff = account.balance - balance;
 
             let computed_balance = this_months_balance + diff;
-            console.log('entered:', this_months_balance);
-            console.log('computed:', computed_balance);
             manager.store.accounts.update(account.id, {balance: computed_balance});
-          })}/> (as of <Date value={appstate.defaultPostingDate} />)
+          })}/> ({sss('balance-as-of', (d:moment.Moment) => {
+            return <span>as of <Date value={d} /></span>
+            })(appstate.defaultPostingDate)})
         </div>
         {import_balance_field}
       </div>
@@ -132,8 +136,8 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
       <div className="rows">
         <div className="subheader">
           <div>
-            <button onClick={this.addAccount}>New account</button>
-            <button onClick={this.createConnection}>Connect to bank</button>
+            <button onClick={this.addAccount}>{sss('New account')}</button>
+            <button onClick={this.createConnection}>{sss('Connect to bank')}</button>
           </div>
         </div>
         <div className="panes">
@@ -158,7 +162,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
       </div>);
   }
   addAccount = () => {
-    manager.store.accounts.add('Savings');
+    manager.store.accounts.add(sss('default account name', 'Savings'));
   }
   createConnection = () => {
     setPath('/connections')

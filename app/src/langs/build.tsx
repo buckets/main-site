@@ -10,7 +10,14 @@ export interface IMessages {
   "accounts.balance_mismatch_msg": IMsg<string>;
   "accounts.name_placeholder": IMsg<string>;
   "accounts.more_link": IMsg<string>;
-  "accounts.Account": IMsg<string>;
+  "Account": IMsg<string>;
+  "Balance": IMsg<string>;
+  "Synced balance": IMsg<string>;
+  "accounts.balance_mismatch_long_msg": IMsg<()=>string>;
+  "balance-as-of": IMsg<(d:any)=>string>;
+  "New account": IMsg<string>;
+  "Connect to bank": IMsg<string>;
+  "default account name": IMsg<string>;
   "Trial Version": IMsg<string>;
   "Accounts": IMsg<string>;
   "Transactions": IMsg<string>;
@@ -44,26 +51,76 @@ export const DEFAULTS:IMessages = {
   "accounts.balance_mismatch_msg": {
     val: "The most recent synced balance does not match the balance computed from transactions.  Click more for more information.",
     translated: false,
-    src: ["src/budget/accounts.tsx line 32"],
+    src: ["src/budget/accounts.tsx line 33"],
     h: "cMuGJ8vkjW+HMm8Ac01xULd9Lwf/iVtXYPi3WBC2JS4=",
   },
   "accounts.name_placeholder": {
     val: "no name",
     translated: false,
-    src: ["src/budget/accounts.tsx line 39"],
+    src: ["src/budget/accounts.tsx line 40","src/budget/accounts.tsx line 97"],
     h: "UwMHboI9q49SZQkwMN8ps9zBi6YOSdtwakjLJwudtyA=",
   },
   "accounts.more_link": {
     val: "more",
     translated: false,
-    src: ["src/budget/accounts.tsx line 45"],
+    src: ["src/budget/accounts.tsx line 46"],
     h: "uiqCMjSdL1TgDZHPNYXLnfN/yZq59+kDR/wKZSAP0hU=",
   },
-  "accounts.Account": {
+  "Account": {
     val: "Account",
     translated: false,
-    src: ["src/budget/accounts.tsx line 51"],
+    src: ["src/budget/accounts.tsx line 52"],
     h: "ihCgI4A9UaFZ63kuiKXqFHoGsze2dYwzpgSVU0clMfQ=",
+  },
+  "Balance": {
+    val: "Balance",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 53","src/budget/accounts.tsx line 105"],
+    h: "azvDWgVPY349dq4q8mbtpDhehRsFKYKNzMk/TcuOvEQ=",
+  },
+  "Synced balance": {
+    val: "Synced balance",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 77"],
+    h: "yyCVeQRle/vbcZ1/QyVYtL+ZmyQ5WanHCYKZpJqFd6o=",
+  },
+  "accounts.balance_mismatch_long_msg": {
+    val: () => {
+            return (<span>
+              The "Balance" above is this account's balance as of the latest entered transaction.
+              The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
+              Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
+              So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+          </span>)},
+    translated: false,
+    src: ["src/budget/accounts.tsx line 82"],
+    h: "wR5L88lhIXbxAVDXEZbN1lwbnZjYUBkAifA2KtAg8dM=",
+  },
+  "balance-as-of": {
+    val: (d:moment.Moment) => {
+            return <span>as of <Date value={d} /></span>
+            },
+    translated: false,
+    src: ["src/budget/accounts.tsx line 112"],
+    h: "tGR0TmgHhvEicsb64nt3wh+45RmXix5cShzkt6B98sw=",
+  },
+  "New account": {
+    val: "New account",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 138"],
+    h: "MtAiANg7ugdeUiGmiGklfBPG4T1igh1iChKeC0Mdxnc=",
+  },
+  "Connect to bank": {
+    val: "Connect to bank",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 139"],
+    h: "0T7eA3oFvMxyPIOAkMZ2rDpJxQVORgxrLqrDx87L1ZY=",
+  },
+  "default account name": {
+    val: "Savings",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 164"],
+    h: "zCYN8vtLT3Hhb9CbDDSL2xOOjqhzmmhMa5yWDTR7bCE=",
   },
   "Trial Version": {
     val: "Trial Version",
