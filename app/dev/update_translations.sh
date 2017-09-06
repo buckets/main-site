@@ -4,8 +4,6 @@ set -e
 echo "extracting messages..."
 ./dev/extract_translations.sh
 
-tsc src/langs/build.tsx
-
 for langfile in $(ls src/langs/??.tsx); do
     if [ $(basename "$langfile") == "en.tsx" ]; then
         echo "(skipping en.tsx)"

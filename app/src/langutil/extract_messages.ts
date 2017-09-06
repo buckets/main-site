@@ -7,6 +7,13 @@ import * as crypto from 'crypto'
 
 let ERRORS = [];
 
+// XXX How do I auto-detect these?
+export const IMPORTS = `
+import * as React from 'react'
+import * as moment from 'moment'
+import { Date } from '../time'
+`
+
 function hash(x:string):string {
   let h = crypto.createHash('sha256');
   h.update(x);
@@ -103,7 +110,7 @@ function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
                 newitem = {
                   key,
                   defaultValue: snip,
-                  interfaceValue: `(${param_types.join(',')})=>string`,
+                  interfaceValue: `(${param_types.join(',')})=>string|JSX.Element`,
                   sources: [{filename, lineno}],
                 }
                 break;
@@ -198,7 +205,7 @@ function displayInterface(msgs:IMessageSpec) {
   translated: boolean;
   src: string[];
   h: string;
-  changed?: boolean;
+  newval?: T;
 }`);
   lines.push('export interface IMessages {');
   _.each(msgs, (msg:IMessage) => {
@@ -224,6 +231,7 @@ function displayDefaults(msgs:IMessageSpec) {
 }
 
 console.log('// Auto-generated file');
+console.log(IMPORTS);
 console.log(displayInterface(MSGS));
 console.log(displayDefaults(MSGS));
 

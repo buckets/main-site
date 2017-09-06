@@ -99,14 +99,14 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
       translated: false,
       src: [],
       h: null,
-      changed: false,
+      newval: null,
     };
     if (olditem !== undefined) {
       // existing translation
       item = olditem;
       if (olditem.h !== newitem.h) {
         // it changed
-        item['changed'] = true;
+        item['newval'] = newitem.val;
         item['h'] = newitem.h;
         console.warn('ORIGINAL CHANGED', key);
       }
@@ -119,7 +119,7 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
     val: ${item.val},
     translated: ${item.translated},
     src: ${item.src},
-    h: ${item.h},${item.changed ? '\n    changed: true,' : ''}
+    h: ${item.h},${item.newval ? `\n    newval: ${item.newval},` : ''}
   },`);
   })
   return lines.join('\n');

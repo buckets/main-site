@@ -1,10 +1,15 @@
 // Auto-generated file
+
+import * as React from 'react'
+import * as moment from 'moment'
+import { Date } from '../time'
+
 interface IMsg<T> {
   val: T;
   translated: boolean;
   src: string[];
   h: string;
-  changed?: boolean;
+  newval?: T;
 }
 export interface IMessages {
   "accounts.balance_mismatch_msg": IMsg<string>;
@@ -13,8 +18,8 @@ export interface IMessages {
   "Account": IMsg<string>;
   "Balance": IMsg<string>;
   "Synced balance": IMsg<string>;
-  "accounts.balance_mismatch_long_msg": IMsg<()=>string>;
-  "balance-as-of": IMsg<(d:any)=>string>;
+  "accounts.balance_mismatch_long_msg": IMsg<()=>string|JSX.Element>;
+  "balance-as-of": IMsg<(d:any)=>string|JSX.Element>;
   "New account": IMsg<string>;
   "Connect to bank": IMsg<string>;
   "default account name": IMsg<string>;
@@ -30,7 +35,7 @@ export interface IMessages {
   "Chat with Matt": IMsg<string>;
   "Rain": IMsg<string>;
   "Delete selected": IMsg<string>;
-  "transactions.delete": IMsg<(size:number)=>string>;
+  "transactions.delete": IMsg<(size:number)=>string|JSX.Element>;
   "File": IMsg<string>;
   "New Budget...": IMsg<string>;
   "Open Budget...": IMsg<string>;
