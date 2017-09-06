@@ -16,8 +16,9 @@ async function copyEm(fromfile, tofile) {
   
   let merged = mergeMessages(oldstate.items, newstate.items);
 
-  let guts = [oldstate.pre + 'messages:IMessages = {',
-  merged, '}'].join('\n');
+  let guts = [oldstate.pre + ' messages:IMessages = {',
+  merged, '}', oldstate.post].join('\n');
+  console.log('guts', guts);
   writeFileSync(tofile, guts);
   console.log('wrote', tofile);
 }
