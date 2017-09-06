@@ -113,7 +113,7 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Accounts')}}</span></Link>
+          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Accounts')}</span></Link>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Transactions')}</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets')}</span>{buckets_badge}</Link>
           <Route path="/buckets">
