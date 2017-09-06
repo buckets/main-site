@@ -37,8 +37,7 @@ export interface IMessages {
   "Purchase Full Version...": IMsg<string>;
   "Enter License...": IMsg<string>;
   "Check For Updates...": IMsg<string>;
-  "menu.file.OpenBudget": IMsg<string>;
-  "wizard.Recently_used": IMsg<string>;
+  "Recently used": IMsg<string>;
 }
 export const DEFAULTS:IMessages = {
   "accounts.balance_mismatch_msg": {
@@ -160,7 +159,7 @@ export const DEFAULTS:IMessages = {
   "Open Budget...": {
     val: "Open Budget...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 43"],
+    src: ["src/mainprocess/menu.ts line 43","src/wwwroot/misc/wizard.html line 0"],
     h: "67FfAce57aSIe2ncVfWeIeiiRLQQ8uuEUdDyI6UHxHU=",
   },
   "Open Recent...": {
@@ -229,13 +228,7 @@ export const DEFAULTS:IMessages = {
     src: ["src/mainprocess/menu.ts line 209"],
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
-  "menu.file.OpenBudget": {
-    val: "Open Budget...",
-    translated: false,
-    src: ["src/wwwroot/misc/wizard.html line 0"],
-    h: "67FfAce57aSIe2ncVfWeIeiiRLQQ8uuEUdDyI6UHxHU=",
-  },
-  "wizard.Recently_used": {
+  "Recently used": {
     val: "Recently used",
     translated: false,
     src: ["src/wwwroot/misc/wizard.html line 0"],

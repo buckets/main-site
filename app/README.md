@@ -20,7 +20,7 @@ To run:
 
 1. Use `sss()` from `i18n.ts` package
 2. Extract messages from the code with `dev/extract_translations.sh`
-3. Update each language file with XXX.TODO
+3. Update each language file with `dev/update_translations.sh`
 4. Send to GitHub for translation with `dev/export_translations.sh`
 5. Get from GitHub with `dev/import_translations.sh`
 

@@ -99,7 +99,7 @@ const messages:IMessages = {
     h: "bsJ1Vyhm8h3AT4g3iLkWOso1mGTLsIFexh1ymwKankw=",
   },
   "transactions.delete": {
-    val:    (size:number) => {
+    val:         (size:number) => {
         return `Delete selected (${size})`
       },
     translated: false,
@@ -190,21 +190,13 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 209"],
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
-  "menu.file.OpenBudget": {
-    val: "Open Budget...",
+  "Recently used": {
+    val: "Recently used",
     translated: false,
-    src: ["src/wwwroot/misc/wizard.html line 0"],
-    h: "67FfAce57aSIe2ncVfWeIeiiRLQQ8uuEUdDyI6UHxHU=",
-  },
-  "wizard.Recently_used": {
-    val: "Recientes",
-    translated: true,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
   },
 }
-
-
 
 export const pack:ILangPack = {
   name: 'español',

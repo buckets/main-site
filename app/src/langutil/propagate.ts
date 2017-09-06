@@ -17,7 +17,7 @@ async function copyEm(fromfile, tofile) {
   let merged = mergeMessages(oldstate.items, newstate.items);
 
   let guts = [oldstate.pre + ' messages:IMessages = {',
-  merged, '}', oldstate.post].join('\n');
+  merged, '}', oldstate.post.trim(), ''].join('\n');
   console.log('guts', guts);
   writeFileSync(tofile, guts);
   console.log('wrote', tofile);
@@ -107,12 +107,12 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
       if (olditem.h !== newitem.h) {
         // it changed
         item['changed'] = true;
-        console.log('ORIGINAL CHANGED', key);
+        console.warn('ORIGINAL CHANGED', key);
       }
     } else {
       // new key to be translated
       item = newitem;
-      console.log('NEW', key);
+      console.warn('NEW', key);
     }
     lines.push(`  ${JSON.stringify(key)}: {
     val: ${item.val},
