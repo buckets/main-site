@@ -11,8 +11,6 @@ const packs:{[x:string]:ILangPack} = {en, es};
 class TranslationContext {
   private langpack:ILangPack = en;
   private _locale:string = 'en';
-  constructor() {
-  }
   get locale() {
     return this._locale
   }
@@ -21,34 +19,22 @@ class TranslationContext {
       this.langpack = packs[x];
       this._locale = x;
       log.info(`locale set to: ${x}`);
+    } else if (packs[x.substr(0, 2)]) {
+      this._locale = x.substr(0, 2);
+      this.langpack = packs[this._locale];
+      log.info(`locale set to: ${this._locale}`);
     } else {
       log.warn(`Not setting locale to unknown: ${x}`);
-      this.langpack = en;
-      this._locale = 'en';
     }
-  }
-  get _():IMessages {
-    return this.langpack.messages;
   }
   sss<T>(key:keyof IMessages, dft?:T):T {
+    let entry = this.langpack.messages[key];
     if (dft === undefined && typeof key === 'string') {
       // The key is the string to translate.
-      return (this._[key] || key) as any;
+      return (entry ? entry.val : key) as any;
+    } else {
+      return (entry ? entry.val : dft) as any;
     }
-    let parts = key.split('.');
-    let result:any = tx._;
-    try {
-      parts.forEach(part => {
-        result = result[part];
-        if (result === undefined) {
-          throw new Error(`Unable to find translation for '${key}'`);
-        }
-      })
-    } catch(err) {
-      log.warn('Localization warning:', err);
-      result = dft;
-    }
-    return result;
   }
   toString() {
     return `TranslationContext locale=${this._locale}`;
@@ -59,7 +45,10 @@ class TranslationContext {
       try {
         let trans_id = elem.getAttribute('data-translate');
         let dft = elem.innerText;
-        elem.innerText = this.sss(trans_id as any, dft);
+        if (!trans_id) {
+          trans_id = dft;
+        }
+        elem.innerHTML = this.sss(trans_id as any, dft);
       } catch(err) {
         console.warn('Localization error:', err, elem);
       }
@@ -69,7 +58,8 @@ class TranslationContext {
 
 const env = remote ? remote.process.env : process.env;
 const tx = new TranslationContext();
-export const sss = tx.sss;
+export const localizeThisPage = tx.localizeThisPage.bind(tx);
+export const sss = tx.sss.bind(tx);
 if (env.LANG) {
   tx.setLocale(env.LANG);
 }

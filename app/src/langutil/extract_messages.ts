@@ -152,11 +152,13 @@ function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
     ts.forEachChild(node, processNode);
   }
   processNode(src);
-}
+}  
 
 function extractMessagesFromHTML(pot:IMessageSpec, filename:string) {
   let html = readFileSync(filename).toString()
   let tree = cheerio.load(html);
+
+  // the data-translate items
   tree('[data-translate]').each((i, elem) => {
     let e = cheerio(elem);
     let key = e.attr('data-translate');

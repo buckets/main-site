@@ -193,8 +193,8 @@
     }
   }();
 
-  const { tx } = req('./src/i18n');
-  tx.localizeThisPage();
+  const { localizeThisPage } = req('./src/i18n');
+  localizeThisPage();
 
   const Path = req('path');
   const { remote, ipcRenderer } = req('electron');

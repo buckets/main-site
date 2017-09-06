@@ -50,6 +50,22 @@ export interface IMessages {
   "Purchase Full Version...": IMsg<string>;
   "Enter License...": IMsg<string>;
   "Check For Updates...": IMsg<string>;
+  "Enter Buckets License": IMsg<string>;
+  "enter-license-prompt": IMsg<string>;
+  "Submit": IMsg<string>;
+  "Success!": IMsg<string>;
+  "Restart Buckets": IMsg<string>;
+  "Invalid license": IMsg<string>;
+  "Buckets Updates": IMsg<string>;
+  "Check for Updates": IMsg<string>;
+  "Checking for updates...": IMsg<string>;
+  "version-available": IMsg<(newv:string)=>string|JSX.Element>;
+  "Download Update": IMsg<string>;
+  "You are running the latest version!": IMsg<string>;
+  "Downloading update...": IMsg<string>;
+  "Update downloaded.": IMsg<string>;
+  "Install and Relaunch Buckets": IMsg<string>;
+  "There was an error.  Maybe try again?": IMsg<string>;
   "Recently used": IMsg<string>;
 }
 export const DEFAULTS:IMessages = {
@@ -290,6 +306,102 @@ export const DEFAULTS:IMessages = {
     translated: false,
     src: ["src/mainprocess/menu.ts line 209"],
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
+  },
+  "Enter Buckets License": {
+    val: "Enter Buckets License",
+    translated: false,
+    src: ["src/wwwroot/misc/enter_license.html line 0"],
+    h: "QPy/bCk+yTP2DzZAmXWbRYj2KC5QbrLq/XeXrysIX6Q=",
+  },
+  "enter-license-prompt": {
+    val: "\n      Please enter your Buckets License below.  Don&apos;t have a license?  <a href=\"#\" id=\"clicktobuy\">Click here to purchase one.</a>\n    ",
+    translated: false,
+    src: ["src/wwwroot/misc/enter_license.html line 0"],
+    h: "bQ5kF1mLhFNyrJzVhTf5Cz5lxO8mRww7nwMpeCy9HC8=",
+  },
+  "Submit": {
+    val: "Submit",
+    translated: false,
+    src: ["src/wwwroot/misc/enter_license.html line 0"],
+    h: "/plzMiu0xhKwtFcT4VqbJMoCd2dB03dB9EJhijEA284=",
+  },
+  "Success!": {
+    val: "Success!",
+    translated: false,
+    src: ["src/wwwroot/misc/enter_license.tsx line 26"],
+    h: "6NxF/uD6sOEPkEbPFOHdBKRxj0ZXVbmnPkRXNJDy0zs=",
+  },
+  "Restart Buckets": {
+    val: "Restart Buckets",
+    translated: false,
+    src: ["src/wwwroot/misc/enter_license.tsx line 27"],
+    h: "TNcYWk7YxhZ0U9Q+mFMRedeWB36VsDXoYgBapDvZCgM=",
+  },
+  "Invalid license": {
+    val: "Invalid license",
+    translated: false,
+    src: ["src/wwwroot/misc/enter_license.tsx line 30"],
+    h: "BfJdh6NOzurSCMGRmCP8gb1VAXUlrSSsCFIGHGXtNiA=",
+  },
+  "Buckets Updates": {
+    val: "Buckets Updates",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.html line 0"],
+    h: "/bdGAwJm/rYxsxx+n8mZcZ2R8TvkVU+hfEC7Acda0nk=",
+  },
+  "Check for Updates": {
+    val: "Check for Updates",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 21"],
+    h: "6vtxqhyfiDaIXgTBH0pdoPzTGftDDEoRFNGU082PhRk=",
+  },
+  "Checking for updates...": {
+    val: "Checking for updates...",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 27"],
+    h: "wjjhyYhYEFdJWUmwdJIEdxm0iAq2bwrWU79ANObzzZY=",
+  },
+  "version-available": {
+    val: (newv:string) => `Version ${newv} available.`,
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 32"],
+    h: "YCoofx1v0tRUHkHfhFnm6bV2xXfnsNT6QAyXqgkUa9c=",
+  },
+  "Download Update": {
+    val: "Download Update",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 36"],
+    h: "OvekDBh71chOkbTXqPs/V/x0lNbpc668s4hyXRF5G+I=",
+  },
+  "You are running the latest version!": {
+    val: "You are running the latest version!",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 42"],
+    h: "hShy87A6GAhRqqtK+8VdVeGD70zA64iiV0/SwectQ0I=",
+  },
+  "Downloading update...": {
+    val: "Downloading update...",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 44"],
+    h: "vTHXpZeFxjQhKPwUQPCm+eHcyYR6YjSmIm4mtV/5iTE=",
+  },
+  "Update downloaded.": {
+    val: "Update downloaded.",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 49"],
+    h: "DO2vE3TgW3xjiD8ZaOWeScL3qWCyiFPK8GENQ9NosYw=",
+  },
+  "Install and Relaunch Buckets": {
+    val: "Install and Relaunch Buckets",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 53"],
+    h: "bzusTDIT831mqEwmmM59eT12mfoNMYiGPbUfoIzaCwo=",
+  },
+  "There was an error.  Maybe try again?": {
+    val: "There was an error.  Maybe try again?",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 62"],
+    h: "l+W2GSV3tl8Gx19ZW+wOCziBj5/UeMCVO8tvh4P7LEo=",
   },
   "Recently used": {
     val: "Recently used",

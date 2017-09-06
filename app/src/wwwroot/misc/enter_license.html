@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Enter Buckets License</title>
+  <title data-translate>Enter Buckets License</title>
   <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
   <link rel="stylesheet" type="text/css" href="../assets/style.css" />
   <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
@@ -45,7 +45,7 @@
 </head>
 <body>
   <div class="license">
-    <p>
+    <p data-translate="enter-license-prompt">
       Please enter your Buckets License below.  Don't have a license?  <a href="#" id="clicktobuy">Click here to purchase one.</a>
     </p>
     <div class="textareaholder">
@@ -53,14 +53,14 @@
     </div>
     <p>
       <div id="status">&nbsp;</div>
-      <button id="submit-button">Submit</button>
+      <button id="submit-button" data-translate>Submit</button>
     </p>
   </div>
 <script>
+const {remote} = require('electron');
+const Path = require('path');
+const appPath = remote.app.getAppPath();
 const req = function() {
-  const {remote} = require('electron');
-  const Path = require('path');
-  const appPath = remote.app.getAppPath();
   return (module) => {
     if (module.startsWith('.') || module.startsWith('/')) {
       return require(Path.resolve(appPath, module))
@@ -70,38 +70,7 @@ const req = function() {
   }
 }();
 
-const app = req('electron').remote.app;
-const log = req('electron-log');
-const { enterLicense, openBuyPage } = req('./src/mainprocess/drm.js');
-let state = 'init';
-let textarea_box = document.getElementById('license-input');
-let button = document.getElementById('submit-button');
-let status_div = document.getElementById('status');
-let clicktobuy = document.getElementById('clicktobuy');
-clicktobuy.addEventListener('click', (ev) => {
-  openBuyPage();
-  ev.preventDefault();
-  return false;
-}, false)
-button.addEventListener('click', () => {
-  if (state === 'init') {
-    status_div.innerHTML = '&nbsp;';
-    status_div.classList.remove('error');
-    try {
-      enterLicense(textarea_box.value);
-      state = 'success';
-      status_div.innerHTML = 'Success!';
-      button.innerHTML = 'Restart Buckets';
-    } catch(err) {
-      log.error(`Error entering license: ${err}`);
-      status_div.innerHTML = 'Invalid license';
-      status_div.classList.add('error');
-    }
-  } else if (state === 'success') {
-    app.relaunch();
-    app.quit();
-  }
-}, false);
+req('./src/wwwroot/misc/enter_license.js');
 </script>
 </body>
 </html>
