@@ -3,6 +3,12 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
  ☐ Turning a regular expense back to a normal bucket retains the deposit in rain
+ ☐ Uncaught (in promise) TypeError: Cannot read property 'store' of undefined
+    at unknowns.map.unknown (/opt/Buckets/resources/app.asar/src/models/simplefin.js:266:28)
+    at Array.map (native)
+    at /opt/Buckets/resources/app.asar/src/models/simplefin.js:265:37
+    at Generator.next (<anonymous>)
+    at fulfilled (/opt/Buckets/resources/app.asar/src/models/simplefin.js:3:58)
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)

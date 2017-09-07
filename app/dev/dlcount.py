@@ -18,7 +18,7 @@ for release in releases[:number]:
     dlcount = defaultdict(lambda:0)
     for asset in release['assets']:
         asset_name = asset['name']
-        if asset_name == 'latest-mac.yml':
+        if asset_name in ['latest-mac.yml', 'latest.yml']:
             continue
         dlcount[asset_name] += asset['download_count']
     total = sum(dlcount.values())

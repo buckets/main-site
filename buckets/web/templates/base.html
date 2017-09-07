@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{% block title %}Buckets{% endblock %}</title>
+  <title>{% block title %}Buckets - Private Family Budgeting App{% endblock %}</title>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+  <meta name="description" content="Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer." />
   {% block extrahead %}{% endblock %}
   <style>
   .hero {
@@ -130,6 +131,7 @@
       <div>
         <div><a href="{{ url_for('anon.gettingstarted') }}">Getting Started</a></div>
         <div><a href="{{ url_for('anon.buy') }}">Pricing</a></div>
+        <div><a href="{{ url_for('anon.buy') }}">Buy</a></div>
       </div>
     </footer>
   </div>

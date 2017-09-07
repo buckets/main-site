@@ -9,7 +9,7 @@ import * as URL from 'url'
 import * as Path from 'path'
 import { updateMenu, updateEnabled } from './menu'
 import { BudgetFile, watchForEvents } from './files'
-import {APP_ROOT} from './globals'
+import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 
@@ -17,6 +17,11 @@ autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
 log.info('App starting...');
+
+process.on('uncaughtException' as any, (err) => {
+  log.error('uncaughtException', err);
+  log.error(err.stack);
+})
 
 // Make accessing '/' access the expected place
 protocol.registerStandardSchemes(['buckets'])
@@ -78,7 +83,7 @@ app.on('ready', function() {
       BudgetFile.openFile(openfirst.shift());  
     }
   } else if (process.env.DEBUG) {
-    BudgetFile.openFile('/tmp/test.buckets');  
+    BudgetFile.openFile('/tmp/test.buckets', true);  
   } else {
     openWizard();
   }

@@ -3,6 +3,25 @@
 {% block navlinks %}{% endblock %}
 
 {% block extrahead %}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Product",
+  "name": "Buckets",
+  "image": "https://www.bucketsisbetter.com/static/img/logo.svg",
+  "description": "Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.",
+  "offers": {
+    "@type": "Offer",
+    "price": "20",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2018-02-01"
+  },
+  "brand": {
+    "@type": "Thing",
+    "name": "Buckets, LLC"
+  }
+}
+</script>
 <style>
 .buttonish.download {
   margin: .5rem 0 0;
@@ -91,11 +110,6 @@ img.main-shot {
 <div class="wrap">
 
   <div class="callout para">
-    Buckets costs <em>$20.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.
-    <span class="highlight">This is the special introductory price.  In 2018 it will cost $40.</span>
-  </div>
-
-  <div class="callout para">
     Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  <em>Ever wonder who's combing through your cloud-stored transaction history?</em>  With Buckets, your personal data stays on your computer.
   </div>
 
@@ -104,7 +118,11 @@ img.main-shot {
   </div>
 
   <div class="callout para">
-    Buckets is for <em>both of you.</em>  Ditch that old spreadsheet that only one of you knows how to use.  From now on, you can stay on the same financial page.
+    Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget that only one of you knows how to use.  From now on, you can stay on the same financial page.
+  </div>
+
+  <div class="callout para">
+    Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Why, yes, that is ridiculously generous.
   </div>
 
   <div class="callout para">
@@ -112,7 +130,12 @@ img.main-shot {
   </div>
 
   <div class="callout para">
-    <em>Try the full app for free</em> and when you're ready, <a href="{{ url_for('.buy') }}">buy it today for a one-time $20 payment.</a>
+    Buckets costs <em>$20.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.
+    <span class="highlight">This is the special introductory price.  In 2018 it will cost $40.</span>
+  </div>
+
+  <div style="text-align: center; margin: 2rem;">
+    <a class="buttonish" href="{{ url_for('.buy') }}">Buy Now &mdash; $20</a>
   </div>
 
 </div>

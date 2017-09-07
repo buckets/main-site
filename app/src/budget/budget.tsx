@@ -1,4 +1,5 @@
 import { shell } from 'electron'
+import * as log from 'electron-log'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
@@ -19,6 +20,7 @@ import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
 import { TransactionImportPage } from './importing'
 import { Help } from '../tooltip'
+import { reportErrorToUser } from '../errors';
 
 import { manager, AppState } from './appstate'
 
@@ -27,6 +29,16 @@ export function setPath(x:string) {
 }
 
 export async function start(base_element, room) {
+  // listen for uncaught exceptions
+  window.addEventListener('error', (ev:ErrorEvent) => {
+    log.error('Uncaught error:', ev.message);
+    log.error(ev.error.stack);
+    reportErrorToUser(ev.error.toString(), {
+      title: 'Uncaught Error',
+      err: ev.error,
+    })
+  }, false);
+
   let store = new RPCRendererStore(room);
 
   // initial state
