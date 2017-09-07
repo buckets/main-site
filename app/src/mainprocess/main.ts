@@ -18,6 +18,10 @@ log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
 log.info('App starting...');
 
+process.on('uncaughtException' as any, (err) => {
+  log.error('uncaughtException', err);
+  log.error(err.stack);
+})
 
 // Make accessing '/' access the expected place
 protocol.registerStandardSchemes(['buckets'])
