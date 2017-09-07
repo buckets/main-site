@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as _ from 'lodash'
-import * as moment from 'moment'
 import { sss } from '../i18n'
 import { shell } from 'electron'
 import {Balances} from '../models/balances'
@@ -111,9 +110,9 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
 
             let computed_balance = this_months_balance + diff;
             manager.store.accounts.update(account.id, {balance: computed_balance});
-          })}/> ({sss('balance-as-of', (d:moment.Moment) => {
-            return <span>as of <Date value={d} /></span>
-          })(appstate.defaultPostingDate)})
+          })}/> ({sss('balance-as-of', (date:JSX.Element) => {
+            return <span>as of {date}</span>
+          })(<Date value={appstate.defaultPostingDate} />)})
         </div>
         {import_balance_field}
       </div>

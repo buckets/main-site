@@ -10,7 +10,7 @@ for langfile in $(ls src/langs/??.tsx); do
         continue
     fi
     echo "updating $langfile"
-    node src/langutil/propagate.js src/langs/build.tsx "$langfile" >/dev/null
+    node src/langutil/propagate.js src/langs/base.tsx "$langfile" >/dev/null
 done
 
 echo "you should run 'tsc' again"
