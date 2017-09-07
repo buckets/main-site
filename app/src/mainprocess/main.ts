@@ -9,7 +9,7 @@ import * as URL from 'url'
 import * as Path from 'path'
 import { updateMenu, updateEnabled } from './menu'
 import { BudgetFile, watchForEvents } from './files'
-import {APP_ROOT} from './globals'
+import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 
@@ -83,7 +83,7 @@ app.on('ready', function() {
       BudgetFile.openFile(openfirst.shift());  
     }
   } else if (process.env.DEBUG) {
-    BudgetFile.openFile('/tmp/test.buckets');  
+    BudgetFile.openFile('/tmp/test.buckets', true);  
   } else {
     openWizard();
   }

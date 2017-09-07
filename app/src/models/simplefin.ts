@@ -278,7 +278,7 @@ export async function linkAccountToHash(store:IStore, hash:string, account_id:nu
     params: { $account_hash: hash },
   })
   let promises = unknowns.map(unknown => {
-    return this.store.deleteObject(UnknownAccount, unknown.id)
+    return store.deleteObject(UnknownAccount, unknown.id)
   })
   await Promise.all(promises);
 }
