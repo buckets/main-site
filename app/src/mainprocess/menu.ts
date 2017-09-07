@@ -4,7 +4,7 @@ import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './fi
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles } from './persistent'
-import { sss } from '../i18n'
+import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 
@@ -132,6 +132,7 @@ export async function updateMenu() {
   };
   let WindowMenu = {
     role: 'window',
+    label: sss('Window'),
     submenu: [
       {role: 'minimize'},
       {role: 'close'}
@@ -140,11 +141,25 @@ export async function updateMenu() {
 
   let HelpMenu = {
     role: 'help',
+    label: sss('Help'),
     submenu: [
       {
         label: sss('Learn More'),
         click () { shell.openExternal('https://www.bucketsisbetter.com') }
       },
+      {
+        label: sss('Getting Started...'),
+        click() {
+          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
+        }
+      },
+      {
+        label: sss('Chat...'),
+        click() {
+          shell.openExternal('https://www.bucketsisbetter.com/chat');
+        }
+      },
+      {type: 'separator'},
       {
         label: sss('Show Log Files...'),
         click() {
@@ -158,15 +173,10 @@ export async function updateMenu() {
         }
       },
       {
-        label: sss('Chat...'),
+        label: sss('Report Translation Error...'),
         click() {
-          shell.openExternal('https://www.bucketsisbetter.com/chat');
-        }
-      },
-      {
-        label: sss('Getting Started...'),
-        click() {
-          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
+          let langname = tx.langpack.name;
+          reportBug(`Language: ${langname}\n` + sss('It says:') + '\n' + sss('It should say:'));
         }
       }
     ],
