@@ -349,5 +349,6 @@ const messages:IMessages = {
 }
 export const pack:ILangPack = {
   name: 'español',
+  dir: 'ltr',
   messages
 }

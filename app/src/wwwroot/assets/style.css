@@ -283,8 +283,8 @@ h2 {
   background-color: transparent;
   -webkit-appearance: none;
   transition: color 0.2s;
-  text-align: right;
-  text-align-last: right;
+  text-align: end;
+  text-align-last: end;
 }
 .month-selector select.month:active,
 .month-selector select.month:focus {
@@ -293,7 +293,7 @@ h2 {
 .month-selector input.year {
   border: 0;
   background: transparent;
-  text-align: left;
+  text-align: start;
   transition: color 0.2s, border-bottom-color 0.2s;
   border-bottom: 2px solid transparent;
   border-top: 2px solid transparent;
@@ -468,7 +468,7 @@ table.ledger th,
 table.ledger td {
   border: 1px solid var(--lightest-grey);
   padding: 1px 5px;
-  text-align: left;
+  text-align: start;
   vertical-align: center;
 }
 table.ledger td.noborder,
@@ -482,7 +482,7 @@ table.ledger tr.group-row td {
 }
 
 table.ledger th {
-  text-align: left;
+  text-align: start;
   vertical-align: bottom;
 
   border: none;
@@ -531,7 +531,7 @@ table.summary thead th {
 table.summary th.side,
 table.summary td.side {
   border-right: 1px solid var(--lighter-grey);
-  text-align: right;
+  text-align: end;
   padding-right: 1rem;
 }
 table.summary th.side-total {
@@ -676,7 +676,7 @@ table.summary td.border-right {
 .totals total amount {
   order: 1;
   font-size: 1.5rem;
-  text-align: left;
+  text-align: start;
 }
 .totals total amount .number {
   display: inline-flex;
@@ -969,7 +969,7 @@ table.props th {
 }
 .progress-bar .bar {
   color: white;
-  text-align: right;
+  text-align: end;
   height: 14px;
   font-size: 9px;
   line-height: 10px;
@@ -984,11 +984,11 @@ table.props th {
   right: -2.1rem;
   color: var(--darkblue);
   width: 2rem;
-  text-align: left;
+  text-align: start;
   transition: right .2s, text-align .2s;
 }
 .progress-bar.overhalf .bar .label {
-  text-align: right;
+  text-align: end;
   color: white;
   right: .2rem;
 }
@@ -1177,7 +1177,7 @@ table.props th {
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
-  text-align: left;
+  text-align: start;
 }
 .tooltip {
   opacity: 0;
@@ -1192,7 +1192,7 @@ table.props th {
   user-select: none;
   pointer-events: none;
   transition: opacity .2s;
-  text-align: left;
+  text-align: start;
 }
 .tooltip.showing {
   opacity: 1;

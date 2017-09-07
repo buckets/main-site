@@ -40,6 +40,7 @@ class TranslationContext {
     return `TranslationContext locale=${this._locale}`;
   }
   localizeThisPage() {
+    document.documentElement.setAttribute('dir', this.langpack.dir);
     Array.from(document.querySelectorAll('[data-translate]'))
     .forEach((elem:HTMLElement) => {
       try {
