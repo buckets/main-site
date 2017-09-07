@@ -7,6 +7,7 @@ import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { EventEmitter } from 'events'
+import { sss } from '../i18n'
 
 export class Connection implements IObject {
   static table_name: string = 'simplefin_connection'
@@ -156,7 +157,7 @@ export class Syncer extends EventEmitter {
         })
       } catch(err) {
         log.info(`Server error while syncing.  Aborting: ${err}`)
-        errors.add('Sync failed');
+        errors.add(sss('Sync failed'));
         break;
       }
       await sleep(this.delay);
@@ -295,7 +296,7 @@ class SimpleFINClient {
       claim_url = Buffer.from(token, 'base64').toString();
     } catch(err) {
       log.error(err);
-      throw new SimpleFinError('Invalid SimpleFIN Token');
+      throw new SimpleFinError(sss('Invalid SimpleFIN Token'));
     }
 
     // claim it
@@ -307,7 +308,7 @@ class SimpleFINClient {
       })
     } catch(err) {
       log.error(err);
-      throw new SimpleFinError('Unable to claim access token');
+      throw new SimpleFinError(sss('Unable to claim access token'));
     }
     return access_url;
   }
@@ -323,14 +324,14 @@ class SimpleFINClient {
       result = await req(options);
     } catch(err) {
       log.error(err);
-      throw new SimpleFinError('Error fetching data');
+      throw new SimpleFinError(sss('Error fetching data'));
     }
 
     try {
       return JSON.parse(result);
     } catch(err) {
       log.error(err);
-      throw new SimpleFinError('Error parsing response');
+      throw new SimpleFinError(sss('Error parsing response'));
     }
   }
 }

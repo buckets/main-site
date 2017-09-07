@@ -14,6 +14,7 @@ import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
 import { BucketBalanceChart } from '../charts/balancechart'
+import { sss } from '../i18n'
 
 const NOGROUP = -1;
 
@@ -41,22 +42,22 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
           <td>{bucket.name}</td>
           <td><button onClick={() => {
             manager.store.buckets.unkick(bucket.id);
-          }}>Un-kick</button></td>
+          }}>{sss('Un-kick')}</button></td>
           <td>
-            <Link relative to={`../${bucket.id}`} className="subtle">more</Link>
+            <Link relative to={`../${bucket.id}`} className="subtle">{sss('more')}</Link>
           </td>
         </tr>
       })
     let body;
     if (rows.length === 0) {
-      body = <div>You haven't kicked the bucket yet...</div>
+      body = <div>{sss("You haven't kicked the bucket yet...")}</div>
     } else {
       body = (
       <div>
         <table className="ledger">
           <thead>
             <tr>
-              <th>Bucket</th>
+              <th>{sss('Bucket')}</th>
               <th></th>
               <th></th>
             </tr>
@@ -92,29 +93,39 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let { pending } = this.state;
     let { to_deposit, to_withdraw } = this.getPending();
 
-    let doPendingLabelParts = [];
+    let doPendingLabel = null;
     if (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0)) {
       // transfer
-      doPendingLabelParts.push(<span key="transfer">Transfer <Money value={to_deposit} symbol nocolor /></span>);
-    } else {
-      if (to_deposit) {
-        doPendingLabelParts.push(<span key="deposit">Deposit <Money value={to_deposit} symbol nocolor /></span>);
-      }
-      if (to_withdraw) {
-        doPendingLabelParts.push(<span key="withdraw">{to_deposit ? ' and withdraw' : 'Withdraw'} <Money value={to_withdraw} symbol nocolor /></span>);
-      }
+      doPendingLabel = sss('action.transfermoney', (money:JSX.Element) => {
+          return <span>Transfer {money}</span>
+        })(<Money value={to_deposit} symbol nocolor />)
+    } else if (to_deposit || to_withdraw) {
+      doPendingLabel = sss('action.transactmoney', (deposit:JSX.Element, withdraw:JSX.Element) => {
+        if (deposit && withdraw) {
+          return <span>Deposit {deposit} and withdraw {withdraw}</span>
+        } else if (deposit) {
+          return <span>Deposit {deposit}</span>
+        } else {
+          return <span>Withdraw {withdraw}</span>
+        }
+      })(
+        to_deposit ? <Money value={to_deposit} symbol nocolor /> : null,
+        to_withdraw ? <Money value={to_withdraw} symbol nocolor /> : null,
+      )
     }
     
     let rainleft;
     if (appstate.rain > 0 && to_deposit) {
-      rainleft = <div>(<Money symbol nocolor value={appstate.rain - (to_deposit + to_withdraw)} /> rain left)</div>;
+      rainleft = <div>({sss('rain left', (money:JSX.Element) => {
+        return <span>{money} rain left</span>
+      })(<Money symbol nocolor value={appstate.rain - (to_deposit + to_withdraw)} />)})</div>;
     }
 
     let doPendingButton;
-    if (doPendingLabelParts.length) {
-      doPendingButton = <button className="primary" onClick={this.doPending}>{doPendingLabelParts}</button>;
+    if (doPendingLabel) {
+      doPendingButton = <button className="primary" onClick={this.doPending}>{doPendingLabel}</button>;
     } else {
-      doPendingButton = <button disabled>Deposit/Withdraw</button>;
+      doPendingButton = <button disabled>{sss('Deposit/Withdraw')}</button>;
     }
 
     let self_debt_amount = 0;
@@ -136,9 +147,9 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let show_nodebt_balance = false;
     if (self_debt_amount) {
       self_debt = <Help icon={<div className="labeled-number">
-        <div className="label">Self debt</div>
+        <div className="label">{sss('Self debt')}</div>
         <div className="value"><Money value={self_debt_amount} /></div>
-      </div>}>Amount of money over-allocated in buckets.</Help>
+      </div>}>{sss('Amount of money over-allocated in buckets.')}</Help>
       show_nodebt_balance = true;
     }
         
@@ -168,13 +179,13 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                 <button
                   onClick={this.makeItRain}
                   disabled={appstate.rain<=0}
-                  className="makeitrain">Make it rain! <span className="fa fa-tint"/></button>
-                <button onClick={this.addBucket}>New bucket</button>
-                <button onClick={this.addGroup}>New group</button>
+                  className="makeitrain">{sss('Make it rain!')} <span className="fa fa-tint"/></button>
+                <button onClick={this.addBucket}>{sss('action.New bucket', 'New bucket')}</button>
+                <button onClick={this.addGroup}>{sss('action.New group', 'New group')}</button>
                 <Help icon={<div className="labeled-number">
-                  <div className="label">Rain<permonth/></div>
+                  <div className="label">{sss('Rain')}<permonth/></div>
                   <div className="value"><Money value={total_rain_needed} /></div>
-                </div>}>Total amount your buckets expect each month.</Help>
+                </div>}>{sss('Total amount your buckets expect each month.')}</Help>
                 {self_debt}
               </div>
               <div className="group">
@@ -201,10 +212,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       </Switch>);
   }
   addBucket = () => {
-    manager.store.buckets.add({name: 'New Bucket'})
+    manager.store.buckets.add({name: sss('default new bucket name', 'New Bucket')})
   }
   addGroup = () => {
-    manager.store.buckets.addGroup({name: 'New Group'})
+    manager.store.buckets.addGroup({name: sss('default new group name', 'New Group')})
   }
   makeItRain = () => {
     let { appstate } = this.props;
@@ -351,7 +362,7 @@ class BucketKindDetails extends React.Component<{
   goalRow() {
     let { bucket } = this.props;
     return <tr key="goal">
-      <td>Goal:</td>
+      <td>{sss('Goal:')}</td>
       <td>
         <MoneyInput
           value={bucket.goal}
@@ -370,7 +381,7 @@ class BucketKindDetails extends React.Component<{
     let year = dt.year();
     let mon = dt.month() + 1;
     return <tr key="end_date">
-      <td>Target date:</td>
+      <td>{sss('Target date:')}</td>
       <td>
         <MonthSelector
           year={year}
@@ -386,7 +397,7 @@ class BucketKindDetails extends React.Component<{
   depositRow() {
     let { bucket } = this.props;
     return <tr key="deposit">
-      <td>Monthly deposit:</td>
+      <td>{sss('Monthly deposit:')}</td>
       <td>
         <MoneyInput
           value={bucket.deposit}
@@ -406,18 +417,18 @@ class BucketKindDetails extends React.Component<{
     if (this.state.open) {
       edit_rows.push(
       <tr key="bucket-type">
-        <td>Bucket type:</td>
+        <td>{sss('Bucket type:')}</td>
         <td>
           <select
             value={bucket.kind}
             onChange={(ev) => {
               manager.store.buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
             }}>
-            <option value="">Plain old bucket</option>
-            <option value="deposit">Recurring expense</option>
-            <option value="goal-date">Save X by Y date</option>
-            <option value="goal-deposit">Save X by depositing Z/mo</option>
-            <option value="deposit-date">Save Z/mo until Y date</option>
+            <option value="">{sss('buckettype.plain', 'Plain old bucket')}</option>
+            <option value="deposit">{sss('buckettype.deposit', 'Recurring expense')}</option>
+            <option value="goal-date">{sss('buckettype.goal-date', 'Save X by Y date')}</option>
+            <option value="goal-deposit">{sss('buckettype.goal-deposit', 'Save X by depositing Z/mo')}</option>
+            <option value="deposit-date">{sss('buckettype.deposit-date', 'Save Z/mo until Y date')}</option>
           </select>
         </td>
       </tr>)
@@ -430,9 +441,9 @@ class BucketKindDetails extends React.Component<{
           edit_rows.push(this.goalRow())
           edit_rows.push(this.depositRow())
           edit_rows.push(<tr key="end-date">
-              <td>Goal completion:</td>
+              <td>{sss('Goal completion:')}</td>
               <td>
-                {computed.end_date ? <Date value={computed.end_date} format="MMM YYYY" /> : "some day..."}
+                {computed.end_date ? <Date value={computed.end_date} format="MMM YYYY" /> : sss("some day...")}
               </td>
             </tr>)
           break;
@@ -441,7 +452,7 @@ class BucketKindDetails extends React.Component<{
           edit_rows.push(this.goalRow())
           edit_rows.push(this.targetDateRow())
           edit_rows.push(<tr key="end-date">
-              <td>Required deposit:</td>
+              <td>{sss('Required deposit:')}</td>
               <td>
                 <Money value={computed.deposit} /><permonth />
               </td>
@@ -453,7 +464,7 @@ class BucketKindDetails extends React.Component<{
           edit_rows.push(this.targetDateRow())
           edit_rows.push(<tr key="goal">
               <td>
-                Ending amount:
+                {sss('Ending amount:')}
               </td>
               <td>
                 <Money value={computed.goal} />
@@ -475,13 +486,13 @@ class BucketKindDetails extends React.Component<{
       }
       if (computed.goal === 0) {
         summary = <div className="goal-summary">
-          <span>Goal: 0</span>
+          <span>{sss('Goal: 0')}</span>
           <Date value={computed.end_date} format="MMM YYYY" />
         </div>
       } else {
         summary = <div className="goal-summary">
           <ProgressBar percent={percent} color={bucket.color} />
-          <span>Goal: <Money value={computed.goal} /></span>
+          <span>{sss('Goal:')} <Money value={computed.goal} /></span>
           <Date value={computed.end_date} format="MMM YYYY" />
         </div>;
       }
@@ -561,7 +572,9 @@ class BucketRow extends React.Component<BucketRowProps, {
       let percent = rainfall/computed.deposit*100;
       rainfall_indicator = <Help
         icon={<ProgressBubble height="1rem" percent={percent} />}>
-        Rainfall received this month: <Money value={rainfall}/> ({Math.floor(percent)}%)
+        {sss('rainfall-received-this-month', (money:JSX.Element, percent:number) => {
+          return <span>Rainfall received this month: {money} ({percent}%)</span>
+        })(<Money value={rainfall}/>, Math.floor(percent))}
       </Help>
     }
 
@@ -768,23 +781,23 @@ class GroupRow extends React.Component<{
       </tr>
       <tr>
         <th className="nopad noborder"></th>
-        <th>Bucket</th>
-        <th className="right">Balance</th>
-        {show_nodebt_balance ? <th className="right">Effective <Help>This would be the balance if no buckets were in debt</Help></th> : null}
-        <th className="left">Transact</th>
-        <th className="right"><span className="fa fa-tint"/> Rain <Help>This is how much money these buckets want each month.  The little box indicates how much they have received.</Help></th>
-        <th>Details</th>
+        <th>{sss('Bucket')}</th>
+        <th className="right">{sss('Balance')}</th>
+        {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</Help></th> : null}
+        <th className="left">{sss('action.transact', 'Transact')}</th>
+        <th className="right"><span className="fa fa-tint"/> {sss('Rain')} <Help>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</Help></th>
+        <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>
       </tr>
       {bucket_rows}
       <tr className="action-row">
         <td colSpan={6}></td>
-        <td><button onClick={this.createBucket}>New bucket</button></td>
+        <td><button onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button></td>
       </tr>
     </tbody>);
   }
   createBucket = () => {
-    manager.store.buckets.add({name: 'New Bucket', group_id: this.props.group.id})
+    manager.store.buckets.add({name: sss('default new bucket name', 'New Bucket'), group_id: this.props.group.id})
   }
   //----------------------------------
   // Draggable
@@ -910,7 +923,7 @@ function getGroupedBuckets(buckets:Bucket[], groups:Group[]) {
   if (group2buckets[NOGROUP]) {
     group_copy.push({
       id: NOGROUP,
-      name: 'Misc',
+      name: sss('misc group name', 'Misc'),
       ranking: 'z',
     } as Group)
   }
@@ -942,11 +955,11 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
     let kick_button;
     let kicked_ribbon;
     if (bucket.kicked) {
-      kicked_ribbon = <div className="kicked-ribbon">Kicked</div>
+      kicked_ribbon = <div className="kicked-ribbon">{sss('single-bucket Kicked', 'Kicked')}</div>
       kick_button = <button
         onClick={() => {
           manager.store.buckets.unkick(bucket.id);
-        }}>Un-kick the bucket</button>
+        }}>{sss('Un-kick')}</button>
     } else {
       kick_button = <button
         className="delete"
@@ -955,10 +968,10 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
           .then(new_bucket => {
             if (!new_bucket.kicked) {
               // it was deleted
-              makeToast('Bucket deleted completely');
+              makeToast(sss('Bucket deleted completely'));
             }
           })
-        }}>Kick the bucket</button>
+        }}>{sss('Kick the bucket')}</button>
     }
 
     let chart;
@@ -1008,8 +1021,8 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
                 }}
               />
             </h1>
-            <div>Balance: <Money value={balance} /></div>
-            <div>Rainfall: <Money value={rainfall} /></div>
+            <div>{sss('Balance:')} <Money value={balance} /></div>
+            <div>{sss('Rainfall:')} <Money value={rainfall} /></div>
             <hr/>
             <TransactionList
               transactions={transactions}
@@ -1055,11 +1068,11 @@ class TransactionList extends React.Component<{
     return <table className="ledger">
       <thead>
         <tr>
-          <th>Posted</th>
-          <th>Memo</th>
-          <th>Amount</th>
-          <th>Transfer <Help>A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.</Help></th>
-          <th>Misc</th>
+          <th>{sss('Posted')}</th>
+          <th>{sss('Memo')}</th>
+          <th>{sss('Amount')}</th>
+          <th>{sss('noun.transfer', 'Transfer')} <Help>{sss('bucket.transfer.help', "A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.")}</Help></th>
+          <th>{sss('Misc')}</th>
         </tr>
       </thead>
       <tbody>

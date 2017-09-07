@@ -96,7 +96,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
             onClick={ev => {
               manager.fileimport.openFileDialog();
             }}>
-            Import from file
+            {sss('Import from file')}
           </button>
           <button
             className="delete"
@@ -106,7 +106,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
             <input
               type="checkbox"
               checked={this.state.show_subset} 
-              onChange={this.showUncategorized} /> Show uncategorized
+              onChange={this.showUncategorized} /> {sss('Show uncategorized')}
           </div>
         </div>
       </div>
@@ -169,7 +169,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
       }
       let source_icon;
       if (trans.fi_id) {
-        source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>This symbol means the transaction came from an import/sync</Help>
+        source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>{sss('sync-symbol help', "This symbol means the transaction came from an import/sync")}</Help>
       }
       return <tr key={trans.id}>
         {select_cell}
@@ -186,11 +186,11 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
       <thead>
         <tr>
           {onSelectChange ? <th></th> : null}
-          <th className="nobr">Posted</th>
-          {hideAccount ? null : <th>Account</th>}
-          <th style={{width: '40%'}}>Memo</th>
-          <th>Amount</th>
-          <th>Category</th>
+          <th className="nobr">{sss('Posted')}</th>
+          {hideAccount ? null : <th>{sss('Account')}</th>}
+          <th style={{width: '40%'}}>{sss('Memo')}</th>
+          <th>{sss('Amount')}</th>
+          <th>{sss('Category')}</th>
         </tr>
       </thead>
       <tbody>
@@ -260,9 +260,9 @@ class CreateTransRow extends React.Component<{
   render() {
     let { account, hideAccount, appstate, showSelectCol } = this.props;
     let account_cell;
-    let transact_label = 'Deposit';
+    let transact_label = sss('action.deposit', 'Deposit');
     if (this.state.amount < 0) {
-      transact_label = 'Withdraw';
+      transact_label = sss('action.withdraw', 'Withdraw');
     }
     if (!hideAccount) {
       // show accounts
@@ -506,12 +506,12 @@ class Categorizer extends React.Component<CategorizerProps, {
     return <div className="categorizer open">
       {elems}
       <div className="bucket-buttons">
-        <button onClick={this.closeCategorizer}>Cancel</button>
-        <button onClick={this.saveChanges}>Save</button>
+        <button onClick={this.closeCategorizer}>{sss('Cancel')}</button>
+        <button onClick={this.saveChanges}>{sss('Save')}</button>
       </div>
       <div className="general-cat-buttons">
-        {transaction.amount >= 0 ? <button onClick={this.generalCat('income')}>💰 Income</button> : null}
-        <button onClick={this.generalCat('transfer')}>⇄ Transfer</button>
+        {transaction.amount >= 0 ? <button onClick={this.generalCat('income')}>💰 {sss('noun.income', 'Income')}</button> : null}
+        <button onClick={this.generalCat('transfer')}>⇄ {sss('noun.transfer', 'Transfer')}</button>
       </div>
     </div>
   }
@@ -522,12 +522,12 @@ class Categorizer extends React.Component<CategorizerProps, {
     if (transaction.general_cat === 'income') {
       // income
       guts = <a className="general-tag" onClick={this.openCategorizer}>
-          💰 Income
+          💰 {sss('noin.income', 'Income')}
         </a>
     } else if (transaction.general_cat === 'transfer') {
       // transfer
       guts = <a className="general-tag" onClick={this.openCategorizer}>
-          ⇄ Transfer
+          ⇄ {sss('noun.transfer', 'Transfer')}
         </a>
     } else if (cats.length) {
       // categorized
@@ -550,7 +550,7 @@ class Categorizer extends React.Component<CategorizerProps, {
       // no category
       guts = <button
         onClick={this.openCategorizer}
-        onFocus={this.openCategorizer}>Categorize</button>
+        onFocus={this.openCategorizer}>{sss('Categorize')}</button>
     }
     return <div className="categorizer">
       {guts}

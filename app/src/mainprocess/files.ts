@@ -9,6 +9,7 @@ import {RPCMainStore} from '../rpc';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
+import { sss } from '../i18n'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -41,7 +42,7 @@ export class BudgetFile {
     } catch(err) {
       log.error(`Error opening file: ${this.filename}`);
       log.error(err.stack);
-      reportErrorToUser(`Unable to open the file: ${this.filename}`, {err});
+      reportErrorToUser(sss('Unable to open the file:') + ` ${this.filename}`, {err});
       return;
     }
     
@@ -99,7 +100,7 @@ export class BudgetFile {
     if (!create) {
       // open, don't create
       if (! await fs.existsAsync(filename)) {
-        displayError(`File does not exist: ${filename}`)
+        displayError(sss('File does not exist:') + ` ${filename}`)
         return;
       }
     }
@@ -124,9 +125,9 @@ export function newBudgetWindow() {
 
 export function openDialog() {
   dialog.showOpenDialog({
-    title: 'Open Buckets Budget',
+    title: sss('Open Buckets Budget'),
     filters: [
-      {name: 'Buckets Budget', extensions: ['buckets']},
+      {name: sss('budget-file-type-name', 'Buckets Budget'), extensions: ['buckets']},
     ],
   }, (paths) => {
     if (paths) {
@@ -140,13 +141,13 @@ export function openDialog() {
 export function newBudgetFileDialog():Promise<BudgetFile> {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
-      title: 'Buckets Budget Filename',
+      title: sss('Buckets Budget Filename'),
       defaultPath: 'My Budget.buckets',
     }, (filename) => {
       if (filename) {
         resolve(BudgetFile.openFile(filename, true));  
       } else {
-        reject(new Error('No file chosen'));
+        reject(new Error(sss('No file chosen')));
       }
     })
   })

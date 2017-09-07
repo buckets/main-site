@@ -170,25 +170,27 @@ class Application extends React.Component<ApplicationProps, any> {
                 <header>
                   <div className="totals">
                     <total>
-                      <name><Help icon={<span><span className="fa fa-tint" /> {sss('Rain')}</span>}>Rain is the money you haven't yet put into buckets.  Drain this to zero every month.</Help></name>
+                      <name><Help icon={<span><span className="fa fa-tint" /> {sss('Rain')}</span>}>{sss('rain.help', "Rain is the money you haven't yet put into buckets.  After transactions are categorized, always keep this 0 or higher.")}</Help></name>
                       <amount><Money value={appstate.rain} /></amount>
                     </total>
                     <total className="section-start">
-                      <name>Income</name>
+                      <name>{sss('Income')}</name>
                       <amount><Money value={appstate.income} /></amount>
                     </total>
                     <inter-total>-</inter-total>
                     <total>
-                      <name>Expenses</name>
+                      <name>{sss('Expenses')}</name>
                       <amount><Money className="negative" value={Math.abs(appstate.expenses)} /></amount>
                     </total>
                     <inter-total>=</inter-total>
                     <total>
-                      <name>Month's {appstate.gain >= 0 ? 'gain' : 'loss'}</name>
+                      <name>{sss('months gain/loss label', (gain) => {
+                        return gain >= 0 ? "Month's gain" : "Month's loss";
+                      })(appstate.gain)}</name>
                       <amount><Money value={appstate.gain} /></amount>
                     </total>
                     <total className="section-start">
-                      <name>in the bank</name>
+                      <name>{sss('in the bank')}</name>
                       <amount><Money value={appstate.account_total_balance} /></amount>
                     </total>
                   </div>

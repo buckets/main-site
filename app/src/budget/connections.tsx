@@ -6,7 +6,7 @@ import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
-
+import { sss } from '../i18n'
 
 function startDefaultSync(appstate:AppState) {
   let range = appstate.viewDateRange;
@@ -20,12 +20,12 @@ export class SyncWidget extends React.Component<{
   appstate: AppState;
 }, {}> {
   render() {
-    let label = 'Sync';
+    let label = sss('Sync');
     let { appstate } = this.props;
     let { syncing, sync_message } = appstate;
     let details;
     if (syncing) {
-      label = 'Syncing...';
+      label = sss('Syncing...');
       if (sync_message) {
         details = <div className="details">
           {sync_message}
@@ -73,23 +73,26 @@ export class ConnectionsPage extends React.Component<{
     if (this.state.connecting) {
       steps = (<div className="dialog">
         <div>
-          Connecting to your bank account will make it easy to pull transaction history
-          from your bank into Buckets.  To connect, do the following:
+          {sss('simplefin-connect-intro', "Connecting to your bank account will make it easy to pull transaction history from your bank into Buckets.  To connect, do the following:")}
         </div>
         <ol>
           <li>
-            Get a SimpleFIN Token from the <a href="#" onClick={(ev) => {
-              ev.preventDefault();
-              shell.openExternal("https://bridge.simplefin.org");
-            }}>SimpleFIN Bridge</a>
+            {sss('simplefin-get-token', (mklink) => {
+              return <span>Get a SimpleFIN Token from the {mklink('SimpleFIN Bridge')}</span>
+            })((linktext:string) => {
+              return <a href="#" onClick={(ev) => {
+                ev.preventDefault();
+                shell.openExternal("https://bridge.simplefin.org");
+              }}>{linktext}</a>
+            })}
           </li>
           <li>
-            Then paste your SimpleFIN Token here:
+            {sss('simplefin-paste', 'Then paste your SimpleFIN Token here:')}
             <div><textarea
               onChange={(ev) => {
                 this.setState({
                   simplefin_token: ev.target.value,
-                  status_message: 'Connecting...',
+                  status_message: sss('Connecting...'),
                 }, () => {
                   this.connect();
                 })
@@ -104,7 +107,7 @@ export class ConnectionsPage extends React.Component<{
     let unknown;
     if (Object.keys(appstate.unknown_accounts).length) {
       unknown = <div>
-        <h2>Unlinked Accounts</h2>
+        <h2>{sss('Unlinked Accounts')}</h2>
         <UnlinkedAccountList appstate={appstate} />
       </div>
     }
@@ -112,7 +115,7 @@ export class ConnectionsPage extends React.Component<{
     let conns;
     if (Object.keys(appstate.connections).length) {
       conns = <div>
-        <h2>Connections</h2>
+        <h2>{sss('Connections')}</h2>
         <ConnectionList connections={_.values(appstate.connections)} />
       </div>
     }
@@ -131,11 +134,11 @@ export class ConnectionsPage extends React.Component<{
               }}
               disabled={!conns}><span className={cx("fa fa-refresh", {
                 'fa-spin': appstate.syncing,
-              })}/> {appstate.syncing ? 'Cancel sync' : 'Sync'}</button>
-            <button onClick={this.startConnecting}>Connect to bank</button>
+              })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
+            <button onClick={this.startConnecting}>{sss('Connect to bank')}</button>
           </div>
           <div>
-            <button onClick={() => { makeToast('Here is some toast')}}>Test Toast</button>
+            <button onClick={() => { makeToast('Here is some toast')}}>{sss('Test Toast')}</button>
           </div>
         </div>
         <div className="padded">
@@ -163,7 +166,7 @@ export class ConnectionsPage extends React.Component<{
       status_message: '',
       connecting: false,
     })
-    makeToast('Connection saved!');
+    makeToast(sss('Connection saved!'));
     return startDefaultSync(this.props.appstate);
   }
 }
@@ -179,14 +182,14 @@ class ConnectionList extends React.Component<{
         <td><DateTime value={conn.last_used} /></td>
         <td><button className="delete" onClick={() => {
           manager.store.deleteObject(Connection, conn.id);
-        }}>Delete</button></td>
+        }}>{sss('Delete')}</button></td>
       </tr>
     })
     return <table className="ledger">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Last used</th>
+          <th>{sss('ID')}</th>
+          <th>{sss('Last used')}</th>
           <th></th>
         </tr>
       </thead>
@@ -211,8 +214,8 @@ class UnlinkedAccountList extends React.Component<{
     return <table className="ledger">
       <thead>
         <tr>
-          <th>Description</th>
-          <th>Account</th>
+          <th>{sss('Description')}</th>
+          <th>{sss('Account')}</th>
           <th></th>
         </tr>
       </thead>
@@ -248,12 +251,12 @@ class UnlinkedAccountRow extends React.Component<{
           onChange={(ev) => {
             this.setState({chosen_account_id: ev.target.value})
           }}>
-          <option value="NEW">+ Create new account</option>
+          <option value="NEW">+ {sss('Create new account')}</option>
           {options}
         </select>
       </td>
       <td>
-        <button onClick={this.link}>Link</button>
+        <button onClick={this.link}>{sss('action.link-account', 'Link')}</button>
       </td>
     </tr>
   }
@@ -262,11 +265,11 @@ class UnlinkedAccountRow extends React.Component<{
     if (str_account_id === 'NEW') {
       let new_account = await manager.store.accounts.add(this.props.unknown.description)
       await manager.store.connections.linkAccountToHash(this.props.unknown.account_hash, new_account.id);
-      makeToast(`Account created: ${new_account.name}`)
+      makeToast(sss('Account created:') + ' ' + new_account.name);
     } else {
       let account_id = parseInt(str_account_id);
       await manager.store.connections.linkAccountToHash(this.props.unknown.account_hash, account_id);
-      makeToast('Account linked');
+      makeToast(sss('Account linked'));
     }
     
   }

@@ -18,6 +18,7 @@ import { IncomeExpenseSum } from '../models/reports'
 import { TransactionList } from './transactions'
 
 import { SizeAwareDiv } from '../charts/util'
+import { sss } from '../i18n'
 
 export class ReportsPage extends React.Component<{
   appstate: AppState;
@@ -64,7 +65,7 @@ export class ReportsPage extends React.Component<{
             />
           </Route>
           <Route path="">
-            <h2 className="center">Month to Month</h2>
+            <h2 className="center">{sss('Month to Month')}</h2>
             <CashFlowComparison
               intervals={month_intervals}
               columnFormatter={(x:Interval, idx:number) => {
@@ -76,7 +77,7 @@ export class ReportsPage extends React.Component<{
               }}
             />
 
-            <h2 className="center">Year to Year</h2>
+            <h2 className="center">{sss('Year to Year')}</h2>
             <CashFlowComparison
               intervals={year_intervals}
               columnFormatter={(x:Interval) => x.start.format('YYYY')}
@@ -210,36 +211,36 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
       </thead>
       <tbody>
         <tr className="hover">
-          <th className="side">Income</th>
+          <th className="side">{sss('Income')}</th>
           {this.state.data.map((item, i) => {
             return <td key={i} className="center">
               <Money className=" smallcents" value={item.income}/>
             </td>
           })}
           <th className="side-total">
-            Avg: <Money className="smallcents" value={d3.mean(complete_data, item => item.income)} />
+            {sss('Avg:')} <Money className="smallcents" value={d3.mean(complete_data, item => item.income)} />
           </th>
         </tr>
         <tr className="hover">
-          <th className="side">Expenses</th>
+          <th className="side">{sss('Expenses')}</th>
           {this.state.data.map((item, i) => {
             return <td key={i} className="center">
               <Money className=" smallcents" value={item.expenses}/>
             </td>
           })}
           <th className="side-total">
-            Avg: <Money className="smallcents" value={d3.mean(complete_data, item => item.expenses)} />
+            {sss('Avg:')} <Money className="smallcents" value={d3.mean(complete_data, item => item.expenses)} />
           </th>
         </tr>
         {net_transfer_total ? <tr className="hover">
-          <th className="side">Net Transfers <Help>Net transfers are the sum total of all transactions marked as a transfer.  It should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.</Help></th>
+          <th className="side">{sss('Net Transfers')} <Help>{sss('net-transfers.help', "Net transfers are the sum total of all transactions marked as a transfer.  It should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.")}</Help></th>
           {this.state.data.map((item, i) => {
             return <td key={i} className="center">
               {item.net_transfer ? <Link relative to={`/transfers/${item.interval.start.format('YYYY')}`}><Money className=" smallcents" value={item.net_transfer}/></Link> : "-"}
             </td>
           })}
           <th className="side-total">
-            Tot: <Money className="smallcents" value={net_transfer_total} />
+            {sss('Tot:')} <Money className="smallcents" value={net_transfer_total} />
           </th>
         </tr> : null }
         <tr>
@@ -370,14 +371,14 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
           </th>
         </tr>
         <tr className="hover">
-          <th className="side">Gain/Loss</th>
+          <th className="side">{sss('Gain/Loss')}</th>
           {this.state.data.map((item, i) => {
             return <td key={i} className="center">
               <Money className=" smallcents" value={item.income + item.expenses}/>
             </td>
           })}
           <th className="side-total">
-            Tot: <Money className="smallcents" value={gain_loss_total} />
+            {sss('Tot:')} <Money className="smallcents" value={gain_loss_total} />
           </th>
         </tr>
         <tr>
@@ -429,7 +430,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
           </th>
         </tr>
         <tr className="hover">
-          <th className="side">Ending Balance</th>
+          <th className="side">{sss('Ending Balance')}</th>
           {this.state.data.map((item, i) => {
             return <td key={i} className="center">
               <Money className=" smallcents" value={item.end_balance}/>
@@ -526,14 +527,14 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
       />
     })
     return <div>
-      <h2 className="center">Recurring Expenses</h2>
+      <h2 className="center">{sss('Recurring Expenses')}</h2>
       <table className="summary full-width">
         <thead>
           <tr>
-            <th className="left">Bucket</th>
-            <th className="right">Budgeted</th>
-            <th className="center" colSpan={3}>Prior 12 months</th>
-            <th className="center" colSpan={3}>Prior 3 months</th>
+            <th className="left">{sss('Bucket')}</th>
+            <th className="right">{sss('Budgeted')}</th>
+            <th className="center" colSpan={3}>{sss('Prior 12 months')}</th>
+            <th className="center" colSpan={3}>{sss('Prior 3 months')}</th>
             <th className="center" colSpan={3}><Date
               value={end_date.clone().subtract(1, 'day')}
               format="MMM YYYY" /></th>

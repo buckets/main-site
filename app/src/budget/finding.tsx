@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {remote, ipcRenderer} from 'electron'
+import { sss } from '../i18n'
 
 const WC = remote.getCurrentWebContents();
 
@@ -126,7 +127,9 @@ export class FinderDisplay extends React.Component<{}, {
     }
     let matchcount;
     if (this.state.text) {
-      matchcount = `${this.state.current_match-1} of ${this.state.total_matches-1}`;
+      matchcount = sss('match-count', (current_match:number, total_matches:number) => {
+        return `${current_match} of ${total_matches}`;
+      })(this.state.current_match-1, this.state.total_matches-1);
     }
     return <div className="text-finder">
       <input

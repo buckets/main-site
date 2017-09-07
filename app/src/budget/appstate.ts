@@ -10,6 +10,7 @@ import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 import { makeToast } from './toast'
 import { FileImportState, FileImportManager } from './importing'
+import { sss } from '../i18n'
 
 interface IAppState {
   accounts: {
@@ -235,19 +236,27 @@ export class StateManager extends EventEmitter {
 
     store.connections.syncer
     .on('start', ({sync_start, sync_end}) => {
-      makeToast(`Syncing transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')}`);
+      makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
+        return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
+      })(sync_start, sync_end));
       this.appstate.syncing = true;
       this.signalChange();
     })
     .on('fetching-range', ({start, end}) => {
-      this.appstate.sync_message = `week of ${start.format('ll')}`;
+      this.appstate.sync_message = sss('sync.status.week', (sync_start:moment.Moment) => {
+        return `week of ${sync_start.format('ll')}`;
+      })(start);
       this.signalChange();
     })
     .on('done', ({sync_start, sync_end, trans_count, errors, cancelled}) => {
       if (cancelled) {
-        makeToast(`Synced ${trans_count} transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')} before being cancelled.`)
+        makeToast(sss('sync.cancelled', (trans_count:number) => {
+          return `Synced ${trans_count} transactions before being cancelled.`;
+        })(trans_count));
       } else {
-        makeToast(`Synced ${trans_count} transactions from ${sync_start.format('ll')} to ${sync_end.format('ll')}`);
+        makeToast(sss('sync.done', (trans_count:number, start:moment.Moment, end:moment.Moment) => {
+          return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
+        })(trans_count, sync_start, sync_end));
       }
       errors.forEach(err => {
         makeToast(err, {className:'error'});

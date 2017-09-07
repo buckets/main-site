@@ -94,21 +94,21 @@ export async function updateMenu() {
       {role: 'selectall'},
       {type: 'separator'},
       {
-        label: 'Find...',
+        label: sss('Find...'),
         accelerator: 'CmdOrCtrl+F',
         click() {
           startFindInPage();
         }
       },
       {
-        label: 'Find Next',
+        label: sss('Find Next'),
         accelerator: 'CmdOrCtrl+G',
         click() {
           findNext();
         }
       },
       {
-        label: 'Find Previous',
+        label: sss('Find Previous'),
         accelerator: 'CmdOrCtrl+Shift+G',
         click() {
           findPrev();
@@ -117,7 +117,7 @@ export async function updateMenu() {
     ]
   };
   let ViewMenu = {
-    label: 'View',
+    label: sss('View'),
     submenu: [
       {role: 'reload'},
       {role: 'forcereload'},
@@ -225,7 +225,7 @@ export async function updateMenu() {
     EditMenu.submenu.push(
       {type: 'separator'},
       <any>{
-        label: 'Speech',
+        label: sss('Speech'),
         submenu: [
           {role: 'startspeaking'},
           {role: 'stopspeaking'}

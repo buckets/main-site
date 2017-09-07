@@ -5,6 +5,7 @@ import * as Path from 'path'
 import { shell, app, dialog, BrowserWindow, ipcMain } from 'electron'
 import { APP_ROOT } from './globals'
 import { autoUpdater } from 'electron-updater'
+import { sss } from '../i18n';
 
 let win:Electron.BrowserWindow;
 
@@ -156,11 +157,11 @@ export async function linux_checkForUpdates() {
   let current_version = `v${app.getVersion()}`;
   if (new_version && current_version !== new_version) {
     dialog.showMessageBox({
-      title: 'Update Available',
-      message: `Version ${new_version} of Buckets is available.`,
+      title: sss('Update Available'),
+      message: sss('version-available', (newv:string) => `Version ${newv} available.`)(new_version),
       buttons: [
-        'Later',
-        'Download',
+        sss('Later'),
+        sss('Download'),
       ],
       defaultId: 0,
     }, (indexClicked) => {

@@ -112,7 +112,7 @@ export class AccountView extends React.Component<AccountViewProps, {}> {
             manager.store.accounts.update(account.id, {balance: computed_balance});
           })}/> ({sss('balance-as-of', (d:moment.Moment) => {
             return <span>as of <Date value={d} /></span>
-            })(appstate.defaultPostingDate)})
+          })(appstate.defaultPostingDate)})
         </div>
         {import_balance_field}
       </div>

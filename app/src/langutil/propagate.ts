@@ -43,7 +43,7 @@ function getSrcValue(thing, src:ts.SourceFile):string {
       return `[${guts.join(',')}]`;
     }
     default: {
-      console.error('thing', thing);
+      console.error('Unknown value type:', thing);
       throw new Error(`Unknown value type: ${thing}`);
     }
   }
@@ -125,8 +125,13 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
   return lines.join('\n');
 }
 
-
-copyEm(fromfile, tofile);
+try {
+  copyEm(fromfile, tofile);  
+} catch(err) {
+  console.log(err);
+  console.error(err.stack);
+  throw err;
+}
 
 
 function openFile(filename:string):ts.SourceFile {

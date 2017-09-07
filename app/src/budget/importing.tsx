@@ -3,6 +3,7 @@ import * as fs from 'fs-extra-promise'
 import * as moment from 'moment'
 import * as log from 'electron-log'
 import * as _ from 'lodash'
+import { sss } from '../i18n'
 import { remote, ipcRenderer } from 'electron'
 import { AppState, StateManager, manager } from './appstate'
 import { setPath } from './budget';
@@ -37,7 +38,7 @@ export class FileImportManager {
   }
   openFileDialog() {
     remote.dialog.showOpenDialog({
-      title: 'Open Transaction File',
+      title: sss('Open Transaction File'),
       filters: [
         {name: 'OFX/QFX', extensions: ['ofx', 'qfx']},
       ],
@@ -78,7 +79,9 @@ export class FileImportManager {
             fi_id: trans.fi_id,
           })
         }));
-        makeToast(`Imported ${imported.length} transactions.`);
+        makeToast(sss('imported X trans', (trans_count:number) => {
+          return `Imported ${trans_count} transactions.`;
+        })(imported.length));
       } else {
         // no matching account
         this.manager.appstate.fileimport.pending_imports.push({
@@ -96,11 +99,11 @@ export class FileImportManager {
       let new_account = await this.manager.store.accounts.add(pending.account_label)
       account_id = new_account.id;
       await manager.store.connections.linkAccountToHash(pending.hash, new_account.id);
-      makeToast(`Account created: ${new_account.name}`)
+      makeToast(sss('Account created:') + ' ' + new_account.name);
     } else {
       account_id = parseInt(str_account_id);
       await manager.store.connections.linkAccountToHash(pending.hash, account_id);
-      makeToast('Account linked');
+      makeToast(sss('Account linked'));
     }
     let imported = await Promise.all(pending.transactions.map(trans => {
       return manager.store.accounts.importTransaction({
@@ -111,7 +114,9 @@ export class FileImportManager {
         fi_id: trans.fi_id,
       })
     }));
-    makeToast(`Imported ${imported.length} transactions.`);
+    makeToast(sss('imported n trans', (num_trans:number) => {
+      return `Imported ${num_trans} transactions.`;
+    })(imported.length));
     let pending_imports = this.manager.appstate.fileimport.pending_imports;
     pending_imports.splice(pending_imports.indexOf(pending), 1);
     this.manager.emit('change');
@@ -143,12 +148,12 @@ class UnlinkedAccountRow extends React.Component<{
           onChange={(ev) => {
             this.setState({chosen_account_id: ev.target.value})
           }}>
-          <option value="NEW">+ Create new account</option>
+          <option value="NEW">+ {sss('Create new account')}</option>
           {options}
         </select>
       </td>
       <td>
-        <button onClick={this.link}>Link</button>
+        <button onClick={this.link}>{sss('action.link-account', 'Link')}</button>
       </td>
     </tr>
   }
@@ -175,8 +180,8 @@ export class TransactionImportPage extends React.Component<PageProps, {}> {
       pending_import_table = <table className="ledger">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Account</th>
+            <th>{sss('Name')}</th>
+            <th>{sss('Account')}</th>
             <th></th>
           </tr>
         </thead>
@@ -191,10 +196,10 @@ export class TransactionImportPage extends React.Component<PageProps, {}> {
           <div className="group">
             <button onClick={() => {
               manager.fileimport.openFileDialog();
-            }}>Import Transaction File</button>
+            }}>{sss('Import transaction file')}</button>
             <button onClick={() => {
               setPath('/connections');
-            }}>Connect to bank</button>
+            }}>{sss('Connect to bank')}</button>
           </div>
         </div>
         <div className="panes">

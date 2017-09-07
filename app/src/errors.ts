@@ -1,4 +1,5 @@
-import { dialog, shell } from 'electron';
+import { dialog, shell } from 'electron'
+import { sss } from './i18n'
 
 export function reportBug(body?:string) {
   let url = 'mailto:hello@bucketsisbetter.com?subject=Bug%20Report';
@@ -14,13 +15,13 @@ export function reportErrorToUser(text?:string, args?:{
 }) {
   args = args || {};
   dialog.showMessageBox({
-    title: args.title || 'Error',
-    message: text || `There has been an error.`,
-    detail: "If this error keeps happening or doesn't make sense, please report a bug or chat with us.",
+    title: args.title || sss('Error'),
+    message: text || sss(`There has been an error.`),
+    detail: sss('error-detail', "If this error keeps happening or doesn't make sense, please report a bug or chat with us."),
     buttons: [
-      'Ignore',
-      'Chat',
-      'Report Bug',
+      sss('action.ignore', 'Ignore'),
+      sss('action.chat', 'Chat'),
+      sss('action.report bug', 'Report Bug'),
     ],
     defaultId: 0,
   }, (indexClicked) => {
@@ -32,7 +33,8 @@ export function reportErrorToUser(text?:string, args?:{
     } else if (indexClicked === 2) {
       // Report Bug
       if (args.err) {
-        reportBug(`\n\n--- Include anything else you want to add above this line ---\n${args.err.stack}`);
+        let body = '\n\n---' + sss('bug-include-line', 'Include anything else you want to add above this line') + `---\n${args.err.stack}`;
+        reportBug(body);
       } else {
         reportBug();  
       }
@@ -42,10 +44,10 @@ export function reportErrorToUser(text?:string, args?:{
 
 export function displayError(text?:string, title?:string) {
   dialog.showMessageBox({
-    title: title || 'Error',
+    title: title || sss('Error'),
     message: text,
     buttons: [
-      'OK',
+      sss('OK'),
     ],
     defaultId: 0,
   }, () => {
