@@ -81,17 +81,41 @@ export async function updateMenu() {
     ],
   };
   let EditMenu = {
-    label: 'Edit',
+    label: sss('Edit'),
     submenu: [
-      {role: 'undo'},
-      {role: 'redo'},
+      {
+        role: 'undo',
+        label: sss('Undo'),
+      },
+      {
+        role: 'redo',
+        label: sss('Redo'),
+      },
       {type: 'separator'},
-      {role: 'cut'},
-      {role: 'copy'},
-      {role: 'paste'},
-      {role: 'pasteandmatchstyle'},
-      {role: 'delete'},
-      {role: 'selectall'},
+      {
+        role: 'cut',
+        label: sss('Cut'),
+      },
+      {
+        role: 'copy',
+        label: sss('Copy'),
+      },
+      {
+        role: 'paste',
+        label: sss('Paste'),
+      },
+      {
+        role: 'pasteandmatchstyle',
+        label: sss('Paste and Match Style'),
+      },
+      {
+        role: 'delete',
+        label: sss('Delete'),
+      },
+      {
+        role: 'selectall',
+        label: sss('Select All'),
+      },
       {type: 'separator'},
       {
         label: sss('Find...'),
@@ -119,23 +143,50 @@ export async function updateMenu() {
   let ViewMenu = {
     label: sss('View'),
     submenu: [
-      {role: 'reload'},
-      {role: 'forcereload'},
-      {role: 'toggledevtools'},
+      {
+        role: 'reload',
+        label: sss('Reload'),
+      },
+      {
+        role: 'forcereload',
+        label: sss('Force Reload'),
+      },
+      {
+        role: 'toggledevtools',
+        label: sss('Toggle Developer Tools'),
+      },
       {type: 'separator'},
-      {role: 'resetzoom'},
-      {role: 'zoomin'},
-      {role: 'zoomout'},
+      {
+        role: 'resetzoom',
+        label: sss('Actual Size'),
+      },
+      {
+        role: 'zoomin',
+        label: sss('Zoom In'),
+      },
+      {
+        role: 'zoomout',
+        label: sss('Zoom Out'),
+      },
       {type: 'separator'},
-      {role: 'togglefullscreen'}
+      {
+        role: 'togglefullscreen',
+        label: sss('Toggle Full Screen'),
+      },
     ]
   };
   let WindowMenu = {
     role: 'window',
     label: sss('Window'),
     submenu: [
-      {role: 'minimize'},
-      {role: 'close'}
+      {
+        role: 'minimize',
+        label: sss('Minimize'),
+      },
+      {
+        role: 'close',
+        label: sss('Close Window'),
+      }
     ]
   };
 
@@ -237,17 +288,35 @@ export async function updateMenu() {
       <any>{
         label: sss('Speech'),
         submenu: [
-          {role: 'startspeaking'},
-          {role: 'stopspeaking'}
+          {
+            role: 'startspeaking',
+            label: sss('Start Speaking'),
+          },
+          {
+            role: 'stopspeaking',
+            label: sss('Stop Speaking'),
+          }
         ]
       }
     )
     WindowMenu.submenu = <any>[
-      {role: 'close'},
-      {role: 'minimize'},
-      {role: 'zoom'},
+      {
+        role: 'close',
+        label: sss('Close Window'),
+      },
+      {
+        role: 'minimize',
+        label: sss('Minimize'),
+      },
+      {
+        role: 'zoom',
+        label: sss('Zoom'),
+      },
       {type: 'separator'},
-      {role: 'front'}
+      {
+        role: 'front',
+        label: sss('Bring All to Front'),
+      }
     ]
   }
   template = [

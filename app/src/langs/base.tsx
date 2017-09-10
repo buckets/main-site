@@ -158,11 +158,28 @@ export interface IMessages {
   "Open Recent...": IMsg<string>;
   "Duplicate Window": IMsg<string>;
   "Import Transactions...": IMsg<string>;
+  "Edit": IMsg<string>;
+  "Undo": IMsg<string>;
+  "Redo": IMsg<string>;
+  "Cut": IMsg<string>;
+  "Copy": IMsg<string>;
+  "Paste": IMsg<string>;
+  "Paste and Match Style": IMsg<string>;
+  "Select All": IMsg<string>;
   "Find...": IMsg<string>;
   "Find Next": IMsg<string>;
   "Find Previous": IMsg<string>;
   "View": IMsg<string>;
+  "Reload": IMsg<string>;
+  "Force Reload": IMsg<string>;
+  "Toggle Developer Tools": IMsg<string>;
+  "Actual Size": IMsg<string>;
+  "Zoom In": IMsg<string>;
+  "Zoom Out": IMsg<string>;
+  "Toggle Full Screen": IMsg<string>;
   "Window": IMsg<string>;
+  "Minimize": IMsg<string>;
+  "Close Window": IMsg<string>;
   "Help": IMsg<string>;
   "Learn More": IMsg<string>;
   "Getting Started...": IMsg<string>;
@@ -176,6 +193,10 @@ export interface IMessages {
   "Enter License...": IMsg<string>;
   "Check For Updates...": IMsg<string>;
   "Speech": IMsg<string>;
+  "Start Speaking": IMsg<string>;
+  "Stop Speaking": IMsg<string>;
+  "Zoom": IMsg<string>;
+  "Bring All to Front": IMsg<string>;
   "Update Available": IMsg<string>;
   "version-available": IMsg<(newv:string)=>string|JSX.Element>;
   "Later": IMsg<string>;
@@ -620,7 +641,7 @@ export const DEFAULTS:IMessages = {
   "Trial Version": {
     val: "Trial Version",
     translated: false,
-    src: ["src/budget/budget.tsx line 91","src/mainprocess/menu.ts line 185"],
+    src: ["src/budget/budget.tsx line 91","src/mainprocess/menu.ts line 236"],
     h: "GtZIXrHILA84HlpKlxi3BErHwR7WIYkQ/e5BE0Fiaxg=",
   },
   "Accounts": {
@@ -774,7 +795,7 @@ export const DEFAULTS:IMessages = {
   "Delete": {
     val: "Delete",
     translated: false,
-    src: ["src/budget/connections.tsx line 184"],
+    src: ["src/budget/connections.tsx line 184","src/mainprocess/menu.ts line 112"],
     h: "sm3jcrSw6qxgICiEpy25imvm6QNueF6oZ+oBxfeSEJg=",
   },
   "ID": {
@@ -1127,113 +1148,239 @@ export const DEFAULTS:IMessages = {
     src: ["src/mainprocess/menu.ts line 72"],
     h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
   },
+  "Edit": {
+    val: "Edit",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 83"],
+    h: "9+ZynTDPePvsJX4rW8Mn0wEzk0GRQ+udON01NKHVsQU=",
+  },
+  "Undo": {
+    val: "Undo",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 87"],
+    h: "Z1A2vTdYwfdLsWS25iSchnHOHa1VfbQg7u8MDGHk4yo=",
+  },
+  "Redo": {
+    val: "Redo",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 91"],
+    h: "7buMF65dyGtKDY/ZW/Lkn7eUmdudCsdGV3KR2lYLLA0=",
+  },
+  "Cut": {
+    val: "Cut",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 96"],
+    h: "+kuX06pgC809fwr+5h9VbC8sVgVWo6EXgg6bzfXXtJs=",
+  },
+  "Copy": {
+    val: "Copy",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 100"],
+    h: "T2DR4UKv+pyVWY8GzF/WWjk5XqMXgZ0gDyXkZmYczHw=",
+  },
+  "Paste": {
+    val: "Paste",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 104"],
+    h: "n2Hnio0AcQPZejqQ+hm35GthBg0zYDNoxd8RCFRUhu4=",
+  },
+  "Paste and Match Style": {
+    val: "Paste and Match Style",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 108"],
+    h: "w8hRIxBBNWtXNPcYtQ4t/mTHfPF66U/mJbVpOiIDgYE=",
+  },
+  "Select All": {
+    val: "Select All",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 116"],
+    h: "tLJuQPindRFUyvGGdMLJbBHcVpAODsfT5p2gDnpB/Oo=",
+  },
   "Find...": {
     val: "Find...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 96"],
+    src: ["src/mainprocess/menu.ts line 120"],
     h: "aUU1pzvlZzKNgYZP2ZpPtQMImBOStbFnK33P3YwXTNs=",
   },
   "Find Next": {
     val: "Find Next",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 103"],
+    src: ["src/mainprocess/menu.ts line 127"],
     h: "LALfI5V4TsQo0DcGJwmNmrm3xNPtY5PmQuxB1voZo34=",
   },
   "Find Previous": {
     val: "Find Previous",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 110"],
+    src: ["src/mainprocess/menu.ts line 134"],
     h: "0n6Dq5KDTxxsTAKrJE+RDdgi9ln6FyfUEPNBJ6ejZ5o=",
   },
   "View": {
     val: "View",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 119"],
+    src: ["src/mainprocess/menu.ts line 143"],
     h: "paIseOhKCT2+NaUBPKk98vQB/lphf7jIGeERV77doDg=",
+  },
+  "Reload": {
+    val: "Reload",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 147"],
+    h: "hUVVd3tppLGqwgo2OeC3h334aTF0Y+/GHbuL/I1clYk=",
+  },
+  "Force Reload": {
+    val: "Force Reload",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 151"],
+    h: "ktBJY2UXO+2r0ZvmbQXhArN51bSTnyaNnnBNR9PQ5K8=",
+  },
+  "Toggle Developer Tools": {
+    val: "Toggle Developer Tools",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 155"],
+    h: "IYSSUL9ezB58nRuajYVa+zH4ucrmXQOB92zA7sDlrJc=",
+  },
+  "Actual Size": {
+    val: "Actual Size",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 160"],
+    h: "k1ZfUj7bmT4XwiALRlZo7ztl2d+e7JcLt3WCnvjpBYg=",
+  },
+  "Zoom In": {
+    val: "Zoom In",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 164"],
+    h: "p3yHl1qkGVfRDPsLKitBuZhRJIDaTy3fV/vbWqOzo24=",
+  },
+  "Zoom Out": {
+    val: "Zoom Out",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 168"],
+    h: "hRo1uzcSNStVll7ef2xHOB6PqFh+q7Sg/VHiGcK4M8M=",
+  },
+  "Toggle Full Screen": {
+    val: "Toggle Full Screen",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 173"],
+    h: "2ZRq+R5E0Cp4QI+y5jCefU1IOiYvNWLrN/iiJq6hGr8=",
   },
   "Window": {
     val: "Window",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 134"],
+    src: ["src/mainprocess/menu.ts line 179"],
     h: "qjw17TPhgeX5msjicdTljyCEeBLFbQvz/oyOunMLJnQ=",
+  },
+  "Minimize": {
+    val: "Minimize",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 183","src/mainprocess/menu.ts line 308"],
+    h: "ELhkWGGY5oNKpfCzoXXW6TgkfS1nI0ZuJbWyYLmT+ro=",
+  },
+  "Close Window": {
+    val: "Close Window",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 187","src/mainprocess/menu.ts line 304"],
+    h: "hrPxvP/hrVgtNNTMX4sv5sljx57neTy+2p0U1TKGuCE=",
   },
   "Help": {
     val: "Help",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 143"],
+    src: ["src/mainprocess/menu.ts line 194"],
     h: "TvUUB7AuCuFJ9IWiz2SbsjnUvYoDPZAaMPxup/rwosM=",
   },
   "Learn More": {
     val: "Learn More",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 146"],
+    src: ["src/mainprocess/menu.ts line 197"],
     h: "8bk7nEyrz+Q0vmMisWIPVuvHR4/TeW4DhemALir6s1o=",
   },
   "Getting Started...": {
     val: "Getting Started...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 150"],
+    src: ["src/mainprocess/menu.ts line 201"],
     h: "XD8GQYEIDrNjTMPX4TjGeAbbCIEBcAONlYPd/D8Hz84=",
   },
   "Chat...": {
     val: "Chat...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 156"],
+    src: ["src/mainprocess/menu.ts line 207"],
     h: "SytGirG0+cdtbPfjBma/G/tEOt4rdOj4mnjcaWsTbt8=",
   },
   "Show Log Files...": {
     val: "Show Log Files...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 163"],
+    src: ["src/mainprocess/menu.ts line 214"],
     h: "In00T9z1A4xO6nLu8zAU5s3UzH3+IcK4XjRvrT9CGMs=",
   },
   "Report Bug...": {
     val: "Report Bug...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 169"],
+    src: ["src/mainprocess/menu.ts line 220"],
     h: "i17nG0QruMiCn612ogDToWB1g4xqqei691Yeh/t8MIk=",
   },
   "Report Translation Error...": {
     val: "Report Translation Error...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 175"],
+    src: ["src/mainprocess/menu.ts line 226"],
     h: "/jSK7LcBLJ1FsOYb9ntsVYAxwAyGLLUZXlTL/zrC020=",
   },
   "It says:": {
     val: "It says:",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 178"],
+    src: ["src/mainprocess/menu.ts line 229"],
     h: "gbWdWRhcKGQzFCi8CcKy9Bmfg2oYqz1zGMHQzSU8jQE=",
   },
   "It should say:": {
     val: "It should say:",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 178"],
+    src: ["src/mainprocess/menu.ts line 229"],
     h: "RjwjZtmUgFzGUxR0zMmyXh0cHzpzsbj4nk6R7tGe+i4=",
   },
   "Purchase Full Version...": {
     val: "Purchase Full Version...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 188"],
+    src: ["src/mainprocess/menu.ts line 239"],
     h: "+6h2Y0QTHEVui0aUhwAlCsyJp/F+S0PYKMRlQysqjrk=",
   },
   "Enter License...": {
     val: "Enter License...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 194"],
+    src: ["src/mainprocess/menu.ts line 245"],
     h: "A+/eZ8qTAh97iBouJPInRkCg7F0nOkteYEBO7+lFHHA=",
   },
   "Check For Updates...": {
     val: "Check For Updates...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 219"],
+    src: ["src/mainprocess/menu.ts line 270"],
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
   "Speech": {
     val: "Speech",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 237"],
+    src: ["src/mainprocess/menu.ts line 288"],
     h: "i4Qm95bH8zVEbjpkUi7jvQiLtDzGkW9z90XEkiglzHM=",
+  },
+  "Start Speaking": {
+    val: "Start Speaking",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 292"],
+    h: "v8sFOpEAoczjEjGparKZylHWHoxHMVQriwuhJaec2rY=",
+  },
+  "Stop Speaking": {
+    val: "Stop Speaking",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 296"],
+    h: "Pme2/qME7bKdVrHTIEBQYt1Fu/SXRNGyy6sLBfKpqqk=",
+  },
+  "Zoom": {
+    val: "Zoom",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 312"],
+    h: "Zjzswxbrkbj1TLPOYCtimoyh/aJlkF/mxeghbzdheSs=",
+  },
+  "Bring All to Front": {
+    val: "Bring All to Front",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 317"],
+    h: "vXNLSncC5dTsDdfhZY5dhbev+Y3PpqQEy1fwxTkGWU0=",
   },
   "Update Available": {
     val: "Update Available",
