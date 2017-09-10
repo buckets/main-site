@@ -263,3 +263,7 @@ export async function updateMenu() {
   template.push(HelpMenu);
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
+
+tx.on('locale-set', () => {
+  updateMenu();
+});

@@ -55,9 +55,9 @@ const messages:IMessages = {
   },
   "balance-as-of": {
     val: (date:JSX.Element) => {
-            return <span>as of {date}</span>
+            return <span>desde {date}</span>
           },
-    translated: false,
+    translated: true,
     src: ["src/budget/accounts.tsx line 112"],
     h: "zfEhD0nTmeclrDPBvF4YQvThWfdELzmW0m1T1UJNEKw=",
   },
@@ -208,8 +208,8 @@ const messages:IMessages = {
     h: "fqeHyOaOYnCtGAcJlJbhAR37DG6YMrsasUNtiL6z8hc=",
   },
   "Total amount your buckets expect each month.": {
-    val: "Total amount your buckets expect each month.",
-    translated: false,
+    val: "Cantidad total que requieren los cubos cada mes.",
+    translated: true,
     src: ["src/budget/buckets.tsx line 187"],
     h: "UtK2gxh+N9D/p1G6dLyhcKMP5Df5XCyEp0jM0c+qoUw=",
   },
@@ -336,8 +336,8 @@ const messages:IMessages = {
     h: "A8cB9Rz7UbbFB6Y9hBfS0LjKzndtjd+8KoyILgsjbcU=",
   },
   "bucketrain.help": {
-    val: "This is how much money these buckets want each month.  The little box indicates how much they have received.",
-    translated: false,
+    val: "La cantidad que los cubos quieren cada mes.  La caja muestra cuanto han recibido ya.",
+    translated: true,
     src: ["src/budget/buckets.tsx line 787"],
     h: "3dbOFkUiGaEoD01CP7kIWDQHgUbULWexjdEKdEAF3sA=",
   },
@@ -531,9 +531,9 @@ const messages:IMessages = {
   },
   "simplefin-get-token": {
     val: (mklink) => {
-              return <span>Get a SimpleFIN Token from the {mklink('SimpleFIN Bridge')}</span>
+              return <span>Obtenga un SimpleFIN Token del {mklink('SimpleFIN Bridge')}</span>
             },
-    translated: false,
+    translated: true,
     src: ["src/budget/connections.tsx line 79"],
     h: "VEeKjngcHxowWbB2xWy5oNH4MXIfJQ7EqpiomT6V0fg=",
   },

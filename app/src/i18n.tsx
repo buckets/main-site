@@ -1,5 +1,6 @@
 import * as log from 'electron-log'
-import { remote } from 'electron'
+import { EventEmitter } from 'events'
+import { remote, app } from 'electron'
 
 import { IMessages, ILangPack } from './langs/spec'
 
@@ -8,7 +9,7 @@ import {pack as es} from './langs/es';
 
 const packs:{[x:string]:ILangPack} = {en, es};
 
-class TranslationContext {
+class TranslationContext extends EventEmitter {
   private _langpack:ILangPack = en;
   private _locale:string = 'en';
   get locale() {
@@ -26,6 +27,7 @@ class TranslationContext {
       this._locale = x.substr(0, 2);
       this._langpack = packs[this._locale];
       log.info(`locale set to: ${this._locale}`);
+      this.emit('locale-set', {locale: this._locale});
     } else {
       log.warn(`Not setting locale to unknown: ${x}`);
     }
@@ -57,13 +59,34 @@ class TranslationContext {
         console.warn('Localization error:', err, elem);
       }
     })
+    this.on('locale-set', () => {
+      this.localizeThisPage();
+    })
   }
+}
+
+function getLocale():Promise<string> {
+  if (env.LANG) {
+    return Promise.resolve(env.LANG);
+  } else {
+    let realapp = app || remote.app;
+    if (realapp.isReady()) {
+      return Promise.resolve(realapp.getLocale());
+    } else {
+      return new Promise((resolve, reject) => {
+        realapp.on('ready', () => {
+          resolve(app.getLocale() || 'en');
+        })
+      })
+    }
+  }  
 }
 
 const env = remote ? remote.process.env : process.env;
 export const tx = new TranslationContext();
 export const localizeThisPage = tx.localizeThisPage.bind(tx);
 export const sss = tx.sss.bind(tx);
-if (env.LANG) {
-  tx.setLocale(env.LANG);
-}
+
+getLocale().then(locale => {
+  tx.setLocale(locale);  
+})
