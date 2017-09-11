@@ -29,6 +29,7 @@ export async function updateEnabled(isbudget:boolean) {
 }
 
 export async function updateMenu() {
+  console.log('updateMenu()');
   let recent_files = await getRecentFiles();
   let FileMenu = {
     label: sss('File'),
@@ -333,6 +334,8 @@ export async function updateMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-tx.on('locale-set', () => {
-  updateMenu();
-});
+if (app) {
+  tx.on('locale-set', () => {
+    updateMenu();
+  });
+}

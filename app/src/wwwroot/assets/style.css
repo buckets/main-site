@@ -312,6 +312,7 @@ h2 {
 .month-selector.big {
   padding: 0.5rem 0;
   margin-right: 1rem;
+  margin-left: 1rem;
 }
 .month-selector.big button {
   font-size: 1rem;
@@ -721,12 +722,9 @@ table.summary td.border-right {
 
 
 
-permonth {
+.permonth {
   font-size: .8rem;
-}
-permonth:after {
   opacity: 0.5;
-  content: '/mo';
 }
 
 /* ColorPicker */

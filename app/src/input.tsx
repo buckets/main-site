@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import * as _ from 'lodash'
 import * as moment from 'moment'
+import { tx } from './i18n'
 
 
 export function onKeys(mapping:object):((ev)=>void) {
@@ -102,6 +103,9 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
   }
 }
 
+const LEFT_ARROW = '\u25c0'
+const RIGHT_ARROW = '\u25b6'
+
 interface MonthSelectorProps {
   year: number;
   month: number;
@@ -132,7 +136,7 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
     })
     let cls = cx(`month-selector bg-${this.state.month}`, className);
     return (<div className={cls}>
-      <button onClick={this.increment(-1)}>&#x25c0;</button>
+      <button onClick={this.increment(-1)}>{tx.langpack.dir === 'ltr' ? LEFT_ARROW : RIGHT_ARROW}</button>
       <select
         className={`month color-${this.state.month}`}
         value={current_month}
@@ -145,7 +149,7 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
         size={4}
         value={this.state.year}
         onChange={this.yearChanged} />
-      <button onClick={this.increment(1)}>&#x25b6;</button>
+      <button onClick={this.increment(1)}>{tx.langpack.dir === 'ltr' ? RIGHT_ARROW : LEFT_ARROW}</button>
     </div>);
   }
   increment(amount) {

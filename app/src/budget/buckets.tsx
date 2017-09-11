@@ -4,7 +4,7 @@ import * as cx from 'classnames'
 import * as moment from 'moment'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
-import { ts2db, Timestamp, Date, ensureUTCMoment } from '../time'
+import { ts2db, Timestamp, Date, ensureUTCMoment, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
 import { onKeys, DebouncedInput, MonthSelector } from '../input'
@@ -183,7 +183,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                 <button onClick={this.addBucket}>{sss('action.New bucket', 'New bucket')}</button>
                 <button onClick={this.addGroup}>{sss('action.New group', 'New group')}</button>
                 <Help icon={<div className="labeled-number">
-                  <div className="label">{sss('Rain')}<permonth/></div>
+                  <div className="label">{sss('Rain')}<PerMonth/></div>
                   <div className="value"><Money value={total_rain_needed} /></div>
                 </div>}>{sss('Total amount your buckets expect each month.')}</Help>
                 {self_debt}
@@ -403,7 +403,7 @@ class BucketKindDetails extends React.Component<{
           value={bucket.deposit}
           onChange={_.debounce(val => {
             manager.store.buckets.update(bucket.id, {deposit: val});
-          }, 250)} /><permonth/>
+          }, 250)} /><PerMonth/>
       </td>
     </tr>
   }
@@ -639,7 +639,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right">
-        <Money value={computed.deposit} hidezero />{computed.deposit ? <permonth/> : ''}
+        <Money value={computed.deposit} hidezero />{computed.deposit ? <PerMonth/> : ''}
         {rainfall_indicator}
       </td>
       <td className="nopad bucket-details-wrap"><BucketKindDetails

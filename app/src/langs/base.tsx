@@ -206,6 +206,7 @@ export interface IMessages {
   "Unable to claim access token": IMsg<string>;
   "Error fetching data": IMsg<string>;
   "Error parsing response": IMsg<string>;
+  "/mo": IMsg<string>;
   "Enter Buckets License": IMsg<string>;
   "enter-license-prompt": IMsg<string>;
   "Submit": IMsg<string>;
@@ -1435,6 +1436,12 @@ export const DEFAULTS:IMessages = {
     translated: false,
     src: ["src/models/simplefin.ts line 333"],
     h: "PsIRbom+m8Y5OIEPW2rzJYVlNA2NQrZmEQnpW7Y/9KI=",
+  },
+  "/mo": {
+    val: "/mo",
+    translated: false,
+    src: ["src/time.tsx line 35"],
+    h: "ggq7na5vMB1wOjQQo0Wq0o7ctwbMUiiJr1tRRKphHss=",
   },
   "Enter Buckets License": {
     val: "Enter Buckets License",

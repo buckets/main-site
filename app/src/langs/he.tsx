@@ -1217,6 +1217,12 @@ const messages:IMessages = {
     src: ["src/models/simplefin.ts line 333"],
     h: "PsIRbom+m8Y5OIEPW2rzJYVlNA2NQrZmEQnpW7Y/9KI=",
   },
+  "/mo": {
+    val: "/mo",
+    translated: false,
+    src: ["src/time.tsx line 35"],
+    h: "ggq7na5vMB1wOjQQo0Wq0o7ctwbMUiiJr1tRRKphHss=",
+  },
   "Enter Buckets License": {
     val: "Enter Buckets License",
     translated: false,

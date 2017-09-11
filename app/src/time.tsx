@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as moment from 'moment';
 import * as cx from 'classnames';
+import { sss } from './i18n'
 
 export function ensureUTCMoment(x:Timestamp):moment.Moment {
   if (moment.isMoment(x)) {
@@ -28,6 +29,12 @@ export function isBetween(x:Timestamp, start:Timestamp, end:Timestamp):boolean {
   start = ensureUTCMoment(start)
   end = ensureUTCMoment(end)
   return x.isSameOrAfter(start) && x.isBefore(end);
+}
+
+export class PerMonth extends React.Component<{}, {}> {
+  render() {
+    return <span className="permonth">{sss('/mo')}</span>
+  }
 }
 
 export type Timestamp = string | moment.Moment;

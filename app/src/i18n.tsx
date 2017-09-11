@@ -1,4 +1,5 @@
 import * as log from 'electron-log'
+import * as moment from 'moment'
 import { EventEmitter } from 'events'
 import { remote, app } from 'electron'
 
@@ -34,6 +35,11 @@ class TranslationContext extends EventEmitter {
       was_set = false;
     }
     if (was_set) {
+      try {
+        moment.locale(this._locale)
+      } catch(err) {
+        console.error('Error setting date locale', err.stack);
+      }
       this.emit('locale-set', {locale: this._locale});
     }
   }
@@ -51,7 +57,6 @@ class TranslationContext extends EventEmitter {
   }
   localizeThisPage(_skipwatch?:boolean) {
     document.documentElement.setAttribute('dir', this.langpack.dir);
-    console.log("set direction", this.langpack.dir);
     Array.from(document.querySelectorAll('[data-translate]'))
     .forEach((elem:HTMLElement) => {
       try {
@@ -66,9 +71,7 @@ class TranslationContext extends EventEmitter {
       }
     })
     if (!_skipwatch) {
-      console.log('set on(locale-set)');
       this.on('locale-set', () => {
-        console.log('locale-set, localizing page again?');
         this.localizeThisPage(true);
       })
     }
@@ -98,6 +101,5 @@ export const localizeThisPage = tx.localizeThisPage.bind(tx);
 export const sss = tx.sss.bind(tx);
 
 getLocale().then(locale => {
-  console.log('Got locale', locale);
   tx.setLocale(locale);  
 })
