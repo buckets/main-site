@@ -420,26 +420,26 @@ const messages:IMessages = {
     h: "DPoc7CIbzLHJxuar3WnaidO3Ryy1QtYkCswRzVHtVBg=",
   },
   "Trial Version": {
-    val: "Trial Version",
-    translated: false,
+    val: "לשוחח עם מאט",
+    translated: true,
     src: ["src/budget/budget.tsx line 91","src/mainprocess/menu.ts line 236"],
     h: "GtZIXrHILA84HlpKlxi3BErHwR7WIYkQ/e5BE0Fiaxg=",
   },
   "Accounts": {
-    val: "Accounts",
-    translated: false,
+    val: "חשבונות",
+    translated: true,
     src: ["src/budget/budget.tsx line 127"],
     h: "1oHDkv2zB1yiCABVTWBY5oX4Ccu36nJBCG7Q+JVg8TA=",
   },
   "Transactions": {
-    val: "Transactions",
-    translated: false,
+    val: "עסקאות",
+    translated: true,
     src: ["src/budget/budget.tsx line 128"],
     h: "4+yGUer/b71cfxTdeUa5QbonqN9ezC8Eii7KO22Ety0=",
   },
   "Buckets": {
-    val: "Buckets",
-    translated: false,
+    val: "דליים",
+    translated: true,
     src: ["src/budget/budget.tsx line 129"],
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
   },
@@ -450,8 +450,8 @@ const messages:IMessages = {
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
   },
   "Analysis": {
-    val: "Analysis",
-    translated: false,
+    val: "אָנָלִיזָה",
+    translated: true,
     src: ["src/budget/budget.tsx line 133"],
     h: "+LNAOPSLW2rpFCrT+U1suhdnoYyZa1k8ALddRlddDlI=",
   },
@@ -462,20 +462,20 @@ const messages:IMessages = {
     h: "yDp5Agru+QzDSy583s3kjOdZbbe6X1WDfMeSNXsYlaY=",
   },
   "Connections": {
-    val: "Connections",
-    translated: false,
+    val: "קשרים",
+    translated: true,
     src: ["src/budget/budget.tsx line 139","src/budget/connections.tsx line 117"],
     h: "1hPfKAqhO0JhEGc2rQ8tee2sqrIAP38KrxQcfLF3I1Y=",
   },
   "Import": {
-    val: "Import",
-    translated: false,
+    val: "לְיַבֵּא",
+    translated: true,
     src: ["src/budget/budget.tsx line 140"],
     h: "F3sijvfYz3oB4iz2rVHjUvNDLQs43MbXDVIr5VFA2/c=",
   },
   "Chat with Matt": {
-    val: "Chat with Matt",
-    translated: false,
+    val: "לשוחח עם מאט",
+    translated: true,
     src: ["src/budget/budget.tsx line 148"],
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
   },
@@ -1315,7 +1315,7 @@ const messages:IMessages = {
   },
 }
 export const pack:ILangPack = {
-  name: 'Hebrew',
+  name: 'עִברִית',
   dir: 'rtl',
   messages
 }

@@ -37,7 +37,9 @@ if (electron_is.windows()) {
 } else if (electron_is.linux()) {
   document.body.classList.add('os-linux');
 }
+console.log('pre start');
 start(document.getElementById('root'), hostname);
+console.log('port start');
 </script>
 </body>
 </html>

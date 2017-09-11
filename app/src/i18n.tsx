@@ -6,8 +6,9 @@ import { IMessages, ILangPack } from './langs/spec'
 
 import {pack as en} from './langs/en';
 import {pack as es} from './langs/es';
+import {pack as he} from './langs/he';
 
-const packs:{[x:string]:ILangPack} = {en, es};
+const packs:{[x:string]:ILangPack} = {en, es, he};
 
 class TranslationContext extends EventEmitter {
   private _langpack:ILangPack = en;
@@ -19,6 +20,7 @@ class TranslationContext extends EventEmitter {
     return this._langpack;
   }
   setLocale(x:string) {
+    let was_set = true;
     if (packs[x]) {
       this._langpack = packs[x];
       this._locale = x;
@@ -27,9 +29,12 @@ class TranslationContext extends EventEmitter {
       this._locale = x.substr(0, 2);
       this._langpack = packs[this._locale];
       log.info(`locale set to: ${this._locale}`);
-      this.emit('locale-set', {locale: this._locale});
     } else {
       log.warn(`Not setting locale to unknown: ${x}`);
+      was_set = false;
+    }
+    if (was_set) {
+      this.emit('locale-set', {locale: this._locale});
     }
   }
   sss<T>(key:keyof IMessages, dft?:T):T {
@@ -44,8 +49,9 @@ class TranslationContext extends EventEmitter {
   toString() {
     return `TranslationContext locale=${this._locale}`;
   }
-  localizeThisPage() {
+  localizeThisPage(_skipwatch?:boolean) {
     document.documentElement.setAttribute('dir', this.langpack.dir);
+    console.log("set direction", this.langpack.dir);
     Array.from(document.querySelectorAll('[data-translate]'))
     .forEach((elem:HTMLElement) => {
       try {
@@ -59,9 +65,13 @@ class TranslationContext extends EventEmitter {
         console.warn('Localization error:', err, elem);
       }
     })
-    this.on('locale-set', () => {
-      this.localizeThisPage();
-    })
+    if (!_skipwatch) {
+      console.log('set on(locale-set)');
+      this.on('locale-set', () => {
+        console.log('locale-set, localizing page again?');
+        this.localizeThisPage(true);
+      })
+    }
   }
 }
 
@@ -88,5 +98,6 @@ export const localizeThisPage = tx.localizeThisPage.bind(tx);
 export const sss = tx.sss.bind(tx);
 
 getLocale().then(locale => {
+  console.log('Got locale', locale);
   tx.setLocale(locale);  
 })
