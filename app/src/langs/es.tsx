@@ -581,7 +581,7 @@ const messages:IMessages = {
   },
   "ID": {
     val: "ID",
-    translated: false,
+    translated: true,
     src: ["src/budget/connections.tsx line 190"],
     h: "ge86Jcy26vcv5uPFI29MfLOxHh8ctACck6nRdrl9aM4=",
   },
@@ -1133,6 +1133,12 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 209"],
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
+  "Preferences...": {
+    val: "Preferencias...",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 280"],
+    h: "6iQxyJ1WC9/Z0f0saApfwL5hmhgN5YgJeikLAYqCGBI=",
+  },
   "Speech": {
     val: "Voz",
     translated: true,
@@ -1258,6 +1264,30 @@ const messages:IMessages = {
     translated: true,
     src: ["src/wwwroot/misc/enter_license.tsx line 30"],
     h: "BfJdh6NOzurSCMGRmCP8gb1VAXUlrSSsCFIGHGXtNiA=",
+  },
+  "Preferences": {
+    val: "Preferencias",
+    translated: true,
+    src: ["src/wwwroot/misc/preferences.html line 0"],
+    h: "g621xQsjA9sSCp1y6ZMsd3RolFp3OMEblL/gPz1k0v8=",
+  },
+  "Language:": {
+    val: "Idioma:",
+    translated: true,
+    src: ["src/wwwroot/misc/preferences.tsx line 31"],
+    h: "Xcdts2Yh+LAPXO+KLTuFxMiNsv+xxIJPLlbCDbLrink=",
+  },
+  "System Default": {
+    val: "Predeterminado del sistema",
+    translated: true,
+    src: ["src/wwwroot/misc/preferences.tsx line 43"],
+    h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
+  },
+  "(Restart Buckets for the change to take effect.)": {
+    val: "(Reinicie Buckets para que el cambio surta efecto).",
+    translated: true,
+    src: ["src/wwwroot/misc/preferences.tsx line 47"],
+    h: "IYHFL+R57iN4UW8AS35balApUouS8GdkRIQ3uEa6wT8=",
   },
   "Buckets Updates": {
     val: "Buckets - Actualizaciones",
