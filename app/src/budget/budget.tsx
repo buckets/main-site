@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { sss } from '../i18n'
+import { sss, tx } from '../i18n'
 import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
@@ -72,6 +72,9 @@ export async function start(base_element, room) {
       />;
   }, base_element);
   renderer.doUpdate();
+  tx.on('locale-set', () => {
+    renderer.doUpdate();
+  })
 
   if (!window.location.hash) {
     window.location.hash = `#/accounts`;

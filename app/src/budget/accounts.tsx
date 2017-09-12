@@ -136,9 +136,11 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
     let accounts_list = _.values(appstate.accounts);
     if (!accounts_list.length) {
       getting_started = <div className="notice">
-        First time using Buckets?  Check out the <a href="#" onClick={() => {
+        {sss('getting-started-link', (clickhandler) => {
+          return <span>First time using Buckets?  Check out the <a href="#" onClick={clickhandler}>Getting Started Videos.</a></span>
+        })(() => {
           shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
-        }}>Getting Started Videos.</a>
+        })}
       </div>
     }
     return (

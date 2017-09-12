@@ -61,6 +61,14 @@ const messages:IMessages = {
     src: ["src/budget/accounts.tsx line 112"],
     h: "zfEhD0nTmeclrDPBvF4YQvThWfdELzmW0m1T1UJNEKw=",
   },
+  "getting-started-link": {
+    val: (clickhandler) => {
+          return <span>¿Primera vez usando Buckets?  Echa un vistazo a <a href="#" onClick={clickhandler}>los vídeos de inicio.</a></span>
+        },
+    translated: false,
+    src: ["src/budget/accounts.tsx line 138"],
+    h: "9NGQRvIxlAaOF9i+zWPXMFQubcY+5jtA7Td/lii16aM=",
+  },
   "New account": {
     val: "Cuenta nueva",
     translated: true,
