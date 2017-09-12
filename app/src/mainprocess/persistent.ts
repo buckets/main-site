@@ -5,9 +5,10 @@ import * as fs from 'fs'
 import * as log from 'electron-log'
 import { updateMenu } from './menu'
 
-interface PersistentState {
+export interface PersistentState {
   recentFiles: string[];
   firstUseDate: string;
+  locale: string;
 }
 
 function stateFilename() {
@@ -18,21 +19,17 @@ function stateFilename() {
 export async function readState():Promise<PersistentState> {
   let p = new Promise<PersistentState>((resolve, reject) => {
     fs.readFile(stateFilename(), 'utf8', (err, data) => {
-      let result:PersistentState;
-      if (err) {
-        result = {
-          recentFiles: [],
-          firstUseDate: null,
-        }
-      } else {
+      let result:PersistentState = {
+        recentFiles: [],
+        firstUseDate: null,
+        locale: '',
+      };
+      if (!err) {
         try {
-          result = JSON.parse(data) as PersistentState;  
+          let fromdisk = JSON.parse(data) as PersistentState;  
+          Object.assign(result, fromdisk);
         } catch(err) {
           log.error(`Broken state: ${data}`)
-          result = {
-            recentFiles: [],
-            firstUseDate: null,
-          }
         }
       }
       resolve(result);
@@ -103,7 +100,7 @@ export async function addRecentFile(path:string) {
 }
 
 if (electron_is.main()) {
-  ipcMain.on('persistent:updateState', (new_state:PersistentState) => {
+  ipcMain.on('persistent:updateState', (ev, new_state:PersistentState) => {
     modifyState(state => {
       return new_state;
     })

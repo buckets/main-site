@@ -7,6 +7,8 @@ import { getRecentFiles } from './persistent'
 import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
+import { openPreferences } from './prefs'
+
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -273,6 +275,14 @@ export async function updateMenu() {
           click() {
             openUpdateWindow();
           },
+        },
+        {type: 'separator'},
+        {
+          label: sss('Preferences...'),
+          accelerator: 'CmdOrCtrl+,',
+          click() {
+            openPreferences();
+          }
         },
         {type: 'separator'},
         {role: 'services', submenu: []},

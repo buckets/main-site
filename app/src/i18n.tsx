@@ -2,6 +2,7 @@ import * as log from 'electron-log'
 import * as moment from 'moment'
 import { EventEmitter } from 'events'
 import { remote, app } from 'electron'
+import { readState } from './mainprocess/persistent'
 
 import { IMessages, ILangPack } from './langs/spec'
 
@@ -78,19 +79,27 @@ class TranslationContext extends EventEmitter {
   }
 }
 
-function getLocale():Promise<string> {
+async function getLocale():Promise<string> {
+  // LANG environment variable beats all
   if (env.LANG) {
-    return Promise.resolve(env.LANG);
+    return env.LANG;
   } else {
-    let realapp = app || remote.app;
-    if (realapp.isReady()) {
-      return Promise.resolve(realapp.getLocale());
+    // Application preference
+    let pstate = await readState();
+    if (pstate.locale) {
+      return pstate.locale;
     } else {
-      return new Promise((resolve, reject) => {
-        realapp.on('ready', () => {
-          resolve(app.getLocale() || 'en');
+      // Ask the OS
+      let realapp = app || remote.app;
+      if (realapp.isReady()) {
+        return realapp.getLocale();
+      } else {
+        return new Promise<string>((resolve, reject) => {
+          realapp.on('ready', () => {
+            resolve(app.getLocale() || 'en');
+          })
         })
-      })
+      }
     }
   }  
 }
