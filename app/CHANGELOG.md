@@ -1,4 +1,10 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.17.0
+
+- **FIX:** Fixed a bug that prevented actually linking SimpleFIN accounts
+
+- NEW: Added better logging for times where there are silent errors
+
 ## v0.16.0
 
 - **FIX:** Got rid of scary balance-mismatch warnings that weren't actually actionable.  And a better explanation of what mismatches mean is included.
