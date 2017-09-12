@@ -6,8 +6,8 @@ import { ILangPack, IMessages } from './spec';
 
 const messages:IMessages = {
   "accounts.balance_mismatch_msg": {
-    val: "The most recent synced balance does not match the balance computed from transactions.  Click more for more information.",
-    translated: false,
+    val: "El saldo sincronizado más reciente no coincide con el saldo calculado a partir de las transacciones.  Haga clic en \"más\" para obtener más información.",
+    translated: true,
     src: ["src/budget/accounts.tsx line 32"],
     h: "cMuGJ8vkjW+HMm8Ac01xULd9Lwf/iVtXYPi3WBC2JS4=",
   },
@@ -44,12 +44,12 @@ const messages:IMessages = {
   "accounts.balance_mismatch_long_msg": {
     val: () => {
             return (<span>
-              The "Balance" above is this account's balance as of the latest entered transaction.
-              The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
-              Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
-              So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+              El "Saldo" anterior es el saldo de esta cuenta a partir de la última transacción introducida.
+              El "Saldo sincronizado" es el saldo de esta cuenta <i>según lo informado por el banco.</i>
+              Algunos bancos siempre reportan el balance <i>de hoy</i> como el "saldo sincronizado", aunque <i>las transacciones de hoy</i> no se han enviado a Buckets todavía.
+              Por lo tanto, este desajuste normalmente se resolverá cuando todas las transacciones de su banco hayan sido sincronizadas en Buckets.
           </span>)},
-    translated: false,
+    translated: true,
     src: ["src/budget/accounts.tsx line 82"],
     h: "wR5L88lhIXbxAVDXEZbN1lwbnZjYUBkAifA2KtAg8dM=",
   },
@@ -81,9 +81,9 @@ const messages:IMessages = {
   },
   "sync.toast.syncing": {
     val: (start:moment.Moment, end:moment.Moment) => {
-        return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
+        return `Sincronizando transacciones de ${start.format('ll')} a ${end.format('ll')}`;
       },
-    translated: false,
+    translated: true,
     src: ["src/budget/appstate.ts line 238"],
     h: "f7R9zSdK0q5+lZ8I9QRhiwN5ENKyWFnrmUG6Gltegfs=",
   },
@@ -97,17 +97,17 @@ const messages:IMessages = {
   },
   "sync.cancelled": {
     val: (trans_count:number) => {
-          return `Synced ${trans_count} transactions before being cancelled.`;
+          return `Sincronizado ${trans_count} transacciones antes de ser cancelado.`;
         },
-    translated: false,
+    translated: true,
     src: ["src/budget/appstate.ts line 252"],
     h: "vKPTjoWpzYT7nXd/1E8Hklltu1+GqPNCLKpPvhQCMjI=",
   },
   "sync.done": {
     val: (trans_count:number, start:moment.Moment, end:moment.Moment) => {
-          return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
+          return `Sincronizado ${trans_count} transacciones de ${start.format('ll')} a ${end.format('ll')}`;
         },
-    translated: false,
+    translated: true,
     src: ["src/budget/appstate.ts line 256"],
     h: "G02Wh4RjKpcx6OWMrzrWbWH2OBPaLf3kaUffUt0FeYY=",
   },
@@ -178,8 +178,8 @@ const messages:IMessages = {
     h: "zRWPLHqBTGcGqHHBHWdXpN2eOUUhRhvCyeAccFlR9Z4=",
   },
   "Amount of money over-allocated in buckets.": {
-    val: "Amount of money over-allocated in buckets.",
-    translated: false,
+    val: "Cantidad sobrepasada en los cubos.",
+    translated: true,
     src: ["src/budget/buckets.tsx line 151"],
     h: "kFucvPefN9Kae7dArnle8i0rTZZq1U+3d8w81lDNVKw=",
   },
@@ -408,8 +408,8 @@ const messages:IMessages = {
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
   },
   "bucket.transfer.help": {
-    val: "A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.",
-    translated: false,
+    val: "Una transferencia es una transacción de un cubo a otro.  Si la transacción no es un ingreso ni un gasto, es probablemente una transferencia.",
+    translated: true,
     src: ["src/budget/buckets.tsx line 1073"],
     h: "dh5nslkaB1wNR4tJ5zAn6Hms+9oJqBDmAIR5k6WE6iY=",
   },
@@ -480,8 +480,8 @@ const messages:IMessages = {
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
   },
   "rain.help": {
-    val: "Rain is the money you haven't yet put into buckets.  After transactions are categorized, always keep this 0 or higher.",
-    translated: false,
+    val: "Lluvia es el dinero que todavía no has puesto en cubos.  Después de categorizar las transacciones, siempre mantener esto a 0 o superior.",
+    translated: true,
     src: ["src/budget/budget.tsx line 172"],
     h: "EkC6Xr/2fRJ+4T4rwU2qK1uLpBk7ZpUa9aLGt0wuNr0=",
   },
@@ -524,8 +524,8 @@ const messages:IMessages = {
     h: "kuwg7vpvp082IqBtRakekOVu7bqB4PYxhnFVsoBDt/g=",
   },
   "simplefin-connect-intro": {
-    val: "Connecting to your bank account will make it easy to pull transaction history from your bank into Buckets.  To connect, do the following:",
-    translated: false,
+    val: "Conectarse a su cuenta bancaria hará que sea más fácil extraer historial de transacciones de su banco a Buckets.  Para conectarse, haga lo siguiente::",
+    translated: true,
     src: ["src/budget/connections.tsx line 75"],
     h: "QyrzIPdjiuD+b5YSn7kbPRbYYDDwryIuscSYpL+TgJw=",
   },
@@ -538,8 +538,8 @@ const messages:IMessages = {
     h: "VEeKjngcHxowWbB2xWy5oNH4MXIfJQ7EqpiomT6V0fg=",
   },
   "simplefin-paste": {
-    val: "Then paste your SimpleFIN Token here:",
-    translated: false,
+    val: "Luego, pégue el SimpleFIN Token aquí:",
+    translated: true,
     src: ["src/budget/connections.tsx line 89"],
     h: "vAoRsY20OBqs8bleaXD3auq8VnO9gQj7gXz5p+p71EI=",
   },
@@ -676,32 +676,32 @@ const messages:IMessages = {
     h: "YBGCdB/QACmMM/QS2qMrGlC8qtfWz9bhue7sgDaIRHg=",
   },
   "Avg:": {
-    val: "Avg:",
-    translated: false,
+    val: "Promedio:",
+    translated: true,
     src: ["src/budget/reports.tsx line 220","src/budget/reports.tsx line 231"],
     h: "EVMZyhHQEFPlI2ib8VqTJo25bJBk8gHsgZR1SZ2Jcj0=",
   },
   "Net Transfers": {
-    val: "Net Transfers",
-    translated: false,
+    val: "Transferencias netas",
+    translated: true,
     src: ["src/budget/reports.tsx line 235"],
     h: "4FYbJ2rCxhrWW9XBurKbS2mOSTwlxIXH/jCv5FDofeM=",
   },
   "net-transfers.help": {
-    val: "Net transfers are the sum total of all transactions marked as a transfer.  It should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.",
-    translated: false,
+    val: "Las transferencias netas son la suma total de todas las transacciones marcadas como transferencia.  Debe ser 0.  Si no es así, haga clic para asegurarse de que no hay transacciones duplicadas o transacciones mal clasificadas como transferencias.",
+    translated: true,
     src: ["src/budget/reports.tsx line 235"],
     h: "2P3jr/VPQ35tlPa/uDMqi1spXO4Rinn76fgfVOegiA8=",
   },
   "Tot:": {
     val: "Tot:",
-    translated: false,
+    translated: true,
     src: ["src/budget/reports.tsx line 242","src/budget/reports.tsx line 380"],
     h: "saHMHdDjhEhiq86BBPRvnL+Rb3M/qOu30ZLtUk20QIM=",
   },
   "Gain/Loss": {
-    val: "Gain/Loss",
-    translated: false,
+    val: "Ganancia/pérdida",
+    translated: true,
     src: ["src/budget/reports.tsx line 373"],
     h: "Kop7hNPijjGN5jXxpDmcP32CJy22tzVz1qXWTjNxVg0=",
   },
@@ -712,34 +712,34 @@ const messages:IMessages = {
     h: "bwan2qqqdDloluCkgp+UPYWSAeOQk9zkaNwb2p0kUDk=",
   },
   "Budgeted": {
-    val: "Budgeted",
-    translated: false,
+    val: "Presupuestado",
+    translated: true,
     src: ["src/budget/reports.tsx line 534"],
     h: "aP72arzLN/j79zGtL8DWE7wcBGciRcWqMOR1aTHJmNo=",
   },
   "Prior 12 months": {
-    val: "Prior 12 months",
-    translated: false,
+    val: "12 meses anteriores",
+    translated: true,
     src: ["src/budget/reports.tsx line 535"],
     h: "0M7KePS3rfMQeASk2IqHTYGXTAj0v1V27kPVHCsgPaY=",
   },
   "Prior 3 months": {
-    val: "Prior 3 months",
-    translated: false,
+    val: "3 meses anteriores",
+    translated: true,
     src: ["src/budget/reports.tsx line 536"],
     h: "spZsVyneGnwmYcYcv5FAET+76DRv205SW2FspmtvKpI=",
   },
   "Delete selected": {
-    val: "Delete selected",
-    translated: false,
+    val: "Eliminar seleccionado",
+    translated: true,
     src: ["src/budget/transactions.tsx line 84"],
     h: "bsJ1Vyhm8h3AT4g3iLkWOso1mGTLsIFexh1ymwKankw=",
   },
   "transactions.delete": {
     val: (size:number) => {
-        return `Delete selected (${size})`
+        return `Eliminar seleccionado (${size})`
       },
-    translated: false,
+    translated: true,
     src: ["src/budget/transactions.tsx line 86"],
     h: "/u86qzz5nT6n9ZqcgDLwC0GHmjDy0cELJjSzjBAim5g=",
   },
@@ -750,14 +750,14 @@ const messages:IMessages = {
     h: "pFUUU47IsBM4t150vlDrtZPYmzaQTNFLynl5hVnyaWI=",
   },
   "Show uncategorized": {
-    val: "Show uncategorized",
-    translated: false,
+    val: "Mostrarlas sin clasificar",
+    translated: true,
     src: ["src/budget/transactions.tsx line 108"],
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
   },
   "sync-symbol help": {
-    val: "This symbol means the transaction came from an import/sync",
-    translated: false,
+    val: "Esta transacción provenía de una importación o sincronización",
+    translated: true,
     src: ["src/budget/transactions.tsx line 171"],
     h: "S3tDRls+AJYj6f8jSNSCa1FVyNY+ngn6Db1EQJ3dpLE=",
   },
@@ -804,8 +804,8 @@ const messages:IMessages = {
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
   },
   "Categorize": {
-    val: "Categorize",
-    translated: false,
+    val: "Categorizar",
+    translated: true,
     src: ["src/budget/transactions.tsx line 552"],
     h: "mA6/TefxgXpo2M+OUx/ATLQ4QYHv4t1+8vy3MmV+EQg=",
   },
@@ -822,8 +822,8 @@ const messages:IMessages = {
     h: "viN5uLRSpgzhvoD9KO9g1cr7ihLQ0Men9LiUpy9RcwE=",
   },
   "error-detail": {
-    val: "If this error keeps happening or doesn't make sense, please report a bug or chat with us.",
-    translated: false,
+    val: "Si este error sigue ocurriendo o no tiene sentido, informe un error o hable con nosotros.",
+    translated: true,
     src: ["src/errors.ts line 19"],
     h: "10Kk29tlHpBnhcTf7RRMfq1OZPGZgvPPguRlInaLNoY=",
   },
@@ -882,8 +882,8 @@ const messages:IMessages = {
     h: "g2jeytcuhPOlEo6R2OlTzT3vNdE7sVWGnXuffEioq4c=",
   },
   "Buckets Budget Filename": {
-    val: "Buckets Budget Filename",
-    translated: false,
+    val: "Nombre de archivo",
+    translated: true,
     src: ["src/mainprocess/files.ts line 143"],
     h: "PMqvee/qJsh/OYtRi+hbcH4fgl07SR6XM0wx4c1C+sU=",
   },
@@ -930,7 +930,7 @@ const messages:IMessages = {
     h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
   },
   "Edit": {
-    val: "Edición",
+    val: "Editar",
     translated: true,
     src: ["src/mainprocess/menu.ts line 83"],
     h: "9+ZynTDPePvsJX4rW8Mn0wEzk0GRQ+udON01NKHVsQU=",
@@ -984,14 +984,14 @@ const messages:IMessages = {
     h: "aUU1pzvlZzKNgYZP2ZpPtQMImBOStbFnK33P3YwXTNs=",
   },
   "Find Next": {
-    val: "Find Next",
-    translated: false,
+    val: "Buscar siguiente",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 103"],
     h: "LALfI5V4TsQo0DcGJwmNmrm3xNPtY5PmQuxB1voZo34=",
   },
   "Find Previous": {
-    val: "Find Previous",
-    translated: false,
+    val: "Buscar anterior",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 110"],
     h: "0n6Dq5KDTxxsTAKrJE+RDdgi9ln6FyfUEPNBJ6ejZ5o=",
   },
@@ -1002,20 +1002,20 @@ const messages:IMessages = {
     h: "paIseOhKCT2+NaUBPKk98vQB/lphf7jIGeERV77doDg=",
   },
   "Reload": {
-    val: "Reload",
-    translated: false,
+    val: "Recargar",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 147"],
     h: "hUVVd3tppLGqwgo2OeC3h334aTF0Y+/GHbuL/I1clYk=",
   },
   "Force Reload": {
-    val: "Force Reload",
-    translated: false,
+    val: "Recargar de fuerza",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 151"],
     h: "ktBJY2UXO+2r0ZvmbQXhArN51bSTnyaNnnBNR9PQ5K8=",
   },
   "Toggle Developer Tools": {
-    val: "Toggle Developer Tools",
-    translated: false,
+    val: "Alternar herramientas del programador",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 155"],
     h: "IYSSUL9ezB58nRuajYVa+zH4ucrmXQOB92zA7sDlrJc=",
   },
@@ -1038,8 +1038,8 @@ const messages:IMessages = {
     h: "hRo1uzcSNStVll7ef2xHOB6PqFh+q7Sg/VHiGcK4M8M=",
   },
   "Toggle Full Screen": {
-    val: "Toggle Full Screen",
-    translated: false,
+    val: "Alternar pantalla completa",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 173"],
     h: "2ZRq+R5E0Cp4QI+y5jCefU1IOiYvNWLrN/iiJq6hGr8=",
   },
@@ -1134,20 +1134,20 @@ const messages:IMessages = {
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
   "Speech": {
-    val: "Speech",
-    translated: false,
+    val: "Voz",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 227"],
     h: "i4Qm95bH8zVEbjpkUi7jvQiLtDzGkW9z90XEkiglzHM=",
   },
   "Start Speaking": {
-    val: "Start Speaking",
-    translated: false,
+    val: "Iniciar locución",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 292"],
     h: "v8sFOpEAoczjEjGparKZylHWHoxHMVQriwuhJaec2rY=",
   },
   "Stop Speaking": {
-    val: "Stop Speaking",
-    translated: false,
+    val: "Detener locución",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 296"],
     h: "Pme2/qME7bKdVrHTIEBQYt1Fu/SXRNGyy6sLBfKpqqk=",
   },
@@ -1164,8 +1164,8 @@ const messages:IMessages = {
     h: "vXNLSncC5dTsDdfhZY5dhbev+Y3PpqQEy1fwxTkGWU0=",
   },
   "Update Available": {
-    val: "Update available",
-    translated: false,
+    val: "Actualización disponible",
+    translated: true,
     src: ["src/mainprocess/updater.ts line 159"],
     h: "FKOD6i3t69T8rvTwVJ5VSnLfkQPBcceuuk2X4ZsNKMY=",
   },
@@ -1176,44 +1176,44 @@ const messages:IMessages = {
     h: "YCoofx1v0tRUHkHfhFnm6bV2xXfnsNT6QAyXqgkUa9c=",
   },
   "Later": {
-    val: "Later",
-    translated: false,
+    val: "Ahora no",
+    translated: true,
     src: ["src/mainprocess/updater.ts line 161"],
     h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
   },
   "Download": {
-    val: "Download",
-    translated: false,
+    val: "Descargar",
+    translated: true,
     src: ["src/mainprocess/updater.ts line 162"],
     h: "QVM3NKWnuJ19cWUaN3y9fVCbkiQTygWbOYuFMklAwNc=",
   },
   "Sync failed": {
-    val: "Sync failed",
-    translated: false,
+    val: "Sincronización ha fallado",
+    translated: true,
     src: ["src/models/simplefin.ts line 159"],
     h: "jBGq60u/Y2WKAulnVvspUq9tLPFtXOnQYczjXXViGA0=",
   },
   "Invalid SimpleFIN Token": {
-    val: "Invalid SimpleFIN Token",
-    translated: false,
+    val: "SimpleFIN Token es inválido",
+    translated: true,
     src: ["src/models/simplefin.ts line 298"],
     h: "C6BzeT0S0G+xUVzgdubtVeH39oIVS4hUaVBd2gKS3Uo=",
   },
   "Unable to claim access token": {
-    val: "Unable to claim access token",
-    translated: false,
+    val: "Incapaz de reclamar SimpleFIN Token",
+    translated: true,
     src: ["src/models/simplefin.ts line 310"],
     h: "Gao95RuT9JvhdAoZ5winV9os7iMaPIex3Vq9CMSjhzs=",
   },
   "Error fetching data": {
-    val: "Error fetching data",
-    translated: false,
+    val: "Error al obtener datos",
+    translated: true,
     src: ["src/models/simplefin.ts line 326"],
     h: "z94B0956dECmmaMVLZFW0oZMVtA92etw+2ZqumR4K9Q=",
   },
   "Error parsing response": {
-    val: "Error parsing response",
-    translated: false,
+    val: "Error al analizar la respuesta",
+    translated: true,
     src: ["src/models/simplefin.ts line 333"],
     h: "PsIRbom+m8Y5OIEPW2rzJYVlNA2NQrZmEQnpW7Y/9KI=",
   },
@@ -1230,8 +1230,8 @@ const messages:IMessages = {
     h: "QPy/bCk+yTP2DzZAmXWbRYj2KC5QbrLq/XeXrysIX6Q=",
   },
   "enter-license-prompt": {
-    val: "\n      Please enter your Buckets License below.  Don&apos;t have a license?  <a href=\"#\" id=\"clicktobuy\">Click here to purchase one.</a>\n    ",
-    translated: false,
+    val: "\n      Por favor, ingrese su licencia de Buckets abajo.  ¿No tiene licencia?  <a href=\"#\" id=\"clicktobuy\">Cómprala aquí.</a>\n    ",
+    translated: true,
     src: ["src/wwwroot/misc/enter_license.html line 0"],
     h: "bQ5kF1mLhFNyrJzVhTf5Cz5lxO8mRww7nwMpeCy9HC8=",
   },
@@ -1284,8 +1284,8 @@ const messages:IMessages = {
     h: "OvekDBh71chOkbTXqPs/V/x0lNbpc668s4hyXRF5G+I=",
   },
   "You are running the latest version!": {
-    val: "You are running the latest version!",
-    translated: false,
+    val: "Buckets está actualizado!",
+    translated: true,
     src: ["src/wwwroot/misc/updates.tsx line 41"],
     h: "hShy87A6GAhRqqtK+8VdVeGD70zA64iiV0/SwectQ0I=",
   },
