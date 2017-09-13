@@ -3,12 +3,11 @@ import * as log from 'electron-log'
 import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
-import { getRecentFiles } from './persistent'
+import { getRecentFiles, PersistEvents } from './persistent'
 import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
-
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -31,7 +30,6 @@ export async function updateEnabled(isbudget:boolean) {
 }
 
 export async function updateMenu() {
-  console.log('updateMenu()');
   let recent_files = await getRecentFiles();
   let FileMenu = {
     label: sss('File'),
@@ -269,7 +267,10 @@ export async function updateMenu() {
     preMenus.push({
       label: app.getName(),
       submenu: [
-        {role: 'about'},
+        {
+          role: 'about',
+          label: sss('About Buckets'),
+        },
         {
           label: sss('Check For Updates...'),
           click() {
@@ -285,13 +286,28 @@ export async function updateMenu() {
           }
         },
         {type: 'separator'},
-        {role: 'services', submenu: []},
+        {
+          role: 'services', submenu: [],
+          label: sss('Services'),
+        },
         {type: 'separator'},
-        {role: 'hide'},
-        {role: 'hideothers'},
-        {role: 'unhide'},
+        {
+          role: 'hide',
+          label: sss('Hide Buckets'),
+        },
+        {
+          role: 'hideothers',
+          label: sss('Hide Others'),
+        },
+        {
+          role: 'unhide',
+          label: sss('Show All'),
+        },
         {type: 'separator'},
-        {role: 'quit'}
+        {
+          role: 'quit',
+          label: sss('Quit Buckets'),
+        }
       ]
     })
     EditMenu.submenu.push(
@@ -345,6 +361,9 @@ export async function updateMenu() {
 }
 
 if (app) {
+  PersistEvents.on('added-recent-file', () => {
+    updateMenu();
+  })
   tx.on('locale-set', () => {
     updateMenu();
   });

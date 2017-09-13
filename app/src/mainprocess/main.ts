@@ -7,6 +7,7 @@ import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
+import { startLocalizing } from '../i18n'
 import { updateMenu, updateEnabled } from './menu'
 import { BudgetFile, watchForEvents } from './files'
 import { APP_ROOT } from './globals'
@@ -17,6 +18,10 @@ autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
 log.info('App starting...');
+
+app.on('ready', () => {
+  startLocalizing();
+});
 
 process.on('uncaughtException' as any, (err) => {
   log.error('uncaughtException', err);
@@ -160,7 +165,7 @@ function openWizard() {
     wiz_win = null;
   })
 }
-export function closeWizard() {
+function closeWizard() {
   if (wiz_win) {
     wiz_win.close();
   }

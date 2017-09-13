@@ -1135,6 +1135,12 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 245"],
     h: "A+/eZ8qTAh97iBouJPInRkCg7F0nOkteYEBO7+lFHHA=",
   },
+  "About Buckets": {
+    val: "About Buckets",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 271"],
+    h: "9bzPsx+kCkNUeLTSVjaygyWCkm3VCdsFaAFRvdS+xEU=",
+  },
   "Check For Updates...": {
     val: "Check For Updates...",
     translated: false,
@@ -1146,6 +1152,36 @@ const messages:IMessages = {
     translated: false,
     src: ["src/mainprocess/menu.ts line 280"],
     h: "6iQxyJ1WC9/Z0f0saApfwL5hmhgN5YgJeikLAYqCGBI=",
+  },
+  "Services": {
+    val: "Services",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 290"],
+    h: "Y5+GuNZXfFSynDsHvAY8cr0RqU+moaHZNmOk2eQrsNs=",
+  },
+  "Hide Buckets": {
+    val: "Hide Buckets",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 295"],
+    h: "38YdGXFjndmgDFgXTpfUZ0F+W/D9e267YaAvzYZm4O8=",
+  },
+  "Hide Others": {
+    val: "Hide Others",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 299"],
+    h: "RpKz0G7Y8OE5oyGm0/zRffPdr7RQkneZCYrikLHIZ+U=",
+  },
+  "Show All": {
+    val: "Show All",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 303"],
+    h: "Kng6HqlojyhuqEK6kaB3KPtAs1w0LcpFWkJYrscali0=",
+  },
+  "Quit Buckets": {
+    val: "Quit Buckets",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 308"],
+    h: "QILEHXgAk6vuNPV3rqkbn2QRZ8WKrPnAZnscp7n8WaM=",
   },
   "Speech": {
     val: "Speech",

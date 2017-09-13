@@ -56,7 +56,8 @@ class TranslationContext extends EventEmitter {
   toString() {
     return `TranslationContext locale=${this._locale}`;
   }
-  localizeThisPage(_skipwatch?:boolean) {
+  async localizeThisPage(_skipwatch?:boolean) {
+    await startLocalizing();
     document.documentElement.setAttribute('dir', this.langpack.dir);
     Array.from(document.querySelectorAll('[data-translate]'))
     .forEach((elem:HTMLElement) => {
@@ -104,11 +105,19 @@ async function getLocale():Promise<string> {
   }  
 }
 
+var STARTED_LOCALIZING = null;
+export async function startLocalizing():Promise<any> {
+  if (STARTED_LOCALIZING) {
+    return;
+  } else {
+    STARTED_LOCALIZING = true;
+    let locale = await getLocale();
+    tx.setLocale(locale);
+  }
+}
+
 const env = remote ? remote.process.env : process.env;
 export const tx = new TranslationContext();
 export const localizeThisPage = tx.localizeThisPage.bind(tx);
 export const sss = tx.sss.bind(tx);
 
-getLocale().then(locale => {
-  tx.setLocale(locale);  
-})

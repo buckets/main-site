@@ -65,7 +65,7 @@ const messages:IMessages = {
     val: (clickhandler) => {
           return <span>¿Primera vez usando Buckets?  Echa un vistazo a <a href="#" onClick={clickhandler}>los vídeos de inicio.</a></span>
         },
-    translated: false,
+    translated: true,
     src: ["src/budget/accounts.tsx line 138"],
     h: "9NGQRvIxlAaOF9i+zWPXMFQubcY+5jtA7Td/lii16aM=",
   },
@@ -1135,6 +1135,12 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 184"],
     h: "A+/eZ8qTAh97iBouJPInRkCg7F0nOkteYEBO7+lFHHA=",
   },
+  "About Buckets": {
+    val: "Acerca de Buckets",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 271"],
+    h: "9bzPsx+kCkNUeLTSVjaygyWCkm3VCdsFaAFRvdS+xEU=",
+  },
   "Check For Updates...": {
     val: "Buscar actualizaciones...",
     translated: true,
@@ -1146,6 +1152,36 @@ const messages:IMessages = {
     translated: true,
     src: ["src/mainprocess/menu.ts line 280"],
     h: "6iQxyJ1WC9/Z0f0saApfwL5hmhgN5YgJeikLAYqCGBI=",
+  },
+  "Services": {
+    val: "Servicios",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 290"],
+    h: "Y5+GuNZXfFSynDsHvAY8cr0RqU+moaHZNmOk2eQrsNs=",
+  },
+  "Hide Buckets": {
+    val: "Ocultar Buckets",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 295"],
+    h: "38YdGXFjndmgDFgXTpfUZ0F+W/D9e267YaAvzYZm4O8=",
+  },
+  "Hide Others": {
+    val: "Ocultar otros",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 299"],
+    h: "RpKz0G7Y8OE5oyGm0/zRffPdr7RQkneZCYrikLHIZ+U=",
+  },
+  "Show All": {
+    val: "Mostrar todo",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 303"],
+    h: "Kng6HqlojyhuqEK6kaB3KPtAs1w0LcpFWkJYrscali0=",
+  },
+  "Quit Buckets": {
+    val: "Salir Buckets",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 308"],
+    h: "QILEHXgAk6vuNPV3rqkbn2QRZ8WKrPnAZnscp7n8WaM=",
   },
   "Speech": {
     val: "Voz",

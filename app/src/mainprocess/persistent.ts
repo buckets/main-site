@@ -3,7 +3,7 @@ import * as electron_is from 'electron-is'
 import * as Path from 'path'
 import * as fs from 'fs'
 import * as log from 'electron-log'
-import { updateMenu } from './menu'
+import { EventEmitter } from 'events'
 
 export interface PersistentState {
   recentFiles: string[];
@@ -80,6 +80,7 @@ async function _modifyState(func:(state:PersistentState)=>(Promise<PersistentSta
 }
 export let modifyState = serialize(_modifyState);
 
+export const PersistEvents = new EventEmitter();
 
 export async function getRecentFiles():Promise<string[]> {
   return (await readState()).recentFiles;
@@ -96,7 +97,7 @@ export async function addRecentFile(path:string) {
     state.recentFiles = recent_files;
     return state;
   })
-  return updateMenu();
+  PersistEvents.emit('added-recent-file', path);
 }
 
 if (electron_is.main()) {
