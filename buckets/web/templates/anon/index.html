@@ -61,6 +61,19 @@ img.main-shot {
 .strikeout {
   text-decoration: line-through;
 }
+.rightimg {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-right: -5rem;
+}
+.leftimg {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-left: -5rem;
+}
+
 </style>
 {% endblock %}
 
@@ -125,12 +138,18 @@ img.main-shot {
     Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Why, yes, that is ridiculously generous.
   </div>
 
-  <div class="callout para">
-    Watch <em>helpful videos</em> to learn how to budget like a master <a href="{{ url_for('.gettingstarted') }}">here</a>.
+  <div class="leftimg">
+    <a href="{{ url_for('.gettingstarted') }}"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
+    <div class="callout para">
+      Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ url_for('.gettingstarted') }}">Check 'em out!</a>
+    </div>
   </div>
 
-  <div class="callout para">
-    Buckets is <em>multilingual</em>.  Currently English and Spanish are supported.
+  <div class="rightimg">
+    <div class="callout para">
+      Buckets is <em>multilingual</em>.  Currently English and Spanish are supported.
+    </div>
+    <img src="/static/img/shots/spanish.png" style="width: 300px;">
   </div>
 
   <div class="callout para">
@@ -138,7 +157,7 @@ img.main-shot {
     <span class="highlight">This is the special introductory price.  In 2018 it will cost $40.</span>
   </div>
 
-  <div style="text-align: center; margin: 2rem;">
+  <div style="text-align: center; margin: 2rem; margin-bottom: 8rem;">
     <a class="buttonish" href="{{ url_for('.buy') }}">Buy Now &mdash; $20</a>
   </div>
 
@@ -171,7 +190,7 @@ img.main-shot {
 <div id="mc_embed_signup">
 <form action="//bucketsisbetter.us8.list-manage.com/subscribe/post?u=bc109895c8df246ae54ad4d71&amp;id=0960a6d05e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
     <div id="mc_embed_signup_scroll">
-  <h2>Subscribe to the Never-More-Than-Monthly, Unsubscribe-Whenever Buckets Newsletter</h2>
+  <h2>Subscribe to the Never-More-Than-Monthly Buckets Newsletter</h2>
 <div class="mc-field-group">
   <label for="mce-EMAIL">Email Address </label>
   <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
