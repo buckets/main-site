@@ -147,6 +147,7 @@ export interface IMessages {
   "action.report bug": IMsg<string>;
   "bug-include-line": IMsg<string>;
   "OK": IMsg<string>;
+  "Buckets License": IMsg<string>;
   "Unable to open the file:": IMsg<string>;
   "File does not exist:": IMsg<string>;
   "Open Buckets Budget": IMsg<string>;
@@ -1096,6 +1097,12 @@ export const DEFAULTS:IMessages = {
     translated: false,
     src: ["src/errors.ts line 48"],
     h: "mMSSK7ZBxlx6MLe8r98jC5sAtmk2McVhRqslsnhu5KM=",
+  },
+  "Buckets License": {
+    val: "Buckets License",
+    translated: false,
+    src: ["src/mainprocess/dbstore.ts line 31","src/mainprocess/dbstore.ts line 65"],
+    h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
   },
   "Unable to open the file:": {
     val: "Unable to open the file:",

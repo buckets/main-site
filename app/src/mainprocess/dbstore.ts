@@ -12,6 +12,7 @@ import { ReportStore } from '../models/reports'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
+import { sss } from '../i18n'
 
 export class NotFound extends Error {
   toString() {
@@ -28,7 +29,7 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
     } catch(e) {
       if (e instanceof NotFound) {
         license_bucket = await store.buckets.add({
-          name: 'Buckets License',
+          name: sss('Buckets License'),
         })
         await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
           $id: license_bucket.id
@@ -62,7 +63,7 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
       goal: 4000,
       deposit: 500,
       kicked: false,
-      name: 'Buckets License',
+      name: sss('Buckets License'),
       ranking: ranking,
       color: 'rgba(52, 152, 219,1.0)',
       group_id: group_id,

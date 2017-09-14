@@ -865,6 +865,12 @@ const messages:IMessages = {
     src: ["src/errors.ts line 48"],
     h: "mMSSK7ZBxlx6MLe8r98jC5sAtmk2McVhRqslsnhu5KM=",
   },
+  "Buckets License": {
+    val: "Buckets License",
+    translated: false,
+    src: ["src/mainprocess/dbstore.ts line 31","src/mainprocess/dbstore.ts line 65"],
+    h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
+  },
   "Unable to open the file:": {
     val: "Unable to open the file:",
     translated: false,

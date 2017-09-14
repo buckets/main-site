@@ -1,4 +1,8 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.18.0
+
+- NEW: Buckets is now available in Spanish!
+
 ## v0.17.0
 
 - **FIX:** Fixed a bug that prevented actually linking SimpleFIN accounts
