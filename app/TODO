@@ -3,12 +3,7 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
  ☐ Turning a regular expense back to a normal bucket retains the deposit in rain
- ☐ Uncaught (in promise) TypeError: Cannot read property 'store' of undefined
-    at unknowns.map.unknown (/opt/Buckets/resources/app.asar/src/models/simplefin.js:266:28)
-    at Array.map (native)
-    at /opt/Buckets/resources/app.asar/src/models/simplefin.js:265:37
-    at Generator.next (<anonymous>)
-    at fulfilled (/opt/Buckets/resources/app.asar/src/models/simplefin.js:3:58)
+ ☐ Preferences page doesn't have the right language.
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
@@ -18,16 +13,11 @@ v1.0.0:
  ☐ Remove "Test Toast" button :)
 
 Videos:
-  ✔ Creating a budget @done (17-08-31 09:49)
   ☐ "Doing" the budget (categorize, make it rain, adjust)
   ☐ Entering transactions
     ☐ SimpleFIN
     ☐ Manually
     ☐ File import
-  ✔ Every field is a calculator @done (17-08-31 09:49)
-  ✔ Goal buckets @done (17-08-31 09:49)
-  ✔ Monthly expense buckets @done (17-08-31 09:49)
-  ✔ Make it rain @done (17-08-31 09:49)
   ☐ Going into debt to yourself
 
 Backlog:
@@ -49,6 +39,17 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Uncaught (in promise) TypeError: Cannot read property 'store' of undefined @done (17-09-14 10:37) @project(Bugs)
+  at unknowns.map.unknown (/opt/Buckets/resources/app.asar/src/models/simplefin.js:266:28)
+  at Array.map (native)
+  at /opt/Buckets/resources/app.asar/src/models/simplefin.js:265:37
+  at Generator.next (<anonymous>)
+  at fulfilled (/opt/Buckets/resources/app.asar/src/models/simplefin.js:3:58)
+ ✔ Monthly expense buckets @done (17-08-31 09:49) @project(Videos)
+ ✔ Make it rain @done (17-08-31 09:49) @project(Videos)
+ ✔ Goal buckets @done (17-08-31 09:49) @project(Videos)
+ ✔ Every field is a calculator @done (17-08-31 09:49) @project(Videos)
+ ✔ Creating a budget @done (17-08-31 09:49) @project(Videos)
  ✔ Bucket analysis -- only go back as far as there are transactions @done (17-08-25 22:40) @project(v1.0.0)
  ✔ If you make a new file in / it won't open or respond or fail or anything. @done (17-08-25 22:38) @project(Bugs)
  ✔ Regular expense chart @done (17-08-25 22:11) @project(v1.0.0)
