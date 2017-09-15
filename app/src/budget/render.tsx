@@ -1,5 +1,7 @@
-import * as ReactDOM from 'react-dom';
-import * as _ from 'lodash';
+import * as ReactDOM from 'react-dom'
+import * as _ from 'lodash'
+import { EventEmitter } from 'events'
+import { tx } from '../i18n'
 
 function ensureFunction<T>(x:T|(()=>T)):()=>T {
   if (_.isFunction(x)) {
@@ -9,11 +11,18 @@ function ensureFunction<T>(x:T|(()=>T)):()=>T {
   }
 }
 
-export class Renderer {
+export class Renderer extends EventEmitter {
   private render_funcs:Array<()=>Promise<any>> = [];
   private update_queue = [];
   private in_update:boolean = false;
   private in_render:boolean = false;
+
+  constructor() {
+    super();
+    tx.on('locale-set', async ({locale}) => {
+      await this.doUpdate();
+    })
+  }
 
   registerRendering(component:(JSX.Element | (()=>JSX.Element)),
     elem:(Element | (()=>Element))) {
@@ -31,6 +40,12 @@ export class Renderer {
     if (func) {
       this.update_queue.push(func);
     }
+    if (this.in_render) {
+      this.once('renderdone', () => {
+        this.doUpdate(func);
+      })
+      return;
+    }
     if (this.in_update) {
       return;
     }
@@ -39,7 +54,6 @@ export class Renderer {
       await this.update_queue.shift()();
     }
     this.in_update = false;
-
     return this.doRender();
   }
   async doRender():Promise<any> {
@@ -52,5 +66,6 @@ export class Renderer {
         return func();
       }));
     this.in_render = false;
+    this.emit('renderdone');
   }
 }

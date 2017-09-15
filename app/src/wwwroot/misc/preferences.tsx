@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { sss, localizeThisPage } from '../../i18n'
-// import * as log from 'electron-log'
 import { readState, modifyState, PersistentState } from '../../mainprocess/persistent'
 import { Renderer } from '../../budget/render'
 
@@ -13,12 +12,11 @@ export async function start(base_element) {
   localizeThisPage();
 
   renderer.registerRendering(() => {
-    console.log('RENDERING');
     return <PreferencesApp
       pstate={PSTATE}
     />;
   }, base_element);
-  renderer.doUpdate();  
+  renderer.doUpdate();
 }
 
 

@@ -56,7 +56,10 @@ class TranslationContext extends EventEmitter {
   toString() {
     return `TranslationContext locale=${this._locale}`;
   }
-  async localizeThisPage(_skipwatch?:boolean) {
+  async localizeThisPage(args?:{
+      skipwatch?:boolean,
+    }) {
+    args = args || {};
     await startLocalizing();
     document.documentElement.setAttribute('dir', this.langpack.dir);
     Array.from(document.querySelectorAll('[data-translate]'))
@@ -72,9 +75,10 @@ class TranslationContext extends EventEmitter {
         console.warn('Localization error:', err, elem);
       }
     })
-    if (!_skipwatch) {
+    if (!args.skipwatch) {
       this.on('locale-set', () => {
-        this.localizeThisPage(true);
+        log.info('Re-localizing page', this.locale);
+        this.localizeThisPage({skipwatch:true});
       })
     }
   }
