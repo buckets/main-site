@@ -9,8 +9,11 @@ v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Sign the code
+ ☐ Encryption: http://atom.github.io/node-keytar/
  ☐ Encrypt simplefin connection stuff
  ☐ Remove "Test Toast" button :)
+ ☐ Prompt to be added to newsletter
+ ☐ Record signing in to bank (with encryption)
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
