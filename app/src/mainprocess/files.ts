@@ -167,4 +167,9 @@ export function watchForEvents(app:Electron.App) {
   ipcMain.on('open-file', (ev, path) => {
     BudgetFile.openFile(path);
   })
+  ipcMain.on('buckets:open-recorder', (ev) => {
+    console.log('open recorder', ev.sender);
+    const file = WIN2FILE[ev.sender.id];
+    file.openWindow('/record/record.html');
+  })
 }

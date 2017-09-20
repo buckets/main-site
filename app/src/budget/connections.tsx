@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { shell } from 'electron'
+import { shell, ipcRenderer } from 'electron'
 import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import { manager, AppState } from './appstate'
@@ -136,6 +136,9 @@ export class ConnectionsPage extends React.Component<{
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
             <button onClick={this.startConnecting}>{sss('Connect to bank')}</button>
+            <button onClick={() => {
+              ipcRenderer.send('buckets:open-recorder');
+            }}>Record</button>
           </div>
           <div>
             <button onClick={() => { makeToast('Here is some toast')}}>{sss('Test Toast')}</button>
