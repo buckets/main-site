@@ -1,32 +1,24 @@
 import * as React from 'react'
 import { Renderer } from '../../budget/render'
 
-
 interface HeaderProps {
   webview: Electron.WebviewTag;
+  url: string;
 }
 class Header extends React.Component<HeaderProps, {
   url: string;
 }> {
   constructor(props:HeaderProps) {
     super(props);
-    console.log('props', props);
-    try {
-      console.log('url', props.webview.getURL())
-    } catch(err) {
-
-    }
     this.state = {
-      url: '',
+      url: props.url,
     }
   }
-  willReceiveProps(nextProps:HeaderProps) {
-    console.log('nextProps', nextProps);
-    try {
-      console.log('url', nextProps.webview.getURL())
-    } catch(err) {
-
-    }
+  shouldComponentUpdate() {
+    return true;
+  }
+  componentWillReceiveProps(nextProps:HeaderProps) {
+    this.setState({url: nextProps.url});
   }
   render() {
     let { webview } = this.props;
@@ -76,8 +68,10 @@ class Header extends React.Component<HeaderProps, {
 export function start(control, webview:Electron.WebviewTag) {
   const renderer = new Renderer();
   renderer.registerRendering(() => {
+    const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
     return <Header
       webview={webview}
+      url={url}
     />
   }, control);
 
@@ -98,7 +92,7 @@ export function start(control, webview:Electron.WebviewTag) {
     'found-in-page',
     'new-window',
     'will-navigate',
-    'did-navigate',
+    // 'did-navigate',
     'did-navigate-in-page',
     'close',
     'ipc-message',
@@ -114,13 +108,13 @@ export function start(control, webview:Electron.WebviewTag) {
     'devtools-closed',
     'devtools-focused'];
   events.forEach(event => {
-    webview.addEventListener(event as any, () => {
-      console.log('event', event);
+    webview.addEventListener(event as any, (ev) => {
+      console.log('event', event, ev);
     }, false);
   })
 
   webview.addEventListener('console-message', (ev) => {
-    console.log('WEBVIEW:', ev.message);
+    console.log('webview:', ev.message);
   }, false)
   webview.addEventListener('page-favicon-updated', (ev) => {
     // console.log('favicon', ev);
@@ -130,6 +124,10 @@ export function start(control, webview:Electron.WebviewTag) {
 
     // }
   })
+  webview.addEventListener('did-navigate', (ev) => {
+    console.log('did-navigate');
+    renderer.doUpdate();
+  }, false);
   webview.addEventListener('page-title-updated', (ev) => {
     document.title = `Buckets Recorder - ${ev.title}`;
   }, false);

@@ -58,7 +58,11 @@
 </head>
 <body>
   <div id="control"></div>
-  <webview id="webview" autosize="on" disableguestresize style="width: 100%;"></webview>
+  <webview id="webview"
+    autosize="on"
+    disableguestresize
+    style="width: 100%;"
+    partition="persist:recordtest"></webview>
 <script>
 const {remote} = require('electron');
 const Path = require('path');

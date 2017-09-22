@@ -98,7 +98,14 @@ export class BudgetFile {
   }
   openRecordWindow() {
     let sesh = session.fromPartition('persist:recordtest', null as any);
-    console.log('sesh', sesh);
+    sesh.on('will-download', (ev, item, webContents) => {
+      console.log('will-download', ev, item);
+      console.log('getFilename', item.getFilename())
+      console.log('mimetype', item.getMimeType());
+      console.log('state', item.getState());
+      console.log('getURL', item.getURL());
+      ev.preventDefault();
+    })
     this.openWindow('/record/record.html');
   }
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
@@ -173,7 +180,6 @@ export function watchForEvents(app:Electron.App) {
     BudgetFile.openFile(path);
   })
   ipcMain.on('buckets:open-recorder', (ev) => {
-    console.log('open recorder', ev.sender);
     const file = WIN2FILE[ev.sender.id];
     file.openRecordWindow();
   })
