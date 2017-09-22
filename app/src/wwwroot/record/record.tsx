@@ -1,31 +1,84 @@
 import * as React from 'react'
 import { Renderer } from '../../budget/render'
 
+
+interface HeaderProps {
+  webview: Electron.WebviewTag;
+}
+class Header extends React.Component<HeaderProps, {
+  url: string;
+}> {
+  constructor(props:HeaderProps) {
+    super(props);
+    console.log('props', props);
+    try {
+      console.log('url', props.webview.getURL())
+    } catch(err) {
+
+    }
+    this.state = {
+      url: '',
+    }
+  }
+  willReceiveProps(nextProps:HeaderProps) {
+    console.log('nextProps', nextProps);
+    try {
+      console.log('url', nextProps.webview.getURL())
+    } catch(err) {
+
+    }
+  }
+  render() {
+    let { webview } = this.props;
+    let { url } = this.state;
+    return <div className="control">
+      <button onClick={() => {
+        webview.goBack();
+      }}>
+        <span className="fa fa-chevron-left"></span>
+      </button>
+      <button onClick={() => {
+        webview.goForward();
+      }}>
+        <span className="fa fa-chevron-right"></span>
+      </button>
+      <input
+        value={url}
+        onChange={ev => {
+          this.setState({url: ev.target.value});
+        }}
+        type="text"
+        placeholder="https://www.example.com/"
+        onKeyDown={ev => {
+          if (ev.key === 'Enter') {
+            this.navigateToURL(this.state.url);
+          }
+        }}
+      />
+      <button onClick={() => {
+        webview.reload();
+      }}>
+        <span className="fa fa-refresh"></span>
+      </button>
+      <button onClick={() => {
+        this.navigateToURL(this.state.url);
+      }}><span className="fa fa-arrow-right"></span></button>
+      <div className="overlay-wrap">
+        <div className="overlay"><span className="fa fa-chevron-up"></span> Enter a URL <span className="fa fa-chevron-up"></span></div>
+      </div>
+    </div>
+  }
+  navigateToURL(url:string) {
+    this.props.webview.src = url;
+  }
+}
+
 export function start(control, webview:Electron.WebviewTag) {
   const renderer = new Renderer();
   renderer.registerRendering(() => {
-    return <div className="control">
-        <button onClick={() => {
-          webview.goBack();
-        }}>
-          <span className="fa fa-chevron-left"></span>
-        </button>
-        <button onClick={() => {
-          webview.goForward();
-        }}>
-          <span className="fa fa-chevron-right"></span>
-        </button>
-        <input type="text" placeholder="https://www.example.com/"/>
-        <button onClick={() => {
-          webview.reload();
-        }}>
-          <span className="fa fa-refresh"></span>
-        </button>
-        <button><span className="fa fa-arrow-right"></span></button>
-        <div className="overlay-wrap">
-          <div className="overlay"><span className="fa fa-chevron-up"></span> Enter a URL <span className="fa fa-chevron-up"></span></div>
-        </div>
-      </div>
+    return <Header
+      webview={webview}
+    />
   }, control);
 
   const events = ['load-commit',
@@ -94,7 +147,7 @@ export function start(control, webview:Electron.WebviewTag) {
   // webview.addEventListener('dom-ready', () => {
   //   console.log('dom-ready webview');
   // }, false)
-  webview.src = 'http://127.0.0.1:8080';
+  // webview.src = 'http://127.0.0.1:8080';
 
   renderer.doUpdate();
 }

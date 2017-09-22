@@ -1,7 +1,7 @@
 import * as log from 'electron-log'
 import * as Path from 'path'
 import * as fs from 'fs-extra-promise'
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { ipcMain, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
@@ -96,6 +96,11 @@ export class BudgetFile {
       this.windows.splice(idx, 1);
     })
   }
+  openRecordWindow() {
+    let sesh = session.fromPartition('persist:recordtest', null as any);
+    console.log('sesh', sesh);
+    this.openWindow('/record/record.html');
+  }
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
     if (!create) {
       // open, don't create
@@ -170,6 +175,6 @@ export function watchForEvents(app:Electron.App) {
   ipcMain.on('buckets:open-recorder', (ev) => {
     console.log('open recorder', ev.sender);
     const file = WIN2FILE[ev.sender.id];
-    file.openWindow('/record/record.html');
+    file.openRecordWindow();
   })
 }
