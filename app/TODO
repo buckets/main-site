@@ -4,6 +4,7 @@ Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
  ☐ Turning a regular expense back to a normal bucket retains the deposit in rain
  ☐ Preferences page doesn't have the right language.
+ ☐ Make light grey text on charts darker
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
@@ -14,6 +15,7 @@ v1.0.0:
  ☐ Remove "Test Toast" button :)
  ☐ Prompt to be added to newsletter
  ☐ Record signing in to bank (with encryption)
+ ☐ Show running balance in bucket transactions list
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
