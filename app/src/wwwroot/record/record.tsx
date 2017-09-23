@@ -75,38 +75,40 @@ export function start(control, webview:Electron.WebviewTag) {
     />
   }, control);
 
-  const events = ['load-commit',
-    'did-finish-load',
-    'did-fail-load',
-    'did-frame-finish-load',
-    'did-start-loading',
-    'did-stop-loading',
-    'did-get-response-details',
-    'did-get-redirect-request',
-    'dom-ready',
-    // 'page-title-updated',
-    'page-favicon-updated',
-    // 'enter-html-full-screen',
-    // 'leave-html-full-screen',
-    // 'console-message',
-    'found-in-page',
-    'new-window',
-    'will-navigate',
-    // 'did-navigate',
-    'did-navigate-in-page',
-    'close',
-    'ipc-message',
-    'crashed',
-    'gpu-crashed',
-    'plugin-crashed',
-    'destroyed',
-    'media-started-playing',
-    'media-paused',
-    'did-change-theme-color',
-    // 'update-target-url',
-    'devtools-opened',
-    'devtools-closed',
-    'devtools-focused'];
+  const events = [
+    // 'load-commit',
+    // 'did-finish-load',
+    // 'did-fail-load',
+    // 'did-frame-finish-load',
+    // 'did-start-loading',
+    // 'did-stop-loading',
+    // 'did-get-response-details',
+    // 'did-get-redirect-request',
+    // 'dom-ready',
+    // // 'page-title-updated',
+    // // 'page-favicon-updated',
+    // // 'enter-html-full-screen',
+    // // 'leave-html-full-screen',
+    // // 'console-message',
+    // 'found-in-page',
+    // 'new-window',
+    // 'will-navigate',
+    // // 'did-navigate',
+    // 'did-navigate-in-page',
+    // 'close',
+    // // 'ipc-message',
+    // 'crashed',
+    // 'gpu-crashed',
+    // 'plugin-crashed',
+    // 'destroyed',
+    // 'media-started-playing',
+    // 'media-paused',
+    // 'did-change-theme-color',
+    // // 'update-target-url',
+    // 'devtools-opened',
+    // 'devtools-closed',
+    // 'devtools-focused',
+  ];
   events.forEach(event => {
     webview.addEventListener(event as any, (ev) => {
       console.log('event', event, ev);
@@ -138,6 +140,44 @@ export function start(control, webview:Electron.WebviewTag) {
   webview.addEventListener('did-stop-loading', () => {
     renderer.doUpdate();
   }, false);
+  webview.addEventListener('ipc-message', (ev, args) => {
+    if (ev.channel === 'rec:click') {
+      let data = ev.args[0];
+      console.log('click', data);
+      setTimeout(() => {
+        console.log('sending input event');
+        webview.sendInputEvent({
+          type: 'mouseDown',
+          x: data.pageX,
+          y: data.pageY,
+        })
+        webview.sendInputEvent({
+          type: 'mouseUp',
+          x: data.pageX,
+          y: data.pageY,
+        })
+      }, 5000);
+    } else if (ev.channel === 'rec:keydown') {
+      let data = ev.args[0];
+      console.log('keydown', data);
+      setTimeout(() => {
+        console.log('sending keydown event', data.keyCode);
+        webview.sendInputEvent({
+          type: 'keyDown',
+          keyCode: data.keyCode,
+        })
+        webview.sendInputEvent({
+          type: 'keyUp',
+          keyCode: data.keyCode,
+        })
+      }, 5000)
+    } else if (ev.channel === 'rec:change') {
+      let data = ev.args[0];
+      console.log('change', data);
+    } else {
+
+    }
+  })
 
   // webview.addEventListener('did-fail-load', () => {
   //   console.log('did fail load');
