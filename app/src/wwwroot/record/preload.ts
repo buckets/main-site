@@ -1,6 +1,12 @@
 import {ipcRenderer} from 'electron';
 
+interface UniqueID {
+  id?: string;
+}
+
 function identifyElement(el) {
+  let unique_id = uniquelyIdentifyElement(el);
+  console.log('unique_id', unique_id);
   let attrs = {};
   Array.from(el.attributes).forEach((item:any) => {
     attrs[item.name] = item.value;
@@ -10,6 +16,21 @@ function identifyElement(el) {
     attrs,
     text: el.innerText,
   }
+}
+
+function uniquelyIdentifyElement(el):UniqueID {
+  let ret:UniqueID = {};
+
+  // id
+  let id = el.getAttribute('id');
+  if (id) {
+    console.log('')
+    ret.id = id;
+  }
+
+  // class
+
+  return ret;
 }
 
 window.addEventListener('click', (ev) => {
@@ -27,9 +48,13 @@ window.addEventListener('click', (ev) => {
     pageX: ev.pageX,
     pageY: ev.pageY,
   });
+  return true;
 }, false)
 
 window.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Meta' || ev.key === 'Control' || ev.key === 'Shift' || ev.key === 'Alt') {
+    return;
+  }
   console.log('keydown', ev);
   ipcRenderer.sendToHost('rec:keydown', {
     key: ev.key,

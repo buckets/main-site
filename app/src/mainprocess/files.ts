@@ -97,7 +97,10 @@ export class BudgetFile {
     })
   }
   openRecordWindow() {
-    let sesh = session.fromPartition('persist:recordtest', null as any);
+    let sesh = session.fromPartition('persist:recordtest2', {cache:false});
+    sesh.clearCache(() => {
+
+    });
     sesh.on('will-download', (ev, item, webContents) => {
       console.log('will-download', ev, item);
       console.log('getFilename', item.getFilename())

@@ -55,14 +55,79 @@ class Header extends React.Component<HeaderProps, {
       <button onClick={() => {
         this.navigateToURL(this.state.url);
       }}><span className="fa fa-arrow-right"></span></button>
+      <button onClick={() => {
+        if (webview.isDevToolsOpened()) {
+          webview.closeDevTools();
+        } else {
+          webview.openDevTools();
+        }
+      }}><span className="fa fa-gear"></span></button>
       <div className="overlay-wrap">
         <div className="overlay"><span className="fa fa-chevron-up"></span> Enter a URL <span className="fa fa-chevron-up"></span></div>
       </div>
     </div>
   }
   navigateToURL(url:string) {
-    this.props.webview.src = url;
+    let wv = this.props.webview;
+    if (wv.getWebContents) {
+      let wc = wv.getWebContents();
+      if (wc) {
+        wc.loadURL(url, {'extraHeaders': 'pragma: no-cache\n'});
+        return
+      }
+    }
+    wv.src = url;
   }
+}
+
+function eventKeyToKeyCode(key:string) {
+  switch (key) {
+    case 'Enter': return '\u000d'
+    case 'Tab': return '\u0009'
+    case 'Backspace': return '\u0008'
+  }
+  return key;
+}
+
+function eventToKeyModifiers(ev:any):string[] {
+  let ret = [];
+  if (ev.shiftKey) {
+    ret.push('Shift');
+  }
+  if (ev.metaKey) {
+    ret.push('Command');
+  }
+  if (ev.ctrlKey) {
+    ret.push('Control');
+  }
+  if (ev.altKey) {
+    ret.push('Alt');
+  }
+  return ret;
+}
+
+function isSpecialChar(key:string):boolean {
+  let cp = key.codePointAt(0);
+  return cp <= 31 || cp === 127;
+}
+
+function sendKey(webview:Electron.WebviewTag, key:string, modifiers?:string[]) {
+  let keyCode = eventKeyToKeyCode(key);
+  let data:any = {
+    type: 'char',
+    keyCode: keyCode,
+  }
+  if (modifiers) {
+    data.modifiers = modifiers;
+  }
+  if (isSpecialChar(keyCode)) {
+    console.log('special', keyCode, key);
+    let keydown = Object.assign({}, data, {type: 'keyDown'})
+    let keyup = Object.assign({}, data, {type: 'keyUp'});
+    webview.sendInputEvent(keydown);
+    webview.sendInputEvent(keyup);
+  }
+  webview.sendInputEvent(data)
 }
 
 export function start(control, webview:Electron.WebviewTag) {
@@ -116,7 +181,7 @@ export function start(control, webview:Electron.WebviewTag) {
   })
 
   webview.addEventListener('console-message', (ev) => {
-    console.log('webview:', ev.message);
+    // console.log('webview:', ev.message);
   }, false)
   webview.addEventListener('page-favicon-updated', (ev) => {
     // console.log('favicon', ev);
@@ -143,37 +208,36 @@ export function start(control, webview:Electron.WebviewTag) {
   webview.addEventListener('ipc-message', (ev, args) => {
     if (ev.channel === 'rec:click') {
       let data = ev.args[0];
-      console.log('click', data);
-      setTimeout(() => {
-        console.log('sending input event');
-        webview.sendInputEvent({
-          type: 'mouseDown',
-          x: data.pageX,
-          y: data.pageY,
-        })
-        webview.sendInputEvent({
-          type: 'mouseUp',
-          x: data.pageX,
-          y: data.pageY,
-        })
-      }, 5000);
+      console.log('rec:click', data);
+      // setTimeout(() => {
+      //   console.log('sending input event');
+      //   let send = {
+      //     type: 'mouseDown',
+      //     x: data.pageX,
+      //     y: data.pageY,
+      //     globalX: data.screenX,
+      //     globalY: data.screenY,
+      //   };
+      //   console.log(send);
+      //   webview.sendInputEvent(send)
+      //   webview.sendInputEvent({
+      //     type: 'mouseUp',
+      //     x: data.pageX,
+      //     y: data.pageY,
+      //     globalX: data.screenX,
+      //     globalY: data.screenY,
+      //   })
+      // }, 5000);
     } else if (ev.channel === 'rec:keydown') {
       let data = ev.args[0];
-      console.log('keydown', data);
+      console.log('rec:keydown', data);
       setTimeout(() => {
-        console.log('sending keydown event', data.keyCode);
-        webview.sendInputEvent({
-          type: 'keyDown',
-          keyCode: data.keyCode,
-        })
-        webview.sendInputEvent({
-          type: 'keyUp',
-          keyCode: data.keyCode,
-        })
-      }, 5000)
+        // console.log('sending keydown event', data.keyCode);
+        sendKey(webview, data.key, eventToKeyModifiers(data));
+      }, 3000)
     } else if (ev.channel === 'rec:change') {
       let data = ev.args[0];
-      console.log('change', data);
+      console.log('rec:change', data);
     } else {
 
     }
@@ -185,7 +249,8 @@ export function start(control, webview:Electron.WebviewTag) {
   // webview.addEventListener('dom-ready', () => {
   //   console.log('dom-ready webview');
   // }, false)
-  // webview.src = 'http://127.0.0.1:8080';
+  // webview.loadURL('http://127.0.0.1:8080', {'extraHeaders': 'pragma: no-cache\n'})
+  webview.src = 'http://127.0.0.1:8080';
 
   renderer.doUpdate();
 }
