@@ -1,81 +1,50 @@
-import {ipcRenderer} from 'electron';
+import { Recorder } from '../../recordlib';
+const recorder = new Recorder();
+recorder
 
-interface UniqueID {
-  id?: string;
-}
+// window.addEventListener('click', (ev) => {
+//   console.log('clicked', ev);
+//   ipcRenderer.sendToHost('rec:click', {
+//     element: identifyElement(ev.target as HTMLElement),
+//     x: ev.x,
+//     y: ev.y,
+//     screenX: ev.screenX,
+//     screenY: ev.screenY,
+//     clientX: ev.clientX,
+//     clientY: ev.clientY,
+//     offsetX: ev.offsetX,
+//     offsetY: ev.offsetY,
+//     pageX: ev.pageX,
+//     pageY: ev.pageY,
+//   });
+//   return true;
+// }, false)
 
-function identifyElement(el) {
-  let unique_id = uniquelyIdentifyElement(el);
-  console.log('unique_id', unique_id);
-  let attrs = {};
-  Array.from(el.attributes).forEach((item:any) => {
-    attrs[item.name] = item.value;
-  })
-  return {
-    tagName: el.tagName,
-    attrs,
-    text: el.innerText,
-  }
-}
+// window.addEventListener('keydown', (ev) => {
+//   if (ev.key === 'Meta' || ev.key === 'Control' || ev.key === 'Shift' || ev.key === 'Alt') {
+//     return;
+//   }
+//   console.log('keydown', ev);
+//   ipcRenderer.sendToHost('rec:keydown', {
+//     element: identifyElement(ev.target as HTMLElement),
+//     key: ev.key,
+//     keyCode: ev.keyCode,
+//     which: ev.which,
+//     shiftKey: ev.shiftKey,
+//     metaKey: ev.metaKey,
+//     ctrlKey: ev.ctrlKey,
+//     altKey: ev.altKey,
+//   });
+// }, false);
 
-function uniquelyIdentifyElement(el):UniqueID {
-  let ret:UniqueID = {};
-
-  // id
-  let id = el.getAttribute('id');
-  if (id) {
-    console.log('')
-    ret.id = id;
-  }
-
-  // class
-
-  return ret;
-}
-
-window.addEventListener('click', (ev) => {
-  console.log('clicked', ev);
-  ipcRenderer.sendToHost('rec:click', {
-    element: identifyElement(ev.target),
-    x: ev.x,
-    y: ev.y,
-    screenX: ev.screenX,
-    screenY: ev.screenY,
-    clientX: ev.clientX,
-    clientY: ev.clientY,
-    offsetX: ev.offsetX,
-    offsetY: ev.offsetY,
-    pageX: ev.pageX,
-    pageY: ev.pageY,
-  });
-  return true;
-}, false)
-
-window.addEventListener('keydown', (ev) => {
-  if (ev.key === 'Meta' || ev.key === 'Control' || ev.key === 'Shift' || ev.key === 'Alt') {
-    return;
-  }
-  console.log('keydown', ev);
-  ipcRenderer.sendToHost('rec:keydown', {
-    key: ev.key,
-    keyCode: ev.keyCode,
-    which: ev.which,
-    shiftKey: ev.shiftKey,
-    metaKey: ev.metaKey,
-    ctrlKey: ev.ctrlKey,
-    altKey: ev.altKey,
-    element: identifyElement(ev.target),
-  });
-}, false);
-
-function elementChanged(ev) {
-  ipcRenderer.sendToHost('rec:change', {
-    element: identifyElement(ev.target),
-    value: ev.target.value,
-    checked: ev.target.checked,
-    selected: ev.target.selected,
-  })
-}
+// function elementChanged(ev) {
+//   ipcRenderer.sendToHost('rec:change', {
+//     element: identifyElement(ev.target as HTMLElement),
+//     value: ev.target.value,
+//     checked: ev.target.checked,
+//     selected: ev.target.selected,
+//   })
+// }
 
 // const observer = new MutationObserver(mutations => {
 //   mutations.forEach(mutation => {

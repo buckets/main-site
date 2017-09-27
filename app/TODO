@@ -1,4 +1,10 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
+Recording:
+  ☐ Enter in textarea
+  ☐ Backspace
+  ☐ Command-A delete
+  ☐ Select elements
+  ☐ Date picker elements
 
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /

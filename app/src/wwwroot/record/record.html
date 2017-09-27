@@ -12,6 +12,9 @@
     body {
       height: 100%;
     }
+    .red {
+      color: var(--red);
+    }
     .control {
       padding: 0.5rem;
       display: flex;
@@ -48,6 +51,7 @@
     #control {
       flex-grow: 0;
       flex-shrink: 0;
+      border-bottom: 1px solid var(--darker-grey);
     }
     #webview {
       flex-grow: 1;
@@ -81,7 +85,6 @@ const {start} = req('./src/wwwroot/record/record.js');
 const control = document.getElementById('control');
 const webview = document.getElementById('webview');
 const preload_url = 'file://' + Path.resolve(appPath, './src/wwwroot/record/preload.js');
-console.log('preload url', preload_url);
 webview.preload = preload_url;
 start(control, webview);
 </script>
