@@ -1,10 +1,12 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 Recording:
-  ☐ Enter in textarea
-  ☐ Backspace
+  ✔ Enter in textarea @done (17-09-27 21:15)
+  ✔ Backspace @done (17-09-27 21:17)
   ☐ Command-A delete
-  ☐ Select elements
-  ☐ Date picker elements
+  ✔ Select elements @done (17-09-28 11:59)
+  ✔ Date picker elements @done (17-09-28 11:59)
+  ✔ Clicking on page should cause clicks at the point and not at offset 1,1 @done (17-09-28 11:38)
+  ✔ Click <a> @done (17-09-28 11:38)
 
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /

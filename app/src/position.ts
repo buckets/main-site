@@ -1,3 +1,10 @@
+export interface IBounds {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export function pageCoords(elem):{x:number,y:number} {
   let y = elem.offsetTop;
   let x = elem.offsetLeft;
@@ -21,5 +28,16 @@ export function dimensions(elem):{h:number,w:number} {
   return {
     h: elem.offsetHeight,
     w: elem.offsetWidth,
+  }
+}
+
+export function getBounds(elem):IBounds {
+  let dims = dimensions(elem);
+  let coords = pageCoords(elem);
+  return {
+    x:coords.x,
+    y:coords.y,
+    w:dims.w,
+    h:dims.h,
   }
 }

@@ -1,7 +1,112 @@
 import {ipcRenderer} from 'electron'
 import {EventEmitter} from 'events'
-import { pageCoords, dimensions } from './position'
+import { getBounds, IBounds } from './position'
 
+
+//-----------------------------------------------------------
+// RPC
+//-----------------------------------------------------------
+interface IRPCHandler {
+  (params?:any):(any|Promise<any>);
+}
+interface IRPCSendFunction {
+  (channel:string, message:object):void;
+}
+export class RPC {
+  static readonly CALL_CHAN = 'rpc:call';
+  static readonly RESP_CHAN = 'rpc:response';
+
+  private nextid = 0;
+  private pending:{
+    [k:number]: {
+      resolve: (result)=>void;
+      reject: (error)=>void;
+    }
+  } = {};
+  private handlers:{
+    [method:string]: IRPCHandler;
+  } = {};
+  constructor(private send:IRPCSendFunction) {
+  }
+  addHandler(method:string, func:IRPCHandler) {
+    this.handlers[method] = func;
+  }
+  addHandlers(handlers:{[method:string]: IRPCHandler}) {
+    Object.assign(this.handlers, handlers);
+  }
+  call<T>(method:string, params?:object):Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      let rpcid = this.nextid++;
+      this.pending[rpcid] = {resolve, reject}
+      this.send(RPC.CALL_CHAN, {rpcid, method, params});
+    })
+  }
+  private sendResult(rpcid:number, result:any, error:any) {
+    this.send(RPC.RESP_CHAN, {rpcid, result, error});
+  }
+  async handleCall(args:{rpcid:number, method:string, params?:object}) {
+    let {rpcid, method, params} = args;
+    try {
+      let result = await this.handlers[method](params);
+      this.sendResult(rpcid, result, null);
+    } catch(err) {
+      this.sendResult(rpcid, null, err);
+    }
+  }
+  async handleResponse(args:{rpcid:number, result:any, error?:any}) {
+    let {rpcid, result, error} = args;
+    let pending = this.pending[rpcid];
+    delete this.pending[rpcid];
+    if (error) {
+      pending.reject(error);
+    } else {
+      pending.resolve(result);
+    }
+  }
+}
+
+function inWebviewRPC():RPC {
+  let rpc = new RPC((channel:string, args) => {
+    ipcRenderer.sendToHost(channel, args);
+  })
+  ipcRenderer.on(RPC.CALL_CHAN, (ev, message) => {
+    rpc.handleCall(message);
+  })
+  ipcRenderer.on(RPC.RESP_CHAN, (ev, message) => {
+    rpc.handleResponse(message);
+  })
+  return rpc
+}
+
+function inHostRPC(webview:Electron.WebviewTag):RPC {
+  let rpc = new RPC((channel:string, args) => {
+    let wc = webview.getWebContents();
+    wc.send(channel, args);
+  })
+  webview.addEventListener('ipc-message', (ev) => {
+    if (ev.channel === RPC.RESP_CHAN) {
+      rpc.handleResponse(ev.args[0]);
+    } else if (ev.channel === RPC.CALL_CHAN) {
+      rpc.handleCall(ev.args[0]);
+    }
+  })
+  return rpc
+}
+
+//-----------------------------------------------------------
+// utilities
+//-----------------------------------------------------------
+function wait(time:number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(null);
+    }, time);
+  })
+}
+
+//-----------------------------------------------------------
+// DOM element identification
+//-----------------------------------------------------------
 interface UniqueElementID {
   xpaths: string[];
 }
@@ -90,20 +195,31 @@ function isXpathUnique(xpath:string):boolean {
 }
 
 // findElement
-export function findElement(ident:UniqueElementID):Node {
+export function findElement(ident:UniqueElementID):HTMLElement {
   for (var i = 0; i < ident.xpaths.length; i++) {
     let xpath = ident.xpaths[i];
     let iter = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null);
     let first = iter.iterateNext();
     let second = iter.iterateNext();
     if (second === null) {
-      return first;
+      return first as HTMLElement;
     }
   }
   return null;
 }
 
-export type RecStep = ActionStep | NavigateStep | PageLoadStep;
+
+
+//-----------------------------------------------------------
+// Recordings
+//-----------------------------------------------------------
+export type RecStep = 
+  NavigateStep
+  | PageLoadStep
+  | KeyPressStep
+  | ClickStep
+  | FocusStep
+  | ChangeStep;
 
 // navigate
 export interface NavigateStep {
@@ -114,30 +230,23 @@ export function isNavigateStep(x:RecStep):x is NavigateStep {
   return (<NavigateStep>x).type === 'navigate';
 }
 
-// action
-export interface ActionStep {
-  type: 'action';
-  element: UniqueElementID;
-}
-export function isActionStep(x:RecStep):x is ActionStep {
-  return (<ActionStep>x).type === 'action';
-}
-
 // keypress
-export interface KeyPressActionStep extends ActionStep {
-  action_type: 'keypress';
+export interface KeyPressStep {
+  type: 'keypress';
+  element: UniqueElementID;
   keys: Array<{
     key: string;
     modifiers: string[];
   }>;
 }
-export function isKeyPressActionStep(x:ActionStep):x is KeyPressActionStep {
-  return (<KeyPressActionStep>x).action_type === 'keypress';
+export function isKeyPressStep(x:RecStep):x is KeyPressStep {
+  return (<KeyPressStep>x).type === 'keypress';
 }
 
 // click
-export interface ClickActionStep extends ActionStep {
-  action_type: 'click';
+export interface ClickStep {
+  type: 'click';
+  element: UniqueElementID;
   pageX: number;
   pageY: number;
   screenX: number;
@@ -145,8 +254,27 @@ export interface ClickActionStep extends ActionStep {
   offsetX: number;
   offsetY: number;
 }
-export function isClickActionStep(x:ActionStep):x is ClickActionStep {
-  return (<ClickActionStep>x).action_type === 'click';
+export function isClickActionStep(x:RecStep):x is ClickStep {
+  return (<ClickStep>x).type === 'click';
+}
+
+// focus
+export interface FocusStep {
+  type: 'focus';
+  element: UniqueElementID;
+}
+export function isFocusStep(x:RecStep):x is FocusStep {
+  return (<FocusStep>x).type === 'focus';
+}
+
+// change
+export interface ChangeStep {
+  type: 'change';
+  element: UniqueElementID;
+  value: any;
+}
+export function isChangeStep(x:RecStep):x is ChangeStep {
+  return (<ChangeStep>x).type === 'change';
 }
 
 // pageload
@@ -167,14 +295,12 @@ export class Recording {
       return;
     }
 
-    if (isActionStep(step)) {
-      if (isKeyPressActionStep(step)) {
-        let last_step = this.steps[this.steps.length-1];
-        if (isActionStep(last_step) && isKeyPressActionStep(last_step)) {
-          // combine keypresses
-          last_step.keys = last_step.keys.concat(step.keys);
-          return;
-        }
+    if (isKeyPressStep(step)) {
+      let last_step = this.steps[this.steps.length-1];
+      if (isKeyPressStep(last_step)) {
+        // combine keypresses
+        last_step.keys = last_step.keys.concat(step.keys);
+        return;
       }
     }
     // otherwise just add it
@@ -182,58 +308,98 @@ export class Recording {
   }
 }
 
-function wait(time:number) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(null);
-    }, time);
-  })
-}
 
-
-// Use in webview
+//-----------------------------------------------------------
+// in-Webview Recorder
+//-----------------------------------------------------------
 export class Recorder {
-  constructor(private onAction?:(step:RecStep)=>void) {
-    ipcRenderer.on('rec:dostep', (ev) => {
-      console.log('dostep', ev);
-    })
-    ipcRenderer.on('rec:getbounds', (ev, identity:UniqueElementID) => {
-      let bounds:any = {};
-      try {
-        let elem = findElement(identity);
-        if (elem === null) {
-          ipcRenderer.sendToHost('rec:gotbounds', null);
-          return
+  private rpc:RPC;
+  constructor() {
+    this.rpc = inWebviewRPC();
+    this.rpc.addHandlers({
+      'getbounds': (params:{element:UniqueElementID}) => {
+        let { element } = params;
+        try {
+          let elem = findElement(element);
+          if (elem === null) {
+            return null;
+          }
+          return getBounds(elem);
+        } catch(err) {
+          return null;
         }
-        Object.assign(bounds, pageCoords(elem));
-        Object.assign(bounds, dimensions(elem));
-        ipcRenderer.sendToHost('rec:gotbounds', bounds);
-      } catch(err) {
-        ipcRenderer.sendToHost('rec:gotbounds', null)
-        return;
-      }
+      },
+      'rec:do-focus': (step:FocusStep) => {
+        let { element } = step;
+        let elem = findElement(element);
+        if (elem === null) {
+          throw new Error('Element not found');
+        }
+        elem.focus();
+      },
+      'rec:do-change': (step:ChangeStep) => {
+        let { element } = step;
+        console.log('do-change step', step);
+        let elem = findElement(element) as HTMLInputElement;
+        if (elem === null) {
+          throw new Error('Element not found');
+        }
+        elem.value = step.value;
+      },
     })
 
-    // default behavior is to send to director
-    if (!this.onAction) {
-      this.onAction = (step) => {
-        ipcRenderer.sendToHost('rec:step', step);
+    const NO_CLICK_INPUT_TYPES = ['date'];
+
+    function isChangeOnlyElement(elem:HTMLElement):boolean {
+      if (elem.tagName === 'SELECT') {
+        return true;
+      } else if (elem.tagName === 'INPUT') {
+        let type = elem.getAttribute('type').toLowerCase();
+        if (NO_CLICK_INPUT_TYPES.indexOf(type) !== -1) {
+          return true;
+        }
       }
+      return false;
     }
 
-    window.addEventListener('click', (ev) => {
+    window.addEventListener('change', (ev:any) => {
+      let target = ev.target;
+      if (isChangeOnlyElement(target)) {
+        let step:ChangeStep = {
+          type: 'change',
+          element: identifyElement(target),
+          value: target.value,
+        }
+        this.rpc.call('rec:step', step);
+      }
+    })
+
+    window.addEventListener('click', (ev:any) => {
+      if (isChangeOnlyElement(ev.target)) {
+        let step:FocusStep = {
+          type: 'focus',
+          element: identifyElement(ev.target),
+        }
+        this.rpc.call('rec:step', step);
+        return;
+      }
       console.log('click ev', ev);
-      let {pageX, pageY, screenX, screenY, offsetX, offsetY} = ev;
+      let {pageX, pageY, screenX, screenY} = ev;
+      let rect = ev.target.getBoundingClientRect();
+      let offsetX = Math.floor(ev.clientX - rect.left);
+      let offsetY = Math.floor(ev.clientY - rect.top);
+
       if (ev.detail === 0) {
         // keyboard triggered
-        let coords = pageCoords(ev.target as HTMLElement);
-        pageX = coords.x + 1;
-        pageY = coords.y + 1;
+        let bounds = getBounds(ev.target as HTMLElement);
+        pageX = bounds.x;
+        pageY = bounds.y;
+        offsetX = 1;
+        offsetY = 1;
       }
-      let action:ClickActionStep = {
-        type: 'action',
+      let step:ClickStep = {
+        type: 'click',
         element: identifyElement(ev.target as HTMLElement),
-        action_type: 'click',
         pageX,
         pageY,
         screenX,
@@ -241,34 +407,28 @@ export class Recorder {
         offsetX,
         offsetY,
       }
-      this.onAction(action);
+      this.rpc.call('rec:step', step);
     }, false)
     
     window.addEventListener('keydown', (ev) => {
-      let action:KeyPressActionStep = {
-        type: 'action',
+      let step:KeyPressStep = {
+        type: 'keypress',
         element: identifyElement(ev.target as HTMLElement),
-        action_type: 'keypress',
         keys: [{
           key: ev.key,
           modifiers: eventToKeyModifiers(ev),
         }]
       }
-      this.onAction(action);
+      this.rpc.call('rec:step', step);
     }, false);
 
-    ipcRenderer.sendToHost('rec:ready-for-control');
+    this.rpc.call('rec:ready-for-control');
   }
 }
 
-interface Bounds {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-// Use in renderer
+//-----------------------------------------------------------
+// in-host container RecordingDirector
+//-----------------------------------------------------------
 export class RecordingDirector extends EventEmitter {
   public is_recording = false;
   public is_playing = false;
@@ -277,36 +437,27 @@ export class RecordingDirector extends EventEmitter {
   public step_index:number = 0;
   public poll_interval:number = 100;
   public playback_delay:number = 120;
+  public typing_delay:number = 20;
 
+  private rpc:RPC;
   private pages_loaded:Array<{
     title: string;
     url: string;
   }> = [];
 
-
   constructor(readonly webview:Electron.WebviewTag) {
     super();
     this.current_recording = new Recording();
-    webview.addEventListener('ipc-message', (ev) => {
-      switch (ev.channel) {
-        case 'rec:ready-for-control': {
-          this.emit('child-ready-for-control');
-          break;
+    this.rpc = inHostRPC(webview);
+    this.rpc.addHandlers({
+      'rec:step': (step:RecStep) => {
+        if (this.is_recording) {
+          this.current_recording.addStep(step);
+          this.emit('recorded-step', step);
         }
-        case 'rec:step': {
-          let step = ev.args[0];
-          if (this.is_recording) {
-            this.current_recording.addStep(step);
-            this.emit('recorded-step', step);
-          }
-          break;
-        }
-        case 'rec:gotbounds': {
-          let bounds = ev.args[0];
-          this.emit('gotbounds', bounds);
-          break;
-        }
-        default:
+      },
+      'rec:ready-for-control': () => {
+        this.emit('child-ready-for-control');
       }
     })
     webview.addEventListener('will-navigate', (ev) => {
@@ -354,12 +505,28 @@ export class RecordingDirector extends EventEmitter {
     }
   }
   async doStep(step:RecStep) {
-    if (isNavigateStep(step)) {
-      return this._doNavigateStep(step)
-    } else if (isActionStep(step)) {
-      return this._doActionStep(step);
-    } else if (isPageLoadStep(step)) {
-      return this._doPageLoadStep(step);
+    switch (step.type) {
+      case 'navigate': {
+        return this._doNavigateStep(step);
+      }
+      case 'pageload': {
+        return this._doPageLoadStep(step);
+      }
+      case 'click': {
+        return this._doClickStep(step);
+      }
+      case 'focus': {
+        return this._doFocusStep(step);
+      }
+      case 'change': {
+        return this._doChangeStep(step);
+      }
+      case 'keypress': {
+        return this._doKeyPressStep(step);
+      }
+      default: {
+        break;
+      }
     }
   }
   async _doNavigateStep(step:NavigateStep) {
@@ -371,48 +538,41 @@ export class RecordingDirector extends EventEmitter {
       wc.loadURL(step.url);
     })
   }
-  async getBoundsFromRemote(elem:UniqueElementID):Promise<Bounds> {
+  async getBoundsFromRemote(elem:UniqueElementID):Promise<IBounds> {
     while (true) {
-      let wc = this.webview.getWebContents();
-      let bounds:Bounds = await new Promise<Bounds>((resolve, reject) => {
-        this.once('gotbounds', (bounds) => {
-          resolve(bounds)
-        })
-        wc.send('rec:getbounds', elem);
-      })
+      // XXX add a timeout
+      let bounds = await this.rpc.call<IBounds>('getbounds', {element: elem});
       if (bounds !== null) {
         return bounds;
       }
       await wait(this.poll_interval);
     }
   }
-  async _doActionStep(step:ActionStep) {
-    // let wc = this.webview.getWebContents();
-    if (isClickActionStep(step)) {
-      console.log('sending click');
-      let bounds = await this.getBoundsFromRemote(step.element)
-      let x = bounds.x + 1;
-      let y = bounds.y + 1;
-
-      console.log('bounds', bounds);
-      console.log('step', step);
-      console.log('x', x);
-      console.log('y', y);
-
-      sendClick(this.webview, {
-        x,
-        y,
-        globalX: step.screenX,
-        globalY: step.screenY,
-      })
-    } else if (isKeyPressActionStep(step)) {
-      // send key
-      for (var i = 0; i < step.keys.length; i++) {
-        let item = step.keys[i];
-        console.log("sending key", item.key);
-        await sendKey(this.webview, item.key, item.modifiers);
-      }
+  async _doClickStep(step:ClickStep) {
+    console.log('sending click');
+    let bounds = await this.getBoundsFromRemote(step.element)
+    let x = bounds.x + step.offsetX;
+    let y = bounds.y + step.offsetY;
+    sendClick(this.webview, {
+      x,
+      y,
+      globalX: step.screenX,
+      globalY: step.screenY,
+    })
+  }
+  async _doKeyPressStep(step:KeyPressStep) {
+    for (var i = 0; i < step.keys.length; i++) {
+      let item = step.keys[i];
+      console.log("sending key", item.key);
+      await sendKey(this.webview, item.key, item.modifiers);
+      await wait(this.typing_delay);
     }
+  }
+  async _doChangeStep(step:ChangeStep) {
+    return this.rpc.call('rec:do-change', step);
+  }
+  async _doFocusStep(step:FocusStep) {
+    return this.rpc.call('rec:do-focus', step);
   }
   async _doPageLoadStep(step:PageLoadStep) {
     if (this.pages_loaded.length) {
@@ -432,7 +592,9 @@ export class RecordingDirector extends EventEmitter {
 }
 
 
-
+//-----------------------------------------------------------
+// Input Events
+//-----------------------------------------------------------
 function eventKeyToKeyCode(key:string) {
   switch (key) {
     case 'Enter': return '\u000d'
@@ -461,6 +623,7 @@ function eventToKeyModifiers(ev:any):string[] {
 
 function doesKeyRequireDownAndUp(key:string):boolean {
   switch (key) {
+    case 'Backspace':
     case 'Enter': {
       return true;
     }
@@ -486,11 +649,13 @@ function sendKey(webview:Electron.WebviewTag, key:string, modifiers?:string[]) {
     data.modifiers = modifiers;
   }
   if (doesKeyRequireDownAndUp(key)) {
+    console.log("down and up");
     let keydown = Object.assign({}, data, {type: 'keyDown'})
     let keyup = Object.assign({}, data, {type: 'keyUp'});
     webview.sendInputEvent(keydown);
     webview.sendInputEvent(keyup);
   } else if (doesKeyRequireDownOnly(key)) {
+    console.log("just down");
     let keydown = Object.assign({}, data, {type: 'keyDown'})
     webview.sendInputEvent(keydown);
   }

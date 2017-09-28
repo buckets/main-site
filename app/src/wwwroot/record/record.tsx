@@ -97,10 +97,6 @@ class Header extends React.Component<HeaderProps, {
             webview.openDevTools();
           }
         }}><span className="fa fa-gear"></span></button>
-
-        <div className="overlay-wrap">
-          <div className="overlay"><span className="fa fa-chevron-up"></span> Enter a URL <span className="fa fa-chevron-up"></span></div>
-        </div>
       </div>
 
       <div className="control">
@@ -128,7 +124,6 @@ export function start(control, webview:Electron.WebviewTag) {
   const renderer = new Renderer();
   
   const director = new RecordingDirector(webview);
-
   director.on('recorded-step', () => {
     renderer.doUpdate();
   })
@@ -209,43 +204,6 @@ export function start(control, webview:Electron.WebviewTag) {
   webview.addEventListener('did-stop-loading', () => {
     renderer.doUpdate();
   }, false);
-  // webview.addEventListener('ipc-message', (ev) => {
-  //   if (ev.channel === 'rec:click') {
-  //     let data = ev.args[0];
-  //     console.log('rec:click', data);
-  //     // setTimeout(() => {
-  //     //   console.log('sending input event');
-  //     //   let send = {
-  //     //     type: 'mouseDown',
-  //     //     x: data.pageX,
-  //     //     y: data.pageY,
-  //     //     globalX: data.screenX,
-  //     //     globalY: data.screenY,
-  //     //   };
-  //     //   console.log(send);
-  //     //   webview.sendInputEvent(send)
-  //     //   webview.sendInputEvent({
-  //     //     type: 'mouseUp',
-  //     //     x: data.pageX,
-  //     //     y: data.pageY,
-  //     //     globalX: data.screenX,
-  //     //     globalY: data.screenY,
-  //     //   })
-  //     // }, 5000);
-  //   } else if (ev.channel === 'rec:keydown') {
-  //     let data = ev.args[0];
-  //     console.log('rec:keydown', data);
-  //     setTimeout(() => {
-  //       // console.log('sending keydown event', data.keyCode);
-  //       sendKey(webview, data.key, eventToKeyModifiers(data));
-  //     }, 3000)
-  //   } else if (ev.channel === 'rec:change') {
-  //     let data = ev.args[0];
-  //     console.log('rec:change', data);
-  //   } else {
-
-  //   }
-  // })
 
   // webview.addEventListener('did-fail-load', () => {
   //   console.log('did fail load');
@@ -253,8 +211,11 @@ export function start(control, webview:Electron.WebviewTag) {
   // webview.addEventListener('dom-ready', () => {
   //   console.log('dom-ready webview');
   // }, false)
-  // webview.loadURL('http://127.0.0.1:8080', {'extraHeaders': 'pragma: no-cache\n'})
+  
+  // while debugging
   webview.src = 'http://127.0.0.1:8080';
+  director.startRecording();
+  director.setURL(webview.src);
 
   renderer.doUpdate();
 }
