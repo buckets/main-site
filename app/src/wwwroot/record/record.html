@@ -15,6 +15,25 @@
     .red {
       color: var(--red);
     }
+    .rec-container {
+      display: flex;
+    }
+    .rec-left-col {
+      flex-basis: 10rem;
+      flex-shrink: 0;
+      background-color: var(--darker-teal);
+      color: white;
+      padding: 1rem;
+    }
+    .rec-middle-col {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    #control {
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
     .control {
       padding: 0.5rem;
       display: flex;
@@ -29,30 +48,6 @@
     .control input {
       flex-grow: 1;
     }
-    .overlay-wrap {
-      position: fixed;
-      bottom: 40vh;
-      width: 100%;
-      text-align: center;
-      margin: 0 auto;
-      pointer-events: none;
-    }
-    .overlay {
-      width: 25vw;
-      margin: 0 auto;
-      background-color: var(--lightest-grey);
-      padding: 2rem;
-      opacity: 0.8;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-    }
-    #control {
-      flex-grow: 0;
-      flex-shrink: 0;
-      border-bottom: 1px solid var(--darker-grey);
-    }
     #webview {
       flex-grow: 1;
     }
@@ -60,13 +55,22 @@
   <style type="text/css">
   </style>
 </head>
-<body>
-  <div id="control"></div>
-  <webview id="webview"
-    autosize="on"
-    disableguestresize
-    style="width: 100%;"
-    partition="persist:recordtest2"></webview>
+<body class="rec-container">
+  <div class="rec-left-col">
+    <div>Great Bank</div>
+    <hr/>
+    <div>Signing in</div>
+    <div>Get transactions</div>
+    <hr/>
+  </div>
+  <div class="rec-middle-col">
+    <div id="control"></div>
+    <webview id="webview"
+      autosize="on"
+      disableguestresize
+      style="width: 100%;"
+      partition="persist:recordtest2"></webview>
+  </div>
 <script>
 const {remote} = require('electron');
 const Path = require('path');

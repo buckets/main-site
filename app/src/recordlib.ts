@@ -348,7 +348,16 @@ export class Recorder {
       },
     })
 
-    const NO_CLICK_INPUT_TYPES = ['date'];
+    const NO_CLICK_INPUT_TYPES = [
+      'date',
+      'datetime-local',
+      'color',
+      'month',
+      'number',
+      'range',
+      'time',
+      'week',
+    ];
 
     function isChangeOnlyElement(elem:HTMLElement):boolean {
       if (elem.tagName === 'SELECT') {

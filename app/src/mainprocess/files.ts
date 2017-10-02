@@ -101,6 +101,14 @@ export class BudgetFile {
     sesh.clearCache(() => {
 
     });
+
+    sesh.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
+    console.log('user-agent', sesh.getUserAgent());
+    console.log('cookies', sesh.cookies);
+    sesh.cookies.on('changed', (ev, cookie, cause) => {
+      console.log('cookie changed', ev, cookie, cause);
+      sesh.cookies.flushStore(() => {});
+    })
     sesh.on('will-download', (ev, item, webContents) => {
       console.log('will-download', ev, item);
       console.log('getFilename', item.getFilename())
