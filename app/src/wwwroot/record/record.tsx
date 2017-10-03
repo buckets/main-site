@@ -2,23 +2,28 @@ import * as React from 'react'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector } from '../../recordlib'
 import { sss } from '../../i18n'
+import { Router, Route, Link, Switch, Redirect, WithRouting} from '../../budget/routing'
 
+
+interface WebviewProps {
+  onWebview?: (x:Electron.WebviewTag)=>void;
+}
 class Webview extends React.Component<any, any> {
   private elem:Electron.WebviewTag;
   shouldComponentUpdate() {
     return false;
   }
+  componentDidMount() {
+    this.props.onWebview && this.props.onWebview(this.elem);
+  }
   render() {
     return <webview ref={elem => {
-      console.log('ref', elem);
       if (elem) {
         this.elem = elem;
-        elem.src = 'https://www.google.com';
       }
     }}
       is
       autosize="on"
-      disableguestresize
       style={{width: '100%'}}
       partition="persist:recordtest2" />
   }
@@ -28,25 +33,81 @@ interface BrowserProps {
   preload?: string;
 }
 class Browser extends React.Component<BrowserProps, {
-  foo: string;
+  url: string;
 }> {
   private webview:Electron.WebviewTag;
   constructor(props) {
     super(props);
     this.state = {
-      foo: '',
+      url: '',
     }
   }
   render() {
-    return <div style={{width:'100%'}}>
-      <div>
-        React-controlled
-        <button onClick={() => {
-          this.setState({foo: 'something' + Math.random()});
-        }}>foo {this.state.foo}</button>
+    let { url } = this.state;
+    return (
+      <div className="browser">
+        <div className="browser-topbar">
+          <button onClick={() => {this.webview.goBack()}}>
+            <span className="fa fa-chevron-left"></span>
+          </button>
+          <button onClick={() => {this.webview.goForward()}}>
+            <span className="fa fa-chevron-right"></span>
+          </button>
+          <input
+            value={url}
+            onChange={ev => {
+              this.setState({url: ev.target.value});
+            }}
+            type="text"
+            placeholder="https://www.example.com/"
+            onKeyDown={ev => {
+              if (ev.key === 'Enter') {
+                this.navigateToURL(this.state.url);
+              }
+            }}
+          />
+          <button onClick={() => {this.webview.reload()}}>
+            <span className="fa fa-refresh"></span>
+          </button>
+          <button onClick={() => {this.navigateToURL(this.state.url)}}><span className="fa fa-arrow-right"></span></button>
+          <button onClick={() => {
+            if (this.webview.isDevToolsOpened()) {
+              this.webview.closeDevTools();
+            } else {
+              this.webview.openDevTools();
+            }
+          }}><span className="fa fa-gear"></span></button>
+        </div>
+        <div className="browser-pane">
+          <Webview
+            onWebview={(webview) => {
+              this.gotWebview(webview);
+            }}
+          />
+        </div>
       </div>
-      <Webview />
-    </div>
+    );
+  }
+  gotWebview(webview:Electron.WebviewTag) {
+    this.webview = webview;
+    webview.addEventListener('did-navigate', ev => {
+      this.setState({url: ev.url});
+    })
+    this.navigateToURL('https://www.google.com')
+  }
+  navigateToURL(url:string) {
+    let wv = this.webview;
+    if (!wv) {
+      throw new Error('Trying to set URL before webview exists');
+    }
+    if (wv.getWebContents) {
+      let wc = wv.getWebContents();
+      if (wc) {
+        wc.loadURL(url, {'extraHeaders': 'pragma: no-cache\n'});
+        return;
+      }
+    }
+    wv.src = url;
   }
 }
 
@@ -152,16 +213,45 @@ class Header extends React.Component<HeaderProps, {
       </div>
     </div>
   }
-  navigateToURL(url:string) {
-    let wv = this.props.webview;
-    if (wv.getWebContents) {
-      let wc = wv.getWebContents();
-      if (wc) {
-        wc.loadURL(url, {'extraHeaders': 'pragma: no-cache\n'});
-        return
-      }
-    }
-    wv.src = url;
+  
+}
+
+export function setPath(x:string) {
+  window.location.hash = '#' + x;
+}
+
+class RecordingApp extends React.Component<any, any> {
+  render() {
+    let path = window.location.hash.substr(1);
+    return <Router
+      path={path}
+      setPath={setPath}>
+        <div className="app">
+          <div className="nav recording-nav">
+            <div>
+              <div className="label">America First Credit Union</div>
+              <Link relative to="/settings" exactMatchClass="selected"><span>{sss('Settings')}</span></Link>
+              <Link relative to="/signin" exactMatchClass="selected"><span>{sss('Sign in')}</span></Link>
+              <Link relative to="/record" exactMatchClass="selected"><span>{sss('Record')}</span></Link>
+            </div>
+          </div>
+          <div className="content">
+            <div className="page">
+              <Switch>
+                <Route path="/settings">
+                  <div>Settings</div>
+                </Route>
+                <Route path="/signin">
+                  <Browser />
+                </Route>
+                <Route path="/record">
+                  <div>Record</div>
+                </Route>
+              </Switch>
+            </div>
+          </div>
+        </div>
+    </Router>
   }
 }
 
@@ -177,9 +267,13 @@ export function start(container, preload_url:string) {
 
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
-    return <Browser preload={preload_url} />
+    return <RecordingApp
+      preload={preload_url} />
   }, container);
 
+  window.addEventListener('hashchange', () => {
+    renderer.doUpdate();
+  }, false);
 
   // const events = [
   //   // 'load-commit',

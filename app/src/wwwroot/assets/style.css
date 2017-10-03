@@ -79,7 +79,8 @@ a:hover {
   flex-direction: column;
   justify-content: space-between;
 }
-.app .nav a {
+.app .nav a,
+.app .nav .label {
   font-size: 1.1rem;
   font-weight: 400;
   padding: 0.3rem 1rem;
@@ -90,6 +91,12 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.app .nav .label {
+  font-size: 1.2rem;
+  opacity: 0.6;
+  max-width: 12rem;
+  border-radius: 0;
 }
 .app .nav a.sub {
   font-size: 1rem;
@@ -122,6 +129,8 @@ a:hover {
   background: var(--blue);
   color: white;
 }
+
+
 
 /* Badges */
 .badge {
