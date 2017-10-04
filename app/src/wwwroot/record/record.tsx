@@ -147,45 +147,84 @@ class RecordPage extends React.Component<RecordPageProps, any> {
         <span className="fa fa-stop"/>
       </button>
 
-    let steps = this.director.current_recording.steps.map((step, i) => {
-      let details = <div>{step.type}</div>
+    let steps = this.director.current_recording.steps
+    .filter((step) => {
       switch (step.type) {
-        case 'navigate': {
-          details = <div>go to {step.url}</div>
-          break;
+        case 'change':
+        case 'keypress': {
+          return true;
         }
-        case 'pageload': {
-          details = <div>...</div>
-          break;
-        }
-        case 'click': {
-          details = <div>click on {step.desc}</div>
-          break;
-        }
-        case 'focus': {
-          details = <div>focus on {step.desc}</div>
-          break;
-        }
+      }
+      return false;
+    })
+    .map((step, i) => {
+      let question;
+
+      switch (step.type) {
         case 'change': {
-          details = <div>change {step.desc} to {step.value}</div>
+          question = <div>
+            <div className="step-value">{step.displayValue || step.value}</div>
+            <div>
+              <select>
+                <option value="">Will always be the same</option>
+                <option>Account</option>
+                <option>Start date</option>
+                <option>Start DAY</option>
+                <option>Start MONTH</option>
+                <option>Start YEAR</option>
+
+                <option>End date</option>
+                <option>End DAY</option>
+                <option>End MONTH</option>
+                <option>End YEAR</option>
+                
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
           break;
         }
         case 'keypress': {
-          // let value = step.keys.map(x => x.key).join('')
-          details = <div>type</div>
+          let value = step.keys.map(x => x.key).join('')
+          question = <div>
+            <div className="step-value">{value}</div>
+            <div>
+              <select>
+                <option value="">Will always be the same</option>
+                <option>Account number</option>
+                <option>Account password/PIN</option>
+                <option>Start date</option>
+                <option>Start DAY</option>
+                <option>Start MONTH</option>
+                <option>Start YEAR</option>
+
+                <option>End date</option>
+                <option>End DAY</option>
+                <option>End MONTH</option>
+                <option>End YEAR</option>
+                
+                <option>Other</option>
+              </select>
+             </div>
+            </div>
+          break;
+        }
+        case 'download': {
+          question = <div>download file</div>
           break;
         }
       }
-      return <div key={i} className="step">{details}</div>
+      return <div key={i} className="step-question">{question}</div>
     })
     return <div className="record-page">
       <div className="browser-wrap">
         <div className="instructions">
-          This tool will record you getting transaction information from your bank.  Buckets should then be able to replay your recording to download transaction data in the future.
+          This tool will record you getting transaction information from your bank.  You will then be able to replay your recording to download transaction data in the future.
           <ol>
             <li>Sign in to your bank</li>
             <li>For each account, download an OFX/QFX file for the date range Aug 15, 2017 to Sep 15, 2017</li>
             <li>Click {stop_button}</li>
+            <li>Fill out the form on the right</li>
           </ol>
         </div>
         <Browser
@@ -207,7 +246,6 @@ class RecordPage extends React.Component<RecordPageProps, any> {
             }}
           ><span className="fa fa-play" /></button>
         </div>
-        <div>Recorded steps:</div>
         <div className="steps">
           {steps}
         </div>
@@ -220,7 +258,7 @@ class SignInPage extends React.Component<any, any> {
   render() {
     return <div className="browser-wrap">
       <div className="instructions">
-        Many banks require extra verification (e.g. security questions, being texted/emailed a code, etc.) when accessing their website from a new computer or device.  Follow these steps to authorize Buckets for your bank:
+        Many banks require extra verification (e.g. security questions, being texted/emailed a code, etc.) when accessing their website from a new computer or device.  In order to remember this computer, follow these steps:
         <ol>
           <li>{sss("Enter your bank's URL below.")}</li>
           <li>{sss("Sign in.  Make sure you choose to have this computer remembered if asked.")}</li>

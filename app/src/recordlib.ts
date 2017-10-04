@@ -118,6 +118,9 @@ function escapeQuote(x:string):string {
 // provide a human-friendly name for element
 function describeElement(el:HTMLElement):string {
   let tagName = el.tagName.toLowerCase();
+  if (tagName === 'input' || tagName === 'select') {
+    
+  } 
   let name = el.getAttribute('name');
   if (name) {
     return `<${tagName} ${name}/>`;
@@ -230,7 +233,9 @@ export type RecStep =
   | KeyPressStep
   | ClickStep
   | FocusStep
-  | ChangeStep;
+  | ChangeStep
+  | DownloadStep
+
 
 // navigate
 export interface NavigateStep {
@@ -251,6 +256,7 @@ export interface KeyPressStep {
     modifiers: string[];
     input_delimiter: boolean;
   }>;
+  valuekey?: string;
 }
 export function isKeyPressStep(x:RecStep):x is KeyPressStep {
   return (<KeyPressStep>x).type === 'keypress';
@@ -289,6 +295,8 @@ export interface ChangeStep {
   element: UniqueElementID;
   value: any;
   selectedIndex?: number;
+  displayValue?: string;
+  valuekey?: string;
 }
 export function isChangeStep(x:RecStep):x is ChangeStep {
   return (<ChangeStep>x).type === 'change';
@@ -300,6 +308,14 @@ export interface PageLoadStep {
 }
 export function isPageLoadStep(x:RecStep):x is PageLoadStep {
   return (<PageLoadStep>x).type === 'pageload';
+}
+
+// download
+export interface DownloadStep {
+  type: 'download';
+}
+export function isDownloadStep(x:RecStep):x is DownloadStep {
+  return (<DownloadStep>x).type === 'download';
 }
 
 export class Recording {
@@ -357,15 +373,25 @@ export class Recorder {
         }
         elem.focus();
       },
-      'rec:do-change': (step:ChangeStep) => {
+      'rec:do-change': ({step, value}:{step:ChangeStep, value:string}) => {
         let { element } = step;
         console.log('do-change step', step);
         let elem = findElement(element) as HTMLInputElement;
         if (elem === null) {
           throw new Error('Element not found');
         }
-        elem.value = step.value;
+        elem.value = value;
       },
+    })
+    ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
+      console.log('file downloaded', localpath, filename, mimetype);
+      let step:DownloadStep = {
+        type: 'download',
+      }
+      this.rpc.call('rec:step', step);
+    })
+    ipcRenderer.on('buckets:will-download', (ev, {filename, mimetype}) => {
+      console.log('will download', filename, mimetype);
     })
 
     const NO_CLICK_INPUT_TYPES = [
@@ -394,12 +420,14 @@ export class Recorder {
     window.addEventListener('change', (ev:any) => {
       let target = ev.target;
       if (isChangeOnlyElement(target)) {
+        let displayValue = target.tagName === 'SELECT' ? target.childNodes[target.selectedIndex].innerText : undefined;
         let step:ChangeStep = {
           type: 'change',
           desc: describeElement(target),
           element: identifyElement(target),
           value: target.value,
           selectedIndex: target.selectedIndex,
+          displayValue,
         }
         this.rpc.call('rec:step', step);
       }
@@ -459,6 +487,7 @@ export class Recorder {
           input_delimiter = true;
           break;
         }
+        case 'Dead':
         case 'Alt':
         case 'Control':
         case 'Shift':
@@ -491,6 +520,7 @@ export class RecordingDirector extends EventEmitter {
   private _state:'idle'|'recording'|'playing' = 'idle';
   public webview:Electron.WebviewTag;
 
+  public current_values:{[k:string]: any} = {};
   public current_recording:Recording;
   public step_index:number = 0;
   public poll_interval:number = 100;
@@ -559,7 +589,8 @@ export class RecordingDirector extends EventEmitter {
   }
 
   // playback
-  async play(rec?:Recording) {
+  async play(values?:object, rec?:Recording) {
+    this.current_values = values || this.current_values;
     this.current_recording = rec || this.current_recording;
     this.step_index = 0;
     this._state = 'playing';
@@ -591,6 +622,9 @@ export class RecordingDirector extends EventEmitter {
       }
       case 'keypress': {
         return this._doKeyPressStep(step);
+      }
+      case 'download': {
+        return this._doDownloadStep(step);
       }
       default: {
         throw new Error(`Unknown step type`);
@@ -629,15 +663,29 @@ export class RecordingDirector extends EventEmitter {
     })
   }
   async _doKeyPressStep(step:KeyPressStep) {
-    for (var i = 0; i < step.keys.length; i++) {
-      let item = step.keys[i];
-      console.log("sending key", item.key);
-      await sendKey(this.webview, item.key, item.modifiers);
-      await wait(this.typing_delay);
+    if (step.valuekey) {
+      let value = this.current_values[step.valuekey];
+      for (var i = 0; i < value.length; i++) {
+        let letter = value[i];
+        console.log('sending key', letter);
+        await sendKey(this.webview, letter, []);
+        await wait(this.typing_delay);
+      }
+    } else {
+      for (var i = 0; i < step.keys.length; i++) {
+        let item = step.keys[i];
+        console.log("sending key", item.key);
+        await sendKey(this.webview, item.key, item.modifiers);
+        await wait(this.typing_delay);
+      }
     }
   }
   async _doChangeStep(step:ChangeStep) {
-    return this.rpc.call('rec:do-change', step);
+    let value = step.value;
+    if (step.valuekey) {
+      value = this.current_values[step.valuekey];
+    }
+    return this.rpc.call('rec:do-change', {step, value});
   }
   async _doFocusStep(step:FocusStep) {
     return this.rpc.call('rec:do-focus', step);
@@ -656,6 +704,9 @@ export class RecordingDirector extends EventEmitter {
         })
       })
     }
+  }
+  async _doDownloadStep(step:DownloadStep) {
+
   }
 }
 

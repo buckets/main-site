@@ -103,19 +103,53 @@ export class BudgetFile {
     });
 
     sesh.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
-    console.log('user-agent', sesh.getUserAgent());
-    console.log('cookies', sesh.cookies);
+    // console.log('user-agent', sesh.getUserAgent());
+    // console.log('cookies', sesh.cookies);
     sesh.cookies.on('changed', (ev, cookie, cause) => {
-      console.log('cookie changed', ev, cookie, cause);
+      // console.log('cookie changed', ev, cookie, cause);
       sesh.cookies.flushStore(() => {});
     })
     sesh.on('will-download', (ev, item, webContents) => {
       console.log('will-download', ev, item);
-      console.log('getFilename', item.getFilename())
-      console.log('mimetype', item.getMimeType());
-      console.log('state', item.getState());
-      console.log('getURL', item.getURL());
-      ev.preventDefault();
+      webContents.send('buckets:will-download', {
+        filename: item.getFilename(),
+        mimetype: item.getMimeType(),
+      })
+      // console.log('getFilename', item.getFilename())
+      // console.log('mimetype', item.getMimeType());
+      // console.log('state', item.getState());
+      // console.log('getURL', item.getURL());
+      try {
+        fs.mkdirSync('/tmp/bucketsdownload');
+      } catch(err) {
+
+      }
+      let save_path = Path.join('/tmp/bucketsdownload', item.getFilename());
+      
+      item.setSavePath(save_path);
+      item.on('updated', (event, state) => {
+        if (state === 'interrupted') {
+          console.log('Download is interrupted but can be resumed')
+        } else if (state === 'progressing') {
+          if (item.isPaused()) {
+            console.log('Download is paused')
+          } else {
+            console.log(`Received bytes: ${item.getReceivedBytes()}`)
+          }
+        }
+      })
+      item.once('done', (event, state) => {
+        if (state === 'completed') {
+          console.log('Download successfully')
+          webContents.send('buckets:file-downloaded', {
+            localpath: save_path,
+            filename: item.getFilename(),
+            mimetype: item.getMimeType(),
+          })
+        } else {
+          console.log(`Download failed: ${state}`)
+        }
+      })
     })
     this.openWindow('/record/record.html');
   }
