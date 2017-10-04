@@ -2,13 +2,14 @@ import * as React from 'react'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector } from '../../recordlib'
 import { sss } from '../../i18n'
-import { Router, Route, Link, Switch, Redirect, WithRouting} from '../../budget/routing'
+import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 
 
 interface WebviewProps {
   onWebview?: (x:Electron.WebviewTag)=>void;
+  preload?: string;
 }
-class Webview extends React.Component<any, any> {
+class Webview extends React.Component<WebviewProps, any> {
   private elem:Electron.WebviewTag;
   shouldComponentUpdate() {
     return false;
@@ -17,6 +18,7 @@ class Webview extends React.Component<any, any> {
     this.props.onWebview && this.props.onWebview(this.elem);
   }
   render() {
+    let { preload } = this.props;
     return <webview ref={elem => {
       if (elem) {
         this.elem = elem;
@@ -24,13 +26,15 @@ class Webview extends React.Component<any, any> {
     }}
       is
       autosize="on"
-      style={{width: '100%'}}
+      preload={preload}
       partition="persist:recordtest2" />
   }
 }
 
 interface BrowserProps {
   preload?: string;
+  onWebview?: (x:Electron.WebviewTag)=>void;
+  onURLChange?: (url:string)=>void;
 }
 class Browser extends React.Component<BrowserProps, {
   url: string;
@@ -43,6 +47,7 @@ class Browser extends React.Component<BrowserProps, {
     }
   }
   render() {
+    let { preload } = this.props;
     let { url } = this.state;
     return (
       <div className="browser">
@@ -80,6 +85,7 @@ class Browser extends React.Component<BrowserProps, {
         </div>
         <div className="browser-pane">
           <Webview
+            preload={preload}
             onWebview={(webview) => {
               this.gotWebview(webview);
             }}
@@ -93,7 +99,7 @@ class Browser extends React.Component<BrowserProps, {
     webview.addEventListener('did-navigate', ev => {
       this.setState({url: ev.url});
     })
-    this.navigateToURL('https://www.google.com')
+    this.props.onWebview && this.props.onWebview(webview);
   }
   navigateToURL(url:string) {
     let wv = this.webview;
@@ -104,124 +110,138 @@ class Browser extends React.Component<BrowserProps, {
       let wc = wv.getWebContents();
       if (wc) {
         wc.loadURL(url, {'extraHeaders': 'pragma: no-cache\n'});
+        this.props.onURLChange && this.props.onURLChange(url);
         return;
       }
     }
     wv.src = url;
+    this.props.onURLChange && this.props.onURLChange(url);
   }
 }
 
-interface HeaderProps {
-  webview: Electron.WebviewTag;
-  url: string;
-  director: RecordingDirector;
-  renderer: Renderer;
+interface RecordPageProps {
+  preload: string;
 }
-class Header extends React.Component<HeaderProps, {
-  url: string;
-}> {
-  constructor(props:HeaderProps) {
+class RecordPage extends React.Component<RecordPageProps, any> {
+  private director:RecordingDirector;
+  constructor(props) {
     super(props);
-    this.state = {
-      url: props.url,
-    }
+    this.state = {};
+    this.director = new RecordingDirector();
   }
-  shouldComponentUpdate() {
-    return true;
-  }
-  componentWillReceiveProps(nextProps:HeaderProps) {
-    this.setState({url: nextProps.url});
+  gotWebview(webview:Electron.WebviewTag) {
+    this.director.attachWebview(webview);
+    this.director.on('change', () => {
+      this.setState(this.state);
+    })
+    this.director.startRecording();
+    console.log('recording');
   }
   render() {
-    let { webview, director, renderer } = this.props;
-    let { url } = this.state;
-
-    let record_button;
-    if (director.is_recording) {
-      record_button = <button onClick={() => {
-        renderer.doUpdate(() => {
-          director.pauseRecording();
-        });
-      }}>
-        <span className="fa fa-stop"></span> {sss('verb.Stop', 'Stop')}
+    let { preload } = this.props;
+    let stop_button = <button
+        disabled={this.director.state !== 'recording'}
+        onClick={() => {
+          this.director.pauseRecording();
+        }}>
+        <span className="fa fa-stop"/>
       </button>
-    } else {
-      record_button = <button onClick={() => {
-        renderer.doUpdate(() => {
-          director.startRecording();
-          director.setURL(this.props.url);
-        })
-      }}><span className="fa fa-circle red"></span> {sss('verb.Record', 'Record')}</button>
-    }
 
-    let play_button;
-    if (!director.is_recording) {
-      play_button = <button onClick={() => {
-        renderer.doUpdate(() => {
-          director.play();
-        });
-      }}>
-        <span className="fa fa-play"></span> {sss('verb.Play', 'Play')}</button>
-    }
-
-    return <div>
-      <div className="control">
-
-        <button onClick={() => {
-          webview.goBack();
-        }}>
-          <span className="fa fa-chevron-left"></span>
-        </button>
-        <button onClick={() => {
-          webview.goForward();
-        }}>
-          <span className="fa fa-chevron-right"></span>
-        </button>
-        <input
-          value={url}
-          onChange={ev => {
-            this.setState({url: ev.target.value});
+    let steps = this.director.current_recording.steps.map((step, i) => {
+      let details = <div>{step.type}</div>
+      switch (step.type) {
+        case 'navigate': {
+          details = <div>go to {step.url}</div>
+          break;
+        }
+        case 'pageload': {
+          details = <div>...</div>
+          break;
+        }
+        case 'click': {
+          details = <div>click on {step.desc}</div>
+          break;
+        }
+        case 'focus': {
+          details = <div>focus on {step.desc}</div>
+          break;
+        }
+        case 'change': {
+          details = <div>change {step.desc} to {step.value}</div>
+          break;
+        }
+        case 'keypress': {
+          // let value = step.keys.map(x => x.key).join('')
+          details = <div>type</div>
+          break;
+        }
+      }
+      return <div key={i} className="step">{details}</div>
+    })
+    return <div className="record-page">
+      <div className="browser-wrap">
+        <div className="instructions">
+          This tool will record you getting transaction information from your bank.  Buckets should then be able to replay your recording to download transaction data in the future.
+          <ol>
+            <li>Sign in to your bank</li>
+            <li>For each account, download an OFX/QFX file for the date range Aug 15, 2017 to Sep 15, 2017</li>
+            <li>Click {stop_button}</li>
+          </ol>
+        </div>
+        <Browser
+          preload={preload}
+          onURLChange={url => {
+            this.director.setURL(url);
           }}
-          type="text"
-          placeholder="https://www.example.com/"
-          onKeyDown={ev => {
-            if (ev.key === 'Enter') {
-              this.navigateToURL(this.state.url);
-            }
-          }}
+          onWebview={webview => { this.gotWebview(webview)}}
         />
-        <button onClick={() => {
-          webview.reload();
-        }}>
-          <span className="fa fa-refresh"></span>
-        </button>
-        <button onClick={() => {
-          this.navigateToURL(this.state.url);
-        }}><span className="fa fa-arrow-right"></span></button>
-        <button onClick={() => {
-          if (webview.isDevToolsOpened()) {
-            webview.closeDevTools();
-          } else {
-            webview.openDevTools();
-          }
-        }}><span className="fa fa-gear"></span></button>
       </div>
-
-      <div className="control">
-        {record_button}
-        {play_button}
+      <div className="recording-pane">
+        <div className="controls">
+          <button disabled={this.director.state === 'recording'}><span className="fa fa-circle red" /></button>
+          {stop_button}
+          <button
+            disabled={this.director.state === 'recording'}
+            onClick={() => {
+              this.director.play();
+            }}
+          ><span className="fa fa-play" /></button>
+        </div>
+        <div>Recorded steps:</div>
+        <div className="steps">
+          {steps}
+        </div>
       </div>
     </div>
   }
-  
+}
+
+class SignInPage extends React.Component<any, any> {
+  render() {
+    return <div className="browser-wrap">
+      <div className="instructions">
+        Many banks require extra verification (e.g. security questions, being texted/emailed a code, etc.) when accessing their website from a new computer or device.  Follow these steps to authorize Buckets for your bank:
+        <ol>
+          <li>{sss("Enter your bank's URL below.")}</li>
+          <li>{sss("Sign in.  Make sure you choose to have this computer remembered if asked.")}</li>
+          <li>{sss("Click this button:")} <button>I signed in</button></li>
+        </ol>
+      </div>
+      <Browser />
+    </div>
+  }
 }
 
 export function setPath(x:string) {
   window.location.hash = '#' + x;
 }
 
-class RecordingApp extends React.Component<any, any> {
+interface RecordingAppProps {
+  preload: string;
+}
+class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
+    let { preload } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -242,11 +262,14 @@ class RecordingApp extends React.Component<any, any> {
                   <div>Settings</div>
                 </Route>
                 <Route path="/signin">
-                  <Browser />
+                  <SignInPage />
                 </Route>
                 <Route path="/record">
-                  <div>Record</div>
+                  <RecordPage
+                    preload={preload}
+                  />
                 </Route>
+                <Redirect to="/settings" />
               </Switch>
             </div>
           </div>

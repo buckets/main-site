@@ -192,6 +192,7 @@ export function watchForEvents(app:Electron.App) {
   })
   ipcMain.on('buckets:open-recorder', (ev) => {
     const file = WIN2FILE[ev.sender.id];
+    console.log('file', file, ev);
     file.openRecordWindow();
   })
 }

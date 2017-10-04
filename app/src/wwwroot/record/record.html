@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title data-translate>Buckets Recorder</title>
+  <title data-translate>EXPERIMENTAL Buckets Recorder</title>
   <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
   <link rel="stylesheet" type="text/css" href="../assets/style.css" />
   <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
@@ -12,9 +12,44 @@
     body {
       height: 100%;
     }
+    .red {
+      color: var(--red);
+    }
     #recorder {
       width: 100vw;
       height: 100vh;
+    }
+    .record-page {
+      display: flex;
+      width: 100%;
+    }
+    .record-page .recording-pane {
+      flex-shrink: 0;
+      width: 15rem;
+      font-size: .8rem;
+      border-left: 1px solid var(--lighter-grey);
+      padding: .5rem;
+      overflow-y: auto;
+    }
+    .recording-pane .step {
+    }
+    ol, ul {
+      margin-left: 1rem;
+      padding-left: 0;
+    }
+    .browser-wrap {
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .instructions {
+      padding: 1.5rem;
+      background-color: var(--faint-blue);
+    }
+    .instructions li {
+      margin: .25rem 0;
     }
     .browser {
       display: flex;

@@ -115,6 +115,17 @@ function escapeQuote(x:string):string {
   return x.replace(/"/g, '&quot;');
 }
 
+// provide a human-friendly name for element
+function describeElement(el:HTMLElement):string {
+  let tagName = el.tagName.toLowerCase();
+  let name = el.getAttribute('name');
+  if (name) {
+    return `<${tagName} ${name}/>`;
+  } else {
+    return `<${tagName}/>`;
+  }
+}
+
 // uniquely identify an element on a page
 export function identifyElement(el:HTMLElement):UniqueElementID {
   let xpaths:string[] = [];
@@ -234,9 +245,11 @@ export function isNavigateStep(x:RecStep):x is NavigateStep {
 export interface KeyPressStep {
   type: 'keypress';
   element: UniqueElementID;
+  desc: string;
   keys: Array<{
     key: string;
     modifiers: string[];
+    input_delimiter: boolean;
   }>;
 }
 export function isKeyPressStep(x:RecStep):x is KeyPressStep {
@@ -246,6 +259,7 @@ export function isKeyPressStep(x:RecStep):x is KeyPressStep {
 // click
 export interface ClickStep {
   type: 'click';
+  desc: string;
   element: UniqueElementID;
   pageX: number;
   pageY: number;
@@ -261,6 +275,7 @@ export function isClickActionStep(x:RecStep):x is ClickStep {
 // focus
 export interface FocusStep {
   type: 'focus';
+  desc: string;
   element: UniqueElementID;
 }
 export function isFocusStep(x:RecStep):x is FocusStep {
@@ -270,8 +285,10 @@ export function isFocusStep(x:RecStep):x is FocusStep {
 // change
 export interface ChangeStep {
   type: 'change';
+  desc: string;
   element: UniqueElementID;
   value: any;
+  selectedIndex?: number;
 }
 export function isChangeStep(x:RecStep):x is ChangeStep {
   return (<ChangeStep>x).type === 'change';
@@ -296,11 +313,14 @@ export class Recording {
     }
 
     if (isKeyPressStep(step)) {
-      let last_step = this.steps[this.steps.length-1];
+      let last_step = this.steps.slice(-1)[0];
       if (isKeyPressStep(last_step)) {
-        // combine keypresses
-        last_step.keys = last_step.keys.concat(step.keys);
-        return;
+        if ( !step.keys[0].input_delimiter
+          && !last_step.keys.slice(-1)[0].input_delimiter) {
+          // combine keypresses
+          last_step.keys = last_step.keys.concat(step.keys);
+          return;
+        }
       }
     }
     // otherwise just add it
@@ -376,8 +396,10 @@ export class Recorder {
       if (isChangeOnlyElement(target)) {
         let step:ChangeStep = {
           type: 'change',
+          desc: describeElement(target),
           element: identifyElement(target),
           value: target.value,
+          selectedIndex: target.selectedIndex,
         }
         this.rpc.call('rec:step', step);
       }
@@ -387,6 +409,7 @@ export class Recorder {
       if (isChangeOnlyElement(ev.target)) {
         let step:FocusStep = {
           type: 'focus',
+          desc: describeElement(ev.target),
           element: identifyElement(ev.target),
         }
         this.rpc.call('rec:step', step);
@@ -409,6 +432,7 @@ export class Recorder {
       let step:ClickStep = {
         type: 'click',
         element: identifyElement(ev.target as HTMLElement),
+        desc: describeElement(ev.target),
         pageX,
         pageY,
         screenX,
@@ -420,12 +444,37 @@ export class Recorder {
     }, false)
     
     window.addEventListener('keydown', (ev) => {
+      let input_delimiter = false;
+      let elem = ev.target as HTMLElement;
+      switch (ev.key) {
+        case 'Enter': {
+          if (elem.tagName === 'TEXTAREA') {
+            input_delimiter = false;
+          } else {
+            input_delimiter = true;
+          }
+          break;
+        }
+        case 'Tab': {
+          input_delimiter = true;
+          break;
+        }
+        case 'Alt':
+        case 'Control':
+        case 'Shift':
+        case 'Meta': {
+          // Don't send this
+          return;
+        }
+      }
       let step:KeyPressStep = {
         type: 'keypress',
+        desc: describeElement(ev.target as HTMLElement),
         element: identifyElement(ev.target as HTMLElement),
         keys: [{
           key: ev.key,
           modifiers: eventToKeyModifiers(ev),
+          input_delimiter,
         }]
       }
       this.rpc.call('rec:step', step);
@@ -439,8 +488,8 @@ export class Recorder {
 // in-host container RecordingDirector
 //-----------------------------------------------------------
 export class RecordingDirector extends EventEmitter {
-  public is_recording = false;
-  public is_playing = false;
+  private _state:'idle'|'recording'|'playing' = 'idle';
+  public webview:Electron.WebviewTag;
 
   public current_recording:Recording;
   public step_index:number = 0;
@@ -454,15 +503,18 @@ export class RecordingDirector extends EventEmitter {
     url: string;
   }> = [];
 
-  constructor(readonly webview:Electron.WebviewTag) {
+  constructor() {
     super();
     this.current_recording = new Recording();
+  }
+  attachWebview(webview:Electron.WebviewTag) {
+    this.webview = webview;
     this.rpc = inHostRPC(webview);
     this.rpc.addHandlers({
       'rec:step': (step:RecStep) => {
-        if (this.is_recording) {
+        if (this.state === 'recording') {
           this.current_recording.addStep(step);
-          this.emit('recorded-step', step);
+          this.emit('change');
         }
       },
       'rec:ready-for-control': () => {
@@ -470,12 +522,14 @@ export class RecordingDirector extends EventEmitter {
       }
     })
     webview.addEventListener('will-navigate', (ev) => {
-      if (this.is_recording) {
+      if (this.state === 'recording') {
+        // subsequent loads
         let pageload:PageLoadStep = {
           type: 'pageload',
         }
-        this.current_recording.addStep(pageload);
-      } else if (this.is_playing) {
+        this.current_recording.addStep(pageload);  
+        this.emit('change');
+      } else if (this.state === 'playing') {
         this.pages_loaded.push({
           title: webview.getTitle(),
           url: webview.getURL(),
@@ -484,26 +538,31 @@ export class RecordingDirector extends EventEmitter {
       }
     })
   }
+  get state() {
+    return this._state;
+  }
   setURL(url:string) {
     this.current_recording.steps.unshift({
       type: 'navigate',
+      desc: '',
       url,
     });
+    this.emit('change');
   }
   startRecording() {
-    this.is_recording = true;
-    this.is_playing = false;
+    this._state = 'recording';
+    this.emit('change');
   }
   pauseRecording() {
-    this.is_recording = false;
+    this._state = 'idle';
+    this.emit('change');
   }
 
   // playback
   async play(rec?:Recording) {
     this.current_recording = rec || this.current_recording;
     this.step_index = 0;
-    this.is_playing = true;
-    this.is_recording = false;
+    this._state = 'playing';
     let steps = this.current_recording.steps;
     for (this.step_index = 0; this.step_index < steps.length; this.step_index++) {
       console.log('doing step', this.step_index);
@@ -534,7 +593,7 @@ export class RecordingDirector extends EventEmitter {
         return this._doKeyPressStep(step);
       }
       default: {
-        break;
+        throw new Error(`Unknown step type`);
       }
     }
   }
