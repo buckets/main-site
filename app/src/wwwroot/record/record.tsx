@@ -190,7 +190,8 @@ class RecordPage extends React.Component<RecordPageProps, any> {
             <div className="step-value">{value}</div>
             <div>
               <select>
-                <option value="">Will always be the same</option>
+                <option value="">---</option>
+                <option value="static">Will always be the same</option>
                 <option>Account number</option>
                 <option>Account password/PIN</option>
                 <option>Start date</option>
