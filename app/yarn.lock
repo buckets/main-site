@@ -246,6 +246,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/keytar@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@types/keytar/-/keytar-4.0.1.tgz#e2cf6405dc33861424e59b67516c66d2cf7bc21b"
+
 "@types/mathjs@^0.0.34":
   version "0.0.34"
   resolved "https://registry.yarnpkg.com/@types/mathjs/-/mathjs-0.0.34.tgz#e22f44b72e6b148608887fb816f9376dcfedc97d"
