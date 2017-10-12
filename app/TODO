@@ -16,6 +16,7 @@ Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
  ☐ Turning a regular expense back to a normal bucket retains the deposit in rain
  ☐ Preferences page doesn't have the right language.
+ ☐ Make light grey text on charts darker
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
@@ -27,6 +28,7 @@ v1.0.0:
  ☐ Prompt to be added to newsletter
  ☐ Record signing in to bank (with encryption)
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
+ ☐ Show running balance in bucket transactions list
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
