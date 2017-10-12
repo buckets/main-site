@@ -14,7 +14,7 @@ import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 
-import { savePassword, getPassword } from '../crypto'
+import { getPassword } from '../crypto'
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
@@ -50,11 +50,9 @@ app.on('ready', () => {
   })
 
   // XXX JUST FOR TESTING
-  getPassword('buckets.somefile', 'account', "Encryption password")
+  getPassword('buckets.test2', 'account', "Encryption password")
   .then(async response => {
     console.log('got response', response);
-    await savePassword('buckets.somefile', 'account', response);
-    console.log('saved password');
   })
   .catch(err => {
     console.log('error with password', err);
