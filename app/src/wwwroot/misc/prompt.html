@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title data-translate>Buckets Updates</title>
+  <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/style.css" />
+  <style type="text/css">
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #handle {
+      background-color: var(--lightest-grey);
+      -webkit-user-select: none;
+      -webkit-app-region: drag;
+      height: 100%;
+      flex-shrink: 0;
+      flex-basis: 25vw;
+      padding: .5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #handle img {
+      height: 100%;
+      width: 72px;
+      height: 72px;
+    }
+    .guts {
+      flex-grow: 1;
+      padding: 1rem;
+    }
+    .buttons {
+      padding: .5rem 0;
+    }
+    .buttons button:first-child {
+      margin-left: 0;
+    }
+  </style>
+  <style type="text/css">
+  </style>
+</head>
+<body>
+  <div id="handle">
+    <img src="../assets/img/logo_med.png" />
+  </div>
+  <div class="guts">
+    <form id="theform">
+      <div id="prompt"></div>
+      <div>
+        <input id="input" type="text" autofocus>
+      </div>
+      <div class="buttons">
+        <button id="cancel">Cancel</button>
+        <button class="primary" type="submit">OK</button>
+      </div>
+    </form>
+  </div>
+<script>
+const {remote} = require('electron');
+const Path = require('path');
+const appPath = remote.app.getAppPath();
+const req = function() {
+  return (module) => {
+    if (module.startsWith('.') || module.startsWith('/')) {
+      return require(Path.resolve(appPath, module))
+    } else {
+      return require(module);
+    }
+  }
+}();
+
+const { localizeThisPage } = req('./src/i18n');
+const { ipcRenderer } = req('electron');
+const querystring = req('querystring');
+
+localizeThisPage();
+
+let qs = querystring.parse(window.location.search.substr(1));
+console.log('prompt', qs.prompt);
+console.log('key', qs.key);
+console.log('hideinput', qs.hideinput);
+
+let prompt = document.getElementById('prompt');
+let theform = document.getElementById('theform');
+let cancel = document.getElementById('cancel');
+let input = document.getElementById('input');
+if (qs.hideinput) {
+  input.setAttribute('type', 'password');
+}
+prompt.innerHTML = qs.prompt;
+
+theform.addEventListener('submit', (ev) => {
+  ipcRenderer.send(qs.key, {response: input.value});
+  ev.preventDefault();
+}, false)
+
+cancel.addEventListener('click', (ev) => {
+  ipcRenderer.send(qs.key, {error:'canceled'});
+  ev.preventDefault();
+}, false);
+</script>
+</body>
+</html>
