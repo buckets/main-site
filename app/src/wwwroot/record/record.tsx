@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector } from '../../recordlib'
+import { RecordingDirector, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 
@@ -185,7 +185,13 @@ class RecordPage extends React.Component<RecordPageProps, any> {
           break;
         }
         case 'keypress': {
-          let value = step.keys.map(x => x.key).join('')
+          let value = step.keys
+            .map(x => x.key)
+            .filter(isInputValue)
+            .join('');
+          if (!value) {
+            break;
+          }
           question = <div>
             <div className="step-value">{value}</div>
             <div>
@@ -215,8 +221,11 @@ class RecordPage extends React.Component<RecordPageProps, any> {
           break;
         }
       }
-      return <div key={i} className="step-question">{question}</div>
+      if (question) {
+        return <div key={i} className="step-question">{question}</div>  
+      }
     })
+    .filter(x => x);
     return <div className="record-page">
       <div className="browser-wrap">
         <div className="instructions">

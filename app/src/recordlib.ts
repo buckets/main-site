@@ -740,6 +740,20 @@ function eventToKeyModifiers(ev:any):string[] {
   return ret;
 }
 
+export function isInputValue(key:string):boolean {
+  switch (key) {
+    case 'Backspace':
+    case 'Delete':
+    case 'Insert':
+    case 'Enter':
+    case 'Escape':
+    case 'Tab': {
+      return false;
+    }
+  }
+  return true;
+}
+
 function doesKeyRequireDownAndUp(key:string):boolean {
   switch (key) {
     case 'Backspace':

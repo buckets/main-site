@@ -12,7 +12,8 @@
     "start": "electron .",
     "compile": "tsc",
     "test": "./test.sh",
-    "postinstall": "install-app-deps"
+    "postinstall": "install-app-deps",
+    "fakebank": "cd test/fakebank && python -m SimpleHTTPServer 8080"
   },
   "dependencies": {
     "bluebird": "3.5.0",
@@ -76,16 +77,17 @@
       }
     ],
     "files": [
-      "!.dockerignore",
       "!**/*.ts",
       "!**/*.tsx",
       "!*.sh",
+      "!.dockerignore",
       "!.taprc",
       "!buckets.sublime-*",
       "!coverage${/*}",
       "!dev${/*}",
       "!mocha.opts",
       "!README.md",
+      "!test${/*}",
       "!TODO",
       "!tsconfig.json",
       "!watchtest.js"
