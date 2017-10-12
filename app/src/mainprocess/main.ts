@@ -14,8 +14,6 @@ import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 
-import { getPassword } from '../crypto'
-
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
@@ -48,16 +46,6 @@ app.on('ready', () => {
       throw new Error('failed to register buckets: protocol');
     }
   })
-
-  // XXX JUST FOR TESTING
-  getPassword('buckets.test2', 'account', "Encryption password")
-  .then(async response => {
-    console.log('got response', response);
-  })
-  .catch(err => {
-    console.log('error with password', err);
-  })
-  // XXX END OF TESTING
 })
 
 // A file was double-clicked

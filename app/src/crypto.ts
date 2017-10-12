@@ -3,6 +3,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import * as keytar from 'keytar'
 import {v4 as uuid} from 'uuid'
 import * as querystring from 'querystring'
+import * as crypto from 'crypto'
 
 import { APP_ROOT } from './mainprocess/globals'
 
@@ -70,3 +71,19 @@ export async function getPassword(service:string, account:string, prompt?:string
 export async function savePassword(service:string, account:string, password:string):Promise<void> {
   await keytar.setPassword(service, account, password)
 }
+
+export function encrypt(plaintext:string, password:string):string {
+  console.log('HEEYYYYYYYYYYYY, USE BETTER CRYPTO');
+  let cipher = crypto.createCipher('aes256', password)
+  cipher.update(plaintext, 'utf8')
+  return cipher.final('base64')
+}
+export function decrypt(ciphertext:string, password:string):string {
+  console.log('HEEYYYYYYYYYYYY, USE BETTER CRYPTO');
+  let cipher = crypto.createDecipher('aes256', password)
+  cipher.update(ciphertext, 'base64')
+  return cipher.final('utf8')
+}
+
+
+
