@@ -256,7 +256,9 @@ export interface KeyPressStep {
     modifiers: string[];
     input_delimiter: boolean;
   }>;
-  valuekey?: string;
+
+  // Name of key inside values object that accompanies playback.
+  refkey?: string;
 }
 export function isKeyPressStep(x:RecStep):x is KeyPressStep {
   return (<KeyPressStep>x).type === 'keypress';
@@ -296,7 +298,9 @@ export interface ChangeStep {
   value: any;
   selectedIndex?: number;
   displayValue?: string;
-  valuekey?: string;
+
+  // Name of key inside values object that accompanies playback.
+  refkey?: string;
 }
 export function isChangeStep(x:RecStep):x is ChangeStep {
   return (<ChangeStep>x).type === 'change';
@@ -514,14 +518,22 @@ export class Recorder {
 }
 
 //-----------------------------------------------------------
-// in-host container RecordingDirector
-//-----------------------------------------------------------
+/**
+  RecordingDirector is used in the host page in a renderer
+  process.  It knows about a `<webview>` tag which it controls
+  and monitors.
+*/
 export class RecordingDirector extends EventEmitter {
   private _state:'idle'|'recording'|'playing' = 'idle';
   public webview:Electron.WebviewTag;
 
-  public current_values:{[k:string]: any} = {};
+  // The currently used Recording.  Used for playback
+  // and for recording.
   public current_recording:Recording;
+
+  // For when the current
+  public current_values:{[k:string]: any} = {};
+  
   public step_index:number = 0;
   public poll_interval:number = 100;
   public playback_delay:number = 120;
@@ -631,7 +643,7 @@ export class RecordingDirector extends EventEmitter {
       }
     }
   }
-  async _doNavigateStep(step:NavigateStep) {
+  private async _doNavigateStep(step:NavigateStep) {
     return new Promise((resolve, reject) => {
       let wc = this.webview.getWebContents();
       this.once('child-ready-for-control', ev => {
@@ -650,7 +662,7 @@ export class RecordingDirector extends EventEmitter {
       await wait(this.poll_interval);
     }
   }
-  async _doClickStep(step:ClickStep) {
+  private async _doClickStep(step:ClickStep) {
     console.log('sending click');
     let bounds = await this.getBoundsFromRemote(step.element)
     let x = bounds.x + step.offsetX;
@@ -662,35 +674,34 @@ export class RecordingDirector extends EventEmitter {
       globalY: step.screenY,
     })
   }
-  async _doKeyPressStep(step:KeyPressStep) {
-    if (step.valuekey) {
-      let value = this.current_values[step.valuekey];
+  private async _doKeyPressStep(step:KeyPressStep) {
+    if (step.refkey) {
+      // Pull the value from the set of current values
+      let value = this.current_values[step.refkey];
       for (var i = 0; i < value.length; i++) {
         let letter = value[i];
-        console.log('sending key', letter);
         await sendKey(this.webview, letter, []);
         await wait(this.typing_delay);
       }
     } else {
       for (var i = 0; i < step.keys.length; i++) {
         let item = step.keys[i];
-        console.log("sending key", item.key);
         await sendKey(this.webview, item.key, item.modifiers);
         await wait(this.typing_delay);
       }
     }
   }
-  async _doChangeStep(step:ChangeStep) {
+  private async _doChangeStep(step:ChangeStep) {
     let value = step.value;
-    if (step.valuekey) {
-      value = this.current_values[step.valuekey];
+    if (step.refkey) {
+      value = this.current_values[step.refkey];
     }
     return this.rpc.call('rec:do-change', {step, value});
   }
-  async _doFocusStep(step:FocusStep) {
+  private async _doFocusStep(step:FocusStep) {
     return this.rpc.call('rec:do-focus', step);
   }
-  async _doPageLoadStep(step:PageLoadStep) {
+  private async _doPageLoadStep(step:PageLoadStep) {
     if (this.pages_loaded.length) {
       // already started
       console.log('page load already started');
@@ -705,7 +716,7 @@ export class RecordingDirector extends EventEmitter {
       })
     }
   }
-  async _doDownloadStep(step:DownloadStep) {
+  private async _doDownloadStep(step:DownloadStep) {
 
   }
 }

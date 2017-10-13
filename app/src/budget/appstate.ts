@@ -8,6 +8,7 @@ import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
+import { BankRecording } from '../models/bankrecording'
 import { makeToast } from './toast'
 import { FileImportState, FileImportManager } from './importing'
 import { sss } from '../i18n'
@@ -54,6 +55,9 @@ export class AppState implements IComputedAppState {
   } = {};
   unknown_accounts: {
     [k: number]: UnknownAccount;
+  } = {};
+  bankrecordings: {
+    [k: number]: BankRecording;
   } = {};
   account_balances: Balances = {};
   bucket_balances: Balances = {};
@@ -311,6 +315,12 @@ export class StateManager extends EventEmitter {
       } else if (ev.event === 'delete') {
         delete this.appstate.unknown_accounts[obj.id];
       }
+    } else if (isObj(BankRecording, obj)) {
+      if (ev.event === 'update') {
+        this.appstate.bankrecordings[obj.id] = obj;
+      } else if (ev.event === 'delete') {
+        delete this.appstate.bankrecordings[obj.id];
+      }
     }
     this.signalChange();
     return this.appstate;
@@ -346,6 +356,7 @@ export class StateManager extends EventEmitter {
       this.fetchBucketTransactions(),
       this.fetchConnections(),
       this.fetchUnknownAccounts(),
+      this.fetchBankRecordings(),
     ])
     this.recomputeTotals();
     return this;
@@ -446,6 +457,15 @@ export class StateManager extends EventEmitter {
       this.appstate.unknown_accounts = {};
       accounts.forEach(obj => {
         this.appstate.unknown_accounts[obj.id] = obj;
+      })
+    })
+  }
+  fetchBankRecordings() {
+    return this.store.listObjects(BankRecording)
+    .then(recordings => {
+      this.appstate.bankrecordings = {};
+      recordings.forEach(obj => {
+        this.appstate.bankrecordings[obj.id] = obj;
       })
     })
   }

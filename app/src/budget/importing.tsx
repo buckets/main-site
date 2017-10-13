@@ -46,8 +46,8 @@ export class FileImportManager {
         paths.forEach(path => {
           this.openFile(path);
         })
+        setPath('/import');
       }
-      setPath('/import');
     })
   }
   async openFile(path) {

@@ -2,10 +2,11 @@ import * as log from 'electron-log'
 import * as URL from 'url'
 import { IStore, DataEventEmitter, TABLE2CLASS, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
 import { ipcMain, ipcRenderer, webContents} from 'electron'
-import { BucketStore } from './models/bucket';
-import { AccountStore } from './models/account';
-import { SimpleFINStore } from './models/simplefin';
-import { ReportStore } from './models/reports';
+import { BucketStore } from './models/bucket'
+import { AccountStore } from './models/account'
+import { SimpleFINStore } from './models/simplefin'
+import { ReportStore } from './models/reports'
+import { BankRecordingStore } from './models/bankrecording'
 
 //--------------------------------------------------------------------------------
 // serializing
@@ -88,6 +89,7 @@ export class RPCRendererStore implements IStore {
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
+  readonly bankrecording:BankRecordingStore;
   constructor(private room:string) {
     this.data = new DataEventEmitter();
     ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
@@ -95,6 +97,7 @@ export class RPCRendererStore implements IStore {
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
+    this.bankrecording = new BankRecordingStore(this);
   }
   get channel() {
     return `rpc-${this.room}`;

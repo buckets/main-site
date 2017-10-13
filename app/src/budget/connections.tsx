@@ -1,9 +1,9 @@
 import * as React from 'react'
-import * as _ from 'lodash'
 import * as cx from 'classnames'
 import { shell, ipcRenderer } from 'electron'
 import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
+import { BankRecording } from '../models/bankrecording'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
@@ -73,7 +73,7 @@ export class ConnectionsPage extends React.Component<{
     if (this.state.connecting) {
       steps = (<div className="dialog">
         <div>
-          {sss('simplefin-connect-intro', "Connecting to your bank account will make it easy to pull transaction history from your bank into Buckets.  To connect, do the following:")}
+          {sss('simplefin-connect-intro', "To connect, do the following:")}
         </div>
         <ol>
           <li>
@@ -112,11 +112,21 @@ export class ConnectionsPage extends React.Component<{
       </div>
     }
 
+    let recordings;
+    if (Object.keys(appstate.bankrecordings).length) {
+      recordings = <div>
+        <h2>{sss('Recordings')}</h2>
+        <BankRecordingList
+          recordings={Object.values(appstate.bankrecordings)}
+        />
+      </div>
+    }
+
     let conns;
     if (Object.keys(appstate.connections).length) {
       conns = <div>
         <h2>{sss('Connections')}</h2>
-        <ConnectionList connections={_.values(appstate.connections)} />
+        <ConnectionList connections={Object.values(appstate.connections)} />
       </div>
     }
 
@@ -135,27 +145,113 @@ export class ConnectionsPage extends React.Component<{
               disabled={!conns}><span className={cx("fa fa-refresh", {
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
-            <button onClick={this.startConnecting}>{sss('Connect to bank')}</button>
-            <button onClick={() => {
-              ipcRenderer.send('buckets:open-recorder');
-            }}>Record</button>
           </div>
           <div>
             <button onClick={() => { makeToast('Here is some toast')}}>{sss('Test Toast')}</button>
           </div>
         </div>
         <div className="padded">
+          
           <div className="connection-steps">{steps}</div>
           {unknown}
           {conns}
+          
+          <p>
+            Buckets supports these methods for getting transaction data from your bank:
+          </p>
+          <div className="horiz-options">
+            <div className="option">
+              <h3>Record</h3>
+              
+              <button
+                className="primary"
+                onClick={this.makeNewRecording}>{sss('New recording')}</button>
+
+              <ul className="fa-ul procon">
+                <li><i className="fa-li fa fa-check" /> Private</li>
+                <li><i className="fa-li fa fa-check" /> Free</li>
+                <li><i className="fa-li fa fa-check" /> One-click sync</li>
+                <li><i className="fa-li fa fa-check" /> Fast</li>
+                <li><i className="fa-li fa fa-close" /> Requires some work</li>
+                <li><i className="fa-li fa fa-check" /> Works with (theoretically) any bank</li>
+              </ul>
+
+              <p>
+                This method records you as you sign in to your bank, then replays the recording to download transaction data.
+              </p>
+
+              <p>
+                Credentials are encrypted and stored with your budget and only ever transmitted to your bank.
+              </p>
+
+            </div>
+            <div className="option">
+              <h3>SimpleFIN</h3>
+              
+              <button
+                className="primary"
+                onClick={this.startSimpleFINConnection}>{sss('Connect')}</button>
+
+              <ul className="fa-ul procon">
+                <li><i className="fa-li fa fa-question" /> Maybe private</li>
+                <li><i className="fa-li fa fa-question" /> Maybe free</li>
+                <li><i className="fa-li fa fa-check" /> One-click sync</li>
+                <li><i className="fa-li fa fa-check" /> Fast</li>
+                <li><i className="fa-li fa fa-check" /> Least amount of work</li>
+                <li><i className="fa-li fa fa-close" /> Works with U.S. banks</li>
+              </ul>
+
+              <p>
+                This method connects to a SimpleFIN server to get transaction data.
+              </p>
+
+              <p>
+                If your bank supports SimpleFIN, <b>this option is the best option</b> since it will likely be free and you won't have to give your credentials to anyone (including Buckets).
+              </p>
+              
+              <p>
+                Otherwise you may use a third party, which may not be free or private.
+              </p>
+
+            </div>
+            <div className="option">
+              <h3>Manual</h3>
+
+              <button className="primary" onClick={() => {
+                manager.fileimport.openFileDialog();
+              }}>
+                Import from file
+              </button>
+              
+              <ul className="fa-ul procon">
+                <li><i className="fa-li fa fa-check" /> Private</li>
+                <li><i className="fa-li fa fa-check" /> Free</li>
+                <li><i className="fa-li fa fa-close" /> Slow</li>
+                <li><i className="fa-li fa fa-close" /> Requires the most work</li>
+                <li><i className="fa-li fa fa-check" /> Works with (theoretically) any bank</li>
+              </ul>
+
+              <p>
+                For this method, you download OFX/QFX files from your bank and import them into Buckets.
+              </p>
+
+              <p>
+                If you only have one bank account, this might be your best option if Recording is too complicated.
+              </p>
+
+            </div>
+          </div>
         </div>
       </div>
     )
   }
-  startConnecting = () => {
+  startSimpleFINConnection = () => {
     this.setState({
       connecting: true,
     })
+  }
+  makeNewRecording = () => {
+    ipcRenderer.send('buckets:open-recorder');
   }
   connect = async () => {
     let connection;
@@ -171,6 +267,36 @@ export class ConnectionsPage extends React.Component<{
     })
     makeToast(sss('Connection saved!'));
     return startDefaultSync(this.props.appstate);
+  }
+}
+
+
+class BankRecordingList extends React.Component<{
+  recordings: BankRecording[];
+}, {}> {
+  render() {
+    return <table className="ledger">
+      <thead>
+        <tr>
+          <th>{sss('ID')}</th>
+          <th>{sss('Name')}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {this.props.recordings.map(recording => {
+          return <tr>
+            <td>XXX id?</td>
+            <td>XXX name?</td>
+            <td>
+              <a className="subtle">
+                <span className="fa fa-gear"></span>  
+              </a>
+            </td>
+          </tr>
+        })}
+      </tbody>
+    </table>
   }
 }
 

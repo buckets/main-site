@@ -4,6 +4,7 @@ import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
+import { BankRecordingStore } from './models/bankrecording'
 
 //--------------------------------------------------------------------------------
 // objects
@@ -26,9 +27,14 @@ export function registerClass(cls:IObjectClass<any>) {
   TABLE2CLASS[cls.table_name] = cls;
 }
 
-//--------------------------------------------------------------------------------
-// Store interface used in both main and renderer processes
-//--------------------------------------------------------------------------------
+/**
+  Store interface used in both main and renderer processes
+
+  XXX I have plans to split this into an interface that contains
+  most of the methods, and another class with the `accounts`, `buckets`,
+  `connections`, etc... on it so that each implementation of
+  the store doesn't have to add those members themselves.
+*/
 export interface IStore {
   data:DataEventEmitter;
   publishObject(event:ObjectEventType, obj:IObject);
@@ -44,6 +50,7 @@ export interface IStore {
   buckets:BucketStore;
   connections:SimpleFINStore;
   reports:ReportStore;
+  bankrecording:BankRecordingStore;
 }
 
 //--------------------------------------------------------------------------------

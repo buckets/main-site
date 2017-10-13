@@ -1039,6 +1039,37 @@ table.props th {
   background-color: var(--faint-green);
 }
 
+
+.horiz-options {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+.horiz-options .option {
+  padding: 1rem;
+  background-color: var(--lightest-grey);
+  border: 1px solid var(--lighter-grey);
+  border-radius: 4px;
+  margin: 1rem;
+  flex-grow: 1;
+  flex-basis: 10%;
+}
+.horiz-options .option h3 {
+  margin-top: 0;
+}
+
+.procon .fa-check {
+  color: var(--green);
+}
+.procon .fa-close {
+  color: var(--red);
+}
+.procon .fa-question {
+  color: var(--blue);
+}
+
+
+
 .dialog {
   border: 6px solid var(--blue);
   border-radius: 20px;

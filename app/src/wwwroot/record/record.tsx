@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector, isInputValue } from '../../recordlib'
+import { RecordingDirector, ChangeStep, KeyPressStep, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 
@@ -119,9 +119,47 @@ class Browser extends React.Component<BrowserProps, {
   }
 }
 
+
+interface StepValueDetailsProps {
+  value: string;
+  step: ChangeStep | KeyPressStep;
+  director: RecordingDirector;
+}
+class StepValueDetails extends React.Component<StepValueDetailsProps, any> {
+  render() {
+    let { value, step, director } = this.props;
+    return <div>
+      <div className="step-value">{value}</div>
+      <div>
+        <select onChange={ev => {
+          console.log('changed', ev.target.value);
+          step.refkey = ev.target.value;
+          director.emit('change');
+        }} defaultValue={step.refkey || ''}>
+          <option value="">Will always be the same</option>
+          <option value="start-date">Start date</option>
+          <option value="start-day">Start DAY</option>
+          <option value="start-month">Start MONTH</option>
+          <option value="start-year">Start YEAR</option>
+
+          <option value="end-date">End date</option>
+          <option value="end-day">End DAY</option>
+          <option value="end-month">End MONTH</option>
+          <option value="end-year">End YEAR</option>
+        </select>
+      </div>
+    </div>
+  }
+}
+
+
+
 interface RecordPageProps {
   preload: string;
 }
+/**
+  Page for making and editing recordings.
+*/
 class RecordPage extends React.Component<RecordPageProps, any> {
   private director:RecordingDirector;
   constructor(props) {
@@ -162,26 +200,12 @@ class RecordPage extends React.Component<RecordPageProps, any> {
 
       switch (step.type) {
         case 'change': {
-          question = <div>
-            <div className="step-value">{step.displayValue || step.value}</div>
-            <div>
-              <select>
-                <option value="">Will always be the same</option>
-                <option>Account</option>
-                <option>Start date</option>
-                <option>Start DAY</option>
-                <option>Start MONTH</option>
-                <option>Start YEAR</option>
-
-                <option>End date</option>
-                <option>End DAY</option>
-                <option>End MONTH</option>
-                <option>End YEAR</option>
-                
-                <option>Other</option>
-              </select>
-            </div>
-          </div>
+          let value = step.displayValue || step.value;
+          question = <StepValueDetails
+            value={value}
+            step={step}
+            director={this.director}
+            />
           break;
         }
         case 'keypress': {
@@ -192,28 +216,11 @@ class RecordPage extends React.Component<RecordPageProps, any> {
           if (!value) {
             break;
           }
-          question = <div>
-            <div className="step-value">{value}</div>
-            <div>
-              <select>
-                <option value="">---</option>
-                <option value="static">Will always be the same</option>
-                <option>Account number</option>
-                <option>Account password/PIN</option>
-                <option>Start date</option>
-                <option>Start DAY</option>
-                <option>Start MONTH</option>
-                <option>Start YEAR</option>
-
-                <option>End date</option>
-                <option>End DAY</option>
-                <option>End MONTH</option>
-                <option>End YEAR</option>
-                
-                <option>Other</option>
-              </select>
-             </div>
-            </div>
+          question = <StepValueDetails
+            value={value}
+            step={step}
+            director={this.director}
+            />
           break;
         }
         case 'download': {

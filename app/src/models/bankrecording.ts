@@ -3,7 +3,7 @@ import { encrypt, decrypt, promptUser } from '../crypto'
 import * as reclib from '../recordlib'
 
 export class BankRecording implements IObject {
-  static table_name: string = 'recording';
+  static table_name: string = 'bank_recording';
   id: number;
   created: string;
   readonly _type: string = BankRecording.table_name;
@@ -41,7 +41,7 @@ export class BankRecordingStore {
     let data:any = args || {};
     if (data.credentials) {
       let password = await this.getPassword();
-      data.enc_credentials = encrypt(JSON.stringify(data.credentials), password)
+      data.enc_credentials = await encrypt(JSON.stringify(data.credentials), password)
       delete data.credentials;
     }
     if (data.recording) {
@@ -52,7 +52,7 @@ export class BankRecordingStore {
   }
   async decryptCredentials(enc_credentials:string):Promise<object> {
     const password = await this.getPassword();
-    return JSON.parse(decrypt(enc_credentials, password));
+    return JSON.parse(await decrypt(enc_credentials, password));
   }
   async add(args:IUpdateArgs):Promise<BankRecording> {
     const data = await this._prepareForDB(args);

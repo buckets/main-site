@@ -29,6 +29,7 @@ v1.0.0:
  ☐ Record signing in to bank (with encryption)
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
  ☐ Show running balance in bucket transactions list
+ ☐ Merge "File import" and "Connections" page
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
