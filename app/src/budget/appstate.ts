@@ -12,39 +12,6 @@ import { makeToast } from './toast'
 import { FileImportState, FileImportManager } from './importing'
 import { sss } from '../i18n'
 
-interface IAppState {
-  accounts: {
-    [k: number]: Account;
-  };
-  transactions: {
-    [k: number]: ATrans;
-  };
-  groups: {
-    [k: number]: Group;
-  };
-  buckets: {
-    [k: number]: Bucket;
-  };
-  btransactions: {
-    [k: number]: BTrans;
-  };
-  connections: {
-    [k: number]: Connection;
-  };
-  unknown_accounts: {
-    [k: number]: UnknownAccount;
-  }
-  account_balances: Balances;
-  bucket_balances: Balances;
-  rainfall: Balances;
-  month: number;
-  year: number;
-
-  syncing: boolean;
-  sync_message: string;
-
-  fileimport: FileImportState;
-}
 
 interface IComputedAppState {
   rain: number;
@@ -66,20 +33,39 @@ interface IComputedAppState {
   kicked_buckets: Bucket[];
 }
 
-export class AppState implements IAppState, IComputedAppState {
-  accounts = {};
-  buckets = {};
-  groups = {};
-  transactions = {};
-  btransactions = {};
-  connections = {};
-  account_balances = {};
-  bucket_balances = {};
-  rainfall = {};
-  nodebt_balances = {};
-  unknown_accounts = {};
-  month = null;
-  year = null;
+export class AppState implements IComputedAppState {
+  accounts: {
+    [k: number]: Account;
+  } = {};
+  transactions: {
+    [k: number]: ATrans;
+  } = {};
+  groups: {
+    [k: number]: Group;
+  } = {};
+  buckets: {
+    [k: number]: Bucket;
+  } = {};
+  btransactions: {
+    [k: number]: BTrans;
+  } = {};
+  connections: {
+    [k: number]: Connection;
+  } = {};
+  unknown_accounts: {
+    [k: number]: UnknownAccount;
+  } = {};
+  account_balances: Balances = {};
+  bucket_balances: Balances = {};
+  nodebt_balances: Balances = {};
+  rainfall: Balances = {};
+  month: number = null;
+  year: number = null;
+
+  syncing: boolean = false;
+  sync_message: string = '';
+
+  fileimport: FileImportState = new FileImportState();
 
   rain: number = 0;
   bucket_total_balance: number = 0;
@@ -98,10 +84,6 @@ export class AppState implements IAppState, IComputedAppState {
   unkicked_buckets: Bucket[] = [];
   kicked_buckets: Bucket[] = [];
 
-  syncing:boolean = false;
-  sync_message:string = '';
-
-  fileimport:FileImportState = new FileImportState();
 
   get defaultPostingDate() {
     let today = moment();

@@ -221,10 +221,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let { appstate } = this.props;
     let left = appstate.rain;
     let pending = {};
-    getGroupedBuckets(appstate.unkicked_buckets, _.values(appstate.groups))
+    getGroupedBuckets(appstate.unkicked_buckets, Object.values(appstate.groups))
     .forEach(item => {
       let { buckets } = item;
-      buckets.forEach(bucket => {
+      buckets.forEach((bucket:Bucket) => {
         let computed = computeBucketData(bucket.kind, bucket, {
           today: appstate.defaultPostingDate,
           balance: appstate.bucket_balances[bucket.id],
@@ -670,7 +670,7 @@ class BucketRow extends React.Component<BucketRowProps, {
   onDrop = (ev) => {
     if (this.canAcceptDrop(ev)) {
       ev.preventDefault();
-      _.each(ev.dataTransfer.items, item => {
+      _.each(ev.dataTransfer.items, (item:any) => {
         let bucket_id = ev.dataTransfer.getData(item.type);
         if (bucket_id !== this.props.bucket.id) {
           const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
@@ -817,7 +817,7 @@ class GroupRow extends React.Component<{
   onDrop = (ev) => {
     if (this.canAcceptDrop(ev)) {
       ev.preventDefault();
-      _.each(ev.dataTransfer.items, item => {
+      _.each(ev.dataTransfer.items, (item:any) => {
         if (item.type === 'group') {
           let group_id = ev.dataTransfer.getData(item.type);
           if (group_id !== this.props.group.id) {
@@ -888,7 +888,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     pending = pending || {};
 
     let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
-      .map((item) => {
+      .map((item:{group:Group, buckets:Bucket[]}) => {
         let { group, buckets } = item;
         return <GroupRow
           key={group.id}

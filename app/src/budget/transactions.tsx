@@ -280,7 +280,7 @@ class CreateTransRow extends React.Component<{
             this.setState({account_id: parseInt(ev.target.value) || null})
           }}>
             <option></option>
-            {_.values(appstate.accounts).map(acc => {
+            {Object.values<Account>(appstate.accounts).map(acc => {
               return <option key={acc.id} value={acc.id}>{acc.name}</option>
             })}
           </select>

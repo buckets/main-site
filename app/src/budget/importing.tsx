@@ -2,7 +2,6 @@ import * as React from 'react'
 import * as fs from 'fs-extra-promise'
 import * as moment from 'moment'
 import * as log from 'electron-log'
-import * as _ from 'lodash'
 import { sss } from '../i18n'
 import { remote, ipcRenderer } from 'electron'
 import { AppState, StateManager, manager } from './appstate'
@@ -168,7 +167,7 @@ interface PageProps {
 export class TransactionImportPage extends React.Component<PageProps, {}> {
   render() {
     let { appstate } = this.props;
-    let accounts = _.values(appstate.accounts);
+    let accounts = Object.values(appstate.accounts);
     let pending_import_table;
     if (appstate.fileimport.pending_imports.length) {
       let rows = appstate.fileimport.pending_imports.map((pending, idx) => {

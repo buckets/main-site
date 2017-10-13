@@ -3,7 +3,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import * as keytar from 'keytar'
 import {v4 as uuid} from 'uuid'
 import * as querystring from 'querystring'
-import * as crypto from 'crypto'
+import * as triplesec from 'triplesec'
 
 import { APP_ROOT } from './mainprocess/globals'
 
@@ -72,17 +72,36 @@ export async function savePassword(service:string, account:string, password:stri
   await keytar.setPassword(service, account, password)
 }
 
-export function encrypt(plaintext:string, password:string):string {
-  console.log('HEEYYYYYYYYYYYY, USE BETTER CRYPTO');
-  let cipher = crypto.createCipher('aes256', password)
-  cipher.update(plaintext, 'utf8')
-  return cipher.final('base64')
+export function encrypt(plaintext:string, password:string):Promise<string> {
+  return new Promise((resolve, reject) => {
+    let key = new Buffer(password, 'utf8')
+    let ptbuffer = new Buffer(plaintext, 'utf8')
+    triplesec.encrypt({key, data:ptbuffer}, (err, ciphertext) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log('cipher buffer', ciphertext);
+        resolve(ciphertext.toString('base64'))  
+      }
+    })
+  })
+  // let cipher = crypto.createCipher('aes256', password)
+  // cipher.update(plaintext, 'utf8')
+  // return cipher.final('base64')
 }
-export function decrypt(ciphertext:string, password:string):string {
-  console.log('HEEYYYYYYYYYYYY, USE BETTER CRYPTO');
-  let cipher = crypto.createDecipher('aes256', password)
-  cipher.update(ciphertext, 'base64')
-  return cipher.final('utf8')
+export function decrypt(ciphertext:string, password:string):Promise<string> {
+  return new Promise((resolve, reject) => {
+    let key = new Buffer(password, 'utf8')
+    let ctbuffer = new Buffer(ciphertext, 'base64')
+    console.log('cipher buffer', ctbuffer);
+    triplesec.decrypt({key, data:ctbuffer}, (err, plaintext) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(plaintext.toString('utf8'))  
+      }
+    })
+  })
 }
 
 
