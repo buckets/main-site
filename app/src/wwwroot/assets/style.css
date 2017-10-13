@@ -172,6 +172,14 @@ a:hover {
   background-color: var(--highlighter);
   display: block;
 }
+span.experimental {
+  background-color: var(--highlighter);
+  border: 1px solid var(--yellow);
+  font-size: .8rem;
+  padding: .2rem .4rem;
+  border-radius: 3px;
+  float: right;
+}
 
 .app .content {
   flex-grow: 1;

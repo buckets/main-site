@@ -161,7 +161,7 @@ export class ConnectionsPage extends React.Component<{
           </p>
           <div className="horiz-options">
             <div className="option">
-              <h3>Record</h3>
+              <h3>Record <span className="experimental">Experimental</span></h3>
               
               <button
                 className="primary"
@@ -251,7 +251,9 @@ export class ConnectionsPage extends React.Component<{
     })
   }
   makeNewRecording = () => {
-    ipcRenderer.send('buckets:open-recorder');
+    ipcRenderer.send('buckets:open-recorder', {
+      recording_id: 'XXX get this id in here',
+    });
   }
   connect = async () => {
     let connection;

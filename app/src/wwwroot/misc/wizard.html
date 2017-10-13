@@ -203,10 +203,10 @@
     remote.getCurrentWindow().close();
   }, false)
   document.getElementById('new-budget').addEventListener('click', () => {
-    ipcRenderer.send('new-budget');
+    ipcRenderer.send('buckets:new-budget');
   }, false);
   document.getElementById('open-file-dialog').addEventListener('click', () => {
-    ipcRenderer.send('open-file-dialog');
+    ipcRenderer.send('buckets:open-file-dialog');
   })
   let recent_list = document.getElementById('recent-list');
   getRecentFiles()
@@ -217,7 +217,7 @@
       a.setAttribute('href', '#');
       a.classList.add('document');
       a.addEventListener('click', (ev) => {
-        ipcRenderer.send('open-file', path);
+        ipcRenderer.send('buckets:open-file', path);
         ev.preventDefault();
         return false;
       }, false);

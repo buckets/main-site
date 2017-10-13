@@ -10,6 +10,7 @@ import * as URL from 'url';
 import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
+import * as querystring from 'querystring'
 
 interface Registry {
   [k:string]: BudgetFile,
@@ -96,7 +97,7 @@ export class BudgetFile {
       this.windows.splice(idx, 1);
     })
   }
-  openRecordWindow() {
+  openRecordWindow(recording_id:number) {
     let sesh = session.fromPartition('persist:recordtest2', {cache:false});
     sesh.clearCache(() => {
 
@@ -151,7 +152,10 @@ export class BudgetFile {
         }
       })
     })
-    this.openWindow('/record/record.html');
+    const qs = querystring.stringify({
+      recording_id
+    })
+    this.openWindow(`/record/record.html?${qs}`);
   }
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
     if (!create) {
@@ -211,22 +215,22 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
 }
 
 export function watchForEvents(app:Electron.App) {
-  ipcMain.on('new-budget', async () => {
+  ipcMain.on('buckets:new-budget', async () => {
     try {
       await newBudgetFileDialog()
     } catch(err) {
 
     }
   })
-  ipcMain.on('open-file-dialog', () => {
+  ipcMain.on('buckets:open-file-dialog', () => {
     openDialog();
   })
-  ipcMain.on('open-file', (ev, path) => {
+  ipcMain.on('buckets:open-file', (ev, path) => {
     BudgetFile.openFile(path);
   })
-  ipcMain.on('buckets:open-recorder', (ev) => {
+  ipcMain.on('buckets:open-recorder', (ev, args) => {
     const file = WIN2FILE[ev.sender.id];
-    console.log('file', file, ev);
-    file.openRecordWindow();
+    log.info('opening recording', file.filename, 'recording', args.recording_id);
+    file.openRecordWindow(args.recording_id);
   })
 }
