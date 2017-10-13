@@ -204,12 +204,12 @@ class UnlinkedAccountList extends React.Component<{
 }, {}> {
   render() {
     let { appstate } = this.props;
-    let rows = _.values(appstate.unknown_accounts)
-    .map(acc => {
+    let rows = Object.values(appstate.unknown_accounts)
+    .map((acc:UnknownAccount) => {
       return <UnlinkedAccountRow
         key={acc.id}
         unknown={acc}
-        accounts={_.values(appstate.accounts)} />
+        accounts={Object.values(appstate.accounts)} />
     })
     return <table className="ledger">
       <thead>

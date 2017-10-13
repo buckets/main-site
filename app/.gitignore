@@ -9,3 +9,4 @@ out
 *.bkts
 .nyc_output
 _CHANGELOG.md
+docs/
