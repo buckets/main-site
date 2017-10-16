@@ -6,6 +6,7 @@ import { Renderer } from '../../budget/render'
 import { RecordingDirector, ChangeStep, KeyPressStep, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
+import { DebouncedInput } from '../../input'
 
 
 interface WebviewProps {
@@ -282,7 +283,10 @@ class SignInPage extends React.Component<any, any> {
         <ol>
           <li>{sss("Enter your bank's URL below.")}</li>
           <li>{sss("Sign in.  Make sure you choose to have this computer remembered if asked.")}</li>
-          <li>{sss("Click this button:")} <button>I signed in</button></li>
+          <li>{sss("Click this button:")} <button
+            onClick={() => {
+              setPath('/record');
+            }}>{sss('I signed in')}</button></li>
         </ol>
       </div>
       <Browser />
@@ -290,15 +294,23 @@ class SignInPage extends React.Component<any, any> {
   }
 }
 
-class SettingsPage extends React.Component<any, any> {
+interface SettingsPageProps {
+  recording: BankRecording;
+  store: IStore;
+  renderer: Renderer;
+}
+class SettingsPage extends React.Component<SettingsPageProps, any> {
   render() {
+    let { recording, store, renderer } = this.props;
     return <div className="padded">
-      Bank/Recording name: <input
+      {sss('Recording name:')} <DebouncedInput
         type="text"
-        placeholder="My Bank..."
-        value={""}
-        onChange={ev => {
-          console.log('change', ev.target.value);
+        placeholder={sss("e.g. My Bank")}
+        value={recording.name}
+        onChange={val => {
+          renderer.doUpdate(() => {
+            return store.bankrecording.update(recording.id, {name: val})  
+          })
         }}/>
     </div>
   }
@@ -316,7 +328,7 @@ interface RecordingAppProps {
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, recording, store } = this.props;
+    let { preload, recording, store, renderer } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -324,7 +336,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
         <div className="app">
           <div className="nav recording-nav">
             <div>
-              <div className="label">America First Credit Union</div>
+              <div className="label">{recording.name}</div>
               <Link relative to="/settings" exactMatchClass="selected"><span>{sss('Settings')}</span></Link>
               <Link relative to="/signin" exactMatchClass="selected"><span>{sss('Sign in')}</span></Link>
               <Link relative to="/record" exactMatchClass="selected"><span>{sss('Record')}</span></Link>
@@ -336,7 +348,9 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
                 <Route path="/settings">
                   <SettingsPage
                     recording={recording}
-                    store={store} />
+                    store={store}
+                    renderer={renderer}
+                  />
                 </Route>
                 <Route path="/signin">
                   <SignInPage />
@@ -378,6 +392,13 @@ export async function start(room:string, container, preload_url:string, recordin
       store={store}
       renderer={renderer} />
   }, container);
+  renderer.afterUpdate(() => {
+    let title = 'EXPERIMENTAL Buckets Recorder';
+    if (RECORDING.name) {
+      title = `${RECORDING.name} - ${title}`;
+    }
+    document.title = title;
+  })
 
   window.addEventListener('hashchange', () => {
     renderer.doUpdate();

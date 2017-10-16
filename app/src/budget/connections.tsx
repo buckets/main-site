@@ -7,6 +7,7 @@ import { BankRecording } from '../models/bankrecording'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
+import { DebouncedInput } from '../input'
 
 function startDefaultSync(appstate:AppState) {
   let range = appstate.viewDateRange;
@@ -150,12 +151,15 @@ export class ConnectionsPage extends React.Component<{
             <button onClick={() => { makeToast('Here is some toast')}}>{sss('Test Toast')}</button>
           </div>
         </div>
-        <div className="padded">
+        <div className="padded section">
           
           <div className="connection-steps">{steps}</div>
           {unknown}
           {conns}
-          
+          {recordings}
+
+        </div>
+        <div className="padded">
           <p>
             Buckets supports these methods for getting transaction data from your bank:
           </p>
@@ -289,10 +293,24 @@ class BankRecordingList extends React.Component<{
       <tbody>
         {this.props.recordings.map(recording => {
           return <tr>
-            <td>XXX id?</td>
-            <td>XXX name?</td>
+            <td>{recording.id}</td>
             <td>
-              <a className="subtle">
+              <DebouncedInput
+                blendin
+                value={recording.name}
+                placeholder="no name"
+                onChange={(val) => {
+                  manager.store.bankrecording.update(recording.id, {name: val});
+                }}
+              />
+            </td>
+            <td>
+              <a className="subtle"
+                onClick={() => {
+                  ipcRenderer.send('buckets:open-recorder', {
+                    recording_id: recording.id,
+                  });
+                }}>
                 <span className="fa fa-gear"></span>  
               </a>
             </td>

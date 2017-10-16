@@ -14,6 +14,7 @@ function ensureFunction<T>(x:T|(()=>T)):()=>T {
 export class Renderer extends EventEmitter {
   private render_funcs:Array<()=>Promise<any>> = [];
   private update_queue = [];
+  private after_update:Array<Function> = [];
   private in_update:boolean = false;
   private in_render:boolean = false;
 
@@ -36,6 +37,12 @@ export class Renderer extends EventEmitter {
       })
     })
   }
+  /**
+    Register a function to run after all updates.
+  */
+  afterUpdate(func?:Function) {
+    this.after_update.push(func);
+  }
   async doUpdate(func?:Function):Promise<any> {
     if (func) {
       this.update_queue.push(func);
@@ -54,6 +61,9 @@ export class Renderer extends EventEmitter {
       await this.update_queue.shift()();
     }
     this.in_update = false;
+    for (let i = 0; i < this.after_update.length; i++) {
+      await this.after_update[i]();
+    }
     return this.doRender();
   }
   async doRender():Promise<any> {

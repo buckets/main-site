@@ -239,6 +239,17 @@ span.experimental {
   margin-right: 0;
 }
 
+.rows .section {
+  border-bottom: 1px dashed var(--lighter-grey);
+}
+
+hr.page {
+  border: 0;
+  border-bottom: 1px dashed var(--lighter-grey);
+  width: 100%;
+  margin: 2rem 0;
+}
+
 .panes {
   display: flex;
   align-items: stretch;
