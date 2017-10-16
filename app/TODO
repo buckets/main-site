@@ -30,6 +30,7 @@ v1.0.0:
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
  ☐ Show running balance in bucket transactions list
  ☐ Merge "File import" and "Connections" page
+ ☐ Make "Import from YNAB4" (look on laptop in ~/Documents/YNAB for format)
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
