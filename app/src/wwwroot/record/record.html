@@ -118,10 +118,13 @@ const req = function() {
   }
 }();
 
+const querystring = require('querystring');
+const hostname = window.location.hostname;
 const {start} = req('./src/wwwroot/record/record.js');
 const container = document.getElementById('recorder');
 const preload_url = 'file://' + Path.resolve(appPath, './src/wwwroot/record/preload.js');
-start(container, preload_url);
+const parsed_qs = querystring.parse(window.location.search.substr(1));
+start(hostname, container, preload_url, parseInt(parsed_qs.recording_id));
 </script>
 </body>
 </html>

@@ -1,4 +1,7 @@
 import * as React from 'react'
+import { RPCRendererStore } from '../../rpc'
+import { isObj, IStore } from '../../store'
+import { BankRecording } from '../../models/bankrecording'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, ChangeStep, KeyPressStep, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
@@ -287,16 +290,33 @@ class SignInPage extends React.Component<any, any> {
   }
 }
 
+class SettingsPage extends React.Component<any, any> {
+  render() {
+    return <div className="padded">
+      Bank/Recording name: <input
+        type="text"
+        placeholder="My Bank..."
+        value={""}
+        onChange={ev => {
+          console.log('change', ev.target.value);
+        }}/>
+    </div>
+  }
+}
+
 export function setPath(x:string) {
   window.location.hash = '#' + x;
 }
 
 interface RecordingAppProps {
   preload: string;
+  recording: BankRecording;
+  store: IStore;
+  renderer: Renderer;
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload } = this.props;
+    let { preload, recording, store } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -314,7 +334,9 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
             <div className="page">
               <Switch>
                 <Route path="/settings">
-                  <div>Settings</div>
+                  <SettingsPage
+                    recording={recording}
+                    store={store} />
                 </Route>
                 <Route path="/signin">
                   <SignInPage />
@@ -335,7 +357,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
 
 
 
-export function start(container, preload_url:string) {
+export async function start(room:string, container, preload_url:string, recording_id:number) {
   const renderer = new Renderer();
   
   // const director = new RecordingDirector(webview);
@@ -343,15 +365,32 @@ export function start(container, preload_url:string) {
   //   renderer.doUpdate();
   // })
 
+  let store = new RPCRendererStore(room);
+  let RECORDING = await store.bankrecording.get(recording_id);
+
+  console.log('starting with recording_id', recording_id, preload_url);
+
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
     return <RecordingApp
-      preload={preload_url} />
+      recording={RECORDING}
+      preload={preload_url}
+      store={store}
+      renderer={renderer} />
   }, container);
 
   window.addEventListener('hashchange', () => {
     renderer.doUpdate();
   }, false);
+
+  store.data.on('obj', async (ev) => {
+    let obj = ev.obj;
+    if (isObj(BankRecording, obj) && obj.id === recording_id) {
+      console.log('Update of the recording this page is looking at');
+      RECORDING = Object.assign(RECORDING, obj);
+      renderer.doUpdate();
+    }
+  })
 
   // const events = [
   //   // 'load-commit',

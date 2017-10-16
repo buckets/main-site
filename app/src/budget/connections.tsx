@@ -215,12 +215,12 @@ export class ConnectionsPage extends React.Component<{
 
             </div>
             <div className="option">
-              <h3>Manual</h3>
+              <h3>File import</h3>
 
               <button className="primary" onClick={() => {
                 manager.fileimport.openFileDialog();
               }}>
-                Import from file
+                Import
               </button>
               
               <ul className="fa-ul procon">
@@ -250,9 +250,10 @@ export class ConnectionsPage extends React.Component<{
       connecting: true,
     })
   }
-  makeNewRecording = () => {
+  makeNewRecording = async () => {
+    let recording = await manager.store.bankrecording.add({name: sss('new recording')});
     ipcRenderer.send('buckets:open-recorder', {
-      recording_id: 'XXX get this id in here',
+      recording_id: recording.id,
     });
   }
   connect = async () => {
