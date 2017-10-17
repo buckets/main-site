@@ -19,6 +19,7 @@ v1.0.0:
  ☐ Show running balance in bucket transactions list
  ☐ Merge "File import" and "Connections" page
  ☐ Make "Import from YNAB4" (look on laptop in ~/Documents/YNAB for format)
+ ☐ Put all budget-related menu items into a "Budget" menu that appears/disappears.
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)

@@ -1,5 +1,6 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
+import * as Path from 'path'
 import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
@@ -8,6 +9,7 @@ import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
+import { APP_ROOT } from './globals'
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -229,6 +231,19 @@ export async function updateMenu() {
         click() {
           let langname = tx.langpack.name;
           reportBug(`Language: ${langname}\n` + sss('It says:') + '\n' + sss('It should say:'));
+        }
+      },
+      {type: 'separator'},
+      {
+        label: sss('API/File Format'),
+        click() {
+          let win = new BrowserWindow({
+            width: 600,
+            height: 400,
+          })
+          let path = Path.join(APP_ROOT, 'src/wwwroot/misc/fileformat.html');
+          path = `file://${path}`;
+          win.loadURL(path);
         }
       }
     ],
