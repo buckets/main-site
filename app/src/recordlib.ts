@@ -346,6 +346,20 @@ export class Recording {
     // otherwise just add it
     this.steps.push(step);
   }
+  stringify():string {
+    return JSON.stringify({
+      steps: this.steps,
+    })
+  }
+  loadFromString(x:string):Recording {
+    const data = JSON.parse(x);
+    this.steps = data.steps;
+    return this;
+  }
+  static parse(x:string):Recording {
+    let recording = new Recording();
+    return recording.loadFromString(x);
+  }
 }
 
 
@@ -531,8 +545,8 @@ export class RecordingDirector extends EventEmitter {
   // and for recording.
   public current_recording:Recording;
 
-  // For when the current
-  public current_values:{[k:string]: any} = {};
+  // Place where steps with a refkey look for values.
+  public current_values:{[k:string]: any};
   
   public step_index:number = 0;
   public poll_interval:number = 100;
@@ -545,9 +559,14 @@ export class RecordingDirector extends EventEmitter {
     url: string;
   }> = [];
 
-  constructor() {
+  constructor(args?:{
+      recording?:Recording,
+      values?:object,
+    }) {
     super();
-    this.current_recording = new Recording();
+    args = args || {};
+    this.current_recording = args.recording || new Recording();
+    this.current_values = args.values || {};
   }
   attachWebview(webview:Electron.WebviewTag) {
     this.webview = webview;

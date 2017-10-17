@@ -3,10 +3,15 @@ import { RPCRendererStore } from '../../rpc'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector, ChangeStep, KeyPressStep, isInputValue } from '../../recordlib'
+import { RecordingDirector, Recording, ChangeStep, KeyPressStep, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 import { DebouncedInput } from '../../input'
+
+
+function setPath(x:string) {
+  window.location.hash = '#' + x;
+}
 
 
 interface WebviewProps {
@@ -160,16 +165,36 @@ class StepValueDetails extends React.Component<StepValueDetailsProps, any> {
 
 interface RecordPageProps {
   preload: string;
+  recording: Recording;
+  values: object;
+  onValuesChange: Function,
+  onRecordingChange: Function,
 }
 /**
   Page for making and editing recordings.
 */
-class RecordPage extends React.Component<RecordPageProps, any> {
+class RecordPage extends React.Component<RecordPageProps, {
+  recording: Recording;
+  values: object;
+}> {
   private director:RecordingDirector;
-  constructor(props) {
+  constructor(props:RecordPageProps) {
     super(props);
-    this.state = {};
-    this.director = new RecordingDirector();
+    this.state = {
+      recording: props.recording,
+      values: props.values,
+    };
+    this.director = new RecordingDirector({
+      recording: props.recording,
+      values: props.values,
+    });
+  }
+  componentWillReceiveProps(nextProps) {
+    console.log('will receive props', nextProps);
+    this.setState({
+      recording: nextProps.recording,
+      values: nextProps.values,
+    })
   }
   gotWebview(webview:Electron.WebviewTag) {
     this.director.attachWebview(webview);
@@ -295,40 +320,40 @@ class SignInPage extends React.Component<any, any> {
 }
 
 interface SettingsPageProps {
-  recording: BankRecording;
+  bankrecording: BankRecording;
   store: IStore;
   renderer: Renderer;
 }
 class SettingsPage extends React.Component<SettingsPageProps, any> {
   render() {
-    let { recording, store, renderer } = this.props;
+    let { bankrecording, store, renderer } = this.props;
     return <div className="padded">
       {sss('Recording name:')} <DebouncedInput
         type="text"
         placeholder={sss("e.g. My Bank")}
-        value={recording.name}
+        value={bankrecording.name}
         onChange={val => {
           renderer.doUpdate(() => {
-            return store.bankrecording.update(recording.id, {name: val})  
+            return store.bankrecording.update(bankrecording.id, {name: val})  
           })
         }}/>
     </div>
   }
 }
 
-export function setPath(x:string) {
-  window.location.hash = '#' + x;
-}
-
 interface RecordingAppProps {
   preload: string;
-  recording: BankRecording;
+  bankrecording: BankRecording;
+  recording: Recording;
+  values: object;
   store: IStore;
   renderer: Renderer;
+  onValuesChange: Function,
+  onRecordingChange: Function,
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, recording, store, renderer } = this.props;
+    let { preload, bankrecording, recording, values, store, renderer, onValuesChange, onRecordingChange } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -336,7 +361,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
         <div className="app">
           <div className="nav recording-nav">
             <div>
-              <div className="label">{recording.name}</div>
+              <div className="label">{bankrecording.name}</div>
               <Link relative to="/settings" exactMatchClass="selected"><span>{sss('Settings')}</span></Link>
               <Link relative to="/signin" exactMatchClass="selected"><span>{sss('Sign in')}</span></Link>
               <Link relative to="/record" exactMatchClass="selected"><span>{sss('Record')}</span></Link>
@@ -347,7 +372,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
               <Switch>
                 <Route path="/settings">
                   <SettingsPage
-                    recording={recording}
+                    bankrecording={bankrecording}
                     store={store}
                     renderer={renderer}
                   />
@@ -358,6 +383,10 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
                 <Route path="/record">
                   <RecordPage
                     preload={preload}
+                    recording={recording}
+                    values={values}
+                    onValuesChange={onValuesChange}
+                    onRecordingChange={onRecordingChange}
                   />
                 </Route>
                 <Redirect to="/settings" />
@@ -380,22 +409,30 @@ export async function start(room:string, container, preload_url:string, recordin
   // })
 
   let store = new RPCRendererStore(room);
-  let RECORDING = await store.bankrecording.get(recording_id);
-
-  console.log('starting with recording_id', recording_id, preload_url);
+  let BANKRECORDING = await store.bankrecording.get(recording_id);
+  let { recording, values } = await store.bankrecording.decryptBankRecording(BANKRECORDING);
 
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
     return <RecordingApp
-      recording={RECORDING}
+      bankrecording={BANKRECORDING}
+      recording={recording}
+      values={values}
       preload={preload_url}
       store={store}
-      renderer={renderer} />
+      renderer={renderer}
+      onRecordingChange={val => {
+        console.log('recording change', val);
+      }}
+      onValuesChange={val => {
+        console.log('values change', val);
+      }}
+    />
   }, container);
   renderer.afterUpdate(() => {
     let title = 'EXPERIMENTAL Buckets Recorder';
-    if (RECORDING.name) {
-      title = `${RECORDING.name} - ${title}`;
+    if (BANKRECORDING.name) {
+      title = `${BANKRECORDING.name} - ${title}`;
     }
     document.title = title;
   })
@@ -408,7 +445,7 @@ export async function start(room:string, container, preload_url:string, recordin
     let obj = ev.obj;
     if (isObj(BankRecording, obj) && obj.id === recording_id) {
       console.log('Update of the recording this page is looking at');
-      RECORDING = Object.assign(RECORDING, obj);
+      BANKRECORDING = Object.assign(BANKRECORDING, obj);
       renderer.doUpdate();
     }
   })

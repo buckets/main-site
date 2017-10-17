@@ -1,9 +1,10 @@
 import * as Path from 'path'
-import { BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow, ipcMain, ipcRenderer } from 'electron'
 import * as keytar from 'keytar'
 import {v4 as uuid} from 'uuid'
 import * as querystring from 'querystring'
 import * as triplesec from 'triplesec'
+import * as electron_is from 'electron-is'
 
 import { APP_ROOT } from './mainprocess/globals'
 
@@ -12,6 +13,15 @@ export function promptUser(prompt:string, args?:{
   parent?:Electron.BrowserWindow,
   password?:boolean,
 }):Promise<string> {
+  if (electron_is.renderer()) {
+    let chan = `response:${uuid()}`
+    return new Promise((resolve, reject) => {
+      ipcRenderer.once(chan, (ev, response) => {
+        resolve(response);
+      })
+      ipcRenderer.send('buckets:crypto:promptUser', chan, prompt, args);  
+    })
+  }
   args = args || {};
   return new Promise((resolve, reject) => {
     let prompt_key = `prompt:${uuid()}`;
@@ -50,7 +60,6 @@ export function promptUser(prompt:string, args?:{
       qs.hideinput = 'yes';
     }
     path = `file://${path}?${querystring.stringify(qs)}`;
-    console.log('path', path);
     win.loadURL(path);
   })
 }
@@ -80,7 +89,6 @@ export function encrypt(plaintext:string, password:string):Promise<string> {
       if (err) {
         reject(err);
       } else {
-        console.log('cipher buffer', ciphertext);
         resolve(ciphertext.toString('base64'))  
       }
     })
@@ -93,7 +101,6 @@ export function decrypt(ciphertext:string, password:string):Promise<string> {
   return new Promise((resolve, reject) => {
     let key = new Buffer(password, 'utf8')
     let ctbuffer = new Buffer(ciphertext, 'base64')
-    console.log('cipher buffer', ctbuffer);
     triplesec.decrypt({key, data:ctbuffer}, (err, plaintext) => {
       if (err) {
         reject(err);
@@ -104,5 +111,15 @@ export function decrypt(ciphertext:string, password:string):Promise<string> {
   })
 }
 
-
+if (electron_is.main()) {
+  ipcMain.on('buckets:crypto:promptUser', async (ev, chan, prompt, args?) => {
+    try {
+      let val = await promptUser(prompt, args);
+      ev.sender.send(chan, val);
+    } catch(err) {
+      ev.sender.send(chan, null);
+    }
+    
+  })
+}
 
