@@ -1,11 +1,13 @@
 import * as log from 'electron-log'
 import * as Path from 'path'
+import * as electron_is from 'electron-is'
 import * as fs from 'fs-extra-promise'
+import * as tmp from 'tmp'
 import { ipcMain, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
-import {RPCMainStore} from '../rpc';
+import { RPCMainStore } from '../rpcstore';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
@@ -66,7 +68,7 @@ export class BudgetFile {
     // at the top.
     this.openWindow(`/budget/index.html`);
   }
-  openWindow(path:string) {
+  openWindow(path:string, dont_show?:boolean) {
     log.debug('opening window to', path);
     const parsed = Path.parse(this.filename);
     let win = new BrowserWindow({
@@ -75,9 +77,11 @@ export class BudgetFile {
       show: false,
       title: `Buckets - ${parsed.name}`,
     });
-    win.once('ready-to-show', () => {
-      win.show();
-    })
+    if (!dont_show) {
+      win.once('ready-to-show', () => {
+        win.show();
+      })  
+    }
 
     // Link this instance and the window
     this.windows.push(win);
@@ -97,21 +101,43 @@ export class BudgetFile {
       this.windows.splice(idx, 1);
     })
   }
-  openRecordWindow(recording_id:number) {
-    let sesh = session.fromPartition('persist:recordtest2', {cache:false});
+  async openRecordWindow(recording_id:number) {
+    // XXX use a unique partition per recording per file
+    let bankrecording = await this.store.bankrecording.get(recording_id);
+
+    let partition = `persist:${bankrecording.uuid}`;
+    let sesh = session.fromPartition(partition, {cache:false});
     sesh.clearCache(() => {
 
     });
 
-    sesh.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
-    // console.log('user-agent', sesh.getUserAgent());
+    // User-Agent
+    let user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+    if (electron_is.macOS()) {
+      user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
+    } else if (electron_is.windows()) {
+      user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36';
+    } else {
+      // linux
+      user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+    }
+    sesh.setUserAgent(user_agent);
+    
+    // Cookies
     // console.log('cookies', sesh.cookies);
     sesh.cookies.on('changed', (ev, cookie, cause) => {
       // console.log('cookie changed', ev, cookie, cause);
       sesh.cookies.flushStore(() => {});
     })
+
+    // Downloads
     sesh.on('will-download', (ev, item, webContents) => {
       console.log('will-download', ev, item);
+
+      // XXX does this need to be explicitly cleaned up?
+      let tmpdir = tmp.dirSync();
+      console.log('tmpdir', tmpdir);
+
       webContents.send('buckets:will-download', {
         filename: item.getFilename(),
         mimetype: item.getMimeType(),
@@ -120,12 +146,8 @@ export class BudgetFile {
       // console.log('mimetype', item.getMimeType());
       // console.log('state', item.getState());
       // console.log('getURL', item.getURL());
-      try {
-        fs.mkdirSync('/tmp/bucketsdownload');
-      } catch(err) {
-
-      }
-      let save_path = Path.join('/tmp/bucketsdownload', item.getFilename());
+      
+      let save_path = Path.join(tmpdir.name, item.getFilename());
       
       item.setSavePath(save_path);
       item.on('updated', (event, state) => {
@@ -152,14 +174,17 @@ export class BudgetFile {
         }
       })
     })
+
+    // Load the url
     const qs = querystring.stringify({
-      recording_id
+      recording_id,
+      partition
     })
     this.openWindow(`/record/record.html?${qs}`);
   }
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
     if (!create) {
-      // open, don't create
+      // open the file and fail if it doesn't exist
       if (! await fs.existsAsync(filename)) {
         displayError(sss('File does not exist:') + ` ${filename}`)
         return;

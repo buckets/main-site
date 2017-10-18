@@ -1,153 +1,41 @@
-import * as log from 'electron-log'
-import * as URL from 'url'
-import { IStore, DataEventEmitter, TABLE2CLASS, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
-import { ipcMain, ipcRenderer, webContents} from 'electron'
-import { BucketStore } from './models/bucket'
-import { AccountStore } from './models/account'
-import { SimpleFINStore } from './models/simplefin'
-import { ReportStore } from './models/reports'
-import { BankRecordingStore } from './models/bankrecording'
+import * as electron_is from 'electron-is'
+import {v4 as uuid} from 'uuid'
+import { ipcMain, ipcRenderer } from 'electron'
 
 //--------------------------------------------------------------------------------
-// serializing
+// General purpose RPC from renderer to main and back
 //--------------------------------------------------------------------------------
-interface SerializedObjectClass {
-  _buckets_serialized_object_class: string;
-}
-function isSerializedObjectClass(obj): obj is SerializedObjectClass {
-  return obj !== null && (<any>obj)._buckets_serialized_object_class !== undefined;
-}
-function serializeObjectClass<T extends IObject>(cls:IObjectClass<T>):SerializedObjectClass {
-  return {
-    _buckets_serialized_object_class: cls.table_name,
-  }
-}
-function deserializeObjectClass<T extends IObject>(obj:SerializedObjectClass):IObjectClass<T> {
-  return TABLE2CLASS[obj._buckets_serialized_object_class]
-}
 
-//--------------------------------------------------------------------------------
-// RPC Store pairs for bridging main and renderer
-//--------------------------------------------------------------------------------
-interface RPCMessage {
-  id: string;
-  method: string;
-  params: Array<any>;
-}
-interface RPCReply {
-  ok: boolean;
-  value: any;
-}
-export class RPCMainStore {
-  private data:DataEventEmitter;
-  constructor(private store:IStore, private room:string) {
-  }
-  get channel() {
-    return `rpc-${this.room}`;
-  }
-  start() {
-    this.data = this.store.data.on('obj', (value) => {
-      // probably not efficient if you have two different files open...
-      // but... that's an edge case, and still probably plenty fast
-      webContents.getAllWebContents().forEach(wc => {
-        if (URL.parse(wc.getURL()).hostname === this.room) {
-          let ch = `data-${this.room}`;
-          wc.send(ch, value);
-        }
-      })
-    });
-    ipcMain.on(this.channel, this.gotMessage);
-  }
-  stop() {
-    ipcMain.removeListener(this.channel, this.gotMessage);
-  }
-  gotMessage = async (event, message:RPCMessage) => {
-    // log.debug('MAIN RPC', message);
-    try {
-      // convert args to classes
-      let args = message.params.map(arg => {
-        return isSerializedObjectClass(arg) ? deserializeObjectClass(arg) : arg;
-      })
-      let retval = await this.store[message.method](...args);
-      event.sender.send(`rpc-reply-${message.id}`, {
-        ok: true,
-        value: retval,
-      });
-    } catch(err) {
-      log.error('RPC error', err);
-      event.sender.send(`rpc-reply-${message.id}`, {
-        ok: false,
-        value: err,
-      })
+export function onlyRunInMain<F extends Function>(name:string, func:F):F {
+  const key = `buckets:rpc:${name}`;
+  if (electron_is.renderer()) {
+    // renderer process
+    return <any>function(...args) {
+      let chan = `buckets:rpc:response:${uuid()}`
+      return new Promise((resolve, reject) => {
+        ipcRenderer.once(chan, (ev, {result, err}) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);  
+          }
+        })
+        ipcRenderer.send(key, chan, ...args);  
+      })  
     }
-  }
-}
-export class RPCRendererStore implements IStore {
-  private next_msg_id:number = 1;
-  public data:DataEventEmitter;
-  readonly accounts:AccountStore;
-  readonly buckets:BucketStore;
-  readonly connections:SimpleFINStore;
-  readonly reports:ReportStore;
-  readonly bankrecording:BankRecordingStore;
-  constructor(private room:string) {
-    this.data = new DataEventEmitter();
-    ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
-    this.accounts = new AccountStore(this);
-    this.buckets = new BucketStore(this);
-    this.connections = new SimpleFINStore(this);
-    this.reports = new ReportStore(this);
-    this.bankrecording = new BankRecordingStore(this);
-  }
-  get channel() {
-    return `rpc-${this.room}`;
-  }
-  async callRemote<T>(method, ...args):Promise<T> {
-    let msg:RPCMessage = {
-      id: '' + this.next_msg_id++,
-      method: method,
-      params: args,
-    }
-    // log.debug('CLIENT CALL', msg.id, method);
-    // console.trace();
-    return new Promise<T>((resolve, reject) => {
-      ipcRenderer.once(`rpc-reply-${msg.id}`, (event, reply:RPCReply) => {
-        // log.debug('CLIENT RECV', msg.id, method, reply.ok);
-        if (reply.ok) {
-          resolve(reply.value as T);
-        } else {
-          reject(reply.value as T);
-        }
-      });
-      ipcRenderer.send(this.channel, msg);
+  } else {
+    // main process
+    ipcMain.on(key, async (ev, chan, ...args) => {
+      try {
+        let result = await func(...args);
+        ev.sender.send(chan, {result})
+      } catch(err) {
+        ev.sender.send(chan, {err})
+      }
     })
-  }
-  dataReceived(event, message:ObjectEvent<any>) {
-    this.data.emit('obj', message);
-  }
-
-  // IStore methods
-  publishObject(event:ObjectEventType, obj:IObject) {
-    return this.callRemote('publishObject', event, obj);
-  }
-  createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
-    return this.callRemote('createObject', serializeObjectClass(cls), data);
-  }
-  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
-    return this.callRemote('updateObject', serializeObjectClass(cls), id, data);
-  }
-  getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    return this.callRemote('getObject', serializeObjectClass(cls), id);
-  }
-  listObjects<T extends IObject>(cls: IObjectClass<T>, ...args):Promise<T[]> {
-    return this.callRemote('listObjects', serializeObjectClass(cls), ...args);
-  }
-  query(sql:string, params:{}):Promise<any> {
-    return this.callRemote('query', sql, params);
-  }
-  deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
-    return this.callRemote('deleteObject', serializeObjectClass(cls), id);
+    return <any>function(...args) {
+      return func(...args);
+    }
   }
 }
-
 

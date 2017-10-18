@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RPCRendererStore } from '../../rpc'
+import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
 import { Renderer } from '../../budget/render'

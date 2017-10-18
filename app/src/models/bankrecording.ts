@@ -1,5 +1,6 @@
+import {v4 as uuid} from 'uuid'
 import { IObject, IStore, registerClass } from '../store'
-import { encrypt, decrypt, promptUser } from '../crypto'
+import { encrypt, decrypt, getPassword } from '../crypto'
 import * as reclib from '../recordlib'
 
 export class BankRecording implements IObject {
@@ -7,6 +8,7 @@ export class BankRecording implements IObject {
   id: number;
   created: string;
   readonly _type: string = BankRecording.table_name;
+  uuid: string;
   name: string;
   enc_recording: string;
   enc_values: string;
@@ -22,20 +24,16 @@ interface IUpdateArgs {
 
 export class BankRecordingStore {
   public store:IStore;
-  private password:string = null;
   constructor(store:IStore) {
     this.store = store;
   }
   async getPassword() {
-    if (this.password === null) {
-      this.password = await promptUser('Encryption password?', {
-        password:true,
-      })
-      if (this.password === null) {
-        throw new Error('Could not get password.');
-      }
-    }
-    return this.password;
+    // XXX when you decide to store in the OS keychain, change
+    // these service and account values to something unique
+    // to the budget file
+    return await getPassword('buckets.encryption', 'encryption', {
+      prompt: 'Encryption password?',
+    });
   }
   async _prepareForDB(args:IUpdateArgs):Promise<Partial<BankRecording>> {
     let data:any = args || {};
@@ -69,6 +67,9 @@ export class BankRecordingStore {
   }
   async add(args:IUpdateArgs):Promise<BankRecording> {
     const data = await this._prepareForDB(args);
+    if (!data.uuid) {
+      data.uuid = uuid();
+    }
     return this.store.createObject(BankRecording, data);
   }
   async list():Promise<BankRecording[]> {

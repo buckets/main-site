@@ -1,31 +1,22 @@
 import * as Path from 'path'
-import { BrowserWindow, ipcMain, ipcRenderer } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import * as keytar from 'keytar'
 import {v4 as uuid} from 'uuid'
 import * as querystring from 'querystring'
 import * as triplesec from 'triplesec'
-import * as electron_is from 'electron-is'
+import { onlyRunInMain } from './rpc'
 
 import { APP_ROOT } from './mainprocess/globals'
 
 
-export function promptUser(prompt:string, args?:{
-  parent?:Electron.BrowserWindow,
-  password?:boolean,
-}):Promise<string> {
-  if (electron_is.renderer()) {
-    let chan = `response:${uuid()}`
-    return new Promise((resolve, reject) => {
-      ipcRenderer.once(chan, (ev, response) => {
-        resolve(response);
-      })
-      ipcRenderer.send('buckets:crypto:promptUser', chan, prompt, args);  
-    })
-  }
+export const promptUser = onlyRunInMain('crypto.promptUser',
+  (prompt:string, args?:{
+    parent?:Electron.BrowserWindow,
+    password?:boolean,
+  }):Promise<string> => {
+
   args = args || {};
   return new Promise((resolve, reject) => {
-    let prompt_key = `prompt:${uuid()}`;
-
     let opts:Electron.BrowserWindowConstructorOptions = {
       modal: true,
       show: false,
@@ -43,6 +34,9 @@ export function promptUser(prompt:string, args?:{
       win.show();
       win.focus();
     })
+
+    // Look for an answer from the window.
+    let prompt_key = `prompt:${uuid()}`;
     ipcMain.once(prompt_key, (event, {response, error}) => {
       win.close();
       if (error) {
@@ -62,21 +56,49 @@ export function promptUser(prompt:string, args?:{
     path = `file://${path}?${querystring.stringify(qs)}`;
     win.loadURL(path);
   })
+})
+
+let PW_CACHE = {};
+const CACHE_TIME = 15 * 60 * 1000;
+function cachePassword(key:string, value:string) {
+  PW_CACHE[key] = value;
+  setTimeout(() => {
+    delete PW_CACHE[key];
+  }, CACHE_TIME)
 }
 
-export async function getPassword(service:string, account:string, prompt?:string):Promise<string> {
+/** Get a password from a cache, the OS keychain or optionally by prompting the user.
+*/
+export const getPassword = onlyRunInMain('crypto.getPassword', async function getPassword(service:string, account:string, args?:{
+  prompt?:string,
+  no_cache?:boolean,
+}):Promise<string> {
+  args = args || {};
+  const cache_key = `${service}:${account}`;
+  console.log("cache_key", cache_key);
+  if (!args.no_cache) {
+    console.log("looking in cache");
+    if (PW_CACHE[cache_key]) {
+      console.log("found in cache");
+      return PW_CACHE[cache_key];
+    }
+  }
   let pw = await keytar.getPassword(service, account)
   if (pw !== null) {
+    args.no_cache || cachePassword(cache_key, pw);
     return pw;
-  } else if (prompt) {
-    pw = await promptUser(prompt, {password:true})
+  } else if (args.prompt) {
+    pw = await promptUser(args.prompt, {password:true})
     if (pw) {
+      args.no_cache || cachePassword(cache_key, pw);
       return pw;
     }
   }
   throw new Error('No password available')
-}
+});
 
+/** Save a password in the OS keychain.
+*/
 export async function savePassword(service:string, account:string, password:string):Promise<void> {
   await keytar.setPassword(service, account, password)
 }
@@ -108,18 +130,6 @@ export function decrypt(ciphertext:string, password:string):Promise<string> {
         resolve(plaintext.toString('utf8'))  
       }
     })
-  })
-}
-
-if (electron_is.main()) {
-  ipcMain.on('buckets:crypto:promptUser', async (ev, chan, prompt, args?) => {
-    try {
-      let val = await promptUser(prompt, args);
-      ev.sender.send(chan, val);
-    } catch(err) {
-      ev.sender.send(chan, null);
-    }
-    
   })
 }
 
