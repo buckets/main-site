@@ -59,13 +59,22 @@ export const promptUser = onlyRunInMain('crypto.promptUser',
 })
 
 let PW_CACHE = {};
+let PW_CACHE_TIMEOUTS = {};
 const CACHE_TIME = 15 * 60 * 1000;
-function cachePassword(key:string, value:string) {
-  PW_CACHE[key] = value;
-  setTimeout(() => {
-    delete PW_CACHE[key];
-  }, CACHE_TIME)
-}
+export const cachePassword = onlyRunInMain('crypto.cachePassword', function(service:string, account:string, value:string) {
+  const cache_key = `${service}:${account}`;
+  // cache it
+  PW_CACHE[cache_key] = value;
+
+  // plan to clear it
+  let existing_timer = PW_CACHE_TIMEOUTS[cache_key];
+  if (existing_timer) {
+    clearTimeout(existing_timer);
+  }
+  PW_CACHE_TIMEOUTS[cache_key] = setTimeout(() => {
+    delete PW_CACHE[cache_key];
+  }, CACHE_TIME);
+});
 
 /** Get a password from a cache, the OS keychain or optionally by prompting the user.
 */
@@ -75,23 +84,27 @@ export const getPassword = onlyRunInMain('crypto.getPassword', async function ge
 }):Promise<string> {
   args = args || {};
   const cache_key = `${service}:${account}`;
-  console.log("cache_key", cache_key);
+  let pw = null;
+
+  // try the cache
   if (!args.no_cache) {
-    console.log("looking in cache");
     if (PW_CACHE[cache_key]) {
-      console.log("found in cache");
-      return PW_CACHE[cache_key];
+      pw = PW_CACHE[cache_key];
+      return pw
     }
   }
-  let pw = await keytar.getPassword(service, account)
+  
+  // try the OS keychain
+  pw = await keytar.getPassword(service, account)
   if (pw !== null) {
-    args.no_cache || cachePassword(cache_key, pw);
-    return pw;
-  } else if (args.prompt) {
+    return pw
+  }
+
+  // try the user
+  if (args.prompt) {
     pw = await promptUser(args.prompt, {password:true})
     if (pw) {
-      args.no_cache || cachePassword(cache_key, pw);
-      return pw;
+      return pw
     }
   }
   throw new Error('No password available')

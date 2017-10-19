@@ -1,7 +1,8 @@
 import {v4 as uuid} from 'uuid'
 import { IObject, IStore, registerClass } from '../store'
-import { encrypt, decrypt, getPassword } from '../crypto'
+import { encrypt, decrypt, getPassword, cachePassword } from '../crypto'
 import * as reclib from '../recordlib'
+import { IncorrectPassword } from '../error'
 
 export class BankRecording implements IObject {
   static table_name: string = 'bank_recording';
@@ -27,25 +28,52 @@ export class BankRecordingStore {
   constructor(store:IStore) {
     this.store = store;
   }
-  async getPassword() {
+  async getPassword():Promise<string> {
+    const service = 'buckets.encryption';
+    const account = 'encryption';
     // XXX when you decide to store in the OS keychain, change
     // these service and account values to something unique
     // to the budget file
-    return await getPassword('buckets.encryption', 'encryption', {
+    let password = await getPassword(service, account, {
       prompt: 'Encryption password?',
     });
+    if (await this.isPasswordCorrect(password)) {
+      cachePassword(service, account, password);
+    } else {
+      throw new IncorrectPassword('Incorrect password');
+    }
+    return password;
+  }
+  private async isPasswordCorrect(password:string):Promise<boolean> {
+    let rows = await this.store.query(
+      `SELECT enc_recording
+      FROM bank_recording
+      WHERE coalesce(enc_recording, '') <> ''
+      LIMIT 1`, {})
+    if (rows.length) {
+      try {
+        await decrypt(rows[0].enc_recording, password)
+        return true;
+      } catch(err) {
+        return false;
+      }
+    } else {
+      // there's no existing encryption, so it's the "correct" password
+      return true;
+    }
   }
   async _prepareForDB(args:IUpdateArgs):Promise<Partial<BankRecording>> {
     let data:any = args || {};
-    if (data.values) {
-      let password = await this.getPassword();
-      data.enc_values = await encrypt(JSON.stringify(data.values), password)
-      delete data.values;
-    }
-    if (data.recording) {
-      let password = await this.getPassword();
-      data.enc_recording = await encrypt(JSON.stringify(data.recording), password)
-      delete data.recording;
+    if (data.values || data.recording) {
+      const password = await this.getPassword();  
+      if (data.values) {
+        data.enc_values = await encrypt(JSON.stringify(data.values), password)
+        delete data.values;
+      }
+      if (data.recording) {
+        data.enc_recording = await encrypt(JSON.stringify(data.recording), password)
+        delete data.recording;
+      }
     }
     const partial:Partial<BankRecording> = data;
     return partial;

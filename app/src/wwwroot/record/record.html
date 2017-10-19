@@ -105,7 +105,7 @@
 <body class="rec-container">
   <div id="recorder"></div>
 <script>
-const {remote} = require('electron');
+const {remote, ipcRenderer} = require('electron');
 const Path = require('path');
 const appPath = remote.app.getAppPath();
 const req = function() {
@@ -118,13 +118,26 @@ const req = function() {
   }
 }();
 
+const log = require('electron-log');
 const querystring = require('querystring');
 const hostname = window.location.hostname;
 const {start} = req('./src/wwwroot/record/record.js');
 const container = document.getElementById('recorder');
 const preload_url = 'file://' + Path.resolve(appPath, './src/wwwroot/record/preload.js');
 const parsed_qs = querystring.parse(window.location.search.substr(1));
-start(hostname, container, preload_url, parseInt(parsed_qs.recording_id));
+const partition = parsed_qs.partition;
+const recording_id = parseInt(parsed_qs.recording_id);
+start({
+  room: hostname,
+  container,
+  preload_url,
+  recording_id,
+  partition,
+})
+.catch(err => {
+  log.error(err.stack);
+  ipcRenderer.send('buckets:close-window');
+});
 </script>
 </body>
 </html>

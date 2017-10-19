@@ -309,6 +309,7 @@ export function isChangeStep(x:RecStep):x is ChangeStep {
 // pageload
 export interface PageLoadStep {
   type: 'pageload';
+  url: string;
 }
 export function isPageLoadStep(x:RecStep):x is PageLoadStep {
   return (<PageLoadStep>x).type === 'pageload';
@@ -449,7 +450,10 @@ export class Recorder {
         }
         this.rpc.call('rec:step', step);
       }
-    })
+    }, {
+      capture: true,
+      passive: true,
+    } as any)
 
     window.addEventListener('click', (ev:any) => {
       if (isChangeOnlyElement(ev.target)) {
@@ -487,7 +491,10 @@ export class Recorder {
         offsetY,
       }
       this.rpc.call('rec:step', step);
-    }, false)
+    }, {
+      capture: true,
+      passive: true,
+    } as any)
     
     window.addEventListener('keydown', (ev) => {
       let input_delimiter = false;
@@ -525,7 +532,10 @@ export class Recorder {
         }]
       }
       this.rpc.call('rec:step', step);
-    }, false);
+    }, {
+      capture: true,
+      passive: true,
+    } as any);
 
     this.rpc.call('rec:ready-for-control');
   }
@@ -582,11 +592,12 @@ export class RecordingDirector extends EventEmitter {
         this.emit('child-ready-for-control');
       }
     })
-    webview.addEventListener('will-navigate', (ev) => {
+    webview.addEventListener('dom-ready', (ev) => {
+      console.log('dom-ready', ev);
       if (this.state === 'recording') {
-        // subsequent loads
         let pageload:PageLoadStep = {
           type: 'pageload',
+          url: webview.getURL(),
         }
         this.current_recording.addStep(pageload);  
         this.emit('change');
@@ -597,6 +608,11 @@ export class RecordingDirector extends EventEmitter {
         })
         this.emit('pageloaded');
       }
+    })
+    webview.addEventListener('new-window', ev => {
+      // XXX there may be some site somewhere that depends on the new window actually opening in a new window...  That might be a pain to handle.
+      // console.log('new window', ev);
+      // webview.loadURL(ev.url);
     })
   }
   get state() {
@@ -627,11 +643,17 @@ export class RecordingDirector extends EventEmitter {
     this._state = 'playing';
     let steps = this.current_recording.steps;
     for (this.step_index = 0; this.step_index < steps.length; this.step_index++) {
-      console.log('doing step', this.step_index);
+      console.log('Start step', this.step_index);
       this.emit('start-step', this.step_index);
       await this.doStep(steps[this.step_index]);
       await wait(this.playback_delay);
       this.emit('finish-step', this.step_index);
+      console.log('Finished step', this.step_index);
+
+      // wait for the webview
+      while (this.webview.isLoading()) {
+        await wait(this.poll_interval);
+      }
     }
   }
   async doStep(step:RecStep) {
@@ -676,16 +698,19 @@ export class RecordingDirector extends EventEmitter {
       // XXX add a timeout
       let bounds = await this.rpc.call<IBounds>('getbounds', {element: elem});
       if (bounds !== null) {
+        console.log('got bounds', bounds);
         return bounds;
       }
+      console.log('will try again for bounds');
       await wait(this.poll_interval);
     }
   }
   private async _doClickStep(step:ClickStep) {
-    console.log('sending click');
+    console.log('preparing click...');
     let bounds = await this.getBoundsFromRemote(step.element)
     let x = bounds.x + step.offsetX;
     let y = bounds.y + step.offsetY;
+    console.log('sending click', x, y);
     sendClick(this.webview, {
       x,
       y,
@@ -721,19 +746,21 @@ export class RecordingDirector extends EventEmitter {
     return this.rpc.call('rec:do-focus', step);
   }
   private async _doPageLoadStep(step:PageLoadStep) {
-    if (this.pages_loaded.length) {
-      // already started
-      console.log('page load already started');
-      this.pages_loaded.shift();
-    } else {
-      console.log('waiting for page to load');
-      return new Promise((resolve, reject) => {
-        this.once('pageloaded', ev => {
-          console.log('page load started');
-          resolve(ev);
-        })
-      })
-    }
+    // waiting for pages to load is already part of the playback process.
+    // console.log('waiting for page load...', step.url);
+    // if (this.pages_loaded.length) {
+    //   // already started
+    //   console.log('page already loaded', this.pages_loaded);
+    //   this.pages_loaded.shift();
+    // } else {
+    //   console.log('waiting for page to load');
+    //   return new Promise((resolve, reject) => {
+    //     this.once('pageloaded', ev => {
+    //       console.log('page loaded');
+    //       resolve(ev);
+    //     })
+    //   })
+    // }
   }
   private async _doDownloadStep(step:DownloadStep) {
 

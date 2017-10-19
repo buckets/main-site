@@ -5,8 +5,8 @@ import * as fs from 'fs-extra-promise'
 import * as tmp from 'tmp'
 import { ipcMain, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
-import {v4 as uuid} from 'uuid';
-import {DBStore} from './dbstore';
+import { v4 as uuid } from 'uuid';
+import { DBStore } from './dbstore';
 import { RPCMainStore } from '../rpcstore';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
@@ -105,7 +105,7 @@ export class BudgetFile {
     // XXX use a unique partition per recording per file
     let bankrecording = await this.store.bankrecording.get(recording_id);
 
-    let partition = `persist:${bankrecording.uuid}`;
+    const partition = `persist:rec-${bankrecording.uuid}`;
     let sesh = session.fromPartition(partition, {cache:false});
     sesh.clearCache(() => {
 
@@ -180,7 +180,7 @@ export class BudgetFile {
       recording_id,
       partition
     })
-    this.openWindow(`/record/record.html?${qs}`);
+    this.openWindow(`/record/record.html?${qs}`, true);
   }
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
     if (!create) {
@@ -257,5 +257,11 @@ export function watchForEvents(app:Electron.App) {
     const file = WIN2FILE[ev.sender.id];
     log.info('opening recording', file.filename, 'recording', args.recording_id);
     file.openRecordWindow(args.recording_id);
+  })
+  ipcMain.on('buckets:show-window', (ev) => {
+    BrowserWindow.fromWebContents(ev.sender).show();
+  })
+  ipcMain.on('buckets:close-window', (ev) => {
+    BrowserWindow.fromWebContents(ev.sender).close();
   })
 }

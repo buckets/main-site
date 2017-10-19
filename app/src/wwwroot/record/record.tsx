@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ipcRenderer } from 'electron'
 import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
@@ -7,6 +8,7 @@ import { RecordingDirector, Recording, ChangeStep, KeyPressStep, isInputValue } 
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 import { DebouncedInput } from '../../input'
+import { IncorrectPassword } from '../../error'
 
 
 function setPath(x:string) {
@@ -17,6 +19,7 @@ function setPath(x:string) {
 interface WebviewProps {
   onWebview?: (x:Electron.WebviewTag)=>void;
   preload?: string;
+  partition?: string;
 }
 class Webview extends React.Component<WebviewProps, any> {
   private elem:Electron.WebviewTag;
@@ -27,7 +30,7 @@ class Webview extends React.Component<WebviewProps, any> {
     this.props.onWebview && this.props.onWebview(this.elem);
   }
   render() {
-    let { preload } = this.props;
+    let { preload, partition } = this.props;
     return <webview ref={elem => {
       if (elem) {
         this.elem = elem;
@@ -36,12 +39,13 @@ class Webview extends React.Component<WebviewProps, any> {
       is
       autosize="on"
       preload={preload}
-      partition="persist:recordtest2" />
+      partition={partition} />
   }
 }
 
 interface BrowserProps {
   preload?: string;
+  partition?: string;
   onWebview?: (x:Electron.WebviewTag)=>void;
   onURLChange?: (url:string)=>void;
 }
@@ -56,7 +60,7 @@ class Browser extends React.Component<BrowserProps, {
     }
   }
   render() {
-    let { preload } = this.props;
+    let { preload, partition } = this.props;
     let { url } = this.state;
     return (
       <div className="browser">
@@ -95,6 +99,7 @@ class Browser extends React.Component<BrowserProps, {
         <div className="browser-pane">
           <Webview
             preload={preload}
+            partition={partition}
             onWebview={(webview) => {
               this.gotWebview(webview);
             }}
@@ -165,9 +170,9 @@ class StepValueDetails extends React.Component<StepValueDetailsProps, any> {
 
 interface RecordPageProps {
   preload: string;
+  partition: string;
   recording: Recording;
   values: object;
-  onValuesChange: Function,
   onRecordingChange: Function,
 }
 /**
@@ -205,7 +210,7 @@ class RecordPage extends React.Component<RecordPageProps, {
     console.log('recording');
   }
   render() {
-    let { preload } = this.props;
+    let { preload, partition, onRecordingChange } = this.props;
     let stop_button = <button
         disabled={this.director.state !== 'recording'}
         onClick={() => {
@@ -213,6 +218,12 @@ class RecordPage extends React.Component<RecordPageProps, {
         }}>
         <span className="fa fa-stop"/>
       </button>
+
+    let save_button = <button
+        onClick={() => {
+          this.director.pauseRecording();
+          onRecordingChange(this.director.current_recording, this.director.current_values);
+        }}>{sss('Save')}</button>
 
     let steps = this.director.current_recording.steps
     .filter((step) => {
@@ -271,10 +282,12 @@ class RecordPage extends React.Component<RecordPageProps, {
             <li>For each account, download an OFX/QFX file for the date range Aug 15, 2017 to Sep 15, 2017</li>
             <li>Click {stop_button}</li>
             <li>Fill out the form on the right</li>
+            <li>Click {save_button}</li>
           </ol>
         </div>
         <Browser
           preload={preload}
+          partition={partition}
           onURLChange={url => {
             this.director.setURL(url);
           }}
@@ -283,7 +296,12 @@ class RecordPage extends React.Component<RecordPageProps, {
       </div>
       <div className="recording-pane">
         <div className="controls">
-          <button disabled={this.director.state === 'recording'}><span className="fa fa-circle red" /></button>
+          <button
+            disabled={this.director.state === 'recording'}
+            onClick={() => {
+              this.director.startRecording();
+            }}
+            ><span className="fa fa-circle red" /></button>
           {stop_button}
           <button
             disabled={this.director.state === 'recording'}
@@ -291,6 +309,7 @@ class RecordPage extends React.Component<RecordPageProps, {
               this.director.play();
             }}
           ><span className="fa fa-play" /></button>
+          {save_button}
         </div>
         <div className="steps">
           {steps}
@@ -300,8 +319,12 @@ class RecordPage extends React.Component<RecordPageProps, {
   }
 }
 
-class SignInPage extends React.Component<any, any> {
+interface SignInPageProps {
+  partition: string;
+}
+class SignInPage extends React.Component<SignInPageProps, any> {
   render() {
+    let { partition } = this.props;
     return <div className="browser-wrap">
       <div className="instructions">
         Many banks require extra verification (e.g. security questions, being texted/emailed a code, etc.) when accessing their website from a new computer or device.  In order to remember this computer, follow these steps:
@@ -314,7 +337,8 @@ class SignInPage extends React.Component<any, any> {
             }}>{sss('I signed in')}</button></li>
         </ol>
       </div>
-      <Browser />
+      <Browser
+        partition={partition} />
     </div>
   }
 }
@@ -343,17 +367,17 @@ class SettingsPage extends React.Component<SettingsPageProps, any> {
 
 interface RecordingAppProps {
   preload: string;
+  partition: string;
   bankrecording: BankRecording;
   recording: Recording;
   values: object;
   store: IStore;
   renderer: Renderer;
-  onValuesChange: Function,
   onRecordingChange: Function,
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, bankrecording, recording, values, store, renderer, onValuesChange, onRecordingChange } = this.props;
+    let { preload, partition, bankrecording, recording, values, store, renderer, onRecordingChange } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -378,14 +402,16 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
                   />
                 </Route>
                 <Route path="/signin">
-                  <SignInPage />
+                  <SignInPage
+                    partition={partition}
+                  />
                 </Route>
                 <Route path="/record">
                   <RecordPage
                     preload={preload}
+                    partition={partition}
                     recording={recording}
                     values={values}
-                    onValuesChange={onValuesChange}
                     onRecordingChange={onRecordingChange}
                   />
                 </Route>
@@ -398,9 +424,13 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
   }
 }
 
-
-
-export async function start(room:string, container, preload_url:string, recording_id:number) {
+export async function start(args:{
+    room:string,
+    container:HTMLElement,
+    preload_url:string,
+    recording_id:number,
+    partition:string,
+  }) {
   const renderer = new Renderer();
   
   // const director = new RecordingDirector(webview);
@@ -408,9 +438,30 @@ export async function start(room:string, container, preload_url:string, recordin
   //   renderer.doUpdate();
   // })
 
-  let store = new RPCRendererStore(room);
-  let BANKRECORDING = await store.bankrecording.get(recording_id);
-  let { recording, values } = await store.bankrecording.decryptBankRecording(BANKRECORDING);
+  let store = new RPCRendererStore(args.room);
+  let BANKRECORDING = await store.bankrecording.get(args.recording_id);
+  let recording = null,
+      values = null;
+
+  // attempt the password 3 times.
+  let i = 0;
+  while (true) {
+    try {
+      let plaintext = await store.bankrecording.decryptBankRecording(BANKRECORDING);
+      recording = plaintext.recording;
+      values = plaintext.values;
+      break;
+    } catch(err) {
+      if (err instanceof IncorrectPassword) {
+        if (i >= 3) {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
+    i++;
+  }
 
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
@@ -418,17 +469,19 @@ export async function start(room:string, container, preload_url:string, recordin
       bankrecording={BANKRECORDING}
       recording={recording}
       values={values}
-      preload={preload_url}
+      preload={args.preload_url}
+      partition={args.partition}
       store={store}
       renderer={renderer}
-      onRecordingChange={val => {
-        console.log('recording change', val);
-      }}
-      onValuesChange={val => {
-        console.log('values change', val);
+      onRecordingChange={(new_recording, new_values) => {
+        console.log('recording change', new_recording, new_values);
+        store.bankrecording.update(args.recording_id, {
+          recording: new_recording,
+          values: new_values,
+        })
       }}
     />
-  }, container);
+  }, args.container);
   renderer.afterUpdate(() => {
     let title = 'EXPERIMENTAL Buckets Recorder';
     if (BANKRECORDING.name) {
@@ -443,90 +496,13 @@ export async function start(room:string, container, preload_url:string, recordin
 
   store.data.on('obj', async (ev) => {
     let obj = ev.obj;
-    if (isObj(BankRecording, obj) && obj.id === recording_id) {
+    if (isObj(BankRecording, obj) && obj.id === args.recording_id) {
       console.log('Update of the recording this page is looking at');
       BANKRECORDING = Object.assign(BANKRECORDING, obj);
       renderer.doUpdate();
     }
   })
 
-  // const events = [
-  //   // 'load-commit',
-  //   // 'did-finish-load',
-  //   // 'did-fail-load',
-  //   // 'did-frame-finish-load',
-  //   // 'did-start-loading',
-  //   // 'did-stop-loading',
-  //   // 'did-get-response-details',
-  //   // 'did-get-redirect-request',
-  //   // 'dom-ready',
-  //   // // 'page-title-updated',
-  //   // // 'page-favicon-updated',
-  //   // // 'enter-html-full-screen',
-  //   // // 'leave-html-full-screen',
-  //   // // 'console-message',
-  //   // 'found-in-page',
-  //   // 'new-window',
-  //   // 'will-navigate',
-  //   // // 'did-navigate',
-  //   // 'did-navigate-in-page',
-  //   // 'close',
-  //   // // 'ipc-message',
-  //   // 'crashed',
-  //   // 'gpu-crashed',
-  //   // 'plugin-crashed',
-  //   // 'destroyed',
-  //   // // 'media-started-playing',
-  //   // // 'media-paused',
-  //   // // 'did-change-theme-color',
-  //   // // 'update-target-url',
-  //   // // 'devtools-opened',
-  //   // // 'devtools-closed',
-  //   // // 'devtools-focused',
-  // ];
-  // events.forEach(event => {
-  //   webview.addEventListener(event as any, (ev) => {
-  //     console.log('event', event, ev);
-  //   }, false);
-  // })
-
-  // webview.addEventListener('console-message', (ev) => {
-  //   // console.log('webview:', ev.message);
-  // }, false)
-  // webview.addEventListener('page-favicon-updated', (ev) => {
-  //   // console.log('favicon', ev);
-  //   // if (ev.favicons.length) {
-  //   //   let favicon = ev.favicons[0];
-  //   // } else {
-
-  //   // }
-  // })
-  // webview.addEventListener('did-navigate', (ev) => {
-  //   console.log('did-navigate');
-  //   renderer.doUpdate();
-  // }, false);
-  // webview.addEventListener('page-title-updated', (ev) => {
-  //   document.title = `[Experimental] Buckets Recorder - ${ev.title}`;
-  // }, false);
-
-  // webview.addEventListener('did-start-loading', () => {
-  //   renderer.doUpdate();
-  // }, false);
-  // webview.addEventListener('did-stop-loading', () => {
-  //   renderer.doUpdate();
-  // }, false);
-
-  // // webview.addEventListener('did-fail-load', () => {
-  // //   console.log('did fail load');
-  // // })
-  // // webview.addEventListener('dom-ready', () => {
-  // //   console.log('dom-ready webview');
-  // // }, false)
-  
-  // // while debugging
-  // webview.src = 'http://127.0.0.1:8080';
-  // director.startRecording();
-  // director.setURL(webview.src);
-
   renderer.doUpdate();
+  ipcRenderer.send('buckets:show-window');
 }
