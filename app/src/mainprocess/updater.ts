@@ -47,7 +47,7 @@ export function checkForUpdates() {
     }, true);
   });
 
-  if (electron_is.linux()) {
+  if (electron_is.linux() && process.env.APPIMAGE === null) {
     linux_checkForUpdates();
   } else {
     autoUpdater.checkForUpdates();
