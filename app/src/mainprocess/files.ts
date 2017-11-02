@@ -28,7 +28,6 @@ export class BudgetFile {
   private rpc_store:RPCMainStore = null;
 
   readonly id:string;
-  readonly windows:Array<Electron.BrowserWindow>=[];
   readonly filename:string;
   constructor(filename?:string) {
     this.id = uuid();
@@ -84,7 +83,6 @@ export class BudgetFile {
     }
 
     // Link this instance and the window
-    this.windows.push(win);
     WIN2FILE[win.id] = this;
 
     if (!path.startsWith('/')) {
@@ -97,8 +95,6 @@ export class BudgetFile {
     win.on('close', ev => {
       // unlink from this instance
       delete WIN2FILE[win.id];
-      let idx = this.windows.indexOf(win);
-      this.windows.splice(idx, 1);
     })
   }
   async openRecordWindow(recording_id:number) {
@@ -255,6 +251,9 @@ export function watchForEvents(app:Electron.App) {
   })
   ipcMain.on('buckets:open-recorder', (ev, args) => {
     const file = WIN2FILE[ev.sender.id];
+    if (!file) {
+      log.error(`No file found for sender: ${ev.sender.id} args=${args}`);
+    }
     log.info('opening recording', file.filename, 'recording', args.recording_id);
     file.openRecordWindow(args.recording_id);
   })

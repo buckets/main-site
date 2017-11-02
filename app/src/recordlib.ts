@@ -400,6 +400,7 @@ export class Recorder {
           throw new Error('Element not found');
         }
         elem.value = value;
+        elem.focus();
       },
     })
     ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
@@ -439,7 +440,7 @@ export class Recorder {
     window.addEventListener('change', (ev:any) => {
       let target = ev.target;
       if (isChangeOnlyElement(target)) {
-        let displayValue = target.tagName === 'SELECT' ? target.childNodes[target.selectedIndex].innerText : undefined;
+        let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
         let step:ChangeStep = {
           type: 'change',
           desc: describeElement(target),
@@ -521,6 +522,10 @@ export class Recorder {
           return;
         }
       }
+      if (isChangeOnlyElement(elem) && !input_delimiter) {
+        // don't send keypresses for change-only elements
+        return;
+      }
       let step:KeyPressStep = {
         type: 'keypress',
         desc: describeElement(ev.target as HTMLElement),
@@ -560,7 +565,7 @@ export class RecordingDirector extends EventEmitter {
   
   public step_index:number = 0;
   public poll_interval:number = 100;
-  public playback_delay:number = 120;
+  public playback_delay:number = 500; //120;
   public typing_delay:number = 20;
 
   private rpc:RPC;
@@ -643,7 +648,7 @@ export class RecordingDirector extends EventEmitter {
     this._state = 'playing';
     let steps = this.current_recording.steps;
     for (this.step_index = 0; this.step_index < steps.length; this.step_index++) {
-      console.log('Start step', this.step_index);
+      console.log('Start step', this.step_index, steps[this.step_index]);
       this.emit('start-step', this.step_index);
       await this.doStep(steps[this.step_index]);
       await wait(this.playback_delay);
@@ -719,7 +724,7 @@ export class RecordingDirector extends EventEmitter {
     })
   }
   private async _doKeyPressStep(step:KeyPressStep) {
-    if (step.refkey) {
+    if (step.refkey && this.current_values[step.refkey] !== undefined) {
       // Pull the value from the set of current values
       let value = this.current_values[step.refkey];
       for (var i = 0; i < value.length; i++) {

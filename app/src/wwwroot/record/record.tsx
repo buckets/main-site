@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as moment from 'moment'
 import { ipcRenderer } from 'electron'
 import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
@@ -181,13 +182,25 @@ interface RecordPageProps {
 class RecordPage extends React.Component<RecordPageProps, {
   recording: Recording;
   values: object;
+  // Date to direct the user to choose
+  start_date: moment.Moment;
+  end_date: moment.Moment;
 }> {
   private director:RecordingDirector;
   constructor(props:RecordPageProps) {
     super(props);
+    const today = moment();
+
+    let start_date = moment().day(15).subtract(2, 'months');
+    if (start_date.day() == today.day()) {
+      start_date.add(1, 'day');
+    }
+    let end_date = start_date.clone().add(1, 'month').add(1, 'day');
     this.state = {
       recording: props.recording,
       values: props.values,
+      start_date,
+      end_date,
     };
     this.director = new RecordingDirector({
       recording: props.recording,
@@ -211,6 +224,7 @@ class RecordPage extends React.Component<RecordPageProps, {
   }
   render() {
     let { preload, partition, onRecordingChange } = this.props;
+    let { start_date, end_date } = this.state;
     let stop_button = <button
         disabled={this.director.state !== 'recording'}
         onClick={() => {
@@ -228,6 +242,7 @@ class RecordPage extends React.Component<RecordPageProps, {
     let steps = this.director.current_recording.steps
     .filter((step) => {
       switch (step.type) {
+        case 'navigate':
         case 'change':
         case 'keypress': {
           return true;
@@ -239,6 +254,10 @@ class RecordPage extends React.Component<RecordPageProps, {
       let question;
 
       switch (step.type) {
+        case 'navigate': {
+          question = <div>{sss('navigatestep', (url) => `Go to ${url}`)(step.url)}</div>
+          break;
+        }
         case 'change': {
           let value = step.displayValue || step.value;
           question = <StepValueDetails
@@ -273,13 +292,14 @@ class RecordPage extends React.Component<RecordPageProps, {
       }
     })
     .filter(x => x);
+
     return <div className="record-page">
       <div className="browser-wrap">
         <div className="instructions">
           This tool will record you getting transaction information from your bank.  You will then be able to replay your recording to download transaction data in the future.
           <ol>
             <li>Sign in to your bank</li>
-            <li>For each account, download an OFX/QFX file for the date range Aug 15, 2017 to Sep 15, 2017</li>
+            <li>For each account, download an OFX/QFX file for the date range <b>{start_date.format('ll')}</b> to <b>{end_date.format('ll')}</b>.</li>
             <li>Click {stop_button}</li>
             <li>Fill out the form on the right</li>
             <li>Click {save_button}</li>

@@ -7,6 +7,11 @@ Recording:
   ✔ Date picker elements @done (17-09-28 11:59)
   ✔ Clicking on page should cause clicks at the point and not at offset 1,1 @done (17-09-28 11:38)
   ✔ Click <a> @done (17-09-28 11:38)
+  ☐ Copy and Paste should be captured correctly
+    ☐ macOS
+    ☐ Windows
+    ☐ Linux
+  ☐ Command+L should focus the URL-selector
   ☐ Partitions are stored in ~/Library/Application Support/Buckets/Partitions on the mac.
     ☐ If that works reply to:
       https://discuss.atom.io/t/how-can-i-persist-sessions-across-electron-app-close/36223

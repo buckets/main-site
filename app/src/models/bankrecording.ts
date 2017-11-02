@@ -35,7 +35,7 @@ export class BankRecordingStore {
     // these service and account values to something unique
     // to the budget file
     let password = await getPassword(service, account, {
-      prompt: 'Encryption password?',
+      prompt: 'Budget password:',
     });
     if (await this.isPasswordCorrect(password)) {
       cachePassword(service, account, password);
