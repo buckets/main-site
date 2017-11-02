@@ -29,10 +29,14 @@ To run:
 
 You should add change snippets to `changes/{fix,break,new,feature,refactor,info,doc}-description.md` as you work then you can do the following:
 
+Do all this with:
+
+    python mkrelease.py
+
 1. Preview changes with `dev/changelog/combine_changes.sh`
 2. Update the version in `package.json`
 3. Run `dev/changelog/updatechangelog.sh`
 4. Publish with `./publish.sh`
 5. Copy up the new `CHANGELOG.md` with `dev/changelog/publishchangelog.py`
 6. Manually release on the GitHub website.
-
+7. Update the version in `package.json` to the next version with `-dev` added.
