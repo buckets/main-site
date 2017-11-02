@@ -57,7 +57,7 @@ def updatePackageVersion(version):
             lines.append(line)
 
     with io.open('package.json', 'w') as fh:
-        fh.write('\n'.join(lines))
+        fh.write(''.join(lines))
 
 def getLatestReleaseVersion():
     r = requests.get('https://api.github.com/repos/buckets/application/releases',
@@ -70,6 +70,8 @@ def getLatestReleaseVersion():
 
 def abort():
     sys.stderr.write('Aborting...\n')
+    print('Revert changes with:')
+    print('  git checkout -- package.json CHANGELOG.md changes/')
     sys.exit(1)
 
 
@@ -84,6 +86,10 @@ print('package.json version:', package_version)
 print('Latest released version on GitHub:', latest_version)
 target_version = prompt('Version to release?',
     default=guess_target_version)
+parts = map(int, target_version.split('.'))
+next_version = '.'.join(map(str, [parts[0], parts[1]+1, 0])) + '-dev'
+next_version = prompt('Next version?',
+    default=next_version)
 
 # verify CHANGELOG
 print('=== CHANGELOG ===')
@@ -93,8 +99,33 @@ if not yesno('Does this look correct?', default=True):
 
 # update version
 updatePackageVersion(target_version)
-print('Updated package.json version to {0}'.format(target_version))
+print('[X] Updated package.json version to {0}'.format(target_version))
 
 # update CHANGELOG
 subprocess.check_call(['dev/changelog/updatechangelog.sh'])
-print('Updated CHANGELOG')
+print('[X] Updated CHANGELOG.')
+
+# publish
+print('Publishing draft release to GitHub...')
+subprocess.check_call(['./publish.sh'])
+print('[X] Done uploading to GitHub.')
+
+# publish CHANGELOG
+subprocess.check_call(['dev/changelog/publishchangelog.py'])
+print('[X] Updated release notes on GitHub')
+
+# Manually publish it
+print('Go to https://github.com/buckets/application/releases to publish the draft')
+if not yesno('Have you clicked the Publish button on GitHub?'):
+    abort()
+
+# tag it
+if not yesno('Proceed with git commit and tag?', default=True):
+    abort()
+subprocess.check_call(['git', 'commit', '-a', '-m', 'Published v{0}'.format(target_version)])
+subprocess.check_call(['git', 'tag', 'v{0}'.target_version])
+
+# prepare for next version
+updatePackageVersion(next_version)
+subprocess.check_call(['git', 'commit', '-a', '-m', 'Start v{0}'.format(next_version)])
+print('Updated version to {0}'.format(next_version))
