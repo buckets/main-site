@@ -13,7 +13,7 @@
     "start": "electron .",
     "compile": "tsc",
     "test": "./test.sh",
-    "postinstall": "install-app-deps"
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "bluebird": "3.5.0",
@@ -45,7 +45,7 @@
   "build": {
     "appId": "com.github.buckets.application",
     "mac": {
-      "category": "your.app.category.type",
+      "category": "public.app-category.finance",
       "target": [
         "zip",
         "dmg"
@@ -55,6 +55,7 @@
       "icon": "build/dmg.icns"
     },
     "linux": {
+      "category": "Finance",
       "target": [
         "tar.gz",
         "deb",
@@ -116,7 +117,6 @@
     "cheerio": "^1.0.0-rc.2",
     "electron": "1.7.9",
     "electron-builder": "19.43.3",
-    "electron-rebuild": "1.5.11",
     "mocha": "3.4.2",
     "tap": "^10.7.0",
     "ts-node": "3.0.6",
