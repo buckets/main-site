@@ -53,7 +53,7 @@ def updatePackageVersion(version):
     with io.open('package.json', 'r') as fh:
         for line in fh:
             if line.count('"version": '):
-                line = '  "version": "{0}",'.format(version)
+                line = '  "version": "{0}",\n'.format(version)
             lines.append(line)
 
     with io.open('package.json', 'w') as fh:

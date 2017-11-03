@@ -1,4 +1,14 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.19.0
+
+- **FIX:** Translate the preferences page
+
+- NEW: Buckets files format is documented
+
+- NEW: Auto-updating is now supported on Linux for AppImage installs
+
+- NEW: Reduce license price from $40 to $29 (and intro price from $20 to $15)
+
 ## v0.18.0
 
 - NEW: Buckets is now available in Spanish!
