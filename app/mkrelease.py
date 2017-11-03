@@ -123,7 +123,7 @@ if not yesno('Have you clicked the Publish button on GitHub?'):
 if not yesno('Proceed with git commit and tag?', default=True):
     abort()
 subprocess.check_call(['git', 'commit', '-a', '-m', 'Published v{0}'.format(target_version)])
-subprocess.check_call(['git', 'tag', 'v{0}'.target_version])
+subprocess.check_call(['git', 'tag', 'v{0}'.format(target_version)])
 
 # prepare for next version
 updatePackageVersion(next_version)
