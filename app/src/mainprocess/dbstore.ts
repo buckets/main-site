@@ -60,8 +60,8 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
     }
     await store.buckets.update(-1, {
       kind: 'goal-deposit',
-      goal: 4000,
-      deposit: 500,
+      goal: 2900,
+      deposit: license_bucket.deposit <= 100 ? 500 : license_bucket.deposit,
       kicked: false,
       name: sss('Buckets License'),
       ranking: ranking,
