@@ -1436,7 +1436,7 @@ const messages:IMessages = {
     h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
   },
   "(Restart Buckets for the change to take effect.)": {
-    val: "(Reinicie Buckets para que el cambio surta efecto).",
+    val: "(Reinicie Buckets para que el cambio pasa).",
     translated: true,
     src: ["src/wwwroot/misc/preferences.tsx line 47"],
     h: "IYHFL+R57iN4UW8AS35balApUouS8GdkRIQ3uEa6wT8=",

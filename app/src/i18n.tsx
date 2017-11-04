@@ -58,9 +58,9 @@ class TranslationContext extends EventEmitter {
   }
   async localizeThisPage(args?:{
       skipwatch?:boolean,
-    }) {
+    }):Promise<string> {
     args = args || {};
-    await startLocalizing();
+    let locale = await startLocalizing();
     document.documentElement.setAttribute('dir', this.langpack.dir);
     Array.from(document.querySelectorAll('[data-translate]'))
     .forEach((elem:HTMLElement) => {
@@ -81,6 +81,7 @@ class TranslationContext extends EventEmitter {
         this.localizeThisPage({skipwatch:true});
       })
     }
+    return locale;
   }
 }
 
@@ -110,13 +111,14 @@ async function getLocale():Promise<string> {
 }
 
 var STARTED_LOCALIZING = null;
-export async function startLocalizing():Promise<any> {
+export async function startLocalizing():Promise<string> {
   if (STARTED_LOCALIZING) {
-    return;
+    return tx.locale;
   } else {
     STARTED_LOCALIZING = true;
     let locale = await getLocale();
     tx.setLocale(locale);
+    return tx.locale;
   }
 }
 

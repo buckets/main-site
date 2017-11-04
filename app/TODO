@@ -2,9 +2,7 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
-   ☐ How do I do this while still allowing for the last-used location to take precendence?
- ✔ Turning a regular expense back to a normal bucket retains the deposit in rain @done (17-11-03 22:21)
- ☐ Preferences page doesn't have the right language.
+   How do I do this while still allowing for the last-used location to take precendence?
  ☐ Make light grey text on charts darker
 
 v1.0.0:
@@ -19,6 +17,8 @@ v1.0.0:
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
  ☐ Show running balance in bucket transactions list
  ☐ Merge "File import" and "Connections" page
+ ☐ Support importing CSV
+ ☐ Show bucket group totals
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
@@ -34,7 +34,6 @@ Backlog:
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
  ☐ Up/Down in bucket transact should go to the next/prev transact input
- ☐ Import CSV
  ☐ Export CSV
  ☐ Automatically sync so the users don't have to
  ☐ Delete (retire) accounts
@@ -47,6 +46,8 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Preferences page doesn't have the right language. @done (17-11-03 22:28) @project(Bugs)
+ ✔ Turning a regular expense back to a normal bucket retains the deposit in rain @done (17-11-03 22:21) @project(Bugs)
  ✔ Put all budget-related menu items into a "Budget" menu that appears/disappears. @done (17-11-03 22:15) @project(v1.0.0)
  ✔ Make "Import from YNAB4" (look on laptop in ~/Documents/YNAB for format) @done (17-11-03 22:15) @project(v1.0.0)
  ✔ Uncaught (in promise) TypeError: Cannot read property 'store' of undefined @done (17-09-14 10:37) @project(Bugs)
