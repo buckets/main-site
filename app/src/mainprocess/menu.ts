@@ -1,7 +1,7 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
 import * as Path from 'path'
-import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './files'
+import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile, WIN2FILE} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles, PersistEvents } from './persistent'
@@ -10,6 +10,7 @@ import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
 import { APP_ROOT } from './globals'
+import { findYNAB4FileAndImport } from '../ynab'
 
 function recursiveMap(menuitems:Electron.MenuItem[], func) {
   menuitems.forEach(item => {
@@ -81,6 +82,17 @@ export async function updateMenu() {
           win.webContents.send('start-file-import');
         }
       },
+      {
+        label: sss('Import From YNAB4...'),
+        id: 'only4budgets importynab',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          let budgetfile = WIN2FILE[win.id];
+          if (budgetfile) {
+            findYNAB4FileAndImport(budgetfile.store);  
+          }
+        }
+      }
     ],
   };
   let EditMenu = {
