@@ -272,7 +272,7 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
           bucket_id: bucket.id,
           amount: trans.rain,
           memo: 'Rain',
-          posted: trans.month,
+          posted: ensureLocalMoment(trans.month),
         })
       }
 
