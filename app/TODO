@@ -2,7 +2,8 @@ MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
  ☐ Have the open/new dialog menus open to a good default location instead of /
- ☐ Turning a regular expense back to a normal bucket retains the deposit in rain
+   ☐ How do I do this while still allowing for the last-used location to take precendence?
+ ✔ Turning a regular expense back to a normal bucket retains the deposit in rain @done (17-11-03 22:21)
  ☐ Preferences page doesn't have the right language.
  ☐ Make light grey text on charts darker
 

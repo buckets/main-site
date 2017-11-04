@@ -430,9 +430,9 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
     }
     default: {
       Object.assign(ret, {
-        goal: b.goal || 0,
-        deposit: b.deposit || 0,
-        end_date: b.end_date || null,
+        goal: 0,
+        deposit: 0,
+        end_date: null,
       })
     }
   }
