@@ -198,6 +198,32 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
     payees[payee.entityId] = payee;
   })
 
+  let monthly_budgets = budget.monthlyBudgets
+    .filter(x => x.monthlySubCategoryBudgets.length)
+    .sort((a,b) => compare(a.month, b.month))
+  let deposit_amounts = {};
+  let rain_transactions:{
+    [k:string]: Array<{
+      categoryId: string;
+      rain: number;
+      month: string;
+    }>
+  } = {};
+  for (let month of monthly_budgets) {
+    month.monthlySubCategoryBudgets.forEach(sub => {
+      deposit_amounts[sub.categoryId] = number2cents(sub.budgeted);
+      if (!rain_transactions[sub.categoryId]) {
+        rain_transactions[sub.categoryId] = [];
+      }
+      let this_rain = rain_transactions[sub.categoryId];
+      this_rain.push({
+        categoryId: sub.categoryId,
+        rain: number2cents(sub.budgeted),
+        month: month.month,
+      })
+    })
+  }
+
   // MasterCategories -> Bucket Groups
   for (let mcat of budget.masterCategories.sort(sortByIndex)) {
     masterCats[mcat.entityId] = mcat;
@@ -221,7 +247,7 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
     for (let cat of mcat.subCategories.sort(sortByIndex)) {
       categories[cat.entityId] = cat;
       let idx = bucket_names.indexOf(cat.name);
-      let bucket;
+      let bucket:Bucket.Bucket;
       if (idx === -1) {
         // make a new bucket
         bucket = await store.buckets.add({name: cat.name, group_id: group_id});
@@ -230,6 +256,26 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
         bucket = buckets.filter(x => x.name === cat.name)[0];
       }
       cat2bucket[cat.entityId] = bucket;
+
+      // Set up deposit amount
+      let deposit_amount = deposit_amounts[cat.entityId]
+      if (!bucket.deposit && bucket.kind === '' && deposit_amount) {
+        await store.buckets.update(bucket.id, {
+          kind: 'deposit',
+          deposit: deposit_amount,
+        })
+      }
+
+      // Record prior rain
+      for (let trans of rain_transactions[cat.entityId]) {
+        await store.buckets.transact({
+          bucket_id: bucket.id,
+          amount: trans.rain,
+          memo: 'Rain',
+          posted: trans.month,
+        })
+      }
+
       if (mcat.entityId === "MasterCategory/__Hidden__") {
         // hidden
         await store.buckets.kick(bucket.id);
