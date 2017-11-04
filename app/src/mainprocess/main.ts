@@ -8,7 +8,7 @@ import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
 import { startLocalizing } from '../i18n'
-import { updateMenu, updateEnabled } from './menu'
+import { updateMenu } from './menu'
 import { BudgetFile, watchForEvents } from './files'
 import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
@@ -96,6 +96,8 @@ app.on('ready', function() {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  } else {
+    updateMenu(false);
   }
 });
 app.on('activate', () => {
@@ -132,10 +134,10 @@ app.on('browser-window-created', (ev, win) => {
 app.on('browser-window-focus', (ev, win) => {
   if (win.webContents.getURL().startsWith('buckets://')) {
     // budget window
-    updateEnabled(true);
+    updateMenu(true);
   } else {
     // non-budget window
-    updateEnabled(false);
+    updateMenu(false);
   }
 })
 watchForEvents(app);

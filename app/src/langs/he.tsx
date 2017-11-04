@@ -931,18 +931,6 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 50"],
     h: "Uf1w3VIwUvsmKvOkQtBwsGvbRzQ5gMbEq/iyNzv95cs=",
   },
-  "Duplicate Window": {
-    val: "Duplicate Window",
-    translated: false,
-    src: ["src/mainprocess/menu.ts line 63"],
-    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
-  },
-  "Import Transactions...": {
-    val: "Import Transactions...",
-    translated: false,
-    src: ["src/mainprocess/menu.ts line 72"],
-    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
-  },
   "Edit": {
     val: "Edit",
     translated: false,
@@ -1074,6 +1062,30 @@ const messages:IMessages = {
     translated: false,
     src: ["src/mainprocess/menu.ts line 187","src/mainprocess/menu.ts line 304"],
     h: "hrPxvP/hrVgtNNTMX4sv5sljx57neTy+2p0U1TKGuCE=",
+  },
+  "Budget": {
+    val: "Budget",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 158"],
+    h: "zOO4DqNSFLa6Z9vlmfaz8OnwggHn8wJeP058V5mUKbE=",
+  },
+  "Duplicate Window": {
+    val: "Duplicate Window",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 63"],
+    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
+  },
+  "Import Transactions...": {
+    val: "Import Transactions...",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 72"],
+    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
+  },
+  "Import From YNAB4...": {
+    val: "Import From YNAB4...",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 179"],
+    h: "z10Vp9BzEC6CkLTNtR8xywSTNYGMBbGFZMD7XUEbrVs=",
   },
   "Help": {
     val: "Help",
@@ -1488,6 +1500,12 @@ const messages:IMessages = {
     translated: false,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
+  },
+  "Open YNAB4 File": {
+    val: "Open YNAB4 File",
+    translated: false,
+    src: ["src/ynab.ts line 311"],
+    h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
   },
 }
 export const pack:ILangPack = {

@@ -158,8 +158,6 @@ export interface IMessages {
   "New Budget...": IMsg<string>;
   "Open Budget...": IMsg<string>;
   "Open Recent...": IMsg<string>;
-  "Duplicate Window": IMsg<string>;
-  "Import Transactions...": IMsg<string>;
   "Edit": IMsg<string>;
   "Undo": IMsg<string>;
   "Redo": IMsg<string>;
@@ -182,6 +180,10 @@ export interface IMessages {
   "Window": IMsg<string>;
   "Minimize": IMsg<string>;
   "Close Window": IMsg<string>;
+  "Budget": IMsg<string>;
+  "Duplicate Window": IMsg<string>;
+  "Import Transactions...": IMsg<string>;
+  "Import From YNAB4...": IMsg<string>;
   "Help": IMsg<string>;
   "Learn More": IMsg<string>;
   "Getting Started...": IMsg<string>;
@@ -251,6 +253,7 @@ export interface IMessages {
   "Install and Relaunch Buckets": IMsg<string>;
   "There was an error.  Maybe try again?": IMsg<string>;
   "Recently used": IMsg<string>;
+  "Open YNAB4 File": IMsg<string>;
 }
 export const DEFAULTS:IMessages = {
   "accounts.balance_mismatch_msg": {
@@ -678,7 +681,7 @@ export const DEFAULTS:IMessages = {
   "Trial Version": {
     val: "Trial Version",
     translated: false,
-    src: ["src/budget/budget.tsx line 91","src/mainprocess/menu.ts line 252"],
+    src: ["src/budget/budget.tsx line 91","src/mainprocess/menu.ts line 249"],
     h: "GtZIXrHILA84HlpKlxi3BErHwR7WIYkQ/e5BE0Fiaxg=",
   },
   "Accounts": {
@@ -832,7 +835,7 @@ export const DEFAULTS:IMessages = {
   "Delete": {
     val: "Delete",
     translated: false,
-    src: ["src/budget/connections.tsx line 184","src/mainprocess/menu.ts line 115"],
+    src: ["src/budget/connections.tsx line 184","src/mainprocess/menu.ts line 77"],
     h: "sm3jcrSw6qxgICiEpy25imvm6QNueF6oZ+oBxfeSEJg=",
   },
   "ID": {
@@ -1158,319 +1161,331 @@ export const DEFAULTS:IMessages = {
   "File": {
     val: "File",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 36"],
+    src: ["src/mainprocess/menu.ts line 17"],
     h: "9XpUff7TtVQbIncvgmrfzVB2gkBh35RnM1ET/HFr3k0=",
   },
   "New Budget...": {
     val: "New Budget...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 39","src/wwwroot/misc/wizard.html line 0"],
+    src: ["src/mainprocess/menu.ts line 20","src/wwwroot/misc/wizard.html line 0"],
     h: "daxIu+dqn7pfUDeB26rLQnPnAz2v5opSTHbAyBovaoI=",
   },
   "Open Budget...": {
     val: "Open Budget...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 46","src/wwwroot/misc/wizard.html line 0"],
+    src: ["src/mainprocess/menu.ts line 27","src/wwwroot/misc/wizard.html line 0"],
     h: "67FfAce57aSIe2ncVfWeIeiiRLQQ8uuEUdDyI6UHxHU=",
   },
   "Open Recent...": {
     val: "Open Recent...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 53"],
+    src: ["src/mainprocess/menu.ts line 34"],
     h: "Uf1w3VIwUvsmKvOkQtBwsGvbRzQ5gMbEq/iyNzv95cs=",
-  },
-  "Duplicate Window": {
-    val: "Duplicate Window",
-    translated: false,
-    src: ["src/mainprocess/menu.ts line 66"],
-    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
-  },
-  "Import Transactions...": {
-    val: "Import Transactions...",
-    translated: false,
-    src: ["src/mainprocess/menu.ts line 75"],
-    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
   },
   "Edit": {
     val: "Edit",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 86"],
+    src: ["src/mainprocess/menu.ts line 48"],
     h: "9+ZynTDPePvsJX4rW8Mn0wEzk0GRQ+udON01NKHVsQU=",
   },
   "Undo": {
     val: "Undo",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 90"],
+    src: ["src/mainprocess/menu.ts line 52"],
     h: "Z1A2vTdYwfdLsWS25iSchnHOHa1VfbQg7u8MDGHk4yo=",
   },
   "Redo": {
     val: "Redo",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 94"],
+    src: ["src/mainprocess/menu.ts line 56"],
     h: "7buMF65dyGtKDY/ZW/Lkn7eUmdudCsdGV3KR2lYLLA0=",
   },
   "Cut": {
     val: "Cut",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 99"],
+    src: ["src/mainprocess/menu.ts line 61"],
     h: "+kuX06pgC809fwr+5h9VbC8sVgVWo6EXgg6bzfXXtJs=",
   },
   "Copy": {
     val: "Copy",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 103"],
+    src: ["src/mainprocess/menu.ts line 65"],
     h: "T2DR4UKv+pyVWY8GzF/WWjk5XqMXgZ0gDyXkZmYczHw=",
   },
   "Paste": {
     val: "Paste",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 107"],
+    src: ["src/mainprocess/menu.ts line 69"],
     h: "n2Hnio0AcQPZejqQ+hm35GthBg0zYDNoxd8RCFRUhu4=",
   },
   "Paste and Match Style": {
     val: "Paste and Match Style",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 111"],
+    src: ["src/mainprocess/menu.ts line 73"],
     h: "w8hRIxBBNWtXNPcYtQ4t/mTHfPF66U/mJbVpOiIDgYE=",
   },
   "Select All": {
     val: "Select All",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 119"],
+    src: ["src/mainprocess/menu.ts line 81"],
     h: "tLJuQPindRFUyvGGdMLJbBHcVpAODsfT5p2gDnpB/Oo=",
   },
   "Find...": {
     val: "Find...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 123"],
+    src: ["src/mainprocess/menu.ts line 85"],
     h: "aUU1pzvlZzKNgYZP2ZpPtQMImBOStbFnK33P3YwXTNs=",
   },
   "Find Next": {
     val: "Find Next",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 130"],
+    src: ["src/mainprocess/menu.ts line 92"],
     h: "LALfI5V4TsQo0DcGJwmNmrm3xNPtY5PmQuxB1voZo34=",
   },
   "Find Previous": {
     val: "Find Previous",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 137"],
+    src: ["src/mainprocess/menu.ts line 99"],
     h: "0n6Dq5KDTxxsTAKrJE+RDdgi9ln6FyfUEPNBJ6ejZ5o=",
   },
   "View": {
     val: "View",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 146"],
+    src: ["src/mainprocess/menu.ts line 108"],
     h: "paIseOhKCT2+NaUBPKk98vQB/lphf7jIGeERV77doDg=",
   },
   "Reload": {
     val: "Reload",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 150"],
+    src: ["src/mainprocess/menu.ts line 112"],
     h: "hUVVd3tppLGqwgo2OeC3h334aTF0Y+/GHbuL/I1clYk=",
   },
   "Force Reload": {
     val: "Force Reload",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 154"],
+    src: ["src/mainprocess/menu.ts line 116"],
     h: "ktBJY2UXO+2r0ZvmbQXhArN51bSTnyaNnnBNR9PQ5K8=",
   },
   "Toggle Developer Tools": {
     val: "Toggle Developer Tools",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 158"],
+    src: ["src/mainprocess/menu.ts line 120"],
     h: "IYSSUL9ezB58nRuajYVa+zH4ucrmXQOB92zA7sDlrJc=",
   },
   "Actual Size": {
     val: "Actual Size",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 163"],
+    src: ["src/mainprocess/menu.ts line 125"],
     h: "k1ZfUj7bmT4XwiALRlZo7ztl2d+e7JcLt3WCnvjpBYg=",
   },
   "Zoom In": {
     val: "Zoom In",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 167"],
+    src: ["src/mainprocess/menu.ts line 129"],
     h: "p3yHl1qkGVfRDPsLKitBuZhRJIDaTy3fV/vbWqOzo24=",
   },
   "Zoom Out": {
     val: "Zoom Out",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 171"],
+    src: ["src/mainprocess/menu.ts line 133"],
     h: "hRo1uzcSNStVll7ef2xHOB6PqFh+q7Sg/VHiGcK4M8M=",
   },
   "Toggle Full Screen": {
     val: "Toggle Full Screen",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 176"],
+    src: ["src/mainprocess/menu.ts line 138"],
     h: "2ZRq+R5E0Cp4QI+y5jCefU1IOiYvNWLrN/iiJq6hGr8=",
   },
   "Window": {
     val: "Window",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 182"],
+    src: ["src/mainprocess/menu.ts line 144"],
     h: "qjw17TPhgeX5msjicdTljyCEeBLFbQvz/oyOunMLJnQ=",
   },
   "Minimize": {
     val: "Minimize",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 186","src/mainprocess/menu.ts line 350"],
+    src: ["src/mainprocess/menu.ts line 148","src/mainprocess/menu.ts line 347"],
     h: "ELhkWGGY5oNKpfCzoXXW6TgkfS1nI0ZuJbWyYLmT+ro=",
   },
   "Close Window": {
     val: "Close Window",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 190","src/mainprocess/menu.ts line 346"],
+    src: ["src/mainprocess/menu.ts line 152","src/mainprocess/menu.ts line 343"],
     h: "hrPxvP/hrVgtNNTMX4sv5sljx57neTy+2p0U1TKGuCE=",
+  },
+  "Budget": {
+    val: "Budget",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 158"],
+    h: "zOO4DqNSFLa6Z9vlmfaz8OnwggHn8wJeP058V5mUKbE=",
+  },
+  "Duplicate Window": {
+    val: "Duplicate Window",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 161"],
+    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
+  },
+  "Import Transactions...": {
+    val: "Import Transactions...",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 169"],
+    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
+  },
+  "Import From YNAB4...": {
+    val: "Import From YNAB4...",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 179"],
+    h: "z10Vp9BzEC6CkLTNtR8xywSTNYGMBbGFZMD7XUEbrVs=",
   },
   "Help": {
     val: "Help",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 197"],
+    src: ["src/mainprocess/menu.ts line 194"],
     h: "TvUUB7AuCuFJ9IWiz2SbsjnUvYoDPZAaMPxup/rwosM=",
   },
   "Learn More": {
     val: "Learn More",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 200"],
+    src: ["src/mainprocess/menu.ts line 197"],
     h: "8bk7nEyrz+Q0vmMisWIPVuvHR4/TeW4DhemALir6s1o=",
   },
   "Getting Started...": {
     val: "Getting Started...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 204"],
+    src: ["src/mainprocess/menu.ts line 201"],
     h: "XD8GQYEIDrNjTMPX4TjGeAbbCIEBcAONlYPd/D8Hz84=",
   },
   "Chat...": {
     val: "Chat...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 210"],
+    src: ["src/mainprocess/menu.ts line 207"],
     h: "SytGirG0+cdtbPfjBma/G/tEOt4rdOj4mnjcaWsTbt8=",
   },
   "Show Log Files...": {
     val: "Show Log Files...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 217"],
+    src: ["src/mainprocess/menu.ts line 214"],
     h: "In00T9z1A4xO6nLu8zAU5s3UzH3+IcK4XjRvrT9CGMs=",
   },
   "Report Bug...": {
     val: "Report Bug...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 223"],
+    src: ["src/mainprocess/menu.ts line 220"],
     h: "i17nG0QruMiCn612ogDToWB1g4xqqei691Yeh/t8MIk=",
   },
   "Report Translation Error...": {
     val: "Report Translation Error...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 229"],
+    src: ["src/mainprocess/menu.ts line 226"],
     h: "/jSK7LcBLJ1FsOYb9ntsVYAxwAyGLLUZXlTL/zrC020=",
   },
   "It says:": {
     val: "It says:",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 232"],
+    src: ["src/mainprocess/menu.ts line 229"],
     h: "gbWdWRhcKGQzFCi8CcKy9Bmfg2oYqz1zGMHQzSU8jQE=",
   },
   "It should say:": {
     val: "It should say:",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 232"],
+    src: ["src/mainprocess/menu.ts line 229"],
     h: "RjwjZtmUgFzGUxR0zMmyXh0cHzpzsbj4nk6R7tGe+i4=",
   },
   "API/File Format": {
     val: "API/File Format",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 237"],
+    src: ["src/mainprocess/menu.ts line 234"],
     h: "tmi6N7ONU1/Iq2UdrKOr06w0UGQwzs39FSzDDXauGHU=",
   },
   "Purchase Full Version...": {
     val: "Purchase Full Version...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 255"],
+    src: ["src/mainprocess/menu.ts line 252"],
     h: "+6h2Y0QTHEVui0aUhwAlCsyJp/F+S0PYKMRlQysqjrk=",
   },
   "Enter License...": {
     val: "Enter License...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 261"],
+    src: ["src/mainprocess/menu.ts line 258"],
     h: "A+/eZ8qTAh97iBouJPInRkCg7F0nOkteYEBO7+lFHHA=",
   },
   "About Buckets": {
     val: "About Buckets",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 286"],
+    src: ["src/mainprocess/menu.ts line 283"],
     h: "9bzPsx+kCkNUeLTSVjaygyWCkm3VCdsFaAFRvdS+xEU=",
   },
   "Check For Updates...": {
     val: "Check For Updates...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 289"],
+    src: ["src/mainprocess/menu.ts line 286"],
     h: "S/1p0syaOMqjAbHpmZa6gWaIh/9e29QR2cRJhiMadz0=",
   },
   "Preferences...": {
     val: "Preferences...",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 296"],
+    src: ["src/mainprocess/menu.ts line 293"],
     h: "6iQxyJ1WC9/Z0f0saApfwL5hmhgN5YgJeikLAYqCGBI=",
   },
   "Services": {
     val: "Services",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 305"],
+    src: ["src/mainprocess/menu.ts line 302"],
     h: "Y5+GuNZXfFSynDsHvAY8cr0RqU+moaHZNmOk2eQrsNs=",
   },
   "Hide Buckets": {
     val: "Hide Buckets",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 310"],
+    src: ["src/mainprocess/menu.ts line 307"],
     h: "38YdGXFjndmgDFgXTpfUZ0F+W/D9e267YaAvzYZm4O8=",
   },
   "Hide Others": {
     val: "Hide Others",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 314"],
+    src: ["src/mainprocess/menu.ts line 311"],
     h: "RpKz0G7Y8OE5oyGm0/zRffPdr7RQkneZCYrikLHIZ+U=",
   },
   "Show All": {
     val: "Show All",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 318"],
+    src: ["src/mainprocess/menu.ts line 315"],
     h: "Kng6HqlojyhuqEK6kaB3KPtAs1w0LcpFWkJYrscali0=",
   },
   "Quit Buckets": {
     val: "Quit Buckets",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 323"],
+    src: ["src/mainprocess/menu.ts line 320"],
     h: "QILEHXgAk6vuNPV3rqkbn2QRZ8WKrPnAZnscp7n8WaM=",
   },
   "Speech": {
     val: "Speech",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 330"],
+    src: ["src/mainprocess/menu.ts line 327"],
     h: "i4Qm95bH8zVEbjpkUi7jvQiLtDzGkW9z90XEkiglzHM=",
   },
   "Start Speaking": {
     val: "Start Speaking",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 334"],
+    src: ["src/mainprocess/menu.ts line 331"],
     h: "v8sFOpEAoczjEjGparKZylHWHoxHMVQriwuhJaec2rY=",
   },
   "Stop Speaking": {
     val: "Stop Speaking",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 338"],
+    src: ["src/mainprocess/menu.ts line 335"],
     h: "Pme2/qME7bKdVrHTIEBQYt1Fu/SXRNGyy6sLBfKpqqk=",
   },
   "Zoom": {
     val: "Zoom",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 354"],
+    src: ["src/mainprocess/menu.ts line 351"],
     h: "Zjzswxbrkbj1TLPOYCtimoyh/aJlkF/mxeghbzdheSs=",
   },
   "Bring All to Front": {
     val: "Bring All to Front",
     translated: false,
-    src: ["src/mainprocess/menu.ts line 359"],
+    src: ["src/mainprocess/menu.ts line 356"],
     h: "vXNLSncC5dTsDdfhZY5dhbev+Y3PpqQEy1fwxTkGWU0=",
   },
   "Update Available": {
@@ -1736,5 +1751,11 @@ export const DEFAULTS:IMessages = {
     translated: false,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
+  },
+  "Open YNAB4 File": {
+    val: "Open YNAB4 File",
+    translated: false,
+    src: ["src/ynab.ts line 311"],
+    h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
   },
 }

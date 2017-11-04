@@ -931,18 +931,6 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 50"],
     h: "Uf1w3VIwUvsmKvOkQtBwsGvbRzQ5gMbEq/iyNzv95cs=",
   },
-  "Duplicate Window": {
-    val: "Duplicar la ventana",
-    translated: true,
-    src: ["src/mainprocess/menu.ts line 63"],
-    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
-  },
-  "Import Transactions...": {
-    val: "Importar transacciones...",
-    translated: true,
-    src: ["src/mainprocess/menu.ts line 72"],
-    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
-  },
   "Edit": {
     val: "Editar",
     translated: true,
@@ -1075,6 +1063,30 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 187","src/mainprocess/menu.ts line 304"],
     h: "hrPxvP/hrVgtNNTMX4sv5sljx57neTy+2p0U1TKGuCE=",
   },
+  "Budget": {
+    val: "Presupuesto",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 158"],
+    h: "zOO4DqNSFLa6Z9vlmfaz8OnwggHn8wJeP058V5mUKbE=",
+  },
+  "Duplicate Window": {
+    val: "Duplicar la ventana",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 63"],
+    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
+  },
+  "Import Transactions...": {
+    val: "Importar transacciones...",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 72"],
+    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
+  },
+  "Import From YNAB4...": {
+    val: "Importar de YNAB4...",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 179"],
+    h: "z10Vp9BzEC6CkLTNtR8xywSTNYGMBbGFZMD7XUEbrVs=",
+  },
   "Help": {
     val: "Ayuda",
     translated: true,
@@ -1130,13 +1142,13 @@ const messages:IMessages = {
     h: "RjwjZtmUgFzGUxR0zMmyXh0cHzpzsbj4nk6R7tGe+i4=",
   },
   "API/File Format": {
-    val: "API/File Format",
-    translated: false,
+    val: "Formato del archivo/API",
+    translated: true,
     src: ["src/mainprocess/menu.ts line 237"],
     h: "tmi6N7ONU1/Iq2UdrKOr06w0UGQwzs39FSzDDXauGHU=",
   },
   "Purchase Full Version...": {
-    val: "Comprar las versión completa...",
+    val: "Comprar la versión completa...",
     translated: true,
     src: ["src/mainprocess/menu.ts line 178"],
     h: "+6h2Y0QTHEVui0aUhwAlCsyJp/F+S0PYKMRlQysqjrk=",
@@ -1322,20 +1334,20 @@ const messages:IMessages = {
     h: "BfJdh6NOzurSCMGRmCP8gb1VAXUlrSSsCFIGHGXtNiA=",
   },
   "Buckets File Format": {
-    val: "Buckets File Format",
-    translated: false,
+    val: "Formato de los Archivos de Buckets",
+    translated: true,
     src: ["src/wwwroot/misc/fileformat.html line 0","src/wwwroot/misc/fileformat.html line 0"],
     h: "nvdgyKvpjrJsaVCyT2YOfOveCKs22Us+MUkm4LSYvAA=",
   },
   "ff.intro": {
-    val: "Buckets budget files are SQLite databases.  The schema is mostly self-explanatory, but this document points out some things that aren&apos;t.",
-    translated: false,
+    val: "Los archivos de Buckets son bases de datos SQLite.  La esquema es auto explicativa en la mayor parte, pero este documento muestra las cosas que no son obvio.",
+    translated: true,
     src: ["src/wwwroot/misc/fileformat.html line 0"],
     h: "8NaWFwFw43kAXH+tkWNuo+51wMiBSq8xg5aV+bmIY4I=",
   },
   "ff.schemawarning": {
-    val: "\n    <b>WARNING:</b> The schema is not final and may change without warning in future versions of Buckets.\n  ",
-    translated: false,
+    val: "\n    <b>ADVERTENCIA:</b> La esquema no es final y puede cambiar sin advertencia de una versión a la siguiente.\n  ",
+    translated: true,
     src: ["src/wwwroot/misc/fileformat.html line 0"],
     h: "eYLdcn3c+SqbEm2+q12x3U8W2RHaVpzGvzNutecB7Nc=",
   },
@@ -1488,6 +1500,12 @@ const messages:IMessages = {
     translated: true,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
+  },
+  "Open YNAB4 File": {
+    val: "Abrir archivo de YNAB4",
+    translated: true,
+    src: ["src/ynab.ts line 311"],
+    h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
   },
 }
 export const pack:ILangPack = {

@@ -12,27 +12,7 @@ import { openPreferences } from './prefs'
 import { APP_ROOT } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
 
-function recursiveMap(menuitems:Electron.MenuItem[], func) {
-  menuitems.forEach(item => {
-    func(item);
-    if ((item as any).submenu !== undefined && (item as any).submenu) {
-      recursiveMap((item as any).submenu.items as Electron.MenuItem[], func);
-    }
-  })
-}
-
-export async function updateEnabled(isbudget:boolean) {
-  recursiveMap(Menu.getApplicationMenu().items, item => {
-    if (item.id) {
-      let labels = item.id.split(' ');
-      if (labels.indexOf('only4budgets') !== -1) {
-        item.enabled = isbudget;  
-      }
-    }
-  })
-}
-
-export async function updateMenu() {
+export async function updateMenu(show_budget:boolean=false) {
   let recent_files = await getRecentFiles();
   let FileMenu = {
     label: sss('File'),
@@ -63,36 +43,6 @@ export async function updateMenu() {
           }
         })
       },
-      {type: 'separator'},
-      {
-        label: sss('Duplicate Window'),
-        id: 'only4budgets duplicate',
-        accelerator: 'CmdOrCtrl+N',
-        click() {
-          newBudgetWindow();
-        },
-      },
-      {type: 'separator'},
-      {
-        label: sss('Import Transactions...'),
-        id: 'only4budgets import',
-        accelerator: 'CmdOrCtrl+I',
-        click() {
-          let win = BrowserWindow.getFocusedWindow();
-          win.webContents.send('start-file-import');
-        }
-      },
-      {
-        label: sss('Import From YNAB4...'),
-        id: 'only4budgets importynab',
-        click() {
-          let win = BrowserWindow.getFocusedWindow();
-          let budgetfile = WIN2FILE[win.id];
-          if (budgetfile) {
-            findYNAB4FileAndImport(budgetfile.store);  
-          }
-        }
-      }
     ],
   };
   let EditMenu = {
@@ -204,6 +154,41 @@ export async function updateMenu() {
       }
     ]
   };
+
+  let BudgetMenu = {
+    label: sss('Budget'),
+    submenu: [
+      {
+        label: sss('Duplicate Window'),
+        id: 'only4budgets duplicate',
+        accelerator: 'CmdOrCtrl+N',
+        click() {
+          newBudgetWindow();
+        },
+      },
+      {
+        label: sss('Import Transactions...'),
+        id: 'only4budgets import',
+        accelerator: 'CmdOrCtrl+I',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          win.webContents.send('start-file-import');
+        }
+      },
+      {type: 'separator'},
+      {
+        label: sss('Import From YNAB4...'),
+        id: 'only4budgets importynab',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          let budgetfile = WIN2FILE[win.id];
+          if (budgetfile) {
+            findYNAB4FileAndImport(budgetfile.store);  
+          }
+        }
+      }
+    ]
+  }
 
   let HelpMenu = {
     role: 'help',
@@ -380,6 +365,9 @@ export async function updateMenu() {
     ViewMenu,
     WindowMenu,
   ]
+  if (show_budget) {
+    template.push(BudgetMenu);
+  }
   if (!isRegistered()) {
     template.push(RegisterMenu);
   }

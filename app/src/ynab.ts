@@ -323,7 +323,7 @@ export async function findYNAB4FileAndImport(store:IStore):Promise<any> {
             await importYNAB4(store, path);  
           } catch(err) {
             log.error(err.stack);
-            reportErrorToUser('Error importing', {err: err});
+            reportErrorToUser(sss('Error importing'), {err: err});
           }
         }
         resolve(null)
