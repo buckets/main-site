@@ -1,9 +1,6 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 
 Bugs:
- ☐ Have the open/new dialog menus open to a good default location instead of /
-   How do I do this while still allowing for the last-used location to take precendence?
- ☐ Make light grey text on charts darker
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
@@ -47,6 +44,9 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Have the open/new dialog menus open to a good default location instead of / @done (17-11-04 16:42) @project(Bugs)
+  How do I do this while still allowing for the last-used location to take precendence?
+ ✔ Make light grey text on charts darker @done (17-11-04 16:35) @project(Bugs)
  ✔ Preferences page doesn't have the right language. @done (17-11-03 22:28) @project(Bugs)
  ✔ Turning a regular expense back to a normal bucket retains the deposit in rain @done (17-11-03 22:21) @project(Bugs)
  ✔ Put all budget-related menu items into a "Budget" menu that appears/disappears. @done (17-11-03 22:15) @project(v1.0.0)

@@ -1,7 +1,7 @@
 import * as log from 'electron-log'
 import * as Path from 'path'
 import * as fs from 'fs-extra-promise'
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { app, ipcMain, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import {v4 as uuid} from 'uuid';
 import {DBStore} from './dbstore';
@@ -142,7 +142,7 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
       title: sss('Buckets Budget Filename'),
-      defaultPath: 'My Budget.buckets',
+      defaultPath: Path.resolve(app.getPath('documents'), 'My Budget.buckets'),
     }, (filename) => {
       if (filename) {
         resolve(BudgetFile.openFile(filename, true));  
