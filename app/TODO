@@ -18,8 +18,6 @@ v1.0.0:
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
  ☐ Show running balance in bucket transactions list
  ☐ Merge "File import" and "Connections" page
- ☐ Make "Import from YNAB4" (look on laptop in ~/Documents/YNAB for format)
- ☐ Put all budget-related menu items into a "Budget" menu that appears/disappears.
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
@@ -48,6 +46,8 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Put all budget-related menu items into a "Budget" menu that appears/disappears. @done (17-11-03 22:15) @project(v1.0.0)
+ ✔ Make "Import from YNAB4" (look on laptop in ~/Documents/YNAB for format) @done (17-11-03 22:15) @project(v1.0.0)
  ✔ Uncaught (in promise) TypeError: Cannot read property 'store' of undefined @done (17-09-14 10:37) @project(Bugs)
   at unknowns.map.unknown (/opt/Buckets/resources/app.asar/src/models/simplefin.js:266:28)
   at Array.map (native)
