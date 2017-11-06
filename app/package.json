@@ -54,6 +54,9 @@
     "dmg": {
       "icon": "build/dmg.icns"
     },
+    "nsis": {
+      "perMachine": true
+    },
     "linux": {
       "category": "Finance",
       "target": [
