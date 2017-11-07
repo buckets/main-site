@@ -46,7 +46,7 @@ class PostmarkMailer(object):
             'TemplateId': template_id,
             'TemplateModel': data,
             'To': to_email,
-            'From': 'hello@bucketsisbetter.com',
+            'From': 'hello@budgetwithbuckets.com',
         }
         return requests.post(
             self.api_root + '/email/withTemplate',

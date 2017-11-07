@@ -1,12 +1,12 @@
 {
   "name": "Buckets",
   "version": "0.21.0-dev",
-  "homepage": "https://www.bucketsisbetter.com",
+  "homepage": "https://www.budgetwithbuckets.com",
   "main": "src/mainprocess/main.js",
   "description": "Buckets Family Budgeting",
   "author": {
     "name": "Buckets",
-    "email": "hello@bucketsisbetter.com"
+    "email": "hello@budgetwithbuckets.com"
   },
   "scripts": {
     "docs": "typedoc --tsconfig tsconfig.json --out docs/ src/",

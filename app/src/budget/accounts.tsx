@@ -139,7 +139,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
         {sss('getting-started-link', (clickhandler) => {
           return <span>First time using Buckets?  Check out the <a href="#" onClick={clickhandler}>Getting Started Videos.</a></span>
         })(() => {
-          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
+          shell.openExternal('https://www.budgetwithbuckets.com/gettingstarted');
         })}
       </div>
     }

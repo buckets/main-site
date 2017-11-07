@@ -2,7 +2,7 @@ import { dialog, shell } from 'electron'
 import { sss } from './i18n'
 
 export function reportBug(body?:string) {
-  let url = 'mailto:hello@bucketsisbetter.com?subject=Bug%20Report';
+  let url = 'mailto:hello@budgetwithbuckets.com?subject=Bug%20Report';
   if (body) {
     url = `${url}&body=${encodeURIComponent(body)}`;
   }
@@ -29,7 +29,7 @@ export function reportErrorToUser(text?:string, args?:{
       // Ignore
     } else if (indexClicked === 1) {
       // Get Help
-      shell.openExternal('https://www.bucketsisbetter.com/chat');
+      shell.openExternal('https://www.budgetwithbuckets.com/chat');
     } else if (indexClicked === 2) {
       // Report Bug
       if (args.err) {
