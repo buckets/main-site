@@ -1,4 +1,26 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.20.0
+
+- **FIX:** Light grey on charts is now less light and more visible
+
+- **FIX:** When turning a bucket from a specialized type back into a regular bucket, the rain is now reported correctly (as zero)
+
+- **FIX:** Set default save directory to ~/Documents (or OS equivalent) so that the default is no longer /
+
+- NEW: All budget-related menu options have been moved to a single 'Budget' menu (rather than being dispersed over several other menus)
+
+- NEW: Buckets can now import You Need a Budget (YNAB) v4 budget files.
+
+## v0.19.0
+
+- **FIX:** Translate the preferences page
+
+- NEW: Buckets files format is documented
+
+- NEW: Auto-updating is now supported on Linux for AppImage installs
+
+- NEW: Reduce license price from $40 to $29 (and intro price from $20 to $15)
+
 ## v0.18.0
 
 - NEW: Buckets is now available in Spanish!

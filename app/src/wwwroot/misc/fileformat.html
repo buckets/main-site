@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title data-translate>Buckets File Format</title>
+  <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/style.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
+  <style type="text/css">
+    html {
+      height: 100%;
+    }
+    body {
+      padding: 3rem;
+      padding-bottom: 3rem;
+    }
+    pre {
+      white-space: pre-wrap;
+      max-width: 60rem;
+      font-size: .9rem;
+    }
+    h2 {
+      margin-bottom: 0;
+      border-bottom: 1px solid var(--lighter-grey);
+    }
+    code, pre.codeblock {
+      color: var(--darker-darkblue);
+      font-weight: bold;
+      background-color: var(--lightest-grey);
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    code {
+      padding: 1px 3px;
+    }
+    pre.codeblock {
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1 data-translate>Buckets File Format</h1>
+  <p data-translate="ff.intro">
+    Buckets budget files are SQLite databases.  The schema is mostly self-explanatory, but this document points out some things that aren't.
+  </p>
+
+  <p data-translate="ff.schemawarning">
+    <b>WARNING:</b> The schema is not final and may change without warning in future versions of Buckets.
+  </p>
+
+  <p data-translate="ff.havequestions">
+    If you still have questions after reading this, feel free to chat with me.
+  </p>
+
+
+  <h2 data-translate>Concurrency</h2>
+  <p data-translate="ff.concurrency">
+    It's not a good idea to do data-manipulating operations (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, etc...) on the same budget file from more than one process at a time.  So before you manipulate data outside of Buckets, close the budget file inside Buckets.
+  </p>
+
+
+  <h2 data-translate>Amounts</h2>
+  <p data-translate="ff.intamounts">
+    Amounts are stored as integers, not floats.  For USD (and most other currencies), this means that amounts are integer cents.
+  </p>
+
+  <p data-translate="ff.amountexampleintro">
+    In this example, account 1 has a balance of $6,500:
+  </p>
+
+  <pre class="codeblock">sqlite> SELECT balance FROM account WHERE id=1;
+650000
+sqlite> SELECT printf("%.2f", balance/100.0) AS balance FROM account WHERE id=1;
+6500.00</pre>
+
+
+  <h2 data-translate>Inserting transactions</h2>
+  <p data-translate="ff.insertintro">
+    Insert bank/account transactions into the <code>account_transaction</code> table.  Be aware of the following:
+  </p>
+
+  <ul>
+    <li data-translate="ff.fi_id">
+      The <code>fi_id</code> column represents an account-unique ID (typically assigned by the bank) for a transaction.
+    </li>
+    <li data-translate="ff.general_cat">
+      <code>general_cat</code> should be one of the strings <code>""</code>, <code>"income"</code>, or <code>"transfer"</code>.
+    </li>
+  </ul>
+
+  <p data-translate="ff.baltriggers">
+    Account and bucket balances are automatically updated (by SQLite triggers) when transactions are inserted/updated/deleted.
+  </p>
+
+  <script>
+  const req = function() {
+    const {remote} = require('electron');
+    const Path = require('path');
+    const appPath = remote.app.getAppPath();
+    return (module) => {
+      if (module.startsWith('.') || module.startsWith('/')) {
+        return require(Path.resolve(appPath, module))
+      } else {
+        return require(module);
+      }
+    }
+  }();
+  const { localizeThisPage } = req('./src/i18n');
+  localizeThisPage();
+  </script>
+</body>
+</html>

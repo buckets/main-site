@@ -5,28 +5,28 @@ import { COLORS } from '../color'
 
 export const CHART_STYLES = {
   axis: {
-    stroke: COLORS.lighter_grey,
+    stroke: COLORS.grey,
     strokeWidth: 1,
   },
   tracer: {
-    stroke: COLORS.lighter_grey,
+    stroke: COLORS.grey,
     strokeWidth: 1,
     strokeDasharray: "5, 5",
   },
   axislabel: {
-    fill: COLORS.lighter_grey,
+    fill: COLORS.grey,
     fontSize: '75%',
   },
   tick: {
-    stroke: COLORS.lightest_grey,
+    stroke: COLORS.lighter_grey,
     strokeWidth: 1,
   },
   ticklabel: {
-    fill: COLORS.lighter_grey,
+    fill: COLORS.grey,
     fontSize: '75%',
   },
   forecastLine: {
-    stroke: COLORS.lighter_grey,
+    stroke: COLORS.grey,
     strokeWidth: 1,
     strokeDasharray: "5, 5",
   }

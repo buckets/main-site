@@ -931,18 +931,6 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 50"],
     h: "Uf1w3VIwUvsmKvOkQtBwsGvbRzQ5gMbEq/iyNzv95cs=",
   },
-  "Duplicate Window": {
-    val: "Duplicate Window",
-    translated: false,
-    src: ["src/mainprocess/menu.ts line 63"],
-    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
-  },
-  "Import Transactions...": {
-    val: "Import Transactions...",
-    translated: false,
-    src: ["src/mainprocess/menu.ts line 72"],
-    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
-  },
   "Edit": {
     val: "Edit",
     translated: false,
@@ -1075,6 +1063,30 @@ const messages:IMessages = {
     src: ["src/mainprocess/menu.ts line 187","src/mainprocess/menu.ts line 304"],
     h: "hrPxvP/hrVgtNNTMX4sv5sljx57neTy+2p0U1TKGuCE=",
   },
+  "Budget": {
+    val: "Budget",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 158"],
+    h: "zOO4DqNSFLa6Z9vlmfaz8OnwggHn8wJeP058V5mUKbE=",
+  },
+  "Duplicate Window": {
+    val: "Duplicate Window",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 63"],
+    h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
+  },
+  "Import Transactions...": {
+    val: "Import Transactions...",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 72"],
+    h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
+  },
+  "Import From YNAB4...": {
+    val: "Import From YNAB4...",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 179"],
+    h: "z10Vp9BzEC6CkLTNtR8xywSTNYGMBbGFZMD7XUEbrVs=",
+  },
   "Help": {
     val: "Help",
     translated: false,
@@ -1128,6 +1140,12 @@ const messages:IMessages = {
     translated: false,
     src: ["src/mainprocess/menu.ts line 229"],
     h: "RjwjZtmUgFzGUxR0zMmyXh0cHzpzsbj4nk6R7tGe+i4=",
+  },
+  "API/File Format": {
+    val: "API/File Format",
+    translated: false,
+    src: ["src/mainprocess/menu.ts line 237"],
+    h: "tmi6N7ONU1/Iq2UdrKOr06w0UGQwzs39FSzDDXauGHU=",
   },
   "Purchase Full Version...": {
     val: "Purchase Full Version...",
@@ -1315,6 +1333,90 @@ const messages:IMessages = {
     src: ["src/wwwroot/misc/enter_license.tsx line 30"],
     h: "BfJdh6NOzurSCMGRmCP8gb1VAXUlrSSsCFIGHGXtNiA=",
   },
+  "Buckets File Format": {
+    val: "Buckets File Format",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0","src/wwwroot/misc/fileformat.html line 0"],
+    h: "nvdgyKvpjrJsaVCyT2YOfOveCKs22Us+MUkm4LSYvAA=",
+  },
+  "ff.intro": {
+    val: "\n    Buckets budget files are SQLite databases.  The schema is mostly self-explanatory, but this document points out some things that aren&apos;t.\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "8NaWFwFw43kAXH+tkWNuo+51wMiBSq8xg5aV+bmIY4I=",
+  },
+  "ff.schemawarning": {
+    val: "\n    <b>WARNING:</b> The schema is not final and may change without warning in future versions of Buckets.\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "eYLdcn3c+SqbEm2+q12x3U8W2RHaVpzGvzNutecB7Nc=",
+  },
+  "ff.havequestions": {
+    val: "\n    If you still have questions after reading this, feel free to chat with me.\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "gyzBJvQC8w04NQLWv7olNUMwZxDUbyOV72JOtCYMdsQ=",
+  },
+  "Concurrency": {
+    val: "Concurrency",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "rkWENZ+l8n8e2mpaKv4y+BINHBJ0c4jp33WU+d4CjNU=",
+  },
+  "ff.concurrency": {
+    val: "\n    It&apos;s not a good idea to do data-manipulating operations (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, etc...) on the same budget file from more than one process at a time.  So before you manipulate data outside of Buckets, close the budget file inside Buckets.\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "ghgaqkozgsgv5d93DBhI2zuT4uKH4h1hXWoWAVZTXqw=",
+  },
+  "Amounts": {
+    val: "Amounts",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "8ZQCjYI7pkNdp9oidhQn+P6xBxcze8h/M0o7fJmZVXk=",
+  },
+  "ff.intamounts": {
+    val: "\n    Amounts are stored as integers, not floats.  For USD (and most other currencies), this means that amounts are integer cents.\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "EUiHjmxxSZruVFbtpFbvSFDO11XS2uw9kdjmNKaYi7s=",
+  },
+  "ff.amountexampleintro": {
+    val: "\n    In this example, account 1 has a balance of $6,500:\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "Tlo6ijWPvwhee8ZLxUitIWNBtB+5jEJTL3KfVUt7yao=",
+  },
+  "Inserting transactions": {
+    val: "Inserting transactions",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "//8Lw1GE774yBa6pDXsipJSchhfXyjjhp1XUVCIfvno=",
+  },
+  "ff.insertintro": {
+    val: "\n    Insert bank/account transactions into the <code>account_transaction</code> table.  Be aware of the following:\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "8kIcAVWwxfdamGPNuoqFbx6xuPjgwVDuphS8b3HdhSw=",
+  },
+  "ff.fi_id": {
+    val: "\n      The <code>fi_id</code> column represents an account-unique ID (typically assigned by the bank) for a transaction.\n    ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "sK4oD8jX+Js/QOoa/LNXRrEhrVIsWxCLzvQKcFcaqk0=",
+  },
+  "ff.general_cat": {
+    val: "\n      <code>general_cat</code> should be one of the strings <code>&quot;&quot;</code>, <code>&quot;income&quot;</code>, or <code>&quot;transfer&quot;</code>.\n    ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "std3l/kWL9KQvL2QGdSonxsEhAE+AbVumCBcZcoUZhA=",
+  },
+  "ff.baltriggers": {
+    val: "\n    Account and bucket balances are automatically updated (by SQLite triggers) when transactions are inserted/updated/deleted.\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
+    h: "9gycbX8P/r8JUSY9qVA6Sra+wwW51kpt8lHqogRyeWA=",
+  },
   "Preferences": {
     val: "Preferences",
     translated: false,
@@ -1398,6 +1500,12 @@ const messages:IMessages = {
     translated: false,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
+  },
+  "Open YNAB4 File": {
+    val: "Open YNAB4 File",
+    translated: false,
+    src: ["src/ynab.ts line 311"],
+    h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
   },
 }
 export const pack:ILangPack = {
