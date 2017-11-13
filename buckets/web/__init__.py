@@ -7,6 +7,7 @@ from flask import Flask, g, request
 from flask import render_template
 
 from flask_sslify import SSLify
+from flask.ext.babel import Babel
 
 from raven.contrib.flask import Sentry
 
@@ -16,6 +17,14 @@ from buckets.web.util import send_warnings_to_sentry
 
 f = Flask(__name__)
 SSLify(f)
+babel = Babel(f)
+
+@babel.localeselector
+def get_locale():
+    return 'es'
+    # return request.accept_languages.best_match(['en', 'es'])
+
+f.jinja_env.add_extension('jinja2.ext.i18n')
 
 sentry = Sentry()
 
