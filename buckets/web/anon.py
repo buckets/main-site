@@ -5,7 +5,7 @@ import requests
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, flash
-from flask import redirect, url_for
+from flask import redirect, url_for, g
 from flask import current_app
 
 from buckets.drm import createLicense, formatLicense
@@ -34,6 +34,15 @@ def getLatestReleaseVersion():
     logger.info('latest_version', _latest_version=_latest_version)
     return _latest_version
 
+
+@blue.url_defaults
+def add_language_code(endpoint, values):
+    values.setdefault('lang_code', g.get('lang_code', 'en'))
+
+@blue.url_value_preprocessor
+def pull_lang_code(endpoint, values):
+    logger.debug('lang_code into g', lang_code=values.get('lang_code'))
+    g.lang_code = values.pop('lang_code', 'en')
 
 # PRIVATE_KEY = os.environ.get('BUCKETS_LICENSE_KEY')
 # if not PRIVATE_KEY:

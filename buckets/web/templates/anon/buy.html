@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Buy Buckets{% endblock %}
+{% block title %}{% trans %}Buy Buckets{% endtrans %}{% endblock %}
 
 {% block navlinks %}{% endblock %}
 
@@ -14,8 +14,8 @@
             data-key="{{ config.STRIPE_PUBLIC_KEY }}"
             data-amount="1500"
             data-name="Buckets"
-            data-label="Purchase License"
-            data-description="Family budgeting app"
+            data-label="{% trans %}Purchase License{% endtrans %}"
+            data-description="{% trans %}Family budgeting app{% endtrans %}"
             data-zip-code="true"
             data-billing-address="false"
             data-locale="auto"
@@ -26,11 +26,11 @@
         </form>
     </div>
     <div class="callout para">
-        <span class="highlight">Buckets is 50% off from now until January 2018.</span>
-        For a <em>one-time $15 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.
+        <span class="highlight">{% trans %}Buckets is 50% off from now until January 2018.{% endtrans %}</span>
+        {% trans %}For a <em>one-time $15 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.{% endtrans %}
     </div>
     <div class="callout para">
-        If you've lost your license, email me at hello@bucketsisbetter.com
+        {% trans %}If you've lost your license, email me at hello@bucketsisbetter.com{% endtrans %}
     </div>
     <div class="callout para">
         - Matt

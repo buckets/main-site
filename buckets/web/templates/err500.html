@@ -3,19 +3,19 @@
 {% block title %}Error{% endblock %}
 
 {% block content %}
-<h1>Oops</h1>
+<h1>{% trans %}Oops{% endtrans %}</h1>
 
 <p>
-  Something broke.  Internal server error.  Aaahhhh...
+  {% trans %}Something broke.  Internal server error.  Aaahhhh...{% endtrans %}
 </p>
 
 <p>
-  Matt has probably been notified about this error.  If he doesn't contact you about it and it keeps happening, please contact him.
+  {% trans %}Matt has probably been notified about this error.  If he doesn't contact you about it and it keeps happening, please contact him.{% endtrans %}
 </p>
 
 {% if sentry_event_id %}
 <p>
-  You can <a href="#" id="start-feedback">submit a bug-report</a> pretty easily.
+  {% trans %}You can <a href="#" id="start-feedback">submit a bug-report</a> pretty easily.{% endtrans %}
   <script>
   document.getElementById('start-feedback').addEventListener('click', function() {
     Raven.showReportDialog({
@@ -32,7 +32,7 @@
   </script>
 {% else %}
 <p>
-  If you do email Matt (hello@bucketsisbetter.com), include this chunk of information in your email:
+  {% trans %}If you do email Matt (hello@bucketsisbetter.com), include this chunk of information in your email:{% endtrans %}
   <pre style="font-family: monospace; white-space: pre-wrap;">{{ request_debug_data() }}</pre>
 </p>
 {% endif %}

@@ -3,11 +3,13 @@ import stripe
 import logging
 logger = structlog.get_logger()
 
-from flask import Flask, g, request
-from flask import render_template
+from flask import Flask, g, request, redirect
+from flask import render_template, abort
 
 from flask_sslify import SSLify
-from flask.ext.babel import Babel
+from flask_babel import Babel
+
+from werkzeug.routing import AnyConverter
 
 from raven.contrib.flask import Sentry
 
@@ -15,16 +17,48 @@ from buckets.mailing import PostmarkMailer, NoMailer
 from buckets.web.util import structlog_context, sentry_context
 from buckets.web.util import send_warnings_to_sentry
 
+
 f = Flask(__name__)
 SSLify(f)
 babel = Babel(f)
 
+#---------------------
+# i18n and l10n
+#---------------------
+LANGS = [x.language for x in babel.list_translations()]
+print('LANGS', LANGS)
+
+class LangConverter(AnyConverter):
+
+    def __init__(self, map):
+        AnyConverter.__init__(self, map)
+        self.regex = '(?:%s)' % '|'.join(LANGS)
+
+f.url_map.converters['lang'] = LangConverter
+
 @babel.localeselector
 def get_locale():
-    return 'es'
-    # return request.accept_languages.best_match(['en', 'es'])
+    locale = g.get('lang_code', request.accept_languages.best_match(LANGS)) or 'en'
+    logger.debug('get_locale', locale=locale)
+    return locale
 
-f.jinja_env.add_extension('jinja2.ext.i18n')
+# f.jinja_env.add_extension('jinja2.ext.i18n')
+
+@f.url_defaults
+def add_language_code(endpoint, values):
+    if 'lang_code' not in values:
+        values['lang_code'] = get_locale()
+
+@f.context_processor
+def inject_langs():
+    return dict(
+        locale=get_locale(),
+        all_locales=babel.list_translations(),
+    )
+
+#---------------------
+# configuration
+#---------------------
 
 sentry = Sentry()
 
@@ -115,7 +149,7 @@ def handle_500(err):
 
 
 @f.before_request
-def put_user_on_request():
+def before_request():
     # initial context
     log = logger.new(**structlog_context())
     sentry.client.context.merge(sentry_context())
@@ -135,4 +169,16 @@ def warning():
     return 'warning'
 
 from buckets.web import anon
-f.register_blueprint(anon.blue, url_prefix='')
+f.register_blueprint(anon.blue, url_prefix='/<lang:lang_code>')
+
+@f.route('/', defaults={'path': ''})
+@f.route('/<path:path>')
+def langredirect(path):
+    locale = get_locale()
+    print('path', path, locale)
+    import sys
+    sys.stdout.flush()
+    if request.path.startswith('/{0}'.format(locale)):
+        abort(404)
+    return redirect('/{0}/{1}'.format(locale, path))
+

@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{% block title %}Buckets - Private Family Budgeting App{% endblock %}</title>
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}"  type="image/png">
+  <title>{% block title %}Buckets - {% trans %}Private Family Budgeting App{% endtrans %}{% endblock %}</title>
+  {% for locale in all_locales %}
+  <link rel="alternate" hreflang="{{ locale.language }}" href="{{ url_for(request.endpoint, lang_code=locale.language) }}" />
+  {% endfor %}
+  <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-  <meta name="description" content="Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer." />
+  <meta name="description" content="{% trans %}Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.{% endtrans %}" />
   {% block extrahead %}{% endblock %}
   <style>
   .hero {
@@ -122,16 +125,16 @@
   <div class="wrap">
     <footer>
       <div>
-        <div>Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
+        <div>{% trans %}Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard{% endtrans %}</a>
         </div>
         <div><a href="mailto:hello@bucketsisbetter.com">hello@bucketsisbetter.com</a>
         </div>
         <div>&copy; Buckets, LLC.</div>
       </div>
       <div>
-        <div><a href="{{ url_for('anon.gettingstarted') }}">Getting Started</a></div>
-        <div><a href="{{ url_for('anon.buy') }}">Pricing</a></div>
-        <div><a href="{{ url_for('anon.buy') }}">Buy</a></div>
+        <div><a href="{{ url_for('anon.gettingstarted') }}">{% trans %}Getting Started{% endtrans %}</a></div>
+        <div><a href="{{ url_for('anon.buy') }}">{% trans %}Pricing{% endtrans %}</a></div>
+        <div><a href="{{ url_for('anon.buy') }}">{% trans %}Buy{% endtrans %}</a></div>
       </div>
     </footer>
   </div>

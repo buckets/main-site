@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}Getting Started{% endblock %}
+{% block title %}{% trans %}Getting Started{% endtrans %}{% endblock %}
 
 {% block navlinks %}{% endblock %}
 
 {% block content %}
 <div class="wrap spaced">
-    <h2>Getting Started</h2>
+    <h2>{% trans %}Getting Started{% endtrans %}</h2>
     <p>
-        Check out these 1-2 minute videos to help you get started budgeting with Buckets:
+        {% trans %}Check out these 1-2 minute videos to help you get started budgeting with Buckets:{% endtrans %}
     </p>
     <iframe width="480" height="270" src="https://www.youtube.com/embed/videoseries?list=PL3szGdfWlPgmYA3BiYKYiWS5MglvCZIou" frameborder="0" allowfullscreen></iframe>
 </div>

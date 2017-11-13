@@ -9,7 +9,7 @@
   "@type": "Product",
   "name": "Buckets",
   "image": "https://www.bucketsisbetter.com/static/img/logo.svg",
-  "description": "Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.",
+  "description": "{% trans %}Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.{% endtrans %}",
   "offers": {
     "@type": "Offer",
     "price": "15",
@@ -96,23 +96,23 @@ img.main-shot {
     
       <div class="download-section">
         <a name="download"></a>
-        <span class="fa fa-download"></span> Download for:
+        <span class="fa fa-download"></span> {% trans %}Download for:{% endtrans %}
         <div>
           <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}.dmg{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
             <span class="fa fa-apple"></span>
-            macOS
+            {% trans %}macOS{% endtrans %}
           </a>
         </div>
         <div>
           <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-Setup-{{ latest_version }}.exe{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
             <span class="fa fa-windows"></span>
-            Windows
+            {% trans %}Windows{% endtrans %}
           </a>
         </div>
         <div>
           <a class="buttonish download" href="https://github.com/buckets/application/releases/latest">
             <span class="fa fa-linux"></span>
-            Linux
+            {% trans %}Linux{% endtrans %}
           </a>
         </div>
       </div>  
@@ -123,46 +123,46 @@ img.main-shot {
 <div class="wrap">
 
   <div class="callout para">
-    Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  <em>Ever wonder who's combing through your cloud-stored transaction history?</em>  With Buckets, your personal data stays on your computer.
+    {% trans %}Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  <em>Ever wonder who's combing through your cloud-stored transaction history?</em>  With Buckets, your personal data stays on your computer.{% endtrans %}
   </div>
 
   <div class="callout para">
-    Buckets is <em>affordable</em> with <em>no monthly fee.</em>  A single license may be used on all your computers and all the computers of family members living in your home.  You can afford to teach your kids how to budget now.
+    {% trans %}Buckets is <em>affordable</em> with <em>no monthly fee.</em>  A single license may be used on all your computers and all the computers of family members living in your home.  You can afford to teach your kids how to budget now.{% endtrans %}
   </div>
 
   <div class="callout para">
-    Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget that only one of you knows how to use.  From now on, you can stay on the same financial page.
+    {% trans %}Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget that only one of you knows how to use.  From now on, you can stay on the same financial page.{% endtrans %}
   </div>
 
   <div class="callout para">
-    Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Why, yes, that is ridiculously generous.
+    {% trans %}Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Why, yes, that is ridiculously generous.{% endtrans %}
   </div>
 
   <div class="leftimg">
     <a href="{{ url_for('.gettingstarted') }}"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
     <div class="callout para">
-      Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ url_for('.gettingstarted') }}">Check 'em out!</a>
+      {% trans %}Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ url_for('.gettingstarted') }}">Check 'em out!</a>{% endtrans %}
     </div>
   </div>
 
   <div class="rightimg">
     <div class="callout para">
-      Buckets is <em>multilingual</em>.  Currently English and Spanish are supported.
+      {% trans %}Buckets is <em>multilingual</em>.  Currently English and Spanish are supported.{% endtrans %}
     </div>
     <img src="/static/img/shots/spanish.png" style="width: 300px;">
   </div>
 
   <div class="callout para">
-    Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.
+    {% trans %}Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.{% endtrans %}
   </div>
 
   <div class="callout para">
-    Buckets costs <em>$15.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.
-    <span class="highlight">This is the special introductory price.  In 2018 it will cost $29.</span>
+    {% trans %}Buckets costs <em>$15.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.{% endtrans %}
+    <span class="highlight">{% trans %}This is the special introductory price.  In 2018 it will cost $29.{% endtrans %}</span>
   </div>
 
   <div style="text-align: center; margin: 2rem; margin-bottom: 8rem;">
-    <a class="buttonish" href="{{ url_for('.buy') }}">Buy Now &mdash; $15</a>
+    <a class="buttonish" href="{{ url_for('.buy') }}">{% trans %}Buy Now &mdash; $15{% endtrans %}</a>
   </div>
 
 </div>
@@ -194,13 +194,13 @@ img.main-shot {
 <div id="mc_embed_signup">
 <form action="//bucketsisbetter.us8.list-manage.com/subscribe/post?u=bc109895c8df246ae54ad4d71&amp;id=0960a6d05e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
     <div id="mc_embed_signup_scroll">
-  <h2>Subscribe to the Never-More-Than-Monthly Buckets Newsletter</h2>
+  <h2>{% trans %}Subscribe to the Never-More-Than-Monthly Buckets Newsletter{% endtrans %}</h2>
 <div class="mc-field-group">
-  <label for="mce-EMAIL">Email Address </label>
+  <label for="mce-EMAIL">{% trans %}Email Address{% endtrans %}</label>
   <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
 </div>
 <div class="mc-field-group">
-  <label for="mce-FNAME">First Name </label>
+  <label for="mce-FNAME">{% trans %}First Name{% endtrans %}</label>
   <input type="text" value="" name="FNAME" class="required" id="mce-FNAME">
 </div>
   <div id="mce-responses" class="clear">
