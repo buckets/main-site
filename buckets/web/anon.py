@@ -7,6 +7,7 @@ logger = structlog.get_logger()
 from flask import Blueprint, render_template, request, flash
 from flask import redirect, url_for, g
 from flask import current_app
+from flask_babel import gettext
 
 from buckets.drm import createLicense, formatLicense
 
@@ -84,7 +85,7 @@ def buy():
                 email=email,
                 private_key=current_app.config['BUCKETS_LICENSE_KEY']))
         except Exception as e:
-            flash('Error generating license.  Your card was not charged.', 'error')
+            flash(gettext('Error generating license.  Your card was not charged.'), 'error')
             raise
 
         # charge the card
@@ -93,13 +94,13 @@ def buy():
                 amount=1500,
                 currency='usd',
                 description='Buckets v1 License',
-                statement_descriptor='Buckets Budgeting App',
+                statement_descriptor=gettext('Buckets Budgeting App'),
                 receipt_email=email,
                 source=token)
             if token_type == 'source_bitcoin':
-                flash('We got your bitcoins.')
+                flash(gettext('We got your bitcoins.'))
             else:
-                flash('Your card was charged.')
+                flash(gettext('Your card was charged.'))
 
         except stripe.error.CardError as e:
             flash(e.message, 'error')
@@ -110,8 +111,8 @@ def buy():
         try:
             current_app.mailer.sendPlain(email,
                 ('Buckets', 'hello@bucketsisbetter.com'),
-                subject='Buckets v1 License',
-                body='''Thank you for purchasing Buckets!
+                subject=gettext('Buckets v1 License'),
+                body=gettext('''Thank you for purchasing Buckets!
 
 Below is your Buckets v1 License.  To use it:
 
@@ -129,9 +130,9 @@ and your immediate family members living in your home.
 Happy budgeting!
 
 - Matt
-'''.format(license=license))
+''').format(license=license))
         except Exception as e:
-            flash("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error')
+            flash(gettext("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error'))
             raise
         return render_template('anon/bought.html', license=license)
 

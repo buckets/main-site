@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2017-11-13 15:46-0700\n"
+"POT-Creation-Date: 2017-11-13 15:52-0700\n"
 "PO-Revision-Date: 2017-11-13 08:39-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
@@ -18,13 +18,61 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 
+#: buckets/web/anon.py:88
+msgid "Error generating license.  Your card was not charged."
+msgstr ""
+
+#: buckets/web/anon.py:97
+msgid "Buckets Budgeting App"
+msgstr ""
+
+#: buckets/web/anon.py:101
+msgid "We got your bitcoins."
+msgstr ""
+
+#: buckets/web/anon.py:103
+msgid "Your card was charged."
+msgstr ""
+
+#: buckets/web/anon.py:114
+msgid "Buckets v1 License"
+msgstr "Licencia v1 para Buckets"
+
+#: buckets/web/anon.py:115
+msgid ""
+"Thank you for purchasing Buckets!\n"
+"\n"
+"Below is your Buckets v1 License.  To use it:\n"
+"\n"
+"1. Open the Buckets application (download at www.bucketsisbetter.com)\n"
+"2. Click the \"Trial Version\" menu\n"
+"3. Click \"Enter License...\"\n"
+"4. Copy and paste the following license into the box\n"
+"5. Click the button\n"
+"\n"
+"{license}\n"
+"\n"
+"This license may be used on any number of computers belonging to you\n"
+"and your immediate family members living in your home.\n"
+"\n"
+"Happy budgeting!\n"
+"\n"
+"- Matt\n"
+msgstr ""
+
+#: buckets/web/anon.py:135
+msgid ""
+"Error emailing license.  If you don't receive an email soon, please reach"
+" out to us."
+msgstr ""
+
 #: buckets/web/templates/err404.html:7
 msgid "404 Not Found"
-msgstr ""
+msgstr "404 No encontrado"
 
 #: buckets/web/templates/err404.html:10
 msgid "That URL doesn't go anywhere that we know of."
-msgstr ""
+msgstr "Este URL no sirve."
 
 #: buckets/web/templates/err500.html:6
 msgid "Oops"
@@ -54,7 +102,7 @@ msgstr ""
 
 #: buckets/web/templates/anon/bought.html:21
 msgid "Thank you for purchasing Buckets!"
-msgstr ""
+msgstr "¡Gracias por comprar Buckets!"
 
 #: buckets/web/templates/anon/bought.html:23
 msgid ""
@@ -83,7 +131,7 @@ msgstr ""
 
 #: buckets/web/templates/anon/bought.html:30
 msgid "Click the button"
-msgstr ""
+msgstr "Clic en el botón"
 
 #: buckets/web/templates/anon/bought.html:36
 msgid ""
@@ -93,19 +141,19 @@ msgstr ""
 
 #: buckets/web/templates/anon/bought.html:40
 msgid "Happy budgeting!"
-msgstr ""
+msgstr "¡Feliz presupuestar!"
 
 #: buckets/web/templates/anon/buy.html:3
 msgid "Buy Buckets"
-msgstr ""
+msgstr "Comprar Buckets"
 
 #: buckets/web/templates/anon/buy.html:17
 msgid "Purchase License"
-msgstr ""
+msgstr "Comprar licencia"
 
 #: buckets/web/templates/anon/buy.html:18
 msgid "Family budgeting app"
-msgstr ""
+msgstr "Aplicación de presupuesto familiar"
 
 #: buckets/web/templates/anon/buy.html:29
 #, python-format

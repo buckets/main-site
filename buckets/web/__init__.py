@@ -175,9 +175,6 @@ f.register_blueprint(anon.blue, url_prefix='/<lang:lang_code>')
 @f.route('/<path:path>')
 def langredirect(path):
     locale = get_locale()
-    print('path', path, locale)
-    import sys
-    sys.stdout.flush()
     if request.path.startswith('/{0}'.format(locale)):
         abort(404)
     return redirect('/{0}/{1}'.format(locale, path))

@@ -73,3 +73,4 @@ def sentry_context():
         'user': user_context,
         'extra': extra_context,
     }
+
