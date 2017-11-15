@@ -132,7 +132,7 @@ export async function linux_checkForUpdates() {
       path: '/repos/buckets/application/releases/latest',
       method: 'GET',
       headers: {
-        'User-Agent': 'Buckets App (hello@bucketsisbetter.com)',
+        'User-Agent': 'Buckets App (hello@budgetwithbuckets.com)',
       }
     }, res => {
       let payload = '';

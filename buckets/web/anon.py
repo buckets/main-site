@@ -100,13 +100,13 @@ def buy():
         # email the license
         try:
             current_app.mailer.sendPlain(email,
-                ('Buckets', 'hello@bucketsisbetter.com'),
+                ('Buckets', 'hello@budgetwithbuckets.com'),
                 subject='Buckets v1 License',
                 body='''Thank you for purchasing Buckets!
 
 Below is your Buckets v1 License.  To use it:
 
-1. Open the Buckets application (download at www.bucketsisbetter.com)
+1. Open the Buckets application (download at www.budgetwithbuckets.com)
 2. Click the "Trial Version" menu
 3. Click "Enter License..."
 4. Copy and paste the following license into the box

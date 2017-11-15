@@ -196,18 +196,18 @@ export async function updateMenu(show_budget:boolean=false) {
     submenu: [
       {
         label: sss('Learn More'),
-        click () { shell.openExternal('https://www.bucketsisbetter.com') }
+        click () { shell.openExternal('https://www.budgetwithbuckets.com') }
       },
       {
         label: sss('Getting Started...'),
         click() {
-          shell.openExternal('https://www.bucketsisbetter.com/gettingstarted');
+          shell.openExternal('https://www.budgetwithbuckets.com/gettingstarted');
         }
       },
       {
         label: sss('Chat...'),
         click() {
-          shell.openExternal('https://www.bucketsisbetter.com/chat');
+          shell.openExternal('https://www.budgetwithbuckets.com/chat');
         }
       },
       {type: 'separator'},
