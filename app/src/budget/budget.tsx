@@ -144,7 +144,7 @@ class Navbar extends React.Component<{
           {sync_widget}
           <a href="#" onClick={(ev) => {
             ev.preventDefault();
-            shell.openExternal('https://www.bucketsisbetter.com/chat');
+            shell.openExternal('https://www.budgetwithbuckets.com/chat');
             return false;
           }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt')}</span></a>
           {trial_version}

@@ -22,7 +22,7 @@ export function isRegistered():boolean {
 }
 
 export function openBuyPage() {
-  shell.openExternal("https://www.bucketsisbetter.com/buy");
+  shell.openExternal("https://www.budgetwithbuckets.com/buy");
 }
 
 const suffix = 'foo';
@@ -141,7 +141,7 @@ of buying it, here's the really weak DRM.  It's intentionally weak.
 But you'll be happier if you're honest.  I promise :)
 
 This app's licensing is rather generous and inexpensive.  Is it really
-worth it to steal?  See for yourself at https://www.bucketsisbetter.com/
+worth it to steal?  See for yourself at https://www.budgetwithbuckets.com/
 
 Thanks,
 
