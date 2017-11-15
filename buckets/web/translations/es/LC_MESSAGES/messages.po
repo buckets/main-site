@@ -20,19 +20,19 @@ msgstr ""
 
 #: buckets/web/anon.py:88
 msgid "Error generating license.  Your card was not charged."
-msgstr ""
+msgstr "Error al generar la licencia.  Su tarjeta no fue cargada."
 
 #: buckets/web/anon.py:97
 msgid "Buckets Budgeting App"
-msgstr ""
+msgstr "Buckets Presupuestos"
 
 #: buckets/web/anon.py:101
 msgid "We got your bitcoins."
-msgstr ""
+msgstr "Recibimos sus bitcoins."
 
 #: buckets/web/anon.py:103
 msgid "Your card was charged."
-msgstr ""
+msgstr "Su tarjeta fue cargada."
 
 #: buckets/web/anon.py:114
 msgid "Buckets v1 License"
@@ -59,6 +59,24 @@ msgid ""
 "\n"
 "- Matt\n"
 msgstr ""
+"¡Gracias por comprar Buckets!\n"
+"\n"
+"Debajo está su licencia de Buckets v1.  Para usarla:\n"
+"\n"
+"1. Abra la aplicación Buckets (descargar en www.budgetwithbuckets.com)\n"
+"2. Click the \"Trial Version\" menu\n"
+"3. Click \"Enter License...\"\n"
+"4. Copy and paste the following license into the box\n"
+"5. Click the button\n"
+"\n"
+"{license}\n"
+"\n"
+"This license may be used on any number of computers belonging to you\n"
+"and your immediate family members living in your home.\n"
+"\n"
+"Happy budgeting!\n"
+"\n"
+"- Matt\n"
 
 #: buckets/web/anon.py:135
 msgid ""
