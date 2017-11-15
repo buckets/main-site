@@ -26,7 +26,6 @@ babel = Babel(f)
 # i18n and l10n
 #---------------------
 LANGS = [x.language for x in babel.list_translations()]
-print('LANGS', LANGS)
 
 class LangConverter(AnyConverter):
 

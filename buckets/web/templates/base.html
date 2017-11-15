@@ -104,7 +104,7 @@
 <body>
   {% block header %}
   <div class="hero mini">
-    <a href="/"><img src="/static/img/logo.svg" border="0"/></a>
+    <a href="{{ url_for('anon.index') }}"><img src="/static/img/logo.svg" border="0"/></a>
   </div>
   {% endblock %}
 
@@ -125,7 +125,7 @@
   <div class="wrap">
     <footer>
       <div>
-        <div>{% trans %}Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard{% endtrans %}</a>
+        <div>{% trans %}Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>{% endtrans %}
         </div>
         <div><a href="mailto:hello@budgetwithbuckets.com">hello@budgetwithbuckets.com</a>
         </div>

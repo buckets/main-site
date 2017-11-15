@@ -96,7 +96,7 @@ img.main-shot {
     
       <div class="download-section">
         <a name="download"></a>
-        <span class="fa fa-download"></span> {% trans %}Download for:{% endtrans %}
+        <span class="fa fa-download"></span> {% trans %}Download Buckets v{{ latest_version }} for{% endtrans %}
         <div>
           <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}.dmg{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
             <span class="fa fa-apple"></span>
@@ -141,7 +141,7 @@ img.main-shot {
   <div class="leftimg">
     <a href="{{ url_for('.gettingstarted') }}"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
     <div class="callout para">
-      {% trans %}Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ url_for('.gettingstarted') }}">Check 'em out!</a>{% endtrans %}
+      {% trans href=url_for('.gettingstarted') %}Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ href }}">Check them out!</a>{% endtrans %}
     </div>
   </div>
 
@@ -208,7 +208,7 @@ img.main-shot {
     <div class="response" id="mce-success-response" style="display:none"></div>
   </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
     <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_bc109895c8df246ae54ad4d71_0960a6d05e" tabindex="-1" value=""></div>
-    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    <div class="clear"><input type="submit" value="{% trans %}Subscribe{% endtrans %}" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
     </div>
 </form>
 </div>
