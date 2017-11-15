@@ -4,7 +4,7 @@ cmd=$1
 
 case "$cmd" in
     extract)
-        pybabel extract -F babel.cfg --no-wrap -o messages.pot .
+        pybabel extract -F babel.cfg -o messages.pot .
         pybabel update -i messages.pot -d buckets/web/translations
         ;;
     compile)

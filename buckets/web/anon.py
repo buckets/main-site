@@ -111,8 +111,8 @@ def buy():
         try:
             current_app.mailer.sendPlain(email,
                 ('Buckets', 'hello@budgetwithbuckets.com'),
-                subject='Buckets v1 License',
-                body='''Thank you for purchasing Buckets!
+                subject=gettext('Buckets v1 License'),
+                body=gettext('''Thank you for purchasing Buckets!
 
 Below is your Buckets v1 License.  To use it:
 
@@ -130,7 +130,7 @@ and your immediate family members living in your home.
 Happy budgeting!
 
 - Matt
-'''.format(license=license))
+''').format(license=license))
         except Exception as e:
             flash(gettext("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error'))
             raise

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-11-13 15:52-0700\n"
+"POT-Creation-Date: 2017-11-15 09:35-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgid ""
 "\n"
 "Below is your Buckets v1 License.  To use it:\n"
 "\n"
-"1. Open the Buckets application (download at www.bucketsisbetter.com)\n"
+"1. Open the Buckets application (download at www.budgetwithbuckets.com)\n"
 "2. Click the \"Trial Version\" menu\n"
 "3. Click \"Enter License...\"\n"
 "4. Copy and paste the following license into the box\n"
@@ -88,7 +88,7 @@ msgid "You can <a href=\"#\" id=\"start-feedback\">submit a bug-report</a> prett
 msgstr ""
 
 #: buckets/web/templates/err500.html:35
-msgid "If you do email Matt (hello@bucketsisbetter.com), include this chunk of information in your email:"
+msgid "If you do email Matt (hello@budgetwithbuckets.com), include this chunk of information in your email:"
 msgstr ""
 
 #: buckets/web/templates/anon/bought.html:21
@@ -100,7 +100,7 @@ msgid "Below is your Buckets v1 License.  You should also receive an email with 
 msgstr ""
 
 #: buckets/web/templates/anon/bought.html:26
-msgid "Open the Buckets application (download at <a href=\"https://www.bucketsisbetter.com\" target=\"_blank\">www.bucketsisbetter.com</a>)"
+msgid "Open the Buckets application (download at <a href=\"https://www.budgetwithbuckets.com\" target=\"_blank\">www.budgetwithbuckets.com</a>)"
 msgstr ""
 
 #: buckets/web/templates/anon/bought.html:27
@@ -149,7 +149,7 @@ msgid "For a <em>one-time $15 payment,</em> you will be emailed a Buckets Licens
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:33
-msgid "If you've lost your license, email me at hello@bucketsisbetter.com"
+msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr ""
 
 #: buckets/web/templates/anon/gettingstarted.html:3

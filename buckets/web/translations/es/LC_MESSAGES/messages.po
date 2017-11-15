@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2017-11-13 15:52-0700\n"
+"POT-Creation-Date: 2017-11-15 09:35-0700\n"
 "PO-Revision-Date: 2017-11-13 08:39-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
@@ -44,7 +44,7 @@ msgid ""
 "\n"
 "Below is your Buckets v1 License.  To use it:\n"
 "\n"
-"1. Open the Buckets application (download at www.bucketsisbetter.com)\n"
+"1. Open the Buckets application (download at www.budgetwithbuckets.com)\n"
 "2. Click the \"Trial Version\" menu\n"
 "3. Click \"Enter License...\"\n"
 "4. Copy and paste the following license into the box\n"
@@ -63,18 +63,18 @@ msgstr ""
 "\n"
 "Debajo está su licencia de Buckets v1.  Para usarla:\n"
 "\n"
-"1. Abra la aplicación Buckets (descargar en www.budgetwithbuckets.com)\n"
-"2. Click the \"Trial Version\" menu\n"
-"3. Click \"Enter License...\"\n"
-"4. Copy and paste the following license into the box\n"
-"5. Click the button\n"
+"1. Abra la aplicación Buckets (descargar"
+" en www.budgetwithbuckets.com)\n"
+"2. Clic en el menú \"Versión de prueba\"\n"
+"3. Clic en \"Entrar licencia...\"\n"
+"4. Copie y pegue la siguiente licencia en la caja\n"
+"5. Clic en el botón\n"
 "\n"
 "{license}\n"
 "\n"
-"This license may be used on any number of computers belonging to you\n"
-"and your immediate family members living in your home.\n"
+"Esta licencia se puede usar en cualquier cantidad de computadoras que le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar.\n"
 "\n"
-"Happy budgeting!\n"
+"¡Feliz presupuestar!\n"
 "\n"
 "- Matt\n"
 
@@ -82,7 +82,7 @@ msgstr ""
 msgid ""
 "Error emailing license.  If you don't receive an email soon, please reach"
 " out to us."
-msgstr ""
+msgstr "Error al enviar la licencia por correo electrónico.  Si no recibe un correo electrónico pronto, póngase en contacto con nosotros"
 
 #: buckets/web/templates/err404.html:7
 msgid "404 Not Found"
@@ -94,29 +94,32 @@ msgstr "Este URL no sirve."
 
 #: buckets/web/templates/err500.html:6
 msgid "Oops"
-msgstr ""
+msgstr "Uy"
 
 #: buckets/web/templates/err500.html:9
 msgid "Something broke.  Internal server error.  Aaahhhh..."
-msgstr ""
+msgstr "Algo se rompió.  Error de servidor interno. Aaahhhh..."
 
 #: buckets/web/templates/err500.html:13
 msgid ""
 "Matt has probably been notified about this error.  If he doesn't contact "
 "you about it and it keeps happening, please contact him."
 msgstr ""
+"Matt probablemente ha sido notificado sobre este error. Si él no se comunica con usted al respecto y sigue sucediendo, comuníquese con él."
 
 #: buckets/web/templates/err500.html:18
 msgid ""
 "You can <a href=\"#\" id=\"start-feedback\">submit a bug-report</a> "
 "pretty easily."
 msgstr ""
+"Puede <a href=\"#\" id=\"start-feedback\">enviar un informe de error</a>."
 
 #: buckets/web/templates/err500.html:35
 msgid ""
-"If you do email Matt (hello@bucketsisbetter.com), include this chunk of "
-"information in your email:"
+"If you do email Matt (hello@budgetwithbuckets.com), include this chunk of"
+" information in your email:"
 msgstr ""
+"Si envía un correo electrónico a Matt (hello@budgetwithbuckets.com), incluya este fragmento de información en su correo electrónico:"
 
 #: buckets/web/templates/anon/bought.html:21
 msgid "Thank you for purchasing Buckets!"
@@ -127,25 +130,28 @@ msgid ""
 "Below is your Buckets v1 License.  You should also receive an email with "
 "this information.  To use the license:"
 msgstr ""
+"Debajo está su licencia de Buckets v1.  También deberías recibir un correo electrónico con esta información.  Para usarla:"
 
 #: buckets/web/templates/anon/bought.html:26
 msgid ""
 "Open the Buckets application (download at <a "
-"href=\"https://www.bucketsisbetter.com\" "
-"target=\"_blank\">www.bucketsisbetter.com</a>)"
+"href=\"https://www.budgetwithbuckets.com\" "
+"target=\"_blank\">www.budgetwithbuckets.com</a>)"
 msgstr ""
+"Abra la aplicación Buckets (descargar"
+" en <a href=\"https://www.budgetwithbuckets.com\" target=\"_blank\">www.budgetwithbuckets.com</a>)"
 
 #: buckets/web/templates/anon/bought.html:27
 msgid "Click the \"Trial Version\" menu"
-msgstr ""
+msgstr "Clic en el menú \"Versión de prueba\""
 
 #: buckets/web/templates/anon/bought.html:28
 msgid "Click \"Enter License...\""
-msgstr ""
+msgstr "Clic en \"Entrar licencia...\""
 
 #: buckets/web/templates/anon/bought.html:29
 msgid "Copy and paste the following license into the box"
-msgstr ""
+msgstr "Copie y pegue la siguiente licencia en la caja"
 
 #: buckets/web/templates/anon/bought.html:30
 msgid "Click the button"
@@ -156,6 +162,7 @@ msgid ""
 "This license may be used on any number of computers belonging to you and "
 "your immediate family members living in your home."
 msgstr ""
+"Esta licencia se puede usar en cualquier cantidad de computadoras que le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
 #: buckets/web/templates/anon/bought.html:40
 msgid "Happy budgeting!"
@@ -176,7 +183,7 @@ msgstr "Aplicación de presupuesto familiar"
 #: buckets/web/templates/anon/buy.html:29
 #, python-format
 msgid "Buckets is 50% off from now until January 2018."
-msgstr ""
+msgstr "Buckets tiene un 50% de descuento hasta enero de 2018."
 
 #: buckets/web/templates/anon/buy.html:30
 msgid ""
@@ -186,25 +193,18 @@ msgid ""
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:33
-msgid "If you've lost your license, email me at hello@bucketsisbetter.com"
-msgstr ""
+msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
+msgstr "Si perdió su licencia, envíeme a hello@budgetwithbuckets.com"
 
 #: buckets/web/templates/anon/gettingstarted.html:3
 #: buckets/web/templates/anon/gettingstarted.html:9
 msgid "Getting Started"
-msgstr ""
+msgstr "Empezando"
 
 #: buckets/web/templates/anon/gettingstarted.html:11
 msgid ""
 "Check out these 1-2 minute videos to help you get started budgeting with "
 "Buckets:"
 msgstr ""
-
-#~ msgid ""
-#~ "Buckets makes budgeting <em>fast</em>, "
-#~ "<em>simple</em> and <em>private.</em>"
-#~ msgstr ""
-#~ "Con Buckets haga su presupuesto "
-#~ "<em>rapidamente</em>, <em>simplemente</em> y <em>con"
-#~ " privacidad.</em>"
+"Vea estos videos de 1 a 2 minutos para ayudarlo a comenzar a presupuestar con Buckets:"
 
