@@ -144,6 +144,7 @@ class StepValueDetails extends React.Component<StepValueDetailsProps, any> {
   render() {
     let { value, step, director } = this.props;
     return <div>
+      <div className="step-desc">Set value of {step.desc} to:</div>
       <div className="step-value">{value}</div>
       <div>
         <select onChange={ev => {
@@ -240,16 +241,6 @@ class RecordPage extends React.Component<RecordPageProps, {
         }}>{sss('Save')}</button>
 
     let steps = this.director.current_recording.steps
-    .filter((step) => {
-      switch (step.type) {
-        case 'navigate':
-        case 'change':
-        case 'keypress': {
-          return true;
-        }
-      }
-      return false;
-    })
     .map((step, i) => {
       let question;
 
@@ -267,7 +258,16 @@ class RecordPage extends React.Component<RecordPageProps, {
             />
           break;
         }
+        case 'focus': {
+          //question = <div>Focus on {step.desc}</div>
+          break;
+        }
+        case 'click': {
+          question = <div>Click on {step.desc}</div>
+          break;
+        }
         case 'keypress': {
+          console.log("keypress", step);
           let value = step.keys
             .map(x => x.key)
             .filter(isInputValue)

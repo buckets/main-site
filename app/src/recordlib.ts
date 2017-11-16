@@ -254,6 +254,7 @@ export interface KeyPressStep {
   keys: Array<{
     key: string;
     modifiers: string[];
+    // If true, this key signals the beginning/end of input
     input_delimiter: boolean;
   }>;
 
@@ -414,58 +415,51 @@ export class Recorder {
       console.log('will download', filename, mimetype);
     })
 
-    const NO_CLICK_INPUT_TYPES = [
-      'date',
-      'datetime-local',
-      'color',
-      'month',
-      'number',
-      'range',
-      'time',
-      'week',
-    ];
-
-    function isChangeOnlyElement(elem:HTMLElement):boolean {
-      if (elem.tagName === 'SELECT') {
-        return true;
-      } else if (elem.tagName === 'INPUT') {
-        let type = elem.getAttribute('type').toLowerCase();
-        if (NO_CLICK_INPUT_TYPES.indexOf(type) !== -1) {
+    function isInputElement(elem:HTMLElement):boolean {
+      switch (elem.tagName) {
+        case 'SELECT':
+        case 'OPTION':
+        case 'INPUT':
+        case 'TEXTAREA':
+        case 'BUTTON': {
           return true;
         }
+        default: {
+          return false;
+        }
       }
-      return false;
     }
 
     window.addEventListener('change', (ev:any) => {
       let target = ev.target;
-      if (isChangeOnlyElement(target)) {
-        let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
-        let step:ChangeStep = {
-          type: 'change',
-          desc: describeElement(target),
-          element: identifyElement(target),
-          value: target.value,
-          selectedIndex: target.selectedIndex,
-          displayValue,
-        }
-        this.rpc.call('rec:step', step);
+      let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
+      let step:ChangeStep = {
+        type: 'change',
+        desc: describeElement(target),
+        element: identifyElement(target),
+        value: target.value,
+        selectedIndex: target.selectedIndex,
+        displayValue,
       }
+      this.rpc.call('rec:step', step);
+    }, {
+      capture: true,
+      passive: true,
+    } as any)
+
+    window.addEventListener('focus', (ev:any) => {
+      let step:FocusStep = {
+        type: 'focus',
+        desc: describeElement(ev.target),
+        element: identifyElement(ev.target),
+      }
+      this.rpc.call('rec:step', step);
     }, {
       capture: true,
       passive: true,
     } as any)
 
     window.addEventListener('click', (ev:any) => {
-      if (isChangeOnlyElement(ev.target)) {
-        let step:FocusStep = {
-          type: 'focus',
-          desc: describeElement(ev.target),
-          element: identifyElement(ev.target),
-        }
-        this.rpc.call('rec:step', step);
-        return;
-      }
       console.log('click ev', ev);
       let {pageX, pageY, screenX, screenY} = ev;
       let rect = ev.target.getBoundingClientRect();
@@ -498,9 +492,17 @@ export class Recorder {
     } as any)
     
     window.addEventListener('keydown', (ev) => {
-      let input_delimiter = false;
       let elem = ev.target as HTMLElement;
+      let input_delimiter = false;
       switch (ev.key) {
+        case 'Dead':
+        case 'Alt':
+        case 'Control':
+        case 'Shift':
+        case 'Meta': {
+          // don't send these
+          return;
+        }
         case 'Enter': {
           if (elem.tagName === 'TEXTAREA') {
             input_delimiter = false;
@@ -513,19 +515,14 @@ export class Recorder {
           input_delimiter = true;
           break;
         }
-        case 'Dead':
-        case 'Alt':
-        case 'Control':
-        case 'Shift':
-        case 'Meta': {
-          // Don't send this
-          return;
-        }
       }
-      if (isChangeOnlyElement(elem) && !input_delimiter) {
-        // don't send keypresses for change-only elements
+
+      if (isInputElement(elem) && !input_delimiter) {
+        // supress normal keys inside an input since we'll get them with the change event
         return;
       }
+
+      // record the keypress
       let step:KeyPressStep = {
         type: 'keypress',
         desc: describeElement(ev.target as HTMLElement),
@@ -537,6 +534,45 @@ export class Recorder {
         }]
       }
       this.rpc.call('rec:step', step);
+
+      // if (elem.tagName)
+      // switch (ev.key) {
+      //   case 'Enter': {
+      //     if (elem.tagName === 'TEXTAREA') {
+      //       input_delimiter = false;
+      //     } else {
+      //       input_delimiter = true;
+      //     }
+      //     break;
+      //   }
+      //   case 'Tab': {
+      //     input_delimiter = true;
+      //     break;
+      //   }
+      //   case 'Dead':
+      //   case 'Alt':
+      //   case 'Control':
+      //   case 'Shift':
+      //   case 'Meta': {
+      //     // Don't send this
+      //     return;
+      //   }
+      // }
+      // if (isChangeOnlyElement(elem) && !input_delimiter) {
+      //   // don't send keypresses for change-only elements
+      //   return;
+      // }
+      // let step:KeyPressStep = {
+      //   type: 'keypress',
+      //   desc: describeElement(ev.target as HTMLElement),
+      //   element: identifyElement(ev.target as HTMLElement),
+      //   keys: [{
+      //     key: ev.key,
+      //     modifiers: eventToKeyModifiers(ev),
+      //     input_delimiter,
+      //   }]
+      // }
+      // this.rpc.call('rec:step', step);
     }, {
       capture: true,
       passive: true,
