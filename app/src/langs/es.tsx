@@ -487,11 +487,25 @@ const messages:IMessages = {
     src: ["src/budget/budget.tsx line 136"],
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
   },
-  "rain.help": {
-    val: "Lluvia es el dinero que todavía no has puesto en cubos.  Después de categorizar las transacciones, siempre mantener esto a 0 o superior.",
+  "rain.help.pos": {
+    val: (abs_amount:JSX.Element) => {
+                                    return <span>
+                                    Te quedan {abs_amount} para poner en los cubos.
+                                    </span>
+                                  },
     translated: true,
-    src: ["src/budget/budget.tsx line 172"],
-    h: "EkC6Xr/2fRJ+4T4rwU2qK1uLpBk7ZpUa9aLGt0wuNr0=",
+    src: ["src/budget/budget.tsx line 205"],
+    h: "+/jK/QSyuJD3iVjhYMN06CfavdnrCnRjxQ1H8Xbw1AI=",
+  },
+  "rain.help.neg": {
+    val: (abs_amount:JSX.Element) => {
+                                    return <span>
+                                    Tienes {abs_amount} demasiado en los cubos.  Si todas las transacciones se han categorizado este mes, elimine {abs_amount} de los cubos que elija.
+                                    </span>
+                                  },
+    translated: true,
+    src: ["src/budget/budget.tsx line 210"],
+    h: "fto4vaDk+40kX6i0CXC6cwlcuojQv8YP+ov9QdBuWk0=",
   },
   "Income": {
     val: "Ingresos",
@@ -1339,84 +1353,6 @@ const messages:IMessages = {
     src: ["src/wwwroot/misc/fileformat.html line 0","src/wwwroot/misc/fileformat.html line 0"],
     h: "nvdgyKvpjrJsaVCyT2YOfOveCKs22Us+MUkm4LSYvAA=",
   },
-  "ff.intro": {
-    val: "Los archivos de Buckets son bases de datos SQLite.  La esquema es auto explicativa en la mayor parte, pero este documento muestra las cosas que no son obvio.",
-    translated: true,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "8NaWFwFw43kAXH+tkWNuo+51wMiBSq8xg5aV+bmIY4I=",
-  },
-  "ff.schemawarning": {
-    val: "\n    <b>ADVERTENCIA:</b> La esquema no es final y puede cambiar sin advertencia de una versión a la siguiente.\n  ",
-    translated: true,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "eYLdcn3c+SqbEm2+q12x3U8W2RHaVpzGvzNutecB7Nc=",
-  },
-  "ff.havequestions": {
-    val: "Si tienes otras preguntas, charlar conmigo.",
-    translated: true,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "gyzBJvQC8w04NQLWv7olNUMwZxDUbyOV72JOtCYMdsQ=",
-  },
-  "Concurrency": {
-    val: "Concurrency",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "rkWENZ+l8n8e2mpaKv4y+BINHBJ0c4jp33WU+d4CjNU=",
-  },
-  "ff.concurrency": {
-    val: "\n    It&apos;s not a good idea to do data-manipulating operations (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, etc...) on the same budget file from more than one process at a time.  So before you manipulate data outside of Buckets, close the budget file inside Buckets.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "ghgaqkozgsgv5d93DBhI2zuT4uKH4h1hXWoWAVZTXqw=",
-  },
-  "Amounts": {
-    val: "Cantidades",
-    translated: true,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "8ZQCjYI7pkNdp9oidhQn+P6xBxcze8h/M0o7fJmZVXk=",
-  },
-  "ff.intamounts": {
-    val: "\n    Amounts are stored as integers, not floats.  For USD (and most other currencies), this means that amounts are integer cents.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "EUiHjmxxSZruVFbtpFbvSFDO11XS2uw9kdjmNKaYi7s=",
-  },
-  "ff.amountexampleintro": {
-    val: "\n    In this example, account 1 has a balance of $6,500:\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "Tlo6ijWPvwhee8ZLxUitIWNBtB+5jEJTL3KfVUt7yao=",
-  },
-  "Inserting transactions": {
-    val: "Inserting transactions",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "//8Lw1GE774yBa6pDXsipJSchhfXyjjhp1XUVCIfvno=",
-  },
-  "ff.insertintro": {
-    val: "\n    Insert bank/account transactions into the <code>account_transaction</code> table.  Be aware of the following:\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "8kIcAVWwxfdamGPNuoqFbx6xuPjgwVDuphS8b3HdhSw=",
-  },
-  "ff.fi_id": {
-    val: "\n      The <code>fi_id</code> column represents an account-unique ID (typically assigned by the bank) for a transaction.\n    ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "sK4oD8jX+Js/QOoa/LNXRrEhrVIsWxCLzvQKcFcaqk0=",
-  },
-  "ff.general_cat": {
-    val: "\n      <code>general_cat</code> should be one of the strings <code>&quot;&quot;</code>, <code>&quot;income&quot;</code>, or <code>&quot;transfer&quot;</code>.\n    ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "std3l/kWL9KQvL2QGdSonxsEhAE+AbVumCBcZcoUZhA=",
-  },
-  "ff.baltriggers": {
-    val: "\n    Account and bucket balances are automatically updated (by SQLite triggers) when transactions are inserted/updated/deleted.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "9gycbX8P/r8JUSY9qVA6Sra+wwW51kpt8lHqogRyeWA=",
-  },
   "Preferences": {
     val: "Preferencias",
     translated: true,
@@ -1506,6 +1442,12 @@ const messages:IMessages = {
     translated: true,
     src: ["src/ynab.ts line 311"],
     h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
+  },
+  "Error importing": {
+    val: "Habia error importando",
+    translated: true,
+    src: ["src/ynab.ts line 371"],
+    h: "rekzwWcY0HRZEhFebX1fJrp4aDJ/NTPxIwWaCYAk+7k=",
   },
 }
 export const pack:ILangPack = {

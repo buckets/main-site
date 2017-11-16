@@ -86,7 +86,8 @@ export interface IMessages {
   "Connections": IMsg<string>;
   "Import": IMsg<string>;
   "Chat with Matt": IMsg<string>;
-  "rain.help": IMsg<string>;
+  "rain.help.pos": IMsg<(abs_amount:any)=>string|JSX.Element>;
+  "rain.help.neg": IMsg<(abs_amount:any)=>string|JSX.Element>;
   "Income": IMsg<string>;
   "Expenses": IMsg<string>;
   "months gain/loss label": IMsg<(gain:any)=>string|JSX.Element>;
@@ -226,19 +227,6 @@ export interface IMessages {
   "Restart Buckets": IMsg<string>;
   "Invalid license": IMsg<string>;
   "Buckets File Format": IMsg<string>;
-  "ff.intro": IMsg<string>;
-  "ff.schemawarning": IMsg<string>;
-  "ff.havequestions": IMsg<string>;
-  "Concurrency": IMsg<string>;
-  "ff.concurrency": IMsg<string>;
-  "Amounts": IMsg<string>;
-  "ff.intamounts": IMsg<string>;
-  "ff.amountexampleintro": IMsg<string>;
-  "Inserting transactions": IMsg<string>;
-  "ff.insertintro": IMsg<string>;
-  "ff.fi_id": IMsg<string>;
-  "ff.general_cat": IMsg<string>;
-  "ff.baltriggers": IMsg<string>;
   "Preferences": IMsg<string>;
   "Language:": IMsg<string>;
   "System Default": IMsg<string>;
@@ -254,6 +242,7 @@ export interface IMessages {
   "There was an error.  Maybe try again?": IMsg<string>;
   "Recently used": IMsg<string>;
   "Open YNAB4 File": IMsg<string>;
+  "Error importing": IMsg<string>;
 }
 export const DEFAULTS:IMessages = {
   "accounts.balance_mismatch_msg": {
@@ -343,7 +332,7 @@ export const DEFAULTS:IMessages = {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
       },
     translated: false,
-    src: ["src/budget/appstate.ts line 220"],
+    src: ["src/budget/appstate.ts line 223"],
     h: "f7R9zSdK0q5+lZ8I9QRhiwN5ENKyWFnrmUG6Gltegfs=",
   },
   "sync.status.week": {
@@ -351,7 +340,7 @@ export const DEFAULTS:IMessages = {
         return `week of ${sync_start.format('ll')}`;
       },
     translated: false,
-    src: ["src/budget/appstate.ts line 227"],
+    src: ["src/budget/appstate.ts line 230"],
     h: "PDBHTH/ocFsAZ2tQBdsDt9agGKjcgYvqJLlYn/lwZeU=",
   },
   "sync.cancelled": {
@@ -359,7 +348,7 @@ export const DEFAULTS:IMessages = {
           return `Synced ${trans_count} transactions before being cancelled.`;
         },
     translated: false,
-    src: ["src/budget/appstate.ts line 234"],
+    src: ["src/budget/appstate.ts line 237"],
     h: "vKPTjoWpzYT7nXd/1E8Hklltu1+GqPNCLKpPvhQCMjI=",
   },
   "sync.done": {
@@ -367,7 +356,7 @@ export const DEFAULTS:IMessages = {
           return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
         },
     translated: false,
-    src: ["src/budget/appstate.ts line 238"],
+    src: ["src/budget/appstate.ts line 241"],
     h: "G02Wh4RjKpcx6OWMrzrWbWH2OBPaLf3kaUffUt0FeYY=",
   },
   "Un-kick": {
@@ -463,7 +452,7 @@ export const DEFAULTS:IMessages = {
   "Rain": {
     val: "Rain",
     translated: false,
-    src: ["src/budget/buckets.tsx line 185","src/budget/buckets.tsx line 787","src/budget/budget.tsx line 184"],
+    src: ["src/budget/buckets.tsx line 185","src/budget/buckets.tsx line 787","src/budget/budget.tsx line 181","src/budget/budget.tsx line 198"],
     h: "fqeHyOaOYnCtGAcJlJbhAR37DG6YMrsasUNtiL6z8hc=",
   },
   "Total amount your buckets expect each month.": {
@@ -687,73 +676,87 @@ export const DEFAULTS:IMessages = {
   "Accounts": {
     val: "Accounts",
     translated: false,
-    src: ["src/budget/budget.tsx line 127"],
+    src: ["src/budget/budget.tsx line 123","src/budget/budget.tsx line 184"],
     h: "1oHDkv2zB1yiCABVTWBY5oX4Ccu36nJBCG7Q+JVg8TA=",
   },
   "Transactions": {
     val: "Transactions",
     translated: false,
-    src: ["src/budget/budget.tsx line 128"],
+    src: ["src/budget/budget.tsx line 124"],
     h: "4+yGUer/b71cfxTdeUa5QbonqN9ezC8Eii7KO22Ety0=",
   },
   "Buckets": {
     val: "Buckets",
     translated: false,
-    src: ["src/budget/budget.tsx line 129"],
+    src: ["src/budget/budget.tsx line 125","src/budget/budget.tsx line 189"],
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
   },
   "Kicked": {
     val: "Kicked",
     translated: false,
-    src: ["src/budget/budget.tsx line 131"],
+    src: ["src/budget/budget.tsx line 127"],
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
   },
   "Analysis": {
     val: "Analysis",
     translated: false,
-    src: ["src/budget/budget.tsx line 133"],
+    src: ["src/budget/budget.tsx line 129"],
     h: "+LNAOPSLW2rpFCrT+U1suhdnoYyZa1k8ALddRlddDlI=",
   },
   "Recurring Expenses": {
     val: "Recurring Expenses",
     translated: false,
-    src: ["src/budget/budget.tsx line 136","src/budget/reports.tsx line 529"],
+    src: ["src/budget/budget.tsx line 132","src/budget/reports.tsx line 529"],
     h: "yDp5Agru+QzDSy583s3kjOdZbbe6X1WDfMeSNXsYlaY=",
   },
   "Connections": {
     val: "Connections",
     translated: false,
-    src: ["src/budget/budget.tsx line 139","src/budget/connections.tsx line 117"],
+    src: ["src/budget/budget.tsx line 135","src/budget/connections.tsx line 117"],
     h: "1hPfKAqhO0JhEGc2rQ8tee2sqrIAP38KrxQcfLF3I1Y=",
   },
   "Import": {
     val: "Import",
     translated: false,
-    src: ["src/budget/budget.tsx line 140"],
+    src: ["src/budget/budget.tsx line 136"],
     h: "F3sijvfYz3oB4iz2rVHjUvNDLQs43MbXDVIr5VFA2/c=",
   },
   "Chat with Matt": {
     val: "Chat with Matt",
     translated: false,
-    src: ["src/budget/budget.tsx line 148"],
+    src: ["src/budget/budget.tsx line 144"],
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
   },
-  "rain.help": {
-    val: "Rain is the money you haven't yet put into buckets.  After transactions are categorized, always keep this 0 or higher.",
+  "rain.help.pos": {
+    val: (abs_amount:JSX.Element) => {
+                                    return <span>
+                                    You have {abs_amount} left to put into buckets.
+                                    </span>
+                                  },
     translated: false,
-    src: ["src/budget/budget.tsx line 184"],
-    h: "EkC6Xr/2fRJ+4T4rwU2qK1uLpBk7ZpUa9aLGt0wuNr0=",
+    src: ["src/budget/budget.tsx line 205"],
+    h: "+/jK/QSyuJD3iVjhYMN06CfavdnrCnRjxQ1H8Xbw1AI=",
+  },
+  "rain.help.neg": {
+    val: (abs_amount:JSX.Element) => {
+                                    return <span>
+                                    You have put {abs_amount} too much money into buckets.  If all transactions have been categorized this month, remove {abs_amount} from buckets of your choosing.
+                                    </span>
+                                  },
+    translated: false,
+    src: ["src/budget/budget.tsx line 210"],
+    h: "fto4vaDk+40kX6i0CXC6cwlcuojQv8YP+ov9QdBuWk0=",
   },
   "Income": {
     val: "Income",
     translated: false,
-    src: ["src/budget/budget.tsx line 188","src/budget/reports.tsx line 213"],
+    src: ["src/budget/budget.tsx line 224","src/budget/reports.tsx line 213"],
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
   },
   "Expenses": {
     val: "Expenses",
     translated: false,
-    src: ["src/budget/budget.tsx line 193","src/budget/reports.tsx line 224"],
+    src: ["src/budget/budget.tsx line 229","src/budget/reports.tsx line 224"],
     h: "d6aKytFAPwPUzFOv41R0itfcMu11VdE29vkM05dnpBU=",
   },
   "months gain/loss label": {
@@ -761,13 +764,13 @@ export const DEFAULTS:IMessages = {
                         return gain >= 0 ? "Month's gain" : "Month's loss";
                       },
     translated: false,
-    src: ["src/budget/budget.tsx line 198"],
+    src: ["src/budget/budget.tsx line 234"],
     h: "lGcEnJfZJau2h5ohbKNxY1FjL0vJoW3oJOJQwSCt+Kg=",
   },
   "in the bank": {
     val: "in the bank",
     translated: false,
-    src: ["src/budget/budget.tsx line 204"],
+    src: ["src/budget/budget.tsx line 240"],
     h: "7gl7ZdgJ3HfhOcQMiU7hVkFpXIR3KFxXtlMhKyE/Irw=",
   },
   "Sync": {
@@ -1587,86 +1590,8 @@ export const DEFAULTS:IMessages = {
   "Buckets File Format": {
     val: "Buckets File Format",
     translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0","src/wwwroot/misc/fileformat.html line 0"],
+    src: ["src/wwwroot/misc/fileformat.html line 0"],
     h: "nvdgyKvpjrJsaVCyT2YOfOveCKs22Us+MUkm4LSYvAA=",
-  },
-  "ff.intro": {
-    val: "\n    Buckets budget files are SQLite databases.  The schema is mostly self-explanatory, but this document points out some things that aren&apos;t.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "8NaWFwFw43kAXH+tkWNuo+51wMiBSq8xg5aV+bmIY4I=",
-  },
-  "ff.schemawarning": {
-    val: "\n    <b>WARNING:</b> The schema is not final and may change without warning in future versions of Buckets.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "eYLdcn3c+SqbEm2+q12x3U8W2RHaVpzGvzNutecB7Nc=",
-  },
-  "ff.havequestions": {
-    val: "\n    If you still have questions after reading this, feel free to chat with me.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "gyzBJvQC8w04NQLWv7olNUMwZxDUbyOV72JOtCYMdsQ=",
-  },
-  "Concurrency": {
-    val: "Concurrency",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "rkWENZ+l8n8e2mpaKv4y+BINHBJ0c4jp33WU+d4CjNU=",
-  },
-  "ff.concurrency": {
-    val: "\n    It&apos;s not a good idea to do data-manipulating operations (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, etc...) on the same budget file from more than one process at a time.  So before you manipulate data outside of Buckets, close the budget file inside Buckets.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "ghgaqkozgsgv5d93DBhI2zuT4uKH4h1hXWoWAVZTXqw=",
-  },
-  "Amounts": {
-    val: "Amounts",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "8ZQCjYI7pkNdp9oidhQn+P6xBxcze8h/M0o7fJmZVXk=",
-  },
-  "ff.intamounts": {
-    val: "\n    Amounts are stored as integers, not floats.  For USD (and most other currencies), this means that amounts are integer cents.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "EUiHjmxxSZruVFbtpFbvSFDO11XS2uw9kdjmNKaYi7s=",
-  },
-  "ff.amountexampleintro": {
-    val: "\n    In this example, account 1 has a balance of $6,500:\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "Tlo6ijWPvwhee8ZLxUitIWNBtB+5jEJTL3KfVUt7yao=",
-  },
-  "Inserting transactions": {
-    val: "Inserting transactions",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "//8Lw1GE774yBa6pDXsipJSchhfXyjjhp1XUVCIfvno=",
-  },
-  "ff.insertintro": {
-    val: "\n    Insert bank/account transactions into the <code>account_transaction</code> table.  Be aware of the following:\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "8kIcAVWwxfdamGPNuoqFbx6xuPjgwVDuphS8b3HdhSw=",
-  },
-  "ff.fi_id": {
-    val: "\n      The <code>fi_id</code> column represents an account-unique ID (typically assigned by the bank) for a transaction.\n    ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "sK4oD8jX+Js/QOoa/LNXRrEhrVIsWxCLzvQKcFcaqk0=",
-  },
-  "ff.general_cat": {
-    val: "\n      <code>general_cat</code> should be one of the strings <code>&quot;&quot;</code>, <code>&quot;income&quot;</code>, or <code>&quot;transfer&quot;</code>.\n    ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "std3l/kWL9KQvL2QGdSonxsEhAE+AbVumCBcZcoUZhA=",
-  },
-  "ff.baltriggers": {
-    val: "\n    Account and bucket balances are automatically updated (by SQLite triggers) when transactions are inserted/updated/deleted.\n  ",
-    translated: false,
-    src: ["src/wwwroot/misc/fileformat.html line 0"],
-    h: "9gycbX8P/r8JUSY9qVA6Sra+wwW51kpt8lHqogRyeWA=",
   },
   "Preferences": {
     val: "Preferences",
@@ -1755,7 +1680,13 @@ export const DEFAULTS:IMessages = {
   "Open YNAB4 File": {
     val: "Open YNAB4 File",
     translated: false,
-    src: ["src/ynab.ts line 311"],
+    src: ["src/ynab.ts line 357"],
     h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
+  },
+  "Error importing": {
+    val: "Error importing",
+    translated: false,
+    src: ["src/ynab.ts line 371"],
+    h: "rekzwWcY0HRZEhFebX1fJrp4aDJ/NTPxIwWaCYAk+7k=",
   },
 }

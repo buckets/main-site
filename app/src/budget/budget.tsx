@@ -103,10 +103,6 @@ class Navbar extends React.Component<{
     if (appstate.fileimport.pending_imports.length) {
       fileimport_badge = <div className="badge">{appstate.fileimport.pending_imports.length}</div>
     }
-    // let accounts_badge;
-    // if (appstate.unmatched_account_balances) {
-    //   accounts_badge = <div className="badge">{appstate.unmatched_account_balances}</div>
-    // }
     let transactions_badge;
     if (appstate.num_uncategorized_trans) {
       transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
@@ -182,7 +178,47 @@ class Application extends React.Component<ApplicationProps, any> {
                 <header>
                   <div className="totals">
                     <total>
-                      <name><Help icon={<span><span className="fa fa-tint" /> {sss('Rain')}</span>}>{sss('rain.help', "Rain is the money you haven't yet put into buckets.  After transactions are categorized, always keep this 0 or higher.")}</Help></name>
+                      <name>
+                        <Help icon={<span><span className="fa fa-tint" /> {sss('Rain')}</span>}>
+                          <table>
+                            <tr>
+                              <td>{sss('Accounts')}</td>
+                              <td></td>
+                              <td className="right"><Money value={appstate.account_total_balance} /></td>
+                            </tr>
+                            <tr>
+                              <td>{sss('Buckets')}</td>
+                              <td>-</td>
+                              <td className="right"><Money value={appstate.bucket_total_balance} /></td>
+                            </tr>
+                            <tr>
+                              <td colSpan={3} className="total-line">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{sss('Rain')}</td>
+                              <td></td>
+                              <td className="right"><Money value={appstate.rain} /></td>
+                            </tr>
+                            <tr>
+                              <td colSpan={3}>
+                                {appstate.rain >= 0
+                                  ? sss('rain.help.pos', (abs_amount:JSX.Element) => {
+                                    return <span>
+                                    You have {abs_amount} left to put into buckets.
+                                    </span>
+                                  })(<Money value={Math.abs(appstate.rain)} />)
+                                  : sss('rain.help.neg', (abs_amount:JSX.Element) => {
+                                    return <span>
+                                    You have put {abs_amount} too much money into buckets.  If all transactions have been categorized this month, remove {abs_amount} from buckets of your choosing.
+                                    </span>
+                                  })(<Money value={Math.abs(appstate.rain)} />)
+                                }
+                              </td>
+                            </tr>
+                          </table>
+                        </Help>
+                      </name>
                       <amount><Money value={appstate.rain} /></amount>
                     </total>
                     <total className="section-start">

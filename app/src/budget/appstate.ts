@@ -58,6 +58,8 @@ export class AppState implements IComputedAppState {
   account_balances: Balances = {};
   bucket_balances: Balances = {};
   nodebt_balances: Balances = {};
+
+  // The rain each bucket has received this month.
   rainfall: Balances = {};
   month: number = null;
   year: number = null;
@@ -67,6 +69,7 @@ export class AppState implements IComputedAppState {
 
   fileimport: FileImportState = new FileImportState();
 
+  // The computed rain for this month.
   rain: number = 0;
   bucket_total_balance: number = 0;
   account_total_balance: number = 0;
