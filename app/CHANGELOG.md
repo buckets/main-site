@@ -1,4 +1,10 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.21.0
+
+- **FIX:** Improved the explanation of what rain is
+
+- NEW: Switch from bucketsisbetter.com to budgetwithbuckets.com
+
 ## v0.20.0
 
 - **FIX:** Light grey on charts is now less light and more visible
