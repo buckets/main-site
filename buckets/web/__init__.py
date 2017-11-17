@@ -50,8 +50,13 @@ def add_language_code(endpoint, values):
 
 @f.context_processor
 def inject_langs():
+    all_locales = babel.list_translations()
+    current_locale = get_locale()
+    this_locale = [x for x in all_locales if x.language == current_locale]
+    if this_locale:
+        this_locale = this_locale[0]
     return dict(
-        locale=get_locale(),
+        locale=this_locale,
         all_locales=babel.list_translations(),
     )
 
