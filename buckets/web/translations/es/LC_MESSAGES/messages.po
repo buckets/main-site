@@ -7,17 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2017-11-15 11:44-0700\n"
+"POT-Creation-Date: 2017-11-20 11:32-0700\n"
 "PO-Revision-Date: 2017-11-15 11:45-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
-"X-Generator: Poedit 2.0.4\n"
 
 #: buckets/web/anon.py:88
 msgid "Error generating license.  Your card was not charged."
@@ -73,7 +72,8 @@ msgstr ""
 "{license}\n"
 "\n"
 "Esta licencia se puede usar en cualquier cantidad de computadoras que le "
-"pertenezcan a usted y a los familiares inmediatos que vivan en su hogar.\n"
+"pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
+"\n"
 "\n"
 "¡Feliz presupuestar!\n"
 "\n"
@@ -81,11 +81,11 @@ msgstr ""
 
 #: buckets/web/anon.py:135
 msgid ""
-"Error emailing license.  If you don't receive an email soon, please reach out "
-"to us."
+"Error emailing license.  If you don't receive an email soon, please reach"
+" out to us."
 msgstr ""
-"Error al enviar la licencia por correo electrónico.  Si no recibe un correo "
-"electrónico pronto, póngase en contacto con nosotros."
+"Error al enviar la licencia por correo electrónico.  Si no recibe un "
+"correo electrónico pronto, póngase en contacto con nosotros."
 
 #: buckets/web/templates/base.html:4
 msgid "Private Family Budgeting App"
@@ -94,32 +94,39 @@ msgstr "Aplicación privada de presupuesto familiar"
 #: buckets/web/templates/anon/index.html:12 buckets/web/templates/base.html:11
 msgid ""
 "Buckets is a private, personal finance app for family budgeting.  Track "
-"expenses, make savings goals, get out of debt all from the privacy of your own "
-"computer."
+"expenses, make savings goals, get out of debt all from the privacy of "
+"your own computer."
 msgstr ""
-"Buckets es una aplicación privada de finanzas personales para presupuestos "
-"familiares. Haga un seguimiento de los gastos, establezca objetivos de ahorro, "
-"salga de la deuda todo desde la privacidad de su propia computadora."
+"Buckets es una aplicación privada de finanzas personales para "
+"presupuestos familiares. Haga un seguimiento de los gastos, establezca "
+"objetivos de ahorro, salga de la deuda todo desde la privacidad de su "
+"propia computadora."
 
-#: buckets/web/templates/base.html:128
+#: buckets/web/templates/base.html:129
 msgid ""
-"Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt Haggard</a>"
+"Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
+"Haggard</a>"
 msgstr ""
-"Hecho por <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt Haggard</a>"
+"Hecho por <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
+"Haggard</a>"
 
 #: buckets/web/templates/anon/gettingstarted.html:3
 #: buckets/web/templates/anon/gettingstarted.html:9
-#: buckets/web/templates/base.html:135
+#: buckets/web/templates/base.html:136
 msgid "Getting Started"
 msgstr "Empezando"
 
-#: buckets/web/templates/base.html:136
+#: buckets/web/templates/base.html:137
 msgid "Pricing"
 msgstr "Precios"
 
-#: buckets/web/templates/base.html:137
+#: buckets/web/templates/base.html:138
 msgid "Buy"
 msgstr "Comprar"
+
+#: buckets/web/templates/base.html:139
+msgid "Blog"
+msgstr "Blog"
 
 #: buckets/web/templates/err404.html:7
 msgid "404 Not Found"
@@ -139,25 +146,25 @@ msgstr "Algo se rompió.  Error de servidor interno. Aaahhhh..."
 
 #: buckets/web/templates/err500.html:13
 msgid ""
-"Matt has probably been notified about this error.  If he doesn't contact you "
-"about it and it keeps happening, please contact him."
+"Matt has probably been notified about this error.  If he doesn't contact "
+"you about it and it keeps happening, please contact him."
 msgstr ""
-"Matt probablemente ha sido notificado sobre este error. Si él no se comunica "
-"con usted al respecto y sigue sucediendo, comuníquese con él."
+"Matt probablemente ha sido notificado sobre este error. Si él no se "
+"comunica con usted al respecto y sigue sucediendo, comuníquese con él."
 
 #: buckets/web/templates/err500.html:18
 msgid ""
-"You can <a href=\"#\" id=\"start-feedback\">submit a bug-report</a> pretty "
-"easily."
+"You can <a href=\"#\" id=\"start-feedback\">submit a bug-report</a> "
+"pretty easily."
 msgstr "Puede <a href=\"#\" id=\"start-feedback\">enviar un informe de error</a>."
 
 #: buckets/web/templates/err500.html:35
 msgid ""
-"If you do email Matt (hello@budgetwithbuckets.com), include this chunk of "
-"information in your email:"
+"If you do email Matt (hello@budgetwithbuckets.com), include this chunk of"
+" information in your email:"
 msgstr ""
-"Si envía un correo electrónico a Matt (hello@budgetwithbuckets.com), incluya "
-"este fragmento de información en su correo electrónico:"
+"Si envía un correo electrónico a Matt (hello@budgetwithbuckets.com), "
+"incluya este fragmento de información en su correo electrónico:"
 
 #: buckets/web/templates/anon/bought.html:21
 msgid "Thank you for purchasing Buckets!"
@@ -165,20 +172,20 @@ msgstr "¡Gracias por comprar Buckets!"
 
 #: buckets/web/templates/anon/bought.html:23
 msgid ""
-"Below is your Buckets v1 License.  You should also receive an email with this "
-"information.  To use the license:"
+"Below is your Buckets v1 License.  You should also receive an email with "
+"this information.  To use the license:"
 msgstr ""
-"Debajo está su licencia de Buckets v1.  También deberías recibir un correo "
-"electrónico con esta información.  Para usarla:"
+"Debajo está su licencia de Buckets v1.  También deberías recibir un "
+"correo electrónico con esta información.  Para usarla:"
 
 #: buckets/web/templates/anon/bought.html:26
 #, python-format
 msgid ""
-"Open the Buckets application (download at %(linkstart)swww.budgetwithbuckets."
-"com</a>)"
+"Open the Buckets application (download at "
+"%(linkstart)swww.budgetwithbuckets.com</a>)"
 msgstr ""
-"Abra la aplicación Buckets (descargar en %(linkstart)swww.budgetwithbuckets."
-"com</a>)"
+"Abra la aplicación Buckets (descargar en "
+"%(linkstart)swww.budgetwithbuckets.com</a>)"
 
 #: buckets/web/templates/anon/bought.html:27
 msgid "Click the \"Trial Version\" menu"
@@ -198,8 +205,8 @@ msgstr "Clic en el botón"
 
 #: buckets/web/templates/anon/bought.html:36
 msgid ""
-"This license may be used on any number of computers belonging to you and your "
-"immediate family members living in your home."
+"This license may be used on any number of computers belonging to you and "
+"your immediate family members living in your home."
 msgstr ""
 "Esta licencia se puede usar en cualquier cantidad de computadoras que le "
 "pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
@@ -226,13 +233,14 @@ msgstr "Buckets está a mitad de camino hasta enero de 2018."
 
 #: buckets/web/templates/anon/buy.html:30
 msgid ""
-"For a <em>one-time $15 payment,</em> you will be emailed a Buckets License "
-"which may be used on any number of computers belonging to you and your "
-"immediate family members living in your home."
+"For a <em>one-time $15 payment,</em> you will be emailed a Buckets "
+"License which may be used on any number of computers belonging to you and"
+" your immediate family members living in your home."
 msgstr ""
-"Para <em>un pago único de $15</em>, se le enviará por correo electrónico una "
-"Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que "
-"le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
+"Para <em>un pago único de $15</em>, se le enviará por correo electrónico "
+"una Licencia de Buckets que se puede usar en cualquier cantidad de "
+"computadoras que le pertenezcan a usted y a los familiares inmediatos que"
+" vivan en su hogar."
 
 #: buckets/web/templates/anon/buy.html:33
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
@@ -243,12 +251,13 @@ msgid ""
 "Check out these 1-2 minute videos to help you get started budgeting with "
 "Buckets:"
 msgstr ""
-"Vea estos videos de 1 a 2 minutos para ayudarlo a comenzar a presupuestar con "
-"Buckets:"
+"Vea estos videos de 1 a 2 minutos para ayudarlo a comenzar a presupuestar"
+" con Buckets:"
 
 #: buckets/web/templates/anon/index.html:94
 msgid ""
-"Buckets makes budgeting <em>fast</em>, <em>simple</em> and <em>private.</em>"
+"Buckets makes budgeting <em>fast</em>, <em>simple</em> and "
+"<em>private.</em>"
 msgstr ""
 "Buckets hace que el presupuesto sea <em>rápido</em>, <em>simple</em> y "
 "<em>privado.</em>"
@@ -272,75 +281,80 @@ msgstr "Linux"
 
 #: buckets/web/templates/anon/index.html:126
 msgid ""
-"Buckets is <em>private</em>.  Other budgeting apps make you store all your "
-"financial information on their servers.  <em>Ever wonder who's combing through "
-"your cloud-stored transaction history?</em>  With Buckets, your personal data "
-"stays on your computer."
+"Buckets is <em>private</em>.  Other budgeting apps make you store all "
+"your financial information on their servers.  <em>Ever wonder who's "
+"combing through your cloud-stored transaction history?</em>  With "
+"Buckets, your personal data stays on your computer."
 msgstr ""
 "Buckets es <em>privado</em>. Otras aplicaciones de presupuesto te hacen "
-"almacenar toda tu información financiera en sus servidores. <em>¿Alguna vez se "
-"ha preguntado quién está analizando su historial de transacciones en la nube?</"
-"em> Con Buckets, sus datos personales permanecen en su computadora."
+"almacenar toda tu información financiera en sus servidores. <em>¿Alguna "
+"vez se ha preguntado quién está analizando su historial de transacciones "
+"en la nube?</em> Con Buckets, sus datos personales permanecen en su "
+"computadora."
 
 #: buckets/web/templates/anon/index.html:130
 msgid ""
-"Buckets is <em>affordable</em> with <em>no monthly fee.</em>  A single license "
-"may be used on all your computers and all the computers of family members "
-"living in your home.  You can afford to teach your kids how to budget now."
+"Buckets is <em>affordable</em> with <em>no monthly fee.</em>  A single "
+"license may be used on all your computers and all the computers of family"
+" members living in your home.  You can afford to teach your kids how to "
+"budget now."
 msgstr ""
 "Buckets es <em>asequible sin cuota mensual.</em> Se puede usar una única "
-"licencia en todas sus computadoras y todas las computadoras de los miembros de "
-"la familia que viven en su hogar. Puede darse el lujo de enseñarles a sus hijos "
-"cómo hacer un presupuesto ahora."
+"licencia en todas sus computadoras y todas las computadoras de los "
+"miembros de la familia que viven en su hogar. Puede darse el lujo de "
+"enseñarles a sus hijos cómo hacer un presupuesto ahora."
 
 #: buckets/web/templates/anon/index.html:134
 msgid ""
-"Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget that "
-"only one of you knows how to use.  From now on, you can stay on the same "
-"financial page."
+"Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget "
+"that only one of you knows how to use.  From now on, you can stay on the "
+"same financial page."
 msgstr ""
-"Buckets es para <em>los dos.</em> Elimine esa vieja hoja de cálculo que solo "
-"uno de ustedes sabe cómo usar. A partir de ahora, puede permanecer en la misma "
-"página financiera."
+"Buckets es para <em>los dos.</em> Elimine esa vieja hoja de cálculo que "
+"solo uno de ustedes sabe cómo usar. A partir de ahora, puede permanecer "
+"en la misma página financiera."
 
 #: buckets/web/templates/anon/index.html:138
 msgid ""
-"Buckets gives you an <em>untimed, free trial</em> for as long as you need to "
-"decide if it works for you.  Why, yes, that is ridiculously generous."
+"Buckets gives you an <em>untimed, free trial</em> for as long as you need"
+" to decide if it works for you.  Why, yes, that is ridiculously generous."
 msgstr ""
-"Buckets le ofrece <em>una prueba gratis, sin tiempo</em>, por el tiempo que "
-"necesite para decidir si le conviene. Sí, eso es ridículamente generoso."
+"Buckets le ofrece <em>una prueba gratis, sin tiempo</em>, por el tiempo "
+"que necesite para decidir si le conviene. Sí, eso es ridículamente "
+"generoso."
 
 #: buckets/web/templates/anon/index.html:144
 #, python-format
 msgid ""
-"Buckets includes <em>helpful videos</em> to teach you how to budget like a "
-"master.  <a href=\"%(href)s\">Check them out!</a>"
+"Buckets includes <em>helpful videos</em> to teach you how to budget like "
+"a master.  <a href=\"%(href)s\">Check them out!</a>"
 msgstr ""
-"Buckets incluye <em>videos útiles</em> para enseñarle a presupuestar como un "
-"maestro.  <a href=\"%(href)s\">¡Échales un vistazo!</a>"
+"Buckets incluye <em>videos útiles</em> para enseñarle a presupuestar como"
+" un maestro.  <a href=\"%(href)s\">¡Échales un vistazo!</a>"
 
 #: buckets/web/templates/anon/index.html:150
 msgid ""
-"Buckets is <em>multilingual</em>.  Currently English and Spanish are supported."
+"Buckets is <em>multilingual</em>.  Currently English and Spanish are "
+"supported."
 msgstr ""
 "Buckets es <em>multilingüe</em>. Actualmente, inglés y español están "
 "disponibles."
 
 #: buckets/web/templates/anon/index.html:156
 msgid ""
-"Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul."
+"Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
+"haul."
 msgstr ""
-"Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
-"aquí por mucho tiempo."
+"Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. "
+"Estoy aquí por mucho tiempo."
 
 #: buckets/web/templates/anon/index.html:160
 msgid ""
-"Buckets costs <em>$15.</em>  Once.  Not monthly.  We're trying to help you save "
-"money, not shackle you to another monthly service."
+"Buckets costs <em>$15.</em>  Once.  Not monthly.  We're trying to help "
+"you save money, not shackle you to another monthly service."
 msgstr ""
-"Buckets cuesta <em>$15</em>. Una vez. No mensualmente. Estamos tratando de "
-"ayudarlo a ahorrar dinero, no a darle otro servicio mensual."
+"Buckets cuesta <em>$15</em>. Una vez. No mensualmente. Estamos tratando "
+"de ayudarlo a ahorrar dinero, no a darle otro servicio mensual."
 
 #: buckets/web/templates/anon/index.html:161
 msgid "This is the special introductory price.  In 2018 it will cost $29."
@@ -371,3 +385,4 @@ msgstr "Suscribir"
 
 #~ msgid "Download for:"
 #~ msgstr "Descargar para:"
+

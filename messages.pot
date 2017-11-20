@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-11-15 11:44-0700\n"
+"POT-Creation-Date: 2017-11-20 11:32-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,7 +76,7 @@ msgid ""
 "your own computer."
 msgstr ""
 
-#: buckets/web/templates/base.html:128
+#: buckets/web/templates/base.html:129
 msgid ""
 "Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
 "Haggard</a>"
@@ -84,16 +84,20 @@ msgstr ""
 
 #: buckets/web/templates/anon/gettingstarted.html:3
 #: buckets/web/templates/anon/gettingstarted.html:9
-#: buckets/web/templates/base.html:135
+#: buckets/web/templates/base.html:136
 msgid "Getting Started"
 msgstr ""
 
-#: buckets/web/templates/base.html:136
+#: buckets/web/templates/base.html:137
 msgid "Pricing"
 msgstr ""
 
-#: buckets/web/templates/base.html:137
+#: buckets/web/templates/base.html:138
 msgid "Buy"
+msgstr ""
+
+#: buckets/web/templates/base.html:139
+msgid "Blog"
 msgstr ""
 
 #: buckets/web/templates/err404.html:7

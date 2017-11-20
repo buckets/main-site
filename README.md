@@ -14,7 +14,7 @@ See app/README.md for everything else
     
     dev/dolangs.sh extract
 
-2. Then translate the stuff in `translations/`
+2. Then translate the stuff in `buckets/web/translations/`
 
 3. Compile
 
