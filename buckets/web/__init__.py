@@ -38,7 +38,6 @@ f.url_map.converters['lang'] = LangConverter
 @babel.localeselector
 def get_locale():
     locale = g.get('lang_code', request.accept_languages.best_match(LANGS)) or 'en'
-    logger.debug('get_locale', locale=locale)
     return locale
 
 # f.jinja_env.add_extension('jinja2.ext.i18n')
