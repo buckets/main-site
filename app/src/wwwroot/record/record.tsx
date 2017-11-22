@@ -5,7 +5,7 @@ import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector, Recording, ChangeStep, KeyPressStep, isInputValue } from '../../recordlib'
+import { RecordingDirector, Recording, ChangeStep, RecStep, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 import { DebouncedInput } from '../../input'
@@ -135,46 +135,138 @@ class Browser extends React.Component<BrowserProps, {
 }
 
 
-interface StepValueDetailsProps {
-  value: string;
-  step: ChangeStep | KeyPressStep;
-  director: RecordingDirector;
+interface ValueOptions {
+  key?: "" | "start-date" | "end-date";
+  variation?: string;
 }
-class StepValueDetails extends React.Component<StepValueDetailsProps, any> {
+
+interface ValueSelectProps {
+  value: string;
+  step: ChangeStep;
+  director: RecordingDirector<ValueOptions>;
+}
+class StepValueSelect extends React.Component<ValueSelectProps, any> {
   render() {
     let { value, step, director } = this.props;
-    return <div>
-      <div className="step-desc">Set value of {step.desc} to:</div>
-      <div className="step-value">{value}</div>
-      <div>
-        <select onChange={ev => {
-          console.log('changed', ev.target.value);
-          step.refkey = ev.target.value;
-          director.emit('change');
-        }} defaultValue={step.refkey || ''}>
-          <option value="">Will always be the same</option>
-          <option value="start-date">Start date</option>
-          <option value="start-day">Start DAY</option>
-          <option value="start-month">Start MONTH</option>
-          <option value="start-year">Start YEAR</option>
+    let options:ValueOptions = step.options || {};
 
-          <option value="end-date">End date</option>
-          <option value="end-day">End DAY</option>
-          <option value="end-month">End MONTH</option>
-          <option value="end-year">End YEAR</option>
-        </select>
-      </div>
-    </div>
+    let defaultValue = options.key || "";
+
+    let variation;
+    let original;
+    if (options && !options.key) {
+      original = <span className="original-value">({value})</span>;
+    }
+    if (options.key === "start-date" || options.key === "end-date") {
+      variation = <select>
+        <option>YYYY-MM-DD</option>
+        <option>YYYY-DD-MM</option>
+        <option>M/D/YYYY</option>
+        <option>MM/DD/YYYY</option>
+        <option>D/M/YYYY</option>
+        <option>DD/MM/YYYY</option>
+        <option>D</option>
+        <option>DD</option>
+        <option>M</option>
+        <option>MM</option>
+        <option>MMM</option>
+        <option>YY</option>
+        <option>YYYY</option>
+      </select>
+    }
+
+    return <span>
+      <select onChange={ev => {
+        console.log('changed', ev.target.value);
+        if (!step.options) {
+          step.options = {};
+        }
+        (step.options as ValueOptions).key = ev.target.value as any;
+        director.emit('change');
+      }} defaultValue={defaultValue}>
+        <option value="">{value}</option>
+        <option value="start-date">Start date...</option>
+        <option value="end-date">End date...</option>
+      </select>
+      {variation}
+      {original}
+    </span>
   }
 }
 
+
+interface RecordingStepProps {
+  step: RecStep;
+  director: RecordingDirector<ValueOptions>;
+}
+class RecordingStep extends React.Component<RecordingStepProps, {
+}> {
+  render() {
+    let { step, director } = this.props;
+    let guts;
+    switch (step.type) {
+      case 'navigate': {
+        guts = <div>
+          {sss('navigatestep', (url) => `Go to ${url}`)(step.url)}
+        </div>
+        break;
+      }
+      case 'change': {
+        console.log('change', step);
+        let value = step.displayValue || step.value;
+        if (value === false) {
+          value = sss('off');
+        } else if (value === true) {
+          value = sss('on');
+        }
+        guts = <div>Change {step.desc} to
+          <StepValueSelect
+            value={value}
+            step={step}
+            director={director}
+          />
+        </div>
+        break;
+      }
+      case 'focus': {
+        break;
+      }
+      case 'click': {
+        guts = <div>Click on {step.desc}</div>
+        break;
+      }
+      case 'keypress': {
+        console.log("keypress", step);
+        let value = step.keys
+          .map(x => x.key)
+          .filter(isInputValue)
+          .join('');
+        if (!value) {
+          break;
+        }
+        guts = <div>Change {step.desc} to {value}</div>
+        break;
+      }
+      case 'download': {
+        guts = <div>download a file</div>
+        break;
+      }
+    }
+    if (guts) {
+      return <div className="step">
+        {guts}
+      </div>
+    } else {
+      return null;
+    }
+  }
+}
 
 
 interface RecordPageProps {
   preload: string;
   partition: string;
   recording: Recording;
-  values: object;
   onRecordingChange: Function,
 }
 /**
@@ -182,37 +274,24 @@ interface RecordPageProps {
 */
 class RecordPage extends React.Component<RecordPageProps, {
   recording: Recording;
-  values: object;
-  // Date to direct the user to choose
-  start_date: moment.Moment;
-  end_date: moment.Moment;
 }> {
-  private director:RecordingDirector;
+  private director:RecordingDirector<ValueOptions>;
   constructor(props:RecordPageProps) {
     super(props);
-    const today = moment();
-
-    let start_date = moment().day(15).subtract(2, 'months');
-    if (start_date.day() == today.day()) {
-      start_date.add(1, 'day');
-    }
-    let end_date = start_date.clone().add(1, 'month').add(1, 'day');
     this.state = {
       recording: props.recording,
-      values: props.values,
-      start_date,
-      end_date,
     };
     this.director = new RecordingDirector({
       recording: props.recording,
-      values: props.values,
+      lookUpValue: (options:ValueOptions) => {
+        return 'some value';
+      }
     });
   }
   componentWillReceiveProps(nextProps) {
     console.log('will receive props', nextProps);
     this.setState({
       recording: nextProps.recording,
-      values: nextProps.values,
     })
   }
   gotWebview(webview:Electron.WebviewTag) {
@@ -225,7 +304,6 @@ class RecordPage extends React.Component<RecordPageProps, {
   }
   render() {
     let { preload, partition, onRecordingChange } = this.props;
-    let { start_date, end_date } = this.state;
     let stop_button = <button
         disabled={this.director.state !== 'recording'}
         onClick={() => {
@@ -237,59 +315,16 @@ class RecordPage extends React.Component<RecordPageProps, {
     let save_button = <button
         onClick={() => {
           this.director.pauseRecording();
-          onRecordingChange(this.director.current_recording, this.director.current_values);
+          onRecordingChange(this.director.current_recording);
         }}>{sss('Save')}</button>
 
     let steps = this.director.current_recording.steps
     .map((step, i) => {
-      let question;
-
-      switch (step.type) {
-        case 'navigate': {
-          question = <div>{sss('navigatestep', (url) => `Go to ${url}`)(step.url)}</div>
-          break;
-        }
-        case 'change': {
-          let value = step.displayValue || step.value;
-          question = <StepValueDetails
-            value={value}
-            step={step}
-            director={this.director}
-            />
-          break;
-        }
-        case 'focus': {
-          //question = <div>Focus on {step.desc}</div>
-          break;
-        }
-        case 'click': {
-          question = <div>Click on {step.desc}</div>
-          break;
-        }
-        case 'keypress': {
-          console.log("keypress", step);
-          let value = step.keys
-            .map(x => x.key)
-            .filter(isInputValue)
-            .join('');
-          if (!value) {
-            break;
-          }
-          question = <StepValueDetails
-            value={value}
-            step={step}
-            director={this.director}
-            />
-          break;
-        }
-        case 'download': {
-          question = <div>download file</div>
-          break;
-        }
-      }
-      if (question) {
-        return <div key={i} className="step-question">{question}</div>  
-      }
+      return <RecordingStep
+        key={i}
+        director={this.director}
+        step={step}
+      />
     })
     .filter(x => x);
 
@@ -299,7 +334,7 @@ class RecordPage extends React.Component<RecordPageProps, {
           This tool will record you getting transaction information from your bank.  You will then be able to replay your recording to download transaction data in the future.
           <ol>
             <li>Sign in to your bank</li>
-            <li>For each account, download an OFX/QFX file for the date range <b>{start_date.format('ll')}</b> to <b>{end_date.format('ll')}</b>.</li>
+            <li>For each account, download an OFX/QFX making sure to <b>adjust both the start and end date range</b>.</li>
             <li>Click {stop_button}</li>
             <li>Fill out the form on the right</li>
             <li>Click {save_button}</li>
@@ -390,14 +425,13 @@ interface RecordingAppProps {
   partition: string;
   bankrecording: BankRecording;
   recording: Recording;
-  values: object;
   store: IStore;
   renderer: Renderer;
   onRecordingChange: Function,
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, partition, bankrecording, recording, values, store, renderer, onRecordingChange } = this.props;
+    let { preload, partition, bankrecording, recording, store, renderer, onRecordingChange } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -431,7 +465,6 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
                     preload={preload}
                     partition={partition}
                     recording={recording}
-                    values={values}
                     onRecordingChange={onRecordingChange}
                   />
                 </Route>
@@ -460,8 +493,7 @@ export async function start(args:{
 
   let store = new RPCRendererStore(args.room);
   let BANKRECORDING = await store.bankrecording.get(args.recording_id);
-  let recording = null,
-      values = null;
+  let recording = null
 
   // attempt the password 3 times.
   let i = 0;
@@ -469,7 +501,6 @@ export async function start(args:{
     try {
       let plaintext = await store.bankrecording.decryptBankRecording(BANKRECORDING);
       recording = plaintext.recording;
-      values = plaintext.values;
       break;
     } catch(err) {
       if (err instanceof IncorrectPassword) {
@@ -488,16 +519,14 @@ export async function start(args:{
     return <RecordingApp
       bankrecording={BANKRECORDING}
       recording={recording}
-      values={values}
       preload={args.preload_url}
       partition={args.partition}
       store={store}
       renderer={renderer}
-      onRecordingChange={(new_recording, new_values) => {
-        console.log('recording change', new_recording, new_values);
+      onRecordingChange={(new_recording) => {
+        console.log('recording change', new_recording);
         store.bankrecording.update(args.recording_id, {
           recording: new_recording,
-          values: new_values,
         })
       }}
     />

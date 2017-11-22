@@ -5,8 +5,7 @@ CREATE TABLE bank_recording (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uuid TEXT,
     name TEXT,
-    enc_recording TEXT,
-    enc_values TEXT
+    enc_recording TEXT
 );
 
 -- Down

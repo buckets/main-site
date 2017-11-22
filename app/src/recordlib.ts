@@ -117,15 +117,18 @@ function escapeQuote(x:string):string {
 
 // provide a human-friendly name for element
 function describeElement(el:HTMLElement):string {
+  console.log('el', el);
   let tagName = el.tagName.toLowerCase();
   if (tagName === 'input' || tagName === 'select') {
     
-  } 
+  } else if (tagName === 'a') {
+    return el.innerText;
+  }
   let name = el.getAttribute('name');
   if (name) {
-    return `<${tagName} ${name}/>`;
+    return `<${tagName} ${name}>`;
   } else {
-    return `<${tagName}/>`;
+    return `<${tagName}>`;
   }
 }
 
@@ -257,9 +260,6 @@ export interface KeyPressStep {
     // If true, this key signals the beginning/end of input
     input_delimiter: boolean;
   }>;
-
-  // Name of key inside values object that accompanies playback.
-  refkey?: string;
 }
 export function isKeyPressStep(x:RecStep):x is KeyPressStep {
   return (<KeyPressStep>x).type === 'keypress';
@@ -300,8 +300,8 @@ export interface ChangeStep {
   selectedIndex?: number;
   displayValue?: string;
 
-  // Name of key inside values object that accompanies playback.
-  refkey?: string;
+  // Application-specific options to be used in playback
+  options?: object;
 }
 export function isChangeStep(x:RecStep):x is ChangeStep {
   return (<ChangeStep>x).type === 'change';
@@ -433,11 +433,18 @@ export class Recorder {
     window.addEventListener('change', (ev:any) => {
       let target = ev.target;
       let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
+      let input_type = target.getAttribute('type');
+      let value = target.value;
+      console.log(target);
+      if (input_type === 'checkbox') {
+        value = target.checked;
+        displayValue = value;
+      }
       let step:ChangeStep = {
         type: 'change',
         desc: describeElement(target),
         element: identifyElement(target),
-        value: target.value,
+        value,
         selectedIndex: target.selectedIndex,
         displayValue,
       }
@@ -588,7 +595,7 @@ export class Recorder {
   process.  It knows about a `<webview>` tag which it controls
   and monitors.
 */
-export class RecordingDirector extends EventEmitter {
+export class RecordingDirector<T> extends EventEmitter {
   private _state:'idle'|'recording'|'playing' = 'idle';
   public webview:Electron.WebviewTag;
 
@@ -596,8 +603,8 @@ export class RecordingDirector extends EventEmitter {
   // and for recording.
   public current_recording:Recording;
 
-  // Place where steps with a refkey look for values.
-  public current_values:{[k:string]: any};
+  // Place where steps can look up values
+  public lookUpValue:(options:T)=>any;
   
   public step_index:number = 0;
   public poll_interval:number = 100;
@@ -612,12 +619,12 @@ export class RecordingDirector extends EventEmitter {
 
   constructor(args?:{
       recording?:Recording,
-      values?:object,
+      lookUpValue?:(options:T)=>any,
     }) {
     super();
     args = args || {};
     this.current_recording = args.recording || new Recording();
-    this.current_values = args.values || {};
+    this.lookUpValue = args.lookUpValue || ((options:T) => null);
   }
   attachWebview(webview:Electron.WebviewTag) {
     this.webview = webview;
@@ -677,8 +684,7 @@ export class RecordingDirector extends EventEmitter {
   }
 
   // playback
-  async play(values?:object, rec?:Recording) {
-    this.current_values = values || this.current_values;
+  async play(rec?:Recording) {
     this.current_recording = rec || this.current_recording;
     this.step_index = 0;
     this._state = 'playing';
@@ -760,26 +766,16 @@ export class RecordingDirector extends EventEmitter {
     })
   }
   private async _doKeyPressStep(step:KeyPressStep) {
-    if (step.refkey && this.current_values[step.refkey] !== undefined) {
-      // Pull the value from the set of current values
-      let value = this.current_values[step.refkey];
-      for (var i = 0; i < value.length; i++) {
-        let letter = value[i];
-        await sendKey(this.webview, letter, []);
-        await wait(this.typing_delay);
-      }
-    } else {
-      for (var i = 0; i < step.keys.length; i++) {
-        let item = step.keys[i];
-        await sendKey(this.webview, item.key, item.modifiers);
-        await wait(this.typing_delay);
-      }
+    for (var i = 0; i < step.keys.length; i++) {
+      let item = step.keys[i];
+      await sendKey(this.webview, item.key, item.modifiers);
+      await wait(this.typing_delay);
     }
   }
   private async _doChangeStep(step:ChangeStep) {
     let value = step.value;
-    if (step.refkey) {
-      value = this.current_values[step.refkey];
+    if (step.options) {
+      value = this.lookUpValue(step.options as any);
     }
     return this.rpc.call('rec:do-change', {step, value});
   }

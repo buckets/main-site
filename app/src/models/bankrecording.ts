@@ -12,7 +12,6 @@ export class BankRecording implements IObject {
   uuid: string;
   name: string;
   enc_recording: string;
-  enc_values: string;
 }
 registerClass(BankRecording);
 
@@ -20,7 +19,6 @@ registerClass(BankRecording);
 interface IUpdateArgs {
   name?: string;
   recording?: reclib.Recording;
-  values?: object;
 }
 
 export class BankRecordingStore {
@@ -64,34 +62,23 @@ export class BankRecordingStore {
   }
   async _prepareForDB(args:IUpdateArgs):Promise<Partial<BankRecording>> {
     let data:any = args || {};
-    if (data.values || data.recording) {
+    if (data.recording) {
       const password = await this.getPassword();  
-      if (data.values) {
-        data.enc_values = await encrypt(JSON.stringify(data.values), password)
-        delete data.values;
-      }
-      if (data.recording) {
-        data.enc_recording = await encrypt(JSON.stringify(data.recording), password)
-        delete data.recording;
-      }
+      data.enc_recording = await encrypt(JSON.stringify(data.recording), password)
+      delete data.recording;
     }
     const partial:Partial<BankRecording> = data;
     return partial;
   }
   async decryptBankRecording(bank_recording:BankRecording):Promise<{
     recording: reclib.Recording,
-    values: object,
   }> {
     const password = await this.getPassword();
-    let values = null;
-    if (bank_recording.enc_values) {
-      values = JSON.parse(await decrypt(bank_recording.enc_values, password));
-    }
     let recording = null;
     if (bank_recording.enc_recording) {
       recording = reclib.Recording.parse(await decrypt(bank_recording.enc_recording, password));
     }
-    return { values, recording }
+    return { recording }
   }
   async add(args:IUpdateArgs):Promise<BankRecording> {
     const data = await this._prepareForDB(args);
