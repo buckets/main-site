@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
+import * as cx from 'classnames'
 import { ipcRenderer } from 'electron'
 import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
@@ -137,6 +138,8 @@ class Browser extends React.Component<BrowserProps, {
 
 interface ValueOptions {
   key?: "" | "start-date" | "end-date";
+
+  // This is a momentjs formatting string
   variation?: string;
 }
 
@@ -158,7 +161,15 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
       original = <span className="original-value">({value})</span>;
     }
     if (options.key === "start-date" || options.key === "end-date") {
-      variation = <select>
+      variation = <select
+          defaultValue=""
+          onChange={ev => {
+            options.variation = ev.target.value;
+            step.options = options;
+            director.emitChange();
+          }}
+        >
+        <option value="">{value}</option>
         <option>YYYY-MM-DD</option>
         <option>YYYY-DD-MM</option>
         <option>M/D/YYYY</option>
@@ -188,8 +199,8 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
         <option value="start-date">Start date...</option>
         <option value="end-date">End date...</option>
       </select>
-      {variation}
       {original}
+      {variation}
     </span>
   }
 }
@@ -229,6 +240,7 @@ class RecordingStep extends React.Component<RecordingStepProps, {
         break;
       }
       case 'focus': {
+        guts = <div>Focus on {step.desc}</div>
         break;
       }
       case 'click': {
@@ -253,7 +265,9 @@ class RecordingStep extends React.Component<RecordingStepProps, {
       }
     }
     if (guts) {
-      return <div className="step">
+      return <div className={cx("step", {
+        'running': step === director.current_recording.steps[director.step_index],
+      })}>
         {guts}
       </div>
     } else {
@@ -283,9 +297,6 @@ class RecordPage extends React.Component<RecordPageProps, {
     };
     this.director = new RecordingDirector({
       recording: props.recording,
-      lookUpValue: (options:ValueOptions) => {
-        return 'some value';
-      }
     });
   }
   componentWillReceiveProps(nextProps) {
@@ -297,6 +308,12 @@ class RecordPage extends React.Component<RecordPageProps, {
   gotWebview(webview:Electron.WebviewTag) {
     this.director.attachWebview(webview);
     this.director.on('change', () => {
+      this.setState(this.state);
+    })
+    this.director.on('start-step', () => {
+      this.setState(this.state);
+    })
+    this.director.on('finish-step', () => {
       this.setState(this.state);
     })
     this.director.startRecording();
@@ -361,7 +378,16 @@ class RecordPage extends React.Component<RecordPageProps, {
           <button
             disabled={this.director.state === 'recording'}
             onClick={() => {
-              this.director.play();
+              this.director.play((options:ValueOptions) => {
+                let today = moment();
+                if (options.key === 'start-date') {
+                  let date = today.subtract(2, 'months').startOf('month');
+                  return date.format(options.variation);
+                } else if (options.key === 'end-date') {
+                  let date = today;
+                  return date.format(options.variation);
+                }
+              });
             }}
           ><span className="fa fa-play" /></button>
           {save_button}
@@ -486,10 +512,6 @@ export async function start(args:{
   }) {
   const renderer = new Renderer();
   
-  // const director = new RecordingDirector(webview);
-  // director.on('recorded-step', () => {
-  //   renderer.doUpdate();
-  // })
 
   let store = new RPCRendererStore(args.room);
   let BANKRECORDING = await store.bankrecording.get(args.recording_id);

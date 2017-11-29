@@ -35,10 +35,15 @@
       text-align: center;
     }
     .recording-pane .step {
-      margin-top: .5rem;
-      padding: .5rem .5rem 0;
+      padding: .5rem .5rem;
       border: 1px solid var(--lighter-grey);
       border-width: 1px 0 0;
+    }
+    .recording-pane .step:last-child {
+      border-width: 1px 0;
+    }
+    .recording-pane .step.running {
+      background-color: var(--hover-highlight-color);
     }
     .recording-pane .step-question {
       margin-top: .5rem;

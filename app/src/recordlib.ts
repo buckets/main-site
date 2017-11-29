@@ -400,7 +400,9 @@ export class Recorder {
         if (elem === null) {
           throw new Error('Element not found');
         }
+        console.log('setting element value to:', value);
         elem.value = value;
+        console.log('elem.value', elem.value);
         elem.focus();
       },
     })
@@ -430,12 +432,30 @@ export class Recorder {
       }
     }
 
+    function shouldRecordFocusInsteadOfClick(elem:HTMLElement):boolean {
+      switch (elem.tagName) {
+        case 'SELECT':
+        case 'OPTION': {
+          return true;
+        }
+        case 'INPUT': {
+          let type = elem.getAttribute('type');
+          switch (type) {
+            case 'date': {
+              return true
+            }
+          }
+        }
+      }
+      return false;
+    }
+
     window.addEventListener('change', (ev:any) => {
       let target = ev.target;
       let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
       let input_type = target.getAttribute('type');
       let value = target.value;
-      console.log(target);
+      console.log(target, 'value', value);
       if (input_type === 'checkbox') {
         value = target.checked;
         displayValue = value;
@@ -455,6 +475,7 @@ export class Recorder {
     } as any)
 
     window.addEventListener('focus', (ev:any) => {
+      console.log('focus', ev);
       let step:FocusStep = {
         type: 'focus',
         desc: describeElement(ev.target),
@@ -467,7 +488,16 @@ export class Recorder {
     } as any)
 
     window.addEventListener('click', (ev:any) => {
-      console.log('click ev', ev);
+      if (shouldRecordFocusInsteadOfClick(ev.target)) {
+        let step:FocusStep = {
+          type: 'focus',
+          element: identifyElement(ev.target),
+          desc: describeElement(ev.target),
+        }
+        this.rpc.call('rec:step', step);
+        return;
+      }
+
       let {pageX, pageY, screenX, screenY} = ev;
       let rect = ev.target.getBoundingClientRect();
       let offsetX = Math.floor(ev.clientX - rect.left);
@@ -602,9 +632,6 @@ export class RecordingDirector<T> extends EventEmitter {
   // The currently used Recording.  Used for playback
   // and for recording.
   public current_recording:Recording;
-
-  // Place where steps can look up values
-  public lookUpValue:(options:T)=>any;
   
   public step_index:number = 0;
   public poll_interval:number = 100;
@@ -619,12 +646,13 @@ export class RecordingDirector<T> extends EventEmitter {
 
   constructor(args?:{
       recording?:Recording,
-      lookUpValue?:(options:T)=>any,
     }) {
     super();
     args = args || {};
     this.current_recording = args.recording || new Recording();
-    this.lookUpValue = args.lookUpValue || ((options:T) => null);
+  }
+  emitChange() {
+    this.emit('change');
   }
   attachWebview(webview:Electron.WebviewTag) {
     this.webview = webview;
@@ -633,7 +661,7 @@ export class RecordingDirector<T> extends EventEmitter {
       'rec:step': (step:RecStep) => {
         if (this.state === 'recording') {
           this.current_recording.addStep(step);
-          this.emit('change');
+          this.emitChange();
         }
       },
       'rec:ready-for-control': () => {
@@ -648,7 +676,7 @@ export class RecordingDirector<T> extends EventEmitter {
           url: webview.getURL(),
         }
         this.current_recording.addStep(pageload);  
-        this.emit('change');
+        this.emitChange();
       } else if (this.state === 'playing') {
         this.pages_loaded.push({
           title: webview.getTitle(),
@@ -672,38 +700,54 @@ export class RecordingDirector<T> extends EventEmitter {
       desc: '',
       url,
     });
-    this.emit('change');
+    this.emitChange();
   }
   startRecording() {
     this._state = 'recording';
-    this.emit('change');
+    this.emitChange();
   }
   pauseRecording() {
     this._state = 'idle';
-    this.emit('change');
+    this.emitChange();
   }
 
   // playback
-  async play(rec?:Recording) {
-    this.current_recording = rec || this.current_recording;
+  async play(lookUpValue:(options:T)=>any) {
     this.step_index = 0;
     this._state = 'playing';
-    let steps = this.current_recording.steps;
-    for (this.step_index = 0; this.step_index < steps.length; this.step_index++) {
-      console.log('Start step', this.step_index, steps[this.step_index]);
-      this.emit('start-step', this.step_index);
-      await this.doStep(steps[this.step_index]);
-      await wait(this.playback_delay);
-      this.emit('finish-step', this.step_index);
-      console.log('Finished step', this.step_index);
 
-      // wait for the webview
-      while (this.webview.isLoading()) {
-        await wait(this.poll_interval);
+    while(true) {
+      if (!await this.playNextStep(lookUpValue)) {
+        break;
+      } else {
+        await wait(this.playback_delay);
       }
     }
+    this._state = 'idle';
   }
-  async doStep(step:RecStep) {
+  async playNextStep(lookUpValue?:(options:T)=>any) {
+    let steps = this.current_recording.steps;
+    if (this.step_index === steps.length) {
+      return false;
+    }
+    let step = steps[this.step_index];
+    console.log('Start step', this.step_index, step);
+    this.emit('start-step', this.step_index);
+    let prior_state = this._state;
+    this._state = 'playing';
+    await this.doStep(step, lookUpValue);
+
+    while (this.webview.isLoading()) {
+      await wait(this.poll_interval);
+    }
+
+    this._state = prior_state;
+    this.emit('finish-step', this.step_index);
+    console.log('Finished step', this.step_index);
+    this.step_index++;
+    return true;
+  }
+  async doStep(step:RecStep, lookUpValue:(options:T)=>any) {
     switch (step.type) {
       case 'navigate': {
         return this._doNavigateStep(step);
@@ -718,7 +762,7 @@ export class RecordingDirector<T> extends EventEmitter {
         return this._doFocusStep(step);
       }
       case 'change': {
-        return this._doChangeStep(step);
+        return this._doChangeStep(step, lookUpValue);
       }
       case 'keypress': {
         return this._doKeyPressStep(step);
@@ -772,10 +816,10 @@ export class RecordingDirector<T> extends EventEmitter {
       await wait(this.typing_delay);
     }
   }
-  private async _doChangeStep(step:ChangeStep) {
+  private async _doChangeStep(step:ChangeStep, lookUpValue:(options:T)=>any) {
     let value = step.value;
     if (step.options) {
-      value = this.lookUpValue(step.options as any);
+      value = lookUpValue(step.options as any);
     }
     return this.rpc.call('rec:do-change', {step, value});
   }
@@ -783,24 +827,9 @@ export class RecordingDirector<T> extends EventEmitter {
     return this.rpc.call('rec:do-focus', step);
   }
   private async _doPageLoadStep(step:PageLoadStep) {
-    // waiting for pages to load is already part of the playback process.
-    // console.log('waiting for page load...', step.url);
-    // if (this.pages_loaded.length) {
-    //   // already started
-    //   console.log('page already loaded', this.pages_loaded);
-    //   this.pages_loaded.shift();
-    // } else {
-    //   console.log('waiting for page to load');
-    //   return new Promise((resolve, reject) => {
-    //     this.once('pageloaded', ev => {
-    //       console.log('page loaded');
-    //       resolve(ev);
-    //     })
-    //   })
-    // }
+    // waiting for pages to load is already part of the playback process
   }
   private async _doDownloadStep(step:DownloadStep) {
-
   }
 }
 
