@@ -128,11 +128,11 @@ export class BudgetFile {
 
     // Downloads
     sesh.on('will-download', (ev, item, webContents) => {
-      console.log('will-download', ev, item);
+      log.info('will-download', item.getFilename(), item.getMimeType());
 
       // XXX does this need to be explicitly cleaned up?
       let tmpdir = tmp.dirSync();
-      console.log('tmpdir', tmpdir);
+      log.debug('tmp dir:', tmpdir);
 
       webContents.send('buckets:will-download', {
         filename: item.getFilename(),
@@ -148,25 +148,25 @@ export class BudgetFile {
       item.setSavePath(save_path);
       item.on('updated', (event, state) => {
         if (state === 'interrupted') {
-          console.log('Download is interrupted but can be resumed')
+          log.info('Download is interrupted but can be resumed')
         } else if (state === 'progressing') {
           if (item.isPaused()) {
-            console.log('Download is paused')
+            log.info('Download is paused')
           } else {
-            console.log(`Received bytes: ${item.getReceivedBytes()}`)
+            log.debug(`Received bytes: ${item.getReceivedBytes()}`)
           }
         }
       })
       item.once('done', (event, state) => {
         if (state === 'completed') {
-          console.log('Download successfully')
+          log.info('Download ok', item.getFilename(), save_path);
           webContents.send('buckets:file-downloaded', {
             localpath: save_path,
             filename: item.getFilename(),
             mimetype: item.getMimeType(),
           })
         } else {
-          console.log(`Download failed: ${state}`)
+          log.warn(`Download failed: ${state}`)
         }
       })
     })

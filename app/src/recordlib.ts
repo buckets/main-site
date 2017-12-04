@@ -1,3 +1,4 @@
+import * as log from 'electron-log'
 import {ipcRenderer} from 'electron'
 import {EventEmitter} from 'events'
 import { getBounds, IBounds } from './position'
@@ -117,7 +118,6 @@ function escapeQuote(x:string):string {
 
 // provide a human-friendly name for element
 function describeElement(el:HTMLElement):string {
-  console.log('el', el);
   let tagName = el.tagName.toLowerCase();
   if (tagName === 'input' || tagName === 'select') {
     
@@ -166,7 +166,6 @@ export function identifyElement(el:HTMLElement):UniqueElementID {
   if (!xpaths.length) {
     xpaths.push(xpathFromRoot(el));  
   }
-  console.log('xpaths', xpaths);
   return {xpaths};
 }
 
@@ -328,7 +327,7 @@ export class Recording {
   public steps:Array<RecStep> = [];
 
   addStep(step:RecStep) {
-    console.log('addStep', step);
+    log.info('addStep', step.type);
     if (this.steps.length === 0) {
       this.steps.push(step)
       return;
@@ -371,6 +370,7 @@ export class Recording {
 export class Recorder {
   private rpc:RPC;
   constructor() {
+    log.info('webview: Recorder initialized');
     this.rpc = inWebviewRPC();
     this.rpc.addHandlers({
       'getbounds': (params:{element:UniqueElementID}) => {
@@ -395,26 +395,26 @@ export class Recorder {
       },
       'rec:do-change': ({step, value}:{step:ChangeStep, value:string}) => {
         let { element } = step;
-        console.log('do-change step', step);
+        log.debug('do-change step', step);
         let elem = findElement(element) as HTMLInputElement;
         if (elem === null) {
           throw new Error('Element not found');
         }
-        console.log('setting element value to:', value);
+        log.debug('setting element value to:', value);
         elem.value = value;
-        console.log('elem.value', elem.value);
+        log.debug('elem.value', elem.value);
         elem.focus();
       },
     })
     ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
-      console.log('file downloaded', localpath, filename, mimetype);
+      log.debug('file downloaded', localpath, filename, mimetype);
       let step:DownloadStep = {
         type: 'download',
       }
       this.rpc.call('rec:step', step);
     })
     ipcRenderer.on('buckets:will-download', (ev, {filename, mimetype}) => {
-      console.log('will download', filename, mimetype);
+      log.debug('will download', filename, mimetype);
     })
 
     function isInputElement(elem:HTMLElement):boolean {
@@ -455,7 +455,7 @@ export class Recorder {
       let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
       let input_type = target.getAttribute('type');
       let value = target.value;
-      console.log(target, 'value', value);
+      log.debug('change', target, 'value', value);
       if (input_type === 'checkbox') {
         value = target.checked;
         displayValue = value;
@@ -476,9 +476,11 @@ export class Recorder {
 
     window.addEventListener('focus', (ev:any) => {
       console.log('focus', ev);
+      const desc = describeElement(ev.target)
+      log.debug('focus', desc)
       let step:FocusStep = {
         type: 'focus',
-        desc: describeElement(ev.target),
+        desc: desc,
         element: identifyElement(ev.target),
       }
       this.rpc.call('rec:step', step);
