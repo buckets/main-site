@@ -7,7 +7,7 @@
 {% block content %}
 <div class="wrap spaced">
     <div style="text-align: center;">
-        <form action="/buy" method="POST">
+        <form action="{{ url_for('.buy') }}" method="POST">
           <script
             src="https://checkout.stripe.com/checkout.js" class="stripe-button"
             data-image="{{ url_for('static', filename='img/main_logo.png') }}"

@@ -126,6 +126,12 @@ def configureApp(flask_secret_key,
     sentry_errors_log.addHandler(logging.StreamHandler())
     return f
 
+@f.errorhandler(405)
+def handle_405(err):
+    return render_template('err_general.html', 
+        code=405,
+        message='Method not allowed')
+
 @f.errorhandler(404)
 def handle_404(err):
     return render_template('err404.html')
