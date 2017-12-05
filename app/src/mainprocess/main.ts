@@ -9,7 +9,7 @@ import * as URL from 'url'
 import * as Path from 'path'
 import { startLocalizing } from '../i18n'
 import { updateMenu } from './menu'
-import { BudgetFile, watchForEvents } from './files'
+import { BudgetFile } from './files'
 import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
@@ -140,8 +140,6 @@ app.on('browser-window-focus', (ev, win) => {
     updateMenu(false);
   }
 })
-watchForEvents(app);
-
 
 let wiz_win:Electron.BrowserWindow;
 function openWizard() {

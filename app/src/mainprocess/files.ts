@@ -84,6 +84,9 @@ export class BudgetFile implements IBudgetFile {
     return BudgetFile.WIN2FILE[id];
   }
 
+  /**
+
+   */
   async start() {
     log.debug('start', this.filename);
 
@@ -121,9 +124,26 @@ export class BudgetFile implements IBudgetFile {
     this.openDefaultWindows();
     return this;
   }
+
+  /**
+   
+   */
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
+    this.rpc_store.stop();
+    ipcMain.removeAllListeners(`budgetfile.rpc.${this.id}`)
   }
+
+  /**
+    Send a message to all Renderer processes for this budget.
+   */
+  // private broadcastToRenderers(chan:string, ...args) {
+  //   webContents.getAllWebContents().forEach(wc => {
+  //     if (URL.parse(wc.getURL()).hostname === this.id) {
+  //       wc.send(chan, ...args)
+  //     }
+  //   })
+  // }
 
   /**
    *  Open the "default" set of windows for a newly opened budget.
@@ -391,12 +411,3 @@ export const openBudgetFile = onlyRunInMain((path:string) => {
   return BudgetFile.openFile(path);
 })
 
-
-export function watchForEvents(app:Electron.App) {
-  ipcMain.on('buckets:show-window', (ev) => {
-    BrowserWindow.fromWebContents(ev.sender).show();
-  })
-  ipcMain.on('buckets:close-window', (ev) => {
-    BrowserWindow.fromWebContents(ev.sender).close();
-  })
-}

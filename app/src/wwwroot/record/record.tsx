@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import * as cx from 'classnames'
-import { ipcRenderer } from 'electron'
+import { remote } from 'electron'
 import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
@@ -575,5 +575,5 @@ export async function start(args:{
   })
 
   renderer.doUpdate();
-  ipcRenderer.send('buckets:show-window');
+  remote.getCurrentWindow().show();
 }

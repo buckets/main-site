@@ -38,6 +38,10 @@ interface RPCReply {
   ok: boolean;
   value: any;
 }
+
+/**
+  
+ */
 export class RPCMainStore {
   private data:DataEventEmitter;
   constructor(private store:IStore, private room:string) {

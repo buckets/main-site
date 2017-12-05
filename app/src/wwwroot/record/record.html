@@ -116,7 +116,7 @@
 <body class="rec-container">
   <div id="recorder"></div>
 <script>
-const {remote, ipcRenderer} = require('electron');
+const {remote} = require('electron');
 const Path = require('path');
 const appPath = remote.app.getAppPath();
 const req = function() {
@@ -147,7 +147,7 @@ start({
 })
 .catch(err => {
   log.error(err.stack);
-  ipcRenderer.send('buckets:close-window');
+  remote.getCurrentWindow().close();
 });
 </script>
 </body>
