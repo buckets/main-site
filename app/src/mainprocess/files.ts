@@ -6,8 +6,9 @@ import * as tmp from 'tmp'
 import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
+import { DataEventEmitter } from '../store'
 import { DBStore } from './dbstore';
-import { RPCMainStore } from '../rpcstore';
+import { RPCMainStore, RPCRendererStore } from '../rpcstore';
 import * as URL from 'url';
 import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
@@ -17,6 +18,11 @@ import { onlyRunInMain } from '../rpc'
 
 
 interface IBudgetFile {
+  data:DataEventEmitter;
+  
+  /**
+   *  Cause the recording window to open for a particular recording
+   */
   openRecordWindow(recording_id:number);
 }
 
@@ -52,6 +58,7 @@ export class BudgetFile implements IBudgetFile {
 
   public store:DBStore;
   private rpc_store:RPCMainStore = null;
+  readonly data:DataEventEmitter;
 
   readonly id:string;
   readonly filename:string;
@@ -59,6 +66,7 @@ export class BudgetFile implements IBudgetFile {
     this.id = uuid();
     this.filename = filename || '';
     this.store = new DBStore(filename, true);
+    this.data = this.store.data;
     BudgetFile.REGISTRY[this.id] = this;
   }
 
@@ -101,7 +109,8 @@ export class BudgetFile implements IBudgetFile {
       }
       ev.sender.send(message.reply_ch, response);
     })
-    
+
+    // listen for child store requests
     this.rpc_store = new RPCMainStore(this.store, this.id);
     await this.rpc_store.start();
 
@@ -115,14 +124,25 @@ export class BudgetFile implements IBudgetFile {
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
   }
+
+  /**
+   *  Open the "default" set of windows for a newly opened budget.
+   *
+   *  Currently, this just opens the accounts page, but in the future
+   *  It might open the set of last-opened windows.
+   */
   openDefaultWindows() {
-    // Later, it might save state so that the last thing opened
-    // is what opens the next time.  But for now, just start
-    // at the top.
     this.openWindow(`/budget/index.html`);
   }
+
+  /**
+   *  Open a new budget-specific window.
+   *
+   *  @param path  Relative path to open
+   *  @param dont_show  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.  
+   */
   openWindow(path:string, dont_show?:boolean) {
-    log.debug('opening window to', path);
+    log.debug('opening new window to', path);
     const parsed = Path.parse(this.filename);
     let win = new BrowserWindow({
       width: 1200,
@@ -143,7 +163,6 @@ export class BudgetFile implements IBudgetFile {
       path = '/' + path;
     }
     let url = `buckets://${this.id}${path}`;
-    log.debug('url', url);
     win.loadURL(url);
     // win.setRepresentedFilename(this.filename);
     win.on('close', ev => {
@@ -151,8 +170,12 @@ export class BudgetFile implements IBudgetFile {
       delete BudgetFile.WIN2FILE[win.id];
     })
   }
+
+  /**
+   *
+   */
   async openRecordWindow(recording_id:number) {
-    let bankrecording = await this.store.bankrecording.get(recording_id);
+    const bankrecording = await this.store.bankrecording.get(recording_id);
 
     const partition = `persist:rec-${bankrecording.uuid}`;
     let sesh = session.fromPartition(partition, {cache:false});
@@ -232,17 +255,9 @@ export class BudgetFile implements IBudgetFile {
     this.openWindow(`/record/record.html?${qs}`, true);
   }
 
-
-  /**
-   *
-   */
-  openRecorder(recording_id:number) {
-
-  }
-
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
     if (!create) {
-      // open the file and fail if it doesn't exist
+      // open the file or fail if it doesn't exist
       if (! await fs.existsAsync(filename)) {
         displayError(sss('File does not exist:') + ` ${filename}`)
         return;
@@ -262,8 +277,13 @@ export class BudgetFile implements IBudgetFile {
  *  In-renderer interface to a main process `BudgetFile`
  */
 class RendererBudgetFile implements IBudgetFile {
+  readonly data:DataEventEmitter;
+  readonly store:RPCRendererStore;
   constructor(readonly id:string) {
+    this.store = new RPCRendererStore(id);
+    this.data = this.store.data;
   }
+
   async openRecordWindow(recording_id:number) {
     try {
       await this.callInMain('openRecordWindow', recording_id)  
@@ -272,6 +292,10 @@ class RendererBudgetFile implements IBudgetFile {
       log.error(err);
     }
   }
+
+  /**
+   *  Call a function on this budget's corresponding main process BudgetFile.
+   */
   private callInMain(method:string, ...args):Promise<any> {
     return new Promise((resolve, reject) => {
       const message:IBudgetFileRPCMessage = {

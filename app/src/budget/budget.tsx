@@ -5,7 +5,6 @@ import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import { sss } from '../i18n'
-import { RPCRendererStore } from '../rpcstore'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
@@ -18,6 +17,7 @@ import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
+import { current_file } from '../mainprocess/files'
 import { TransactionImportPage } from './importing'
 import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
@@ -39,7 +39,7 @@ export async function start(base_element, room) {
     })
   }, false);
 
-  let store = new RPCRendererStore(room);
+  let store = current_file.store;
 
   // initial state
   manager.setStore(store);
