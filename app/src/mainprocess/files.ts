@@ -3,7 +3,7 @@ import * as Path from 'path'
 import * as electron_is from 'electron-is'
 import * as fs from 'fs-extra-promise'
 import * as tmp from 'tmp'
-import { app, ipcMain, dialog, BrowserWindow, session } from 'electron';
+import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 import { DBStore } from './dbstore';
@@ -13,9 +13,32 @@ import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import * as querystring from 'querystring'
+import { onlyRunInMain } from '../rpc'
 
 
-export class BudgetFile {
+interface IBudgetFile {
+  openRecordWindow(recording_id:number);
+}
+
+interface IBudgetFileRPCMessage {
+  reply_ch: string;
+  method: string;
+  params: any[];
+}
+interface IBudgetFileRPCResponse {
+  result?: any;
+  err?: any;
+}
+
+
+//------------------------------------------------------------------------------
+// Main process
+//------------------------------------------------------------------------------
+
+/**
+ *  Main process interface to a single budget file.
+ */
+export class BudgetFile implements IBudgetFile {
   
   // Mapping of BudgetFile ids to BudgetFiles
   private static REGISTRY:{
@@ -65,6 +88,19 @@ export class BudgetFile {
       reportErrorToUser(sss('Unable to open the file:') + ` ${this.filename}`, {err});
       return;
     }
+
+    // listen for child renderer processes
+    ipcMain.on(`budgetfile.rpc.${this.id}`, async (ev, message:IBudgetFileRPCMessage) => {
+      let response:IBudgetFileRPCResponse = {};
+      try {
+        let func = this[message.method];
+        response.result = await func.bind(this)(...message.params);
+      } catch(err) {
+        log.error('Budget RPC error', message, err);
+        response.err = err;
+      }
+      ev.sender.send(message.reply_ch, response);
+    })
     
     this.rpc_store = new RPCMainStore(this.store, this.id);
     await this.rpc_store.start();
@@ -116,7 +152,6 @@ export class BudgetFile {
     })
   }
   async openRecordWindow(recording_id:number) {
-    // XXX use a unique partition per recording per file
     let bankrecording = await this.store.bankrecording.get(recording_id);
 
     const partition = `persist:rec-${bankrecording.uuid}`;
@@ -196,6 +231,15 @@ export class BudgetFile {
     })
     this.openWindow(`/record/record.html?${qs}`, true);
   }
+
+
+  /**
+   *
+   */
+  openRecorder(recording_id:number) {
+
+  }
+
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
     if (!create) {
       // open the file and fail if it doesn't exist
@@ -209,7 +253,64 @@ export class BudgetFile {
   }
 }
 
-export function newBudgetWindow() {
+
+//------------------------------------------------------------------------------
+// Renderer
+//------------------------------------------------------------------------------
+
+/**
+ *  In-renderer interface to a main process `BudgetFile`
+ */
+class RendererBudgetFile implements IBudgetFile {
+  constructor(readonly id:string) {
+  }
+  async openRecordWindow(recording_id:number) {
+    try {
+      await this.callInMain('openRecordWindow', recording_id)  
+    } catch(err) {
+      log.error(err.stack)
+      log.error(err);
+    }
+  }
+  private callInMain(method:string, ...args):Promise<any> {
+    return new Promise((resolve, reject) => {
+      const message:IBudgetFileRPCMessage = {
+        reply_ch: `budgetfile.reply.${uuid()}`,
+        method,
+        params:args,
+      }
+      ipcRenderer.once(message.reply_ch, (event, reply:IBudgetFileRPCResponse) => {
+        if (reply.err) {
+          reject(reply.err)
+        } else {
+          resolve(reply.result)
+        }
+      })
+      ipcRenderer.send(`budgetfile.rpc.${this.id}`, message);  
+    })
+  }
+}
+
+/**
+ *  In renderer processes attached to a particular budget file, this is a RendererBudgetFile instance.
+ *
+ *  In the main process this is `undefined`
+ */
+export let current_file:RendererBudgetFile;
+if (electron_is.renderer()) {
+  let hostname = window.location.hostname;
+  current_file = new RendererBudgetFile(hostname);
+}
+
+
+//------------------------------------------------------------------------------
+// Global functions
+//------------------------------------------------------------------------------
+
+/**
+ *  Open a new window to the same location as the currently focused window
+ */
+export const duplicateWindow = onlyRunInMain(() => {
   let win = BrowserWindow.getFocusedWindow();
   if (!win) {
     return;
@@ -221,9 +322,12 @@ export function newBudgetWindow() {
   let url = win.webContents.getURL();
   let parsed = URL.parse(url);
   bf.openWindow(`${parsed.pathname}${parsed.hash}`);
-}
+})
 
-export function openDialog() {
+/**
+ *  Start the "Open Budget File" dialog
+ */
+export const openBudgetFileDialog = onlyRunInMain(() => {
   dialog.showOpenDialog({
     title: sss('Open Buckets Budget'),
     filters: [
@@ -236,9 +340,12 @@ export function openDialog() {
       })
     }
   })
-}
+})
 
-export function newBudgetFileDialog():Promise<BudgetFile> {
+/**
+ *  Start the "New Budget File" dialog.
+ */
+export const newBudgetFileDialog = onlyRunInMain(() => {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
       title: sss('Buckets Budget Filename'),
@@ -251,30 +358,17 @@ export function newBudgetFileDialog():Promise<BudgetFile> {
       }
     })
   })
-}
+})
+
+/**
+ *  Open a budget file (in a new window).
+ */
+export const openBudgetFile = onlyRunInMain((path:string) => {
+  return BudgetFile.openFile(path);
+})
+
 
 export function watchForEvents(app:Electron.App) {
-  ipcMain.on('buckets:new-budget', async () => {
-    try {
-      await newBudgetFileDialog()
-    } catch(err) {
-
-    }
-  })
-  ipcMain.on('buckets:open-file-dialog', () => {
-    openDialog();
-  })
-  ipcMain.on('buckets:open-file', (ev, path) => {
-    BudgetFile.openFile(path);
-  })
-  ipcMain.on('buckets:open-recorder', (ev, args) => {
-    const bf = BudgetFile.fromWindowId(ev.sender.id);
-    if (!bf) {
-      log.error(`No file found for sender: ${ev.sender.id} args=${args}`);
-    }
-    log.info('opening recording', bf.filename, 'recording', args.recording_id);
-    bf.openRecordWindow(args.recording_id);
-  })
   ipcMain.on('buckets:show-window', (ev) => {
     BrowserWindow.fromWebContents(ev.sender).show();
   })

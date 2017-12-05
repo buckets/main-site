@@ -1,17 +1,30 @@
 import * as electron_is from 'electron-is'
 import {v4 as uuid} from 'uuid'
 import { ipcMain, ipcRenderer } from 'electron'
+import * as crypto from 'crypto'
 
 //--------------------------------------------------------------------------------
 // General purpose RPC from renderer to main and back
 //--------------------------------------------------------------------------------
 
-export function onlyRunInMain<F extends Function>(name:string, func:F):F {
-  const key = `buckets:rpc:${name}`;
+/**
+ *  Wrap a function so that it will only ever be called in the main process.
+ *  
+ *  If you call the function from a renderer process, it will make a request
+ *  of the main process to run the function.
+ *
+ *  You can only wrap functions which have serializable objects arguments and
+ *  return values.
+ */
+export function onlyRunInMain<F extends Function>(func:F):F {
+  const hash = crypto.createHash('sha256');
+  hash.update(func.name);
+  hash.update(func.toString());
+  const key = `rpc-mainfunc-${hash.digest('hex')}`;
   if (electron_is.renderer()) {
     // renderer process
     return <any>function(...args) {
-      let chan = `buckets:rpc:response:${uuid()}`
+      let chan = `rpc-response-${uuid()}`
       return new Promise((resolve, reject) => {
         ipcRenderer.once(chan, (ev, {result, err}) => {
           if (err) {

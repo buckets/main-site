@@ -9,8 +9,7 @@ import { onlyRunInMain } from './rpc'
 import { APP_ROOT } from './mainprocess/globals'
 
 
-export const promptUser = onlyRunInMain('crypto.promptUser',
-  (prompt:string, args?:{
+export const promptUser = onlyRunInMain((prompt:string, args?:{
     parent?:Electron.BrowserWindow,
     password?:boolean,
   }):Promise<string> => {
@@ -61,7 +60,7 @@ export const promptUser = onlyRunInMain('crypto.promptUser',
 let PW_CACHE = {};
 let PW_CACHE_TIMEOUTS = {};
 const CACHE_TIME = 15 * 60 * 1000;
-export const cachePassword = onlyRunInMain('crypto.cachePassword', function(service:string, account:string, value:string) {
+export const cachePassword = onlyRunInMain(function(service:string, account:string, value:string) {
   const cache_key = `${service}:${account}`;
   // cache it
   PW_CACHE[cache_key] = value;
@@ -78,7 +77,7 @@ export const cachePassword = onlyRunInMain('crypto.cachePassword', function(serv
 
 /** Get a password from a cache, the OS keychain or optionally by prompting the user.
 */
-export const getPassword = onlyRunInMain('crypto.getPassword', async function getPassword(service:string, account:string, args?:{
+export const getPassword = onlyRunInMain(async function getPassword(service:string, account:string, args?:{
   prompt?:string,
   no_cache?:boolean,
 }):Promise<string> {

@@ -9,7 +9,7 @@
     "email": "hello@bucketsisbetter.com"
   },
   "scripts": {
-    "docs": "typedoc --tsconfig tsconfig.json --out docs/ src/",
+    "docs": "typedoc --tsconfig tsconfig.json --theme minimal --exclude '**/*.{test,spec}.*' --out docs/ src/",
     "start": "electron .",
     "compile": "tsc",
     "test": "./test.sh",

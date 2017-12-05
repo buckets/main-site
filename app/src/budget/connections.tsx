@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { shell, ipcRenderer } from 'electron'
+import { shell } from 'electron'
 import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
 import { BankRecording } from '../models/bankrecording'
@@ -8,6 +8,7 @@ import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
 import { DebouncedInput } from '../input'
+import { current_file } from '../mainprocess/files'
 
 function startDefaultSync(appstate:AppState) {
   let range = appstate.viewDateRange;
@@ -256,9 +257,7 @@ export class ConnectionsPage extends React.Component<{
   }
   makeNewRecording = async () => {
     let recording = await manager.store.bankrecording.add({name: sss('new recording')});
-    ipcRenderer.send('buckets:open-recorder', {
-      recording_id: recording.id,
-    });
+    current_file.openRecordWindow(recording.id);
   }
   connect = async () => {
     let connection;
@@ -307,9 +306,7 @@ class BankRecordingList extends React.Component<{
             <td>
               <a className="subtle"
                 onClick={() => {
-                  ipcRenderer.send('buckets:open-recorder', {
-                    recording_id: recording.id,
-                  });
+                  current_file.openRecordWindow(recording.id);
                 }}>
                 <span className="fa fa-gear"></span>  
               </a>

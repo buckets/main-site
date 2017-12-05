@@ -1,7 +1,10 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
 import * as Path from 'path'
-import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile} from './files'
+import { openBudgetFileDialog,
+         newBudgetFileDialog,
+         duplicateWindow,
+         BudgetFile} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles, PersistEvents } from './persistent'
@@ -28,7 +31,7 @@ export async function updateMenu(show_budget:boolean=false) {
         label: sss('Open Budget...'),
         accelerator: 'CmdOrCtrl+O',
         click() {
-          openDialog();
+          openBudgetFileDialog();
         }
       },
       {
@@ -163,7 +166,7 @@ export async function updateMenu(show_budget:boolean=false) {
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
         click() {
-          newBudgetWindow();
+          duplicateWindow();
         },
       },
       {
