@@ -14,16 +14,19 @@ import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import * as querystring from 'querystring'
 
-interface Registry {
-  [k:string]: BudgetFile,
-}
-
-export let WIN2FILE:{
-  [k:number]: BudgetFile,
-}={};
 
 export class BudgetFile {
-  static REGISTRY:Registry={};
+  
+  // Mapping of BudgetFile ids to BudgetFiles
+  private static REGISTRY:{
+    [k:string]: BudgetFile;
+  } = {};
+
+  // Mapping of BrowserWindow ids to BudgetFile
+  private static WIN2FILE:{
+    [win_id:number]: BudgetFile;
+  } = {};
+
   public store:DBStore;
   private rpc_store:RPCMainStore = null;
 
@@ -35,6 +38,21 @@ export class BudgetFile {
     this.store = new DBStore(filename, true);
     BudgetFile.REGISTRY[this.id] = this;
   }
+
+  /**
+   *  Get a BudgetFile from its id
+   */
+  static fromId(id:string):BudgetFile {
+    return BudgetFile.REGISTRY[id]
+  }
+
+  /**
+   *  Get a BudgetFile from a BrowserWindow.id
+   */
+  static fromWindowId(id:number):BudgetFile {
+    return BudgetFile.WIN2FILE[id];
+  }
+
   async start() {
     log.debug('start', this.filename);
 
@@ -83,7 +101,7 @@ export class BudgetFile {
     }
 
     // Link this instance and the window
-    WIN2FILE[win.id] = this;
+    BudgetFile.WIN2FILE[win.id] = this;
 
     if (!path.startsWith('/')) {
       path = '/' + path;
@@ -94,7 +112,7 @@ export class BudgetFile {
     // win.setRepresentedFilename(this.filename);
     win.on('close', ev => {
       // unlink from this instance
-      delete WIN2FILE[win.id];
+      delete BudgetFile.WIN2FILE[win.id];
     })
   }
   async openRecordWindow(recording_id:number) {
@@ -196,7 +214,7 @@ export function newBudgetWindow() {
   if (!win) {
     return;
   }
-  let bf = WIN2FILE[win.id];
+  let bf = BudgetFile.fromWindowId(win.id);
   if (!bf) {
     return;
   }
@@ -250,12 +268,12 @@ export function watchForEvents(app:Electron.App) {
     BudgetFile.openFile(path);
   })
   ipcMain.on('buckets:open-recorder', (ev, args) => {
-    const file = WIN2FILE[ev.sender.id];
-    if (!file) {
+    const bf = BudgetFile.fromWindowId(ev.sender.id);
+    if (!bf) {
       log.error(`No file found for sender: ${ev.sender.id} args=${args}`);
     }
-    log.info('opening recording', file.filename, 'recording', args.recording_id);
-    file.openRecordWindow(args.recording_id);
+    log.info('opening recording', bf.filename, 'recording', args.recording_id);
+    bf.openRecordWindow(args.recording_id);
   })
   ipcMain.on('buckets:show-window', (ev) => {
     BrowserWindow.fromWebContents(ev.sender).show();

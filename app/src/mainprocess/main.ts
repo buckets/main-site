@@ -33,7 +33,7 @@ protocol.registerStandardSchemes(['buckets'])
 app.on('ready', () => {
   session.defaultSession.protocol.registerFileProtocol('buckets', (request, callback) => {
     const parsed = URL.parse(request.url);
-    let bf = BudgetFile.REGISTRY[parsed.hostname];
+    let bf = BudgetFile.fromId(parsed.hostname);
     if (bf || parsed.hostname === 'main') {
       let path = Path.join(APP_ROOT, 'src/wwwroot/', parsed.pathname);
       callback(path);

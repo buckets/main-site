@@ -38,4 +38,3 @@ export function onlyRunInMain<F extends Function>(name:string, func:F):F {
     }
   }
 }
-
