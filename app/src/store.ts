@@ -74,6 +74,9 @@ export class ObjectEvent<T extends IObject> {
   }
 }
 
+/**
+ *  A bus for budget-related events.
+ */
 export interface IBudgetBus {
   obj: EventSource<ObjectEvent<any>>;
 }
@@ -90,11 +93,14 @@ export class BudgetBus extends BaseBudgetBus {
 
   constructor(readonly budget_id:string) {
     super();
-    this.monitor('obj');
-  }
-  private monitor(event: keyof IBudgetBus) {
-    (<EventSource<any>>this[event]).on(message => {
-      this.broadcast(event, message)
+    // monitor all local events for broadcast
+    Object.keys(this).forEach(event => {
+      let prop = this[event];
+      if (prop instanceof EventSource) {
+        prop.on(message => {
+          this.broadcast(event as any, message);
+        })
+      }
     })
   }
   private broadcast(event: keyof IBudgetBus, message) {
