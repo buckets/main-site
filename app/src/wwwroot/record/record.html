@@ -136,7 +136,13 @@ const {start} = req('./src/wwwroot/record/record.js');
 const container = document.getElementById('recorder');
 const preload_url = 'file://' + Path.resolve(appPath, './src/wwwroot/record/preload.js');
 const parsed_qs = querystring.parse(window.location.search.substr(1));
-const partition = parsed_qs.partition;
+const { partition } = parsed_qs;
+const autoplay_JSON = parsed_qs.autoplay;
+let autoplay;
+if (autoplay_JSON) {
+  autoplay = JSON.parse(autoplay_JSON);
+}
+console.log('autoplay', autoplay);
 const recording_id = parseInt(parsed_qs.recording_id);
 start({
   room: hostname,
@@ -144,6 +150,7 @@ start({
   preload_url,
   recording_id,
   partition,
+  autoplay,
 })
 .catch(err => {
   log.error(err.stack);

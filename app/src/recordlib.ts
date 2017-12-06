@@ -395,14 +395,11 @@ export class Recorder {
       },
       'rec:do-change': ({step, value}:{step:ChangeStep, value:string}) => {
         let { element } = step;
-        log.debug('do-change step', step);
         let elem = findElement(element) as HTMLInputElement;
         if (elem === null) {
           throw new Error('Element not found');
         }
-        log.debug('setting element value to:', value);
         elem.value = value;
-        log.debug('elem.value', elem.value);
         elem.focus();
       },
     })
@@ -413,9 +410,9 @@ export class Recorder {
       }
       this.rpc.call('rec:step', step);
     })
-    ipcRenderer.on('buckets:will-download', (ev, {filename, mimetype}) => {
-      log.debug('will download', filename, mimetype);
-    })
+    // ipcRenderer.on('buckets:will-download', (ev, {filename, mimetype}) => {
+    //   log.debug('will download', filename, mimetype);
+    // })
 
     function isInputElement(elem:HTMLElement):boolean {
       switch (elem.tagName) {
@@ -475,7 +472,6 @@ export class Recorder {
     } as any)
 
     window.addEventListener('focus', (ev:any) => {
-      console.log('focus', ev);
       const desc = describeElement(ev.target)
       log.debug('focus', desc)
       let step:FocusStep = {
@@ -637,7 +633,7 @@ export class RecordingDirector<T> {
   
   public step_index:number = 0;
   public poll_interval:number = 100;
-  public playback_delay:number = 500; //120;
+  public playback_delay:number = 120;
   public typing_delay:number = 20;
 
   private rpc:RPC;
@@ -682,7 +678,6 @@ export class RecordingDirector<T> {
       }
     })
     webview.addEventListener('dom-ready', (ev) => {
-      console.log('dom-ready', ev);
       if (this.state === 'recording') {
         let pageload:PageLoadStep = {
           type: 'pageload',
@@ -744,19 +739,27 @@ export class RecordingDirector<T> {
       return false;
     }
     let step = steps[this.step_index];
+    log.debug(`Doing step ${this.step_index}: ${step.type}`);
     
     this.events.step_started.emit({step_number: this.step_index});
     
     let prior_state = this._state;
     this._state = 'playing';
-    await this.doStep(step, lookUpValue);
-
+    try {
+      await this.doStep(step, lookUpValue);  
+    } catch(err) {
+      log.error('Error doing step', this.step_index, err.toString())
+      log.error(err.stack);
+      throw err;
+    }
+    
     while (this.webview.isLoading()) {
       await wait(this.poll_interval);
     }
 
     this._state = prior_state;
     this.events.step_finished.emit({step_number: this.step_index});
+
     this.step_index++;
     return true;
   }
@@ -794,7 +797,11 @@ export class RecordingDirector<T> {
       this.events.child_ready_for_control.once(ev => {
         resolve(null);
       })
-      wc.loadURL(step.url);
+      try {
+        wc.loadURL(step.url);
+      } catch(err) {
+        this.webview.src = step.url;
+      }
     })
   }
   async getBoundsFromRemote(elem:UniqueElementID):Promise<IBounds> {
@@ -802,19 +809,15 @@ export class RecordingDirector<T> {
       // XXX add a timeout
       let bounds = await this.rpc.call<IBounds>('getbounds', {element: elem});
       if (bounds !== null) {
-        console.log('got bounds', bounds);
         return bounds;
       }
-      console.log('will try again for bounds');
       await wait(this.poll_interval);
     }
   }
   private async _doClickStep(step:ClickStep) {
-    console.log('preparing click...');
     let bounds = await this.getBoundsFromRemote(step.element)
     let x = bounds.x + step.offsetX;
     let y = bounds.y + step.offsetY;
-    console.log('sending click', x, y);
     sendClick(this.webview, {
       x,
       y,
@@ -918,13 +921,11 @@ function sendKey(webview:Electron.WebviewTag, key:string, modifiers?:string[]) {
     data.modifiers = modifiers;
   }
   if (doesKeyRequireDownAndUp(key)) {
-    console.log("down and up");
     let keydown = Object.assign({}, data, {type: 'keyDown'})
     let keyup = Object.assign({}, data, {type: 'keyUp'});
     webview.sendInputEvent(keydown);
     webview.sendInputEvent(keyup);
   } else if (doesKeyRequireDownOnly(key)) {
-    console.log("just down");
     let keydown = Object.assign({}, data, {type: 'keyDown'})
     webview.sendInputEvent(keydown);
   }

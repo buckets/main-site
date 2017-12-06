@@ -1,20 +1,23 @@
 import * as log from 'electron-log'
 import * as Path from 'path'
+import * as URL from 'url';
 import * as electron_is from 'electron-is'
 import * as fs from 'fs-extra-promise'
 import * as tmp from 'tmp'
+import * as querystring from 'querystring'
 import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
+
+import { Timestamp, ts2db } from '../time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
-import * as URL from 'url';
 import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
-import * as querystring from 'querystring'
 import { onlyRunInMain } from '../rpc'
+import { FileImport } from '../importing'
 
 
 interface IBudgetFile {
@@ -23,7 +26,10 @@ interface IBudgetFile {
   /**
    *  Cause the recording window to open for a particular recording
    */
-  openRecordWindow(recording_id:number);
+  openRecordWindow(recording_id:number, autoplay?:{
+    onOrAfter: Timestamp,
+    before: Timestamp,
+  });
 }
 
 interface IBudgetFileRPCMessage {
@@ -194,7 +200,10 @@ export class BudgetFile implements IBudgetFile {
   /**
    *
    */
-  async openRecordWindow(recording_id:number) {
+  async openRecordWindow(recording_id:number, autoplay?:{
+    onOrAfter: Timestamp,
+    before: Timestamp,
+  }) {
     const bankrecording = await this.store.bankrecording.get(recording_id);
 
     const partition = `persist:rec-${bankrecording.uuid}`;
@@ -202,6 +211,11 @@ export class BudgetFile implements IBudgetFile {
     sesh.clearCache(() => {
 
     });
+
+    if (autoplay) {
+      autoplay.onOrAfter = ts2db(autoplay.onOrAfter)
+      autoplay.before = ts2db(autoplay.before)
+    }
 
     // User-Agent
     let user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
@@ -224,53 +238,71 @@ export class BudgetFile implements IBudgetFile {
 
     // Downloads
     sesh.on('will-download', (ev, item, webContents) => {
-      log.info('will-download', item.getFilename(), item.getMimeType());
+      let dlid = uuid();
+      log.info(`[${dlid}] will-download`, item.getFilename(), item.getMimeType());
 
       // XXX does this need to be explicitly cleaned up?
       let tmpdir = tmp.dirSync();
-      log.debug('tmp dir:', tmpdir);
 
-      webContents.send('buckets:will-download', {
-        filename: item.getFilename(),
-        mimetype: item.getMimeType(),
-      })
+      // webContents.send('buckets:will-download', {
+      //   filename: item.getFilename(),
+      //   mimetype: item.getMimeType(),
+      // })
       // console.log('getFilename', item.getFilename())
       // console.log('mimetype', item.getMimeType());
       // console.log('state', item.getState());
       // console.log('getURL', item.getURL());
       
       let save_path = Path.join(tmpdir.name, item.getFilename());
+      log.info(`[${dlid}] saving ${item.getFilename()} to ${save_path}`);
       
       item.setSavePath(save_path);
       item.on('updated', (event, state) => {
         if (state === 'interrupted') {
-          log.info('Download is interrupted but can be resumed')
+          log.info(`[${dlid}] ${state} - Download is interrupted but can be resumed`)
         } else if (state === 'progressing') {
           if (item.isPaused()) {
-            log.info('Download is paused')
+            log.info(`[${dlid}] ${state} - Download is paused`)
           } else {
-            log.debug(`Received bytes: ${item.getReceivedBytes()}`)
+            log.debug(`[${dlid}] ${state} - received bytes: ${item.getReceivedBytes()}`)
           }
         }
       })
-      item.once('done', (event, state) => {
+      item.once('done', async (event, state) => {
         if (state === 'completed') {
-          log.info('Download ok', item.getFilename(), save_path);
+          log.info(`[${dlid}] Downloaded`);
+          
           webContents.send('buckets:file-downloaded', {
             localpath: save_path,
             filename: item.getFilename(),
             mimetype: item.getMimeType(),
           })
+
+          // process it
+          log.info(`[${dlid}] processing file`, save_path);
+          let fileimport = new FileImport(this.store, save_path)
+          await fileimport.run();
+          if (fileimport.error) {
+            log.error(`[${dlid}] Error importing`, fileimport.error);
+          } else if (fileimport.pending) {
+            log.error(`[${dlid}] Unhandled case`);
+            // XXX
+          } else {
+            log.info(`[${dlid}] Imported`, fileimport.imported.length);
+          }
         } else {
-          log.warn(`Download failed: ${state}`)
+          log.warn(`[${dlid}] Download failed: ${state}`)
         }
       })
     })
 
+    console.log('autoplay', autoplay);
+
     // Load the url
     const qs = querystring.stringify({
       recording_id,
-      partition
+      partition,
+      autoplay: JSON.stringify(autoplay),
     })
     this.openWindow(`/record/record.html?${qs}`, true);
   }
@@ -304,9 +336,16 @@ class RendererBudgetFile implements IBudgetFile {
     this.store = new RPCRendererStore(id, this.bus);
   }
 
-  async openRecordWindow(recording_id:number) {
+  async openRecordWindow(recording_id:number, autoplay?:{
+    onOrAfter: Timestamp,
+    before: Timestamp,
+  }) {
     try {
-      await this.callInMain('openRecordWindow', recording_id)  
+      if (autoplay) {
+        autoplay.before = ts2db(autoplay.before);
+        autoplay.onOrAfter = ts2db(autoplay.onOrAfter);
+      }
+      await this.callInMain('openRecordWindow', recording_id, autoplay) 
     } catch(err) {
       log.error(err.stack)
       log.error(err);

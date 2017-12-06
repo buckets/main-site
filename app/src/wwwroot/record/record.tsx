@@ -1,6 +1,8 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import * as cx from 'classnames'
+import * as log from 'electron-log'
+import { Timestamp, ensureLocalMoment } from '../../time'
 import { remote } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
@@ -278,10 +280,12 @@ class RecordingStep extends React.Component<RecordingStepProps, {
 
 
 interface RecordPageProps {
+  director: RecordingDirector<ValueOptions>;
   preload: string;
   partition: string;
   recording: Recording;
   onRecordingChange: Function,
+  onLoad: Function;
 }
 /**
   Page for making and editing recordings.
@@ -289,15 +293,11 @@ interface RecordPageProps {
 class RecordPage extends React.Component<RecordPageProps, {
   recording: Recording;
 }> {
-  private director:RecordingDirector<ValueOptions>;
   constructor(props:RecordPageProps) {
     super(props);
     this.state = {
       recording: props.recording,
     };
-    this.director = new RecordingDirector({
-      recording: props.recording,
-    });
   }
   componentWillReceiveProps(nextProps) {
     console.log('will receive props', nextProps);
@@ -306,40 +306,42 @@ class RecordPage extends React.Component<RecordPageProps, {
     })
   }
   gotWebview(webview:Electron.WebviewTag) {
-    this.director.attachWebview(webview);
-    this.director.events.change.on(() => {
+    let { director, onLoad } = this.props;
+    director.attachWebview(webview);
+    director.events.change.on(() => {
       this.setState(this.state);
     })
-    this.director.events.step_started.on(() => {
+    director.events.step_started.on(() => {
       this.setState(this.state);
     })
-    this.director.events.step_finished.on(() => {
+    director.events.step_finished.on(() => {
       this.setState(this.state);
     })
-    this.director.startRecording();
-    console.log('recording');
+    if (onLoad) {
+      onLoad()
+    }
   }
   render() {
-    let { preload, partition, onRecordingChange } = this.props;
+    let { preload, partition, director, onRecordingChange } = this.props;
     let stop_button = <button
-        disabled={this.director.state !== 'recording'}
+        disabled={director.state !== 'recording'}
         onClick={() => {
-          this.director.pauseRecording();
+          director.pauseRecording();
         }}>
         <span className="fa fa-stop"/>
       </button>
 
     let save_button = <button
         onClick={() => {
-          this.director.pauseRecording();
-          onRecordingChange(this.director.current_recording);
+          director.pauseRecording();
+          onRecordingChange(director.current_recording);
         }}>{sss('Save')}</button>
 
-    let steps = this.director.current_recording.steps
+    let steps = director.current_recording.steps
     .map((step, i) => {
       return <RecordingStep
         key={i}
-        director={this.director}
+        director={director}
         step={step}
       />
     })
@@ -361,7 +363,7 @@ class RecordPage extends React.Component<RecordPageProps, {
           preload={preload}
           partition={partition}
           onURLChange={url => {
-            this.director.setURL(url);
+            director.setURL(url);
           }}
           onWebview={webview => { this.gotWebview(webview)}}
         />
@@ -369,16 +371,16 @@ class RecordPage extends React.Component<RecordPageProps, {
       <div className="recording-pane">
         <div className="controls">
           <button
-            disabled={this.director.state === 'recording'}
+            disabled={director.state === 'recording'}
             onClick={() => {
-              this.director.startRecording();
+              director.startRecording();
             }}
             ><span className="fa fa-circle red" /></button>
           {stop_button}
           <button
-            disabled={this.director.state === 'recording'}
+            disabled={director.state === 'recording'}
             onClick={() => {
-              this.director.play((options:ValueOptions) => {
+              director.play((options:ValueOptions) => {
                 let today = moment();
                 if (options.key === 'start-date') {
                   let date = today.subtract(2, 'months').startOf('month');
@@ -454,10 +456,12 @@ interface RecordingAppProps {
   store: IStore;
   renderer: Renderer;
   onRecordingChange: Function,
+  director: RecordingDirector<any>,
+  onLoadRecordPage: Function,
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, partition, bankrecording, recording, store, renderer, onRecordingChange } = this.props;
+    let { preload, partition, bankrecording, recording, store, renderer, onRecordingChange, director, onLoadRecordPage } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -488,9 +492,11 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
                 </Route>
                 <Route path="/record">
                   <RecordPage
+                    director={director}
                     preload={preload}
                     partition={partition}
                     recording={recording}
+                    onLoad={onLoadRecordPage}
                     onRecordingChange={onRecordingChange}
                   />
                 </Route>
@@ -509,6 +515,10 @@ export async function start(args:{
     preload_url:string,
     recording_id:number,
     partition:string,
+    autoplay?: {
+      onOrAfter: Timestamp,
+      before: Timestamp,
+    }
   }) {
   const renderer = new Renderer();
   
@@ -535,15 +545,37 @@ export async function start(args:{
     i++;
   }
 
+  let director = new RecordingDirector({
+    recording: recording,
+  });
+
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
     return <RecordingApp
+      director={director}
       bankrecording={BANKRECORDING}
       recording={recording}
       preload={args.preload_url}
       partition={args.partition}
       store={store}
       renderer={renderer}
+      onLoadRecordPage={() => {
+        log.debug('onLoadRecordPage');
+        if (args.autoplay) {
+          log.debug('director.play');
+          director.play((options:ValueOptions) => {
+            if (options.key === 'start-date') {
+              let date = ensureLocalMoment(args.autoplay.onOrAfter);
+              return date.format(options.variation);
+            } else if (options.key === 'end-date') {
+              let date = ensureLocalMoment(args.autoplay.before);
+              return date.format(options.variation);
+            }
+          });
+        } else {
+          director.startRecording();
+        }
+      }}
       onRecordingChange={(new_recording) => {
         console.log('recording change', new_recording);
         store.bankrecording.update(args.recording_id, {
@@ -573,6 +605,13 @@ export async function start(args:{
     }
   })
 
-  renderer.doUpdate();
+  renderer.doUpdate()
+  .then(() => {
+    console.log('doUpdate done');
+    console.log('args', args);
+    if (args.autoplay) {
+      setPath('/record');
+    }
+  })
   remote.getCurrentWindow().show();
 }

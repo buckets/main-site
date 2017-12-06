@@ -77,12 +77,10 @@ export class FileImport {
     this.pending = null;
     this.imported = [];
 
-    // read file
-    let data = await fs.readFileAsync(this.path, {encoding:'utf8'});
-
     // try ofx
     let parsed:ImportableTrans[];
     try {
+      let data = await fs.readFileAsync(this.path, {encoding:'utf8'});
       parsed = await ofx2importable(data);
     } catch(err) {
       this.error = err.toString();

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
+import * as moment from 'moment'
 import { shell } from 'electron'
 import { makeToast } from './toast'
 import { Connection, UnknownAccount } from '../models/simplefin'
@@ -287,6 +288,7 @@ class BankRecordingList extends React.Component<{
           <th>{sss('ID')}</th>
           <th>{sss('Name')}</th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -308,7 +310,18 @@ class BankRecordingList extends React.Component<{
                 onClick={() => {
                   current_file.openRecordWindow(recording.id);
                 }}>
-                <span className="fa fa-gear"></span>  
+                <span className="fa fa-gear"></span>
+              </a>
+            </td>
+            <td>
+              <a className="subtle"
+                onClick={() => {
+                  current_file.openRecordWindow(recording.id, {
+                    onOrAfter: moment().startOf('month'),
+                    before: moment().endOf('month'),
+                  })
+                }}>
+                <span className="fa fa-play"></span>
               </a>
             </td>
           </tr>
