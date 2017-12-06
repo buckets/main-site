@@ -175,7 +175,7 @@ export async function updateMenu(show_budget:boolean=false) {
         accelerator: 'CmdOrCtrl+I',
         click() {
           let win = BrowserWindow.getFocusedWindow();
-          win.webContents.send('start-file-import');
+          win.webContents.send('buckets:start-file-import');
         }
       },
       {type: 'separator'},
@@ -379,10 +379,10 @@ export async function updateMenu(show_budget:boolean=false) {
 }
 
 if (app) {
-  PersistEvents.on('added-recent-file', () => {
+  PersistEvents.added_recent_file.on(() => {
     updateMenu();
   })
-  tx.on('locale-set', () => {
+  tx.localechanged.on(() => {
     updateMenu();
   });
 }

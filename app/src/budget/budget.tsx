@@ -46,10 +46,10 @@ export async function start(base_element, room) {
   await manager.refresh();
 
   // watch for changes
-  store.data.on('obj', async (data) => {
+  store.data.obj.on(async (data) => {
     await manager.processEvent(data);
   })
-  manager.on('change', () => {
+  manager.events.change.on(() => {
     renderer.doUpdate();
   })
 

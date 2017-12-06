@@ -125,7 +125,7 @@ export class DBStore implements IStore {
     return this._db;
   }
   publishObject(event:ObjectEventType, obj:IObject) {
-    this.data.emit('obj', new ObjectEvent(event, obj));
+    this.data.obj.emit(new ObjectEvent(event, obj));
   }
   async createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
     let params = {};

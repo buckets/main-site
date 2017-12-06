@@ -1,6 +1,6 @@
 import * as log from 'electron-log'
 import {ipcRenderer} from 'electron'
-import {EventEmitter} from 'events'
+import { EventSource } from './events'
 import { getBounds, IBounds } from './position'
 
 
@@ -627,7 +627,7 @@ export class Recorder {
   process.  It knows about a `<webview>` tag which it controls
   and monitors.
 */
-export class RecordingDirector<T> extends EventEmitter {
+export class RecordingDirector<T> {
   private _state:'idle'|'recording'|'playing' = 'idle';
   public webview:Electron.WebviewTag;
 
@@ -646,15 +646,26 @@ export class RecordingDirector<T> extends EventEmitter {
     url: string;
   }> = [];
 
+  readonly events = {
+    change: new EventSource<boolean>(),
+    child_ready_for_control: new EventSource<boolean>(),
+    page_loaded: new EventSource<boolean>(),
+    step_started: new EventSource<{
+      step_number: number,
+    }>(),
+    step_finished: new EventSource<{
+      step_number: number,
+    }>(),
+  }
+
   constructor(args?:{
       recording?:Recording,
     }) {
-    super();
     args = args || {};
     this.current_recording = args.recording || new Recording();
   }
   emitChange() {
-    this.emit('change');
+    this.events.change.emit(true);
   }
   attachWebview(webview:Electron.WebviewTag) {
     this.webview = webview;
@@ -667,7 +678,7 @@ export class RecordingDirector<T> extends EventEmitter {
         }
       },
       'rec:ready-for-control': () => {
-        this.emit('child-ready-for-control');
+        this.events.child_ready_for_control.emit(true);
       }
     })
     webview.addEventListener('dom-ready', (ev) => {
@@ -684,7 +695,7 @@ export class RecordingDirector<T> extends EventEmitter {
           title: webview.getTitle(),
           url: webview.getURL(),
         })
-        this.emit('pageloaded');
+        this.events.page_loaded.emit(true);
       }
     })
     webview.addEventListener('new-window', ev => {
@@ -733,8 +744,9 @@ export class RecordingDirector<T> extends EventEmitter {
       return false;
     }
     let step = steps[this.step_index];
-    console.log('Start step', this.step_index, step);
-    this.emit('start-step', this.step_index);
+    
+    this.events.step_started.emit({step_number: this.step_index});
+    
     let prior_state = this._state;
     this._state = 'playing';
     await this.doStep(step, lookUpValue);
@@ -744,8 +756,7 @@ export class RecordingDirector<T> extends EventEmitter {
     }
 
     this._state = prior_state;
-    this.emit('finish-step', this.step_index);
-    console.log('Finished step', this.step_index);
+    this.events.step_finished.emit({step_number: this.step_index});
     this.step_index++;
     return true;
   }
@@ -780,7 +791,7 @@ export class RecordingDirector<T> extends EventEmitter {
   private async _doNavigateStep(step:NavigateStep) {
     return new Promise((resolve, reject) => {
       let wc = this.webview.getWebContents();
-      this.once('child-ready-for-control', ev => {
+      this.events.child_ready_for_control.once(ev => {
         resolve(null);
       })
       wc.loadURL(step.url);

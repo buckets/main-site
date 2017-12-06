@@ -6,7 +6,7 @@ import * as crypto from 'crypto'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
-import { EventEmitter } from 'events'
+import { EventSource } from '../events'
 import { sss } from '../i18n'
 
 export class Connection implements IObject {
@@ -98,15 +98,32 @@ export function sleep(milliseconds:number):Promise<any> {
 }
 
 
-export class Syncer extends EventEmitter {
+export class Syncer {
   private time_range:number = 7;
   private time_unit:string = 'day';
   private delay = 1000;
   private max_delay = 60 * 1000;
   private running:boolean = false;
   private please_stop:boolean = false;
+
+  readonly events = {
+    start: new EventSource<{
+      start: moment.Moment,
+      end: moment.Moment,
+    }>(),
+    fetching_range: new EventSource<{
+      start: moment.Moment,
+      end: moment.Moment,
+    }>(),
+    done: new EventSource<{
+      start: moment.Moment,
+      end: moment.Moment,
+      trans_count: number,
+      errors: Array<string>,
+      cancelled: boolean,
+    }>(),
+  }
   constructor(private store:SimpleFINStore) {
-    super();
   }
   incDelay() {
     this.delay *= 1.5;
@@ -132,9 +149,9 @@ export class Syncer extends EventEmitter {
     log.info(`Sync started from ${sync_start.format()} to ${sync_end.format()}`)
     this.please_stop = false;
     this.running = true;
-    this.emit('start', {
-      sync_start: sync_start.clone(),
-      sync_end: sync_end.clone(),
+    this.events.start.emit({
+      start: sync_start.clone(),
+      end: sync_end.clone(),
     });
 
     let window_start = sync_start.clone();
@@ -146,7 +163,7 @@ export class Syncer extends EventEmitter {
       if (window_end.isAfter(sync_end)) {
         window_end = sync_end.clone();
       }
-      this.emit('fetching-range', {start:window_start, end:window_end});
+      this.events.fetching_range.emit({start:window_start, end:window_end});
 
       try {
         let result = await this.store._sync(window_start, window_end)  
@@ -165,11 +182,11 @@ export class Syncer extends EventEmitter {
       window_end.add(this.time_range as any, this.time_unit);
     }
     this.running = false;
-    this.emit('done', {
+    this.events.done.emit({
       trans_count,
-      errors,
-      sync_start,
-      sync_end,
+      errors: Array.from(errors),
+      start: sync_start,
+      end: sync_end,
       cancelled: this.please_stop,
     })
   }

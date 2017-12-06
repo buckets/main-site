@@ -1,6 +1,6 @@
 import * as ReactDOM from 'react-dom'
 import * as _ from 'lodash'
-import { EventEmitter } from 'events'
+import { EventSource } from '../events'
 import { tx } from '../i18n'
 
 function ensureFunction<T>(x:T|(()=>T)):()=>T {
@@ -11,16 +11,19 @@ function ensureFunction<T>(x:T|(()=>T)):()=>T {
   }
 }
 
-export class Renderer extends EventEmitter {
+export class Renderer {
   private render_funcs:Array<()=>Promise<any>> = [];
   private update_queue = [];
   private after_update:Array<Function> = [];
   private in_update:boolean = false;
   private in_render:boolean = false;
 
+  readonly events = {
+    renderdone: new EventSource<boolean>(),
+  }
+
   constructor() {
-    super();
-    tx.on('locale-set', async ({locale}) => {
+    tx.localechanged.on(async ({locale}) => {
       await this.doUpdate();
     })
   }
@@ -48,7 +51,7 @@ export class Renderer extends EventEmitter {
       this.update_queue.push(func);
     }
     if (this.in_render) {
-      this.once('renderdone', () => {
+      this.events.renderdone.once(() => {
         this.doUpdate(func);
       })
       return;
@@ -76,6 +79,6 @@ export class Renderer extends EventEmitter {
         return func();
       }));
     this.in_render = false;
-    this.emit('renderdone');
+    this.events.renderdone.emit(true);
   }
 }

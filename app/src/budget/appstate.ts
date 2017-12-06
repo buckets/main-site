@@ -1,7 +1,7 @@
 import * as moment from 'moment'
 import * as _ from 'lodash'
 
-import {EventEmitter} from 'events'
+import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
@@ -205,14 +205,19 @@ function computeTotals(appstate:AppState):IComputedAppState {
   };
 }
 
-export class StateManager extends EventEmitter {
+export class StateManager {
   public store:IStore;
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
   private posttick: Set<string> = new Set();
   readonly fileimport:FileImportManager;
+
+  public events = {
+    obj: new EventSource<ObjectEvent<any>>(),
+    change: new EventSource<AppState>(),
+  }
+
   constructor() {
-    super()
     this.appstate = new AppState();
     this.store = null;
     this.fileimport = new FileImportManager(this);
@@ -220,21 +225,21 @@ export class StateManager extends EventEmitter {
   setStore(store: IStore) {
     this.store = store;
 
-    store.connections.syncer
-    .on('start', ({sync_start, sync_end}) => {
+    let events = store.connections.syncer.events
+    events.start.on(({start, end}) => {
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
-      })(sync_start, sync_end));
+      })(start, end));
       this.appstate.syncing = true;
       this.signalChange();
     })
-    .on('fetching-range', ({start, end}) => {
-      this.appstate.sync_message = sss('sync.status.week', (sync_start:moment.Moment) => {
-        return `week of ${sync_start.format('ll')}`;
+    events.fetching_range.on(({start, end}) => {
+      this.appstate.sync_message = sss('sync.status.week', (start:moment.Moment) => {
+        return `week of ${start.format('ll')}`;
       })(start);
       this.signalChange();
     })
-    .on('done', ({sync_start, sync_end, trans_count, errors, cancelled}) => {
+    events.done.on(({start, end, trans_count, errors, cancelled}) => {
       if (cancelled) {
         makeToast(sss('sync.cancelled', (trans_count:number) => {
           return `Synced ${trans_count} transactions before being cancelled.`;
@@ -242,7 +247,7 @@ export class StateManager extends EventEmitter {
       } else {
         makeToast(sss('sync.done', (trans_count:number, start:moment.Moment, end:moment.Moment) => {
           return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
-        })(trans_count, sync_start, sync_end));
+        })(trans_count, start, end));
       }
       errors.forEach(err => {
         makeToast(err, {className:'error'});
@@ -253,7 +258,7 @@ export class StateManager extends EventEmitter {
   }
   async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
     this.queue.push(ev);
-    this.emit('obj', ev);
+    this.events.obj.emit(ev);
     return this.tick();
   }
   async tick():Promise<AppState> {
@@ -333,7 +338,7 @@ export class StateManager extends EventEmitter {
       return this[funcname]();
     }));
     this.recomputeTotals();
-    this.emit('change', this.appstate);
+    this.events.change.emit(this.appstate);
   }, 50, {leading: true, trailing: true});
 
   async setDate(year:number, month:number):Promise<any> {
@@ -341,7 +346,7 @@ export class StateManager extends EventEmitter {
       this.appstate.year = year;
       this.appstate.month = month;
       await this.refresh();
-      this.emit('change', this.appstate);
+      this.events.change.emit(this.appstate);
     }
   }
   async refresh():Promise<any> {

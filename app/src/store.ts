@@ -1,4 +1,4 @@
-import {EventEmitter} from 'events'
+import { EventSource } from './events'
 import {} from 'bluebird'
 import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
@@ -68,13 +68,6 @@ export class ObjectEvent<T extends IObject> {
     this.obj = obj;
   }
 }
-export class DataEventEmitter extends EventEmitter {
-  emit(event: 'obj', obj:ObjectEvent<any>):boolean;
-  emit(event, obj):boolean {
-    return super.emit(event, obj);
-  }
-  on(event: 'obj', listener: (obj:ObjectEvent<any>) => void):this;
-  on(event, listener):this {
-    return super.on(event, listener);
-  }
+export class DataEventEmitter {
+  obj = new EventSource<ObjectEvent<any>>();
 }

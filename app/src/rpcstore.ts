@@ -43,14 +43,13 @@ interface RPCReply {
   
  */
 export class RPCMainStore {
-  private data:DataEventEmitter;
   constructor(private store:IStore, private room:string) {
   }
   get channel() {
     return `rpc-${this.room}`;
   }
   start() {
-    this.data = this.store.data.on('obj', (value) => {
+    this.store.data.obj.on(value => {
       // probably not efficient if you have two different files open...
       // but... that's an edge case, and still probably plenty fast
       webContents.getAllWebContents().forEach(wc => {
@@ -127,7 +126,7 @@ export class RPCRendererStore implements IStore {
     })
   }
   dataReceived(event, message:ObjectEvent<any>) {
-    this.data.emit('obj', message);
+    this.data.obj.emit(message);
   }
 
   // IStore methods

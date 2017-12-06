@@ -193,7 +193,7 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
           step.options = {};
         }
         (step.options as ValueOptions).key = ev.target.value as any;
-        director.emit('change');
+        director.emitChange();
       }} defaultValue={defaultValue}>
         <option value="">{value}</option>
         <option value="start-date">Start date...</option>
@@ -307,13 +307,13 @@ class RecordPage extends React.Component<RecordPageProps, {
   }
   gotWebview(webview:Electron.WebviewTag) {
     this.director.attachWebview(webview);
-    this.director.on('change', () => {
+    this.director.events.change.on(() => {
       this.setState(this.state);
     })
-    this.director.on('start-step', () => {
+    this.director.events.step_started.on(() => {
       this.setState(this.state);
     })
-    this.director.on('finish-step', () => {
+    this.director.events.step_finished.on(() => {
       this.setState(this.state);
     })
     this.director.startRecording();
@@ -565,7 +565,7 @@ export async function start(args:{
     renderer.doUpdate();
   }, false);
 
-  store.data.on('obj', async (ev) => {
+  store.data.obj.on(async (ev) => {
     let obj = ev.obj;
     if (isObj(BankRecording, obj) && obj.id === args.recording_id) {
       console.log('Update of the recording this page is looking at');

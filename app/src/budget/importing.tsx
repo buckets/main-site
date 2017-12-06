@@ -31,7 +31,7 @@ export class FileImportState {
 
 export class FileImportManager {
   constructor(public manager:StateManager) {
-    ipcRenderer.on('start-file-import', () => {
+    ipcRenderer.on('buckets:start-file-import', () => {
       this.openFileDialog();
     })
   }
@@ -88,7 +88,7 @@ export class FileImportManager {
           account_label,
           hash,
         })
-        this.manager.emit('change');
+        this.manager.events.change.emit(this.manager.appstate);
       }
     }
   }
@@ -118,7 +118,7 @@ export class FileImportManager {
     })(imported.length));
     let pending_imports = this.manager.appstate.fileimport.pending_imports;
     pending_imports.splice(pending_imports.indexOf(pending), 1);
-    this.manager.emit('change');
+    this.manager.events.change.emit(this.manager.appstate);
   }
 }
 
