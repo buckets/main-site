@@ -2,12 +2,12 @@ import * as req from 'request-promise'
 import * as log from 'electron-log';
 import * as moment from 'moment'
 import { IObject, IStore, registerClass } from '../store'
-import * as crypto from 'crypto'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { EventSource } from '../events'
 import { sss } from '../i18n'
+import { hashStrings } from '../importing'
 
 export class Connection implements IObject {
   static table_name: string = 'simplefin_connection'
@@ -70,16 +70,6 @@ export declare namespace SFIN {
     description: string;
     extra: object;
   }
-}
-
-export function hashStrings(strings:string[]):string {
-  let ret = crypto.createHash('sha256');
-  strings.forEach(s => {
-    let hash = crypto.createHash('sha256');
-    hash.update(s)
-    ret.update(hash.digest('hex'))
-  });
-  return ret.digest('hex');
 }
 
 export function parseStringAmount(x:string):number {

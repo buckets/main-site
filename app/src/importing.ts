@@ -1,11 +1,24 @@
 import * as fs from 'fs-extra-promise'
 import * as moment from 'moment'
+import * as crypto from 'crypto'
 
-import { hashStrings } from './models/simplefin'
 import { Account, Transaction } from './models/account'
 import { ofx2importable } from './ofx'
 import { EventSource } from './events'
 import { IStore } from './store'
+
+/**
+ *  Hash a list of strings in a consistent way.
+ */
+export function hashStrings(strings:string[]):string {
+  let ret = crypto.createHash('sha256');
+  strings.forEach(s => {
+    let hash = crypto.createHash('sha256');
+    hash.update(s)
+    ret.update(hash.digest('hex'))
+  });
+  return ret.digest('hex');
+}
 
 export interface ImportableTrans {
   account_label: string;
@@ -135,16 +148,5 @@ export class FileImport {
       })
     }));
     this.events.imported.emit(this.imported);
-  }
-}
-
-export class FileImporter {
-  constructor(readonly store:IStore) {
-
-  }
-  async createImport(path:string):Promise<FileImport> {
-    let fileimport = new FileImport(this.store, path);
-    await fileimport.run();
-    return fileimport;
   }
 }
