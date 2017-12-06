@@ -2,7 +2,7 @@ import * as Path from 'path'
 import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
 
-import {IStore, DataEventEmitter, ObjectEventType, ObjectEvent, IObject, IObjectClass} from '../store'
+import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass} from '../store'
 import {APP_ROOT} from './globals'
 
 import { BucketStore } from '../models/bucket'
@@ -82,15 +82,13 @@ export function sanitizeDbFieldName(x) {
 }
 export class DBStore implements IStore {
   private _db:sqlite.Database;
-  public data:DataEventEmitter;
 
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankrecording:BankRecordingStore;
-  constructor(private filename:string, private doTrialWork:boolean=false) {
-    this.data = new DataEventEmitter();
+  constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
@@ -125,7 +123,7 @@ export class DBStore implements IStore {
     return this._db;
   }
   publishObject(event:ObjectEventType, obj:IObject) {
-    this.data.obj.emit(new ObjectEvent(event, obj));
+    this.bus.obj.emit(new ObjectEvent(event, obj));
   }
   async createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
     let params = {};

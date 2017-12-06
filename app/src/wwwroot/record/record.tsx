@@ -2,9 +2,9 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as cx from 'classnames'
 import { remote } from 'electron'
-import { RPCRendererStore } from '../../rpcstore'
 import { isObj, IStore } from '../../store'
 import { BankRecording } from '../../models/bankrecording'
+import { current_file } from '../../mainprocess/files'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, RecStep, isInputValue } from '../../recordlib'
 import { sss } from '../../i18n'
@@ -512,8 +512,7 @@ export async function start(args:{
   }) {
   const renderer = new Renderer();
   
-
-  let store = new RPCRendererStore(args.room);
+  let store = current_file.store;
   let BANKRECORDING = await store.bankrecording.get(args.recording_id);
   let recording = null
 
@@ -565,7 +564,7 @@ export async function start(args:{
     renderer.doUpdate();
   }, false);
 
-  store.data.obj.on(async (ev) => {
+  store.bus.obj.on(async (ev) => {
     let obj = ev.obj;
     if (isObj(BankRecording, obj) && obj.id === args.recording_id) {
       console.log('Update of the recording this page is looking at');

@@ -1,7 +1,6 @@
 import * as log from 'electron-log'
-import * as URL from 'url'
-import { IStore, DataEventEmitter, TABLE2CLASS, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
-import { ipcMain, ipcRenderer, webContents} from 'electron'
+import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
+import { ipcMain, ipcRenderer } from 'electron'
 import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
@@ -49,16 +48,6 @@ export class RPCMainStore {
     return `rpc-${this.room}`;
   }
   start() {
-    this.store.data.obj.on(value => {
-      // probably not efficient if you have two different files open...
-      // but... that's an edge case, and still probably plenty fast
-      webContents.getAllWebContents().forEach(wc => {
-        if (URL.parse(wc.getURL()).hostname === this.room) {
-          let ch = `data-${this.room}`;
-          wc.send(ch, value);
-        }
-      })
-    });
     ipcMain.on(this.channel, this.gotMessage);
   }
   stop() {
@@ -87,15 +76,12 @@ export class RPCMainStore {
 }
 export class RPCRendererStore implements IStore {
   private next_msg_id:number = 1;
-  public data:DataEventEmitter;
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankrecording:BankRecordingStore;
-  constructor(private room:string) {
-    this.data = new DataEventEmitter();
-    ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
+  constructor(private room:string, readonly bus:IBudgetBus) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
@@ -124,9 +110,6 @@ export class RPCRendererStore implements IStore {
       });
       ipcRenderer.send(this.channel, msg);
     })
-  }
-  dataReceived(event, message:ObjectEvent<any>) {
-    this.data.obj.emit(message);
   }
 
   // IStore methods

@@ -1,5 +1,9 @@
-import { EventSource } from './events'
+import * as URL from 'url'
+
+import { webContents, ipcRenderer } from 'electron'
 import {} from 'bluebird'
+
+import { EventSource } from './events'
 import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
@@ -36,7 +40,8 @@ export function registerClass(cls:IObjectClass<any>) {
   the store doesn't have to add those members themselves.
 */
 export interface IStore {
-  data:DataEventEmitter;
+  bus:IBudgetBus;
+
   publishObject(event:ObjectEventType, obj:IObject);
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
@@ -68,6 +73,50 @@ export class ObjectEvent<T extends IObject> {
     this.obj = obj;
   }
 }
-export class DataEventEmitter {
+
+export interface IBudgetBus {
+  obj: EventSource<ObjectEvent<any>>;
+}
+
+class BaseBudgetBus implements IBudgetBus {
   obj = new EventSource<ObjectEvent<any>>();
 }
+
+/**
+ *  Main process bus which automatically broadcasts events to renderer buses
+ */
+export class BudgetBus extends BaseBudgetBus {
+  obj = new EventSource<ObjectEvent<any>>();
+
+  constructor(readonly budget_id:string) {
+    super();
+    this.monitor('obj');
+  }
+  private monitor(event: keyof IBudgetBus) {
+    (<EventSource<any>>this[event]).on(message => {
+      this.broadcast(event, message)
+    })
+  }
+  private broadcast(event: keyof IBudgetBus, message) {
+    webContents.getAllWebContents().forEach(wc => {
+      if (URL.parse(wc.getURL()).hostname === this.budget_id) {
+        wc.send('bus', event, message)
+      }
+    })
+  }
+}
+
+/**
+ *  Renderer process bus that automatically receives all events from the main process bus
+ */ 
+export class BudgetBusRenderer extends BaseBudgetBus {
+  obj = new EventSource<ObjectEvent<any>>();
+
+  constructor(readonly budget_id:string) {
+    super();
+    ipcRenderer.on('bus', (ev, event_name: keyof IBudgetBus, message) => {
+      (<EventSource<any>>this[event_name]).emit(message);
+    })
+  }
+}
+

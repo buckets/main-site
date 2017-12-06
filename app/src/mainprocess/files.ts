@@ -6,7 +6,7 @@ import * as tmp from 'tmp'
 import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'electron';
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
-import { DataEventEmitter } from '../store'
+import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
 import * as URL from 'url';
@@ -18,7 +18,7 @@ import { onlyRunInMain } from '../rpc'
 
 
 interface IBudgetFile {
-  data:DataEventEmitter;
+  bus:IBudgetBus;
   
   /**
    *  Cause the recording window to open for a particular recording
@@ -58,15 +58,15 @@ export class BudgetFile implements IBudgetFile {
 
   public store:DBStore;
   private rpc_store:RPCMainStore = null;
-  readonly data:DataEventEmitter;
+  readonly bus:BudgetBus;
 
   readonly id:string;
   readonly filename:string;
   constructor(filename?:string) {
     this.id = uuid();
     this.filename = filename || '';
-    this.store = new DBStore(filename, true);
-    this.data = this.store.data;
+    this.bus = new BudgetBus(this.id);
+    this.store = new DBStore(filename, this.bus, true);
     BudgetFile.REGISTRY[this.id] = this;
   }
 
@@ -297,11 +297,11 @@ export class BudgetFile implements IBudgetFile {
  *  In-renderer interface to a main process `BudgetFile`
  */
 class RendererBudgetFile implements IBudgetFile {
-  readonly data:DataEventEmitter;
+  readonly bus:BudgetBusRenderer;
   readonly store:RPCRendererStore;
   constructor(readonly id:string) {
-    this.store = new RPCRendererStore(id);
-    this.data = this.store.data;
+    this.bus = new BudgetBusRenderer(id);
+    this.store = new RPCRendererStore(id, this.bus);
   }
 
   async openRecordWindow(recording_id:number) {
