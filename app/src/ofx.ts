@@ -2,7 +2,7 @@ import * as _ from 'lodash'
 import * as moment from 'moment'
 import { parse as parseOFX } from 'ofx-js'
 import { decimal2cents } from './money'
-import { ImportableTrans } from './budget/importing'
+import { ImportableTrans } from './importing'
 
 
 let formats = [

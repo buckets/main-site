@@ -1,32 +1,15 @@
 import * as React from 'react'
-import * as fs from 'fs-extra-promise'
-import * as moment from 'moment'
 import * as log from 'electron-log'
+import { FileImport } from '../importing'
 import { sss } from '../i18n'
 import { remote, ipcRenderer } from 'electron'
 import { AppState, StateManager, manager } from './appstate'
 import { setPath } from './budget';
-import { ofx2importable } from '../ofx'
-import { hashStrings } from '../models/simplefin'
 import { makeToast } from './toast'
 
-export interface ImportableTrans {
-  account_label: string;
-  amount:number;
-  memo:string;
-  posted:moment.Moment;
-  fi_id?:string;
-  currency?:string;
-}
-
-interface PendingImport {
-  transactions: ImportableTrans[];
-  account_label: string;
-  hash: string;
-}
 
 export class FileImportState {
-  pending_imports:PendingImport[] = [];
+  pending_imports:FileImport[] = [];
 }
 
 export class FileImportManager {
@@ -44,89 +27,54 @@ export class FileImportManager {
     }, paths => {
       if (paths) {
         paths.forEach(path => {
-          this.openFile(path);
+          this.doImport(path);
         })
         setPath('/import');
       }
     })
   }
-  async openFile(path) {
-    let data = await fs.readFileAsync(path, {encoding:'utf8'});
+  async doImport(path:string):Promise<FileImport> {
+    let imp = new FileImport(this.manager.store, path);
+    await imp.run();
 
-    // try ofx
-    let parsed:ImportableTrans[];
-    try {
-      parsed = await ofx2importable(data);
-    } catch(err) {
-      log.error(err);
-      return;
-    }
-
-    if (parsed.length) {
-      let account_label = parsed[0].account_label;
-      let hash = hashStrings([account_label]);
-      let rows = await this.manager.store.query(`SELECT account_id FROM account_mapping WHERE account_hash=$hash`, {$hash: hash});
-      if (rows.length === 1) {
-        // matching account
-        let account_id = rows[0].account_id;
-        let imported = await Promise.all(parsed.map(trans => {
-          return this.manager.store.accounts.importTransaction({
-            account_id,
-            amount: trans.amount,
-            memo: trans.memo,
-            posted: trans.posted,
-            fi_id: trans.fi_id,
-          })
-        }));
-        makeToast(sss('imported X trans', (trans_count:number) => {
-          return `Imported ${trans_count} transactions.`;
-        })(imported.length));
-      } else {
-        // no matching account
-        this.manager.appstate.fileimport.pending_imports.push({
-          transactions: parsed,
-          account_label,
-          hash,
-        })
-        this.manager.events.change.emit(this.manager.appstate);
-      }
-    }
-  }
-  async finishImport(pending:PendingImport, str_account_id:string) {
-    let account_id:number;
-    if (str_account_id === 'NEW') {
-      let new_account = await this.manager.store.accounts.add(pending.account_label)
-      account_id = new_account.id;
-      await manager.store.connections.linkAccountToHash(pending.hash, new_account.id);
-      makeToast(sss('Account created:') + ' ' + new_account.name);
-    } else {
-      account_id = parseInt(str_account_id);
-      await manager.store.connections.linkAccountToHash(pending.hash, account_id);
-      makeToast(sss('Account linked'));
-    }
-    let imported = await Promise.all(pending.transactions.map(trans => {
-      return manager.store.accounts.importTransaction({
-        account_id,
-        amount: trans.amount,
-        memo: trans.memo,
-        posted: trans.posted,
-        fi_id: trans.fi_id,
+    if (imp.error) {
+      log.error(imp.error);
+      makeToast(sss('Error importing file:') + imp.error)
+    } else if (imp.pending) {
+      // prepare for finishing
+      imp.events.account_created.on(account => {
+        makeToast(sss('Account created:') + ' ' + account.name);
       })
-    }));
-    makeToast(sss('imported n trans', (num_trans:number) => {
-      return `Imported ${num_trans} transactions.`;
-    })(imported.length));
-    let pending_imports = this.manager.appstate.fileimport.pending_imports;
-    pending_imports.splice(pending_imports.indexOf(pending), 1);
-    this.manager.events.change.emit(this.manager.appstate);
+      imp.events.account_linked.on(() => {
+        makeToast(sss('Account linked'));
+      })
+      imp.events.imported.on(transactions => {
+        makeToast(sss('imported n trans', (num_trans:number) => {
+          return `Imported ${num_trans} transactions.`;
+        })(transactions.length));
+        
+        // remove it from the pending list
+        let pending_imports = this.manager.appstate.fileimport.pending_imports;
+        pending_imports.splice(pending_imports.indexOf(imp), 1);
+        this.manager.events.change.emit(this.manager.appstate);
+      })
+
+      this.manager.appstate.fileimport.pending_imports.push(imp)
+      this.manager.events.change.emit(this.manager.appstate);
+    } else {
+      makeToast(sss('imported X trans', (trans_count:number) => {
+        return `Imported ${trans_count} transactions.`;
+      })(imp.imported.length));
+    }
+    return imp;
   }
 }
 
 class UnlinkedAccountRow extends React.Component<{
-  pending: PendingImport;
+  pending: FileImport;
   accounts: Account[];
 }, {
-  chosen_account_id: string;
+  chosen_account_id: number|'NEW';
 }> {
   constructor(props) {
     super(props);
@@ -140,12 +88,12 @@ class UnlinkedAccountRow extends React.Component<{
       return <option key={account.id} value={account.id}>{account.name}</option>
     })
     return <tr>
-      <td>{pending.account_label}</td>
+      <td>{pending.pending.account_label}</td>
       <td>
         <select
           value={this.state.chosen_account_id}
           onChange={(ev) => {
-            this.setState({chosen_account_id: ev.target.value})
+            this.setState({chosen_account_id: ev.target.value as (number|'NEW')})
           }}>
           <option value="NEW">+ {sss('Create new account')}</option>
           {options}
@@ -157,7 +105,7 @@ class UnlinkedAccountRow extends React.Component<{
     </tr>
   }
   link = async () => {
-    manager.fileimport.finishImport(this.props.pending, this.state.chosen_account_id);
+    this.props.pending.finish(this.state.chosen_account_id);
   }
 }
 
