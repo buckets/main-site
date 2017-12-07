@@ -2,7 +2,7 @@ import * as _ from 'lodash'
 import * as moment from 'moment'
 import { parse as parseOFX } from 'ofx-js'
 import { decimal2cents } from './money'
-import { ImportableTrans } from './importing'
+import { ImportableTrans, ImportableAccountSet } from './importing'
 
 
 let formats = [
@@ -15,9 +15,12 @@ function parseOFXDate(x:string):moment.Moment {
   return ret;
 }
 
-export async function ofx2importable(ofx:string):Promise<ImportableTrans[]> {
+export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
+  // XXX this does not handle the case where there are multiple accounts in a single file.
   let parsed = await parseOFX(ofx);
-  let ret = [];
+  let ret:ImportableAccountSet = {
+    accounts: [],
+  };
   let fi_description = '';
   try {
     let fi = parsed.OFX.SIGNONMSGSRSV1.SONRS.FI;
@@ -58,6 +61,11 @@ export async function ofx2importable(ofx:string):Promise<ImportableTrans[]> {
     }
     tranlist = statement.BANKTRANLIST;
   }
+
+  let account_label = account_description;
+  if (fi_description) {
+    account_label += ' ' + fi_description;
+  }
   
   if (tranlist) {
     let transactions;
@@ -66,19 +74,18 @@ export async function ofx2importable(ofx:string):Promise<ImportableTrans[]> {
     } else {
       transactions = [statement.BANKTRANLIST.STMTTRN];
     }
-    ret = transactions.map((trans):ImportableTrans => {
-      let account_label = account_description;
-      if (fi_description) {
-        account_label += ' ' + fi_description;
-      }
+    let importable:ImportableTrans[] = transactions.map((trans):ImportableTrans => {
       return {
-        account_label: account_label,
         amount: decimal2cents(trans.TRNAMT),
         memo: trans.MEMO || trans.NAME,
         posted: parseOFXDate(trans.DTPOSTED),
         fi_id: trans.FITID,
-        currency: currency,
       };
+    })
+    ret.accounts.push({
+      label: account_label,
+      transactions: importable,
+      currency,
     })
   }
   return ret;

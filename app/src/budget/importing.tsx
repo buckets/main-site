@@ -35,6 +35,13 @@ export class FileImportManager {
   }
   async doImport(path:string):Promise<FileImport> {
     let imp = new FileImport(this.manager.store, path);
+
+    imp.events.imported.on(transactions => {
+      makeToast(sss('imported n trans', (num_trans:number) => {
+        return `Imported ${num_trans} transactions.`;
+      })(transactions.length));
+    });
+    
     await imp.run();
 
     if (imp.error) {
@@ -48,11 +55,8 @@ export class FileImportManager {
       imp.events.account_linked.on(() => {
         makeToast(sss('Account linked'));
       })
-      imp.events.imported.on(transactions => {
-        makeToast(sss('imported n trans', (num_trans:number) => {
-          return `Imported ${num_trans} transactions.`;
-        })(transactions.length));
-        
+      
+      imp.events.done.on(() => {
         // remove it from the pending list
         let pending_imports = this.manager.appstate.fileimport.pending_imports;
         pending_imports.splice(pending_imports.indexOf(imp), 1);
@@ -61,17 +65,15 @@ export class FileImportManager {
 
       this.manager.appstate.fileimport.pending_imports.push(imp)
       this.manager.events.change.emit(this.manager.appstate);
-    } else {
-      makeToast(sss('imported X trans', (trans_count:number) => {
-        return `Imported ${trans_count} transactions.`;
-      })(imp.imported.length));
     }
     return imp;
   }
 }
 
 class UnlinkedAccountRow extends React.Component<{
-  pending: FileImport;
+  fileimport: FileImport;
+  label: string;
+  hash: string;
   accounts: Account[];
 }, {
   chosen_account_id: number|'NEW';
@@ -88,7 +90,7 @@ class UnlinkedAccountRow extends React.Component<{
       return <option key={account.id} value={account.id}>{account.name}</option>
     })
     return <tr>
-      <td>{pending.pending.account_label}</td>
+      <td>{pending.pending.account.label}</td>
       <td>
         <select
           value={this.state.chosen_account_id}
@@ -118,10 +120,11 @@ export class TransactionImportPage extends React.Component<PageProps, {}> {
     let accounts = Object.values(appstate.accounts);
     let pending_import_table;
     if (appstate.fileimport.pending_imports.length) {
-      let rows = appstate.fileimport.pending_imports.map((pending, idx) => {
+      let rows = appstate.fileimport.pending_imports.map((fileimport, idx) => {
         return <UnlinkedAccountRow
           key={idx}
-          pending={pending}
+          fileimport={fileimport}
+          label
           accounts={accounts} />
       })
       pending_import_table = <table className="ledger">

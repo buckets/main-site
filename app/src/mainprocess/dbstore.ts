@@ -2,8 +2,9 @@ import * as Path from 'path'
 import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
 
-import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass} from '../store'
+import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass, IMemoryStore} from '../store'
 import {APP_ROOT} from './globals'
+import { MemoryStore } from '../rpcstore'
 
 import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
@@ -72,14 +73,18 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
   }
 }
 
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 // DBStore
 // The IStore for the main process
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 let ALLOWED_RE = /[^a-zA-Z0-9_]+/g
 export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
+
+/**
+ * The IStore for the main process
+ */
 export class DBStore implements IStore {
   private _db:sqlite.Database;
 
@@ -88,12 +93,14 @@ export class DBStore implements IStore {
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankrecording:BankRecordingStore;
+  readonly memory:IMemoryStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankrecording = new BankRecordingStore(this);
+    this.memory = new MemoryStore(bus);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})
@@ -135,7 +142,7 @@ export class DBStore implements IStore {
       params['$'+snkey] = (<T>data)[key];
       values.push('$'+snkey);
     })
-    let sql = `INSERT INTO ${cls.table_name} (${columns}) VALUES ( ${values} );`;
+    let sql = `INSERT INTO ${cls.type} (${columns}) VALUES ( ${values} );`;
     let result = await this.db.run(sql, params);
     let obj = await this.getObject(cls, result.lastID);
     this.publishObject('update', obj);
@@ -148,7 +155,7 @@ export class DBStore implements IStore {
       params['$'+snkey] = (<T>data)[key];
       return `${snkey}=$${snkey}`
     })
-    let sql = `UPDATE ${cls.table_name}
+    let sql = `UPDATE ${cls.type}
       SET ${settings} WHERE id=$id;`;;
     await this.db.run(sql, params);
     let obj = await this.getObject<T>(cls, id);
@@ -156,11 +163,11 @@ export class DBStore implements IStore {
     return obj
   }
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
+    let sql = `SELECT *,'${cls.type}' as _type FROM ${cls.type}
     WHERE id=$id`;
     let ret = await this.db.get(sql, {$id: id});
     if (ret === undefined) {
-      throw new NotFound(`${cls.table_name} ${id}`);
+      throw new NotFound(`${cls.type} ${id}`);
     }
     if (cls.fromdb !== undefined) {
       ret = cls.fromdb(ret);
@@ -169,7 +176,7 @@ export class DBStore implements IStore {
   }
   async listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]> {
     let { where, params, order } = <any>(args || {});
-    let select = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}`;
+    let select = `SELECT *,'${cls.type}' as _type FROM ${cls.type}`;
     if (where) {
       where = `WHERE ${where}`;
     }
@@ -194,7 +201,7 @@ export class DBStore implements IStore {
   }
   async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     let obj = await this.getObject<T>(cls, id);
-    let sql = `DELETE FROM ${cls.table_name} WHERE id=$id`;
+    let sql = `DELETE FROM ${cls.type} WHERE id=$id`;
     await this.db.run(sql, {$id: id});
     this.publishObject('delete', obj);
   }

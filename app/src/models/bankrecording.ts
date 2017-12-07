@@ -5,10 +5,10 @@ import * as reclib from '../recordlib'
 import { IncorrectPassword } from '../error'
 
 export class BankRecording implements IObject {
-  static table_name: string = 'bank_recording';
+  static type: string = 'bank_recording';
   id: number;
   created: string;
-  readonly _type: string = BankRecording.table_name;
+  readonly _type: string = BankRecording.type;
   uuid: string;
   name: string;
   enc_recording: string;

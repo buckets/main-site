@@ -30,6 +30,7 @@ interface IBudgetFile {
     onOrAfter: Timestamp,
     before: Timestamp,
   });
+  
 }
 
 interface IBudgetFileRPCMessage {
@@ -141,17 +142,6 @@ export class BudgetFile implements IBudgetFile {
   }
 
   /**
-    Send a message to all Renderer processes for this budget.
-   */
-  // private broadcastToRenderers(chan:string, ...args) {
-  //   webContents.getAllWebContents().forEach(wc => {
-  //     if (URL.parse(wc.getURL()).hostname === this.id) {
-  //       wc.send(chan, ...args)
-  //     }
-  //   })
-  // }
-
-  /**
    *  Open the "default" set of windows for a newly opened budget.
    *
    *  Currently, this just opens the accounts page, but in the future
@@ -211,11 +201,6 @@ export class BudgetFile implements IBudgetFile {
     sesh.clearCache(() => {
 
     });
-
-    if (autoplay) {
-      autoplay.onOrAfter = ts2db(autoplay.onOrAfter)
-      autoplay.before = ts2db(autoplay.before)
-    }
 
     // User-Agent
     let user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
@@ -285,8 +270,8 @@ export class BudgetFile implements IBudgetFile {
           if (fileimport.error) {
             log.error(`[${dlid}] Error importing`, fileimport.error);
           } else if (fileimport.pending) {
-            log.error(`[${dlid}] Unhandled case`);
-            // XXX
+            // unknown accounts will have been created
+            log.info(`[${dlid}] Unknown accounts`);
           } else {
             log.info(`[${dlid}] Imported`, fileimport.imported.length);
           }
@@ -296,7 +281,10 @@ export class BudgetFile implements IBudgetFile {
       })
     })
 
-    console.log('autoplay', autoplay);
+    if (autoplay) {
+      autoplay.onOrAfter = ts2db(autoplay.onOrAfter)
+      autoplay.before = ts2db(autoplay.before)
+    }
 
     // Load the url
     const qs = querystring.stringify({

@@ -21,6 +21,7 @@ Bugs:
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
+ ☐ Handle OFX files with more than one account in them
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Sign the code
  ☐ Encryption: http://atom.github.io/node-keytar/

@@ -1,6 +1,7 @@
 import * as req from 'request-promise'
 import * as log from 'electron-log';
 import * as moment from 'moment'
+
 import { IObject, IStore, registerClass } from '../store'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
@@ -8,39 +9,18 @@ import { Transaction } from './account'
 import { EventSource } from '../events'
 import { sss } from '../i18n'
 import { hashStrings } from '../importing'
+import { UnknownAccount } from './account'
 
 export class Connection implements IObject {
-  static table_name: string = 'simplefin_connection'
+  static type: string = 'simplefin_connection'
   id: number;
   created: string;
-  readonly _type: string = Connection.table_name;
+  readonly _type: string = Connection.type;
   
   access_token: string;
   last_used: string;
 }
 registerClass(Connection);
-
-export class UnknownAccount implements IObject {
-  static table_name: string = 'unknown_account'
-  id: number;
-  created: string;
-  readonly _type: string = UnknownAccount.table_name;
-
-  description: string;
-  account_hash: string;
-}
-registerClass(UnknownAccount);
-
-export class AccountMapping implements IObject {
-  static table_name: string = 'account_mapping'
-  id: number;
-  created: string;
-  readonly _type: string = AccountMapping.table_name;
-
-  account_id: number;
-  account_hash: string;
-}
-registerClass(AccountMapping);
 
 export declare namespace SFIN {
   export interface AccountSet {
@@ -215,10 +195,8 @@ export class SimpleFINStore {
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
-        let rows = await this.store.query(`SELECT account_id FROM account_mapping
-          WHERE account_hash=$hash`, {$hash: hash})
-        if (rows.length) {
-          let account_id = rows[0].account_id;
+        let account_id = await this.store.accounts.hashToAccountId(hash)
+        if (account_id) {
           let has_transactions = await this.store.accounts.hasTransactions(account_id);
           account.transactions
           .map(trans => {
@@ -243,15 +221,11 @@ export class SimpleFINStore {
           })
         } else {
           // no matching account
-          try {
-            let unknown = await this.store.createObject(UnknownAccount, {
-              description: `${account.org.name || account.org.domain} ${account.name}`,
-              account_hash: hash,
-            })
-            unknowns.push(unknown);
-          } catch(err) {
-            log.warn(err);
-          }
+          let unknown = await this.store.accounts.getOrCreateUnknownAccount({
+            description: `${account.org.name || account.org.domain} ${account.name}`,
+            account_hash: hash,
+          })
+          unknowns.push(unknown);
         }
       }))
       if (got_data) {
@@ -271,25 +245,8 @@ export class SimpleFINStore {
   computeHash(org:SFIN.Organization, account_id:string):string {
     return hashStrings([org.name || org.domain, account_id]);
   }
-  linkAccountToHash(hash:string, account_id:number) {
-    return linkAccountToHash(this.store, hash, account_id);
-  }
 }
 
-export async function linkAccountToHash(store:IStore, hash:string, account_id:number) {
-  await store.createObject(AccountMapping, {
-    account_id: account_id,
-    account_hash: hash,
-  })
-  let unknowns = await store.listObjects(UnknownAccount, {
-    where: 'account_hash = $account_hash',
-    params: { $account_hash: hash },
-  })
-  let promises = unknowns.map(unknown => {
-    return store.deleteObject(UnknownAccount, unknown.id)
-  })
-  await Promise.all(promises);
-}
 
 class SimpleFinError extends Error {
 }

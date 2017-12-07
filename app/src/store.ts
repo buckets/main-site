@@ -10,9 +10,9 @@ import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
 import { BankRecordingStore } from './models/bankrecording'
 
-//--------------------------------------------------------------------------------
-// objects
-//--------------------------------------------------------------------------------
+//----------------------------------------------------------------------
+// Database objects
+//----------------------------------------------------------------------
 export let TABLE2CLASS = {};
 export interface IObject {
   id:number;
@@ -21,14 +21,22 @@ export interface IObject {
 }
 export interface IObjectClass<T> {
   new(): T;
-  table_name: string;
+  type: string;
   fromdb?(obj:T):T;
 }
 export function isObj<T extends IObject>(cls: IObjectClass<T>, obj: IObject): obj is T {
-  return obj._type === cls.table_name;
+  return obj._type === cls.type;
 }
 export function registerClass(cls:IObjectClass<any>) {
-  TABLE2CLASS[cls.table_name] = cls;
+  TABLE2CLASS[cls.type] = cls;
+}
+
+/**
+ *  Update/delete event for database-stored objects.
+ */
+export class ObjectEvent<T extends IObject> {
+  constructor(readonly event:ObjectEventType, readonly obj:T) {
+  }
 }
 
 /**
@@ -43,12 +51,18 @@ export interface IStore {
   bus:IBudgetBus;
 
   publishObject(event:ObjectEventType, obj:IObject);
+
+  // Database-backed objects
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
   listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
+
+  // Memory-backed objects
+  memory:IMemoryStore;
+  
 
   // model-specific stuff
   accounts:AccountStore;
@@ -58,39 +72,44 @@ export interface IStore {
   bankrecording:BankRecordingStore;
 }
 
-//--------------------------------------------------------------------------------
+export interface IMemoryStore {
+  bus:IBudgetBus;
+
+  publishObject(event:ObjectEventType, obj:IObject);
+  createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
+  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
+  getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
+  listObjects<T extends IObject>(cls: IObjectClass<T>):Promise<T[]>;
+  deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
+}
+
+
+//----------------------------------------------------------------------
 // DataEvents
-//--------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 export type ObjectEventType =
   'update'
   | 'delete';
 
-export class ObjectEvent<T extends IObject> {
-  public event: ObjectEventType;
-  public obj: T;
-  constructor(event:ObjectEventType, obj:T) {
-    this.event = event;
-    this.obj = obj;
-  }
-}
+
 
 /**
  *  A bus for budget-related events.
  */
 export interface IBudgetBus {
+  // Database object events
   obj: EventSource<ObjectEvent<any>>;
+  memobj: EventSource<ObjectEvent<any>>;
 }
-
 class BaseBudgetBus implements IBudgetBus {
   obj = new EventSource<ObjectEvent<any>>();
+  memobj = new EventSource<ObjectEvent<any>>();
 }
 
 /**
  *  Main process bus which automatically broadcasts events to renderer buses
  */
 export class BudgetBus extends BaseBudgetBus {
-  obj = new EventSource<ObjectEvent<any>>();
-
   constructor(readonly budget_id:string) {
     super();
     // monitor all local events for broadcast
@@ -116,8 +135,6 @@ export class BudgetBus extends BaseBudgetBus {
  *  Renderer process bus that automatically receives all events from the main process bus
  */ 
 export class BudgetBusRenderer extends BaseBudgetBus {
-  obj = new EventSource<ObjectEvent<any>>();
-
   constructor(readonly budget_id:string) {
     super();
     ipcRenderer.on('bus', (ev, event_name: keyof IBudgetBus, message) => {

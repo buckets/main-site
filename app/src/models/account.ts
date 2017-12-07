@@ -13,10 +13,10 @@ export type GeneralCatType =
 
 
 export class Account implements IObject {
-  static table_name: string = 'account';
+  static type: string = 'account';
   id: number;
   created: string;
-  readonly _type: string = Account.table_name;
+  readonly _type: string = Account.type;
   name: string;
   balance: number;
   import_balance: number;
@@ -25,11 +25,11 @@ export class Account implements IObject {
 registerClass(Account);
 
 export class Transaction implements IObject {
-  static table_name: string = 'account_transaction';
+  static type: string = 'account_transaction';
   id: number;
   created: string;
   posted: string;
-  readonly _type: string = Transaction.table_name;
+  readonly _type: string = Transaction.type;
   account_id: number;
   amount: number;
   memo: string;
@@ -37,6 +37,29 @@ export class Transaction implements IObject {
   general_cat: GeneralCatType;
 }
 registerClass(Transaction);
+
+export class UnknownAccount implements IObject {
+  static type: string = 'unknown_account'
+  id: number;
+  created: string;
+  readonly _type: string = UnknownAccount.type;
+
+  description: string;
+  account_hash: string;
+}
+registerClass(UnknownAccount);
+
+export class AccountMapping implements IObject {
+  static type: string = 'account_mapping'
+  id: number;
+  created: string;
+  readonly _type: string = AccountMapping.type;
+
+  account_id: number;
+  account_hash: string;
+}
+registerClass(AccountMapping);
+
 
 export interface Category {
   bucket_id: number;
@@ -51,6 +74,9 @@ export function expectedBalance(a:Account):number {
   }
 }
 
+/**
+ *
+ */
 export class AccountStore {
   public store:IStore;
   constructor(store:IStore) {
@@ -186,6 +212,46 @@ export class AccountStore {
       this.store.publishObject('update', bucket);
     }))
   }
+
+  //------------------------------------------------------------
+  // account mapping
+  //------------------------------------------------------------
+  async hashToAccountId(hash:string):Promise<number|null> {
+    let rows = await this.store.query(`SELECT account_id FROM account_mapping
+        WHERE account_hash=$hash`, {$hash: hash})
+    if (rows.length) {
+      return rows[0].id;
+    } else {
+      return null;
+    }
+  }
+  async getOrCreateUnknownAccount(args:{description:string, account_hash:string}):Promise<UnknownAccount> {
+    let rows = await this.store.query(`SELECT id FROM unknown_account WHERE account_hash=$hash`, {$hash: args.account_hash});
+    if (rows.length === 1) {
+      return this.store.getObject(UnknownAccount, rows[0].id);
+    } else {
+      await this.store.createObject(UnknownAccount, {
+        description: args.description,
+        account_hash: args.account_hash,
+      })
+    }
+  }
+  async linkAccountToHash(hash:string, account_id:number) {
+    await this.store.createObject(AccountMapping, {
+      account_id: account_id,
+      account_hash: hash,
+    })
+    let unknowns = await this.store.listObjects(UnknownAccount, {
+      where: 'account_hash = $account_hash',
+      params: { $account_hash: hash },
+    })
+    let promises = unknowns.map(unknown => {
+      return this.store.deleteObject(UnknownAccount, unknown.id)
+    })
+    await Promise.all(promises);
+  }
+
+
   // asof is a UTC time
   async balances(asof?:Timestamp):Promise<Balances> {
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof);

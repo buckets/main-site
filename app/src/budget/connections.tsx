@@ -3,7 +3,8 @@ import * as cx from 'classnames'
 import * as moment from 'moment'
 import { shell } from 'electron'
 import { makeToast } from './toast'
-import { Connection, UnknownAccount } from '../models/simplefin'
+import { UnknownAccount } from '../models/account'
+import { Connection } from '../models/simplefin'
 import { BankRecording } from '../models/bankrecording'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
@@ -424,11 +425,11 @@ class UnlinkedAccountRow extends React.Component<{
     let str_account_id = this.state.chosen_account_id;
     if (str_account_id === 'NEW') {
       let new_account = await manager.store.accounts.add(this.props.unknown.description)
-      await manager.store.connections.linkAccountToHash(this.props.unknown.account_hash, new_account.id);
+      await manager.store.accounts.linkAccountToHash(this.props.unknown.account_hash, new_account.id);
       makeToast(sss('Account created:') + ' ' + new_account.name);
     } else {
       let account_id = parseInt(str_account_id);
-      await manager.store.connections.linkAccountToHash(this.props.unknown.account_hash, account_id);
+      await manager.store.accounts.linkAccountToHash(this.props.unknown.account_hash, account_id);
       makeToast(sss('Account linked'));
     }
     

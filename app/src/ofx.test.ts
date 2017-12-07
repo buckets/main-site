@@ -94,15 +94,13 @@ NEWFILEUID:NONE
 </STMTTRNRS>
 </BANKMSGSRSV1>
 </OFX>`
-  let transactions = await ofx2importable(data);
+  let accountset = await ofx2importable(data);
+  let account = accountset.accounts[0];
+  let transactions = account.transactions;
   t.equal(transactions.length, 5, "Should have 5 transactions");
 
   let [t0, t1, t2, t3, t4] = transactions;
-  t.equal((new Set(transactions.map(x => x.account_label))).size, 1,
-      "Should all have the same account label")
-  t.equal((new Set(transactions.map(x => x.currency))).size, 1,
-      "Should all have the same currency")
-  t.equal(t0.currency, 'NZD')
+  t.equal(account.currency, 'NZD')
   
   t.equal(t0.amount, 1990)
   t.equal(t0.memo, 'Credit Interest Paid')
@@ -197,16 +195,18 @@ NEWFILEUID:NONE
     </STMTTRNRS>
   </BANKMSGSRSV1>
 </OFX>`
-  let transactions = await ofx2importable(data);
+  let accountset = await ofx2importable(data);
+  let account = accountset.accounts[0];
+  let transactions = account.transactions;
   t.equal(transactions.length, 1)
 
   let t0 = transactions[0];
-  t.notEqual(t0.account_label, null)
-  t.ok(t0.account_label.indexOf('55555555~1') !== -1, "Should have account number");
-  t.ok(t0.account_label.indexOf('GOOBYGOO') !== -1, "Should have bank");
-  t.ok(t0.account_label.indexOf('SAVINGS') !== -1, "Should have account name");
+  t.notEqual(account.label, null)
+  t.ok(account.label.indexOf('55555555~1') !== -1, "Should have account number");
+  t.ok(account.label.indexOf('GOOBYGOO') !== -1, "Should have bank");
+  t.ok(account.label.indexOf('SAVINGS') !== -1, "Should have account name");
   
-  t.equal(t0.currency, 'USD')
+  t.equal(account.currency, 'USD')
   t.equal(t0.amount, 17)
   t.equal(t0.memo, 'DIVIDEND EARNED FOR PERIOD OF 04/01/2016 THROUGH 04/30/2016 ANNUAL PERCENTAGE YIELD EARNED IS 0.10%')
   t.equal(t0.fi_id, '0000760')
@@ -284,22 +284,23 @@ NEWFILEUID:NONE
 </CREDITCARDMSGSRSV1>
 </OFX>
 `
-  let transactions = await ofx2importable(data);
+  let accountset = await ofx2importable(data);
+  let account = accountset.accounts[0];
+  let transactions = account.transactions;
   t.equal(transactions.length, 2)
 
   let t0 = transactions[0];
-  t.notEqual(t0.account_label, null)
-  t.ok(t0.account_label.indexOf('11111111111111111') !== -1, "Should have account number");
-  t.ok(t0.account_label.indexOf('ISC') !== -1, "Should have bank");
-  
-  t.equal(t0.currency, 'USD')
+  t.notEqual(account.label, null)
+  t.ok(account.label.indexOf('11111111111111111') !== -1, "Should have account number");
+  t.ok(account.label.indexOf('ISC') !== -1, "Should have bank");
+  t.equal(account.currency, 'USD')
+
   t.equal(t0.amount, -1299)
   t.equal(t0.memo, 'ETSY SELLER FEES')
   t.equal(t0.fi_id, '2016050124224436122105002709067')
   t.equal(t0.posted.format(), moment.utc({y:2016, M:5-1, d:1, h:12}).format())
 
   let t1 = transactions[1];
-  t.equal(t1.currency, 'USD')
   t.equal(t1.amount, -3622)
   t.equal(t1.memo, 'BARNES & NOBLE #2626')
   t.equal(t1.fi_id, '2016050624445006126100312436287')
