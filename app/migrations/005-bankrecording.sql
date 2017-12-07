@@ -8,4 +8,6 @@ CREATE TABLE bank_recording (
     enc_recording TEXT
 );
 
+CREATE UNIQUE INDEX account_mapping_hash ON account_mapping(account_hash);
+
 -- Down

@@ -10,7 +10,6 @@ import {isBetween} from '../time'
 import {Balances} from '../models/balances'
 import { BankRecording } from '../models/bankrecording'
 import { makeToast } from './toast'
-import { FileImportState, FileImportManager } from './importing'
 import { sss } from '../i18n'
 
 
@@ -68,8 +67,6 @@ export class AppState implements IComputedAppState {
 
   syncing: boolean = false;
   sync_message: string = '';
-
-  fileimport: FileImportState = new FileImportState();
 
   rain: number = 0;
   bucket_total_balance: number = 0;
@@ -205,12 +202,34 @@ function computeTotals(appstate:AppState):IComputedAppState {
   };
 }
 
+
+class DelayingCounter {
+  readonly done = new EventSource<number>();
+  private _count = 0;
+  private _timer;
+  constructor(private delay:number=200) {}
+  add(num:number=1) {
+    this._count++;
+    if (this._timer) {
+      // restart the timer
+      clearTimeout(this._timer);
+    }
+    this._timer = setTimeout(() => {
+      let count = this._count;
+      this.done.emit(count)
+      this._count = 0;
+    }, this.delay);
+  }
+}
+
+
 export class StateManager {
   public store:IStore;
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
   private posttick: Set<string> = new Set();
-  readonly fileimport:FileImportManager;
+
+  private updated_trans_counter = new DelayingCounter();
 
   public events = {
     obj: new EventSource<ObjectEvent<any>>(),
@@ -220,7 +239,9 @@ export class StateManager {
   constructor() {
     this.appstate = new AppState();
     this.store = null;
-    this.fileimport = new FileImportManager(this);
+    this.updated_trans_counter.done.on(count => {
+      makeToast(sss('toast.updated-trans', count => `Updated/created ${count} transactions`)(count));
+    })
   }
   setStore(store: IStore) {
     this.store = store;
@@ -269,6 +290,9 @@ export class StateManager {
     let obj = ev.obj;
     if (isObj(Account, obj)) {
       if (ev.event === 'update') {
+        if (!this.appstate.accounts[obj.id]) {
+          makeToast(sss('Account created: ') + obj.name);
+        }
         this.appstate.accounts[obj.id] = obj;
         this.posttick.add('fetchAccountBalances');
       } else if (ev.event === 'delete') {
@@ -289,6 +313,9 @@ export class StateManager {
         delete this.appstate.groups[obj.id];
       }
     } else if (isObj(ATrans, obj)) {
+      if (ev.event === 'update') {
+        this.updated_trans_counter.add();
+      }
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(obj.posted, dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
@@ -316,6 +343,9 @@ export class StateManager {
       }
     } else if (isObj(UnknownAccount, obj)) {
       if (ev.event === 'update') {
+        if (!this.appstate.unknown_accounts[obj.id]) {
+          makeToast(sss('Unknown account: ') + obj.description);
+        }
         this.appstate.unknown_accounts[obj.id] = obj;
       } else if (ev.event === 'delete') {
         delete this.appstate.unknown_accounts[obj.id];

@@ -3,7 +3,7 @@ import * as cx from 'classnames'
 import * as moment from 'moment'
 import { shell } from 'electron'
 import { makeToast } from './toast'
-import { UnknownAccount } from '../models/account'
+import { Account, UnknownAccount } from '../models/account'
 import { Connection } from '../models/simplefin'
 import { BankRecording } from '../models/bankrecording'
 import { manager, AppState } from './appstate'
@@ -56,7 +56,7 @@ export class SyncWidget extends React.Component<{
   }
 }
 
-export class ConnectionsPage extends React.Component<{
+export class ImportPage extends React.Component<{
   appstate: AppState;
 }, {
   connecting: boolean;
@@ -112,14 +112,14 @@ export class ConnectionsPage extends React.Component<{
     if (Object.keys(appstate.unknown_accounts).length) {
       unknown = <div>
         <h2>{sss('Unlinked Accounts')}</h2>
-        <UnlinkedAccountList appstate={appstate} />
+        <UnknownAccountList appstate={appstate} />
       </div>
     }
 
     let recordings;
     if (Object.keys(appstate.bankrecordings).length) {
       recordings = <div>
-        <h2>{sss('Recordings')}</h2>
+        <h2>{sss('Macros')}</h2>
         <BankRecordingList
           recordings={Object.values(appstate.bankrecordings)}
         />
@@ -149,6 +149,11 @@ export class ConnectionsPage extends React.Component<{
               disabled={!conns}><span className={cx("fa fa-refresh", {
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
+            <button onClick={() => {
+                current_file.openImportFileDialog();
+              }}>
+                <span className="fa fa-upload"></span> Import file
+              </button>
           </div>
           <div>
             <button onClick={() => { makeToast('Here is some toast')}}>{sss('Test Toast')}</button>
@@ -168,11 +173,11 @@ export class ConnectionsPage extends React.Component<{
           </p>
           <div className="horiz-options">
             <div className="option">
-              <h3>Record <span className="experimental">Experimental</span></h3>
+              <h3>Macro <span className="experimental">Experimental</span></h3>
               
               <button
                 className="primary"
-                onClick={this.makeNewRecording}>{sss('New recording')}</button>
+                onClick={this.makeNewRecording}>{sss('Create macro')}</button>
 
               <ul className="fa-ul procon">
                 <li><i className="fa-li fa fa-check" /> Private</li>
@@ -184,11 +189,11 @@ export class ConnectionsPage extends React.Component<{
               </ul>
 
               <p>
-                This method records you as you sign in to your bank, then replays the recording to download transaction data.
+                Create a macro to download transaction data directly from your bank.
               </p>
 
               <p>
-                Credentials are encrypted and stored with your budget and only ever transmitted to your bank.
+                Your username and password/PIN are encrypted and stored in this budget file and only ever sent to your bank.
               </p>
 
             </div>
@@ -225,9 +230,9 @@ export class ConnectionsPage extends React.Component<{
               <h3>File import</h3>
 
               <button className="primary" onClick={() => {
-                manager.fileimport.openFileDialog();
+                current_file.openImportFileDialog();
               }}>
-                Import
+                <span className="fa fa-upload"></span> Import file
               </button>
               
               <ul className="fa-ul procon">
@@ -243,7 +248,7 @@ export class ConnectionsPage extends React.Component<{
               </p>
 
               <p>
-                If you only have one bank account, this might be your best option if Recording is too complicated.
+                If you only have one bank account, this might be your best option if macros are too complicated.
               </p>
 
             </div>
@@ -258,7 +263,7 @@ export class ConnectionsPage extends React.Component<{
     })
   }
   makeNewRecording = async () => {
-    let recording = await manager.store.bankrecording.add({name: sss('new recording')});
+    let recording = await manager.store.bankrecording.add({name: sss('new macro')});
     current_file.openRecordWindow(recording.id);
   }
   connect = async () => {
@@ -360,17 +365,18 @@ class ConnectionList extends React.Component<{
 }
 
 
-class UnlinkedAccountList extends React.Component<{
+class UnknownAccountList extends React.Component<{
   appstate: AppState,
 }, {}> {
   render() {
     let { appstate } = this.props;
-    let rows = Object.values(appstate.unknown_accounts)
-    .map((acc:UnknownAccount) => {
-      return <UnlinkedAccountRow
-        key={acc.id}
-        unknown={acc}
-        accounts={Object.values(appstate.accounts)} />
+    let accounts = Object.values<Account>(appstate.accounts);
+    let rows = Object.values<UnknownAccount>(appstate.unknown_accounts)
+    .map((unknown:UnknownAccount) => {
+      return <UnknownAccountRow
+        key={unknown.id}
+        unknown={unknown}
+        accounts={accounts} />
     })
     return <table className="ledger">
       <thead>
@@ -387,11 +393,11 @@ class UnlinkedAccountList extends React.Component<{
   }
 }
 
-class UnlinkedAccountRow extends React.Component<{
+class UnknownAccountRow extends React.Component<{
   unknown: UnknownAccount;
   accounts: Account[];
 }, {
-  chosen_account_id: string;
+  chosen_account_id: string|'NEW';
 }> {
   constructor(props) {
     super(props);
@@ -422,16 +428,17 @@ class UnlinkedAccountRow extends React.Component<{
     </tr>
   }
   link = async () => {
-    let str_account_id = this.state.chosen_account_id;
-    if (str_account_id === 'NEW') {
-      let new_account = await manager.store.accounts.add(this.props.unknown.description)
-      await manager.store.accounts.linkAccountToHash(this.props.unknown.account_hash, new_account.id);
-      makeToast(sss('Account created:') + ' ' + new_account.name);
+    let { unknown } = this.props;
+    let account_id = this.state.chosen_account_id;
+    let numeric_account_id:number;
+    if (account_id === 'NEW') {
+      // Make a new account
+      let new_account = await manager.store.accounts.add(unknown.description);
+      numeric_account_id = new_account.id;
     } else {
-      let account_id = parseInt(str_account_id);
-      await manager.store.accounts.linkAccountToHash(this.props.unknown.account_hash, account_id);
-      makeToast(sss('Account linked'));
+      // Link to an existing account
+      numeric_account_id = parseInt(account_id);
     }
-    
+    await manager.store.accounts.linkAccountToHash(unknown.account_hash, numeric_account_id);
   }
 }

@@ -10,6 +10,7 @@ import {Money, MoneyInput} from '../money'
 import { Help } from '../tooltip'
 import { onKeys } from '../input'
 import { sss } from '../i18n'
+import { current_file } from '../mainprocess/files'
 
 
 interface TransactionPageProps {
@@ -93,12 +94,6 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
       <div className="subheader">
         <div className="group">
           <button
-            onClick={ev => {
-              manager.fileimport.openFileDialog();
-            }}>
-            {sss('Import from file')}
-          </button>
-          <button
             className="delete"
             disabled={!selected.size}
             onClick={this.deleteSelected}>{delete_label}</button>  
@@ -108,6 +103,15 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
               checked={this.state.show_subset} 
               onChange={this.showUncategorized} /> {sss('Show uncategorized')}
           </div>
+        </div>
+        <div className="group">
+          <button
+            onClick={ev => {
+              current_file.openImportFileDialog();
+
+            }}>
+            <span className="fa fa-upload"></span> {sss('Import file')}
+          </button>
         </div>
       </div>
       <div className="panes">

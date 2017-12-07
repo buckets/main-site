@@ -2,9 +2,8 @@ import * as Path from 'path'
 import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
 
-import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass, IMemoryStore} from '../store'
+import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass } from '../store'
 import {APP_ROOT} from './globals'
-import { MemoryStore } from '../rpcstore'
 
 import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
@@ -93,14 +92,12 @@ export class DBStore implements IStore {
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankrecording:BankRecordingStore;
-  readonly memory:IMemoryStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankrecording = new BankRecordingStore(this);
-    this.memory = new MemoryStore(bus);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})

@@ -74,6 +74,15 @@ export function expectedBalance(a:Account):number {
   }
 }
 
+
+interface ImportArgs {
+  account_id: number,
+  amount: number,
+  memo: string,
+  posted: Timestamp,
+  fi_id: string,
+}
+
 /**
  *
  */
@@ -134,13 +143,29 @@ export class AccountStore {
     return rows.length !== 0;
   }
 
-  async importTransaction(args: {
-    account_id:number,
-    amount:number,
-    memo:string,
-    posted:Timestamp,
-    fi_id:string,
-  }):Promise<Transaction> {
+  async importTransactions(transactions:ImportArgs[]) {
+    let num_new = 0;
+    let num_updated = 0;
+    let imported = await Promise.all(transactions.map(async trans => {
+      let result = await this.importTransaction(trans);
+      if (result.isupdate) {
+        num_updated += 1;
+      } else {
+        num_new += 1;
+      }
+      return result.transaction;
+    }))
+    return {
+      transactions: imported,
+      num_new,
+      num_updated,
+    }
+  }
+
+  async importTransaction(args: ImportArgs):Promise<{
+    isupdate: boolean,
+    transaction: Transaction,
+  }> {
     let rows = await this.store.query(`SELECT id
       FROM account_transaction
       WHERE
@@ -163,16 +188,23 @@ export class AccountStore {
       .then(account => {
         this.store.publishObject('update', account);  
       })
-      return ret;
+      return {
+        transaction: ret,
+        isupdate: true,
+      }
     } else {
       // Create new transaction
-      return this.store.accounts.transact({
+      let transaction = await this.store.accounts.transact({
         account_id: args.account_id,
         amount: args.amount,
         posted: args.posted,
         memo: args.memo,
         fi_id: args.fi_id,
       })
+      return {
+        transaction,
+        isupdate: false,
+      }
     }
   }
 
@@ -220,7 +252,7 @@ export class AccountStore {
     let rows = await this.store.query(`SELECT account_id FROM account_mapping
         WHERE account_hash=$hash`, {$hash: hash})
     if (rows.length) {
-      return rows[0].id;
+      return rows[0].account_id;
     } else {
       return null;
     }

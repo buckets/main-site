@@ -60,10 +60,6 @@ export interface IStore {
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
 
-  // Memory-backed objects
-  memory:IMemoryStore;
-  
-
   // model-specific stuff
   accounts:AccountStore;
   buckets:BucketStore;
@@ -72,21 +68,9 @@ export interface IStore {
   bankrecording:BankRecordingStore;
 }
 
-export interface IMemoryStore {
-  bus:IBudgetBus;
-
-  publishObject(event:ObjectEventType, obj:IObject);
-  createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
-  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
-  getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
-  listObjects<T extends IObject>(cls: IObjectClass<T>):Promise<T[]>;
-  deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
-}
-
-
-//----------------------------------------------------------------------
+//----------------------------------------------------------------
 // DataEvents
-//----------------------------------------------------------------------
+//----------------------------------------------------------------
 export type ObjectEventType =
   'update'
   | 'delete';
@@ -99,11 +83,9 @@ export type ObjectEventType =
 export interface IBudgetBus {
   // Database object events
   obj: EventSource<ObjectEvent<any>>;
-  memobj: EventSource<ObjectEvent<any>>;
 }
 class BaseBudgetBus implements IBudgetBus {
   obj = new EventSource<ObjectEvent<any>>();
-  memobj = new EventSource<ObjectEvent<any>>();
 }
 
 /**

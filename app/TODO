@@ -12,6 +12,7 @@ Recording:
     ☐ Windows
     ☐ Linux
   ☐ Command+L should focus the URL-selector
+  ☐ When creating a password for the first time, confirm the password
   ☐ Partitions are stored in ~/Library/Application Support/Buckets/Partitions on the mac.
     ☐ If that works reply to:
       https://discuss.atom.io/t/how-can-i-persist-sessions-across-electron-app-close/36223

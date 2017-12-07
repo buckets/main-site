@@ -314,7 +314,7 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
       let payee = payees[ytrans.payeeId];
       memo = payee.name;
     }
-    let trans = await store.accounts.importTransaction({
+    let { transaction } = await store.accounts.importTransaction({
       account_id: buckets_account.id,
       amount: number2cents(ytrans.amount),
       memo,
@@ -325,7 +325,7 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
     // Now categorize
     if (ytrans.categoryId === "Category/__ImmediateIncome__") {
       // Income
-      await store.accounts.categorizeGeneral(trans.id, 'income');
+      await store.accounts.categorizeGeneral(transaction.id, 'income');
     } else if (ytrans.categoryId === "Category/__Split__") {
       // Split category
       let cats = ytrans.subTransactions.map(sub => {
@@ -336,14 +336,14 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
           amount,
         }
       })
-      await store.accounts.categorize(trans.id, cats);
+      await store.accounts.categorize(transaction.id, cats);
     } else {
       // Single category
       let bucket = cat2bucket[ytrans.categoryId];
       if (bucket) {
-        await store.accounts.categorize(trans.id, [{
+        await store.accounts.categorize(transaction.id, [{
           bucket_id: bucket.id,
-          amount: trans.amount,
+          amount: transaction.amount,
         }])
       }
     }

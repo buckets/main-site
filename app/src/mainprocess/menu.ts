@@ -175,7 +175,8 @@ export async function updateMenu(show_budget:boolean=false) {
         accelerator: 'CmdOrCtrl+I',
         click() {
           let win = BrowserWindow.getFocusedWindow();
-          win.webContents.send('buckets:start-file-import');
+          BudgetFile.fromWindowId(win.id).openImportFileDialog();
+          win.webContents.send('buckets:goto', '/import');
         }
       },
       {type: 'separator'},

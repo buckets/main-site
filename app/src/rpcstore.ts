@@ -1,7 +1,6 @@
 import * as log from 'electron-log'
-import * as moment from 'moment'
 import { v4 as uuid } from 'uuid';
-import { IStore, IMemoryStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
+import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
 import { ipcMain, ipcRenderer } from 'electron'
 import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
@@ -123,7 +122,6 @@ export class RPCRendererStore implements IStore {
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankrecording:BankRecordingStore;
-  readonly memory:IMemoryStore;
   private caller:RPCCaller<IStore>;
   constructor(room:string, readonly bus:IBudgetBus) {
     this.accounts = new AccountStore(this);
@@ -132,7 +130,6 @@ export class RPCRendererStore implements IStore {
     this.reports = new ReportStore(this);
     this.bankrecording = new BankRecordingStore(this);
     this.caller = new RPCCaller(`rpc-store-${room}`);
-    this.memory = new RPCRendererMemoryStore(room, bus);
   }
   async callRemote<T>(method, ...args):Promise<T> {
     return this.caller.callRemote<T>(method, ...args);
@@ -162,115 +159,3 @@ export class RPCRendererStore implements IStore {
   }
 }
 
-/**
- * Main process, normal memory store
- */
-export class MemoryStore implements IMemoryStore {
-  private _nextid = 1;
-  private _objects:{
-    [type:string]: {
-      [id:number]: IObject,
-    },
-  } = {}
-  constructor(readonly bus:IBudgetBus) {}
-  get nextid():number {
-    return this._nextid++;
-  }
-  publishObject(event:ObjectEventType, obj:IObject) {
-    this.bus.memobj.emit(new ObjectEvent(event, obj))
-  }
-  async createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
-    let obj = <T>Object.assign({}, data, {
-      id: this.nextid,
-      created: moment().format(),
-      _type: cls.type,
-    });
-    let type = cls.type;
-    if (!this._objects[type]) {
-      this._objects[type] = {};
-    }
-    this._objects[type][obj.id] = obj;
-    this.publishObject('update', obj);
-    return obj;
-  }
-  async updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
-    Object.assign(this._objects[cls.type][id], data);
-    return this.getObject(cls, id);
-  }
-  async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    return this._objects[cls.type][id] as T;
-  }
-  async listObjects<T extends IObject>(cls: IObjectClass<T>):Promise<T[]> {
-    return Object.values(this._objects[cls.type]) as T[]
-  }
-  async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
-    delete this._objects[cls.type][id];
-  }
-}
-
-
-
-/**
- *  Main process handler for RendererMemoryStore
- */
-export class RPCMainMemoryStore {
-  private receiver:RPCReceiver<IMemoryStore>;
-  constructor(store:IMemoryStore, room:string) {
-    this.receiver = new RPCReceiver(`rpc-memstore-${room}`, store);
-  }
-  start() {
-    this.receiver.start();
-  }
-  stop() {
-    this.receiver.stop();
-  }
-}
-/**
- *  Renderer process memory store
- */
-export class RPCRendererMemoryStore implements IMemoryStore {
-  private caller:RPCCaller<IMemoryStore>;
-  private _objects:{
-    [type:string]: {
-      [id:number]: IObject,
-    },
-  } = {}
-  constructor(room:string, readonly bus:IBudgetBus) {
-    this.caller = new RPCCaller<IMemoryStore>(`rpc-store-${room}`);
-    bus.memobj.on(this.gotMessage);
-  }
-  gotMessage = (message:ObjectEvent<IObject>) => {
-    let type = message.obj._type;
-    if (!this._objects[type]) {
-      this._objects[type] = {};   
-    }
-    if (message.event === 'update') {
-      this._objects[type][message.obj.id] = message.obj;
-    } else if (message.event === 'delete') {
-      delete this._objects[type][message.obj.id];
-    }
-  }
-  async callRemote<T>(method, ...args):Promise<T> {
-    return this.caller.callRemote<T>(method, ...args);
-  }
-
-  publishObject(event:ObjectEventType, obj:IObject) {
-    return this.callRemote('publishObject', event, obj);
-  }
-
-  createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
-    return this.callRemote('createObject', serializeObjectClass(cls), data);
-  }
-  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
-    return this.callRemote('updateObject', serializeObjectClass(cls), id, data);
-  }
-  getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    return this.callRemote('getObject', serializeObjectClass(cls), id);
-  }
-  listObjects<T extends IObject>(cls: IObjectClass<T>, ...args):Promise<T[]> {
-    return this.callRemote('listObjects', serializeObjectClass(cls), ...args);
-  }
-  deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
-    return this.callRemote('deleteObject', serializeObjectClass(cls), id);
-  }
-}

@@ -3,19 +3,21 @@ import * as log from 'electron-log'
 
 export class EventSource<T> {
   private listeners:Array<{
-    listener: (message:T)=>void,
-    remove?: boolean,
+    listener: (message:T)=>void|boolean|Promise<boolean>,
+    remove?: boolean|'ifsuccessful',
   }> = [];
 
   emit(message:T) {
     this.listeners.slice().forEach(async obj => {
+      let result;
       try {
-        await obj.listener(message);
+        result = await obj.listener(message);
       } catch(err) {
-        log.error("Error in listener", message, err);
+        log.error("Error in listener", message, obj.listener);
         log.error(err.stack);
       }
-      if (obj.remove) {
+      if (obj.remove === true
+         || (obj.remove === 'ifsuccessful' && result === true)) {
         this.listeners.splice(this.listeners.indexOf(obj), 1);
       }
     })
@@ -32,6 +34,13 @@ export class EventSource<T> {
       remove: true,
     });
     return this
+  }
+  onceSuccessfully(listener:(message:T)=>boolean|Promise<boolean>):this {
+    this.listeners.push({
+      listener,
+      remove: 'ifsuccessful',
+    })
+    return this;
   }
   removeAllListeners():this {
     this.listeners = [];

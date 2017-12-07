@@ -17,7 +17,7 @@ import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import { onlyRunInMain } from '../rpc'
-import { FileImport } from '../importing'
+import { importFile } from '../importing'
 
 
 interface IBudgetFile {
@@ -31,6 +31,11 @@ interface IBudgetFile {
     before: Timestamp,
   });
   
+  /**
+   *  Import a transaction-laden file
+   */
+  importFile(path:string);
+  openImportFileDialog();
 }
 
 interface IBudgetFileRPCMessage {
@@ -265,16 +270,20 @@ export class BudgetFile implements IBudgetFile {
 
           // process it
           log.info(`[${dlid}] processing file`, save_path);
-          let fileimport = new FileImport(this.store, save_path)
-          await fileimport.run();
-          if (fileimport.error) {
-            log.error(`[${dlid}] Error importing`, fileimport.error);
-          } else if (fileimport.pending) {
-            // unknown accounts will have been created
-            log.info(`[${dlid}] Unknown accounts`);
-          } else {
-            log.info(`[${dlid}] Imported`, fileimport.imported.length);
+          let imported;
+          let pendings;
+          try {
+            let result = await importFile(this.store, save_path);
+            imported = result.imported;
+            pendings = result.pendings;
+          } catch(err) {
+            log.error(`[${dlid}] error importing: ${err}`);
           }
+          if (pendings.length) {
+            // unknown accounts will have been created
+            log.info(`[${dlid}] ${pendings.length} unknown accounts`);
+          }
+          log.info(`[${dlid}] ${imported.length} imported`);
         } else {
           log.warn(`[${dlid}] Download failed: ${state}`)
         }
@@ -293,6 +302,31 @@ export class BudgetFile implements IBudgetFile {
       autoplay: JSON.stringify(autoplay),
     })
     this.openWindow(`/record/record.html?${qs}`, true);
+  }
+
+  async importFile(path:string) {
+    try {
+      await importFile(this.store, path);  
+    } catch(err) {
+      reportErrorToUser("Error importing file");
+      log.error(`Error importing file: ${path}`);
+      log.error(err.stack);
+    }
+  }
+
+  openImportFileDialog() {
+    dialog.showOpenDialog({
+      title: sss('Open Transaction File'),
+      filters: [
+        {name: 'OFX/QFX', extensions: ['ofx', 'qfx']},
+      ],
+    }, paths => {
+      if (paths) {
+        paths.forEach(path => {
+          this.importFile(path);
+        })
+      }
+    })
   }
 
   static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
@@ -340,10 +374,17 @@ class RendererBudgetFile implements IBudgetFile {
     }
   }
 
+  importFile(path:string) {
+    return this.callInMain('importFile', path);
+  }
+  openImportFileDialog() {
+    return this.callInMain('openImportFileDialog');
+  }
+
   /**
    *  Call a function on this budget's corresponding main process BudgetFile.
    */
-  private callInMain(method:string, ...args):Promise<any> {
+  private callInMain(method:keyof IBudgetFile, ...args):Promise<any> {
     return new Promise((resolve, reject) => {
       const message:IBudgetFileRPCMessage = {
         reply_ch: `budgetfile.reply.${uuid()}`,
