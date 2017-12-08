@@ -26,7 +26,7 @@ interface IBudgetFile {
   /**
    *  Cause the recording window to open for a particular recording
    */
-  openRecordWindow(recording_id:number, autoplay?:{
+  openRecordWindow(macro_id:number, autoplay?:{
     onOrAfter: Timestamp,
     before: Timestamp,
   });
@@ -195,11 +195,11 @@ export class BudgetFile implements IBudgetFile {
   /**
    *
    */
-  async openRecordWindow(recording_id:number, autoplay?:{
+  async openRecordWindow(macro_id:number, autoplay?:{
     onOrAfter: Timestamp,
     before: Timestamp,
   }) {
-    const bankmacro = await this.store.bankmacro.get(recording_id);
+    const bankmacro = await this.store.bankmacro.get(macro_id);
 
     const partition = `persist:rec-${bankmacro.uuid}`;
     let sesh = session.fromPartition(partition, {cache:false});
@@ -297,7 +297,7 @@ export class BudgetFile implements IBudgetFile {
 
     // Load the url
     const qs = querystring.stringify({
-      recording_id,
+      macro_id,
       partition,
       autoplay: JSON.stringify(autoplay),
     })
@@ -358,7 +358,7 @@ class RendererBudgetFile implements IBudgetFile {
     this.store = new RPCRendererStore(id, this.bus);
   }
 
-  async openRecordWindow(recording_id:number, autoplay?:{
+  async openRecordWindow(macro_id:number, autoplay?:{
     onOrAfter: Timestamp,
     before: Timestamp,
   }) {
@@ -367,7 +367,7 @@ class RendererBudgetFile implements IBudgetFile {
         autoplay.before = ts2db(autoplay.before);
         autoplay.onOrAfter = ts2db(autoplay.onOrAfter);
       }
-      await this.callInMain('openRecordWindow', recording_id, autoplay) 
+      await this.callInMain('openRecordWindow', macro_id, autoplay) 
     } catch(err) {
       log.error(err.stack)
       log.error(err);

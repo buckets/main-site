@@ -104,10 +104,12 @@ export class DBStore implements IStore {
 
     // upgrade database
     try {
+      log.info('Doing database migrations');
       await this._db.migrate({
         migrationsPath: Path.join(APP_ROOT, 'migrations'),
-      })  
+      })
     } catch(err) {
+      log.error('Error during database migrations');
       log.error(err.stack);
       throw err;
     }
