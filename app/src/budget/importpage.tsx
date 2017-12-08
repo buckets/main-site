@@ -5,7 +5,7 @@ import { shell } from 'electron'
 import { makeToast } from './toast'
 import { Account, UnknownAccount } from '../models/account'
 import { Connection } from '../models/simplefin'
-import { BankRecording } from '../models/bankrecording'
+import { BankMacro } from '../models/bankmacro'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
@@ -116,12 +116,12 @@ export class ImportPage extends React.Component<{
       </div>
     }
 
-    let recordings;
-    if (Object.keys(appstate.bankrecordings).length) {
-      recordings = <div>
+    let macros;
+    if (Object.keys(appstate.bank_macros).length) {
+      macros = <div>
         <h2>{sss('Macros')}</h2>
-        <BankRecordingList
-          recordings={Object.values(appstate.bankrecordings)}
+        <BankMacroList
+          macros={Object.values(appstate.bank_macros)}
         />
       </div>
     }
@@ -164,7 +164,7 @@ export class ImportPage extends React.Component<{
           <div className="connection-steps">{steps}</div>
           {unknown}
           {conns}
-          {recordings}
+          {macros}
 
         </div>
         <div className="padded">
@@ -177,7 +177,7 @@ export class ImportPage extends React.Component<{
               
               <button
                 className="primary"
-                onClick={this.makeNewRecording}>{sss('Create macro')}</button>
+                onClick={this.createMacro}>{sss('Create macro')}</button>
 
               <ul className="fa-ul procon">
                 <li><i className="fa-li fa fa-check" /> Private</li>
@@ -262,9 +262,9 @@ export class ImportPage extends React.Component<{
       connecting: true,
     })
   }
-  makeNewRecording = async () => {
-    let recording = await manager.store.bankrecording.add({name: sss('new macro')});
-    current_file.openRecordWindow(recording.id);
+  createMacro = async () => {
+    let macro = await manager.store.bankmacro.add({name: sss('new macro')});
+    current_file.openRecordWindow(macro.id);
   }
   connect = async () => {
     let connection;
@@ -284,8 +284,8 @@ export class ImportPage extends React.Component<{
 }
 
 
-class BankRecordingList extends React.Component<{
-  recordings: BankRecording[];
+class BankMacroList extends React.Component<{
+  macros: BankMacro[];
 }, {}> {
   render() {
     return <table className="ledger">
@@ -299,23 +299,23 @@ class BankRecordingList extends React.Component<{
         </tr>
       </thead>
       <tbody>
-        {this.props.recordings.map(recording => {
+        {this.props.macros.map(macro => {
           return <tr>
-            <td>{recording.id}</td>
+            <td>{macro.id}</td>
             <td>
               <DebouncedInput
                 blendin
-                value={recording.name}
+                value={macro.name}
                 placeholder="no name"
                 onChange={(val) => {
-                  manager.store.bankrecording.update(recording.id, {name: val});
+                  manager.store.bankmacro.update(macro.id, {name: val});
                 }}
               />
             </td>
             <td>
               <button className="icon"
                 onClick={() => {
-                  current_file.openRecordWindow(recording.id);
+                  current_file.openRecordWindow(macro.id);
                 }}>
                 <span className="fa fa-gear"></span>
               </button>
@@ -323,7 +323,7 @@ class BankRecordingList extends React.Component<{
             <td>
               <button className="icon"
                 onClick={() => {
-                  current_file.openRecordWindow(recording.id, {
+                  current_file.openRecordWindow(macro.id, {
                     onOrAfter: moment().startOf('month'),
                     before: moment().endOf('month'),
                   })
@@ -333,7 +333,7 @@ class BankRecordingList extends React.Component<{
               <Confirmer
                 first={<button className="icon"><span className="fa fa-trash"></span></button>}
                 second={<button className="delete" onClick={(ev) => {
-                  manager.store.bankrecording.delete(recording.id);
+                  manager.store.bankmacro.delete(macro.id);
                 }}>{sss('Confirm delete?')}</button>}
               />
             </td>

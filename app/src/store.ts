@@ -8,7 +8,7 @@ import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
-import { BankRecordingStore } from './models/bankrecording'
+import { BankMacroStore } from './models/bankmacro'
 
 //----------------------------------------------------------------------
 // Database objects
@@ -65,7 +65,7 @@ export interface IStore {
   buckets:BucketStore;
   connections:SimpleFINStore;
   reports:ReportStore;
-  bankrecording:BankRecordingStore;
+  bankmacro:BankMacroStore;
 }
 
 //----------------------------------------------------------------

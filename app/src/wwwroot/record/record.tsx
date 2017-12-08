@@ -5,7 +5,7 @@ import * as log from 'electron-log'
 import { Timestamp, ensureLocalMoment } from '../../time'
 import { remote } from 'electron'
 import { isObj, IStore } from '../../store'
-import { BankRecording } from '../../models/bankrecording'
+import { BankMacro } from '../../models/bankmacro'
 import { current_file } from '../../mainprocess/files'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, RecStep, isInputValue } from '../../recordlib'
@@ -427,21 +427,21 @@ class SignInPage extends React.Component<SignInPageProps, any> {
 }
 
 interface SettingsPageProps {
-  bankrecording: BankRecording;
+  bankmacro: BankMacro;
   store: IStore;
   renderer: Renderer;
 }
 class SettingsPage extends React.Component<SettingsPageProps, any> {
   render() {
-    let { bankrecording, store, renderer } = this.props;
+    let { bankmacro, store, renderer } = this.props;
     return <div className="padded">
       {sss('Recording name:')} <DebouncedInput
         type="text"
         placeholder={sss("e.g. My Bank")}
-        value={bankrecording.name}
+        value={bankmacro.name}
         onChange={val => {
           renderer.doUpdate(() => {
-            return store.bankrecording.update(bankrecording.id, {name: val})  
+            return store.bankmacro.update(bankmacro.id, {name: val})  
           })
         }}/>
     </div>
@@ -451,7 +451,7 @@ class SettingsPage extends React.Component<SettingsPageProps, any> {
 interface RecordingAppProps {
   preload: string;
   partition: string;
-  bankrecording: BankRecording;
+  bankmacro: BankMacro;
   recording: Recording;
   store: IStore;
   renderer: Renderer;
@@ -461,7 +461,7 @@ interface RecordingAppProps {
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, partition, bankrecording, recording, store, renderer, onRecordingChange, director, onLoadRecordPage } = this.props;
+    let { preload, partition, bankmacro, recording, store, renderer, onRecordingChange, director, onLoadRecordPage } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -469,7 +469,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
         <div className="app">
           <div className="nav recording-nav">
             <div>
-              <div className="label">{bankrecording.name}</div>
+              <div className="label">{bankmacro.name}</div>
               <Link relative to="/settings" exactMatchClass="selected"><span>{sss('Settings')}</span></Link>
               <Link relative to="/signin" exactMatchClass="selected"><span>{sss('Sign in')}</span></Link>
               <Link relative to="/record" exactMatchClass="selected"><span>{sss('Record')}</span></Link>
@@ -480,7 +480,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
               <Switch>
                 <Route path="/settings">
                   <SettingsPage
-                    bankrecording={bankrecording}
+                    bankmacro={bankmacro}
                     store={store}
                     renderer={renderer}
                   />
@@ -513,7 +513,7 @@ export async function start(args:{
     room:string,
     container:HTMLElement,
     preload_url:string,
-    recording_id:number,
+    macro_id:number,
     partition:string,
     autoplay?: {
       onOrAfter: Timestamp,
@@ -523,14 +523,14 @@ export async function start(args:{
   const renderer = new Renderer();
   
   let store = current_file.store;
-  let BANKRECORDING = await store.bankrecording.get(args.recording_id);
+  let BANKMACRO = await store.bankmacro.get(args.macro_id);
   let recording = null
 
   // attempt the password 3 times.
   let i = 0;
   while (true) {
     try {
-      let plaintext = await store.bankrecording.decryptBankRecording(BANKRECORDING);
+      let plaintext = await store.bankmacro.decryptRecording(BANKMACRO);
       recording = plaintext.recording;
       break;
     } catch(err) {
@@ -553,7 +553,7 @@ export async function start(args:{
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
     return <RecordingApp
       director={director}
-      bankrecording={BANKRECORDING}
+      bankmacro={BANKMACRO}
       recording={recording}
       preload={args.preload_url}
       partition={args.partition}
@@ -578,16 +578,16 @@ export async function start(args:{
       }}
       onRecordingChange={(new_recording) => {
         console.log('recording change', new_recording);
-        store.bankrecording.update(args.recording_id, {
+        store.bankmacro.update(args.macro_id, {
           recording: new_recording,
         })
       }}
     />
   }, args.container);
   renderer.afterUpdate(() => {
-    let title = 'EXPERIMENTAL Buckets Recorder';
-    if (BANKRECORDING.name) {
-      title = `${BANKRECORDING.name} - ${title}`;
+    let title = sss('EXPERIMENTAL Buckets Macro Maker');
+    if (BANKMACRO.name) {
+      title = `${BANKMACRO.name} - ${title}`;
     }
     document.title = title;
   })
@@ -598,9 +598,9 @@ export async function start(args:{
 
   store.bus.obj.on(async (ev) => {
     let obj = ev.obj;
-    if (isObj(BankRecording, obj) && obj.id === args.recording_id) {
+    if (isObj(BankMacro, obj) && obj.id === args.macro_id) {
       console.log('Update of the recording this page is looking at');
-      BANKRECORDING = Object.assign(BANKRECORDING, obj);
+      BANKMACRO = Object.assign(BANKMACRO, obj);
       renderer.doUpdate();
     }
   })

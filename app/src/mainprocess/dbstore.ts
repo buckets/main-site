@@ -9,7 +9,7 @@ import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
 import { SimpleFINStore } from '../models/simplefin'
 import { ReportStore } from '../models/reports'
-import { BankRecordingStore } from '../models/bankrecording'
+import { BankMacroStore } from '../models/bankmacro'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
@@ -91,13 +91,13 @@ export class DBStore implements IStore {
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
-  readonly bankrecording:BankRecordingStore;
+  readonly bankmacro:BankMacroStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
-    this.bankrecording = new BankRecordingStore(this);
+    this.bankmacro = new BankMacroStore(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})

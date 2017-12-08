@@ -199,9 +199,9 @@ export class BudgetFile implements IBudgetFile {
     onOrAfter: Timestamp,
     before: Timestamp,
   }) {
-    const bankrecording = await this.store.bankrecording.get(recording_id);
+    const bankmacro = await this.store.bankmacro.get(recording_id);
 
-    const partition = `persist:rec-${bankrecording.uuid}`;
+    const partition = `persist:rec-${bankmacro.uuid}`;
     let sesh = session.fromPartition(partition, {cache:false});
     sesh.clearCache(() => {
 

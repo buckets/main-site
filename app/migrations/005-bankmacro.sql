@@ -1,6 +1,6 @@
 -- Up
 
-CREATE TABLE bank_recording (
+CREATE TABLE bank_macro (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uuid TEXT,

@@ -6,7 +6,7 @@ import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
-import { BankRecordingStore } from './models/bankrecording'
+import { BankMacroStore } from './models/bankmacro'
 
 //--------------------------------------------------------------------------------
 // serializing
@@ -121,14 +121,14 @@ export class RPCRendererStore implements IStore {
   readonly buckets:BucketStore;
   readonly connections:SimpleFINStore;
   readonly reports:ReportStore;
-  readonly bankrecording:BankRecordingStore;
+  readonly bankmacro:BankMacroStore;
   private caller:RPCCaller<IStore>;
   constructor(room:string, readonly bus:IBudgetBus) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.connections = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
-    this.bankrecording = new BankRecordingStore(this);
+    this.bankmacro = new BankMacroStore(this);
     this.caller = new RPCCaller(`rpc-store-${room}`);
   }
   async callRemote<T>(method, ...args):Promise<T> {

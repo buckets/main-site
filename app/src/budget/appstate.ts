@@ -8,7 +8,7 @@ import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import { Connection } from '../models/simplefin'
 import {isBetween} from '../time'
 import {Balances} from '../models/balances'
-import { BankRecording } from '../models/bankrecording'
+import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
 import { sss } from '../i18n'
 
@@ -55,8 +55,8 @@ export class AppState implements IComputedAppState {
   unknown_accounts: {
     [k: number]: UnknownAccount;
   } = {};
-  bankrecordings: {
-    [k: number]: BankRecording;
+  bank_macros: {
+    [k: number]: BankMacro;
   } = {};
   account_balances: Balances = {};
   bucket_balances: Balances = {};
@@ -350,11 +350,11 @@ export class StateManager {
       } else if (ev.event === 'delete') {
         delete this.appstate.unknown_accounts[obj.id];
       }
-    } else if (isObj(BankRecording, obj)) {
+    } else if (isObj(BankMacro, obj)) {
       if (ev.event === 'update') {
-        this.appstate.bankrecordings[obj.id] = obj;
+        this.appstate.bank_macros[obj.id] = obj;
       } else if (ev.event === 'delete') {
-        delete this.appstate.bankrecordings[obj.id];
+        delete this.appstate.bank_macros[obj.id];
       }
     }
     this.signalChange();
@@ -391,7 +391,7 @@ export class StateManager {
       this.fetchBucketTransactions(),
       this.fetchConnections(),
       this.fetchUnknownAccounts(),
-      this.fetchBankRecordings(),
+      this.fetchBankMacros(),
     ])
     this.recomputeTotals();
     return this;
@@ -495,12 +495,12 @@ export class StateManager {
       })
     })
   }
-  fetchBankRecordings() {
-    return this.store.listObjects(BankRecording)
-    .then(recordings => {
-      this.appstate.bankrecordings = {};
-      recordings.forEach(obj => {
-        this.appstate.bankrecordings[obj.id] = obj;
+  fetchBankMacros() {
+    return this.store.listObjects(BankMacro)
+    .then(macros => {
+      this.appstate.bank_macros = {};
+      macros.forEach(obj => {
+        this.appstate.bank_macros[obj.id] = obj;
       })
     })
   }

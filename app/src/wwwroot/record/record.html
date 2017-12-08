@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title data-translate>EXPERIMENTAL Buckets Recorder</title>
+  <title data-translate>EXPERIMENTAL Buckets Macro Maker</title>
   <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
   <link rel="stylesheet" type="text/css" href="../assets/style.css" />
   <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
@@ -143,12 +143,12 @@ if (autoplay_JSON) {
   autoplay = JSON.parse(autoplay_JSON);
 }
 console.log('autoplay', autoplay);
-const recording_id = parseInt(parsed_qs.recording_id);
+const macro_id = parseInt(parsed_qs.macro_id);
 start({
   room: hostname,
   container,
   preload_url,
-  recording_id,
+  macro_id,
   partition,
   autoplay,
 })

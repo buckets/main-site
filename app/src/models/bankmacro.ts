@@ -5,16 +5,16 @@ import * as reclib from '../recordlib'
 import { IncorrectPassword } from '../error'
 import { sss } from '../i18n'
 
-export class BankRecording implements IObject {
-  static type: string = 'bank_recording';
+export class BankMacro implements IObject {
+  static type: string = 'bank_macro';
   id: number;
   created: string;
-  readonly _type: string = BankRecording.type;
+  readonly _type: string = BankMacro.type;
   uuid: string;
   name: string;
   enc_recording: string;
 }
-registerClass(BankRecording);
+registerClass(BankMacro);
 
 
 async function createPassword(service:string, account:string, prompt:string):Promise<string> {
@@ -44,7 +44,7 @@ interface IUpdateArgs {
   recording?: reclib.Recording;
 }
 
-export class BankRecordingStore {
+export class BankMacroStore {
   public store:IStore;
   constructor(store:IStore) {
     this.store = store;
@@ -52,7 +52,7 @@ export class BankRecordingStore {
   async hasPassword():Promise<boolean> {
     let rows = await this.store.query(
       `SELECT enc_recording
-      FROM bank_recording
+      FROM bank_macro
       WHERE coalesce(enc_recording, '') <> ''
       LIMIT 1`, {})
     if (rows.length) {
@@ -88,7 +88,7 @@ export class BankRecordingStore {
   private async isPasswordCorrect(password:string):Promise<boolean> {
     let rows = await this.store.query(
       `SELECT enc_recording
-      FROM bank_recording
+      FROM bank_macro
       WHERE coalesce(enc_recording, '') <> ''
       LIMIT 1`, {})
     if (rows.length) {
@@ -103,46 +103,46 @@ export class BankRecordingStore {
       return true;
     }
   }
-  async _prepareForDB(args:IUpdateArgs):Promise<Partial<BankRecording>> {
+  async _prepareForDB(args:IUpdateArgs):Promise<Partial<BankMacro>> {
     let data:any = args || {};
     if (data.recording) {
       const password = await this.getPassword();  
       data.enc_recording = await encrypt(JSON.stringify(data.recording), password)
       delete data.recording;
     }
-    const partial:Partial<BankRecording> = data;
+    const partial:Partial<BankMacro> = data;
     return partial;
   }
-  async decryptBankRecording(bank_recording:BankRecording):Promise<{
+  async decryptRecording(bank_macro:BankMacro):Promise<{
     recording: reclib.Recording,
   }> {
     let recording = null;
-    if (bank_recording.enc_recording) {
+    if (bank_macro.enc_recording) {
       const password = await this.getPassword();
-      recording = reclib.Recording.parse(await decrypt(bank_recording.enc_recording, password));
+      recording = reclib.Recording.parse(await decrypt(bank_macro.enc_recording, password));
     }
     return { recording }
   }
-  async add(args:IUpdateArgs):Promise<BankRecording> {
+  async add(args:IUpdateArgs):Promise<BankMacro> {
     const data = await this._prepareForDB(args);
     if (!data.uuid) {
       data.uuid = uuid();
     }
-    return this.store.createObject(BankRecording, data);
+    return this.store.createObject(BankMacro, data);
   }
-  async list():Promise<BankRecording[]> {
-    return this.store.listObjects(BankRecording, {
+  async list():Promise<BankMacro[]> {
+    return this.store.listObjects(BankMacro, {
       order: ['name ASC', 'id'],
     })
   }
-  async get(recording_id:number):Promise<BankRecording> {
-    return this.store.getObject(BankRecording, recording_id);
+  async get(macro_id:number):Promise<BankMacro> {
+    return this.store.getObject(BankMacro, macro_id);
   }
-  async update(recording_id:number, args:IUpdateArgs):Promise<BankRecording> {
+  async update(macro_id:number, args:IUpdateArgs):Promise<BankMacro> {
     const data = await this._prepareForDB(args);
-    return this.store.updateObject(BankRecording, recording_id, data);
+    return this.store.updateObject(BankMacro, macro_id, data);
   }
-  async delete(recording_id:number):Promise<any> {
-    return this.store.deleteObject(BankRecording, recording_id);
+  async delete(macro_id:number):Promise<any> {
+    return this.store.deleteObject(BankMacro, macro_id);
   }
 }
