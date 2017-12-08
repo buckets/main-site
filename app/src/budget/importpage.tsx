@@ -9,7 +9,7 @@ import { BankRecording } from '../models/bankrecording'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
-import { DebouncedInput } from '../input'
+import { DebouncedInput, Confirmer } from '../input'
 import { current_file } from '../mainprocess/files'
 
 function startDefaultSync(appstate:AppState) {
@@ -189,7 +189,7 @@ export class ImportPage extends React.Component<{
               </ul>
 
               <p>
-                Create a macro to download transaction data directly from your bank.
+                Create a local macro to download transaction data directly from your bank.
               </p>
 
               <p>
@@ -295,6 +295,7 @@ class BankRecordingList extends React.Component<{
           <th>{sss('Name')}</th>
           <th></th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -312,23 +313,29 @@ class BankRecordingList extends React.Component<{
               />
             </td>
             <td>
-              <a className="subtle"
+              <button className="icon"
                 onClick={() => {
                   current_file.openRecordWindow(recording.id);
                 }}>
                 <span className="fa fa-gear"></span>
-              </a>
+              </button>
             </td>
             <td>
-              <a className="subtle"
+              <button className="icon"
                 onClick={() => {
                   current_file.openRecordWindow(recording.id, {
                     onOrAfter: moment().startOf('month'),
                     before: moment().endOf('month'),
                   })
-                }}>
-                <span className="fa fa-play"></span>
-              </a>
+                }}><span className="fa fa-play"></span></button>
+            </td>
+            <td>
+              <Confirmer
+                first={<button className="icon"><span className="fa fa-trash"></span></button>}
+                second={<button className="delete" onClick={(ev) => {
+                  manager.store.bankrecording.delete(recording.id);
+                }}>{sss('Confirm delete?')}</button>}
+              />
             </td>
           </tr>
         })}

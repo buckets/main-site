@@ -9,9 +9,9 @@ import { onlyRunInMain } from './rpc'
 import { APP_ROOT } from './mainprocess/globals'
 
 
-export const promptUser = onlyRunInMain((prompt:string, args?:{
+export const promptForPassword = onlyRunInMain((prompt:string, args?:{
     parent?:Electron.BrowserWindow,
-    password?:boolean,
+    error?:string,
   }):Promise<string> => {
 
   args = args || {};
@@ -23,7 +23,7 @@ export const promptUser = onlyRunInMain((prompt:string, args?:{
       minWidth: 350,
       width: 350,
       minHeight: 100,
-      height: 120,
+      height: 140,
     };
     if (args.parent) {
       opts.parent = args.parent;
@@ -48,9 +48,8 @@ export const promptUser = onlyRunInMain((prompt:string, args?:{
     let qs:any = {
       prompt,
       key: prompt_key,
-    }
-    if (args.password) {
-      qs.hideinput = 'yes';
+      hideinput: 'yes',
+      error: args.error,
     }
     path = `file://${path}?${querystring.stringify(qs)}`;
     win.loadURL(path);
@@ -75,11 +74,13 @@ export const cachePassword = onlyRunInMain(function(service:string, account:stri
   }, CACHE_TIME);
 });
 
-/** Get a password from a cache, the OS keychain or optionally by prompting the user.
+/**
+  Get a password from a cache, the OS keychain or optionally by prompting the user.
 */
 export const getPassword = onlyRunInMain(async function getPassword(service:string, account:string, args?:{
   prompt?:string,
   no_cache?:boolean,
+  error?:string,
 }):Promise<string> {
   args = args || {};
   const cache_key = `${service}:${account}`;
@@ -94,14 +95,16 @@ export const getPassword = onlyRunInMain(async function getPassword(service:stri
   }
   
   // try the OS keychain
-  pw = await keytar.getPassword(service, account)
-  if (pw !== null) {
-    return pw
-  }
+  // pw = await keytar.getPassword(service, account)
+  // if (pw !== null) {
+  //   return pw
+  // }
 
   // try the user
   if (args.prompt) {
-    pw = await promptUser(args.prompt, {password:true})
+    pw = await promptForPassword(args.prompt, {
+      error: args.error,
+    })
     if (pw) {
       return pw
     }
@@ -109,8 +112,9 @@ export const getPassword = onlyRunInMain(async function getPassword(service:stri
   throw new Error('No password available')
 });
 
-/** Save a password in the OS keychain.
-*/
+/**
+    Save a password in the OS keychain.
+ */
 export async function savePassword(service:string, account:string, password:string):Promise<void> {
   await keytar.setPassword(service, account, password)
 }

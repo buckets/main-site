@@ -3,6 +3,7 @@ import { IObject, IStore, registerClass } from '../store'
 import { encrypt, decrypt, getPassword, cachePassword } from '../crypto'
 import * as reclib from '../recordlib'
 import { IncorrectPassword } from '../error'
+import { sss } from '../i18n'
 
 export class BankRecording implements IObject {
   static type: string = 'bank_recording';
@@ -16,6 +17,28 @@ export class BankRecording implements IObject {
 registerClass(BankRecording);
 
 
+async function createPassword(service:string, account:string, prompt:string):Promise<string> {
+  let error;
+  for (var i = 0; i < 3; i++) {
+    let p1 = await getPassword(service, account, {
+      prompt: prompt,
+      no_cache: true,
+      error: error,
+    });
+    let p2 = await getPassword(service, account, {
+      prompt: sss('Confirm password:'),
+      no_cache: true,
+    })
+    if (p1 === p2) {
+      return p1;
+    } else {
+      error = sss('Passwords did not match');
+    }
+  }
+  throw new Error("Passwords didn't match");
+}
+
+
 interface IUpdateArgs {
   name?: string;
   recording?: reclib.Recording;
@@ -26,21 +49,41 @@ export class BankRecordingStore {
   constructor(store:IStore) {
     this.store = store;
   }
+  async hasPassword():Promise<boolean> {
+    let rows = await this.store.query(
+      `SELECT enc_recording
+      FROM bank_recording
+      WHERE coalesce(enc_recording, '') <> ''
+      LIMIT 1`, {})
+    if (rows.length) {
+      return true
+    } else {
+      return false
+    }
+  }
   async getPassword():Promise<string> {
     const service = 'buckets.encryption';
     const account = 'encryption';
     // XXX when you decide to store in the OS keychain, change
     // these service and account values to something unique
     // to the budget file
-    let password = await getPassword(service, account, {
-      prompt: 'Budget password:',
-    });
-    if (await this.isPasswordCorrect(password)) {
-      cachePassword(service, account, password);
+    if (! await this.hasPassword() ) {
+      // No password set yet
+      let password = await createPassword(service, account, sss('Create budget password:'));
+      await cachePassword(service, account, password);
+      return password;
     } else {
-      throw new IncorrectPassword('Incorrect password');
+      // Already have a set password
+      let password = await getPassword(service, account, {
+        prompt: 'Budget password:',
+      });
+      if (await this.isPasswordCorrect(password)) {
+        await cachePassword(service, account, password);
+      } else {
+        throw new IncorrectPassword('Incorrect password');
+      }
+      return password;
     }
-    return password;
   }
   private async isPasswordCorrect(password:string):Promise<boolean> {
     let rows = await this.store.query(
@@ -73,9 +116,9 @@ export class BankRecordingStore {
   async decryptBankRecording(bank_recording:BankRecording):Promise<{
     recording: reclib.Recording,
   }> {
-    const password = await this.getPassword();
     let recording = null;
     if (bank_recording.enc_recording) {
+      const password = await this.getPassword();
       recording = reclib.Recording.parse(await decrypt(bank_recording.enc_recording, password));
     }
     return { recording }
@@ -98,5 +141,8 @@ export class BankRecordingStore {
   async update(recording_id:number, args:IUpdateArgs):Promise<BankRecording> {
     const data = await this._prepareForDB(args);
     return this.store.updateObject(BankRecording, recording_id, data);
+  }
+  async delete(recording_id:number):Promise<any> {
+    return this.store.deleteObject(BankRecording, recording_id);
   }
 }

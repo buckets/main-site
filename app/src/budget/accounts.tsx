@@ -177,6 +177,6 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
     manager.store.accounts.add(sss('default account name', 'Savings'));
   }
   createConnection = () => {
-    setPath('/connections')
+    setPath('/import')
   }
 }

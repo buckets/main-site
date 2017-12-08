@@ -864,10 +864,16 @@ button.primary {
   color: white;
   border-color: var(--darker-blue);
 }
-button.delete {
-  background-color: var(--red);
-  color: white;
-  border-color: var(--darker-red);
+button.icon {
+  background-color: transparent;
+  border-color: transparent;
+  font-size: 0.9rem;
+  margin: 0;
+  width: 1.4rem;
+  height: 1.5rem;
+  line-height: 1rem;
+  padding: 0;
+  text-align: center;
 }
 button:hover {
   background-color: var(--yellow);
@@ -888,6 +894,14 @@ button[disabled]:hover {
   background-color: var(--lightest-grey);
   border-color: var(--lighter-grey);
   cursor: initial;
+}
+button.delete {
+  background-color: var(--red);
+  color: white;
+  border-color: var(--darker-red);
+}
+button.delete:hover {
+  background-color: var(--darker-red);
 }
 
 
