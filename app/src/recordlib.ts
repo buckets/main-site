@@ -3,6 +3,8 @@ import {ipcRenderer} from 'electron'
 import { EventSource } from './events'
 import { getBounds, IBounds } from './position'
 
+export class DoublePlayError extends Error {}
+
 
 //-----------------------------------------------------------
 // RPC
@@ -36,10 +38,17 @@ export class RPC {
     Object.assign(this.handlers, handlers);
   }
   call<T>(method:string, params?:object):Promise<T> {
+    log.debug('rpc.call', method, params);
     return new Promise<T>((resolve, reject) => {
       let rpcid = this.nextid++;
       this.pending[rpcid] = {resolve, reject}
       this.send(RPC.CALL_CHAN, {rpcid, method, params});
+    }).then(response => {
+      log.debug('rpc.call response', response);
+      return response;
+    }).catch(err => {
+      log.error('rpc.call error', err);
+      throw err;
     })
   }
   private sendResult(rpcid:number, result:any, error:any) {
@@ -121,7 +130,7 @@ function describeElement(el:HTMLElement):string {
   let tagName = el.tagName.toLowerCase();
   if (tagName === 'input' || tagName === 'select') {
     
-  } else if (tagName === 'a') {
+  } else if (tagName === 'a' && el.innerText) {
     return el.innerText;
   }
   let name = el.getAttribute('name');
@@ -140,7 +149,7 @@ export function identifyElement(el:HTMLElement):UniqueElementID {
   let id = el.getAttribute('id');
   let name = el.getAttribute('name');
   let className = el.getAttribute('class');
-  let type= el.getAttribute('type');
+  let type = el.getAttribute('type');
 
   if (id) {
     xpaths.push(`//${tagName}[@id="${escapeQuote(id)}"]`);
@@ -162,10 +171,20 @@ export function identifyElement(el:HTMLElement):UniqueElementID {
   }
 
   xpaths = xpaths.filter(isXpathUnique);
-  
-  if (!xpaths.length) {
-    xpaths.push(xpathFromRoot(el));  
+
+  // Try all the attributes
+  if (!xpaths.length && el.hasAttributes()) {
+    let attrs = Array.from(el.attributes);
+    for (let i = 0; i < attrs.length; i++) {
+      let attr = attrs[i];
+      xpaths.push(`//${tagName}[@${attr.name}="${escapeQuote(attr.value)}"]`)
+    }
   }
+
+  // Map it from the root
+  xpaths.push(xpathFromRoot(el));
+
+  xpaths = xpaths.filter(isXpathUnique);
   return {xpaths};
 }
 
@@ -204,10 +223,15 @@ function xpathFromRoot(el:HTMLElement, root?:HTMLElement):string {
 }
 
 function isXpathUnique(xpath:string):boolean {
-  let iter = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null);
-  iter.iterateNext();
-  let second = iter.iterateNext();
-  return second === null;
+  try {
+    let iter = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null);
+    iter.iterateNext();
+    let second = iter.iterateNext();
+    return second === null;  
+  } catch(err) {
+    console.log("isXpathUnique error", err);
+    return false;
+  }
 }
 
 // findElement
@@ -333,6 +357,17 @@ export class Recording {
       return;
     }
 
+    // swap Enter change
+    if (isChangeStep(step)) {
+      let last_step = this.steps.slice(-1)[0];
+      if (isKeyPressStep(last_step) && last_step.keys[0].key === 'Enter') {
+        // stick the change before the Enter
+        this.steps.splice(this.steps.length-1, 0, step);
+        return;
+      }
+    }
+
+    // combine keypresses into a single step
     if (isKeyPressStep(step)) {
       let last_step = this.steps.slice(-1)[0];
       if (isKeyPressStep(last_step)) {
@@ -346,6 +381,9 @@ export class Recording {
     }
     // otherwise just add it
     this.steps.push(step);
+  }
+  clear() {
+    this.steps = [];
   }
   stringify():string {
     return JSON.stringify({
@@ -385,6 +423,18 @@ export class Recorder {
           return null;
         }
       },
+      'rec:elementPresent': (params:{element:UniqueElementID}) => {
+        try {
+          let elem = findElement(params.element);
+          if (elem === null) {
+            return false;
+          } else {
+            return true;
+          }
+        } catch(err) {
+          return false;
+        }
+      },
       'rec:do-focus': (step:FocusStep) => {
         let { element } = step;
         let elem = findElement(element);
@@ -404,15 +454,12 @@ export class Recorder {
       },
     })
     ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
-      log.debug('file downloaded', localpath, filename, mimetype);
+      log.info('file downloaded', localpath, filename, mimetype);
       let step:DownloadStep = {
         type: 'download',
       }
       this.rpc.call('rec:step', step);
     })
-    // ipcRenderer.on('buckets:will-download', (ev, {filename, mimetype}) => {
-    //   log.debug('will download', filename, mimetype);
-    // })
 
     function isInputElement(elem:HTMLElement):boolean {
       switch (elem.tagName) {
@@ -448,11 +495,14 @@ export class Recorder {
     }
 
     window.addEventListener('change', (ev:any) => {
+      console.log('window.change');
       let target = ev.target;
+      if (target.tagName === undefined) {
+        return;
+      }
       let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
       let input_type = target.getAttribute('type');
       let value = target.value;
-      log.debug('change', target, 'value', value);
       if (input_type === 'checkbox') {
         value = target.checked;
         displayValue = value;
@@ -472,8 +522,11 @@ export class Recorder {
     } as any)
 
     window.addEventListener('focus', (ev:any) => {
+      console.log('window.focus');
+      if (ev.target.tagName === undefined) {
+        return;
+      }
       const desc = describeElement(ev.target)
-      log.debug('focus', desc)
       let step:FocusStep = {
         type: 'focus',
         desc: desc,
@@ -486,6 +539,10 @@ export class Recorder {
     } as any)
 
     window.addEventListener('click', (ev:any) => {
+      console.log('window.click');
+      if (ev.target.tagName === undefined) {
+        return;
+      }
       if (shouldRecordFocusInsteadOfClick(ev.target)) {
         let step:FocusStep = {
           type: 'focus',
@@ -569,45 +626,6 @@ export class Recorder {
         }]
       }
       this.rpc.call('rec:step', step);
-
-      // if (elem.tagName)
-      // switch (ev.key) {
-      //   case 'Enter': {
-      //     if (elem.tagName === 'TEXTAREA') {
-      //       input_delimiter = false;
-      //     } else {
-      //       input_delimiter = true;
-      //     }
-      //     break;
-      //   }
-      //   case 'Tab': {
-      //     input_delimiter = true;
-      //     break;
-      //   }
-      //   case 'Dead':
-      //   case 'Alt':
-      //   case 'Control':
-      //   case 'Shift':
-      //   case 'Meta': {
-      //     // Don't send this
-      //     return;
-      //   }
-      // }
-      // if (isChangeOnlyElement(elem) && !input_delimiter) {
-      //   // don't send keypresses for change-only elements
-      //   return;
-      // }
-      // let step:KeyPressStep = {
-      //   type: 'keypress',
-      //   desc: describeElement(ev.target as HTMLElement),
-      //   element: identifyElement(ev.target as HTMLElement),
-      //   keys: [{
-      //     key: ev.key,
-      //     modifiers: eventToKeyModifiers(ev),
-      //     input_delimiter,
-      //   }]
-      // }
-      // this.rpc.call('rec:step', step);
     }, {
       capture: true,
       passive: true,
@@ -636,6 +654,9 @@ export class RecordingDirector<T> {
   public playback_delay:number = 120;
   public typing_delay:number = 20;
 
+  private busy:boolean = false;
+  private keepplaying:boolean = true;
+
   private rpc:RPC;
   private pages_loaded:Array<{
     title: string;
@@ -660,6 +681,14 @@ export class RecordingDirector<T> {
     args = args || {};
     this.current_recording = args.recording || new Recording();
   }
+  clear() {
+    this.current_recording.clear();
+    this.step_index = 0;
+    this.busy = false;
+    this.keepplaying = true;
+    this.pages_loaded = [];
+    this.emitChange();
+  }
   emitChange() {
     this.events.change.emit(true);
   }
@@ -668,6 +697,7 @@ export class RecordingDirector<T> {
     this.rpc = inHostRPC(webview);
     this.rpc.addHandlers({
       'rec:step': (step:RecStep) => {
+        console.log('rec:step', step, this.state);
         if (this.state === 'recording') {
           this.current_recording.addStep(step);
           this.emitChange();
@@ -703,11 +733,15 @@ export class RecordingDirector<T> {
     return this._state;
   }
   setURL(url:string) {
-    this.current_recording.steps.unshift({
+    let step:NavigateStep = {
       type: 'navigate',
-      desc: '',
       url,
-    });
+    }
+    if (this.current_recording.steps.length) {
+      this.current_recording.addStep(step)
+    } else {
+      this.current_recording.steps.unshift(step);
+    }
     this.emitChange();
   }
   startRecording() {
@@ -718,13 +752,33 @@ export class RecordingDirector<T> {
     this._state = 'idle';
     this.emitChange();
   }
+  rewind() {
+    this.step_index = 0;
+    this.emitChange();
+  }
+
+  getCurrentStep():RecStep {
+    try {
+      return this.current_recording.steps[this.step_index];
+    } catch(err) {
+      return null;
+    }
+  }
 
   // playback
   async play(lookUpValue:(options:T)=>any) {
     this.step_index = 0;
+    return this.resume(lookUpValue);
+  }
+  pausePlayback() {
+    this.keepplaying = false;
+  }
+  async resume(lookUpValue:(options:T)=>any) {
     this._state = 'playing';
+    this.keepplaying = true;
+    this.emitChange();
 
-    while(true) {
+    while(this.keepplaying) {
       if (!await this.playNextStep(lookUpValue)) {
         break;
       } else {
@@ -732,14 +786,20 @@ export class RecordingDirector<T> {
       }
     }
     this._state = 'idle';
+    this.emitChange();
   }
   async playNextStep(lookUpValue?:(options:T)=>any) {
+    if (this.busy) {
+      throw new DoublePlayError('Attemped playing of step while busy');
+    }
+    this.busy = true;
     let steps = this.current_recording.steps;
     if (this.step_index === steps.length) {
+      this.busy = false;
       return false;
     }
     let step = steps[this.step_index];
-    log.debug(`Doing step ${this.step_index}: ${step.type}`);
+    log.info(`Doing step ${this.step_index}: ${step.type}`);
     
     this.events.step_started.emit({step_number: this.step_index});
     
@@ -750,6 +810,7 @@ export class RecordingDirector<T> {
     } catch(err) {
       log.error('Error doing step', this.step_index, err.toString())
       log.error(err.stack);
+      this.busy = false;
       throw err;
     }
     
@@ -761,9 +822,13 @@ export class RecordingDirector<T> {
     this.events.step_finished.emit({step_number: this.step_index});
 
     this.step_index++;
+    this.busy = false;
     return true;
   }
   async doStep(step:RecStep, lookUpValue:(options:T)=>any) {
+    if ((step as any).element !== undefined) {
+      await this._waitForElement((step as any).element);
+    }
     switch (step.type) {
       case 'navigate': {
         return this._doNavigateStep(step);
@@ -790,6 +855,24 @@ export class RecordingDirector<T> {
         throw new Error(`Unknown step type`);
       }
     }
+  }
+  /**
+   *  Wait for an element to exist on the page
+   */
+  private async _waitForElement(elem:UniqueElementID, timeout:number=30000):Promise<boolean> {
+    let keepgoing = true;
+    let timer = setTimeout(() => {
+      keepgoing = false;
+    }, timeout);
+    while (keepgoing) {
+      if (await this.rpc.call<boolean>('rec:elementPresent', {
+        element: elem,
+      })) {
+        clearTimeout(timer);
+        return true;
+      }
+    }
+    return false;
   }
   private async _doNavigateStep(step:NavigateStep) {
     return new Promise((resolve, reject) => {

@@ -263,9 +263,7 @@ export class ImportPage extends React.Component<{
     })
   }
   createMacro = async () => {
-    let macro = await manager.store.bankmacro.add({name: sss('new macro')});
-    console.log('new macro', macro);
-    console.log('macro id', macro.id);
+    let macro = await manager.store.bankmacro.add({name: sss('')});
     current_file.openRecordWindow(macro.id);
   }
   connect = async () => {
@@ -325,9 +323,19 @@ class BankMacroList extends React.Component<{
             <td>
               <button className="icon"
                 onClick={() => {
+                  let { onOrAfter, before } = manager.appstate.viewDateRange;
+                  let today = moment();
+                  if (today.isBefore(onOrAfter)) {
+                    // We're in the future
+                    onOrAfter = today.clone().startOf('month');
+                  }
+                  before = onOrAfter.clone().add(1, 'month');
+                  if (today.isBefore(before)) {
+                    before = today.clone();
+                  }
                   current_file.openRecordWindow(macro.id, {
-                    onOrAfter: moment().startOf('month'),
-                    before: moment().endOf('month'),
+                    onOrAfter,
+                    before,
                   })
                 }}><span className="fa fa-play"></span></button>
             </td>

@@ -26,13 +26,37 @@
     .record-page .recording-pane {
       flex-shrink: 0;
       width: 15rem;
+      height: 100%;
       font-size: .8rem;
       border-left: 1px solid var(--lighter-grey);
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .recording-state {
+      width: 100%;
+      font-size: 1rem;
+      padding: .5rem;
+      background-color: var(--lighter-grey);
+      font-weight: bold;
+      text-align: center;
+    }
+    .recording-state.recording {
+      color: white;
+      background-color: var(--red);
+    }
+    .recording-state.playing {
+      background-color: var(--darker-green);
+      color: white;
     }
     .recording-pane .controls {
       padding: .5rem;
       text-align: center;
+      flex-shrink: 0;
+    }
+    .recording-pane .steps {
+      overflow-y: auto;
+      flex-grow: 1;
     }
     .recording-pane .step {
       padding: .5rem .5rem;
@@ -45,18 +69,16 @@
     .recording-pane .step.running {
       background-color: var(--hover-highlight-color);
     }
-    .recording-pane .step-question {
-      margin-top: .5rem;
-      padding: .5rem .5rem 0;
-      border: 1px solid var(--lighter-grey);
-      border-width: 1px 0 0;
+    table.step-params {
+
     }
-    .recording-pane .step-value {
-      background: var(--lightest-grey);
-      border-radius: 2px;
-      padding: .2rem;
-      display: block;
-      margin: .2rem 0;
+    table.step-params th,
+    table.step-params td {
+    }
+    table.step-params th {
+      font-weight: bold;
+      padding: 0 .5rem;
+      text-align: right;
     }
     ol, ul {
       margin-left: 1rem;
@@ -142,7 +164,6 @@ let autoplay;
 if (autoplay_JSON) {
   autoplay = JSON.parse(autoplay_JSON);
 }
-console.log('autoplay', autoplay);
 const macro_id = parseInt(parsed_qs.macro_id);
 start({
   room: hostname,

@@ -1,12 +1,16 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 Recording:
-  ☐ Command-A delete
+  ✔ Command-A delete @done (17-12-08 12:10)
   ☐ Copy and Paste should be captured correctly
-    ☐ macOS
+    ✔ macOS @done (17-12-08 12:10)
     ☐ Windows
     ☐ Linux
   ☐ Command+L should focus the URL-selector
-  ☐ When creating a password for the first time, confirm the password
+  ☐ Let people type in URL without http://
+  ☐ Make all icon buttons into class="icon" <buttons>
+  ☐ Add thorough, debuggable logging
+  ☐ Test all of your own banks
+  ☐ Test Every Button
 
 Bugs:
 
@@ -54,6 +58,8 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Don't show black dots on click @done (17-12-08 12:09) @project(Recording)
+ ✔ When creating a password for the first time, confirm the password @done (17-12-08 09:57) @project(Recording)
  ✘ Partitions are stored in ~/Library/Application Support/Buckets/Partitions on the mac. @cancelled (17-12-08 08:04) @project(Recording)
  ✘ If that works reply to: @cancelled (17-12-08 08:04) @project(Recording)
   https://discuss.atom.io/t/how-can-i-persist-sessions-across-electron-app-close/36223

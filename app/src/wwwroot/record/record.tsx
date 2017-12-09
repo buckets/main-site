@@ -1,17 +1,17 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import * as cx from 'classnames'
-import * as log from 'electron-log'
 import { Timestamp, ensureLocalMoment } from '../../time'
 import { remote } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankMacro } from '../../models/bankmacro'
 import { current_file } from '../../mainprocess/files'
+import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector, Recording, ChangeStep, RecStep, isInputValue } from '../../recordlib'
+import { RecordingDirector, Recording, ChangeStep, RecStep } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
-import { DebouncedInput } from '../../input'
+import { DebouncedInput, Confirmer } from '../../input'
 import { IncorrectPassword } from '../../error'
 
 
@@ -159,51 +159,82 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
 
     let variation;
     let original;
-    if (options && !options.key) {
-      original = <span className="original-value">({value})</span>;
+    if (options.key) {
+      original = <tr>
+        <th>Original:</th>
+        <td>{value}</td>
+      </tr>;
     }
     if (options.key === "start-date" || options.key === "end-date") {
-      variation = <select
-          defaultValue=""
-          onChange={ev => {
-            options.variation = ev.target.value;
-            step.options = options;
-            director.emitChange();
-          }}
-        >
-        <option value="">{value}</option>
-        <option>YYYY-MM-DD</option>
-        <option>YYYY-DD-MM</option>
-        <option>M/D/YYYY</option>
-        <option>MM/DD/YYYY</option>
-        <option>D/M/YYYY</option>
-        <option>DD/MM/YYYY</option>
-        <option>D</option>
-        <option>DD</option>
-        <option>M</option>
-        <option>MM</option>
-        <option>MMM</option>
-        <option>YY</option>
-        <option>YYYY</option>
-      </select>
+      let example;
+      if (options.variation) {
+        try {
+          example = <tr>
+            <th></th>
+            <td>e.g. {moment().format(options.variation)}</td>
+          </tr>
+        } catch(err) {
+        }  
+      }
+      variation = <tbody>
+        <tr>
+            <th>Format:</th>
+            <td>
+              <select
+                defaultValue=""
+                value={options.variation}
+                onChange={ev => {
+                  options.variation = ev.target.value;
+                  step.options = options;
+                  console.log('step.options changed to', step.options);
+                  director.emitChange();
+                }}
+              >
+                <option value="">---</option>
+                <option>YYYY-MM-DD</option>
+                <option>YYYY-DD-MM</option>
+                <option>M/D/YYYY</option>
+                <option>MM/DD/YYYY</option>
+                <option>D/M/YYYY</option>
+                <option>DD/MM/YYYY</option>
+                <option>MMM DD, YYYY</option>
+                <option>D</option>
+                <option>DD</option>
+                <option>M</option>
+                <option>MM</option>
+                <option>MMM</option>
+                <option>YY</option>
+                <option>YYYY</option>
+              </select>
+              
+          </td>
+        </tr>
+        {example}
+      </tbody>
     }
 
-    return <span>
-      <select onChange={ev => {
-        console.log('changed', ev.target.value);
-        if (!step.options) {
-          step.options = {};
-        }
-        (step.options as ValueOptions).key = ev.target.value as any;
-        director.emitChange();
-      }} defaultValue={defaultValue}>
-        <option value="">{value}</option>
-        <option value="start-date">Start date...</option>
-        <option value="end-date">End date...</option>
-      </select>
-      {original}
+    return <table className="step-params">
+      <tbody>
+        <tr>
+          <th>Value:</th>
+          <td>
+            <select onChange={ev => {
+              if (!step.options) {
+                step.options = {};
+              }
+              (step.options as ValueOptions).key = ev.target.value as any;
+              director.emitChange();
+            }} defaultValue={defaultValue}>
+              <option value="">{value}</option>
+              <option value="start-date">Start date</option>
+              <option value="end-date">End date</option>
+            </select>
+          </td>
+        </tr>
+        {original}
+      </tbody>
       {variation}
-    </span>
+    </table>
   }
 }
 
@@ -211,11 +242,33 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
 interface RecordingStepProps {
   step: RecStep;
   director: RecordingDirector<ValueOptions>;
+  showall: boolean;
+  showdebug: boolean;
 }
 class RecordingStep extends React.Component<RecordingStepProps, {
 }> {
   render() {
-    let { step, director } = this.props;
+    let { step, director, showall, showdebug } = this.props;
+    let show = false;
+    let is_current_step = director.getCurrentStep() === step
+    if (showall) {
+      show = true;
+    } else {
+      if (is_current_step) {
+        show = true;
+      } else {
+        switch (step.type) {
+          case 'navigate':
+          case 'change':
+          case 'download':
+            show = true;
+            break;
+        }
+      }
+    }
+    if (!show) {
+      return null;
+    }
     let guts;
     switch (step.type) {
       case 'navigate': {
@@ -225,14 +278,13 @@ class RecordingStep extends React.Component<RecordingStepProps, {
         break;
       }
       case 'change': {
-        console.log('change', step);
         let value = step.displayValue || step.value;
         if (value === false) {
           value = sss('off');
         } else if (value === true) {
           value = sss('on');
         }
-        guts = <div>Change {step.desc} to
+        guts = <div>Change {step.desc}
           <StepValueSelect
             value={value}
             step={step}
@@ -242,7 +294,7 @@ class RecordingStep extends React.Component<RecordingStepProps, {
         break;
       }
       case 'focus': {
-        guts = <div>Focus on {step.desc}</div>
+        guts = <div>Focus on {step.desc}</div>  
         break;
       }
       case 'click': {
@@ -250,27 +302,31 @@ class RecordingStep extends React.Component<RecordingStepProps, {
         break;
       }
       case 'keypress': {
-        console.log("keypress", step);
         let value = step.keys
           .map(x => x.key)
-          .filter(isInputValue)
+          // .filter(isInputValue)
           .join('');
-        if (!value) {
-          break;
-        }
-        guts = <div>Change {step.desc} to {value}</div>
+        guts = <div>Type {value}</div>
         break;
       }
       case 'download': {
-        guts = <div>download a file</div>
+        guts = <div>Download a file</div>
+        break;
+      }
+      case 'pageload': {
+        guts = <div>Wait for page to load</div>
         break;
       }
     }
-    if (guts) {
+    let debug;
+    if (showdebug) {
+      debug = <pre>{JSON.stringify(step, null, 2)}</pre>
+    }
+    if (guts || showdebug) {
       return <div className={cx("step", {
-        'running': step === director.current_recording.steps[director.step_index],
+        'running': is_current_step,
       })}>
-        {guts}
+        {guts}{debug}
       </div>
     } else {
       return null;
@@ -292,11 +348,15 @@ interface RecordPageProps {
 */
 class RecordPage extends React.Component<RecordPageProps, {
   recording: Recording;
+  showallsteps: boolean;
+  debugmode: boolean;
 }> {
   constructor(props:RecordPageProps) {
     super(props);
     this.state = {
       recording: props.recording,
+      showallsteps: false,
+      debugmode: false,
     };
   }
   componentWillReceiveProps(nextProps) {
@@ -324,7 +384,8 @@ class RecordPage extends React.Component<RecordPageProps, {
   render() {
     let { preload, partition, director, onRecordingChange } = this.props;
     let stop_button = <button
-        disabled={director.state !== 'recording'}
+        className="icon"
+        disabled={director.state === 'idle'}
         onClick={() => {
           director.pauseRecording();
         }}>
@@ -342,10 +403,45 @@ class RecordPage extends React.Component<RecordPageProps, {
       return <RecordingStep
         key={i}
         director={director}
+        showall={this.state.showallsteps}
+        showdebug={this.state.debugmode}
         step={step}
       />
     })
     .filter(x => x);
+
+    let dummyLookup = (options:ValueOptions) => {
+      let today = moment();
+      if (options.key === 'start-date') {
+        let date = today.subtract(2, 'months').startOf('month');
+        return date.format(options.variation);
+      } else if (options.key === 'end-date') {
+        let date = today;
+        return date.format(options.variation);
+      }
+    }
+
+    let recording_state;
+    switch (director.state) {
+      case 'idle': {
+        recording_state = <div className="recording-state">
+          {sss('Paused')}
+        </div>
+        break;
+      }
+      case 'recording': {
+        recording_state = <div className="recording-state recording">
+          {sss('Recording')}
+        </div>
+        break;
+      }
+      case 'playing': {
+        recording_state = <div className="recording-state playing">
+          {sss('Playing')}
+        </div>
+        break;
+      }
+    }
 
     return <div className="record-page">
       <div className="browser-wrap">
@@ -354,8 +450,9 @@ class RecordPage extends React.Component<RecordPageProps, {
           <ol>
             <li>Sign in to your bank</li>
             <li>For each account, download an OFX/QFX making sure to <b>adjust both the start and end date range</b>.</li>
+            <li>Sign out</li>
             <li>Click {stop_button}</li>
-            <li>Fill out the form on the right</li>
+            <li>Adjust each date field in the right panel</li>
             <li>Click {save_button}</li>
           </ol>
         </div>
@@ -369,33 +466,71 @@ class RecordPage extends React.Component<RecordPageProps, {
         />
       </div>
       <div className="recording-pane">
+        {recording_state}
         <div className="controls">
           <button
+            className="icon"
             disabled={director.state === 'recording'}
             onClick={() => {
               director.startRecording();
             }}
             ><span className="fa fa-circle red" /></button>
-          {stop_button}
           <button
+            className="icon"
             disabled={director.state === 'recording'}
             onClick={() => {
-              director.play((options:ValueOptions) => {
-                let today = moment();
-                if (options.key === 'start-date') {
-                  let date = today.subtract(2, 'months').startOf('month');
-                  return date.format(options.variation);
-                } else if (options.key === 'end-date') {
-                  let date = today;
-                  return date.format(options.variation);
-                }
-              });
+              director.pauseRecording();
+              director.rewind();
+            }}>
+            <span className="fa fa-fast-backward" />
+          </button>
+          {stop_button}
+          <button
+            className="icon"
+            disabled={director.state === 'recording'}
+            onClick={() => {
+              director.play(dummyLookup);
             }}
           ><span className="fa fa-play" /></button>
+          <button
+            className="icon"
+            disabled={director.state === 'recording'}
+            onClick={() => {
+              director.playNextStep(dummyLookup);
+            }}>
+            <span className="fa fa-step-forward" />
+          </button>
           {save_button}
         </div>
         <div className="steps">
           {steps}
+        </div>
+        <div className="controls">
+          <div>
+            <input
+              type="checkbox"
+              checked={this.state.showallsteps}
+              onChange={(ev) => {
+                this.setState({showallsteps: ev.target.checked});
+              }}/> Show all steps
+            {IS_DEBUG ? <span>
+                <input
+                type="checkbox"
+                checked={this.state.debugmode}
+                onChange={(ev) => {
+                  this.setState({debugmode: ev.target.checked});
+                }}
+                /> Debug
+              </span> : null }
+          </div>
+          <Confirmer
+            first={<button>Delete all</button>}
+            second={<button className="delete"
+              onClick={(ev) => {
+                console.log('clearing director');
+                director.clear();
+              }}>Confirm delete</button>}
+          />
         </div>
       </div>
     </div>
@@ -435,7 +570,7 @@ class SettingsPage extends React.Component<SettingsPageProps, any> {
   render() {
     let { bankmacro, store, renderer } = this.props;
     return <div className="padded">
-      {sss('Recording name:')} <DebouncedInput
+      {sss('Macro/bank name:')} <DebouncedInput
         type="text"
         placeholder={sss("e.g. My Bank")}
         value={bankmacro.name}
@@ -524,7 +659,7 @@ export async function start(args:{
   
   let store = current_file.store;
   let BANKMACRO = await store.bankmacro.get(args.macro_id);
-  let recording = null
+  let recording:Recording = null
 
   // attempt the password 3 times.
   let i = 0;
@@ -560,9 +695,7 @@ export async function start(args:{
       store={store}
       renderer={renderer}
       onLoadRecordPage={() => {
-        log.debug('onLoadRecordPage');
         if (args.autoplay) {
-          log.debug('director.play');
           director.play((options:ValueOptions) => {
             if (options.key === 'start-date') {
               let date = ensureLocalMoment(args.autoplay.onOrAfter);
@@ -572,7 +705,8 @@ export async function start(args:{
               return date.format(options.variation);
             }
           });
-        } else {
+        } else if (!recording
+            || (recording && !recording.steps.length)) {
           director.startRecording();
         }
       }}
@@ -595,6 +729,11 @@ export async function start(args:{
   window.addEventListener('hashchange', () => {
     renderer.doUpdate();
   }, false);
+
+  // director.events.change.on(() => {
+  //   console.log('doing update');
+  //   renderer.doUpdate();
+  // })
 
   store.bus.obj.on(async (ev) => {
     let obj = ev.obj;
