@@ -6,6 +6,9 @@ Recording:
     ☐ Windows
     ☐ Linux
   ☐ Command+L should focus the URL-selector
+  ☐ Timeout when a step can't be completed.
+    ☐ Turn to paused
+    ☐ Display a message to the user
   ☐ Let people type in URL without http://
   ☐ Make all icon buttons into class="icon" <buttons>
   ☐ Add thorough, debuggable logging
