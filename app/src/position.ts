@@ -32,12 +32,11 @@ export function dimensions(elem):{h:number,w:number} {
 }
 
 export function getBounds(elem):IBounds {
-  let dims = dimensions(elem);
-  let coords = pageCoords(elem);
+  let bounding_rect = elem.getBoundingClientRect();
   return {
-    x:coords.x,
-    y:coords.y,
-    w:dims.w,
-    h:dims.h,
+    x: Math.floor(bounding_rect.left),
+    y: Math.floor(bounding_rect.top),
+    w: Math.ceil(bounding_rect.width),
+    h: Math.ceil(bounding_rect.height),
   }
 }
