@@ -1,9 +1,21 @@
-import * as log from 'electron-log'
-import {ipcRenderer} from 'electron'
+import { PrefixLogger } from './logging'
+import { ipcRenderer } from 'electron'
 import { EventSource } from './events'
 import { getBounds, IBounds } from './position'
 
 export class DoublePlayError extends Error {}
+export class TimeoutError extends Error {}
+
+const log = new PrefixLogger('[macro]');
+
+function compare(a, b) {
+  if (a < b) {
+    return -1;
+  } else if (a > b) {
+    return 1;
+  }
+  return 0;
+}
 
 
 //-----------------------------------------------------------
@@ -38,16 +50,14 @@ export class RPC {
     Object.assign(this.handlers, handlers);
   }
   call<T>(method:string, params?:object):Promise<T> {
-    log.debug('rpc.call', method, params);
     return new Promise<T>((resolve, reject) => {
       let rpcid = this.nextid++;
       this.pending[rpcid] = {resolve, reject}
       this.send(RPC.CALL_CHAN, {rpcid, method, params});
     }).then(response => {
-      log.debug('rpc.call response', response);
       return response;
     }).catch(err => {
-      log.error('rpc.call error', err);
+      log.error('rpc.call error', method, err);
       throw err;
     })
   }
@@ -146,17 +156,12 @@ export function identifyElement(el:HTMLElement):UniqueElementID {
   let xpaths:string[] = [];
 
   let tagName = el.tagName.toLowerCase();
+
   let id = el.getAttribute('id');
   let name = el.getAttribute('name');
   let className = el.getAttribute('class');
   let type = el.getAttribute('type');
 
-  if (id) {
-    xpaths.push(`//${tagName}[@id="${escapeQuote(id)}"]`);
-    if (name) {
-      xpaths.push(`//${tagName}[@id="${escapeQuote(id)}" and @name="${escapeQuote(name)}"]`);
-    }
-  }
   if (name) {
     xpaths.push(`//${tagName}[@name="${escapeQuote(name)}"]`)
     if (type) {
@@ -170,19 +175,22 @@ export function identifyElement(el:HTMLElement):UniqueElementID {
     xpaths.push(`//${tagName}[@class="${escapeQuote(className)}"]`);
   }
 
-  xpaths = xpaths.filter(isXpathUnique);
-
   // Try all the attributes
-  if (!xpaths.length && el.hasAttributes()) {
-    let attrs = Array.from(el.attributes);
-    for (let i = 0; i < attrs.length; i++) {
-      let attr = attrs[i];
-      xpaths.push(`//${tagName}[@${attr.name}="${escapeQuote(attr.value)}"]`)
-    }
+  let attrs = Array.from(el.attributes);
+  for (let i = 0; i < attrs.length; i++) {
+    let attr = attrs[i];
+    xpaths.push(`//${tagName}[@${attr.name}="${escapeQuote(attr.value)}"]`)
   }
 
   // Map it from the root
   xpaths.push(xpathFromRoot(el));
+
+  if (id) {
+    xpaths.push(`//${tagName}[@id="${escapeQuote(id)}"]`);
+    if (name) {
+      xpaths.push(`//${tagName}[@id="${escapeQuote(id)}" and @name="${escapeQuote(name)}"]`);
+    }
+  }
 
   xpaths = xpaths.filter(isXpathUnique);
   return {xpaths};
@@ -262,6 +270,11 @@ export type RecStep =
   | ChangeStep
   | DownloadStep
 
+export type TabRecStep = RecStep & TabStep;
+
+interface TabStep {
+  tab_id: number;
+}
 
 // navigate
 export interface NavigateStep {
@@ -273,7 +286,7 @@ export function isNavigateStep(x:RecStep):x is NavigateStep {
 }
 
 // keypress
-export interface KeyPressStep {
+export interface KeyPressStep  {
   type: 'keypress';
   element: UniqueElementID;
   desc: string;
@@ -289,7 +302,7 @@ export function isKeyPressStep(x:RecStep):x is KeyPressStep {
 }
 
 // click
-export interface ClickStep {
+export interface ClickStep  {
   type: 'click';
   desc: string;
   element: UniqueElementID;
@@ -305,7 +318,7 @@ export function isClickActionStep(x:RecStep):x is ClickStep {
 }
 
 // focus
-export interface FocusStep {
+export interface FocusStep  {
   type: 'focus';
   desc: string;
   element: UniqueElementID;
@@ -315,13 +328,14 @@ export function isFocusStep(x:RecStep):x is FocusStep {
 }
 
 // change
-export interface ChangeStep {
+export interface ChangeStep  {
   type: 'change';
   desc: string;
   element: UniqueElementID;
   value: any;
   selectedIndex?: number;
   displayValue?: string;
+  isPassword: boolean;
 
   // Application-specific options to be used in playback
   options?: object;
@@ -331,7 +345,7 @@ export function isChangeStep(x:RecStep):x is ChangeStep {
 }
 
 // pageload
-export interface PageLoadStep {
+export interface PageLoadStep  {
   type: 'pageload';
   url: string;
 }
@@ -340,7 +354,7 @@ export function isPageLoadStep(x:RecStep):x is PageLoadStep {
 }
 
 // download
-export interface DownloadStep {
+export interface DownloadStep  {
   type: 'download';
 }
 export function isDownloadStep(x:RecStep):x is DownloadStep {
@@ -348,20 +362,27 @@ export function isDownloadStep(x:RecStep):x is DownloadStep {
 }
 
 export class Recording {
-  public steps:Array<RecStep> = [];
+  public steps:Array<TabRecStep> = [];
 
-  addStep(step:RecStep) {
+  removeStep(step:TabRecStep) {
+    let idx = this.steps.indexOf(step);
+    this.steps.splice(idx, 1);
+  }
+
+  addStep(step:TabRecStep) {
     log.info('addStep', step.type);
     if (this.steps.length === 0) {
       this.steps.push(step)
       return;
     }
 
-    // swap Enter change
+    // swap Enter/Tab change
     if (isChangeStep(step)) {
       let last_step = this.steps.slice(-1)[0];
-      if (isKeyPressStep(last_step) && last_step.keys[0].key === 'Enter') {
-        // stick the change before the Enter
+      if (isKeyPressStep(last_step)
+        && (last_step.keys[0].key === 'Enter'
+          || last_step.keys[0].key === 'Tab')) {
+        // stick the change before the Enter/Tab
         this.steps.splice(this.steps.length-1, 0, step);
         return;
       }
@@ -408,7 +429,8 @@ export class Recording {
 export class Recorder {
   private rpc:RPC;
   constructor() {
-    log.info('webview: Recorder initialized');
+    const logger = log.child('(Recorder)')
+    logger.info('init');
     this.rpc = inWebviewRPC();
     this.rpc.addHandlers({
       'getbounds': (params:{element:UniqueElementID}) => {
@@ -441,6 +463,7 @@ export class Recorder {
         if (elem === null) {
           throw new Error('Element not found');
         }
+        elem.scrollIntoView();
         elem.focus();
       },
       'rec:do-change': ({step, value}:{step:ChangeStep, value:string}) => {
@@ -454,7 +477,7 @@ export class Recorder {
       },
     })
     ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
-      log.info('file downloaded', localpath, filename, mimetype);
+      logger.info('file downloaded', localpath, filename, mimetype);
       let step:DownloadStep = {
         type: 'download',
       }
@@ -495,7 +518,6 @@ export class Recorder {
     }
 
     window.addEventListener('change', (ev:any) => {
-      console.log('window.change');
       let target = ev.target;
       if (target.tagName === undefined) {
         return;
@@ -506,12 +528,15 @@ export class Recorder {
       if (input_type === 'checkbox') {
         value = target.checked;
         displayValue = value;
+      } else if (input_type === 'hidden') {
+        return;
       }
       let step:ChangeStep = {
         type: 'change',
         desc: describeElement(target),
         element: identifyElement(target),
         value,
+        isPassword: input_type === 'password',
         selectedIndex: target.selectedIndex,
         displayValue,
       }
@@ -522,7 +547,6 @@ export class Recorder {
     } as any)
 
     window.addEventListener('focus', (ev:any) => {
-      console.log('window.focus');
       if (ev.target.tagName === undefined) {
         return;
       }
@@ -539,7 +563,6 @@ export class Recorder {
     } as any)
 
     window.addEventListener('click', (ev:any) => {
-      console.log('window.click');
       if (ev.target.tagName === undefined) {
         return;
       }
@@ -641,14 +664,28 @@ export class Recorder {
   process.  It knows about a `<webview>` tag which it controls
   and monitors.
 */
+interface ITab {
+  id: number,
+  webview: Electron.WebviewTag,
+  rpc: RPC,
+  init_url?: string,
+  pages_loaded: Array<{
+    title: string;
+    url: string;
+  }>,
+}
 export class RecordingDirector<T> {
   private _state:'idle'|'recording'|'playing' = 'idle';
-  public webview:Electron.WebviewTag;
+
+  private next_tab_id = 0;
+  public tabs:{[id:number]: ITab} = {};
 
   // The currently used Recording.  Used for playback
   // and for recording.
   public current_recording:Recording;
+
   
+  private STEP_TIMEOUT = 30000;
   public step_index:number = 0;
   public poll_interval:number = 100;
   public playback_delay:number = 120;
@@ -657,16 +694,10 @@ export class RecordingDirector<T> {
   private busy:boolean = false;
   private keepplaying:boolean = true;
 
-  private rpc:RPC;
-  private pages_loaded:Array<{
-    title: string;
-    url: string;
-  }> = [];
-
   readonly events = {
     change: new EventSource<boolean>(),
-    child_ready_for_control: new EventSource<boolean>(),
-    page_loaded: new EventSource<boolean>(),
+    child_ready_for_control: new EventSource<number>(),
+    page_loaded: new EventSource<number>(),
     step_started: new EventSource<{
       step_number: number,
     }>(),
@@ -675,65 +706,101 @@ export class RecordingDirector<T> {
     }>(),
   }
 
-  constructor(args?:{
-      recording?:Recording,
-    }) {
-    args = args || {};
+  constructor(args: {
+    recording?:Recording;
+  }) {
     this.current_recording = args.recording || new Recording();
+    this.createTab();
   }
   clear() {
     this.current_recording.clear();
+    this.next_tab_id = 1;
+    this.tabs = {0: this.tabs[0]}
     this.step_index = 0;
     this.busy = false;
     this.keepplaying = true;
-    this.pages_loaded = [];
+    this.tab_list.forEach(tab => {
+      tab.pages_loaded = [];
+    })
     this.emitChange();
   }
   emitChange() {
     this.events.change.emit(true);
   }
-  attachWebview(webview:Electron.WebviewTag) {
-    this.webview = webview;
-    this.rpc = inHostRPC(webview);
-    this.rpc.addHandlers({
+  createTab(url?:string) {
+    let tab_id = this.next_tab_id++;
+    this.tabs[tab_id] = {
+      id: tab_id,
+      rpc: null,
+      init_url: url,
+      webview: null,
+      pages_loaded: [],
+    }
+    this.emitChange();
+  }
+  get tab_list():ITab[] {
+    return Object.values<ITab>(this.tabs)
+      .sort((a, b) => compare(a.id, b.id));
+  }
+  attachWebview(tab_id:number, webview:Electron.WebviewTag) {
+    let logger = log.child(`webview${tab_id}`);
+    let tab = this.tabs[tab_id];
+    tab.webview = webview;
+    tab.rpc = inHostRPC(webview);
+    tab.pages_loaded = [];
+    logger.info('attached');
+
+    if (tab.init_url) {
+      logger.info('navigating to init_url');
+      webview.src = tab.init_url;
+    }
+    
+    tab.rpc.addHandlers({
       'rec:step': (step:RecStep) => {
-        console.log('rec:step', step, this.state);
+        logger.debug(`rec:step state=${this.state} type=${step.type}`);
+        let tab_step:TabRecStep = Object.assign(step, {
+          tab_id
+        })
         if (this.state === 'recording') {
-          this.current_recording.addStep(step);
+          this.current_recording.addStep(tab_step);
           this.emitChange();
         }
       },
       'rec:ready-for-control': () => {
-        this.events.child_ready_for_control.emit(true);
+        this.events.child_ready_for_control.emit(tab_id);
       }
     })
     webview.addEventListener('dom-ready', (ev) => {
       if (this.state === 'recording') {
-        let pageload:PageLoadStep = {
+        let pageload:PageLoadStep&TabStep = {
+          tab_id,
           type: 'pageload',
           url: webview.getURL(),
         }
         this.current_recording.addStep(pageload);  
         this.emitChange();
       } else if (this.state === 'playing') {
-        this.pages_loaded.push({
+        tab.pages_loaded.push({
           title: webview.getTitle(),
           url: webview.getURL(),
         })
-        this.events.page_loaded.emit(true);
+        this.events.page_loaded.emit(tab_id);
       }
     })
     webview.addEventListener('new-window', ev => {
-      // XXX there may be some site somewhere that depends on the new window actually opening in a new window...  That might be a pain to handle.
-      // console.log('new window', ev);
-      // webview.loadURL(ev.url);
+      logger.info(`request for new window disposition=${ev.disposition} frameName=${ev.frameName}`);
+      this.createTab(ev.url);
+    })
+    webview.addEventListener('close', ev => {
+      logger.info(`request to close`);
     })
   }
   get state() {
     return this._state;
   }
-  setURL(url:string) {
-    let step:NavigateStep = {
+  setURL(tab_id:number, url:string) {
+    let step:NavigateStep&TabStep = {
+      tab_id,
       type: 'navigate',
       url,
     }
@@ -744,6 +811,16 @@ export class RecordingDirector<T> {
     }
     this.emitChange();
   }
+
+  pause() {
+    if (this._state === 'recording') {
+      this.pauseRecording();
+    } else if (this._state === 'playing') {
+      this.pausePlayback();
+    }
+  }
+
+
   startRecording() {
     this._state = 'recording';
     this.emitChange();
@@ -754,10 +831,12 @@ export class RecordingDirector<T> {
   }
   rewind() {
     this.step_index = 0;
+    this.next_tab_id = 1;
+    this.tabs = {0: this.tabs[0]};
     this.emitChange();
   }
 
-  getCurrentStep():RecStep {
+  getCurrentStep():TabRecStep {
     try {
       return this.current_recording.steps[this.step_index];
     } catch(err) {
@@ -768,12 +847,20 @@ export class RecordingDirector<T> {
   // playback
   async play(lookUpValue:(options:T)=>any) {
     this.step_index = 0;
-    return this.resume(lookUpValue);
+    return this.resumePlayback(lookUpValue);
   }
   pausePlayback() {
     this.keepplaying = false;
   }
-  async resume(lookUpValue:(options:T)=>any) {
+  backOneStep() {
+    if (this._state === 'idle') {
+      this.step_index--;
+      if (this.step_index <= 0) {
+        this.step_index = 0;
+      }
+    }
+  }
+  async resumePlayback(lookUpValue:(options:T)=>any) {
     this._state = 'playing';
     this.keepplaying = true;
     this.emitChange();
@@ -799,7 +886,7 @@ export class RecordingDirector<T> {
       return false;
     }
     let step = steps[this.step_index];
-    log.info(`Doing step ${this.step_index}: ${step.type}`);
+    log.info(`doing step#${this.step_index} tab#${step.tab_id} ${step.type} `);
     
     this.events.step_started.emit({step_number: this.step_index});
     
@@ -808,26 +895,36 @@ export class RecordingDirector<T> {
     try {
       await this.doStep(step, lookUpValue);  
     } catch(err) {
-      log.error('Error doing step', this.step_index, err.toString())
-      log.error(err.stack);
+      if (err instanceof TimeoutError) {
+        log.error(`Timed out: step#${this.step_index} tab#${step.tab_id} ${step.type}`);
+      } else {
+        log.error(`Error on step#${this.step_index} tab#${step.tab_id} ${step.type} ${err}`);
+        log.error(err.stack);  
+      }
+      this.pausePlayback();
       this.busy = false;
       throw err;
     }
     
-    while (this.webview.isLoading()) {
-      await wait(this.poll_interval);
+    // Wait for all pages to load
+    for (let tab of this.tab_list) {
+      while (tab.webview.isLoading()) {
+        await wait(this.poll_interval);
+      }
     }
 
     this._state = prior_state;
     this.events.step_finished.emit({step_number: this.step_index});
 
+    log.debug(`done #${this.step_index} tab#${step.tab_id} ${step.type}`);
+
     this.step_index++;
     this.busy = false;
     return true;
   }
-  async doStep(step:RecStep, lookUpValue:(options:T)=>any) {
+  async doStep(step:TabRecStep, lookUpValue:(options:T)=>any) {
     if ((step as any).element !== undefined) {
-      await this._waitForElement((step as any).element);
+      await this._waitForElement(step.tab_id, (step as any).element);
     }
     switch (step.type) {
       case 'navigate': {
@@ -859,13 +956,13 @@ export class RecordingDirector<T> {
   /**
    *  Wait for an element to exist on the page
    */
-  private async _waitForElement(elem:UniqueElementID, timeout:number=30000):Promise<boolean> {
+  private async _waitForElement(tab_id:number, elem:UniqueElementID, timeout:number=30000):Promise<boolean> {
     let keepgoing = true;
     let timer = setTimeout(() => {
       keepgoing = false;
     }, timeout);
     while (keepgoing) {
-      if (await this.rpc.call<boolean>('rec:elementPresent', {
+      if (await this.tabs[tab_id].rpc.call<boolean>('rec:elementPresent', {
         element: elem,
       })) {
         clearTimeout(timer);
@@ -874,61 +971,81 @@ export class RecordingDirector<T> {
     }
     return false;
   }
-  private async _doNavigateStep(step:NavigateStep) {
+  private async _doNavigateStep(step:NavigateStep&TabStep) {
     return new Promise((resolve, reject) => {
-      let wc = this.webview.getWebContents();
-      this.events.child_ready_for_control.once(ev => {
-        resolve(null);
+      let timer = setTimeout(() => {
+        reject(new TimeoutError());
+        timer = null;
+      }, this.STEP_TIMEOUT);
+
+      let { webview } = this.tabs[step.tab_id];
+      this.events.child_ready_for_control.onceSuccessfully(tab_id => {
+        log.debug('got child_ready_for_control', tab_id, step.tab_id);
+        if (tab_id === step.tab_id) {
+          if (timer) {
+            clearTimeout(timer);
+            resolve(null);  
+          }
+          return true;
+        } else {
+          return false;
+        }
       })
       try {
+        let wc = webview.getWebContents();
         wc.loadURL(step.url);
       } catch(err) {
-        this.webview.src = step.url;
+        webview.src = step.url;
       }
     })
   }
-  async getBoundsFromRemote(elem:UniqueElementID):Promise<IBounds> {
+  async getBoundsFromRemote(tab_id:number, elem:UniqueElementID):Promise<IBounds> {
     while (true) {
       // XXX add a timeout
-      let bounds = await this.rpc.call<IBounds>('getbounds', {element: elem});
+      let bounds = await this.tabs[tab_id].rpc.call<IBounds>('getbounds', {element: elem});
       if (bounds !== null) {
         return bounds;
       }
       await wait(this.poll_interval);
     }
   }
-  private async _doClickStep(step:ClickStep) {
-    let bounds = await this.getBoundsFromRemote(step.element)
+  private async _doClickStep(step:ClickStep&TabStep) {
+    let bounds = await this.getBoundsFromRemote(step.tab_id, step.element);
+    log.debug('bounds for', step.desc, bounds);
     let x = bounds.x + step.offsetX;
     let y = bounds.y + step.offsetY;
-    sendClick(this.webview, {
+    let { webview } = this.tabs[step.tab_id];
+    sendClick(webview, {
       x,
       y,
       globalX: step.screenX,
       globalY: step.screenY,
     })
   }
-  private async _doKeyPressStep(step:KeyPressStep) {
+  private async _doKeyPressStep(step:KeyPressStep&TabStep) {
+    let { webview } = this.tabs[step.tab_id];
     for (var i = 0; i < step.keys.length; i++) {
       let item = step.keys[i];
-      await sendKey(this.webview, item.key, item.modifiers);
+      await sendKey(webview, item.key, item.modifiers);
       await wait(this.typing_delay);
     }
   }
-  private async _doChangeStep(step:ChangeStep, lookUpValue:(options:T)=>any) {
+  private async _doChangeStep(step:ChangeStep&TabStep, lookUpValue:(options:T)=>any) {
+    let { rpc } = this.tabs[step.tab_id];
     let value = step.value;
     if (step.options) {
       value = lookUpValue(step.options as any);
     }
-    return this.rpc.call('rec:do-change', {step, value});
+    return rpc.call('rec:do-change', {step, value});
   }
-  private async _doFocusStep(step:FocusStep) {
-    return this.rpc.call('rec:do-focus', step);
+  private async _doFocusStep(step:FocusStep&TabStep) {
+    let { rpc } = this.tabs[step.tab_id];
+    return rpc.call('rec:do-focus', step);
   }
-  private async _doPageLoadStep(step:PageLoadStep) {
+  private async _doPageLoadStep(step:PageLoadStep&TabStep) {
     // waiting for pages to load is already part of the playback process
   }
-  private async _doDownloadStep(step:DownloadStep) {
+  private async _doDownloadStep(step:DownloadStep&TabStep) {
   }
 }
 
@@ -1025,6 +1142,7 @@ function sendClick(webview:Electron.WebviewTag, pos:{x:number, y:number, globalX
     clickCount: 1,
     button: 'left',
   };
+  log.debug('sending click', send);
   webview.sendInputEvent(send)
   webview.sendInputEvent({
     type: 'mouseUp',

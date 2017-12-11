@@ -59,6 +59,7 @@
       flex-grow: 1;
     }
     .recording-pane .step {
+      position: relative;
       padding: .5rem .5rem;
       border: 1px solid var(--lighter-grey);
       border-width: 1px 0 0;
@@ -68,6 +69,11 @@
     }
     .recording-pane .step.running {
       background-color: var(--hover-highlight-color);
+    }
+    .recording-pane .step .step-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
     }
     table.step-params {
 
@@ -91,12 +97,51 @@
       height: 100%;
       width: 100%;
     }
+    .browser-wrap.hidden {
+      display: none;
+    }
     .instructions {
       padding: 1.5rem;
       background-color: var(--faint-blue);
     }
     .instructions li {
       margin: .25rem 0;
+    }
+    .tabbed-browser {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .tabbed-browser-tab-list {
+      display: flex;
+      background-color: var(--darker-darkblue);
+      padding: .25rem .25rem 0 0;
+    }
+    .tabbed-browser .tab {
+      background-color: white;
+      color: var(--lighter-grey);
+      border-radius: 3px 3px 0 0;
+      padding: .2rem .5rem;
+      margin-right: .25rem;
+      font-size: .9rem;
+      background-color: var(--lightest-grey);
+      color: black;
+      opacity: 0.5;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tabbed-browser .tab.focused {
+      opacity: 1;
+      background-color: var(--lightest-grey);
+      color: black;
+    }
+    .tabbed-browser-body {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
     }
     .browser {
       display: flex;
@@ -125,6 +170,7 @@
       width: 100%;
       display: flex;
       flex-direction: column;
+      overflow: auto;
     }
     .browser-pane webview {
       width: 100%;

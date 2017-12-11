@@ -74,6 +74,7 @@ export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
     } else {
       transactions = [statement.BANKTRANLIST.STMTTRN];
     }
+    transactions = transactions.filter(x => x);
     let importable:ImportableTrans[] = transactions.map((trans):ImportableTrans => {
       return {
         amount: decimal2cents(trans.TRNAMT),

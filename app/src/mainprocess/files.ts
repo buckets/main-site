@@ -18,6 +18,7 @@ import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import { onlyRunInMain } from '../rpc'
 import { importFile } from '../importing'
+import { PrefixLogger } from '../logging'
 
 
 interface IBudgetFile {
@@ -229,7 +230,8 @@ export class BudgetFile implements IBudgetFile {
     // Downloads
     sesh.on('will-download', (ev, item, webContents) => {
       let dlid = uuid();
-      log.info(`[${dlid}] will-download`, item.getFilename(), item.getMimeType());
+      let logger = new PrefixLogger(`(dl ${dlid})`);
+      logger.info(`will-download`, item.getFilename(), item.getMimeType());
 
       // XXX does this need to be explicitly cleaned up?
       let tmpdir = tmp.dirSync();
@@ -244,23 +246,23 @@ export class BudgetFile implements IBudgetFile {
       // console.log('getURL', item.getURL());
       
       let save_path = Path.join(tmpdir.name, item.getFilename());
-      log.info(`[${dlid}] saving ${item.getFilename()} to ${save_path}`);
+      logger.info(`saving ${item.getFilename()} to ${save_path}`);
       
       item.setSavePath(save_path);
       item.on('updated', (event, state) => {
         if (state === 'interrupted') {
-          log.info(`[${dlid}] ${state} - Download is interrupted but can be resumed`)
+          logger.info(`${state} - Download is interrupted but can be resumed`)
         } else if (state === 'progressing') {
           if (item.isPaused()) {
-            log.info(`[${dlid}] ${state} - Download is paused`)
+            logger.info(`${state} - Download is paused`)
           } else {
-            log.debug(`[${dlid}] ${state} - received bytes: ${item.getReceivedBytes()}`)
+            logger.debug(`${state} - received bytes: ${item.getReceivedBytes()}`)
           }
         }
       })
       item.once('done', async (event, state) => {
         if (state === 'completed') {
-          log.info(`[${dlid}] Downloaded`);
+          logger.info(`Downloaded`);
           
           webContents.send('buckets:file-downloaded', {
             localpath: save_path,
@@ -269,7 +271,7 @@ export class BudgetFile implements IBudgetFile {
           })
 
           // process it
-          log.info(`[${dlid}] processing file`, save_path);
+          logger.info(`processing file`, save_path);
           let imported;
           let pendings;
           try {
@@ -277,15 +279,17 @@ export class BudgetFile implements IBudgetFile {
             imported = result.imported;
             pendings = result.pendings;
           } catch(err) {
-            log.error(`[${dlid}] error importing: ${err}`);
+            logger.error(`error importing: ${err}`);
+            logger.error(err.stack);
           }
-          if (pendings.length) {
-            // unknown accounts will have been created
-            log.info(`[${dlid}] ${pendings.length} unknown accounts`);
+          if (pendings && pendings.length) {
+            logger.info(`${pendings.length} unknown accounts`);
           }
-          log.info(`[${dlid}] ${imported.length} imported`);
+          if (imported && imported.length) {
+            logger.info(`${imported.length} imported`);  
+          }
         } else {
-          log.warn(`[${dlid}] Download failed: ${state}`)
+          logger.warn(`Download failed: ${state}`)
         }
       })
     })

@@ -6,6 +6,7 @@ Recording:
     ☐ Windows
     ☐ Linux
   ☐ Command+L should focus the URL-selector
+  ☐ On Ally, the date input changes aren't detected (MutationObserver?)
   ☐ Timeout when a step can't be completed.
     ☐ Turn to paused
     ☐ Display a message to the user
@@ -14,6 +15,8 @@ Recording:
   ☐ Add thorough, debuggable logging
   ☐ Test all of your own banks
   ☐ Test Every Button
+  ☐ OFX
+    Cannot read property 'TRNAMT' of undefined
 
 Bugs:
 

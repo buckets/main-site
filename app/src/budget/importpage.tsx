@@ -299,8 +299,8 @@ class BankMacroList extends React.Component<{
         </tr>
       </thead>
       <tbody>
-        {this.props.macros.map(macro => {
-          return <tr>
+        {this.props.macros.map((macro, idx) => {
+          return <tr key={idx}>
             <td>{macro.id}</td>
             <td>
               <DebouncedInput
@@ -312,7 +312,7 @@ class BankMacroList extends React.Component<{
                 }}
               />
             </td>
-            <td>
+            <td className="icon-button-wrap">
               <button className="icon"
                 onClick={() => {
                   current_file.openRecordWindow(macro.id);
@@ -320,7 +320,7 @@ class BankMacroList extends React.Component<{
                 <span className="fa fa-gear"></span>
               </button>
             </td>
-            <td>
+            <td className="icon-button-wrap">
               <button className="icon"
                 onClick={() => {
                   let { onOrAfter, before } = manager.appstate.viewDateRange;
@@ -339,7 +339,7 @@ class BankMacroList extends React.Component<{
                   })
                 }}><span className="fa fa-play"></span></button>
             </td>
-            <td>
+            <td className="icon-button-wrap">
               <Confirmer
                 first={<button className="icon"><span className="fa fa-trash"></span></button>}
                 second={<button className="delete" onClick={(ev) => {

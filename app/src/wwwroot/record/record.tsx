@@ -8,7 +8,7 @@ import { BankMacro } from '../../models/bankmacro'
 import { current_file } from '../../mainprocess/files'
 import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector, Recording, ChangeStep, RecStep } from '../../recordlib'
+import { RecordingDirector, Recording, ChangeStep, TabRecStep } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 import { DebouncedInput, Confirmer } from '../../input'
@@ -92,13 +92,13 @@ class Browser extends React.Component<BrowserProps, {
             <span className="fa fa-refresh"></span>
           </button>
           <button onClick={() => {this.navigateToURL(this.state.url)}}><span className="fa fa-arrow-right"></span></button>
-          <button onClick={() => {
+          {IS_DEBUG ? <button onClick={() => {
             if (this.webview.isDevToolsOpened()) {
               this.webview.closeDevTools();
             } else {
               this.webview.openDevTools();
             }
-          }}><span className="fa fa-gear"></span></button>
+          }}><span className="fa fa-gear"></span></button> : null }
         </div>
         <div className="browser-pane">
           <Webview
@@ -137,6 +137,81 @@ class Browser extends React.Component<BrowserProps, {
   }
 }
 
+interface ITab {
+  id: number;
+  start_url?: string;
+  preload?: string;
+  partition?: string;
+  onWebview?: (x:Electron.WebviewTag, tab_index:number)=>void;
+  onURLChange?: (url:string, tab_index:number)=>void;
+}
+
+interface TabbedBrowserProps {
+  tabs: ITab[];
+}
+class TabbedBrowser extends React.Component<TabbedBrowserProps, {
+  focused_tab: number;
+}> {
+  constructor(props:TabbedBrowserProps) {
+    super(props);
+    let focused_tab;
+    if (props.tabs.length) {
+      focused_tab = props.tabs[0].id;
+    }
+    this.state = {
+      focused_tab,
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.tabs.length > this.props.tabs.length) {
+      this.setState({focused_tab: nextProps.tabs.slice(-1)[0].id})
+    } else {
+      let tab_ids = nextProps.tabs.map(tab => tab.id);
+      let idx = tab_ids.indexOf(this.state.focused_tab);
+      if (idx === -1) {
+        this.setState({focused_tab: tab_ids.slice(-1)[0]})
+      }
+    }
+  }
+  render() {
+    let tabs = this.props.tabs.map((tab) => {
+      return <div
+        key={tab.id}
+        onClick={() => {
+          this.setState({focused_tab: tab.id});
+        }}
+        className={cx('tab', {
+          'focused': tab.id === this.state.focused_tab,
+        })}
+      >Tab {tab.id+1}</div>
+    })
+    let bodies = this.props.tabs.map((tab, idx) => {
+      return <div key={tab.id} className={cx('browser-wrap', {
+        'hidden': tab.id !== this.state.focused_tab,
+      })}>
+        <Browser
+          preload={tab.preload}
+          partition={tab.partition}
+          onWebview={(webview) => {
+            tab.onWebview(webview, idx);
+          }}
+          onURLChange={(url) => {
+            tab.onURLChange(url, idx);
+          }}
+        />
+      </div>
+    })
+    return <div className="tabbed-browser">
+      <div className="tabbed-browser-tab-list">
+        {tabs}
+      </div>
+      <div className="tabbed-browser-body">
+        {bodies}
+      </div>
+    </div>
+  }
+}
+
 
 interface ValueOptions {
   key?: "" | "start-date" | "end-date";
@@ -154,6 +229,10 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
   render() {
     let { value, step, director } = this.props;
     let options:ValueOptions = step.options || {};
+
+    if (step.isPassword && value) {
+      value = 'x'.repeat(value.length);
+    }
 
     let defaultValue = options.key || "";
 
@@ -240,7 +319,7 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
 
 
 interface RecordingStepProps {
-  step: RecStep;
+  step: TabRecStep;
   director: RecordingDirector<ValueOptions>;
   showall: boolean;
   showdebug: boolean;
@@ -327,6 +406,16 @@ class RecordingStep extends React.Component<RecordingStepProps, {
         'running': is_current_step,
       })}>
         {guts}{debug}
+        <div className="step-actions">
+          <Confirmer
+            first={<button className="icon"><span className="fa fa-trash" /></button>}
+            second={<button className="delete"
+              onClick={(ev) => {
+                director.current_recording.removeStep(step);
+                director.emitChange();
+              }}>Confirm delete</button>}
+          />
+        </div>
       </div>
     } else {
       return null;
@@ -365,9 +454,9 @@ class RecordPage extends React.Component<RecordPageProps, {
       recording: nextProps.recording,
     })
   }
-  gotWebview(webview:Electron.WebviewTag) {
+  gotWebview(tab_id:number, webview:Electron.WebviewTag) {
     let { director, onLoad } = this.props;
-    director.attachWebview(webview);
+    director.attachWebview(tab_id, webview);
     director.events.change.on(() => {
       this.setState(this.state);
     })
@@ -382,19 +471,19 @@ class RecordPage extends React.Component<RecordPageProps, {
     }
   }
   render() {
-    let { preload, partition, director, onRecordingChange } = this.props;
+    let { director, preload, partition, onRecordingChange } = this.props;
     let stop_button = <button
         className="icon"
         disabled={director.state === 'idle'}
         onClick={() => {
-          director.pauseRecording();
+          director.pause();
         }}>
         <span className="fa fa-stop"/>
       </button>
 
     let save_button = <button
         onClick={() => {
-          director.pauseRecording();
+          director.pause();
           onRecordingChange(director.current_recording);
         }}>{sss('Save')}</button>
 
@@ -443,6 +532,20 @@ class RecordPage extends React.Component<RecordPageProps, {
       }
     }
 
+    let tabs = director.tab_list.map((tab, index):ITab => {
+      return {
+        id: tab.id,
+        preload,
+        partition,
+        onURLChange: (url:string) => {
+          this.props.director.setURL(tab.id, url);
+        },
+        onWebview: (webview) => {
+          this.gotWebview(tab.id, webview);
+        },
+      }
+    })
+
     return <div className="record-page">
       <div className="browser-wrap">
         <div className="instructions">
@@ -456,13 +559,8 @@ class RecordPage extends React.Component<RecordPageProps, {
             <li>Click {save_button}</li>
           </ol>
         </div>
-        <Browser
-          preload={preload}
-          partition={partition}
-          onURLChange={url => {
-            director.setURL(url);
-          }}
-          onWebview={webview => { this.gotWebview(webview)}}
+        <TabbedBrowser
+          tabs={tabs}
         />
       </div>
       <div className="recording-pane">
@@ -479,17 +577,26 @@ class RecordPage extends React.Component<RecordPageProps, {
             className="icon"
             disabled={director.state === 'recording'}
             onClick={() => {
-              director.pauseRecording();
+              director.pause();
               director.rewind();
             }}>
             <span className="fa fa-fast-backward" />
+          </button>
+          <button
+            className="icon"
+            disabled={director.state === 'recording'}
+            onClick={() => {
+              director.pause();
+              director.backOneStep();
+            }}>
+            <span className="fa fa-step-backward" />
           </button>
           {stop_button}
           <button
             className="icon"
             disabled={director.state === 'recording'}
             onClick={() => {
-              director.play(dummyLookup);
+              director.resumePlayback(dummyLookup);
             }}
           ><span className="fa fa-play" /></button>
           <button
@@ -507,13 +614,13 @@ class RecordPage extends React.Component<RecordPageProps, {
         </div>
         <div className="controls">
           <div>
-            <input
+            <label><input
               type="checkbox"
               checked={this.state.showallsteps}
               onChange={(ev) => {
                 this.setState({showallsteps: ev.target.checked});
-              }}/> Show all steps
-            {IS_DEBUG ? <span>
+              }}/> Show all steps</label>
+            {IS_DEBUG ? <label>
                 <input
                 type="checkbox"
                 checked={this.state.debugmode}
@@ -521,7 +628,7 @@ class RecordPage extends React.Component<RecordPageProps, {
                   this.setState({debugmode: ev.target.checked});
                 }}
                 /> Debug
-              </span> : null }
+              </label> : null }
           </div>
           <Confirmer
             first={<button>Delete all</button>}

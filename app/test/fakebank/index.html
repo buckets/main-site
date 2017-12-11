@@ -65,18 +65,24 @@
   <a download href="irongiant.jpg">Iron Giant</a>
   <a download href="export.ofx">export.ofx</a>
   <hr/>
+  <div style="overflow: auto;">
+    <div style="width: 1200px; display: flex;">
+      <div style="flex-basis: 1100px; background-color: blue; height: 10px;"></div>
+      <button onclick="this.innerHTML='I got clicked';">Click me way out here</button>
+    </div>
+  </div>
+  <hr/>
   <p>This is a form that you can submit by pressing enter</p>
   <form method="get" action="page2.html">
     <input type="text" name="something">
     <button type="submit">Go</button>
   </form>
   <hr/>
-  <p>These inputs try to cancel change events</p>
-  <input type="text" id="canceler">
+  <a href="page2.html" target="_blank">New window page 2</a>
+  <a id="new-window">New window</a>
   <script>
-    document.getElementById('canceler').addEventListener('change', (ev) => {
-      ev.preventDefault();
-      return false;
+    document.getElementById('new-window').addEventListener('click', () => {
+      window.open('page2.html');
     })
   </script>
 
