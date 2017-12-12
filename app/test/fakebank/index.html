@@ -3,17 +3,6 @@
 <head>
   <title></title>
   <style type="text/css">
-    .marker {
-      pointer-events: none;
-      width: 3px;
-      height: 3px;
-      background-color: red;
-      border: 1px solid blue;
-      position: fixed;
-      border-radius: 1000px;
-      top: 0;
-      left: 0;
-    }
     #rando {
       background-color: #ddd;
     }
@@ -93,23 +82,6 @@
     let rando = document.getElementById('rando');
     let height = Math.ceil(Math.random() * 200);
     rando.setAttribute('style', `height: ${height}px;`);
-
-    window.addEventListener('mousedown', (ev) => {
-      // console.log('mousedown happened', ev)
-      let div = document.createElement('div');
-      div.setAttribute('class', 'marker');
-      div.setAttribute('style', `left: ${ev.pageX}px; top: ${ev.pageY}px;`);
-      document.body.appendChild(div);
-      setTimeout(() => {
-        document.body.removeChild(div);
-      }, 5000)
-    })
-    // window.addEventListener('mouseup', ev => {
-    //   console.log('mouseup happened', ev);
-    // })
-    // window.addEventListener('click', ev => {
-    //   console.log('click happened', ev);
-    // })
   </script>
 </body>
 </html>

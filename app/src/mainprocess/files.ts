@@ -193,6 +193,101 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
+  private _sessions:{
+    [parition:string]: Electron.Session,
+  } = {};
+  ensureSession(partition:string):Electron.Session {
+    if (!this._sessions[partition]) {
+      let sesh = session.fromPartition(partition, {cache:false});
+      sesh.clearCache(() => {
+      });
+
+      // User-Agent
+      let user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+      if (electron_is.macOS()) {
+        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
+      } else if (electron_is.windows()) {
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36';
+      } else {
+        // linux
+        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+      }
+      sesh.setUserAgent(user_agent);
+      
+      // Cookies
+      sesh.cookies.on('changed', (ev, cookie, cause) => {
+        sesh.cookies.flushStore(() => {});
+      })
+
+      // Downloads
+      sesh.on('will-download', (ev, item, webContents) => {
+        let dlid = uuid();
+        let logger = new PrefixLogger(`(dl ${dlid})`);
+        logger.info(`will-download`, item.getFilename(), item.getMimeType());
+
+        // XXX does this need to be explicitly cleaned up?
+        let tmpdir = tmp.dirSync();
+
+        // webContents.send('buckets:will-download', {
+        //   filename: item.getFilename(),
+        //   mimetype: item.getMimeType(),
+        // })
+        // console.log('getFilename', item.getFilename())
+        // console.log('mimetype', item.getMimeType());
+        // console.log('state', item.getState());
+        // console.log('getURL', item.getURL());
+        
+        let save_path = Path.join(tmpdir.name, item.getFilename());
+        logger.info(`saving ${item.getFilename()} to ${save_path}`);
+        
+        item.setSavePath(save_path);
+        item.on('updated', (event, state) => {
+          if (state === 'interrupted') {
+            logger.info(`${state} - Download is interrupted but can be resumed`)
+          } else if (state === 'progressing') {
+            if (item.isPaused()) {
+              logger.info(`${state} - Download is paused`)
+            } else {
+              logger.debug(`${state} - received bytes: ${item.getReceivedBytes()}`)
+            }
+          }
+        })
+        item.once('done', async (event, state) => {
+          if (state === 'completed') {
+            logger.info(`Downloaded`);
+            
+            webContents.send('buckets:file-downloaded', {
+              localpath: save_path,
+              filename: item.getFilename(),
+              mimetype: item.getMimeType(),
+            })
+
+            // process it
+            logger.info(`processing file`, save_path);
+            let imported;
+            let pendings;
+            try {
+              let result = await importFile(this.store, save_path);
+              imported = result.imported;
+              pendings = result.pendings;
+            } catch(err) {
+              logger.error(`error importing: ${err}`);
+              logger.error(err.stack);
+            }
+            if (pendings && pendings.length) {
+              logger.info(`${pendings.length} unknown accounts`);
+            }
+            if (imported && imported.length) {
+              logger.info(`${imported.length} imported`);  
+            }
+          } else {
+            logger.warn(`Download failed: ${state}`)
+          }
+        })
+      })
+    }
+    return this._sessions[partition];
+  }
   /**
    *
    */
@@ -203,96 +298,7 @@ export class BudgetFile implements IBudgetFile {
     const bankmacro = await this.store.bankmacro.get(macro_id);
 
     const partition = `persist:rec-${bankmacro.uuid}`;
-    let sesh = session.fromPartition(partition, {cache:false});
-    sesh.clearCache(() => {
-
-    });
-
-    // User-Agent
-    let user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
-    if (electron_is.macOS()) {
-      user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
-    } else if (electron_is.windows()) {
-      user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36';
-    } else {
-      // linux
-      user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
-    }
-    sesh.setUserAgent(user_agent);
-    
-    // Cookies
-    // console.log('cookies', sesh.cookies);
-    sesh.cookies.on('changed', (ev, cookie, cause) => {
-      // console.log('cookie changed', ev, cookie, cause);
-      sesh.cookies.flushStore(() => {});
-    })
-
-    // Downloads
-    sesh.on('will-download', (ev, item, webContents) => {
-      let dlid = uuid();
-      let logger = new PrefixLogger(`(dl ${dlid})`);
-      logger.info(`will-download`, item.getFilename(), item.getMimeType());
-
-      // XXX does this need to be explicitly cleaned up?
-      let tmpdir = tmp.dirSync();
-
-      // webContents.send('buckets:will-download', {
-      //   filename: item.getFilename(),
-      //   mimetype: item.getMimeType(),
-      // })
-      // console.log('getFilename', item.getFilename())
-      // console.log('mimetype', item.getMimeType());
-      // console.log('state', item.getState());
-      // console.log('getURL', item.getURL());
-      
-      let save_path = Path.join(tmpdir.name, item.getFilename());
-      logger.info(`saving ${item.getFilename()} to ${save_path}`);
-      
-      item.setSavePath(save_path);
-      item.on('updated', (event, state) => {
-        if (state === 'interrupted') {
-          logger.info(`${state} - Download is interrupted but can be resumed`)
-        } else if (state === 'progressing') {
-          if (item.isPaused()) {
-            logger.info(`${state} - Download is paused`)
-          } else {
-            logger.debug(`${state} - received bytes: ${item.getReceivedBytes()}`)
-          }
-        }
-      })
-      item.once('done', async (event, state) => {
-        if (state === 'completed') {
-          logger.info(`Downloaded`);
-          
-          webContents.send('buckets:file-downloaded', {
-            localpath: save_path,
-            filename: item.getFilename(),
-            mimetype: item.getMimeType(),
-          })
-
-          // process it
-          logger.info(`processing file`, save_path);
-          let imported;
-          let pendings;
-          try {
-            let result = await importFile(this.store, save_path);
-            imported = result.imported;
-            pendings = result.pendings;
-          } catch(err) {
-            logger.error(`error importing: ${err}`);
-            logger.error(err.stack);
-          }
-          if (pendings && pendings.length) {
-            logger.info(`${pendings.length} unknown accounts`);
-          }
-          if (imported && imported.length) {
-            logger.info(`${imported.length} imported`);  
-          }
-        } else {
-          logger.warn(`Download failed: ${state}`)
-        }
-      })
-    })
+    this.ensureSession(partition);
 
     if (autoplay) {
       autoplay.onOrAfter = ts2db(autoplay.onOrAfter)

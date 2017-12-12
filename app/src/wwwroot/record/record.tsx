@@ -231,7 +231,7 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
     let options:ValueOptions = step.options || {};
 
     if (step.isPassword && value) {
-      value = 'x'.repeat(value.length);
+      value = '•'.repeat(8);
     }
 
     let defaultValue = options.key || "";
@@ -402,9 +402,13 @@ class RecordingStep extends React.Component<RecordingStepProps, {
       debug = <pre>{JSON.stringify(step, null, 2)}</pre>
     }
     if (guts || showdebug) {
-      return <div className={cx("step", {
-        'running': is_current_step,
-      })}>
+      return <div
+        onDoubleClick={() => {
+          director.chooseStep(step)
+        }}
+        className={cx("step", {
+          'running': is_current_step,
+        })}>
         {guts}{debug}
         <div className="step-actions">
           <Confirmer
@@ -596,7 +600,7 @@ class RecordPage extends React.Component<RecordPageProps, {
             className="icon"
             disabled={director.state === 'recording'}
             onClick={() => {
-              director.resumePlayback(dummyLookup);
+              director.play(dummyLookup);
             }}
           ><span className="fa fa-play" /></button>
           <button
@@ -628,6 +632,15 @@ class RecordPage extends React.Component<RecordPageProps, {
                   this.setState({debugmode: ev.target.checked});
                 }}
                 /> Debug
+              </label> : null }
+            {IS_DEBUG ? <label>
+                <input
+                type="checkbox"
+                checked={director.showdebug}
+                onChange={(ev) => {
+                  director.showdebug = ev.target.checked;
+                }}
+                /> Show click markers
               </label> : null }
           </div>
           <Confirmer
@@ -803,7 +816,7 @@ export async function start(args:{
       renderer={renderer}
       onLoadRecordPage={() => {
         if (args.autoplay) {
-          director.play((options:ValueOptions) => {
+          director.playFromBeginning((options:ValueOptions) => {
             if (options.key === 'start-date') {
               let date = ensureLocalMoment(args.autoplay.onOrAfter);
               return date.format(options.variation);

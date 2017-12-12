@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import { PrefixLogger } from './logging'
 import { ipcRenderer } from 'electron'
 import { EventSource } from './events'
@@ -70,6 +71,8 @@ export class RPC {
       let result = await this.handlers[method](params);
       this.sendResult(rpcid, result, null);
     } catch(err) {
+      log.error('rpc error', err);
+      log.error(err.stack);
       this.sendResult(rpcid, null, err);
     }
   }
@@ -123,6 +126,28 @@ function wait(time:number) {
     }, time);
   })
 }
+class TryAgainError extends Error {}
+async function runUntilSuccessful<T>(func:()=>T, timeout:number=10000):Promise<T> {
+    let keepgoing = true;
+    let timer = setTimeout(() => {
+      keepgoing = false;
+    }, timeout);
+
+    while (keepgoing) {
+      try {
+        let result = await func();
+        clearTimeout(timer);
+        return result;
+      } catch(err) {
+        if (err instanceof TryAgainError) {
+          await wait(50);
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw new TimeoutError();
+  }
 
 //-----------------------------------------------------------
 // DOM element identification
@@ -151,6 +176,13 @@ function describeElement(el:HTMLElement):string {
   }
 }
 
+
+function uniqPush(list:Array<any>, item:any) {
+  if (list.indexOf(item) === -1) {
+    list.push(item);
+  }
+}
+
 // uniquely identify an element on a page
 export function identifyElement(el:HTMLElement):UniqueElementID {
   let xpaths:string[] = [];
@@ -163,32 +195,32 @@ export function identifyElement(el:HTMLElement):UniqueElementID {
   let type = el.getAttribute('type');
 
   if (name) {
-    xpaths.push(`//${tagName}[@name="${escapeQuote(name)}"]`)
+    uniqPush(xpaths, `//${tagName}[@name="${escapeQuote(name)}"]`)
     if (type) {
-      xpaths.push(`//${tagName}[@name="${escapeQuote(name)}" and @type="${escapeQuote(type)}"]`)
+      uniqPush(xpaths, `//${tagName}[@name="${escapeQuote(name)}" and @type="${escapeQuote(type)}"]`)
     }
   }
   if (type) {
-    xpaths.push(`//${tagName}[@type="${escapeQuote(type)}"]`)
+    uniqPush(xpaths, `//${tagName}[@type="${escapeQuote(type)}"]`)
   }
   if (className) {
-    xpaths.push(`//${tagName}[@class="${escapeQuote(className)}"]`);
+    uniqPush(xpaths, `//${tagName}[@class="${escapeQuote(className)}"]`);
   }
 
   // Try all the attributes
   let attrs = Array.from(el.attributes);
   for (let i = 0; i < attrs.length; i++) {
     let attr = attrs[i];
-    xpaths.push(`//${tagName}[@${attr.name}="${escapeQuote(attr.value)}"]`)
+    uniqPush(xpaths, `//${tagName}[@${attr.name}="${escapeQuote(attr.value)}"]`)
   }
 
   // Map it from the root
-  xpaths.push(xpathFromRoot(el));
+  uniqPush(xpaths, xpathFromRoot(el));
 
   if (id) {
-    xpaths.push(`//${tagName}[@id="${escapeQuote(id)}"]`);
+    uniqPush(xpaths, `//${tagName}[@id="${escapeQuote(id)}"]`);
     if (name) {
-      xpaths.push(`//${tagName}[@id="${escapeQuote(id)}" and @name="${escapeQuote(name)}"]`);
+      uniqPush(xpaths, `//${tagName}[@id="${escapeQuote(id)}" and @name="${escapeQuote(name)}"]`);
     }
   }
 
@@ -249,6 +281,9 @@ export function findElement(ident:UniqueElementID):HTMLElement {
     let iter = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null);
     let first = iter.iterateNext();
     let second = iter.iterateNext();
+    if (first === null) {
+      continue;
+    }
     if (second === null) {
       return first as HTMLElement;
     }
@@ -276,8 +311,12 @@ interface TabStep {
   tab_id: number;
 }
 
+interface BaseStep {
+  time: number;
+}
+
 // navigate
-export interface NavigateStep {
+export interface NavigateStep extends BaseStep {
   type: 'navigate';
   url: string;
 }
@@ -286,7 +325,7 @@ export function isNavigateStep(x:RecStep):x is NavigateStep {
 }
 
 // keypress
-export interface KeyPressStep  {
+export interface KeyPressStep extends BaseStep {
   type: 'keypress';
   element: UniqueElementID;
   desc: string;
@@ -302,10 +341,11 @@ export function isKeyPressStep(x:RecStep):x is KeyPressStep {
 }
 
 // click
-export interface ClickStep  {
+export interface ClickStep extends BaseStep {
   type: 'click';
   desc: string;
   element: UniqueElementID;
+  keyboardTriggered: boolean;
   pageX: number;
   pageY: number;
   screenX: number;
@@ -313,12 +353,12 @@ export interface ClickStep  {
   offsetX: number;
   offsetY: number;
 }
-export function isClickActionStep(x:RecStep):x is ClickStep {
+export function isClickStep(x:RecStep):x is ClickStep {
   return (<ClickStep>x).type === 'click';
 }
 
 // focus
-export interface FocusStep  {
+export interface FocusStep extends BaseStep {
   type: 'focus';
   desc: string;
   element: UniqueElementID;
@@ -328,7 +368,7 @@ export function isFocusStep(x:RecStep):x is FocusStep {
 }
 
 // change
-export interface ChangeStep  {
+export interface ChangeStep extends BaseStep {
   type: 'change';
   desc: string;
   element: UniqueElementID;
@@ -345,7 +385,7 @@ export function isChangeStep(x:RecStep):x is ChangeStep {
 }
 
 // pageload
-export interface PageLoadStep  {
+export interface PageLoadStep extends BaseStep {
   type: 'pageload';
   url: string;
 }
@@ -354,7 +394,7 @@ export function isPageLoadStep(x:RecStep):x is PageLoadStep {
 }
 
 // download
-export interface DownloadStep  {
+export interface DownloadStep extends BaseStep {
   type: 'download';
 }
 export function isDownloadStep(x:RecStep):x is DownloadStep {
@@ -370,36 +410,58 @@ export class Recording {
   }
 
   addStep(step:TabRecStep) {
-    log.info('addStep', step.type);
+    log.info('addStep', step.time, step.type);
+
     if (this.steps.length === 0) {
       this.steps.push(step)
       return;
     }
+    let last_step = this.steps.slice(-1)[0];
+    // let tdiff = step.time - last_step.time;
 
     // swap Enter/Tab change
     if (isChangeStep(step)) {
-      let last_step = this.steps.slice(-1)[0];
       if (isKeyPressStep(last_step)
         && (last_step.keys[0].key === 'Enter'
           || last_step.keys[0].key === 'Tab')) {
         // stick the change before the Enter/Tab
         this.steps.splice(this.steps.length-1, 0, step);
+        log.debug('swap change and keypress');
         return;
       }
     }
 
     // combine keypresses into a single step
     if (isKeyPressStep(step)) {
-      let last_step = this.steps.slice(-1)[0];
       if (isKeyPressStep(last_step)) {
         if ( !step.keys[0].input_delimiter
           && !last_step.keys.slice(-1)[0].input_delimiter) {
           // combine keypresses
           last_step.keys = last_step.keys.concat(step.keys);
+          log.debug('combine keys');
           return;
         }
       }
     }
+
+    if (isClickStep(step)) {
+      if (step.keyboardTriggered) {
+        if (isKeyPressStep(last_step) && last_step.keys[0].key === 'Enter') {
+          // pressed enter on a form element that caused a submit
+          // don't record the click
+          log.debug('skip click step caused by pressing Enter');
+          return;
+        }
+      } else {
+        // actual mouse click
+        if (isFocusStep(last_step) && _.isEqual(last_step.element, step.element)) {
+          log.debug('removing focus before click');
+          this.steps.splice(this.steps.length-1, 1, step);
+          return;
+        }
+      }
+    }
+
     // otherwise just add it
     this.steps.push(step);
   }
@@ -428,11 +490,17 @@ export class Recording {
 //-----------------------------------------------------------
 export class Recorder {
   private rpc:RPC;
+  private showdebug = false;
   constructor() {
     const logger = log.child('(Recorder)')
     logger.info('init');
     this.rpc = inWebviewRPC();
     this.rpc.addHandlers({
+      'echo': () => 'echo',
+      'showdebug': (params:{value:boolean}) => {
+        this.showdebug = params.value;
+        logger.info('debug set to', this.showdebug);
+      },
       'getbounds': (params:{element:UniqueElementID}) => {
         let { element } = params;
         try {
@@ -457,6 +525,15 @@ export class Recorder {
           return false;
         }
       },
+      'rec:scrollIntoView': (params:{element:UniqueElementID}) => {
+        let { element } = params;
+        let elem = findElement(element);
+        if (elem === null) {
+          return false;
+        }
+        elem.scrollIntoView();
+        return true;
+      },
       'rec:do-focus': (step:FocusStep) => {
         let { element } = step;
         let elem = findElement(element);
@@ -480,6 +557,7 @@ export class Recorder {
       logger.info('file downloaded', localpath, filename, mimetype);
       let step:DownloadStep = {
         type: 'download',
+        time: Date.now(),
       }
       this.rpc.call('rec:step', step);
     })
@@ -533,6 +611,7 @@ export class Recorder {
       }
       let step:ChangeStep = {
         type: 'change',
+        time: Date.now(),
         desc: describeElement(target),
         element: identifyElement(target),
         value,
@@ -553,6 +632,7 @@ export class Recorder {
       const desc = describeElement(ev.target)
       let step:FocusStep = {
         type: 'focus',
+        time: Date.now(),
         desc: desc,
         element: identifyElement(ev.target),
       }
@@ -566,9 +646,18 @@ export class Recorder {
       if (ev.target.tagName === undefined) {
         return;
       }
+      if (this.showdebug) {
+        let marker = document.createElement('div');
+        marker.setAttribute('style', `position: absolute; top: ${ev.pageY-3}px; left: ${ev.pageX-3}px; background-color: red; border: 1px solid black; width: 6px; height: 6px; pointer-events: none; opacity: 0.5; border-radius: 1000px; box-sizing: border-box;`);
+        document.body.insertBefore(marker, document.body.childNodes[0]);
+        setTimeout(() => {
+          document.body.removeChild(marker);
+        }, 10000)
+      }
       if (shouldRecordFocusInsteadOfClick(ev.target)) {
         let step:FocusStep = {
           type: 'focus',
+          time: Date.now(),
           element: identifyElement(ev.target),
           desc: describeElement(ev.target),
         }
@@ -581,8 +670,10 @@ export class Recorder {
       let offsetX = Math.floor(ev.clientX - rect.left);
       let offsetY = Math.floor(ev.clientY - rect.top);
 
+      let keyboardTriggered = false;
       if (ev.detail === 0) {
         // keyboard triggered
+        keyboardTriggered = true;
         let bounds = getBounds(ev.target as HTMLElement);
         pageX = bounds.x;
         pageY = bounds.y;
@@ -591,8 +682,10 @@ export class Recorder {
       }
       let step:ClickStep = {
         type: 'click',
+        time: Date.now(),
         element: identifyElement(ev.target as HTMLElement),
         desc: describeElement(ev.target),
+        keyboardTriggered,
         pageX,
         pageY,
         screenX,
@@ -640,6 +733,7 @@ export class Recorder {
       // record the keypress
       let step:KeyPressStep = {
         type: 'keypress',
+        time: Date.now(),
         desc: describeElement(ev.target as HTMLElement),
         element: identifyElement(ev.target as HTMLElement),
         keys: [{
@@ -659,11 +753,7 @@ export class Recorder {
 }
 
 //-----------------------------------------------------------
-/**
-  RecordingDirector is used in the host page in a renderer
-  process.  It knows about a `<webview>` tag which it controls
-  and monitors.
-*/
+
 interface ITab {
   id: number,
   webview: Electron.WebviewTag,
@@ -674,8 +764,14 @@ interface ITab {
     url: string;
   }>,
 }
+type DirectorState = 'idle'|'recording'|'playing';
+/**
+  RecordingDirector is used in the host page in a renderer
+  process.  It knows about `<webview>` tags which it controls
+  and monitors.
+*/
 export class RecordingDirector<T> {
-  private _state:'idle'|'recording'|'playing' = 'idle';
+  private _state:DirectorState = 'idle';
 
   private next_tab_id = 0;
   public tabs:{[id:number]: ITab} = {};
@@ -683,16 +779,15 @@ export class RecordingDirector<T> {
   // The currently used Recording.  Used for playback
   // and for recording.
   public current_recording:Recording;
-
+  private _showdebug = false;
   
-  private STEP_TIMEOUT = 30000;
+  private STEP_TIMEOUT = 10000;
   public step_index:number = 0;
   public poll_interval:number = 100;
   public playback_delay:number = 120;
   public typing_delay:number = 20;
 
   private busy:boolean = false;
-  private keepplaying:boolean = true;
 
   readonly events = {
     change: new EventSource<boolean>(),
@@ -718,7 +813,6 @@ export class RecordingDirector<T> {
     this.tabs = {0: this.tabs[0]}
     this.step_index = 0;
     this.busy = false;
-    this.keepplaying = true;
     this.tab_list.forEach(tab => {
       tab.pages_loaded = [];
     })
@@ -726,6 +820,27 @@ export class RecordingDirector<T> {
   }
   emitChange() {
     this.events.change.emit(true);
+  }
+  set showdebug(val:boolean) {
+    this._showdebug = val;
+    this.tab_list.forEach(tab => {
+      if (tab.webview) {
+        tab.rpc.call('showdebug', {value:val})
+        .catch(err => {
+          log.warn('Error setting showdebug');
+        })
+      }
+    })
+    this.emitChange();
+  }
+  get showdebug() {
+    return this._showdebug;
+  }
+  async chooseStep(step:TabRecStep) {
+    await this.pause()
+    let index = this.current_recording.steps.indexOf(step);
+    this.step_index = index;
+    this.emitChange();
   }
   createTab(url?:string) {
     let tab_id = this.next_tab_id++;
@@ -756,6 +871,7 @@ export class RecordingDirector<T> {
     }
     
     tab.rpc.addHandlers({
+      'echo': () => 'echo',
       'rec:step': (step:RecStep) => {
         logger.debug(`rec:step state=${this.state} type=${step.type}`);
         let tab_step:TabRecStep = Object.assign(step, {
@@ -767,7 +883,9 @@ export class RecordingDirector<T> {
         }
       },
       'rec:ready-for-control': () => {
+        logger.info('child ready for control');
         this.events.child_ready_for_control.emit(tab_id);
+        tab.rpc.call('showdebug', {value: this.showdebug});
       }
     })
     webview.addEventListener('dom-ready', (ev) => {
@@ -776,6 +894,7 @@ export class RecordingDirector<T> {
           tab_id,
           type: 'pageload',
           url: webview.getURL(),
+          time: Date.now(),
         }
         this.current_recording.addStep(pageload);  
         this.emitChange();
@@ -795,44 +914,18 @@ export class RecordingDirector<T> {
       logger.info(`request to close`);
     })
   }
-  get state() {
-    return this._state;
-  }
   setURL(tab_id:number, url:string) {
     let step:NavigateStep&TabStep = {
       tab_id,
       type: 'navigate',
       url,
+      time: Date.now(),
     }
     if (this.current_recording.steps.length) {
       this.current_recording.addStep(step)
     } else {
       this.current_recording.steps.unshift(step);
     }
-    this.emitChange();
-  }
-
-  pause() {
-    if (this._state === 'recording') {
-      this.pauseRecording();
-    } else if (this._state === 'playing') {
-      this.pausePlayback();
-    }
-  }
-
-
-  startRecording() {
-    this._state = 'recording';
-    this.emitChange();
-  }
-  pauseRecording() {
-    this._state = 'idle';
-    this.emitChange();
-  }
-  rewind() {
-    this.step_index = 0;
-    this.next_tab_id = 1;
-    this.tabs = {0: this.tabs[0]};
     this.emitChange();
   }
 
@@ -843,88 +936,139 @@ export class RecordingDirector<T> {
       return null;
     }
   }
+  get state():DirectorState {
+    return this._state;
+  }
+  private setState(newstate:DirectorState) {
+    this._state = newstate;
+    this.emitChange();
+  }
+
+  /**
+    Pause either recording or playback
+   */
+  pause() {
+    this.setState('idle');
+  }
+  startRecording() {
+    this.setState('recording');
+  }
+  rewind() {
+    this.step_index = 0;
+    this.next_tab_id = 1;
+    this.tabs = {0: this.tabs[0]};
+    this.setState('idle');
+  }
 
   // playback
+  async playFromBeginning(lookUpValue:(options:T)=>any) {
+    this.rewind();
+    return this.play(lookUpValue);
+  }
   async play(lookUpValue:(options:T)=>any) {
-    this.step_index = 0;
-    return this.resumePlayback(lookUpValue);
-  }
-  pausePlayback() {
-    this.keepplaying = false;
-  }
-  backOneStep() {
-    if (this._state === 'idle') {
-      this.step_index--;
-      if (this.step_index <= 0) {
-        this.step_index = 0;
-      }
-    }
-  }
-  async resumePlayback(lookUpValue:(options:T)=>any) {
-    this._state = 'playing';
-    this.keepplaying = true;
-    this.emitChange();
+    this.setState('playing');
 
-    while(this.keepplaying) {
+    while (this.state === 'playing') {
       if (!await this.playNextStep(lookUpValue)) {
         break;
       } else {
         await wait(this.playback_delay);
       }
     }
-    this._state = 'idle';
-    this.emitChange();
+
+    this.pause();
   }
-  async playNextStep(lookUpValue?:(options:T)=>any) {
+  backOneStep() {
+    if (this.state === 'idle') {
+      this.step_index--;
+      if (this.step_index <= 0) {
+        this.step_index = 0;
+      } else {
+        this.emitChange();
+      }
+    }
+  }
+  /**
+    Play the next step.
+
+    Returns `true` if a step was played, `false` if there are no more
+    steps to play.
+   */
+  async playNextStep(lookUpValue?:(options:T)=>any):Promise<boolean> {
     if (this.busy) {
       throw new DoublePlayError('Attemped playing of step while busy');
     }
     this.busy = true;
-    let steps = this.current_recording.steps;
-    if (this.step_index === steps.length) {
-      this.busy = false;
-      return false;
-    }
-    let step = steps[this.step_index];
-    log.info(`doing step#${this.step_index} tab#${step.tab_id} ${step.type} `);
-    
-    this.events.step_started.emit({step_number: this.step_index});
-    
-    let prior_state = this._state;
-    this._state = 'playing';
+
     try {
+      let steps = this.current_recording.steps;
+      if (this.step_index === steps.length) {
+        // there is no next step
+        return false;
+      }
+
+      // Do the step
+      let step = steps[this.step_index];
+      log.info(`doing step#${this.step_index} tab#${step.tab_id} ${step.type} `);      
+      this.events.step_started.emit({step_number: this.step_index});
       await this.doStep(step, lookUpValue);  
+      
+      // Wait for all pages to load
+      for (let tab of this.tab_list) {
+        try {
+          await runUntilSuccessful(async () => {
+            if (tab.webview.isLoading()) {
+              throw new TryAgainError();
+            }
+          })  
+        } catch(err) {
+          if (err instanceof TimeoutError) {
+            log.info('Timed out waiting for isLoading');
+          }
+        }
+        
+        try {
+          await runUntilSuccessful(async () => {
+            if (! await tab.rpc.call('echo')) {
+              throw new TryAgainError();
+            }
+          })
+        } catch(err) {
+          if (err instanceof TimeoutError) {
+            log.info('Timed out waiting for rpc echo');
+          }
+        }
+      }
+
+      // Move to next step
+      this.events.step_finished.emit({step_number: this.step_index});
+      log.debug(`done #${this.step_index} tab#${step.tab_id} ${step.type}`);
+      this.step_index++;
+
+      return true;
     } catch(err) {
       if (err instanceof TimeoutError) {
-        log.error(`Timed out: step#${this.step_index} tab#${step.tab_id} ${step.type}`);
+        log.error(`Timed out: step#${this.step_index}`);
       } else {
-        log.error(`Error on step#${this.step_index} tab#${step.tab_id} ${step.type} ${err}`);
+        log.error(`Error on step#${this.step_index} ${err.toString()}`);
         log.error(err.stack);  
       }
-      this.pausePlayback();
-      this.busy = false;
+      this.pause();
       throw err;
+    } finally {
+      this.busy = false;
     }
-    
-    // Wait for all pages to load
-    for (let tab of this.tab_list) {
-      while (tab.webview.isLoading()) {
-        await wait(this.poll_interval);
-      }
-    }
-
-    this._state = prior_state;
-    this.events.step_finished.emit({step_number: this.step_index});
-
-    log.debug(`done #${this.step_index} tab#${step.tab_id} ${step.type}`);
-
-    this.step_index++;
-    this.busy = false;
-    return true;
   }
   async doStep(step:TabRecStep, lookUpValue:(options:T)=>any) {
     if ((step as any).element !== undefined) {
-      await this._waitForElement(step.tab_id, (step as any).element);
+      try {
+        await this._waitForElement(step.tab_id, (step as any).element);
+      } catch(err) {
+        if (err instanceof TimeoutError) {
+          log.info('Timed out during waitForElement', (step as any).desc, (step as any).element);
+        }
+        throw err;
+      }
     }
     switch (step.type) {
       case 'navigate': {
@@ -953,23 +1097,21 @@ export class RecordingDirector<T> {
       }
     }
   }
+  private 
   /**
    *  Wait for an element to exist on the page
    */
-  private async _waitForElement(tab_id:number, elem:UniqueElementID, timeout:number=30000):Promise<boolean> {
-    let keepgoing = true;
-    let timer = setTimeout(() => {
-      keepgoing = false;
-    }, timeout);
-    while (keepgoing) {
-      if (await this.tabs[tab_id].rpc.call<boolean>('rec:elementPresent', {
+  private async _waitForElement(tab_id:number, elem:UniqueElementID):Promise<boolean> {
+    return runUntilSuccessful(async () => {
+      let present = await this.tabs[tab_id].rpc.call<boolean>('rec:elementPresent', {
         element: elem,
-      })) {
-        clearTimeout(timer);
+      })
+      if (!present) {
+        throw new TryAgainError();
+      } else {
         return true;
       }
-    }
-    return false;
+    }, this.STEP_TIMEOUT)
   }
   private async _doNavigateStep(step:NavigateStep&TabStep) {
     return new Promise((resolve, reject) => {
@@ -999,19 +1141,30 @@ export class RecordingDirector<T> {
       }
     })
   }
+  async scrollElementIntoView(tab_id:number, elem:UniqueElementID) {
+    return runUntilSuccessful(async () => {
+      if (await this.tabs[tab_id].rpc.call('rec:scrollIntoView', {
+        element: elem
+      })) {
+        return true;
+      } else {
+        throw new TryAgainError();
+      }
+    })
+  }
   async getBoundsFromRemote(tab_id:number, elem:UniqueElementID):Promise<IBounds> {
-    while (true) {
-      // XXX add a timeout
+    return runUntilSuccessful(async () => {
       let bounds = await this.tabs[tab_id].rpc.call<IBounds>('getbounds', {element: elem});
       if (bounds !== null) {
         return bounds;
+      } else {
+        throw new TryAgainError();
       }
-      await wait(this.poll_interval);
-    }
+    }, this.STEP_TIMEOUT)
   }
   private async _doClickStep(step:ClickStep&TabStep) {
+    await this.scrollElementIntoView(step.tab_id, step.element);
     let bounds = await this.getBoundsFromRemote(step.tab_id, step.element);
-    log.debug('bounds for', step.desc, bounds);
     let x = bounds.x + step.offsetX;
     let y = bounds.y + step.offsetY;
     let { webview } = this.tabs[step.tab_id];
@@ -1032,11 +1185,12 @@ export class RecordingDirector<T> {
   }
   private async _doChangeStep(step:ChangeStep&TabStep, lookUpValue:(options:T)=>any) {
     let { rpc } = this.tabs[step.tab_id];
+
     let value = step.value;
     if (step.options) {
       value = lookUpValue(step.options as any);
     }
-    return rpc.call('rec:do-change', {step, value});
+    await rpc.call('rec:do-change', {step, value});
   }
   private async _doFocusStep(step:FocusStep&TabStep) {
     let { rpc } = this.tabs[step.tab_id];
@@ -1044,6 +1198,7 @@ export class RecordingDirector<T> {
   }
   private async _doPageLoadStep(step:PageLoadStep&TabStep) {
     // waiting for pages to load is already part of the playback process
+    return wait(1000);
   }
   private async _doDownloadStep(step:DownloadStep&TabStep) {
   }
@@ -1142,7 +1297,7 @@ function sendClick(webview:Electron.WebviewTag, pos:{x:number, y:number, globalX
     clickCount: 1,
     button: 'left',
   };
-  log.debug('sending click', send);
+  log.debug('sending click', {x: send.x, y: send.y});
   webview.sendInputEvent(send)
   webview.sendInputEvent({
     type: 'mouseUp',
