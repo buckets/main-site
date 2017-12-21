@@ -1,6 +1,8 @@
 export interface IBounds {
   x: number;
   y: number;
+  viewportx: number;
+  viewporty: number;
   w: number;
   h: number;
 }
@@ -31,12 +33,27 @@ export function dimensions(elem):{h:number,w:number} {
   }
 }
 
+function getScrollOffset(elem):{x:number, y:number} {
+  let x = 0, y = 0;
+  while (elem.parentNode) {
+    elem = elem.parentNode;
+    x += elem.scrollLeft || 0
+    y += elem.scrollTop || 0
+  }
+  return {x,y}
+}
+
 export function getBounds(elem):IBounds {
-  let bounding_rect = elem.getBoundingClientRect();
+  const { left, top, width, height } = elem.getBoundingClientRect();
+  const scrolloffset = getScrollOffset(elem);
+  const x = Number(left) + scrolloffset.x;
+  const y = Number(top) + scrolloffset.y;
   return {
-    x: Math.floor(bounding_rect.left),
-    y: Math.floor(bounding_rect.top),
-    w: Math.ceil(bounding_rect.width),
-    h: Math.ceil(bounding_rect.height),
+    viewportx: Math.floor(left),
+    viewporty: Math.floor(top),
+    x: Math.floor(x),
+    y: Math.floor(y),
+    w: Math.ceil(width),
+    h: Math.ceil(height),
   }
 }

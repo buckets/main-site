@@ -346,12 +346,8 @@ export interface ClickStep extends BaseStep {
   desc: string;
   element: UniqueElementID;
   keyboardTriggered: boolean;
-  pageX: number;
-  pageY: number;
-  screenX: number;
-  screenY: number;
-  offsetX: number;
-  offsetY: number;
+  // Offset from the top right of the element
+  innerOffset: {x:number, y:number};
 }
 export function isClickStep(x:RecStep):x is ClickStep {
   return (<ClickStep>x).type === 'click';
@@ -445,6 +441,7 @@ export class Recording {
     }
 
     if (isClickStep(step)) {
+      log.debug('click step', step);
       if (step.keyboardTriggered) {
         if (isKeyPressStep(last_step) && last_step.keys[0].key === 'Enter') {
           // pressed enter on a form element that caused a submit
@@ -508,7 +505,9 @@ export class Recorder {
           if (elem === null) {
             return null;
           }
-          return getBounds(elem);
+          let bounds = getBounds(elem);
+          log.debug('bounds', bounds);
+          return bounds;
         } catch(err) {
           return null;
         }
@@ -665,7 +664,6 @@ export class Recorder {
         return;
       }
 
-      let {pageX, pageY, screenX, screenY} = ev;
       let rect = ev.target.getBoundingClientRect();
       let offsetX = Math.floor(ev.clientX - rect.left);
       let offsetY = Math.floor(ev.clientY - rect.top);
@@ -674,9 +672,6 @@ export class Recorder {
       if (ev.detail === 0) {
         // keyboard triggered
         keyboardTriggered = true;
-        let bounds = getBounds(ev.target as HTMLElement);
-        pageX = bounds.x;
-        pageY = bounds.y;
         offsetX = 1;
         offsetY = 1;
       }
@@ -686,12 +681,10 @@ export class Recorder {
         element: identifyElement(ev.target as HTMLElement),
         desc: describeElement(ev.target),
         keyboardTriggered,
-        pageX,
-        pageY,
-        screenX,
-        screenY,
-        offsetX,
-        offsetY,
+        innerOffset: {
+          x: offsetX,
+          y: offsetY,
+        }
       }
       this.rpc.call('rec:step', step);
     }, {
@@ -1165,15 +1158,12 @@ export class RecordingDirector<T> {
   private async _doClickStep(step:ClickStep&TabStep) {
     await this.scrollElementIntoView(step.tab_id, step.element);
     let bounds = await this.getBoundsFromRemote(step.tab_id, step.element);
-    let x = bounds.x + step.offsetX;
-    let y = bounds.y + step.offsetY;
+    log.debug('bounds', bounds);
+    log.debug('innerOffset', step.innerOffset);
+    let x = bounds.viewportx + step.innerOffset.x;
+    let y = bounds.viewporty + step.innerOffset.y;
     let { webview } = this.tabs[step.tab_id];
-    sendClick(webview, {
-      x,
-      y,
-      globalX: step.screenX,
-      globalY: step.screenY,
-    })
+    sendClick(webview, {x,y});
   }
   private async _doKeyPressStep(step:KeyPressStep&TabStep) {
     let { webview } = this.tabs[step.tab_id];
@@ -1287,7 +1277,7 @@ function sendKey(webview:Electron.WebviewTag, key:string, modifiers?:string[]) {
   webview.sendInputEvent(data)
 }
 
-function sendClick(webview:Electron.WebviewTag, pos:{x:number, y:number, globalX:number, globalY:number}) {
+function sendClick(webview:Electron.WebviewTag, pos:{x:number, y:number}) {
   let send = {
     type: 'mouseDown',
     x: pos.x,

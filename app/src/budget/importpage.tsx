@@ -331,7 +331,7 @@ class BankMacroList extends React.Component<{
                   }
                   before = onOrAfter.clone().add(1, 'month');
                   if (today.isBefore(before)) {
-                    before = today.clone();
+                    before = today.clone().subtract(1, 'day');
                   }
                   current_file.openRecordWindow(macro.id, {
                     onOrAfter,

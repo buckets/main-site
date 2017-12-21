@@ -506,10 +506,10 @@ class RecordPage extends React.Component<RecordPageProps, {
     let dummyLookup = (options:ValueOptions) => {
       let today = moment();
       if (options.key === 'start-date') {
-        let date = today.subtract(2, 'months').startOf('month');
+        let date = today.clone().subtract(2, 'months').startOf('month');
         return date.format(options.variation);
       } else if (options.key === 'end-date') {
-        let date = today;
+        let date = today.clone().subtract(1, 'day');
         return date.format(options.variation);
       }
     }
