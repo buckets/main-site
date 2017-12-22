@@ -198,7 +198,10 @@ export class BudgetFile implements IBudgetFile {
   } = {};
   ensureSession(partition:string):Electron.Session {
     if (!this._sessions[partition]) {
+      log.info('Creating session for partition', partition);
       let sesh = session.fromPartition(partition, {cache:false});
+      this._sessions[partition] = sesh;
+      
       sesh.clearCache(() => {
       });
 
@@ -256,7 +259,9 @@ export class BudgetFile implements IBudgetFile {
           if (state === 'completed') {
             logger.info(`Downloaded`);
             
-            webContents.send('buckets:file-downloaded', {
+            // Tell the renderer or webview's parent about the download
+            let wc = webContents.hostWebContents || webContents;
+            wc.send('buckets:file-downloaded', {
               localpath: save_path,
               filename: item.getFilename(),
               mimetype: item.getMimeType(),

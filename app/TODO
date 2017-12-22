@@ -1,27 +1,23 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
 Recording:
-  ✔ Command-A delete @done (17-12-08 12:10)
   ☐ Copy and Paste should be captured correctly
-    ✔ macOS @done (17-12-08 12:10)
     ☐ Windows
     ☐ Linux
   ☐ Command+L should focus the URL-selector
-  ☐ On Ally, the date input changes aren't detected (MutationObserver?)
+  ☐ Close tabs that are just downloads.
   ☐ Timeout when a step can't be completed.
     ☐ Turn to paused
     ☐ Display a message to the user
   ☐ Let people type in URL without http://
-  ☐ Make all icon buttons into class="icon" <buttons>
   ☐ Add thorough, debuggable logging
   ☐ Test all of your own banks
   ☐ Test Every Button
-  ☐ OFX
-    Cannot read property 'TRNAMT' of undefined
 
 Bugs:
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
+ ☐ Make all icon buttons into class="icon" <buttons>
  ☐ Handle OFX files with more than one account in them
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Sign the code
@@ -64,6 +60,12 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Record download step. @done (17-12-22 10:57) @project(Recording)
+ ✔ On Ally, the date input changes aren't detected (MutationObserver?) @done (17-12-22 10:57) @project(Recording)
+  MutationObserver won't work directly.  Maybe I just have to keep track of every input's value and check after every interaction
+ ✔ Notify in the macro creator when a download happens. @done (17-12-22 10:57) @project(Recording)
+ ✔ macOS @done (17-12-08 12:10) @project(Recording)
+ ✔ Command-A delete @done (17-12-08 12:10) @project(Recording)
  ✔ Don't show black dots on click @done (17-12-08 12:09) @project(Recording)
  ✔ When creating a password for the first time, confirm the password @done (17-12-08 09:57) @project(Recording)
  ✘ Partitions are stored in ~/Library/Application Support/Buckets/Partitions on the mac. @cancelled (17-12-08 08:04) @project(Recording)

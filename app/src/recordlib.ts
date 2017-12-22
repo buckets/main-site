@@ -269,7 +269,7 @@ function isXpathUnique(xpath:string):boolean {
     let second = iter.iterateNext();
     return second === null;  
   } catch(err) {
-    console.log("isXpathUnique error", err);
+    log.warn("isXpathUnique error", err);
     return false;
   }
 }
@@ -424,6 +424,13 @@ export class Recording {
         this.steps.splice(this.steps.length-1, 0, step);
         log.debug('swap change and keypress');
         return;
+      } else if (isChangeStep(last_step)) {
+        if (_.isEqual(last_step.element, step.element)) {
+          // remove double change
+          log.debug('removing double change');
+          this.steps.splice(this.steps.length-1, 1, step);
+          return;
+        }
       }
     }
 
@@ -552,14 +559,6 @@ export class Recorder {
         elem.focus();
       },
     })
-    ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
-      logger.info('file downloaded', localpath, filename, mimetype);
-      let step:DownloadStep = {
-        type: 'download',
-        time: Date.now(),
-      }
-      this.rpc.call('rec:step', step);
-    })
 
     function isInputElement(elem:HTMLElement):boolean {
       switch (elem.tagName) {
@@ -594,31 +593,127 @@ export class Recorder {
       return false;
     }
 
-    window.addEventListener('change', (ev:any) => {
-      let target = ev.target;
-      if (target.tagName === undefined) {
+    function getValue(el:HTMLElement) {
+      if (el instanceof HTMLSelectElement) {
+        return {
+          displayValue: (el.children[el.selectedIndex] as any).innerText,
+          value: el.value,
+          input_type: 'select',
+        }
+      } else if (el instanceof HTMLInputElement) {
+        let input_type = el.getAttribute('type');
+        let value;
+        if (input_type === 'checkbox') {
+          value = el.checked;
+        } else {
+          value = el.value;
+        }
+        return {
+          displayValue: value,
+          value,
+          input_type,
+        }
+      } else {
+        // unknown element type
+        throw new Error('Unknown element type');
+      }
+    }
+
+    const emitChangeStep = (el:HTMLElement) => {
+      if (el.tagName === undefined) {
         return;
       }
-      let displayValue = target.tagName === 'SELECT' ? target.children[target.selectedIndex].innerText : undefined;
-      let input_type = target.getAttribute('type');
-      let value = target.value;
-      if (input_type === 'checkbox') {
-        value = target.checked;
-        displayValue = value;
-      } else if (input_type === 'hidden') {
+      let displayValue, value, input_type;
+      try {
+        let val = getValue(el);
+        displayValue = val.displayValue;
+        value = val.value;
+        input_type = val.input_type;
+      } catch(err) {
+        return;
+      }
+     
+      if (input_type === 'hidden') {
         return;
       }
       let step:ChangeStep = {
         type: 'change',
         time: Date.now(),
-        desc: describeElement(target),
-        element: identifyElement(target),
+        desc: describeElement(el),
+        element: identifyElement(el),
         value,
         isPassword: input_type === 'password',
-        selectedIndex: target.selectedIndex,
+        selectedIndex: (el as any).selectedIndex,
         displayValue,
       }
       this.rpc.call('rec:step', step);
+    }
+
+    // watch for input.value changes
+    let input_elements:HTMLInputElement[] = [];
+    let input_values:string[] = [];
+
+    /**
+     *  Recursively add input nodes.
+     */ 
+    const addInputs = (node:Node) => {
+      if (node instanceof HTMLInputElement) {
+        input_elements.push(node);
+        input_values.push(getValue(node).value);
+      } else {
+        Array.from(node.childNodes).forEach(subnode => {
+          addInputs(subnode);
+        })
+      }
+    }
+
+    let observer = new MutationObserver((records, observer) => {
+      // console.log('mutation', records);
+      records.forEach(record => {
+        if (record.type === 'childList') {
+          Array.from(record.addedNodes).forEach((node:Node) => {
+            addInputs(node)
+          })
+          if (record.removedNodes.length) {
+            // clean out gone nodes
+            for (let i = 0; i < input_elements.length; i++) {
+              let el = input_elements[i];
+              if (!document.body.contains(el)) {
+                input_elements.splice(i, 1);
+                input_values.splice(i, 1);
+                i--;
+              }
+            }
+          }
+        }
+      })
+    })
+    observer.observe(document, {
+      childList: true,
+      subtree: true,
+    })
+    log.debug('Started observing document for mutations');
+    const checkInputsForChanges = (emit:boolean=true) => {
+      // console.log('checkInputsForChanges', input_elements.length);
+      setTimeout(() => {
+        input_elements.forEach((el, idx) => {
+          // console.log('checking', el);
+          let new_value = getValue(el).value;
+          let old_value = input_values[idx];
+          if (old_value !== new_value) {
+            // changed value
+            input_values[idx] = new_value;
+            if (emit) {
+              emitChangeStep(el);  
+            }
+          }
+        })  
+      }, 0)
+    }
+
+    window.addEventListener('change', (ev:any) => {
+      emitChangeStep(ev.target);
+      checkInputsForChanges(false);
     }, {
       capture: true,
       passive: true,
@@ -645,6 +740,7 @@ export class Recorder {
       if (ev.target.tagName === undefined) {
         return;
       }
+      checkInputsForChanges();
       if (this.showdebug) {
         let marker = document.createElement('div');
         marker.setAttribute('style', `position: absolute; top: ${ev.pageY-3}px; left: ${ev.pageX-3}px; background-color: red; border: 1px solid black; width: 6px; height: 6px; pointer-events: none; opacity: 0.5; border-radius: 1000px; box-sizing: border-box;`);
@@ -798,6 +894,7 @@ export class RecordingDirector<T> {
     recording?:Recording;
   }) {
     this.current_recording = args.recording || new Recording();
+    this.listenForDownloads();
     this.createTab();
   }
   clear() {
@@ -828,6 +925,18 @@ export class RecordingDirector<T> {
   }
   get showdebug() {
     return this._showdebug;
+  }
+  listenForDownloads() {
+    ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
+      log.info('file downloaded', localpath, filename, mimetype);
+      let step:DownloadStep&TabRecStep = {
+        type: 'download',
+        time: Date.now(),
+        tab_id: 0,
+      }
+      this.current_recording.addStep(step);
+      this.emitChange();
+    })
   }
   async chooseStep(step:TabRecStep) {
     await this.pause()
