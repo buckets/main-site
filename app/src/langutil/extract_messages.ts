@@ -15,7 +15,13 @@ import * as moment from 'moment'
 
 function hash(x:string):string {
   let h = crypto.createHash('sha256');
-  h.update(x);
+  try {
+    h.update(x);  
+  } catch(err) {
+    console.error("Error processing string", x);
+    throw err;
+  }
+  
   return h.digest('base64');
 }
 
@@ -220,12 +226,18 @@ function displayDefaults(msgs:IMessageSpec) {
   let lines = [];
   lines.push('export const DEFAULTS:IMessages = {');
   _.each(msgs, (msg:IMessage) => {
-    lines.push(`  ${JSON.stringify(msg.key)}: {
+    try {
+      lines.push(`  ${JSON.stringify(msg.key)}: {
     val: ${msg.defaultValue},
     translated: false,
     src: ${JSON.stringify(msg.sources.map(formatSource))},
     h: ${JSON.stringify(hash(msg.defaultValue))},
   },`);
+    } catch(err) {
+      console.error("Error processing msg", msg);
+      throw err;
+    }
+    
   })
   lines.push('}');
   return lines.join('\n');

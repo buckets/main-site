@@ -60,6 +60,7 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Notify on download @done (17-12-22 22:02) @project(Recording)
  ✔ Record download step. @done (17-12-22 10:57) @project(Recording)
  ✔ On Ally, the date input changes aren't detected (MutationObserver?) @done (17-12-22 10:57) @project(Recording)
   MutationObserver won't work directly.  Maybe I just have to keep track of every input's value and check after every interaction

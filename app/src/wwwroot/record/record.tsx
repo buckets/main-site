@@ -8,11 +8,12 @@ import { BankMacro } from '../../models/bankmacro'
 import { current_file } from '../../mainprocess/files'
 import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
-import { RecordingDirector, Recording, ChangeStep, TabRecStep } from '../../recordlib'
+import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 import { DebouncedInput, Confirmer } from '../../input'
 import { IncorrectPassword } from '../../error'
+import { makeToast, ToastDisplay } from '../../budget/toast'
 
 
 function setPath(x:string) {
@@ -721,6 +722,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
     return <Router
       path={path}
       setPath={setPath}>
+        <ToastDisplay />
         <div className="app">
           <div className="nav recording-nav">
             <div>
@@ -803,6 +805,20 @@ export async function start(args:{
   let director = new RecordingDirector({
     recording: recording,
   });
+  director.events.file_downloaded.on(({filename}) => {
+    makeToast(sss('notify-downloaded-file', filename => `Downloaded file: ${filename}`));
+  })
+  director.events.error.on(err => {
+    if (err instanceof TimeoutError) {
+      makeToast(sss('Step took too long'), {
+        className: 'error',
+      });
+    } else {
+      makeToast(sss('Error running recording'), {
+        className: 'error',
+      });
+    }
+  })
 
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';

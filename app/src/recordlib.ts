@@ -888,6 +888,10 @@ export class RecordingDirector<T> {
     step_finished: new EventSource<{
       step_number: number,
     }>(),
+    file_downloaded: new EventSource<{
+      filename: string,
+    }>(),
+    error: new EventSource<Error>(),
   }
 
   constructor(args: {
@@ -934,8 +938,11 @@ export class RecordingDirector<T> {
         time: Date.now(),
         tab_id: 0,
       }
-      this.current_recording.addStep(step);
-      this.emitChange();
+      this.events.file_downloaded.emit({filename});
+      if (this.state === 'recording') {
+        this.current_recording.addStep(step);
+        this.emitChange();
+      }
     })
   }
   async chooseStep(step:TabRecStep) {
@@ -1127,6 +1134,7 @@ export class RecordingDirector<T> {
           if (err instanceof TimeoutError) {
             log.info('Timed out waiting for isLoading');
           }
+          throw err
         }
         
         try {
@@ -1139,6 +1147,7 @@ export class RecordingDirector<T> {
           if (err instanceof TimeoutError) {
             log.info('Timed out waiting for rpc echo');
           }
+          throw err
         }
       }
 
@@ -1151,11 +1160,13 @@ export class RecordingDirector<T> {
     } catch(err) {
       if (err instanceof TimeoutError) {
         log.error(`Timed out: step#${this.step_index}`);
+
       } else {
         log.error(`Error on step#${this.step_index} ${err.toString()}`);
-        log.error(err.stack);  
+        log.error(err.stack);
       }
       this.pause();
+      this.events.error.emit(err)
       throw err;
     } finally {
       this.busy = false;
