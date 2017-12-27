@@ -11,6 +11,8 @@ import { sss } from '../i18n'
 import { hashStrings } from '../importing'
 import { UnknownAccount } from './account'
 
+import { ISyncChannel, ASyncening, SyncResult } from '../sync'
+
 export class Connection implements IObject {
   static type: string = 'simplefin_connection'
   id: number;
@@ -67,108 +69,87 @@ export function sleep(milliseconds:number):Promise<any> {
   })
 }
 
+export class SimpleFINSync implements ASyncening {
+  readonly done = new EventSource<SyncResult>()
+  public result:SyncResult;
 
-export class Syncer {
   private time_range:number = 7;
   private time_unit:string = 'day';
   private delay = 1000;
-  private max_delay = 60 * 1000;
   private running:boolean = false;
   private please_stop:boolean = false;
 
-  readonly events = {
-    start: new EventSource<{
-      start: moment.Moment,
-      end: moment.Moment,
-    }>(),
-    fetching_range: new EventSource<{
-      start: moment.Moment,
-      end: moment.Moment,
-    }>(),
-    done: new EventSource<{
-      start: moment.Moment,
-      end: moment.Moment,
-      trans_count: number,
-      errors: Array<string>,
-      cancelled: boolean,
-    }>(),
+  constructor(private store:IStore, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
+
   }
-  constructor(private store:SimpleFINStore) {
-  }
-  incDelay() {
-    this.delay *= 1.5;
-    if (this.delay > this.max_delay) {
-      this.delay = this.max_delay;
-    }
-  }
-  stop() {
-    if (this.running) {
-      this.please_stop = true;
-    }
-  }
-  isRunning() {
-    return this.running;
-  }
-  stopRequested() {
-    return this.please_stop;
-  }
-  async start(sync_start:moment.Moment, sync_end:moment.Moment) {
+  async start() {
     if (this.running) {
       return;
     }
-    log.info(`Sync started from ${sync_start.format()} to ${sync_end.format()}`)
+    let { onOrAfter, before } = this;
+    log.info(`Sync started from ${onOrAfter.format()} to ${before.format()}`)
     this.please_stop = false;
     this.running = true;
-    this.events.start.emit({
-      start: sync_start.clone(),
-      end: sync_end.clone(),
-    });
 
-    let window_start = sync_start.clone();
-    let window_end = window_start.clone().add(this.time_range as any, this.time_unit);
-
-    let trans_count = 0;
+    let imported_count = 0;
     let errors = new Set();
-    while (!this.please_stop && window_start.isSameOrBefore(sync_end)) {
-      if (window_end.isAfter(sync_end)) {
-        window_end = sync_end.clone();
-      }
-      this.events.fetching_range.emit({start:window_start, end:window_end});
+    try {
+      let window_start = onOrAfter.clone();
+      let window_end = window_start.clone().add(this.time_range as any, this.time_unit);
 
-      try {
-        let result = await this.store._sync(window_start, window_end)  
-        trans_count += result.transactions.length;
-        result.errors.forEach(err => {
-          log.info(`SimpleFin error: ${err}`);
-          errors.add(err);
-        })
-      } catch(err) {
-        log.info(`Server error while syncing.  Aborting: ${err}`)
-        errors.add(sss('Sync failed'));
-        break;
+      while (!this.please_stop && window_start.isSameOrBefore(before)) {
+        if (window_end.isAfter(before)) {
+          window_end = before.clone();
+        }
+
+        try {
+          let result = await this.store.simplefin.sync(window_start, window_end)  
+          imported_count += result.transactions.length;
+          result.errors.forEach(err => {
+            log.info(`SimpleFin error: ${err}`);
+            errors.add(err);
+          })
+        } catch(err) {
+          log.info(`Server error while syncing.  Aborting: ${err}`)
+          errors.add(sss('Sync failed'));
+          break;
+        }
+        await sleep(this.delay);
+        window_start.add(this.time_range as any, this.time_unit);
+        window_end.add(this.time_range as any, this.time_unit);
       }
-      await sleep(this.delay);
-      window_start.add(this.time_range as any, this.time_unit);
-      window_end.add(this.time_range as any, this.time_unit);
+    } catch(err) {
+      log.error("Unexpected sync error:", err.toString(), err.stack)
+      errors.add(sss('Unexpected sync error'))
+    } finally {
+      this.running = false;
+      this.please_stop = false;
+      this.result = {
+        errors: Array.from(errors),
+        imported_count,
+      }
+      this.done.emit(this.result);
     }
-    this.running = false;
-    this.events.done.emit({
-      trans_count,
-      errors: Array.from(errors),
-      start: sync_start,
-      end: sync_end,
-      cancelled: this.please_stop,
-    })
+  }
+  cancel() {
+    this.please_stop = true;
   }
 }
 
+export class SimpleFINSyncer implements ISyncChannel {
+  constructor(private store:IStore) {
+
+  }
+  syncTransactions(onOrAfter:moment.Moment, before:moment.Moment):SimpleFINSync {
+    return new SimpleFINSync(this.store, onOrAfter, before);
+  }
+}
 
 export class SimpleFINStore {
   private client:SimpleFINClient;
-  syncer:Syncer;
+  
   constructor(private store:IStore) {
     this.client = new SimpleFINClient();
-    this.syncer = new Syncer(this);
   }
   async consumeToken(token:string):Promise<Connection> {
     let access_url = await this.client.consumeToken(token);
@@ -179,7 +160,7 @@ export class SimpleFINStore {
   async listConnections():Promise<Connection[]> {
     return this.store.listObjects(Connection);
   }
-  async _sync(since:moment.Moment, enddate:moment.Moment):Promise<{
+  async sync(since:moment.Moment, enddate:moment.Moment):Promise<{
     transactions: Transaction[],
     unknowns: UnknownAccount[],
     errors: string[],

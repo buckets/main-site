@@ -9,20 +9,35 @@ import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'elect
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
-import { Timestamp, ts2db } from '../time'
+import { Timestamp, ts2db, serializeTimestamp, ensureLocalMoment } from '../time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
 import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
-import { onlyRunInMain } from '../rpc'
+import { onlyRunInMain, Room } from '../rpc'
 import { importFile } from '../importing'
 import { PrefixLogger } from '../logging'
+import { SyncResult, MultiSyncer, ASyncening } from '../sync'
 
 
-interface IBudgetFile {
+interface BudgetFileEvents {
+  sync_started: {
+    onOrAfter: string;
+    before: string;
+  };
+  sync_done: {
+    onOrAfter: string;
+    before: string;
+    result: SyncResult;
+  };
+}
+
+export interface IBudgetFile {
   bus:IBudgetBus;
+
+  room: Room<BudgetFileEvents>;
   
   /**
    *  Cause the recording window to open for a particular recording
@@ -37,6 +52,16 @@ interface IBudgetFile {
    */
   importFile(path:string);
   openImportFileDialog();
+
+  /**
+   *  Start a sync
+   */
+  startSync(onOrAfter:Timestamp, before:Timestamp);
+
+  /**
+   *  Cancel sync
+   */
+  cancelSync();
 }
 
 interface IBudgetFileRPCMessage {
@@ -71,15 +96,22 @@ export class BudgetFile implements IBudgetFile {
 
   public store:DBStore;
   private rpc_store:RPCMainStore = null;
+  
   readonly bus:BudgetBus;
+  readonly room:Room<BudgetFileEvents>;
+
+  public running_syncs:ASyncening[] = [];
+  private syncer:MultiSyncer;
 
   readonly id:string;
   readonly filename:string;
   constructor(filename?:string) {
     this.id = uuid();
+    this.room = new Room<BudgetFileEvents>(this.id);
     this.filename = filename || '';
     this.bus = new BudgetBus(this.id);
     this.store = new DBStore(filename, this.bus, true);
+    this.syncer = new MultiSyncer([]);
     BudgetFile.REGISTRY[this.id] = this;
   }
 
@@ -101,8 +133,6 @@ export class BudgetFile implements IBudgetFile {
 
    */
   async start() {
-    log.debug('start', this.filename);
-
     // connect to database
     try {
       await this.store.open();  
@@ -164,7 +194,7 @@ export class BudgetFile implements IBudgetFile {
    *  @param dont_show  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.  
    */
   openWindow(path:string, dont_show?:boolean) {
-    log.debug('opening new window to', path);
+    log.info('opening new window to', path);
     const parsed = Path.parse(this.filename);
     let win = new BrowserWindow({
       width: 1200,
@@ -355,6 +385,36 @@ export class BudgetFile implements IBudgetFile {
     let bf = new BudgetFile(filename);
     return bf.start();
   }
+
+
+  startSync(onOrAfter:Timestamp, before:Timestamp) {
+    let m_onOrAfter = ensureLocalMoment(onOrAfter);
+    let m_before = ensureLocalMoment(before);
+    let sync = this.syncer.syncTransactions(m_onOrAfter, m_before);
+    this.running_syncs.push(sync);
+    return new Promise(resolve => {
+      sync.done.once(result => {
+        this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
+        this.room.broadcast('sync_done', {
+          onOrAfter: serializeTimestamp(onOrAfter),
+          before: serializeTimestamp(m_before),
+          result,
+        })
+        resolve(result);
+      })
+      this.room.broadcast('sync_started', {
+        onOrAfter: serializeTimestamp(onOrAfter),
+        before: serializeTimestamp(m_before),
+      })
+      sync.start();
+    });
+  }
+
+  cancelSync() {
+    this.running_syncs.forEach(sync => {
+      sync.cancel();
+    })
+  }
 }
 
 
@@ -367,10 +427,12 @@ export class BudgetFile implements IBudgetFile {
  */
 class RendererBudgetFile implements IBudgetFile {
   readonly bus:BudgetBusRenderer;
+  readonly room:Room<BudgetFileEvents>;
   readonly store:RPCRendererStore;
   constructor(readonly id:string) {
     this.bus = new BudgetBusRenderer(id);
     this.store = new RPCRendererStore(id, this.bus);
+    this.room = new Room<BudgetFileEvents>(this.id);
   }
 
   async openRecordWindow(macro_id:number, autoplay?:{
@@ -394,6 +456,13 @@ class RendererBudgetFile implements IBudgetFile {
   }
   openImportFileDialog() {
     return this.callInMain('openImportFileDialog');
+  }
+
+  startSync(onOrAfter:Timestamp, before:Timestamp) {
+    return this.callInMain('startSync', serializeTimestamp(onOrAfter), serializeTimestamp(before));
+  }
+  cancelSync() {
+    return this.callInMain('cancelSync');
   }
 
   /**

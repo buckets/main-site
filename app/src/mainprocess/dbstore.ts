@@ -89,13 +89,13 @@ export class DBStore implements IStore {
 
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
-  readonly connections:SimpleFINStore;
+  readonly simplefin:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankmacro:BankMacroStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
-    this.connections = new SimpleFINStore(this);
+    this.simplefin = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankmacro = new BankMacroStore(this);
   }

@@ -12,11 +12,11 @@ import { sss } from '../i18n'
 import { DebouncedInput, Confirmer } from '../input'
 import { current_file } from '../mainprocess/files'
 
-function startDefaultSync(appstate:AppState) {
+function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
-  let since = range.onOrAfter.clone();
-  let enddate = range.before.clone();
-  manager.store.connections.syncer.start(since, enddate);
+  let onOrAfter = range.onOrAfter.clone();
+  let before = range.before.clone();
+  current_file.startSync(onOrAfter, before);
 }
 
 
@@ -26,22 +26,17 @@ export class SyncWidget extends React.Component<{
   render() {
     let label = sss('Sync');
     let { appstate } = this.props;
-    let { syncing, sync_message } = appstate;
+    let { syncing } = appstate;
     let details;
     if (syncing) {
       label = sss('Syncing...');
-      if (sync_message) {
-        details = <div className="details">
-          {sync_message}
-        </div>
-      }
     }
     return <div className="sync-widget">
       <a
         href="#"
         onClick={ev => {
           ev.preventDefault();
-          startDefaultSync(appstate);
+          syncCurrentMonth(appstate);
           return false;
         }}>
         <span>
@@ -127,10 +122,10 @@ export class ImportPage extends React.Component<{
     }
 
     let conns;
-    if (Object.keys(appstate.connections).length) {
+    if (Object.keys(appstate.sfinconnections).length) {
       conns = <div>
         <h2>{sss('Connections')}</h2>
-        <ConnectionList connections={Object.values(appstate.connections)} />
+        <ConnectionList connections={Object.values(appstate.sfinconnections)} />
       </div>
     }
 
@@ -141,9 +136,9 @@ export class ImportPage extends React.Component<{
             <button
               onClick={() => {
                 if (appstate.syncing) {
-                  manager.store.connections.syncer.stop();
+                  current_file.cancelSync();
                 } else {
-                  startDefaultSync(appstate);
+                  syncCurrentMonth(appstate);
                 }
               }}
               disabled={!conns}><span className={cx("fa fa-refresh", {
@@ -269,7 +264,7 @@ export class ImportPage extends React.Component<{
   connect = async () => {
     let connection;
     try {
-      connection = await manager.store.connections.consumeToken(this.state.simplefin_token)
+      connection = await manager.store.simplefin.consumeToken(this.state.simplefin_token)
     } catch(err) {
       this.setState({status_message: err.toString()});
       return;
@@ -279,7 +274,7 @@ export class ImportPage extends React.Component<{
       connecting: false,
     })
     makeToast(sss('Connection saved!'));
-    return startDefaultSync(this.props.appstate);
+    return syncCurrentMonth(this.props.appstate);
   }
 }
 

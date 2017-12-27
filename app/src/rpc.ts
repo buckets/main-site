@@ -1,7 +1,9 @@
+import * as log from 'electron-log'
 import * as electron_is from 'electron-is'
 import {v4 as uuid} from 'uuid'
 import { ipcMain, ipcRenderer } from 'electron'
 import * as crypto from 'crypto'
+import { EventSource } from './events'
 
 //--------------------------------------------------------------------------------
 // General purpose RPC from renderer to main and back
@@ -51,3 +53,85 @@ export function onlyRunInMain<F extends Function>(func:F):F {
     }
   }
 }
+
+
+/**
+ *  Generic, interprocess, room-based, typed pub-sub
+ *  Can be used in either main or renderer process.
+ */
+export class Room<T> {
+  private webContents:Electron.WebContents[] = [];
+  private isrenderer:boolean;
+  private eventSources:{
+    [k:string]: EventSource<any>,
+  } = {};
+
+  constructor(private key:string) {
+    this.isrenderer = electron_is.renderer();
+    if (this.isrenderer) {
+      // renderer process
+      ipcRenderer.send(`${this.key}.join`);
+      ipcRenderer.on(`${this.key}.message`, (ev, channel, message) => {
+        let es = this.eventSources[channel];
+        if (es) {
+          es.emit(message);
+        }
+      })
+    } else {
+      // main process
+      ipcMain.on(`${this.key}.join`, (ev) => {
+        this.webContents.push(ev.sender);
+        ev.sender.on('destroyed', () => {
+          this.webContents.splice(this.webContents.indexOf(ev.sender, 1));
+        })
+      })
+      ipcMain.on(`${this.key}.pleasesend`, <K extends keyof T>(ev, channel:K, message:T[K]) => {
+        this.broadcast(channel, message);
+      })
+    }
+  }
+  broadcast<K extends keyof T>(channel:K, message:T[K]) {
+    if (this.isrenderer) {
+      // renderer process
+      ipcRenderer.send(`${this.key}.pleasesend`, channel, message);
+    } else {
+      // main process
+      this.webContents.forEach(wc => {
+        wc.send(`${this.key}.message`, channel, message);
+      })
+      Object.values(this.eventSources).forEach(es => {
+        es.emit(message);
+      })
+    }
+  }
+  events<K extends keyof T>(channel:K):EventSource<T[K]> {
+    if (!this.eventSources[channel]) {
+      this.eventSources[channel] = new EventSource<T[K]>();
+    }
+    return this.eventSources[channel];
+  }
+}
+
+export class RendererEventSource<T> extends EventSource<T> {
+  constructor(private key:string) {
+    super();
+    ipcRenderer.on(`rpc-eventsource-${key}`, (message:T) => {
+      // send to in-renderer subscribers
+      super.emit(message)
+    })
+  }
+  emit(message:T) {
+    // send to host (who will hopefully send it back)
+    ipcRenderer.send(`rpc-eventsource-${this.key}`, message);
+  }
+}
+
+export class MainEventSource<T> extends EventSource<T> {
+  constructor(private key:string) {
+    super();
+    ipcMain.on(`rpc-eventsource-${this.key}`, (message:T) => {
+
+    })
+  }
+}
+

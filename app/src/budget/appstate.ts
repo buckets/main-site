@@ -1,16 +1,18 @@
 import * as moment from 'moment'
 import * as _ from 'lodash'
+import * as log from 'electron-log'
 
 import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import { Connection } from '../models/simplefin'
-import {isBetween} from '../time'
+import { isBetween, ensureLocalMoment } from '../time'
 import {Balances} from '../models/balances'
 import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
 import { sss } from '../i18n'
+import { IBudgetFile } from '../mainprocess/files'
 
 
 interface IComputedAppState {
@@ -49,7 +51,7 @@ export class AppState implements IComputedAppState {
   btransactions: {
     [k: number]: BTrans;
   } = {};
-  connections: {
+  sfinconnections: {
     [k: number]: Connection;
   } = {};
   unknown_accounts: {
@@ -65,8 +67,7 @@ export class AppState implements IComputedAppState {
   month: number = null;
   year: number = null;
 
-  syncing: boolean = false;
-  sync_message: string = '';
+  syncing: number = 0;
 
   rain: number = 0;
   bucket_total_balance: number = 0;
@@ -225,6 +226,8 @@ class DelayingCounter {
 
 export class StateManager {
   public store:IStore;
+  private file:IBudgetFile;
+
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
   private posttick: Set<string> = new Set();
@@ -243,37 +246,33 @@ export class StateManager {
       makeToast(sss('toast.updated-trans', count => `Updated/created ${count} transactions`)(count));
     })
   }
-  setStore(store: IStore) {
+  attach(store: IStore, file:IBudgetFile) {
     this.store = store;
+    this.file = file;
 
-    let events = store.connections.syncer.events
-    events.start.on(({start, end}) => {
+    file.room.events('sync_started').on(message => {
+      let onOrAfter = ensureLocalMoment(message.onOrAfter);
+      let before = ensureLocalMoment(message.before);
+      log.info('Started sync', onOrAfter.format(), before.format());
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
-      })(start, end));
-      this.appstate.syncing = true;
+      })(onOrAfter, before));
+      this.appstate.syncing++;
       this.signalChange();
     })
-    events.fetching_range.on(({start, end}) => {
-      this.appstate.sync_message = sss('sync.status.week', (start:moment.Moment) => {
-        return `week of ${start.format('ll')}`;
-      })(start);
-      this.signalChange();
-    })
-    events.done.on(({start, end, trans_count, errors, cancelled}) => {
-      if (cancelled) {
-        makeToast(sss('sync.cancelled', (trans_count:number) => {
-          return `Synced ${trans_count} transactions before being cancelled.`;
-        })(trans_count));
-      } else {
-        makeToast(sss('sync.done', (trans_count:number, start:moment.Moment, end:moment.Moment) => {
+    file.room.events('sync_done').on(message => {
+      let { result } = message;
+      let onOrAfter = ensureLocalMoment(message.onOrAfter);
+      let before = ensureLocalMoment(message.before);
+      log.info('Sync done', onOrAfter.format(), before.format(), 'errors:', result.errors.length, 'trans:', result.imported_count);
+      this.appstate.syncing--;
+      makeToast(sss('sync.done', (trans_count:number, start:moment.Moment, end:moment.Moment) => {
           return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
-        })(trans_count, start, end));
-      }
-      errors.forEach(err => {
-        makeToast(err, {className:'error'});
+        })(result.imported_count, onOrAfter, before));
+      result.errors.forEach(err => {
+        log.warn('Error during sync:', err);
+        makeToast(err, {className:'error'})
       })
-      this.appstate.syncing = false;
       this.signalChange();
     })
   }
@@ -337,9 +336,9 @@ export class StateManager {
       }
     } else if (isObj(Connection, obj)) {
       if (ev.event === 'update') {
-        this.appstate.connections[obj.id] = obj;
+        this.appstate.sfinconnections[obj.id] = obj;
       } else if (ev.event === 'delete') {
-        delete this.appstate.connections[obj.id];
+        delete this.appstate.sfinconnections[obj.id];
       }
     } else if (isObj(UnknownAccount, obj)) {
       if (ev.event === 'update') {
@@ -478,11 +477,11 @@ export class StateManager {
       })
   }
   fetchConnections() {
-    return this.store.connections.listConnections()
+    return this.store.simplefin.listConnections()
     .then(connections => {
-      this.appstate.connections = {};
+      this.appstate.sfinconnections = {};
       connections.forEach(obj => {
-        this.appstate.connections[obj.id] = obj;
+        this.appstate.sfinconnections[obj.id] = obj;
       })
     })
   }

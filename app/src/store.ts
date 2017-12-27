@@ -63,7 +63,7 @@ export interface IStore {
   // model-specific stuff
   accounts:AccountStore;
   buckets:BucketStore;
-  connections:SimpleFINStore;
+  simplefin:SimpleFINStore;
   reports:ReportStore;
   bankmacro:BankMacroStore;
 }
@@ -74,7 +74,6 @@ export interface IStore {
 export type ObjectEventType =
   'update'
   | 'delete';
-
 
 
 /**

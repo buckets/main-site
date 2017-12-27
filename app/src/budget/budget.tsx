@@ -41,7 +41,7 @@ export async function start(base_element, room) {
   let store = current_file.store;
 
   // initial state
-  manager.setStore(store);
+  manager.attach(store, current_file);
   await manager.refresh();
 
   // watch for changes
@@ -118,10 +118,6 @@ class Navbar extends React.Component<{
       })
       buckets_badge = <div className={cls}><span className="fa fa-tint"/></div>
     }
-    let sync_widget;
-    if (_.values(appstate.connections).length) {
-      sync_widget = <SyncWidget appstate={appstate} />
-    }
     return (
       <div className="nav">
         <div>
@@ -140,7 +136,7 @@ class Navbar extends React.Component<{
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected"><span>{sss('Import')}</span>{import_badge}</Link>
         </div>
         <div>
-          {sync_widget}
+          <SyncWidget appstate={appstate} />
           <a href="#" onClick={(ev) => {
             ev.preventDefault();
             shell.openExternal('https://www.bucketsisbetter.com/chat');

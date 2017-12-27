@@ -265,9 +265,7 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
                 value={options.variation}
                 onChange={ev => {
                   options.variation = ev.target.value;
-                  step.options = options;
-                  console.log('step.options changed to', step.options);
-                  director.emitChange();
+                  director.recording.updateStep(step, {options});
                 }}
               >
                 <option value="">---</option>
@@ -416,8 +414,7 @@ class RecordingStep extends React.Component<RecordingStepProps, {
             first={<button className="icon"><span className="fa fa-trash" /></button>}
             second={<button className="delete"
               onClick={(ev) => {
-                director.current_recording.removeStep(step);
-                director.emitChange();
+                director.recording.removeStep(step);
               }}>Confirm delete</button>}
           />
         </div>
@@ -489,10 +486,10 @@ class RecordPage extends React.Component<RecordPageProps, {
     let save_button = <button
         onClick={() => {
           director.pause();
-          onRecordingChange(director.current_recording);
+          onRecordingChange(director.recording);
         }}>{sss('Save')}</button>
 
-    let steps = director.current_recording.steps
+    let steps = director.recording.steps
     .map((step, i) => {
       return <RecordingStep
         key={i}
@@ -806,7 +803,7 @@ export async function start(args:{
     recording: recording,
   });
   director.events.file_downloaded.on(({filename}) => {
-    makeToast(sss('notify-downloaded-file', filename => `Downloaded file: ${filename}`));
+    makeToast(sss('notify-downloaded-file', filename => `Downloaded file: ${filename}`)(filename));
   })
   director.events.error.on(err => {
     if (err instanceof TimeoutError) {

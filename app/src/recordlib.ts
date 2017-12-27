@@ -397,19 +397,33 @@ export function isDownloadStep(x:RecStep):x is DownloadStep {
   return (<DownloadStep>x).type === 'download';
 }
 
+/**
+ *  Data structure that holds the set of steps that make up a recording
+ *  This is the part that's saved/loaded.
+ */
 export class Recording {
   public steps:Array<TabRecStep> = [];
+  readonly events = {
+    change: new EventSource<boolean>(),
+  }
+
+  updateStep(step:RecStep, newparts:Partial<RecStep>) {
+    Object.assign(step, newparts);
+    this.events.change.emit(true);
+  }
 
   removeStep(step:TabRecStep) {
     let idx = this.steps.indexOf(step);
     this.steps.splice(idx, 1);
+    this.events.change.emit(true);
   }
 
   addStep(step:TabRecStep) {
     log.info('addStep', step.time, step.type);
 
     if (this.steps.length === 0) {
-      this.steps.push(step)
+      this.steps.push(step);
+      this.events.change.emit(true);
       return;
     }
     let last_step = this.steps.slice(-1)[0];
@@ -423,12 +437,14 @@ export class Recording {
         // stick the change before the Enter/Tab
         this.steps.splice(this.steps.length-1, 0, step);
         log.debug('swap change and keypress');
+        this.events.change.emit(true);
         return;
       } else if (isChangeStep(last_step)) {
         if (_.isEqual(last_step.element, step.element)) {
           // remove double change
           log.debug('removing double change');
           this.steps.splice(this.steps.length-1, 1, step);
+          this.events.change.emit(true);
           return;
         }
       }
@@ -442,6 +458,7 @@ export class Recording {
           // combine keypresses
           last_step.keys = last_step.keys.concat(step.keys);
           log.debug('combine keys');
+          this.events.change.emit(true);
           return;
         }
       }
@@ -461,6 +478,7 @@ export class Recording {
         if (isFocusStep(last_step) && _.isEqual(last_step.element, step.element)) {
           log.debug('removing focus before click');
           this.steps.splice(this.steps.length-1, 1, step);
+          this.events.change.emit(true);
           return;
         }
       }
@@ -468,9 +486,11 @@ export class Recording {
 
     // otherwise just add it
     this.steps.push(step);
+    this.events.change.emit(true);
   }
   clear() {
     this.steps = [];
+    this.events.change.emit(true);
   }
   stringify():string {
     return JSON.stringify({
@@ -480,6 +500,7 @@ export class Recording {
   loadFromString(x:string):Recording {
     const data = JSON.parse(x);
     this.steps = data.steps;
+    this.events.change.emit(true);
     return this;
   }
   static parse(x:string):Recording {
@@ -867,7 +888,7 @@ export class RecordingDirector<T> {
 
   // The currently used Recording.  Used for playback
   // and for recording.
-  public current_recording:Recording;
+  public recording:Recording;
   private _showdebug = false;
   
   private STEP_TIMEOUT = 10000;
@@ -897,12 +918,15 @@ export class RecordingDirector<T> {
   constructor(args: {
     recording?:Recording;
   }) {
-    this.current_recording = args.recording || new Recording();
+    this.recording = args.recording || new Recording();
+    this.recording.events.change.on(() => {
+      this.emitChange();
+    })
     this.listenForDownloads();
     this.createTab();
   }
   clear() {
-    this.current_recording.clear();
+    this.recording.clear();
     this.next_tab_id = 1;
     this.tabs = {0: this.tabs[0]}
     this.step_index = 0;
@@ -940,14 +964,13 @@ export class RecordingDirector<T> {
       }
       this.events.file_downloaded.emit({filename});
       if (this.state === 'recording') {
-        this.current_recording.addStep(step);
-        this.emitChange();
+        this.recording.addStep(step);
       }
     })
   }
   async chooseStep(step:TabRecStep) {
     await this.pause()
-    let index = this.current_recording.steps.indexOf(step);
+    let index = this.recording.steps.indexOf(step);
     this.step_index = index;
     this.emitChange();
   }
@@ -987,8 +1010,7 @@ export class RecordingDirector<T> {
           tab_id
         })
         if (this.state === 'recording') {
-          this.current_recording.addStep(tab_step);
-          this.emitChange();
+          this.recording.addStep(tab_step);
         }
       },
       'rec:ready-for-control': () => {
@@ -1005,8 +1027,7 @@ export class RecordingDirector<T> {
           url: webview.getURL(),
           time: Date.now(),
         }
-        this.current_recording.addStep(pageload);  
-        this.emitChange();
+        this.recording.addStep(pageload);  
       } else if (this.state === 'playing') {
         tab.pages_loaded.push({
           title: webview.getTitle(),
@@ -1030,17 +1051,17 @@ export class RecordingDirector<T> {
       url,
       time: Date.now(),
     }
-    if (this.current_recording.steps.length) {
-      this.current_recording.addStep(step)
+    if (this.recording.steps.length) {
+      this.recording.addStep(step)
     } else {
-      this.current_recording.steps.unshift(step);
+      this.recording.steps.unshift(step);
     }
     this.emitChange();
   }
 
   getCurrentStep():TabRecStep {
     try {
-      return this.current_recording.steps[this.step_index];
+      return this.recording.steps[this.step_index];
     } catch(err) {
       return null;
     }
@@ -1110,7 +1131,7 @@ export class RecordingDirector<T> {
     this.busy = true;
 
     try {
-      let steps = this.current_recording.steps;
+      let steps = this.recording.steps;
       if (this.step_index === steps.length) {
         // there is no next step
         return false;

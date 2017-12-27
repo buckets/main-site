@@ -1,7 +1,22 @@
 import * as log from 'electron-log'
 
+/**
+ * Generic EventSource interface.
+ */
+export interface IEventSource<T> {
+  emit(message:T);
+  on(listener:(message:T)=>void):this
+  once(listener:(message:T)=>void):this
+  onceSuccessfully(listener:(message:T)=>boolean|Promise<boolean>):this
+  removeAllListeners():this
+  removeListener(listener:(message:T)=>void):this
+}
 
-export class EventSource<T> {
+
+/**
+ *  Basic, single-process IEventSource implementation.
+ */
+export class EventSource<T> implements IEventSource<T> {
   private listeners:Array<{
     listener: (message:T)=>void|boolean|Promise<boolean>,
     remove?: boolean|'ifsuccessful',

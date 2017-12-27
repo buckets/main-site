@@ -119,14 +119,14 @@ export class RPCMainStore {
 export class RPCRendererStore implements IStore {
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
-  readonly connections:SimpleFINStore;
+  readonly simplefin:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankmacro:BankMacroStore;
   private caller:RPCCaller<IStore>;
   constructor(room:string, readonly bus:IBudgetBus) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
-    this.connections = new SimpleFINStore(this);
+    this.simplefin = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankmacro = new BankMacroStore(this);
     this.caller = new RPCCaller(`rpc-store-${room}`);
