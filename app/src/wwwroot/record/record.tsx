@@ -10,17 +10,13 @@ import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
 import { sss } from '../../i18n'
-import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
 import { Confirmer } from '../../input'
 import { IncorrectPassword } from '../../error'
 import { makeToast, ToastDisplay } from '../../budget/toast'
 import { PrefixLogger } from '../../logging'
+import { Help } from '../../tooltip'
 
 const log = new PrefixLogger('(record)')
-
-function setPath(x:string) {
-  window.location.hash = '#' + x;
-}
 
 
 interface WebviewProps {
@@ -491,6 +487,14 @@ class RecordPage extends React.Component<RecordPageProps, {
           onRecordingChange(director.recording);
         }}>{sss('Save')}</button>
 
+    let record_button = <button
+        className="icon"
+        disabled={director.state === 'recording'}
+        onClick={() => {
+          director.startRecording();
+        }}
+        ><span className="fa fa-circle red" /></button>
+
     let steps = director.recording.steps
     .map((step, i) => {
       return <RecordingStep
@@ -553,13 +557,23 @@ class RecordPage extends React.Component<RecordPageProps, {
     return <div className="record-page">
       <div className="browser-wrap">
         <div className="instructions">
-          This tool will record you getting transaction information from your bank.  You will then be able to replay your recording to download transaction data in the future.
+          To create a macro:
           <ol>
-            <li>Sign in to your bank</li>
-            <li>For each account, download an OFX/QFX making sure to <b>adjust both the start and end date range</b>.</li>
+            <li>Sign in to your bank.  Make sure you have this computer remembered if asked.</li>
+            <li>Sign out</li>
+            <li>Click {record_button}</li>
+            <li>For each account, download a file <Help>
+              Supported formats
+              <ul>
+                <li>Quicken</li>
+                <li>Microsoft Money</li>
+                <li>OFX</li>
+                <li>QFX</li>
+              </ul>
+              </Help> making sure to <b>adjust both the start and end date range</b>.</li>
             <li>Sign out</li>
             <li>Click {stop_button}</li>
-            <li>Adjust each date field in the right panel</li>
+            <li>Adjust each date field (in the panel at the right)</li>
             <li>Click {save_button}</li>
           </ol>
         </div>
@@ -570,13 +584,7 @@ class RecordPage extends React.Component<RecordPageProps, {
       <div className="recording-pane">
         {recording_state}
         <div className="controls">
-          <button
-            className="icon"
-            disabled={director.state === 'recording'}
-            onClick={() => {
-              director.startRecording();
-            }}
-            ><span className="fa fa-circle red" /></button>
+          {record_button}
           <button
             className="icon"
             disabled={director.state === 'recording'}
@@ -657,52 +665,6 @@ class RecordPage extends React.Component<RecordPageProps, {
   }
 }
 
-interface SignInPageProps {
-  partition: string;
-}
-class SignInPage extends React.Component<SignInPageProps, any> {
-  render() {
-    let { partition } = this.props;
-    return <div className="browser-wrap">
-      <div className="instructions">
-        Many banks require extra verification (e.g. security questions, being texted/emailed a code, etc.) when accessing their website from a new computer or device.  In order to remember this computer, follow these steps:
-        <ol>
-          <li>{sss("Enter your bank's URL below.")}</li>
-          <li>{sss("Sign in.  Make sure you choose to have this computer remembered if asked.")}</li>
-          <li>{sss("Click this button:")} <button
-            onClick={() => {
-              setPath('/record');
-            }}>{sss('I signed in')}</button></li>
-        </ol>
-      </div>
-      <Browser
-        partition={partition} />
-    </div>
-  }
-}
-
-// interface SettingsPageProps {
-//   bankmacro: BankMacro;
-//   store: IStore;
-//   renderer: Renderer;
-// }
-// class SettingsPage extends React.Component<SettingsPageProps, any> {
-//   render() {
-//     let { bankmacro, store, renderer } = this.props;
-//     return <div className="padded">
-//       {sss('Macro/bank name:')} <DebouncedInput
-//         type="text"
-//         placeholder={sss("e.g. My Bank")}
-//         value={bankmacro.name}
-//         onChange={val => {
-//           renderer.doUpdate(() => {
-//             return store.bankmacro.update(bankmacro.id, {name: val})  
-//           })
-//         }}/>
-//     </div>
-//   }
-// }
-
 interface RecordingAppProps {
   preload: string;
   partition: string;
@@ -716,44 +678,18 @@ interface RecordingAppProps {
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, partition, bankmacro, recording, onRecordingChange, director, onLoadRecordPage } = this.props;
-    let path = window.location.hash.substr(1);
-    return <Router
-      path={path}
-      setPath={setPath}>
+    let { preload, partition, recording, onRecordingChange, director, onLoadRecordPage } = this.props;
+    return <div className="page-wrap">
         <ToastDisplay />
-        <div className="app">
-          <div className="nav recording-nav">
-            <div>
-              <div className="label">{bankmacro.name}</div>
-              <Link relative to="/signin" exactMatchClass="selected"><span>{sss('Sign in')}</span></Link>
-              <Link relative to="/record" exactMatchClass="selected"><span>{sss('Record')}</span></Link>
-            </div>
-          </div>
-          <div className="content">
-            <div className="page">
-              <Switch>
-                <Route path="/signin">
-                  <SignInPage
-                    partition={partition}
-                  />
-                </Route>
-                <Route path="/record">
-                  <RecordPage
-                    director={director}
-                    preload={preload}
-                    partition={partition}
-                    recording={recording}
-                    onLoad={onLoadRecordPage}
-                    onRecordingChange={onRecordingChange}
-                  />
-                </Route>
-                <Redirect to="/signin" />
-              </Switch>
-            </div>
-          </div>
-        </div>
-    </Router>
+        <RecordPage
+          director={director}
+          preload={preload}
+          partition={partition}
+          recording={recording}
+          onLoad={onLoadRecordPage}
+          onRecordingChange={onRecordingChange}
+        />
+    </div>
   }
 }
 
@@ -852,13 +788,9 @@ export async function start(args:{
             current_window.show();
             current_window.focus();
           });
-        } else if (!recording
-            || (recording && !recording.steps.length)) {
-          director.startRecording();
         }
       }}
       onRecordingChange={(new_recording) => {
-        console.log('recording change', new_recording);
         store.bankmacro.update(args.macro_id, {
           recording: new_recording,
         })
@@ -885,18 +817,10 @@ export async function start(args:{
   store.bus.obj.on(async (ev) => {
     let obj = ev.obj;
     if (isObj(BankMacro, obj) && obj.id === args.macro_id) {
-      console.log('Update of the recording this page is looking at');
       BANKMACRO = Object.assign(BANKMACRO, obj);
       renderer.doUpdate();
     }
   })
 
   renderer.doUpdate()
-  .then(() => {
-    console.log('doUpdate done');
-    console.log('args', args);
-    if (args.autoplay) {
-      setPath('/record');
-    }
-  })
 }

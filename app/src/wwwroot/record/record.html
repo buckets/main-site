@@ -19,9 +19,15 @@
       width: 100vw;
       height: 100vh;
     }
+    .page-wrap {
+      width: 100vw;
+      height: 100vh;
+    }
     .record-page {
+      flex-grow: 1;
       display: flex;
       width: 100%;
+      height: 100%;
     }
     .record-page .recording-pane {
       flex-shrink: 0;
@@ -102,7 +108,9 @@
     }
     .instructions {
       padding: 1.5rem;
+      max-height: 15rem;
       background-color: var(--faint-blue);
+      overflow: auto;
     }
     .instructions li {
       margin: .25rem 0;
