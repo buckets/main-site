@@ -202,18 +202,24 @@ export class BudgetFile implements IBudgetFile {
    *  Open a new budget-specific window.
    *
    *  @param path  Relative path to open
-   *  @param hide  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.  
+   *  @param hide  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.
+   *  @param options  Extra BrowserWindow options
    */
-  openWindow(path:string, hide?:boolean):Electron.BrowserWindow {
+  openWindow(path:string, args: {
+      hide?: boolean;
+      options?: Partial<Electron.BrowserWindowConstructorOptions>;
+    } = {}):Electron.BrowserWindow {
     log.info('opening new window to', path);
     const parsed = Path.parse(this.filename);
-    let win = new BrowserWindow({
+    let options:Partial<Electron.BrowserWindowConstructorOptions> = {
       width: 1200,
       height: 900,
       show: false,
       title: `Buckets - ${parsed.name}`,
-    });
-    if (!hide) {
+    }
+    options = Object.assign(options, args.options || {})
+    let win = new BrowserWindow(options);
+    if (!args.hide) {
       win.once('ready-to-show', () => {
         win.show();
       })  
@@ -365,7 +371,13 @@ export class BudgetFile implements IBudgetFile {
       response_id,
       autoplay: JSON.stringify(autoplay),
     })
-    win = this.openWindow(`/record/record.html?${qs}`, hide);
+    win = this.openWindow(`/record/record.html?${qs}`, {
+      hide,
+      options: {
+        width: 1100,
+        height: 800,
+      }
+    });
     
     if (autoplay) {
       return new Promise((resolve, reject) => {

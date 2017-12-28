@@ -8,8 +8,6 @@ Recording:
   ☐ Timeout when a step can't be completed.
     ☐ Turn to paused
     ☐ Display a message to the user
-  ✔ Sync button should use macros that are enabled @done (17-12-28 11:22)
-  ☐ Let people type in URL without http://
   ☐ Add thorough, debuggable logging
   ☐ Test all of your own banks
   ☐ Test Every Button
@@ -61,6 +59,8 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Let people type in URL without http:// @done (17-12-28 11:56) @project(Recording)
+ ✔ Sync button should use macros that are enabled @done (17-12-28 11:22) @project(Recording)
  ✔ Notify on download @done (17-12-22 22:02) @project(Recording)
  ✔ Record download step. @done (17-12-22 10:57) @project(Recording)
  ✔ On Ally, the date input changes aren't detected (MutationObserver?) @done (17-12-22 10:57) @project(Recording)
