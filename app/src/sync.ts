@@ -22,6 +22,9 @@ export interface ISyncChannel {
   syncTransactions(onOrAfter:moment.Moment, before:moment.Moment):ASyncening;
 }
 
+/**
+ *  Aggregate ISyncChannel
+ */
 export class MultiSyncer implements ISyncChannel {
   constructor(private channels:ISyncChannel[]) {
 
@@ -41,7 +44,6 @@ class MultiSyncerSync implements ASyncening {
   readonly done = new EventSource<SyncResult>()
 
   constructor(readonly onOrAfter:moment.Moment, readonly before:moment.Moment, readonly subs:ASyncening[]) {
-
   }
   async start() {    
     let promises:Array<Promise<SyncResult>> = [];

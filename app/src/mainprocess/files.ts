@@ -20,6 +20,7 @@ import { onlyRunInMain, Room } from '../rpc'
 import { importFile } from '../importing'
 import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
+import { SimpleFINSyncer } from '../models/simplefin'
 
 
 interface BudgetFileEvents {
@@ -111,7 +112,10 @@ export class BudgetFile implements IBudgetFile {
     this.filename = filename || '';
     this.bus = new BudgetBus(this.id);
     this.store = new DBStore(filename, this.bus, true);
-    this.syncer = new MultiSyncer([]);
+    this.syncer = new MultiSyncer([
+      new SimpleFINSyncer(this.store),
+
+    ]);
     BudgetFile.REGISTRY[this.id] = this;
   }
 
@@ -330,6 +334,8 @@ export class BudgetFile implements IBudgetFile {
     onOrAfter: Timestamp,
     before: Timestamp,
   }) {
+    Matt, you need to make this (or make a new method that just plays) return a Promise that, on autoplay, will resolve with the number of transactions imported or else reject with an error on timeout or any other problem.
+     
     const bankmacro = await this.store.bankmacro.get(macro_id);
 
     const partition = `persist:rec-${bankmacro.uuid}`;
@@ -441,8 +447,8 @@ class RendererBudgetFile implements IBudgetFile {
   }) {
     try {
       if (autoplay) {
-        autoplay.before = ts2db(autoplay.before);
-        autoplay.onOrAfter = ts2db(autoplay.onOrAfter);
+        autoplay.before = serializeTimestamp(autoplay.before);
+        autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter);
       }
       await this.callInMain('openRecordWindow', macro_id, autoplay) 
     } catch(err) {

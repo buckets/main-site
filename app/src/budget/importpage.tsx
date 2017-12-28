@@ -36,7 +36,11 @@ export class SyncWidget extends React.Component<{
         href="#"
         onClick={ev => {
           ev.preventDefault();
-          syncCurrentMonth(appstate);
+          if (syncing) {
+            makeToast(sss('A sync is already in progress'), {className: 'warning'})
+          } else {
+            syncCurrentMonth(appstate);  
+          }
           return false;
         }}>
         <span>

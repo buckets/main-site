@@ -1,9 +1,11 @@
-import * as log from 'electron-log'
 import * as electron_is from 'electron-is'
 import {v4 as uuid} from 'uuid'
-import { ipcMain, ipcRenderer } from 'electron'
+import { ipcMain, ipcRenderer, webContents } from 'electron'
 import * as crypto from 'crypto'
 import { EventSource } from './events'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger(electron_is.renderer() ? '(rpc.rend)' : '(rpc.main)')
 
 //--------------------------------------------------------------------------------
 // General purpose RPC from renderer to main and back
@@ -60,7 +62,7 @@ export function onlyRunInMain<F extends Function>(func:F):F {
  *  Can be used in either main or renderer process.
  */
 export class Room<T> {
-  private webContents:Electron.WebContents[] = [];
+  private webContents = new Set<Electron.WebContents>();
   private isrenderer:boolean;
   private eventSources:{
     [k:string]: EventSource<any>,
@@ -71,6 +73,7 @@ export class Room<T> {
     if (this.isrenderer) {
       // renderer process
       ipcRenderer.send(`${this.key}.join`);
+      log.debug(this.key, 'joining');
       ipcRenderer.on(`${this.key}.message`, (ev, channel, message) => {
         let es = this.eventSources[channel];
         if (es) {
@@ -79,10 +82,16 @@ export class Room<T> {
       })
     } else {
       // main process
-      ipcMain.on(`${this.key}.join`, (ev) => {
-        this.webContents.push(ev.sender);
-        ev.sender.on('destroyed', () => {
-          this.webContents.splice(this.webContents.indexOf(ev.sender, 1));
+      ipcMain.on(`${this.key}.join`, (ev:Electron.IpcMessageEvent) => {
+        let wc = webContents.fromId(ev.sender.id);
+        if (!this.webContents.has(wc)) {
+          log.debug(this.key, 'renderer joined:', wc.id)
+        }
+        this.webContents.add(wc);
+        
+        wc.on('destroyed', () => {
+          log.debug(this.key, 'renderer destroyed:', wc.id)
+          this.webContents.delete(wc);
         })
       })
       ipcMain.on(`${this.key}.pleasesend`, <K extends keyof T>(ev, channel:K, message:T[K]) => {
@@ -97,11 +106,13 @@ export class Room<T> {
     } else {
       // main process
       this.webContents.forEach(wc => {
+        log.debug(this.key, 'broadcasting to', wc.id);
         wc.send(`${this.key}.message`, channel, message);
       })
-      Object.values(this.eventSources).forEach(es => {
+      let es = this.eventSources[channel];
+      if (es) {
         es.emit(message);
-      })
+      }
     }
   }
   events<K extends keyof T>(channel:K):EventSource<T[K]> {

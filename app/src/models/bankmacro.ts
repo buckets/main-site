@@ -1,9 +1,13 @@
+import * as moment from 'moment'
 import {v4 as uuid} from 'uuid'
+
 import { IObject, IStore, registerClass } from '../store'
 import { encrypt, decrypt, getPassword, cachePassword } from '../crypto'
 import * as reclib from '../recordlib'
 import { IncorrectPassword } from '../error'
 import { sss } from '../i18n'
+import { ISyncChannel, ASyncening, SyncResult } from '../sync'
+import { EventSource } from '../events'
 
 export class BankMacro implements IObject {
   static type: string = 'bank_macro';
@@ -144,5 +148,29 @@ export class BankMacroStore {
   }
   async delete(macro_id:number):Promise<any> {
     return this.store.deleteObject(BankMacro, macro_id);
+  }
+}
+
+
+export class MacroSyncer implements ISyncChannel {
+  constructor(private store:IStore) {
+  }
+  syncTransactions(onOrAfter:moment.Moment, before:moment.Moment) {
+    return new MacroSync();
+  }
+}
+
+class MacroSync implements ASyncening {
+  readonly done = new EventSource<SyncResult>();
+  public result:SyncResult;
+
+  constructor(readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
+
+  }
+  async start() {
+
+  }
+  cancel() {
+    throw new Error('Not implemented');
   }
 }

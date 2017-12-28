@@ -1163,6 +1163,12 @@ table.props th {
   font-weight: bold;
   border-color: var(--darker-red);
 }
+.toasts .toast.warning {
+  background-color: var(--yellow);
+  color: black;
+  font-weight: bold;
+  border-color: var(--yellow);
+}
 .toast-enter {
   right: -100%;
   opacity: 0;

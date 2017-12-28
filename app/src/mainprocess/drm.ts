@@ -6,6 +6,7 @@ import * as jwt from 'jsonwebtoken'
 import * as fs from 'fs'
 import * as moment from 'moment'
 import { readState, modifyState } from './persistent'
+import { onlyRunInMain } from '../rpc'
 
 let ISREGISTERED = null;
 export function isRegistered():boolean {
@@ -30,7 +31,7 @@ suffix;
 
 let win:Electron.BrowserWindow = null;
 
-export function promptForLicense() {
+export const promptForLicense = onlyRunInMain(() => {
   if (win) {
     win.focus();
     return;
@@ -51,7 +52,7 @@ export function promptForLicense() {
     path = `file://${path}`
     win.loadURL(path);
   }
-}
+})
 
 function licenseFilePath() {
   let real_app = remote ? remote.app : app;

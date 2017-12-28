@@ -1,5 +1,4 @@
 import * as req from 'request-promise'
-import * as log from 'electron-log';
 import * as moment from 'moment'
 
 import { IObject, IStore, registerClass } from '../store'
@@ -10,6 +9,9 @@ import { EventSource } from '../events'
 import { sss } from '../i18n'
 import { hashStrings } from '../importing'
 import { UnknownAccount } from './account'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(simplefin)')
 
 import { ISyncChannel, ASyncening, SyncResult } from '../sync'
 
@@ -69,27 +71,22 @@ export function sleep(milliseconds:number):Promise<any> {
   })
 }
 
-export class SimpleFINSync implements ASyncening {
+class SimpleFINSync implements ASyncening {
   readonly done = new EventSource<SyncResult>()
   public result:SyncResult;
 
   private time_range:number = 7;
   private time_unit:string = 'day';
-  private delay = 1000;
-  private running:boolean = false;
+  private delay = 100;
   private please_stop:boolean = false;
 
   constructor(private store:IStore, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
 
   }
   async start() {
-    if (this.running) {
-      return;
-    }
     let { onOrAfter, before } = this;
     log.info(`Sync started from ${onOrAfter.format()} to ${before.format()}`)
     this.please_stop = false;
-    this.running = true;
 
     let imported_count = 0;
     let errors = new Set();
@@ -122,7 +119,6 @@ export class SimpleFINSync implements ASyncening {
       log.error("Unexpected sync error:", err.toString(), err.stack)
       errors.add(sss('Unexpected sync error'))
     } finally {
-      this.running = false;
       this.please_stop = false;
       this.result = {
         errors: Array.from(errors),
