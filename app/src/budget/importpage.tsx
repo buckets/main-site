@@ -11,12 +11,13 @@ import { DateTime } from '../time'
 import { sss } from '../i18n'
 import { DebouncedInput, Confirmer } from '../input'
 import { current_file } from '../mainprocess/files'
+import { Help } from '../tooltip'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
   let onOrAfter = range.onOrAfter.clone();
   let before = range.before.clone();
-  current_file.startSync(onOrAfter, before);
+  return current_file.startSync(onOrAfter, before)
 }
 
 
@@ -34,12 +35,16 @@ export class SyncWidget extends React.Component<{
     return <div className="sync-widget">
       <a
         href="#"
-        onClick={ev => {
+        onClick={async ev => {
           ev.preventDefault();
           if (syncing) {
             makeToast(sss('A sync is already in progress'), {className: 'warning'})
           } else {
-            syncCurrentMonth(appstate);  
+            try {
+              await syncCurrentMonth(appstate);  
+            } catch(err) {
+              makeToast(sss('Error running sync'), {className: 'error'});
+            }
           }
           return false;
         }}>
@@ -121,6 +126,7 @@ export class ImportPage extends React.Component<{
         <h2>{sss('Macros')}</h2>
         <BankMacroList
           macros={Object.values(appstate.bank_macros)}
+          running_bank_macros={appstate.running_bank_macros}
         />
       </div>
     }
@@ -145,7 +151,7 @@ export class ImportPage extends React.Component<{
                   syncCurrentMonth(appstate);
                 }
               }}
-              disabled={!conns}><span className={cx("fa fa-refresh", {
+              disabled={!conns && !macros}><span className={cx("fa fa-refresh", {
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
             <button onClick={() => {
@@ -285,12 +291,14 @@ export class ImportPage extends React.Component<{
 
 class BankMacroList extends React.Component<{
   macros: BankMacro[];
+  running_bank_macros: Set<number>;
 }, {}> {
   render() {
+    let { running_bank_macros } = this.props;
     return <table className="ledger">
       <thead>
         <tr>
-          <th>{sss('ID')}</th>
+          <th><Help icon={sss('On')}>{sss('When "On" this macro will be run during a normal sync.')}</Help></th>
           <th>{sss('Name')}</th>
           <th></th>
           <th></th>
@@ -299,8 +307,42 @@ class BankMacroList extends React.Component<{
       </thead>
       <tbody>
         {this.props.macros.map((macro, idx) => {
+          let play_button;
+          if (running_bank_macros.has(macro.id)) {
+            // macro is currently running
+            play_button = <button className="icon">
+              <span className="fa fa-refresh fa-spin"/>
+            </button>
+          } else {
+            // macro is currently not running
+            play_button = <button className="icon"
+              onClick={() => {
+                let { onOrAfter, before } = manager.appstate.viewDateRange;
+                let today = moment();
+                if (today.isBefore(onOrAfter)) {
+                  // We're in the future
+                  onOrAfter = today.clone().startOf('month');
+                }
+                before = onOrAfter.clone().add(1, 'month');
+                if (today.isBefore(before)) {
+                  before = today.clone().subtract(1, 'day');
+                }
+                current_file.openRecordWindow(macro.id, {
+                  onOrAfter,
+                  before,
+                })
+              }}><span className="fa fa-play"></span></button>
+          }
           return <tr key={idx}>
-            <td>{macro.id}</td>
+            <td className="center">
+              <input
+                type="checkbox"
+                checked={macro.enabled}
+                onClick={(ev) => {
+                  manager.store.bankmacro.update(macro.id, {enabled: (ev.target as any).checked});
+                }}
+              />
+            </td>
             <td>
               <DebouncedInput
                 blendin
@@ -320,23 +362,7 @@ class BankMacroList extends React.Component<{
               </button>
             </td>
             <td className="icon-button-wrap">
-              <button className="icon"
-                onClick={() => {
-                  let { onOrAfter, before } = manager.appstate.viewDateRange;
-                  let today = moment();
-                  if (today.isBefore(onOrAfter)) {
-                    // We're in the future
-                    onOrAfter = today.clone().startOf('month');
-                  }
-                  before = onOrAfter.clone().add(1, 'month');
-                  if (today.isBefore(before)) {
-                    before = today.clone().subtract(1, 'day');
-                  }
-                  current_file.openRecordWindow(macro.id, {
-                    onOrAfter,
-                    before,
-                  })
-                }}><span className="fa fa-play"></span></button>
+              {play_button}
             </td>
             <td className="icon-button-wrap">
               <Confirmer

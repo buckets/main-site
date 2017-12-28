@@ -62,7 +62,7 @@ export function onlyRunInMain<F extends Function>(func:F):F {
  *  Can be used in either main or renderer process.
  */
 export class Room<T> {
-  private webContents = new Set<Electron.WebContents>();
+  private webContents = new Map<number, Electron.WebContents>();
   private isrenderer:boolean;
   private eventSources:{
     [k:string]: EventSource<any>,
@@ -83,15 +83,17 @@ export class Room<T> {
     } else {
       // main process
       ipcMain.on(`${this.key}.join`, (ev:Electron.IpcMessageEvent) => {
-        let wc = webContents.fromId(ev.sender.id);
-        if (!this.webContents.has(wc)) {
-          log.debug(this.key, 'renderer joined:', wc.id)
+        let wc_id = ev.sender.id;
+        if (this.webContents.has(wc_id)) {
+          return;
         }
-        this.webContents.add(wc);
-        
+
+        let wc = webContents.fromId(wc_id);
+        log.debug(this.key, 'renderer joined:', wc_id)
+        this.webContents.set(wc_id, wc);
         wc.on('destroyed', () => {
-          log.debug(this.key, 'renderer destroyed:', wc.id)
-          this.webContents.delete(wc);
+          log.debug(this.key, 'renderer destroyed:', wc_id)
+          this.webContents.delete(wc_id);
         })
       })
       ipcMain.on(`${this.key}.pleasesend`, <K extends keyof T>(ev, channel:K, message:T[K]) => {
@@ -106,7 +108,6 @@ export class Room<T> {
     } else {
       // main process
       this.webContents.forEach(wc => {
-        log.debug(this.key, 'broadcasting to', wc.id);
         wc.send(`${this.key}.message`, channel, message);
       })
       let es = this.eventSources[channel];

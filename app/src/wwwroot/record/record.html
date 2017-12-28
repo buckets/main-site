@@ -204,7 +204,7 @@ const {start} = req('./src/wwwroot/record/record.js');
 const container = document.getElementById('recorder');
 const preload_url = 'file://' + Path.resolve(appPath, './src/wwwroot/record/preload.js');
 const parsed_qs = querystring.parse(window.location.search.substr(1));
-const { partition } = parsed_qs;
+const { partition, response_id } = parsed_qs;
 const autoplay_JSON = parsed_qs.autoplay;
 let autoplay;
 if (autoplay_JSON) {
@@ -218,6 +218,7 @@ start({
   macro_id,
   partition,
   autoplay,
+  response_id,
 })
 .catch(err => {
   log.error(err.stack);

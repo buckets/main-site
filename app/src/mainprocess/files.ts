@@ -1,4 +1,3 @@
-import * as log from 'electron-log'
 import * as Path from 'path'
 import * as URL from 'url';
 import * as electron_is from 'electron-is'
@@ -9,7 +8,7 @@ import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'elect
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
-import { Timestamp, ts2db, serializeTimestamp, ensureLocalMoment } from '../time'
+import { Timestamp, serializeTimestamp, ensureLocalMoment } from '../time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
@@ -21,7 +20,9 @@ import { importFile } from '../importing'
 import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
 import { SimpleFINSyncer } from '../models/simplefin'
+import { MacroSyncer } from '../models/bankmacro'
 
+const log = new PrefixLogger('(files)')
 
 interface BudgetFileEvents {
   sync_started: {
@@ -32,6 +33,12 @@ interface BudgetFileEvents {
     onOrAfter: string;
     before: string;
     result: SyncResult;
+  };
+  macro_started: {
+    id: number;
+  };
+  macro_stopped: {
+    id: number;
   };
 }
 
@@ -46,7 +53,7 @@ export interface IBudgetFile {
   openRecordWindow(macro_id:number, autoplay?:{
     onOrAfter: Timestamp,
     before: Timestamp,
-  });
+  }):Promise<any|SyncResult>;
   
   /**
    *  Import a transaction-laden file
@@ -113,8 +120,8 @@ export class BudgetFile implements IBudgetFile {
     this.bus = new BudgetBus(this.id);
     this.store = new DBStore(filename, this.bus, true);
     this.syncer = new MultiSyncer([
+      new MacroSyncer(this.store, this),
       new SimpleFINSyncer(this.store),
-
     ]);
     BudgetFile.REGISTRY[this.id] = this;
   }
@@ -195,9 +202,9 @@ export class BudgetFile implements IBudgetFile {
    *  Open a new budget-specific window.
    *
    *  @param path  Relative path to open
-   *  @param dont_show  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.  
+   *  @param hide  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.  
    */
-  openWindow(path:string, dont_show?:boolean) {
+  openWindow(path:string, hide?:boolean):Electron.BrowserWindow {
     log.info('opening new window to', path);
     const parsed = Path.parse(this.filename);
     let win = new BrowserWindow({
@@ -206,7 +213,7 @@ export class BudgetFile implements IBudgetFile {
       show: false,
       title: `Buckets - ${parsed.name}`,
     });
-    if (!dont_show) {
+    if (!hide) {
       win.once('ready-to-show', () => {
         win.show();
       })  
@@ -225,6 +232,7 @@ export class BudgetFile implements IBudgetFile {
       // unlink from this instance
       delete BudgetFile.WIN2FILE[win.id];
     })
+    return win;
   }
 
   private _sessions:{
@@ -334,25 +342,43 @@ export class BudgetFile implements IBudgetFile {
     onOrAfter: Timestamp,
     before: Timestamp,
   }) {
-    Matt, you need to make this (or make a new method that just plays) return a Promise that, on autoplay, will resolve with the number of transactions imported or else reject with an error on timeout or any other problem.
-     
+    let win:Electron.BrowserWindow;
     const bankmacro = await this.store.bankmacro.get(macro_id);
 
     const partition = `persist:rec-${bankmacro.uuid}`;
     this.ensureSession(partition);
 
+    let response_id:string;
+    let hide:boolean = false;
     if (autoplay) {
-      autoplay.onOrAfter = ts2db(autoplay.onOrAfter)
-      autoplay.before = ts2db(autoplay.before)
+      autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter)
+      autoplay.before = serializeTimestamp(autoplay.before)
+      response_id = uuid();
+      hide = true;
+      this.room.broadcast('macro_started', {id: macro_id});
     }
 
     // Load the url
     const qs = querystring.stringify({
       macro_id,
       partition,
+      response_id,
       autoplay: JSON.stringify(autoplay),
     })
-    this.openWindow(`/record/record.html?${qs}`, true);
+    win = this.openWindow(`/record/record.html?${qs}`, hide);
+    
+    if (autoplay) {
+      return new Promise((resolve, reject) => {
+        ipcMain.once('buckets:playback-response', (ev:Electron.IpcMessageEvent, message:SyncResult) => {
+          log.info('closing macro window', win.id);
+          win.close();
+          this.room.broadcast('macro_stopped', {id: macro_id});
+          resolve(message);
+        })
+      })
+    } else {
+      return Promise.resolve(null);
+    }
   }
 
   async importFile(path:string) {
@@ -393,27 +419,23 @@ export class BudgetFile implements IBudgetFile {
   }
 
 
-  startSync(onOrAfter:Timestamp, before:Timestamp) {
+  async startSync(onOrAfter:Timestamp, before:Timestamp) {
     let m_onOrAfter = ensureLocalMoment(onOrAfter);
     let m_before = ensureLocalMoment(before);
     let sync = this.syncer.syncTransactions(m_onOrAfter, m_before);
     this.running_syncs.push(sync);
-    return new Promise(resolve => {
-      sync.done.once(result => {
-        this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
-        this.room.broadcast('sync_done', {
-          onOrAfter: serializeTimestamp(onOrAfter),
-          before: serializeTimestamp(m_before),
-          result,
-        })
-        resolve(result);
-      })
-      this.room.broadcast('sync_started', {
-        onOrAfter: serializeTimestamp(onOrAfter),
-        before: serializeTimestamp(m_before),
-      })
-      sync.start();
-    });
+    let p = sync.start();
+    this.room.broadcast('sync_started', {
+      onOrAfter: serializeTimestamp(onOrAfter),
+      before: serializeTimestamp(m_before),
+    })
+    let result = await p;
+    this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
+    this.room.broadcast('sync_done', {
+      onOrAfter: serializeTimestamp(onOrAfter),
+      before: serializeTimestamp(m_before),
+      result,
+    })
   }
 
   cancelSync() {

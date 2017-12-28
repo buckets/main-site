@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as cx from 'classnames'
 import { Timestamp, ensureLocalMoment } from '../../time'
-import { remote } from 'electron'
+import { remote, ipcRenderer } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankMacro } from '../../models/bankmacro'
 import { current_file } from '../../mainprocess/files'
@@ -11,10 +11,12 @@ import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
 import { sss } from '../../i18n'
 import { Router, Route, Link, Switch, Redirect} from '../../budget/routing'
-import { DebouncedInput, Confirmer } from '../../input'
+import { Confirmer } from '../../input'
 import { IncorrectPassword } from '../../error'
 import { makeToast, ToastDisplay } from '../../budget/toast'
+import { PrefixLogger } from '../../logging'
 
+const log = new PrefixLogger('(record)')
 
 function setPath(x:string) {
   window.location.hash = '#' + x;
@@ -679,27 +681,27 @@ class SignInPage extends React.Component<SignInPageProps, any> {
   }
 }
 
-interface SettingsPageProps {
-  bankmacro: BankMacro;
-  store: IStore;
-  renderer: Renderer;
-}
-class SettingsPage extends React.Component<SettingsPageProps, any> {
-  render() {
-    let { bankmacro, store, renderer } = this.props;
-    return <div className="padded">
-      {sss('Macro/bank name:')} <DebouncedInput
-        type="text"
-        placeholder={sss("e.g. My Bank")}
-        value={bankmacro.name}
-        onChange={val => {
-          renderer.doUpdate(() => {
-            return store.bankmacro.update(bankmacro.id, {name: val})  
-          })
-        }}/>
-    </div>
-  }
-}
+// interface SettingsPageProps {
+//   bankmacro: BankMacro;
+//   store: IStore;
+//   renderer: Renderer;
+// }
+// class SettingsPage extends React.Component<SettingsPageProps, any> {
+//   render() {
+//     let { bankmacro, store, renderer } = this.props;
+//     return <div className="padded">
+//       {sss('Macro/bank name:')} <DebouncedInput
+//         type="text"
+//         placeholder={sss("e.g. My Bank")}
+//         value={bankmacro.name}
+//         onChange={val => {
+//           renderer.doUpdate(() => {
+//             return store.bankmacro.update(bankmacro.id, {name: val})  
+//           })
+//         }}/>
+//     </div>
+//   }
+// }
 
 interface RecordingAppProps {
   preload: string;
@@ -714,7 +716,7 @@ interface RecordingAppProps {
 }
 class RecordingApp extends React.Component<RecordingAppProps, any> {
   render() {
-    let { preload, partition, bankmacro, recording, store, renderer, onRecordingChange, director, onLoadRecordPage } = this.props;
+    let { preload, partition, bankmacro, recording, onRecordingChange, director, onLoadRecordPage } = this.props;
     let path = window.location.hash.substr(1);
     return <Router
       path={path}
@@ -724,7 +726,6 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
           <div className="nav recording-nav">
             <div>
               <div className="label">{bankmacro.name}</div>
-              <Link relative to="/settings" exactMatchClass="selected"><span>{sss('Settings')}</span></Link>
               <Link relative to="/signin" exactMatchClass="selected"><span>{sss('Sign in')}</span></Link>
               <Link relative to="/record" exactMatchClass="selected"><span>{sss('Record')}</span></Link>
             </div>
@@ -732,13 +733,6 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
           <div className="content">
             <div className="page">
               <Switch>
-                <Route path="/settings">
-                  <SettingsPage
-                    bankmacro={bankmacro}
-                    store={store}
-                    renderer={renderer}
-                  />
-                </Route>
                 <Route path="/signin">
                   <SignInPage
                     partition={partition}
@@ -754,7 +748,7 @@ class RecordingApp extends React.Component<RecordingAppProps, any> {
                     onRecordingChange={onRecordingChange}
                   />
                 </Route>
-                <Redirect to="/settings" />
+                <Redirect to="/signin" />
               </Switch>
             </div>
           </div>
@@ -769,6 +763,7 @@ export async function start(args:{
     preload_url:string,
     macro_id:number,
     partition:string,
+    response_id?:string,
     autoplay?: {
       onOrAfter: Timestamp,
       before: Timestamp,
@@ -802,6 +797,11 @@ export async function start(args:{
   let director = new RecordingDirector({
     recording: recording,
   });
+  director.events.newpage.on(message => {
+    if (!BANKMACRO.name) {
+      store.bankmacro.update(BANKMACRO.id, {name: message.title});
+    }
+  })
   director.events.file_downloaded.on(({filename}) => {
     makeToast(sss('notify-downloaded-file', filename => `Downloaded file: ${filename}`)(filename));
   })
@@ -837,6 +837,20 @@ export async function start(args:{
               let date = ensureLocalMoment(args.autoplay.before);
               return date.format(options.variation);
             }
+          })
+          .then(playback_result => {
+            log.debug('playback_result', playback_result);
+            if (args.response_id) {
+              ipcRenderer.send('buckets:playback-response', {
+                errors: [],
+                imported_count: 0,
+              })
+            }
+          })
+          .catch(err => {
+            let current_window = remote.getCurrentWindow();
+            current_window.show();
+            current_window.focus();
           });
         } else if (!recording
             || (recording && !recording.steps.length)) {
@@ -885,5 +899,4 @@ export async function start(args:{
       setPath('/record');
     }
   })
-  remote.getCurrentWindow().show();
 }

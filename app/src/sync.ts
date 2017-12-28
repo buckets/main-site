@@ -1,5 +1,4 @@
 import * as moment from 'moment'
-import { EventSource } from './events'
 
 export interface SyncResult {
   errors: string[];
@@ -9,9 +8,8 @@ export interface SyncResult {
 export interface ASyncening {
   onOrAfter: moment.Moment;
   before: moment.Moment;
-  done: EventSource<SyncResult>;
   result: SyncResult;
-  start();
+  start():Promise<SyncResult>;
   cancel();
 }
 
@@ -41,29 +39,15 @@ export class MultiSyncer implements ISyncChannel {
  */
 class MultiSyncerSync implements ASyncening {
   public result: SyncResult;
-  readonly done = new EventSource<SyncResult>()
 
   constructor(readonly onOrAfter:moment.Moment, readonly before:moment.Moment, readonly subs:ASyncening[]) {
   }
-  async start() {    
-    let promises:Array<Promise<SyncResult>> = [];
-    
-    // Start them
-    this.subs.forEach(sub => {
-      promises.push(new Promise(resolve => {
-        sub.done.once(result => {
-          resolve(result);
-        })
-      }));
-      sub.start();
-    })
-
-    // Process results
+  async start() {
     let errors:string[] = [];
     let imported_count = 0;
-    for (let promise of promises) {
+    for (let sub of this.subs) {
       try {
-        let result = await promise;
+        let result = await sub.start();
         errors = errors.concat(result.errors);
         imported_count += result.imported_count;
       } catch(err) {
@@ -74,7 +58,7 @@ class MultiSyncerSync implements ASyncening {
       errors,
       imported_count,
     }
-    this.done.emit(this.result);
+    return this.result;
   }
   cancel() {
     this.subs.forEach(sub => {

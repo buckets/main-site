@@ -1,6 +1,5 @@
 import * as moment from 'moment'
 import * as _ from 'lodash'
-import * as log from 'electron-log'
 
 import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
@@ -13,6 +12,9 @@ import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
 import { sss } from '../i18n'
 import { IBudgetFile } from '../mainprocess/files'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(appstate)')
 
 
 interface IComputedAppState {
@@ -60,6 +62,7 @@ export class AppState implements IComputedAppState {
   bank_macros: {
     [k: number]: BankMacro;
   } = {};
+  running_bank_macros = new Set<number>();
   account_balances: Balances = {};
   bucket_balances: Balances = {};
   nodebt_balances: Balances = {};
@@ -226,7 +229,6 @@ class DelayingCounter {
 
 export class StateManager {
   public store:IStore;
-  private file:IBudgetFile;
 
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
@@ -248,12 +250,11 @@ export class StateManager {
   }
   attach(store: IStore, file:IBudgetFile) {
     this.store = store;
-    this.file = file;
 
+    // Syncing events
     file.room.events('sync_started').on(message => {
       let onOrAfter = ensureLocalMoment(message.onOrAfter);
       let before = ensureLocalMoment(message.before);
-      log.info('Started sync', onOrAfter.format(), before.format());
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
       })(onOrAfter, before));
@@ -266,13 +267,24 @@ export class StateManager {
       let before = ensureLocalMoment(message.before);
       log.info('Sync done', onOrAfter.format(), before.format(), 'errors:', result.errors.length, 'trans:', result.imported_count);
       this.appstate.syncing--;
-      makeToast(sss('sync.done', (trans_count:number, start:moment.Moment, end:moment.Moment) => {
-          return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
-        })(result.imported_count, onOrAfter, before));
-      result.errors.forEach(err => {
-        log.warn('Error during sync:', err);
-        makeToast(err, {className:'error'})
-      })
+      if (result.errors.length) {
+        result.errors.forEach(err => {
+          log.warn('Error during sync:', err);
+          makeToast(err, {className:'error'})
+        })  
+      } else {
+        makeToast(sss('Sync complete'));  
+      }
+      this.signalChange();
+    })
+
+    // Macro playback events
+    file.room.events('macro_started').on(message => {
+      this.appstate.running_bank_macros.add(message.id);
+      this.signalChange();
+    })
+    file.room.events('macro_stopped').on(message => {
+      this.appstate.running_bank_macros.delete(message.id);
       this.signalChange();
     })
   }

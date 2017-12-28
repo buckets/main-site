@@ -8,7 +8,7 @@ Recording:
   ☐ Timeout when a step can't be completed.
     ☐ Turn to paused
     ☐ Display a message to the user
-  ☐ Sync button should use macros that are enabled
+  ✔ Sync button should use macros that are enabled @done (17-12-28 11:22)
   ☐ Let people type in URL without http://
   ☐ Add thorough, debuggable logging
   ☐ Test all of your own banks

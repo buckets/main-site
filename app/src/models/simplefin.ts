@@ -5,7 +5,6 @@ import { IObject, IStore, registerClass } from '../store'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
-import { EventSource } from '../events'
 import { sss } from '../i18n'
 import { hashStrings } from '../importing'
 import { UnknownAccount } from './account'
@@ -72,7 +71,6 @@ export function sleep(milliseconds:number):Promise<any> {
 }
 
 class SimpleFINSync implements ASyncening {
-  readonly done = new EventSource<SyncResult>()
   public result:SyncResult;
 
   private time_range:number = 7;
@@ -85,7 +83,7 @@ class SimpleFINSync implements ASyncening {
   }
   async start() {
     let { onOrAfter, before } = this;
-    log.info(`Sync started from ${onOrAfter.format()} to ${before.format()}`)
+    log.info(`Sync started from ${onOrAfter.format('l')} to ${before.format('l')}`)
     this.please_stop = false;
 
     let imported_count = 0;
@@ -124,8 +122,8 @@ class SimpleFINSync implements ASyncening {
         errors: Array.from(errors),
         imported_count,
       }
-      this.done.emit(this.result);
     }
+    return this.result;
   }
   cancel() {
     this.please_stop = true;

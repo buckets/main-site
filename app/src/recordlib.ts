@@ -1,4 +1,5 @@
 import * as _ from 'lodash'
+import * as electron_is from 'electron-is'
 import { PrefixLogger } from './logging'
 import { ipcRenderer } from 'electron'
 import { EventSource } from './events'
@@ -7,7 +8,7 @@ import { getBounds, IBounds } from './position'
 export class DoublePlayError extends Error {}
 export class TimeoutError extends Error {}
 
-const log = new PrefixLogger('[macro]');
+const log = new PrefixLogger(electron_is.renderer() ? '(recordlib.rend)' : '(recordlib.main)');
 
 function compare(a, b) {
   if (a < b) {
@@ -465,7 +466,6 @@ export class Recording {
     }
 
     if (isClickStep(step)) {
-      log.debug('click step', step);
       if (step.keyboardTriggered) {
         if (isKeyPressStep(last_step) && last_step.keys[0].key === 'Enter') {
           // pressed enter on a form element that caused a submit
@@ -534,7 +534,6 @@ export class Recorder {
             return null;
           }
           let bounds = getBounds(elem);
-          log.debug('bounds', bounds);
           return bounds;
         } catch(err) {
           return null;
@@ -901,6 +900,7 @@ export class RecordingDirector<T> {
 
   readonly events = {
     change: new EventSource<boolean>(),
+    newpage: new EventSource<{title: string}>(),
     child_ready_for_control: new EventSource<number>(),
     page_loaded: new EventSource<number>(),
     step_started: new EventSource<{
@@ -1035,6 +1035,9 @@ export class RecordingDirector<T> {
         })
         this.events.page_loaded.emit(tab_id);
       }
+      this.events.newpage.emit({
+        title: webview.getTitle()
+      })
     })
     webview.addEventListener('new-window', ev => {
       logger.info(`request for new window disposition=${ev.disposition} frameName=${ev.frameName}`);
@@ -1299,8 +1302,6 @@ export class RecordingDirector<T> {
   private async _doClickStep(step:ClickStep&TabStep) {
     await this.scrollElementIntoView(step.tab_id, step.element);
     let bounds = await this.getBoundsFromRemote(step.tab_id, step.element);
-    log.debug('bounds', bounds);
-    log.debug('innerOffset', step.innerOffset);
     let x = bounds.viewportx + step.innerOffset.x;
     let y = bounds.viewporty + step.innerOffset.y;
     let { webview } = this.tabs[step.tab_id];

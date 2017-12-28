@@ -7,7 +7,10 @@ import * as reclib from '../recordlib'
 import { IncorrectPassword } from '../error'
 import { sss } from '../i18n'
 import { ISyncChannel, ASyncening, SyncResult } from '../sync'
-import { EventSource } from '../events'
+import { IBudgetFile } from '../mainprocess/files'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(bankmacro)');
 
 export class BankMacro implements IObject {
   static type: string = 'bank_macro';
@@ -17,6 +20,12 @@ export class BankMacro implements IObject {
   uuid: string;
   name: string;
   enc_recording: string;
+  enabled: boolean;
+
+  static fromdb(obj:BankMacro) {
+    obj.enabled = !!obj.enabled;
+    return obj;
+  }
 }
 registerClass(BankMacro);
 
@@ -46,6 +55,7 @@ async function createPassword(service:string, account:string, prompt:string):Pro
 interface IUpdateArgs {
   name?: string;
   recording?: reclib.Recording;
+  enabled?: boolean;
 }
 
 export class BankMacroStore {
@@ -153,22 +163,52 @@ export class BankMacroStore {
 
 
 export class MacroSyncer implements ISyncChannel {
-  constructor(private store:IStore) {
+  constructor(private store:IStore, private file:IBudgetFile) {
   }
   syncTransactions(onOrAfter:moment.Moment, before:moment.Moment) {
-    return new MacroSync();
+    return new MacroSync(this.store, this.file, onOrAfter, before);
   }
 }
 
 class MacroSync implements ASyncening {
-  readonly done = new EventSource<SyncResult>();
   public result:SyncResult;
 
-  constructor(readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
+  constructor(private store:IStore, private file:IBudgetFile, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
 
   }
-  async start() {
+  async start():Promise<SyncResult> {
+    log.debug('MacroSync start', this.onOrAfter.format('l'), this.before.format('l'))
+    let macros = (await this.store.bankmacro.list()).filter(macro => macro.enabled);
+    let { onOrAfter, before } = this;
+    let today = moment();
+    if (today.isBefore(onOrAfter)) {
+      // We're in the future
+      onOrAfter = today.clone().startOf('month');
+    }
+    before = onOrAfter.clone().add(1, 'month');
+    if (today.isBefore(before)) {
+      before = today.clone().subtract(1, 'day');
+    }
 
+    let errors = [];
+    let imported_count = 0;
+    for (let macro of macros) {
+      log.info(`Syncing macro #${macro.id} ${macro.name}`);
+      try {
+        let result:SyncResult = await this.file.openRecordWindow(macro.id, {
+          onOrAfter,
+          before,
+        })
+        errors = errors.concat(result.errors);
+        imported_count += result.imported_count;
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+    return {
+      errors,
+      imported_count,
+    }
   }
   cancel() {
     throw new Error('Not implemented');
