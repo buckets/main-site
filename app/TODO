@@ -3,7 +3,6 @@ Recording:
   ☐ Copy and Paste should be captured correctly
     ☐ Windows
     ☐ Linux
-  ☐ Command+L should focus the URL-selector
   ☐ Close tabs that are just downloads.
   ☐ Timeout when a step can't be completed.
     ☐ Turn to paused
@@ -24,7 +23,6 @@ v1.0.0:
  ☐ Encrypt simplefin connection stuff
  ☐ Remove "Test Toast" button :)
  ☐ Prompt to be added to newsletter
- ☐ Record signing in to bank (with encryption)
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
  ☐ Show running balance in bucket transactions list
  ☐ Merge "File import" and "Connections" page
@@ -42,7 +40,7 @@ Videos:
 Backlog:
  ☐ Don't upload the application code to Heroku
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
- ☐ Support bitcoin (with no decimal places)
+ ☐ Support bitcoin as a currency (with no decimal places)
  ☐ Align the warning triangle on account balance mismatch.
  ☐ When you create a new bucket, focus on that new bucket
  ☐ When you create a new account, focus on that new account
@@ -59,6 +57,8 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Record signing in to bank (with encryption) @done (17-12-28 12:14) @project(v1.0.0)
+ ✘ Command+L sould focus the URL-selector @cancelled (17-12-28 12:13) @project(Recording)
  ✔ Let people type in URL without http:// @done (17-12-28 11:56) @project(Recording)
  ✔ Sync button should use macros that are enabled @done (17-12-28 11:22) @project(Recording)
  ✔ Notify on download @done (17-12-22 22:02) @project(Recording)
