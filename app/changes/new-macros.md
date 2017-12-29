@@ -1,1 +1,0 @@
-Added first (experimental) version of creating macros to download transaction data from banks automatically.  (Not yet translated into Spanish).
