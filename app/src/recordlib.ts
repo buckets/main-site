@@ -373,6 +373,7 @@ export interface ChangeStep extends BaseStep {
   selectedIndex?: number;
   displayValue?: string;
   isPassword: boolean;
+  useKeyboard: boolean;
 
   // Application-specific options to be used in playback
   options?: object;
@@ -560,8 +561,8 @@ export class Recorder {
         elem.scrollIntoView();
         return true;
       },
-      'rec:do-focus': (step:FocusStep) => {
-        let { element } = step;
+      'rec:do-focus': (params:{element:UniqueElementID}) => {
+        let { element } = params;
         let elem = findElement(element);
         if (elem === null) {
           throw new Error('Element not found');
@@ -643,6 +644,7 @@ export class Recorder {
       if (el.tagName === undefined) {
         return;
       }
+      let useKeyboard = false;
       let displayValue, value, input_type;
       try {
         let val = getValue(el);
@@ -653,8 +655,15 @@ export class Recorder {
         return;
       }
      
-      if (input_type === 'hidden') {
-        return;
+      switch (input_type) {
+        case 'hidden': {
+          return;
+        }
+        case 'text':
+        case 'password': {
+          useKeyboard = true;
+          break;
+        }
       }
       let step:ChangeStep = {
         type: 'change',
@@ -665,6 +674,7 @@ export class Recorder {
         isPassword: input_type === 'password',
         selectedIndex: (el as any).selectedIndex,
         displayValue,
+        useKeyboard,
       }
       this.rpc.call('rec:step', step);
     }
@@ -1344,11 +1354,22 @@ export class RecordingDirector<T> {
     if (step.options) {
       value = lookUpValue(step.options as any);
     }
-    await rpc.call('rec:do-change', {step, value});
+    if (step.useKeyboard) {
+      let { webview } = this.tabs[step.tab_id];
+      await rpc.call('rec:do-focus', {element: step.element});
+      for (let i = 0; i < value.length; i++) {
+        let character = value[i];
+        await sendKey(webview, character);
+        await wait(this.typing_delay);
+      }
+    } else {
+      await rpc.call('rec:do-change', {step, value});  
+    }
+    
   }
   private async _doFocusStep(step:FocusStep&TabStep) {
     let { rpc } = this.tabs[step.tab_id];
-    return rpc.call('rec:do-focus', step);
+    return rpc.call('rec:do-focus', {element: step.element});
   }
   private async _doPageLoadStep(step:PageLoadStep&TabStep) {
     // waiting for pages to load is already part of the playback process
