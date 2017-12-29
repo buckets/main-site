@@ -13,10 +13,10 @@ export type BucketKind =
   | 'deposit-date';
 
 export class Bucket implements IObject {
-  static table_name: string = 'bucket';
+  static type: string = 'bucket';
   id: number;
   created: string;
-  readonly _type: string = Bucket.table_name;
+  readonly _type: string = Bucket.type;
   name: string;
   notes: string;
   balance: number = 0;
@@ -39,10 +39,10 @@ export class Bucket implements IObject {
 registerClass(Bucket);
 
 export class Transaction implements IObject {
-  static table_name: string = 'bucket_transaction';
+  static type: string = 'bucket_transaction';
   id: number;
   created: string;
-  readonly _type: string = Transaction.table_name;
+  readonly _type: string = Transaction.type;
   bucket_id: number;
   
   amount: number;
@@ -60,10 +60,10 @@ export class Transaction implements IObject {
 registerClass(Transaction);
 
 export class Group implements IObject {
-  static table_name: string = 'bucket_group';
+  static type: string = 'bucket_group';
   id: number;
   created: string;
-  readonly _type: string = Group.table_name;
+  readonly _type: string = Group.type;
   name: string;
   ranking: string;
 }

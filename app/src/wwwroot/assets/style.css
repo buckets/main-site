@@ -79,7 +79,8 @@ a:hover {
   flex-direction: column;
   justify-content: space-between;
 }
-.app .nav a {
+.app .nav a,
+.app .nav .label {
   font-size: 1.1rem;
   font-weight: 400;
   padding: 0.3rem 1rem;
@@ -90,6 +91,12 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.app .nav .label {
+  font-size: 1.2rem;
+  opacity: 0.6;
+  max-width: 12rem;
+  border-radius: 0;
 }
 .app .nav a.sub {
   font-size: 1rem;
@@ -122,6 +129,8 @@ a:hover {
   background: var(--blue);
   color: white;
 }
+
+
 
 /* Badges */
 .badge {
@@ -162,6 +171,14 @@ a:hover {
   padding: 1rem;
   background-color: var(--highlighter);
   display: block;
+}
+span.experimental {
+  background-color: var(--highlighter);
+  border: 1px solid var(--yellow);
+  font-size: .8rem;
+  padding: .2rem .4rem;
+  border-radius: 3px;
+  float: right;
 }
 
 .app .content {
@@ -220,6 +237,17 @@ a:hover {
 .subheader > div:last-child,
 .subheader .group > div:last-child {
   margin-right: 0;
+}
+
+.rows .section {
+  border-bottom: 1px dashed var(--lighter-grey);
+}
+
+hr.page {
+  border: 0;
+  border-bottom: 1px dashed var(--lighter-grey);
+  width: 100%;
+  margin: 2rem 0;
 }
 
 .panes {
@@ -547,6 +575,19 @@ table.summary td.border-right {
   border-right: 1px solid var(--lighter-grey);
 }
 
+table.ledger .icon-button-wrap,
+.icon-button-wrap {
+  padding: 0;
+}
+table.ledger .icon-button-wrap button.icon,
+.icon-button-wrap button.icon {
+  border: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  padding: .25rem .5rem;
+}
+
 
 /* Money */
 .money-input {
@@ -836,11 +877,18 @@ button.primary {
   color: white;
   border-color: var(--darker-blue);
 }
-button.delete {
-  background-color: var(--red);
-  color: white;
-  border-color: var(--darker-red);
+button.icon {
+  background-color: transparent;
+  border-color: transparent;
+  font-size: 0.9rem;
+  margin: 0;
+  width: 1.4rem;
+  height: 1.5rem;
+  line-height: 1rem;
+  padding: 0;
+  text-align: center;
 }
+
 button:hover {
   background-color: var(--yellow);
   border-color: var(--yellow);
@@ -860,6 +908,14 @@ button[disabled]:hover {
   background-color: var(--lightest-grey);
   border-color: var(--lighter-grey);
   cursor: initial;
+}
+button.delete {
+  background-color: var(--red);
+  color: white;
+  border-color: var(--darker-red);
+}
+button.delete:hover {
+  background-color: var(--darker-red);
 }
 
 
@@ -1031,6 +1087,37 @@ table.props th {
   background-color: var(--faint-green);
 }
 
+
+.horiz-options {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+.horiz-options .option {
+  padding: 1rem;
+  background-color: var(--lightest-grey);
+  border: 1px solid var(--lighter-grey);
+  border-radius: 4px;
+  margin: 1rem;
+  flex-grow: 1;
+  flex-basis: 10%;
+}
+.horiz-options .option h3 {
+  margin-top: 0;
+}
+
+.procon .fa-check {
+  color: var(--green);
+}
+.procon .fa-close {
+  color: var(--red);
+}
+.procon .fa-question {
+  color: var(--blue);
+}
+
+
+
 .dialog {
   border: 6px solid var(--blue);
   border-radius: 20px;
@@ -1076,6 +1163,12 @@ table.props th {
   color: white;
   font-weight: bold;
   border-color: var(--darker-red);
+}
+.toasts .toast.warning {
+  background-color: var(--yellow);
+  color: black;
+  font-weight: bold;
+  border-color: var(--yellow);
 }
 .toast-enter {
   right: -100%;

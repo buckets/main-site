@@ -1,16 +1,15 @@
-import { shell } from 'electron'
+import { shell, ipcRenderer } from 'electron'
 import * as log from 'electron-log'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import { sss } from '../i18n'
-import {RPCRendererStore} from '../rpc'
 import {Renderer} from './render'
 import {AccountsPage} from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
-import { ConnectionsPage, SyncWidget } from './connections'
+import { ImportPage, SyncWidget } from './importpage'
 import { ReportsPage } from './reports'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
@@ -18,7 +17,7 @@ import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
-import { TransactionImportPage } from './importing'
+import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
 
@@ -39,17 +38,17 @@ export async function start(base_element, room) {
     })
   }, false);
 
-  let store = new RPCRendererStore(room);
+  let store = current_file.store;
 
   // initial state
-  manager.setStore(store);
+  manager.attach(store, current_file);
   await manager.refresh();
 
   // watch for changes
-  store.data.on('obj', async (data) => {
+  store.bus.obj.on(async (data) => {
     await manager.processEvent(data);
   })
-  manager.on('change', () => {
+  manager.events.change.on(() => {
     renderer.doUpdate();
   })
 
@@ -60,6 +59,11 @@ export async function start(base_element, room) {
   window.addEventListener('hashchange', () => {
     renderer.doUpdate();
   }, false);
+
+  // watch for the main process to tell me where to go
+  ipcRenderer.on('buckets:goto', (path:string) => {
+    setPath(path);
+  })
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
@@ -95,13 +99,9 @@ class Navbar extends React.Component<{
     if (isRegistered()) {
       trial_version = null;
     }
-    let connections_badge;
+    let import_badge;
     if (appstate.num_unknowns) {
-      connections_badge = <div className="badge">{appstate.num_unknowns}</div>
-    }
-    let fileimport_badge;
-    if (appstate.fileimport.pending_imports.length) {
-      fileimport_badge = <div className="badge">{appstate.fileimport.pending_imports.length}</div>
+      import_badge = <div className="badge">{appstate.num_unknowns}</div>
     }
     let transactions_badge;
     if (appstate.num_uncategorized_trans) {
@@ -113,10 +113,6 @@ class Navbar extends React.Component<{
         'red': appstate.rain < 0,
       })
       buckets_badge = <div className={cls}><span className="fa fa-tint"/></div>
-    }
-    let sync_widget;
-    if (_.values(appstate.connections).length) {
-      sync_widget = <SyncWidget appstate={appstate} />
     }
     return (
       <div className="nav">
@@ -133,11 +129,10 @@ class Navbar extends React.Component<{
               <Link relative to="/recurring-expenses" className="sub" exactMatchClass="selected">{sss('Recurring Expenses')}</Link>
             </div>
           </Route>
-          <Link relative to="/connections" exactMatchClass="selected" matchClass="selected"><span>{sss('Connections')}</span>{connections_badge}</Link>
-          <Link relative to="/import" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Import')}</span>{fileimport_badge}</Link>
+          <Link relative to="/import" exactMatchClass="selected" matchClass="selected"><span>{sss('Import')}</span>{import_badge}</Link>
         </div>
         <div>
-          {sync_widget}
+          <SyncWidget appstate={appstate} />
           <a href="#" onClick={(ev) => {
             ev.preventDefault();
             shell.openExternal('https://www.budgetwithbuckets.com/chat');
@@ -272,11 +267,8 @@ class Application extends React.Component<ApplicationProps, any> {
                     <Route path="/analysis">
                       <ReportsPage appstate={appstate} />
                     </Route>
-                    <Route path="/connections">
-                      <ConnectionsPage appstate={appstate} />
-                    </Route>
                     <Route path="/import">
-                      <TransactionImportPage appstate={appstate} />
+                      <ImportPage appstate={appstate} />
                     </Route>
                   </Switch>
                 </div>

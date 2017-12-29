@@ -103,7 +103,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
       transactions: [],
     }
     this.recomputeState(props);
-    manager.addListener('obj', this.processEvent)
+    manager.events.obj.on(this.processEvent)
   }
   async recomputeState(props:TransferTransactionsProps) {
     let current = this.props;
@@ -135,7 +135,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
     }
   }
   componentWillUnmount() {
-    manager.removeListener('obj', this.processEvent);
+    manager.events.obj.on(this.processEvent);
   }
   render() {
     return <TransactionList

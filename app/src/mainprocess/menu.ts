@@ -1,7 +1,10 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
 import * as Path from 'path'
-import {openDialog, newBudgetFileDialog, newBudgetWindow, BudgetFile, WIN2FILE} from './files'
+import { openBudgetFileDialog,
+         newBudgetFileDialog,
+         duplicateWindow,
+         BudgetFile} from './files'
 import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles, PersistEvents } from './persistent'
@@ -28,7 +31,7 @@ export async function updateMenu(show_budget:boolean=false) {
         label: sss('Open Budget...'),
         accelerator: 'CmdOrCtrl+O',
         click() {
-          openDialog();
+          openBudgetFileDialog();
         }
       },
       {
@@ -163,7 +166,7 @@ export async function updateMenu(show_budget:boolean=false) {
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
         click() {
-          newBudgetWindow();
+          duplicateWindow();
         },
       },
       {
@@ -172,7 +175,8 @@ export async function updateMenu(show_budget:boolean=false) {
         accelerator: 'CmdOrCtrl+I',
         click() {
           let win = BrowserWindow.getFocusedWindow();
-          win.webContents.send('start-file-import');
+          BudgetFile.fromWindowId(win.id).openImportFileDialog();
+          win.webContents.send('buckets:goto', '/import');
         }
       },
       {type: 'separator'},
@@ -181,7 +185,7 @@ export async function updateMenu(show_budget:boolean=false) {
         id: 'only4budgets importynab',
         click() {
           let win = BrowserWindow.getFocusedWindow();
-          let budgetfile = WIN2FILE[win.id];
+          let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
             findYNAB4FileAndImport(budgetfile.store);  
           }
@@ -376,10 +380,10 @@ export async function updateMenu(show_budget:boolean=false) {
 }
 
 if (app) {
-  PersistEvents.on('added-recent-file', () => {
+  PersistEvents.added_recent_file.on(() => {
     updateMenu();
   })
-  tx.on('locale-set', () => {
+  tx.localechanged.on(() => {
     updateMenu();
   });
 }

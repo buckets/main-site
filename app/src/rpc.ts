@@ -1,150 +1,148 @@
-import * as log from 'electron-log'
-import * as URL from 'url'
-import { IStore, DataEventEmitter, TABLE2CLASS, IObject, IObjectClass, ObjectEvent, ObjectEventType} from './store'
-import { ipcMain, ipcRenderer, webContents} from 'electron'
-import { BucketStore } from './models/bucket';
-import { AccountStore } from './models/account';
-import { SimpleFINStore } from './models/simplefin';
-import { ReportStore } from './models/reports';
+import * as electron_is from 'electron-is'
+import {v4 as uuid} from 'uuid'
+import { ipcMain, ipcRenderer, webContents } from 'electron'
+import * as crypto from 'crypto'
+import { EventSource } from './events'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger(electron_is.renderer() ? '(rpc.rend)' : '(rpc.main)')
 
 //--------------------------------------------------------------------------------
-// serializing
+// General purpose RPC from renderer to main and back
 //--------------------------------------------------------------------------------
-interface SerializedObjectClass {
-  _buckets_serialized_object_class: string;
-}
-function isSerializedObjectClass(obj): obj is SerializedObjectClass {
-  return obj !== null && (<any>obj)._buckets_serialized_object_class !== undefined;
-}
-function serializeObjectClass<T extends IObject>(cls:IObjectClass<T>):SerializedObjectClass {
-  return {
-    _buckets_serialized_object_class: cls.table_name,
-  }
-}
-function deserializeObjectClass<T extends IObject>(obj:SerializedObjectClass):IObjectClass<T> {
-  return TABLE2CLASS[obj._buckets_serialized_object_class]
-}
 
-//--------------------------------------------------------------------------------
-// RPC Store pairs for bridging main and renderer
-//--------------------------------------------------------------------------------
-interface RPCMessage {
-  id: string;
-  method: string;
-  params: Array<any>;
-}
-interface RPCReply {
-  ok: boolean;
-  value: any;
-}
-export class RPCMainStore {
-  private data:DataEventEmitter;
-  constructor(private store:IStore, private room:string) {
-  }
-  get channel() {
-    return `rpc-${this.room}`;
-  }
-  start() {
-    this.data = this.store.data.on('obj', (value) => {
-      // probably not efficient if you have two different files open...
-      // but... that's an edge case, and still probably plenty fast
-      webContents.getAllWebContents().forEach(wc => {
-        if (URL.parse(wc.getURL()).hostname === this.room) {
-          let ch = `data-${this.room}`;
-          wc.send(ch, value);
-        }
-      })
-    });
-    ipcMain.on(this.channel, this.gotMessage);
-  }
-  stop() {
-    ipcMain.removeListener(this.channel, this.gotMessage);
-  }
-  gotMessage = async (event, message:RPCMessage) => {
-    // log.debug('MAIN RPC', message);
-    try {
-      // convert args to classes
-      let args = message.params.map(arg => {
-        return isSerializedObjectClass(arg) ? deserializeObjectClass(arg) : arg;
-      })
-      let retval = await this.store[message.method](...args);
-      event.sender.send(`rpc-reply-${message.id}`, {
-        ok: true,
-        value: retval,
-      });
-    } catch(err) {
-      log.error('RPC error', err);
-      event.sender.send(`rpc-reply-${message.id}`, {
-        ok: false,
-        value: err,
-      })
+/**
+ *  Wrap a function so that it will only ever be called in the main process.
+ *  
+ *  If you call the function from a renderer process, it will make a request
+ *  of the main process to run the function.
+ *
+ *  You can only wrap functions which have serializable objects arguments and
+ *  return values.
+ */
+export function onlyRunInMain<F extends Function>(func:F):F {
+  const hash = crypto.createHash('sha256');
+  hash.update(func.name);
+  hash.update(func.toString());
+  const key = `rpc-mainfunc-${hash.digest('hex')}`;
+  if (electron_is.renderer()) {
+    // renderer process
+    return <any>function(...args) {
+      let chan = `rpc-response-${uuid()}`
+      return new Promise((resolve, reject) => {
+        ipcRenderer.once(chan, (ev, {result, err}) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);  
+          }
+        })
+        ipcRenderer.send(key, chan, ...args);  
+      })  
+    }
+  } else {
+    // main process
+    ipcMain.on(key, async (ev, chan, ...args) => {
+      try {
+        let result = await func(...args);
+        ev.sender.send(chan, {result})
+      } catch(err) {
+        ev.sender.send(chan, {err})
+      }
+    })
+    return <any>function(...args) {
+      return func(...args);
     }
   }
 }
-export class RPCRendererStore implements IStore {
-  private next_msg_id:number = 1;
-  public data:DataEventEmitter;
-  readonly accounts:AccountStore;
-  readonly buckets:BucketStore;
-  readonly connections:SimpleFINStore;
-  readonly reports:ReportStore;
-  constructor(private room:string) {
-    this.data = new DataEventEmitter();
-    ipcRenderer.on(`data-${room}`, this.dataReceived.bind(this));
-    this.accounts = new AccountStore(this);
-    this.buckets = new BucketStore(this);
-    this.connections = new SimpleFINStore(this);
-    this.reports = new ReportStore(this);
-  }
-  get channel() {
-    return `rpc-${this.room}`;
-  }
-  async callRemote<T>(method, ...args):Promise<T> {
-    let msg:RPCMessage = {
-      id: '' + this.next_msg_id++,
-      method: method,
-      params: args,
-    }
-    // log.debug('CLIENT CALL', msg.id, method);
-    // console.trace();
-    return new Promise<T>((resolve, reject) => {
-      ipcRenderer.once(`rpc-reply-${msg.id}`, (event, reply:RPCReply) => {
-        // log.debug('CLIENT RECV', msg.id, method, reply.ok);
-        if (reply.ok) {
-          resolve(reply.value as T);
-        } else {
-          reject(reply.value as T);
+
+
+/**
+ *  Generic, interprocess, room-based, typed pub-sub
+ *  Can be used in either main or renderer process.
+ */
+export class Room<T> {
+  private webContents = new Map<number, Electron.WebContents>();
+  private isrenderer:boolean;
+  private eventSources:{
+    [k:string]: EventSource<any>,
+  } = {};
+
+  constructor(private key:string) {
+    this.isrenderer = electron_is.renderer();
+    if (this.isrenderer) {
+      // renderer process
+      ipcRenderer.send(`${this.key}.join`);
+      log.debug(this.key, 'joining');
+      ipcRenderer.on(`${this.key}.message`, (ev, channel, message) => {
+        let es = this.eventSources[channel];
+        if (es) {
+          es.emit(message);
         }
-      });
-      ipcRenderer.send(this.channel, msg);
+      })
+    } else {
+      // main process
+      ipcMain.on(`${this.key}.join`, (ev:Electron.IpcMessageEvent) => {
+        let wc_id = ev.sender.id;
+        if (this.webContents.has(wc_id)) {
+          return;
+        }
+
+        let wc = webContents.fromId(wc_id);
+        log.debug(this.key, 'renderer joined:', wc_id)
+        this.webContents.set(wc_id, wc);
+        wc.on('destroyed', () => {
+          this.webContents.delete(wc_id);
+        })
+      })
+      ipcMain.on(`${this.key}.pleasesend`, <K extends keyof T>(ev, channel:K, message:T[K]) => {
+        this.broadcast(channel, message);
+      })
+    }
+  }
+  broadcast<K extends keyof T>(channel:K, message:T[K]) {
+    if (this.isrenderer) {
+      // renderer process
+      ipcRenderer.send(`${this.key}.pleasesend`, channel, message);
+    } else {
+      // main process
+      this.webContents.forEach(wc => {
+        wc.send(`${this.key}.message`, channel, message);
+      })
+      let es = this.eventSources[channel];
+      if (es) {
+        es.emit(message);
+      }
+    }
+  }
+  events<K extends keyof T>(channel:K):EventSource<T[K]> {
+    if (!this.eventSources[channel]) {
+      this.eventSources[channel] = new EventSource<T[K]>();
+    }
+    return this.eventSources[channel];
+  }
+}
+
+export class RendererEventSource<T> extends EventSource<T> {
+  constructor(private key:string) {
+    super();
+    ipcRenderer.on(`rpc-eventsource-${key}`, (message:T) => {
+      // send to in-renderer subscribers
+      super.emit(message)
     })
   }
-  dataReceived(event, message:ObjectEvent<any>) {
-    this.data.emit('obj', message);
-  }
-
-  // IStore methods
-  publishObject(event:ObjectEventType, obj:IObject) {
-    return this.callRemote('publishObject', event, obj);
-  }
-  createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
-    return this.callRemote('createObject', serializeObjectClass(cls), data);
-  }
-  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
-    return this.callRemote('updateObject', serializeObjectClass(cls), id, data);
-  }
-  getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    return this.callRemote('getObject', serializeObjectClass(cls), id);
-  }
-  listObjects<T extends IObject>(cls: IObjectClass<T>, ...args):Promise<T[]> {
-    return this.callRemote('listObjects', serializeObjectClass(cls), ...args);
-  }
-  query(sql:string, params:{}):Promise<any> {
-    return this.callRemote('query', sql, params);
-  }
-  deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
-    return this.callRemote('deleteObject', serializeObjectClass(cls), id);
+  emit(message:T) {
+    // send to host (who will hopefully send it back)
+    ipcRenderer.send(`rpc-eventsource-${this.key}`, message);
   }
 }
 
+export class MainEventSource<T> extends EventSource<T> {
+  constructor(private key:string) {
+    super();
+    ipcMain.on(`rpc-eventsource-${this.key}`, (message:T) => {
+
+    })
+  }
+}
 

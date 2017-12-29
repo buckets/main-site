@@ -199,15 +199,18 @@
   const Path = req('path');
   const { remote, ipcRenderer } = req('electron');
   const { getRecentFiles } = req('./src/mainprocess/persistent')
+  const { newBudgetFileDialog, openBudgetFileDialog, openBudgetFile } = req('./src/mainprocess/files')
+
   document.getElementById('close-button').addEventListener('click', () => {
     remote.getCurrentWindow().close();
   }, false)
   document.getElementById('new-budget').addEventListener('click', () => {
-    ipcRenderer.send('new-budget');
+    newBudgetFileDialog();
   }, false);
   document.getElementById('open-file-dialog').addEventListener('click', () => {
-    ipcRenderer.send('open-file-dialog');
+    openBudgetFileDialog();
   })
+  
   let recent_list = document.getElementById('recent-list');
   getRecentFiles()
   .then(recentFiles => {
@@ -217,7 +220,7 @@
       a.setAttribute('href', '#');
       a.classList.add('document');
       a.addEventListener('click', (ev) => {
-        ipcRenderer.send('open-file', path);
+        openBudgetFile(path)
         ev.preventDefault();
         return false;
       }, false);

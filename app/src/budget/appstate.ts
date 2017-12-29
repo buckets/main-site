@@ -1,16 +1,20 @@
 import * as moment from 'moment'
 import * as _ from 'lodash'
 
-import {EventEmitter} from 'events'
+import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
-import { Account, expectedBalance, Transaction as ATrans} from '../models/account'
+import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
-import { Connection, UnknownAccount } from '../models/simplefin'
-import {isBetween} from '../time'
+import { Connection } from '../models/simplefin'
+import { isBetween, ensureLocalMoment } from '../time'
 import {Balances} from '../models/balances'
+import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
-import { FileImportState, FileImportManager } from './importing'
 import { sss } from '../i18n'
+import { IBudgetFile } from '../mainprocess/files'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(appstate)')
 
 
 interface IComputedAppState {
@@ -31,6 +35,8 @@ interface IComputedAppState {
 
   unkicked_buckets: Bucket[];
   kicked_buckets: Bucket[];
+
+  can_sync: boolean;
 }
 
 export class AppState implements IComputedAppState {
@@ -49,12 +55,16 @@ export class AppState implements IComputedAppState {
   btransactions: {
     [k: number]: BTrans;
   } = {};
-  connections: {
+  sfinconnections: {
     [k: number]: Connection;
   } = {};
   unknown_accounts: {
     [k: number]: UnknownAccount;
   } = {};
+  bank_macros: {
+    [k: number]: BankMacro;
+  } = {};
+  running_bank_macros = new Set<number>();
   account_balances: Balances = {};
   bucket_balances: Balances = {};
   nodebt_balances: Balances = {};
@@ -64,10 +74,7 @@ export class AppState implements IComputedAppState {
   month: number = null;
   year: number = null;
 
-  syncing: boolean = false;
-  sync_message: string = '';
-
-  fileimport: FileImportState = new FileImportState();
+  syncing: number = 0;
 
   // The computed rain for this month.
   rain: number = 0;
@@ -87,6 +94,7 @@ export class AppState implements IComputedAppState {
   unkicked_buckets: Bucket[] = [];
   kicked_buckets: Bucket[] = [];
 
+  can_sync = false;
 
   get defaultPostingDate() {
     let today = moment();
@@ -185,6 +193,9 @@ function computeTotals(appstate:AppState):IComputedAppState {
       unmatched_account_balances += 1;
     }
   })
+  let can_sync = 
+      !!Object.keys(appstate.sfinconnections).length
+    ||!!Object.keys(appstate.bank_macros).length;
   return {
     bucket_total_balance,
     account_total_balance,
@@ -201,58 +212,95 @@ function computeTotals(appstate:AppState):IComputedAppState {
     unkicked_buckets,
     unmatched_account_balances,
     nodebt_balances,
+    can_sync,
   };
 }
 
-export class StateManager extends EventEmitter {
+
+class DelayingCounter {
+  readonly done = new EventSource<number>();
+  private _count = 0;
+  private _timer;
+  constructor(private delay:number=200) {}
+  add(num:number=1) {
+    this._count++;
+    if (this._timer) {
+      // restart the timer
+      clearTimeout(this._timer);
+    }
+    this._timer = setTimeout(() => {
+      let count = this._count;
+      this.done.emit(count)
+      this._count = 0;
+    }, this.delay);
+  }
+}
+
+
+export class StateManager {
   public store:IStore;
+
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
   private posttick: Set<string> = new Set();
-  readonly fileimport:FileImportManager;
+
+  private updated_trans_counter = new DelayingCounter();
+
+  public events = {
+    obj: new EventSource<ObjectEvent<any>>(),
+    change: new EventSource<AppState>(),
+  }
+
   constructor() {
-    super()
     this.appstate = new AppState();
     this.store = null;
-    this.fileimport = new FileImportManager(this);
+    this.updated_trans_counter.done.on(count => {
+      makeToast(sss('toast.updated-trans', count => `Updated/created ${count} transactions`)(count));
+    })
   }
-  setStore(store: IStore) {
+  attach(store: IStore, file:IBudgetFile) {
     this.store = store;
 
-    store.connections.syncer
-    .on('start', ({sync_start, sync_end}) => {
+    // Syncing events
+    file.room.events('sync_started').on(message => {
+      let onOrAfter = ensureLocalMoment(message.onOrAfter);
+      let before = ensureLocalMoment(message.before);
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
-      })(sync_start, sync_end));
-      this.appstate.syncing = true;
+      })(onOrAfter, before));
+      this.appstate.syncing++;
       this.signalChange();
     })
-    .on('fetching-range', ({start, end}) => {
-      this.appstate.sync_message = sss('sync.status.week', (sync_start:moment.Moment) => {
-        return `week of ${sync_start.format('ll')}`;
-      })(start);
-      this.signalChange();
-    })
-    .on('done', ({sync_start, sync_end, trans_count, errors, cancelled}) => {
-      if (cancelled) {
-        makeToast(sss('sync.cancelled', (trans_count:number) => {
-          return `Synced ${trans_count} transactions before being cancelled.`;
-        })(trans_count));
+    file.room.events('sync_done').on(message => {
+      let { result } = message;
+      let onOrAfter = ensureLocalMoment(message.onOrAfter);
+      let before = ensureLocalMoment(message.before);
+      log.info('Sync done', onOrAfter.format(), before.format(), 'errors:', result.errors.length, 'trans:', result.imported_count);
+      this.appstate.syncing--;
+      if (result.errors.length) {
+        result.errors.forEach(err => {
+          log.warn('Error during sync:', err);
+          makeToast(err.toString(), {className:'error'})
+        })  
       } else {
-        makeToast(sss('sync.done', (trans_count:number, start:moment.Moment, end:moment.Moment) => {
-          return `Synced ${trans_count} transactions from ${start.format('ll')} to ${end.format('ll')}`;
-        })(trans_count, sync_start, sync_end));
+        makeToast(sss('Sync complete'));  
       }
-      errors.forEach(err => {
-        makeToast(err, {className:'error'});
-      })
-      this.appstate.syncing = false;
+      this.signalChange();
+    })
+
+    // Macro playback events
+    file.room.events('macro_started').on(message => {
+      this.appstate.running_bank_macros.add(message.id);
+      this.signalChange();
+    })
+    file.room.events('macro_stopped').on(message => {
+      this.appstate.running_bank_macros.delete(message.id);
       this.signalChange();
     })
   }
   async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
     this.queue.push(ev);
-    this.emit('obj', ev);
+    this.events.obj.emit(ev);
     return this.tick();
   }
   async tick():Promise<AppState> {
@@ -263,6 +311,9 @@ export class StateManager extends EventEmitter {
     let obj = ev.obj;
     if (isObj(Account, obj)) {
       if (ev.event === 'update') {
+        if (!this.appstate.accounts[obj.id]) {
+          makeToast(sss('Account created: ') + obj.name);
+        }
         this.appstate.accounts[obj.id] = obj;
         this.posttick.add('fetchAccountBalances');
       } else if (ev.event === 'delete') {
@@ -283,6 +334,9 @@ export class StateManager extends EventEmitter {
         delete this.appstate.groups[obj.id];
       }
     } else if (isObj(ATrans, obj)) {
+      if (ev.event === 'update') {
+        this.updated_trans_counter.add();
+      }
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(obj.posted, dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
@@ -304,15 +358,24 @@ export class StateManager extends EventEmitter {
       }
     } else if (isObj(Connection, obj)) {
       if (ev.event === 'update') {
-        this.appstate.connections[obj.id] = obj;
+        this.appstate.sfinconnections[obj.id] = obj;
       } else if (ev.event === 'delete') {
-        delete this.appstate.connections[obj.id];
+        delete this.appstate.sfinconnections[obj.id];
       }
     } else if (isObj(UnknownAccount, obj)) {
       if (ev.event === 'update') {
+        if (!this.appstate.unknown_accounts[obj.id]) {
+          makeToast(sss('Unknown account: ') + obj.description);
+        }
         this.appstate.unknown_accounts[obj.id] = obj;
       } else if (ev.event === 'delete') {
         delete this.appstate.unknown_accounts[obj.id];
+      }
+    } else if (isObj(BankMacro, obj)) {
+      if (ev.event === 'update') {
+        this.appstate.bank_macros[obj.id] = obj;
+      } else if (ev.event === 'delete') {
+        delete this.appstate.bank_macros[obj.id];
       }
     }
     this.signalChange();
@@ -326,7 +389,7 @@ export class StateManager extends EventEmitter {
       return this[funcname]();
     }));
     this.recomputeTotals();
-    this.emit('change', this.appstate);
+    this.events.change.emit(this.appstate);
   }, 50, {leading: true, trailing: true});
 
   async setDate(year:number, month:number):Promise<any> {
@@ -334,7 +397,7 @@ export class StateManager extends EventEmitter {
       this.appstate.year = year;
       this.appstate.month = month;
       await this.refresh();
-      this.emit('change', this.appstate);
+      this.events.change.emit(this.appstate);
     }
   }
   async refresh():Promise<any> {
@@ -349,6 +412,7 @@ export class StateManager extends EventEmitter {
       this.fetchBucketTransactions(),
       this.fetchConnections(),
       this.fetchUnknownAccounts(),
+      this.fetchBankMacros(),
     ])
     this.recomputeTotals();
     return this;
@@ -435,11 +499,11 @@ export class StateManager extends EventEmitter {
       })
   }
   fetchConnections() {
-    return this.store.connections.listConnections()
+    return this.store.simplefin.listConnections()
     .then(connections => {
-      this.appstate.connections = {};
+      this.appstate.sfinconnections = {};
       connections.forEach(obj => {
-        this.appstate.connections[obj.id] = obj;
+        this.appstate.sfinconnections[obj.id] = obj;
       })
     })
   }
@@ -449,6 +513,15 @@ export class StateManager extends EventEmitter {
       this.appstate.unknown_accounts = {};
       accounts.forEach(obj => {
         this.appstate.unknown_accounts[obj.id] = obj;
+      })
+    })
+  }
+  fetchBankMacros() {
+    return this.store.listObjects(BankMacro)
+    .then(macros => {
+      this.appstate.bank_macros = {};
+      macros.forEach(obj => {
+        this.appstate.bank_macros[obj.id] = obj;
       })
     })
   }

@@ -17,6 +17,13 @@ export function ensureLocalMoment(x:Timestamp):moment.Moment {
     return moment(x)
   } 
 }
+export function serializeTimestamp(x:Timestamp):string {
+  if (typeof x === 'string') {
+    return x;
+  } else {
+    return x.format('YYYY-MM-DD HH:mm:ss');
+  }
+}
 export function ts2db(x:Timestamp):string {
   return ensureUTCMoment(x).format('YYYY-MM-DD HH:mm:ss');
 }

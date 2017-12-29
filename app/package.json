@@ -9,11 +9,12 @@
     "email": "hello@budgetwithbuckets.com"
   },
   "scripts": {
-    "docs": "typedoc --tsconfig tsconfig.json --out docs/ src/",
+    "docs": "typedoc --tsconfig tsconfig.json --theme minimal --exclude '**/*.{test,spec}.*' --out docs/ src/",
     "start": "electron .",
     "compile": "tsc",
     "test": "./test.sh",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "install-app-deps",
+    "fakebank": "http-server -a localhost -p 8080 test/fakebank"
   },
   "dependencies": {
     "bluebird": "3.5.0",
@@ -80,16 +81,17 @@
       }
     ],
     "files": [
-      "!.dockerignore",
       "!**/*.ts",
       "!**/*.tsx",
       "!*.sh",
+      "!.dockerignore",
       "!.taprc",
       "!buckets.sublime-*",
       "!coverage${/*}",
       "!dev${/*}",
       "!mocha.opts",
       "!README.md",
+      "!test${/*}",
       "!TODO",
       "!tsconfig.json",
       "!watchtest.js"
@@ -120,6 +122,7 @@
     "cheerio": "^1.0.0-rc.2",
     "electron": "1.7.9",
     "electron-builder": "19.43.3",
+    "http-server": "^0.10.0",
     "mocha": "3.4.2",
     "tap": "^10.7.0",
     "ts-node": "3.0.6",

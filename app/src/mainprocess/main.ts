@@ -9,7 +9,7 @@ import * as URL from 'url'
 import * as Path from 'path'
 import { startLocalizing } from '../i18n'
 import { updateMenu } from './menu'
-import { BudgetFile, watchForEvents } from './files'
+import { BudgetFile } from './files'
 import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
@@ -33,7 +33,7 @@ protocol.registerStandardSchemes(['buckets'])
 app.on('ready', () => {
   session.defaultSession.protocol.registerFileProtocol('buckets', (request, callback) => {
     const parsed = URL.parse(request.url);
-    let bf = BudgetFile.REGISTRY[parsed.hostname];
+    let bf = BudgetFile.fromId(parsed.hostname);
     if (bf || parsed.hostname === 'main') {
       let path = Path.join(APP_ROOT, 'src/wwwroot/', parsed.pathname);
       callback(path);
@@ -140,8 +140,6 @@ app.on('browser-window-focus', (ev, win) => {
     updateMenu(false);
   }
 })
-watchForEvents(app);
-
 
 let wiz_win:Electron.BrowserWindow;
 function openWizard() {

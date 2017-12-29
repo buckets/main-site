@@ -2,13 +2,14 @@ import * as Path from 'path'
 import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
 
-import {IStore, DataEventEmitter, ObjectEventType, ObjectEvent, IObject, IObjectClass} from '../store'
+import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass } from '../store'
 import {APP_ROOT} from './globals'
 
 import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
 import { SimpleFINStore } from '../models/simplefin'
 import { ReportStore } from '../models/reports'
+import { BankMacroStore } from '../models/bankmacro'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
@@ -71,38 +72,44 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
   }
 }
 
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 // DBStore
 // The IStore for the main process
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 let ALLOWED_RE = /[^a-zA-Z0-9_]+/g
 export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
+
+/**
+ * The IStore for the main process
+ */
 export class DBStore implements IStore {
   private _db:sqlite.Database;
-  public data:DataEventEmitter;
 
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
-  readonly connections:SimpleFINStore;
+  readonly simplefin:SimpleFINStore;
   readonly reports:ReportStore;
-  constructor(private filename:string, private doTrialWork:boolean=false) {
-    this.data = new DataEventEmitter();
+  readonly bankmacro:BankMacroStore;
+  constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
-    this.connections = new SimpleFINStore(this);
+    this.simplefin = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
+    this.bankmacro = new BankMacroStore(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})
 
     // upgrade database
     try {
+      log.info('Doing database migrations');
       await this._db.migrate({
         migrationsPath: Path.join(APP_ROOT, 'migrations'),
-      })  
+      })
     } catch(err) {
+      log.error('Error during database migrations');
       log.error(err.stack);
       throw err;
     }
@@ -122,7 +129,7 @@ export class DBStore implements IStore {
     return this._db;
   }
   publishObject(event:ObjectEventType, obj:IObject) {
-    this.data.emit('obj', new ObjectEvent(event, obj));
+    this.bus.obj.emit(new ObjectEvent(event, obj));
   }
   async createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
     let params = {};
@@ -134,7 +141,7 @@ export class DBStore implements IStore {
       params['$'+snkey] = (<T>data)[key];
       values.push('$'+snkey);
     })
-    let sql = `INSERT INTO ${cls.table_name} (${columns}) VALUES ( ${values} );`;
+    let sql = `INSERT INTO ${cls.type} (${columns}) VALUES ( ${values} );`;
     let result = await this.db.run(sql, params);
     let obj = await this.getObject(cls, result.lastID);
     this.publishObject('update', obj);
@@ -147,7 +154,7 @@ export class DBStore implements IStore {
       params['$'+snkey] = (<T>data)[key];
       return `${snkey}=$${snkey}`
     })
-    let sql = `UPDATE ${cls.table_name}
+    let sql = `UPDATE ${cls.type}
       SET ${settings} WHERE id=$id;`;;
     await this.db.run(sql, params);
     let obj = await this.getObject<T>(cls, id);
@@ -155,11 +162,11 @@ export class DBStore implements IStore {
     return obj
   }
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    let sql = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}
+    let sql = `SELECT *,'${cls.type}' as _type FROM ${cls.type}
     WHERE id=$id`;
     let ret = await this.db.get(sql, {$id: id});
     if (ret === undefined) {
-      throw new NotFound(`${cls.table_name} ${id}`);
+      throw new NotFound(`${cls.type} ${id}`);
     }
     if (cls.fromdb !== undefined) {
       ret = cls.fromdb(ret);
@@ -168,7 +175,7 @@ export class DBStore implements IStore {
   }
   async listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]> {
     let { where, params, order } = <any>(args || {});
-    let select = `SELECT *,'${cls.table_name}' as _type FROM ${cls.table_name}`;
+    let select = `SELECT *,'${cls.type}' as _type FROM ${cls.type}`;
     if (where) {
       where = `WHERE ${where}`;
     }
@@ -193,7 +200,7 @@ export class DBStore implements IStore {
   }
   async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     let obj = await this.getObject<T>(cls, id);
-    let sql = `DELETE FROM ${cls.table_name} WHERE id=$id`;
+    let sql = `DELETE FROM ${cls.type} WHERE id=$id`;
     await this.db.run(sql, {$id: id});
     this.publishObject('delete', obj);
   }

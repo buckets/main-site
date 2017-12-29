@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title data-translate>EXPERIMENTAL Buckets Macro Maker</title>
+  <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/style.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
+  <style type="text/css">
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      background-color: white;
+    }
+    .red {
+      color: var(--red);
+    }
+    #recorder {
+      width: 100vw;
+      height: 100vh;
+    }
+    .page-wrap {
+      width: 100vw;
+      height: 100vh;
+    }
+    .record-page {
+      flex-grow: 1;
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+    .record-page .recording-pane {
+      flex-shrink: 0;
+      width: 15rem;
+      height: 100%;
+      font-size: .8rem;
+      border-left: 1px solid var(--lighter-grey);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .recording-state {
+      width: 100%;
+      font-size: 1rem;
+      padding: .5rem;
+      background-color: var(--lighter-grey);
+      font-weight: bold;
+      text-align: center;
+    }
+    .recording-state.recording {
+      color: white;
+      background-color: var(--red);
+    }
+    .recording-state.playing {
+      background-color: var(--darker-green);
+      color: white;
+    }
+    .recording-pane .controls {
+      padding: .5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .recording-pane .steps {
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .recording-pane .step {
+      position: relative;
+      padding: .5rem .5rem;
+      border: 1px solid var(--lighter-grey);
+      border-width: 1px 0 0;
+    }
+    .recording-pane .step:last-child {
+      border-width: 1px 0;
+    }
+    .recording-pane .step.running {
+      background-color: var(--hover-highlight-color);
+    }
+    .recording-pane .step .step-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    table.step-params {
+
+    }
+    table.step-params th,
+    table.step-params td {
+    }
+    table.step-params th {
+      font-weight: bold;
+      padding: 0 .5rem;
+      text-align: right;
+    }
+    ol, ul {
+      margin-left: 1rem;
+      padding-left: 0;
+    }
+    .browser-wrap {
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .browser-wrap.hidden {
+      display: none;
+    }
+    .instructions {
+      padding: 1.5rem;
+      max-height: 15rem;
+      background-color: var(--faint-blue);
+      overflow: auto;
+    }
+    .instructions li {
+      margin: .25rem 0;
+    }
+    .tabbed-browser {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .tabbed-browser-tab-list {
+      display: flex;
+      background-color: var(--darker-darkblue);
+      padding: .25rem .25rem 0 0;
+    }
+    .tabbed-browser .tab {
+      background-color: white;
+      color: var(--lighter-grey);
+      border-radius: 3px 3px 0 0;
+      padding: .2rem .5rem;
+      margin-right: .25rem;
+      font-size: .9rem;
+      background-color: var(--lightest-grey);
+      color: black;
+      opacity: 0.5;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tabbed-browser .tab.focused {
+      opacity: 1;
+      background-color: var(--lightest-grey);
+      color: black;
+    }
+    .tabbed-browser-body {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .browser {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .browser-topbar {
+      flex-shrink: 0;
+      flex-grow: 0;
+      display: flex;
+      padding: 0.5rem;
+      align-items: stretch;
+      justify-content: space-between;
+      background: var(--lightest-grey);
+    }
+    .browser-topbar button {
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+    .browser-topbar input {
+      flex-grow: 1;
+    }
+    .browser-pane {
+      flex-grow: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+    .browser-pane webview {
+      width: 100%;
+      height: 100%;
+      flex-grow: 1;
+    }
+    .loading-screen {
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(45deg, var(--darker-darkblue), var(--blue));
+      background-image: url(../assets/img/logo_med.png), linear-gradient(45deg, var(--darker-darkblue), var(--blue));
+      background-position: center 33%;
+      background-repeat: no-repeat;
+    }
+  </style>
+  <style type="text/css">
+  </style>
+</head>
+<body class="rec-container">
+  <div id="recorder"><div class="loading-screen"></div></div>
+<script>
+const {remote} = require('electron');
+const Path = require('path');
+const appPath = remote.app.getAppPath();
+const req = function() {
+  return (module) => {
+    if (module.startsWith('.') || module.startsWith('/')) {
+      return require(Path.resolve(appPath, module))
+    } else {
+      return require(module);
+    }
+  }
+}();
+
+const log = require('electron-log');
+const querystring = require('querystring');
+const hostname = window.location.hostname;
+const {start} = req('./src/wwwroot/record/record.js');
+const container = document.getElementById('recorder');
+const preload_url = 'file://' + Path.resolve(appPath, './src/wwwroot/record/preload.js');
+const parsed_qs = querystring.parse(window.location.search.substr(1));
+const { partition, response_id } = parsed_qs;
+const autoplay_JSON = parsed_qs.autoplay;
+let autoplay;
+if (autoplay_JSON) {
+  autoplay = JSON.parse(autoplay_JSON);
+}
+const macro_id = parseInt(parsed_qs.macro_id);
+start({
+  room: hostname,
+  container,
+  preload_url,
+  macro_id,
+  partition,
+  autoplay,
+  response_id,
+})
+.catch(err => {
+  log.error(err.stack);
+  remote.getCurrentWindow().close();
+});
+</script>
+</body>
+</html>

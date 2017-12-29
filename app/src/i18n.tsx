@@ -1,6 +1,6 @@
 import * as log from 'electron-log'
 import * as moment from 'moment'
-import { EventEmitter } from 'events'
+import { EventSource } from './events'
 import { remote, app } from 'electron'
 import { readState } from './mainprocess/persistent'
 
@@ -12,9 +12,12 @@ import {pack as he} from './langs/he';
 
 const packs:{[x:string]:ILangPack} = {en, es, he};
 
-class TranslationContext extends EventEmitter {
+class TranslationContext {
   private _langpack:ILangPack = en;
   private _locale:string = 'en';
+
+  readonly localechanged = new EventSource<{locale:string}>();
+
   get locale() {
     return this._locale
   }
@@ -41,7 +44,7 @@ class TranslationContext extends EventEmitter {
       } catch(err) {
         console.error('Error setting date locale', err.stack);
       }
-      this.emit('locale-set', {locale: this._locale});
+      this.localechanged.emit({locale: this._locale});
     }
   }
   sss<T>(key:keyof IMessages, dft?:T):T {
@@ -76,7 +79,7 @@ class TranslationContext extends EventEmitter {
       }
     })
     if (!args.skipwatch) {
-      this.on('locale-set', () => {
+      this.localechanged.on(() => {
         log.info('Re-localizing page', this.locale);
         this.localizeThisPage({skipwatch:true});
       })

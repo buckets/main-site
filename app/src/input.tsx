@@ -201,3 +201,47 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
     this.setState(newstate);
   }
 }
+
+
+interface ConfirmerProps {
+  timeout?: number;
+  first: JSX.Element;
+  second: JSX.Element;
+}
+export class Confirmer extends React.Component<ConfirmerProps, {
+  clicked: boolean;
+}> {
+  private timer;
+  constructor(props) {
+    super(props);
+    this.state = {
+      clicked: false,
+    }
+  }
+  render() {
+    let { first, second } = this.props;
+    if (!this.state.clicked) {
+      return React.cloneElement(first, {
+        onClick: this.firstClick,
+      });
+    } else {
+      return React.cloneElement(second, {
+        onClick: (ev) => {
+          this.revert();
+          return second.props.onClick(ev);
+        }
+      })
+    }
+  }
+  firstClick = () => {
+    this.timer = setTimeout(this.revert, this.props.timeout || 5000);
+    this.setState({clicked: true});
+  }
+  revert = () => {
+    this.setState({clicked: false});
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
+    this.timer = null;
+  }
+}

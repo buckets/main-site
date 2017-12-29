@@ -1,46 +1,29 @@
 import * as req from 'request-promise'
-import * as log from 'electron-log';
 import * as moment from 'moment'
+
 import { IObject, IStore, registerClass } from '../store'
-import * as crypto from 'crypto'
 import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
-import { EventEmitter } from 'events'
 import { sss } from '../i18n'
+import { hashStrings } from '../importing'
+import { UnknownAccount } from './account'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(simplefin)')
+
+import { ISyncChannel, ASyncening, SyncResult } from '../sync'
 
 export class Connection implements IObject {
-  static table_name: string = 'simplefin_connection'
+  static type: string = 'simplefin_connection'
   id: number;
   created: string;
-  readonly _type: string = Connection.table_name;
+  readonly _type: string = Connection.type;
   
   access_token: string;
   last_used: string;
 }
 registerClass(Connection);
-
-export class UnknownAccount implements IObject {
-  static table_name: string = 'unknown_account'
-  id: number;
-  created: string;
-  readonly _type: string = UnknownAccount.table_name;
-
-  description: string;
-  account_hash: string;
-}
-registerClass(UnknownAccount);
-
-export class AccountMapping implements IObject {
-  static table_name: string = 'account_mapping'
-  id: number;
-  created: string;
-  readonly _type: string = AccountMapping.table_name;
-
-  account_id: number;
-  account_hash: string;
-}
-registerClass(AccountMapping);
 
 export declare namespace SFIN {
   export interface AccountSet {
@@ -72,16 +55,6 @@ export declare namespace SFIN {
   }
 }
 
-export function hashStrings(strings:string[]):string {
-  let ret = crypto.createHash('sha256');
-  strings.forEach(s => {
-    let hash = crypto.createHash('sha256');
-    hash.update(s)
-    ret.update(hash.digest('hex'))
-  });
-  return ret.digest('hex');
-}
-
 export function parseStringAmount(x:string):number {
   return decimal2cents(x)
 }
@@ -97,91 +70,80 @@ export function sleep(milliseconds:number):Promise<any> {
   })
 }
 
+class SimpleFINSync implements ASyncening {
+  public result:SyncResult;
 
-export class Syncer extends EventEmitter {
   private time_range:number = 7;
   private time_unit:string = 'day';
-  private delay = 1000;
-  private max_delay = 60 * 1000;
-  private running:boolean = false;
+  private delay = 100;
   private please_stop:boolean = false;
-  constructor(private store:SimpleFINStore) {
-    super();
+
+  constructor(private store:IStore, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
+
   }
-  incDelay() {
-    this.delay *= 1.5;
-    if (this.delay > this.max_delay) {
-      this.delay = this.max_delay;
-    }
-  }
-  stop() {
-    if (this.running) {
-      this.please_stop = true;
-    }
-  }
-  isRunning() {
-    return this.running;
-  }
-  stopRequested() {
-    return this.please_stop;
-  }
-  async start(sync_start:moment.Moment, sync_end:moment.Moment) {
-    if (this.running) {
-      return;
-    }
-    log.info(`Sync started from ${sync_start.format()} to ${sync_end.format()}`)
+  async start() {
+    let { onOrAfter, before } = this;
+    log.info(`Sync started from ${onOrAfter.format('l')} to ${before.format('l')}`)
     this.please_stop = false;
-    this.running = true;
-    this.emit('start', {
-      sync_start: sync_start.clone(),
-      sync_end: sync_end.clone(),
-    });
 
-    let window_start = sync_start.clone();
-    let window_end = window_start.clone().add(this.time_range as any, this.time_unit);
-
-    let trans_count = 0;
+    let imported_count = 0;
     let errors = new Set();
-    while (!this.please_stop && window_start.isSameOrBefore(sync_end)) {
-      if (window_end.isAfter(sync_end)) {
-        window_end = sync_end.clone();
-      }
-      this.emit('fetching-range', {start:window_start, end:window_end});
+    try {
+      let window_start = onOrAfter.clone();
+      let window_end = window_start.clone().add(this.time_range as any, this.time_unit);
 
-      try {
-        let result = await this.store._sync(window_start, window_end)  
-        trans_count += result.transactions.length;
-        result.errors.forEach(err => {
-          log.info(`SimpleFin error: ${err}`);
-          errors.add(err);
-        })
-      } catch(err) {
-        log.info(`Server error while syncing.  Aborting: ${err}`)
-        errors.add(sss('Sync failed'));
-        break;
+      while (!this.please_stop && window_start.isSameOrBefore(before)) {
+        if (window_end.isAfter(before)) {
+          window_end = before.clone();
+        }
+
+        try {
+          let result = await this.store.simplefin.sync(window_start, window_end)  
+          imported_count += result.transactions.length;
+          result.errors.forEach(err => {
+            log.info(`SimpleFin error: ${err}`);
+            errors.add(err);
+          })
+        } catch(err) {
+          log.info(`Server error while syncing.  Aborting: ${err}`)
+          errors.add(sss('Sync failed'));
+          break;
+        }
+        await sleep(this.delay);
+        window_start.add(this.time_range as any, this.time_unit);
+        window_end.add(this.time_range as any, this.time_unit);
       }
-      await sleep(this.delay);
-      window_start.add(this.time_range as any, this.time_unit);
-      window_end.add(this.time_range as any, this.time_unit);
+    } catch(err) {
+      log.error("Unexpected sync error:", err.toString(), err.stack)
+      errors.add(sss('Unexpected sync error'))
+    } finally {
+      this.please_stop = false;
+      this.result = {
+        errors: Array.from(errors),
+        imported_count,
+      }
     }
-    this.running = false;
-    this.emit('done', {
-      trans_count,
-      errors,
-      sync_start,
-      sync_end,
-      cancelled: this.please_stop,
-    })
+    return this.result;
+  }
+  cancel() {
+    this.please_stop = true;
   }
 }
 
+export class SimpleFINSyncer implements ISyncChannel {
+  constructor(private store:IStore) {
+
+  }
+  syncTransactions(onOrAfter:moment.Moment, before:moment.Moment):SimpleFINSync {
+    return new SimpleFINSync(this.store, onOrAfter, before);
+  }
+}
 
 export class SimpleFINStore {
   private client:SimpleFINClient;
-  syncer:Syncer;
+  
   constructor(private store:IStore) {
     this.client = new SimpleFINClient();
-    this.syncer = new Syncer(this);
   }
   async consumeToken(token:string):Promise<Connection> {
     let access_url = await this.client.consumeToken(token);
@@ -192,7 +154,7 @@ export class SimpleFINStore {
   async listConnections():Promise<Connection[]> {
     return this.store.listObjects(Connection);
   }
-  async _sync(since:moment.Moment, enddate:moment.Moment):Promise<{
+  async sync(since:moment.Moment, enddate:moment.Moment):Promise<{
     transactions: Transaction[],
     unknowns: UnknownAccount[],
     errors: string[],
@@ -208,10 +170,8 @@ export class SimpleFINStore {
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
-        let rows = await this.store.query(`SELECT account_id FROM account_mapping
-          WHERE account_hash=$hash`, {$hash: hash})
-        if (rows.length) {
-          let account_id = rows[0].account_id;
+        let account_id = await this.store.accounts.hashToAccountId(hash)
+        if (account_id) {
           let has_transactions = await this.store.accounts.hasTransactions(account_id);
           account.transactions
           .map(trans => {
@@ -236,15 +196,11 @@ export class SimpleFINStore {
           })
         } else {
           // no matching account
-          try {
-            let unknown = await this.store.createObject(UnknownAccount, {
-              description: `${account.org.name || account.org.domain} ${account.name}`,
-              account_hash: hash,
-            })
-            unknowns.push(unknown);
-          } catch(err) {
-            log.warn(err);
-          }
+          let unknown = await this.store.accounts.getOrCreateUnknownAccount({
+            description: `${account.org.name || account.org.domain} ${account.name}`,
+            account_hash: hash,
+          })
+          unknowns.push(unknown);
         }
       }))
       if (got_data) {
@@ -264,25 +220,8 @@ export class SimpleFINStore {
   computeHash(org:SFIN.Organization, account_id:string):string {
     return hashStrings([org.name || org.domain, account_id]);
   }
-  linkAccountToHash(hash:string, account_id:number) {
-    return linkAccountToHash(this.store, hash, account_id);
-  }
 }
 
-export async function linkAccountToHash(store:IStore, hash:string, account_id:number) {
-  await store.createObject(AccountMapping, {
-    account_id: account_id,
-    account_hash: hash,
-  })
-  let unknowns = await store.listObjects(UnknownAccount, {
-    where: 'account_hash = $account_hash',
-    params: { $account_hash: hash },
-  })
-  let promises = unknowns.map(unknown => {
-    return store.deleteObject(UnknownAccount, unknown.id)
-  })
-  await Promise.all(promises);
-}
 
 class SimpleFinError extends Error {
 }
