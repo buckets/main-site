@@ -53,7 +53,7 @@ export interface IBudgetFile {
   openRecordWindow(macro_id:number, autoplay?:{
     onOrAfter: Timestamp,
     before: Timestamp,
-  }):Promise<any|SyncResult>;
+  }):Promise<SyncResult>;
   
   /**
    *  Import a transaction-laden file
@@ -380,16 +380,21 @@ export class BudgetFile implements IBudgetFile {
     });
     
     if (autoplay) {
-      return new Promise((resolve, reject) => {
+      return new Promise<SyncResult>((resolve, reject) => {
         ipcMain.once('buckets:playback-response', (ev:Electron.IpcMessageEvent, message:SyncResult) => {
-          log.info('closing macro window', win.id);
-          win.close();
+          if (!message.errors.length) {
+            log.info('closing macro window', win.id);
+            win.close();  
+          }
           this.room.broadcast('macro_stopped', {id: macro_id});
           resolve(message);
         })
       })
     } else {
-      return Promise.resolve(null);
+      return Promise.resolve<SyncResult>({
+        errors: [],
+        imported_count: 0,
+      });
     }
   }
 
@@ -484,7 +489,7 @@ class RendererBudgetFile implements IBudgetFile {
         autoplay.before = serializeTimestamp(autoplay.before);
         autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter);
       }
-      await this.callInMain('openRecordWindow', macro_id, autoplay) 
+      return await this.callInMain('openRecordWindow', macro_id, autoplay) 
     } catch(err) {
       log.error(err.stack)
       log.error(err);

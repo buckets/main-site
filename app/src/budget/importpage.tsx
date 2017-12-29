@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import * as moment from 'moment'
 import { shell } from 'electron'
 import { makeToast } from './toast'
 import { Account, UnknownAccount } from '../models/account'
@@ -12,6 +11,7 @@ import { sss } from '../i18n'
 import { DebouncedInput, Confirmer } from '../input'
 import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
+import { setPath } from './budget'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
@@ -28,7 +28,6 @@ export class SyncWidget extends React.Component<{
     let label = sss('Sync');
     let { appstate } = this.props;
     let { syncing } = appstate;
-    let details;
     if (syncing) {
       label = sss('Syncing...');
     }
@@ -40,10 +39,16 @@ export class SyncWidget extends React.Component<{
           if (syncing) {
             makeToast(sss('A sync is already in progress'), {className: 'warning'})
           } else {
-            try {
-              await syncCurrentMonth(appstate);  
-            } catch(err) {
-              makeToast(sss('Error running sync'), {className: 'error'});
+            if (appstate.can_sync) {
+              try {
+                await syncCurrentMonth(appstate);  
+              } catch(err) {
+                makeToast(sss('Error running sync'), {className: 'error'});
+              }  
+            } else {
+              // nothing to sync
+              setPath('/import');
+              makeToast(sss('Sync has not yet been set up.'), {className: 'warning'})
             }
           }
           return false;
@@ -55,7 +60,6 @@ export class SyncWidget extends React.Component<{
             })}/> {label}
         </span>
       </a>
-      {details}
     </div>
   }
 }
@@ -134,7 +138,7 @@ export class ImportPage extends React.Component<{
     let conns;
     if (Object.keys(appstate.sfinconnections).length) {
       conns = <div>
-        <h2>{sss('Connections')}</h2>
+        <h2>{sss('SimpleFIN Connections')}</h2>
         <ConnectionList connections={Object.values(appstate.sfinconnections)} />
       </div>
     }
@@ -151,7 +155,7 @@ export class ImportPage extends React.Component<{
                   syncCurrentMonth(appstate);
                 }
               }}
-              disabled={!conns && !macros}><span className={cx("fa fa-refresh", {
+              disabled={!appstate.can_sync}><span className={cx("fa fa-refresh", {
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
             <button onClick={() => {
@@ -195,10 +199,6 @@ export class ImportPage extends React.Component<{
 
               <p>
                 Create a local macro to download transaction data directly from your bank.
-              </p>
-
-              <p>
-                Your username and password/PIN are encrypted and stored in this budget file and only ever sent to your bank.
               </p>
 
             </div>
@@ -249,7 +249,7 @@ export class ImportPage extends React.Component<{
               </ul>
 
               <p>
-                For this method, you download OFX/QFX files from your bank and import them into Buckets.
+                Download files from your bank and import them into Buckets by hand.
               </p>
 
               <p>
@@ -318,19 +318,7 @@ class BankMacroList extends React.Component<{
             play_button = <button className="icon"
               onClick={() => {
                 let { onOrAfter, before } = manager.appstate.viewDateRange;
-                let today = moment();
-                if (today.isBefore(onOrAfter)) {
-                  // We're in the future
-                  onOrAfter = today.clone().startOf('month');
-                }
-                before = onOrAfter.clone().add(1, 'month');
-                if (today.isBefore(before)) {
-                  before = today.clone().subtract(1, 'day');
-                }
-                current_file.openRecordWindow(macro.id, {
-                  onOrAfter,
-                  before,
-                })
+                manager.store.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
               }}><span className="fa fa-play"></span></button>
           }
           return <tr key={idx}>

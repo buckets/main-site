@@ -159,6 +159,35 @@ export class BankMacroStore {
   async delete(macro_id:number):Promise<any> {
     return this.store.deleteObject(BankMacro, macro_id);
   }
+  async runMacro(file:IBudgetFile, macro_id:number, onOrAfter:moment.Moment, before:moment.Moment):Promise<SyncResult> {
+    let today = moment();
+    if (today.isBefore(onOrAfter)) {
+      // We're in the future
+      onOrAfter = today.clone().startOf('month');
+    }
+    before = onOrAfter.clone().add(1, 'month');
+    if (today.isBefore(before)) {
+      before = today.clone().subtract(1, 'day');
+    }
+
+    let errors = [];
+    let imported_count = 0;
+    log.info(`Running macro #${macro_id}`);
+    try {
+      let result:SyncResult = await file.openRecordWindow(macro_id, {
+        onOrAfter,
+        before,
+      })
+      errors = errors.concat(result.errors);
+      imported_count += result.imported_count;
+    } catch (err) {
+      errors.push(err);
+    }
+    return {
+      errors,
+      imported_count,
+    }
+  }
 }
 
 
@@ -180,25 +209,12 @@ class MacroSync implements ASyncening {
     log.debug('MacroSync start', this.onOrAfter.format('l'), this.before.format('l'))
     let macros = (await this.store.bankmacro.list()).filter(macro => macro.enabled);
     let { onOrAfter, before } = this;
-    let today = moment();
-    if (today.isBefore(onOrAfter)) {
-      // We're in the future
-      onOrAfter = today.clone().startOf('month');
-    }
-    before = onOrAfter.clone().add(1, 'month');
-    if (today.isBefore(before)) {
-      before = today.clone().subtract(1, 'day');
-    }
-
     let errors = [];
     let imported_count = 0;
     for (let macro of macros) {
       log.info(`Syncing macro #${macro.id} ${macro.name}`);
       try {
-        let result:SyncResult = await this.file.openRecordWindow(macro.id, {
-          onOrAfter,
-          before,
-        })
+        let result:SyncResult = await this.store.bankmacro.runMacro(this.file, macro.id, onOrAfter, before);
         errors = errors.concat(result.errors);
         imported_count += result.imported_count;
       } catch (err) {

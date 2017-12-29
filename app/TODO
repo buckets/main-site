@@ -4,10 +4,6 @@ Recording:
     ☐ Windows
     ☐ Linux
   ☐ Close tabs that are just downloads.
-  ☐ Timeout when a step can't be completed.
-    ☐ Turn to paused
-    ☐ Display a message to the user
-  ☐ Add thorough, debuggable logging
   ☐ Test all of your own banks
   ☐ Test Every Button
 
@@ -57,6 +53,10 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Turn to paused @done (17-12-28 22:13) @project(Recording)
+ ✔ Timeout when a step can't be completed. @done (17-12-28 22:13) @project(Recording)
+ ✔ Display a message to the user @done (17-12-28 22:13) @project(Recording)
+ ✔ Add thorough, debuggable logging @done (17-12-28 20:36) @project(Recording)
  ✔ Record signing in to bank (with encryption) @done (17-12-28 12:14) @project(v1.0.0)
  ✘ Command+L sould focus the URL-selector @cancelled (17-12-28 12:13) @project(Recording)
  ✔ Let people type in URL without http:// @done (17-12-28 11:56) @project(Recording)

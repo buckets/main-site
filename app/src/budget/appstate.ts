@@ -35,6 +35,8 @@ interface IComputedAppState {
 
   unkicked_buckets: Bucket[];
   kicked_buckets: Bucket[];
+
+  can_sync: boolean;
 }
 
 export class AppState implements IComputedAppState {
@@ -89,6 +91,7 @@ export class AppState implements IComputedAppState {
   unkicked_buckets: Bucket[] = [];
   kicked_buckets: Bucket[] = [];
 
+  can_sync = false;
 
   get defaultPostingDate() {
     let today = moment();
@@ -187,6 +190,9 @@ function computeTotals(appstate:AppState):IComputedAppState {
       unmatched_account_balances += 1;
     }
   })
+  let can_sync = 
+      !!Object.keys(appstate.sfinconnections).length
+    ||!!Object.keys(appstate.bank_macros).length;
   return {
     bucket_total_balance,
     account_total_balance,
@@ -203,6 +209,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     unkicked_buckets,
     unmatched_account_balances,
     nodebt_balances,
+    can_sync,
   };
 }
 
@@ -270,7 +277,7 @@ export class StateManager {
       if (result.errors.length) {
         result.errors.forEach(err => {
           log.warn('Error during sync:', err);
-          makeToast(err, {className:'error'})
+          makeToast(err.toString(), {className:'error'})
         })  
       } else {
         makeToast(sss('Sync complete'));  

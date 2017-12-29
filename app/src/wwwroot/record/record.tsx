@@ -13,10 +13,10 @@ import { sss } from '../../i18n'
 import { Confirmer } from '../../input'
 import { IncorrectPassword } from '../../error'
 import { makeToast, ToastDisplay } from '../../budget/toast'
-import { PrefixLogger } from '../../logging'
+// import { PrefixLogger } from '../../logging'
 import { Help } from '../../tooltip'
 
-const log = new PrefixLogger('(record)')
+// const log = new PrefixLogger('(record)')
 
 
 interface WebviewProps {
@@ -778,7 +778,6 @@ export async function start(args:{
             }
           })
           .then(playback_result => {
-            log.debug('playback_result', playback_result);
             if (args.response_id) {
               ipcRenderer.send('buckets:playback-response', {
                 errors: [],
@@ -790,6 +789,12 @@ export async function start(args:{
             let current_window = remote.getCurrentWindow();
             current_window.show();
             current_window.focus();
+            if (args.response_id) {
+              ipcRenderer.send('buckets:playback-response', {
+                errors: [err.toString()],
+                imported_count: 0,
+              })
+            }
           });
         }
       }}
