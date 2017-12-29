@@ -376,9 +376,14 @@ class ConnectionList extends React.Component<{
       return <tr key={conn.id}>
         <td>{conn.id}</td>
         <td><DateTime value={conn.last_used} /></td>
-        <td><button className="delete" onClick={() => {
-          manager.store.deleteObject(Connection, conn.id);
-        }}>{sss('Delete')}</button></td>
+        <td className="icon-button-wrap">
+          <Confirmer
+            first={<button className="icon"><span className="fa fa-trash"></span></button>}
+            second={<button className="delete" onClick={(ev) => {
+              manager.store.deleteObject(Connection, conn.id);
+            }}>{sss('Confirm delete?')}</button>}
+          />
+        </td>
       </tr>
     })
     return <table className="ledger">
