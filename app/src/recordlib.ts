@@ -1019,6 +1019,9 @@ export class RecordingDirector<T> {
         tab.rpc.call('showdebug', {value: this.showdebug});
       }
     })
+    // webview.addEventListener('did-get-response-details', (ev, ...args) => {
+    //   logger.debug('response details', ev, args);
+    // })
     webview.addEventListener('dom-ready', (ev) => {
       if (this.state === 'recording') {
         let pageload:PageLoadStep&TabStep = {
@@ -1054,10 +1057,8 @@ export class RecordingDirector<T> {
       url,
       time: Date.now(),
     }
-    if (this.recording.steps.length) {
+    if (this.state === 'recording') {
       this.recording.addStep(step)
-    } else {
-      this.recording.steps.unshift(step);
     }
     this.emitChange();
   }
