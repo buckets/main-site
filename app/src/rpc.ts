@@ -92,7 +92,6 @@ export class Room<T> {
         log.debug(this.key, 'renderer joined:', wc_id)
         this.webContents.set(wc_id, wc);
         wc.on('destroyed', () => {
-          log.debug(this.key, 'renderer destroyed:', wc_id)
           this.webContents.delete(wc_id);
         })
       })

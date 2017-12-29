@@ -13,10 +13,11 @@ import { sss } from '../../i18n'
 import { Confirmer } from '../../input'
 import { IncorrectPassword } from '../../error'
 import { makeToast, ToastDisplay } from '../../budget/toast'
-// import { PrefixLogger } from '../../logging'
+import { PrefixLogger } from '../../logging'
 import { Help } from '../../tooltip'
+import { SyncResult } from '../../sync'
 
-// const log = new PrefixLogger('(record)')
+const log = new PrefixLogger('(record)')
 
 
 interface WebviewProps {
@@ -713,6 +714,10 @@ export async function start(args:{
   let store = current_file.store;
   let BANKMACRO = await store.bankmacro.get(args.macro_id);
   let recording:Recording = null
+  let sync_result:SyncResult = {
+    errors: [],
+    imported_count: 0,
+  }
 
   // attempt the password 3 times.
   let i = 0;
@@ -741,8 +746,28 @@ export async function start(args:{
       store.bankmacro.update(BANKMACRO.id, {name: message.title});
     }
   })
-  director.events.file_downloaded.on(({filename}) => {
+  director.events.file_downloaded.on(async ({localpath, filename, mimetype}) => {
+    log.info('File downloaded', filename, localpath, mimetype);
     makeToast(sss('notify-downloaded-file', filename => `Downloaded file: ${filename}`)(filename));
+
+    // process downloaded file
+    let imported;
+    let pendings;
+    try {
+      let result = await current_file.importFile(localpath);
+      imported = result.imported;
+      pendings = result.pendings;
+    } catch(err) {
+      log.error(`error importing: ${err}`);
+      log.error(err.stack);
+    }
+    if (pendings && pendings.length) {
+      log.info(`${pendings.length} unknown accounts`);
+    }
+    if (imported && imported.length) {
+      log.info(`${imported.length} imported`);
+      sync_result.imported_count += imported.length;
+    }
   })
   director.events.error.on(err => {
     if (err instanceof TimeoutError) {
@@ -756,6 +781,8 @@ export async function start(args:{
     }
   })
 
+  let loaded = false;
+
   renderer.registerRendering(() => {
     // const url = webview.getWebContents && webview.getWebContents() ? webview.getURL() : '';
     return <RecordingApp
@@ -767,7 +794,14 @@ export async function start(args:{
       store={store}
       renderer={renderer}
       onLoadRecordPage={() => {
+        if (loaded) {
+          log.warn('Not rerunning onLoadRecordPage');
+          return;
+        }
+        loaded = true;
+
         if (args.autoplay) {
+          log.info('Starting autoplay');
           director.playFromBeginning((options:ValueOptions) => {
             if (options.key === 'start-date') {
               let date = ensureLocalMoment(args.autoplay.onOrAfter);
@@ -777,23 +811,20 @@ export async function start(args:{
               return date.format(options.variation);
             }
           })
-          .then(playback_result => {
+          .then(() => {
+            log.debug('autoplay done', sync_result);
             if (args.response_id) {
-              ipcRenderer.send('buckets:playback-response', {
-                errors: [],
-                imported_count: 0,
-              })
+              ipcRenderer.send('buckets:playback-response', sync_result)
             }
           })
           .catch(err => {
+            log.error('autoplay error', err.toString());
             let current_window = remote.getCurrentWindow();
             current_window.show();
             current_window.focus();
             if (args.response_id) {
-              ipcRenderer.send('buckets:playback-response', {
-                errors: [err.toString()],
-                imported_count: 0,
-              })
+              sync_result.errors.push(err.toString())
+              ipcRenderer.send('buckets:playback-response', sync_result)
             }
           });
         }

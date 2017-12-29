@@ -16,7 +16,7 @@ import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import { onlyRunInMain, Room } from '../rpc'
-import { importFile } from '../importing'
+import { importFile, ImportResult } from '../importing'
 import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
 import { SimpleFINSyncer } from '../models/simplefin'
@@ -58,7 +58,7 @@ export interface IBudgetFile {
   /**
    *  Import a transaction-laden file
    */
-  importFile(path:string);
+  importFile(path:string):Promise<ImportResult>;
   openImportFileDialog();
 
   /**
@@ -314,25 +314,6 @@ export class BudgetFile implements IBudgetFile {
               filename: item.getFilename(),
               mimetype: item.getMimeType(),
             })
-
-            // process it
-            logger.info(`processing file`, save_path);
-            let imported;
-            let pendings;
-            try {
-              let result = await importFile(this.store, save_path);
-              imported = result.imported;
-              pendings = result.pendings;
-            } catch(err) {
-              logger.error(`error importing: ${err}`);
-              logger.error(err.stack);
-            }
-            if (pendings && pendings.length) {
-              logger.info(`${pendings.length} unknown accounts`);
-            }
-            if (imported && imported.length) {
-              logger.info(`${imported.length} imported`);  
-            }
           } else {
             logger.warn(`Download failed: ${state}`)
           }
@@ -398,9 +379,9 @@ export class BudgetFile implements IBudgetFile {
     }
   }
 
-  async importFile(path:string) {
+  async importFile(path:string):Promise<ImportResult> {
     try {
-      await importFile(this.store, path);  
+      return await importFile(this.store, path);  
     } catch(err) {
       reportErrorToUser("Error importing file");
       log.error(`Error importing file: ${path}`);
@@ -496,7 +477,7 @@ class RendererBudgetFile implements IBudgetFile {
     }
   }
 
-  importFile(path:string) {
+  importFile(path:string):Promise<ImportResult> {
     return this.callInMain('importFile', path);
   }
   openImportFileDialog() {

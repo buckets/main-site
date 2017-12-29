@@ -38,6 +38,10 @@ export interface PendingImport {
   hash: string;
 
 }
+export interface ImportResult {
+  imported: Transaction[];
+  pendings: PendingImport[];
+}
 
 
 /**
@@ -47,7 +51,7 @@ export interface PendingImport {
  *  can't be found, then creating an AccountMapping will
  *  automatically finish the import.
  */
-export async function importFile(store:IStore, path:string) {
+export async function importFile(store:IStore, path:string):Promise<ImportResult> {
   let set:ImportableAccountSet;
   let data = await fs.readFileAsync(path, {encoding:'utf8'});
   try {

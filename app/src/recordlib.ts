@@ -867,6 +867,7 @@ interface ITab {
   id: number,
   webview: Electron.WebviewTag,
   rpc: RPC,
+  isHTML: boolean;
   init_url?: string,
   pages_loaded: Array<{
     title: string;
@@ -910,7 +911,9 @@ export class RecordingDirector<T> {
       step_number: number,
     }>(),
     file_downloaded: new EventSource<{
+      localpath: string,
       filename: string,
+      mimetype: string,
     }>(),
     error: new EventSource<Error>(),
   }
@@ -955,14 +958,20 @@ export class RecordingDirector<T> {
     return this._showdebug;
   }
   listenForDownloads() {
-    ipcRenderer.on('buckets:file-downloaded', (ev, {localpath, filename, mimetype}) => {
+    ipcRenderer.on('buckets:file-downloaded', async (ev, {localpath, filename, mimetype}) => {
       log.info('file downloaded', localpath, filename, mimetype);
+
+      // record it
       let step:DownloadStep&TabRecStep = {
         type: 'download',
         time: Date.now(),
         tab_id: 0,
       }
-      this.events.file_downloaded.emit({filename});
+      this.events.file_downloaded.emit({
+        localpath,
+        filename,
+        mimetype,
+      });
       if (this.state === 'recording') {
         this.recording.addStep(step);
       }
@@ -979,6 +988,7 @@ export class RecordingDirector<T> {
     this.tabs[tab_id] = {
       id: tab_id,
       rpc: null,
+      isHTML: false,
       init_url: url,
       webview: null,
       pages_loaded: [],
@@ -996,11 +1006,6 @@ export class RecordingDirector<T> {
     tab.rpc = inHostRPC(webview);
     tab.pages_loaded = [];
     logger.info('attached');
-
-    if (tab.init_url) {
-      logger.info('navigating to init_url');
-      webview.src = tab.init_url;
-    }
     
     tab.rpc.addHandlers({
       'echo': () => 'echo',
@@ -1020,7 +1025,16 @@ export class RecordingDirector<T> {
       }
     })
     // webview.addEventListener('did-get-response-details', (ev, ...args) => {
-    //   logger.debug('response details', ev, args);
+    //   logger.debug('did-get-response-details', ev, args);
+    // })
+    webview.addEventListener('did-finish-load', (ev) => {
+      // Since this event is only called for HTML pages
+      tab.isHTML = true;
+    })
+    // webview.addEventListener('did-stop-loading', (ev) => {
+    //   if (!tab.isHTML) {
+    //     this.deleteTab(tab.id);
+    //   }
     // })
     webview.addEventListener('dom-ready', (ev) => {
       if (this.state === 'recording') {
@@ -1049,6 +1063,11 @@ export class RecordingDirector<T> {
     webview.addEventListener('close', ev => {
       logger.info(`request to close`);
     })
+
+    if (tab.init_url) {
+      logger.debug('navigating to init_url', tab.id, tab.init_url);
+      webview.src = tab.init_url;
+    }
   }
   setURL(tab_id:number, url:string) {
     let step:NavigateStep&TabStep = {
@@ -1162,17 +1181,19 @@ export class RecordingDirector<T> {
           throw err
         }
         
-        try {
-          await runUntilSuccessful(async () => {
-            if (! await tab.rpc.call('echo')) {
-              throw new TryAgainError();
+        if (tab.isHTML) {
+          try {
+            await runUntilSuccessful(async () => {
+              if (! await tab.rpc.call('echo')) {
+                throw new TryAgainError();
+              }
+            })
+          } catch(err) {
+            if (err instanceof TimeoutError) {
+              log.info('Timed out waiting for rpc echo');
             }
-          })
-        } catch(err) {
-          if (err instanceof TimeoutError) {
-            log.info('Timed out waiting for rpc echo');
+            throw err
           }
-          throw err
         }
       }
 

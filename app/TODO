@@ -34,6 +34,7 @@ Videos:
   ☐ Going into debt to yourself
 
 Backlog:
+ ☐ Make Toasts their own width instead of matching the width of the widest current toast
  ☐ Don't upload the application code to Heroku
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
  ☐ Support bitcoin as a currency (with no decimal places)
