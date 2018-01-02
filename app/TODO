@@ -21,8 +21,8 @@ v1.0.0:
  ☐ Prompt to be added to newsletter
  ☐ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
  ☐ Show running balance in bucket transactions list
- ☐ Merge "File import" and "Connections" page
- ☐ Support importing CSV
+ ✔ Merge "File import" and "Connections" page @done (18-01-02 12:57)
+ ✘ Support importing CSV @cancelled (18-01-02 12:57)
  ☐ Show bucket group totals
 
 Videos:
