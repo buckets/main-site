@@ -1,13 +1,7 @@
 MAKE SURE YOU ADD TO changes/{type}-{name}.md
-Recording:
-  ☐ Copy and Paste should be captured correctly
-    ☐ Windows
-    ☐ Linux
-  ☐ Close tabs that are just downloads.
-  ☐ Test all of your own banks
-  ☐ Test Every Button
 
 Bugs:
+  ☐ Remove docs and other things from packaged app.
 
 v1.0.0:
  ☐ Timeout syncing (like if there's no internet connection)
