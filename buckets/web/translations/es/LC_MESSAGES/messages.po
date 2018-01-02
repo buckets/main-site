@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2017-12-04 09:10-0700\n"
-"PO-Revision-Date: 2017-12-04 09:12-0700\n"
+"POT-Creation-Date: 2018-01-02 08:36-0700\n"
+"PO-Revision-Date: 2018-01-02 08:38-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -224,8 +224,8 @@ msgid "Family budgeting app"
 msgstr "Aplicación de presupuesto familiar"
 
 #: buckets/web/templates/anon/buy.html:29
-msgid "Buckets is half off from now until January 2018."
-msgstr "Buckets está a mitad de camino hasta enero de 2018."
+msgid "Buckets is half off from now until January 10, 2018."
+msgstr "Buckets está a mitad de camino hasta 10 de enero de 2018."
 
 #: buckets/web/templates/anon/buy.html:30
 msgid ""
@@ -350,8 +350,10 @@ msgstr ""
 "ayudarlo a ahorrar dinero, no a darle otro servicio mensual."
 
 #: buckets/web/templates/anon/index.html:164
-msgid "This is the special introductory price.  In 2018 it will cost $29."
-msgstr "Este es el precio especial de lanzamiento. En 2018 costará $ 29."
+msgid ""
+"This is the special introductory price.  After January 10, 2018 it will cost "
+"$29."
+msgstr "Este es el precio especial de lanzamiento. Despues de 10 de enero de 2018 costará $29."
 
 #: buckets/web/templates/anon/index.html:168
 msgid "Buy Now &mdash; $15"
@@ -385,3 +387,9 @@ msgstr "Suscribir"
 #~ msgstr ""
 #~ "Abra la aplicación Buckets (descargar en %(linkstart)swww.budgetwithbuckets."
 #~ "com</a>)"
+
+#~ msgid "Buckets is half off from now until January 2018."
+#~ msgstr "Buckets está a mitad de camino hasta enero de 2018."
+
+#~ msgid "This is the special introductory price.  In 2018 it will cost $29."
+#~ msgstr "Este es el precio especial de lanzamiento. En 2018 costará $ 29."

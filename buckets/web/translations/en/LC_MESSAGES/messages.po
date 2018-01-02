@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-12-04 09:10-0700\n"
+"POT-Creation-Date: 2018-01-02 08:36-0700\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -192,7 +192,7 @@ msgid "Family budgeting app"
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:29
-msgid "Buckets is half off from now until January 2018."
+msgid "Buckets is half off from now until January 10, 2018."
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:30
@@ -294,7 +294,9 @@ msgid ""
 msgstr ""
 
 #: buckets/web/templates/anon/index.html:164
-msgid "This is the special introductory price.  In 2018 it will cost $29."
+msgid ""
+"This is the special introductory price.  After January 10, 2018 it will "
+"cost $29."
 msgstr ""
 
 #: buckets/web/templates/anon/index.html:168
@@ -462,5 +464,8 @@ msgstr ""
 #~ msgid ""
 #~ "Open the Buckets application (download "
 #~ "at %(linkstart)swww.budgetwithbuckets.com</a>)"
+#~ msgstr ""
+
+#~ msgid "Buckets is half off from now until January 2018."
 #~ msgstr ""
 
