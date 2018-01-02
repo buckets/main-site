@@ -267,13 +267,16 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
       }
 
       // Record prior rain
-      for (let trans of rain_transactions[cat.entityId]) {
-        await store.buckets.transact({
-          bucket_id: bucket.id,
-          amount: trans.rain,
-          memo: 'Rain',
-          posted: ensureLocalMoment(trans.month),
-        })
+      let transactions = rain_transactions[cat.entityId];
+      if (transactions) {
+        for (let trans of transactions) {
+          await store.buckets.transact({
+            bucket_id: bucket.id,
+            amount: trans.rain,
+            memo: 'Rain',
+            posted: ensureLocalMoment(trans.month),
+          })
+        }
       }
 
       if (mcat.entityId === "MasterCategory/__Hidden__") {
@@ -356,6 +359,7 @@ export async function findYNAB4FileAndImport(store:IStore):Promise<any> {
   return new Promise((resolve, reject) => {
     dialog.showOpenDialog({
       title: sss('Open YNAB4 File'),
+      properties: ['openFile', 'openDirectory'],
       filters: [
         {
           name: 'YNAB',
