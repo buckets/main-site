@@ -8,7 +8,7 @@ import { Money } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
-import { Date, chunkTime, Interval } from '../time'
+import { chunkTime, Interval } from '../time'
 
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
@@ -531,18 +531,20 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
       <table className="summary full-width">
         <thead>
           <tr>
-            <th className="left">{sss('Bucket')}</th>
-            <th className="right">{sss('Budgeted')}</th>
-            <th className="center" colSpan={3}>{sss('Prior 12 months')}</th>
-            <th className="center" colSpan={3}>{sss('Prior 3 months')}</th>
-            <th className="center" colSpan={3}><Date
-              value={end_date.clone().subtract(1, 'day')}
-              format="MMM YYYY" /></th>
+            <th className="right right-padded">{sss('Bucket')}</th>
+            <th className="right right-padded">{sss('Budgeted')}</th>
+            <th className="right right-padded">{sss('Last 18 months')}</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {rows}
         </tbody>
+        <tfoot>
+          <tr>
+            <th colSpan={100}></th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   }
@@ -554,106 +556,134 @@ interface BucketExpenseSummaryRowProps {
   balance: number;
 }
 class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {
-  last12: number;
-  last3: number;
-  last: number;
+  last18: number[];
 }> {
   constructor(props) {
     super(props)
     this.state = {
-      last12: null,
-      last3: null,
-      last: null,
+      last18: [],
     }
     this.recomputeState(props);
   }
   async recomputeState(props:BucketExpenseSummaryRowProps) {
-    let { end_date } = props;
-    let earliestTrans = await manager.store.buckets.earliestTransaction(props.bucket.id);
-    let start = end_date.clone().subtract(12, 'months');
+    let { end_date, bucket } = props;
+    let start = end_date.clone().subtract(18, 'months');
+    let earliestTrans = await manager.store.buckets.earliestTransaction(bucket.id);
     if (start.isBefore(earliestTrans)) {
       start = earliestTrans.clone().startOf('month');
     }
-    let months = await Promise.all(chunkTime({
+    // async function computeAverageExpenses(interval:Interval, bucket_id) {
+    //   const balances = await manager.store.buckets.balances(interval.start, bucket.id);  
+    //   const balance = balances[bucket.id];
+    //   const expenses = await manager.store.reports.bucketExpenses({
+    //     bucket_id,
+    //     start: interval.start,
+    //     end: interval.end,
+    //   });
+    //   const months = interval.end.diff(interval.start, 'month');
+    //   console.log('start', interval.start.format('ll'))
+    //   console.log('end', interval.end.format('ll'))
+    //   console.log('beginning balance', balance);
+    //   console.log('expenses         ', expenses);
+    //   console.log('months           ', months);
+    //   return Math.abs(expenses) / months;
+    // }
+    // console.log(bucket.name);
+    // let last18 = await computeAverageExpenses({
+    //   start: start,
+    //   end: end_date,
+    // }, bucket.id);
+    // let last3 = await computeAverageExpenses({
+    //   start: end_date.clone().subtract(3, 'month'),
+    //   end: end_date,
+    // }, bucket.id);
+    
+    // console.log(bucket.name, 'balance_12ago', balance_12ago);
+
+    // let last12_expenses = await manager.store.reports.bucketExpenses({
+    //   bucket_id: bucket.id,
+    //   start: start,
+    //   end: end_date,
+    // })
+    // let last12_months = end_date.diff(start, 'month');
+    // console.log(bucket.name, 'last12_expenses', last12_expenses, last12_months);
+
+    // let last_expenses = await manager.store.reports.bucketExpenses({
+    //   bucket_id: bucket.id,
+    //   start: end_date.clone().subtract(1, 'month'),
+    //   end: end_date,
+    // })
+    // console.log(bucket.name, "last_expenses", last_expenses);
+    // this.setState({
+    //   last18: last12_expenses,
+    //   last: last_expenses,
+    // })
+    let expenses = await Promise.all(chunkTime({
       start: start,
       end: end_date,
       unit: 'month',
       step: 1
     }).map(interval => {
       return manager.store.reports.bucketExpenses({
-        bucket_id: props.bucket.id,
+        bucket_id: bucket.id,
         start: interval.start,
         end: interval.end,
       })
     }));
-    function getAvg(slice:number[]):number {
-      return Math.ceil(slice.reduce((a,b)=> {
-        return (a||0) + (b||0);
-      }, 0) / slice.length);
-    }
-    if (months.length) {
-      let last12 = Math.abs(getAvg(months));
-      let last3 = Math.abs(getAvg(months.slice(-3)));
-      let last = Math.abs(getAvg([months[months.length-1]]));
-      this.setState({
-        last12,
-        last3,
-        last,
-      })
-    }
+    // function getAvg(slice:number[]):number {
+    //   return Math.ceil(slice.reduce((a,b)=> {
+    //     return (a||0) + (b||0);
+    //   }, 0) / slice.length);
+    // }
+    // if (months.length) {
+    //   let last18 = Math.abs(getAvg(months));
+    //   let last = Math.abs(getAvg([months[months.length-1]]));
+    this.setState({
+      last18: expenses,
+    })
   }
   componentWillReceiveProps(nextProps) {
     this.recomputeState(nextProps);
   }
   render() {
     let { bucket, end_date, balance } = this.props;
-    // let { last12, last3, last } = this.state;
     let computed = computeBucketData(bucket.kind, bucket, {
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
-    function makeComparison(amount, label:string) {
-      if (amount === 0) {
-        return [
-          <td className="right" key={`${label}-amount`}>-</td>,
-          <td key={`${label}-percent`}></td>,
-          <td className="side" key={`${label}-incamount`}></td>,
-        ];
+    function showAnalysis(expenses:number[], label:string) {
+      if (!expenses.length) {
+        return <div>-</div>
       }
-      let incdeclabel;
-      let incdecamt;
+      // let incdeclabel;
+      // let incdecamt;
 
-      let diff = computed.deposit - amount;
-      let percent = diff / computed.deposit;
-      let cls = cx('incdeclabel', 'nominal', {
-        bad: percent < 0,
-        good: percent > 0,
-        // reallybad: percent < -0.4,
-        // reallygood: percent > 0.4,
-      })
-      incdecamt = <span className={cls}><Money value={diff} /></span>;
-      if (percent < 0) {
-        incdeclabel = <span className={cls}>&#x25B2;{Math.abs(Math.ceil(percent*100))}%</span>
-      } else if (percent > 0) {
-        incdeclabel = <span className={cls}>&#x25BC;{Math.abs(Math.ceil(percent*100))}%</span>
-      }
-      return [<td className="right" key={`${label}-amount`}>
-        <Money value={amount} />
-      </td>,
-      <td className="right" key={`${label}-percent`}>
-        {incdeclabel}
-      </td>,
-      <td className="side" key={`${label}-incamount`}>
-        {incdecamt}
-      </td>,
-      ]
+      let avg = d3.sum(expenses) / expenses.length;
+
+      // let diff = computed.deposit - avg;
+      // let percent = diff / computed.deposit;
+      // let cls = cx('incdeclabel', 'nominal', {
+      //   bad: percent < 0,
+      //   good: percent > 0,
+      //   // reallybad: percent < -0.4,
+      //   // reallygood: percent > 0.4,
+      // })
+      // incdecamt = <span className={cls}><Money value={diff} /></span>;
+      // if (percent < 0) {
+      //   incdeclabel = <span className={cls}>&#x25B2;{Math.abs(Math.ceil(percent*100))}%</span>
+      // } else if (percent > 0) {
+      //   incdeclabel = <span className={cls}>&#x25BC;{Math.abs(Math.ceil(percent*100))}%</span>
+      // }
+      return <div>
+        <div className="right">
+          <Money value={-avg} round />
+        </div>
+      </div>
     }
     return <tr className="hover">
-      <th className="side">{bucket.name}</th>
-      <td className="side"><Money value={computed.deposit} /></td>
-      {makeComparison(this.state.last12, 'last12')}
-      {makeComparison(this.state.last3, 'last3')}
-      {makeComparison(this.state.last, 'last')}
+      <th className="right-border">{bucket.name}</th>
+      <td className="right-border"><Money value={computed.deposit} /></td>
+      <td>{showAnalysis(this.state.last18, 'last18')}</td>
     </tr>
   }
 }

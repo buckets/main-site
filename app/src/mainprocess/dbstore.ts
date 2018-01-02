@@ -173,7 +173,7 @@ export class DBStore implements IStore {
     }
     return ret;
   }
-  async listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]> {
+  async listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[], limit?:number, offset?:number}):Promise<T[]> {
     let { where, params, order } = <any>(args || {});
     let select = `SELECT *,'${cls.type}' as _type FROM ${cls.type}`;
     if (where) {
@@ -186,7 +186,15 @@ export class DBStore implements IStore {
     if (order && order.length) {
       order_clause = `ORDER BY ${order.join(',')}`;
     }
-    let sql = `${select} ${where} ${order_clause}`;
+    let limit_clause = '';
+    if (args.limit !== undefined) {
+      limit_clause = `LIMIT ${args.limit}`
+    }
+    let offset_clause = '';
+    if (args.offset !== undefined) {
+      offset_clause = `OFFSET ${args.offset}`
+    }
+    let sql = `${select} ${where} ${order_clause} ${limit_clause} ${offset_clause}`;
     let ret = this.db.all(sql, params);
     if (cls.fromdb) {
       ret.then(objects => {

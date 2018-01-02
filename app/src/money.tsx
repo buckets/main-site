@@ -103,6 +103,7 @@ interface MoneyProps {
   noanimate?: boolean;
   nocolor?: boolean;
   symbol?: string|boolean;
+  round?: boolean;
   [x:string]: any;
 }
 export class Money extends React.Component<MoneyProps, {
@@ -186,12 +187,15 @@ export class Money extends React.Component<MoneyProps, {
     })
   }
   render() {
-    let { value, className, hidezero, noanimate, nocolor, symbol, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, symbol, round, ...rest } = this.props;
     let going_up = true;
     if (ANIMATION_ENABLED && !noanimate) {
       // animating
       going_up = value > this.state.current_value;
       value = this.state.current_value;
+    }
+    if (round) {
+      value = value - value % 100;
     }
     let display = cents2decimal(value, this.state.anim_show_decimal) || '0';
     if (hidezero && !value) {
@@ -234,6 +238,9 @@ export let decimal_sep = '.';
 export function cents2decimal(cents:number|null|string, show_decimal?:boolean, show_sep?:boolean):string {
   if (cents === null || cents === undefined || cents === '') {
     return null;
+  }
+  if (cents === Infinity) {
+    return '∞'
   }
   if (show_decimal === undefined) {
     show_decimal = false;
