@@ -1,6 +1,6 @@
 import * as moment from 'moment'
 import { IObject, IStore, registerClass } from '../store'
-import { ensureLocalMoment, ts2db, Timestamp } from '../time'
+import { ensureLocalMoment, ts2db, Timestamp, Interval } from '../time'
 import { Balances, computeBalances } from './balances'
 import { rankBetween } from '../ranking'
 import { DEFAULT_COLORS } from '../color'
@@ -135,6 +135,64 @@ export class BucketStore {
     }
     return moment.utc(rows[0].d);
   }
+  /**
+   *
+   */
+  async countTransactions(bucket_id:number, interval:Interval, where?:string):Promise<number> {
+    if (where) {
+      where = `AND ${where}`;
+    }
+    let rows = await this.store.query(`
+      SELECT
+        count(*)
+      FROM bucket_transaction
+      WHERE
+        bucket_id = $bucket_id
+        AND posted >= $start
+        AND posted < $end
+        ${where}`, {
+          $bucket_id: bucket_id,
+          $start: ts2db(interval.start),
+          $end: ts2db(interval.end),
+        });
+    if (rows.length) {
+      // No transactions within this 
+      return rows[0][0]
+    } else {
+      return 0;
+    }
+  }
+  /**
+   *  Return the dates of the earliest and latest transactions with a range
+   */
+  async transactionSpan(bucket_id:number, interval:Interval, where?:string):Promise<Interval> {
+    if (where) {
+      where = `AND ${where}`;
+    }
+    let rows = await this.store.query(`
+      SELECT
+        min(posted) as start,
+        max(posted) as end
+      FROM bucket_transaction
+      WHERE
+        bucket_id = $bucket_id
+        AND posted >= $start
+        AND posted < $end
+        ${where}`, {
+          $bucket_id: bucket_id,
+          $start: ts2db(interval.start),
+          $end: ts2db(interval.end),
+        });
+    if (rows.length) {
+      // No transactions within this 
+      return {
+        start: moment.utc(rows[0].start),
+        end: moment.utc(rows[0].end),
+      }
+    } else {
+      return null;
+    }
+  }
 
   async transact(args:{
     bucket_id: number,
@@ -227,7 +285,6 @@ export class BucketStore {
     return ret;
   }
 
-
   async listTransactions(args:{
     bucket_id?: number,
     account_trans_id?: number,
@@ -235,6 +292,9 @@ export class BucketStore {
       onOrAfter?:Timestamp,
       before?:Timestamp,
     },
+    limit?: number;
+    offset?: number;
+    where?: string;
   }):Promise<Transaction[]> {
     let where_parts:string[] = [];
     let params:any = {};
@@ -263,11 +323,21 @@ export class BucketStore {
           params['$before'] = ts2db(args.posted.before);
         }
       }
+
+      // where
+      if (args.where) {
+        where_parts.push(args.where);
+      }
     }
 
     let where = where_parts.join(' AND ');
-    return this.store.listObjects(Transaction, {where, params,
-      order: ['posted DESC', 'id']});
+    return this.store.listObjects(Transaction, {
+      where,
+      params,
+      order: ['posted DESC', 'id'],
+      limit: args.limit,
+      offset: args.offset,
+    });
   }
   async moveBucket(moving_id:number, placement:'before'|'after', reference_id:number):Promise<Bucket> {
     let where;

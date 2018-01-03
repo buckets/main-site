@@ -559,21 +559,37 @@ table.summary td,
 table.summary th {
   padding: .5rem 0rem;
 }
-table.summary thead th {
+table.summary thead th,
+table.summary tr.divider th,
+table.summary tbody.line-below tr:last-child td,
+table.summary tbody.line-below tr:last-child th {
   border-bottom: 1px solid var(--lighter-grey);
 }
-table.summary th.side,
-table.summary td.side {
+table.summary .right-border {
+  padding: .5rem 1rem;
+}
+table.summary tfoot th {
+  border-top: 1px solid var(--lighter-grey);
+}
+table.summary .right-padded {
+  padding-right: 1rem;
+}
+table.summary .left-padded {
+  padding-left: 1rem;
+}
+table.summary th.right-border,
+table.summary td.right-border {
   border-right: 1px solid var(--lighter-grey);
   text-align: end;
   padding-right: 1rem;
 }
-table.summary th.side-total {
+table.summary th.total {
   border-left: 1px solid var(--lighter-grey);
 }
 table.summary td.border-right {
   border-right: 1px solid var(--lighter-grey);
 }
+
 
 table.ledger .icon-button-wrap,
 .icon-button-wrap {
@@ -1316,4 +1332,9 @@ table.props th {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+/* Charts */
+.numberline {
+  display: inline-block;
 }

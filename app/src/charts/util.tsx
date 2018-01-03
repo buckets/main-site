@@ -3,6 +3,9 @@ import * as d3 from 'd3'
 import { COLORS } from '../color'
 
 
+export const UPARROW = <span>&#x25B2;</span>
+export const DOWNARROW = <span>&#x25BC;</span>
+
 export const CHART_STYLES = {
   axis: {
     stroke: COLORS.grey,

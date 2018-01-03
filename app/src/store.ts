@@ -56,7 +56,7 @@ export interface IStore {
   createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T>;
   updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T>;
   getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T>;
-  listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[]}):Promise<T[]>;
+  listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[], limit?:number, offset?:number}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
 
