@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { manager, AppState } from './appstate'
 import { ObjectEvent, isObj } from '../store'
-import { Money } from '../money'
+import { Money, cents2decimal } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
@@ -533,7 +533,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
           <tr>
             <th className="right right-padded">{sss('Bucket')}</th>
             <th className="right right-padded">{sss('Budgeted')}</th>
-            <th className="right right-padded">{sss('Last 18 months')}</th>
+            <th className="right right-padded">{sss('Last 4 months')}</th>
             <th></th>
           </tr>
         </thead>
@@ -550,96 +550,44 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, an
   }
 }
 
+interface BucketExpenseSummaryRowState {
+  max_expenses: number;
+  min_expenses: number;
+  avg_expenses: number;
+}
 interface BucketExpenseSummaryRowProps {
   bucket: Bucket;
   end_date: moment.Moment;
   balance: number;
 }
-class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {
-  last18: number[];
-}> {
+class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, BucketExpenseSummaryRowState> {
   constructor(props) {
     super(props)
     this.state = {
-      last18: [],
+      max_expenses: 0,
+      min_expenses: 0,
+      avg_expenses: 0,
     }
     this.recomputeState(props);
   }
   async recomputeState(props:BucketExpenseSummaryRowProps) {
     let { end_date, bucket } = props;
-    let start = end_date.clone().subtract(18, 'months');
-    let earliestTrans = await manager.store.buckets.earliestTransaction(bucket.id);
-    if (start.isBefore(earliestTrans)) {
-      start = earliestTrans.clone().startOf('month');
-    }
-    // async function computeAverageExpenses(interval:Interval, bucket_id) {
-    //   const balances = await manager.store.buckets.balances(interval.start, bucket.id);  
-    //   const balance = balances[bucket.id];
-    //   const expenses = await manager.store.reports.bucketExpenses({
-    //     bucket_id,
-    //     start: interval.start,
-    //     end: interval.end,
-    //   });
-    //   const months = interval.end.diff(interval.start, 'month');
-    //   console.log('start', interval.start.format('ll'))
-    //   console.log('end', interval.end.format('ll'))
-    //   console.log('beginning balance', balance);
-    //   console.log('expenses         ', expenses);
-    //   console.log('months           ', months);
-    //   return Math.abs(expenses) / months;
-    // }
-    // console.log(bucket.name);
-    // let last18 = await computeAverageExpenses({
-    //   start: start,
-    //   end: end_date,
-    // }, bucket.id);
-    // let last3 = await computeAverageExpenses({
-    //   start: end_date.clone().subtract(3, 'month'),
-    //   end: end_date,
-    // }, bucket.id);
+    let start = end_date.clone().subtract(4, 'months');
     
-    // console.log(bucket.name, 'balance_12ago', balance_12ago);
+    let history = await manager.store.reports.bucketExpenseHistory({
+      interval: {start, end:end_date},
+      bucket_id: bucket.id,
+    });
+    let expenses = history.intervals
+      .map(i => -i.expenses);
+    let max_expenses = d3.max(expenses);
+    let min_expenses = d3.min(expenses);
+    let avg_expenses = d3.sum(expenses) / expenses.length;
 
-    // let last12_expenses = await manager.store.reports.bucketExpenses({
-    //   bucket_id: bucket.id,
-    //   start: start,
-    //   end: end_date,
-    // })
-    // let last12_months = end_date.diff(start, 'month');
-    // console.log(bucket.name, 'last12_expenses', last12_expenses, last12_months);
-
-    // let last_expenses = await manager.store.reports.bucketExpenses({
-    //   bucket_id: bucket.id,
-    //   start: end_date.clone().subtract(1, 'month'),
-    //   end: end_date,
-    // })
-    // console.log(bucket.name, "last_expenses", last_expenses);
-    // this.setState({
-    //   last18: last12_expenses,
-    //   last: last_expenses,
-    // })
-    let expenses = await Promise.all(chunkTime({
-      start: start,
-      end: end_date,
-      unit: 'month',
-      step: 1
-    }).map(interval => {
-      return manager.store.reports.bucketExpenses({
-        bucket_id: bucket.id,
-        start: interval.start,
-        end: interval.end,
-      })
-    }));
-    // function getAvg(slice:number[]):number {
-    //   return Math.ceil(slice.reduce((a,b)=> {
-    //     return (a||0) + (b||0);
-    //   }, 0) / slice.length);
-    // }
-    // if (months.length) {
-    //   let last18 = Math.abs(getAvg(months));
-    //   let last = Math.abs(getAvg([months[months.length-1]]));
     this.setState({
-      last18: expenses,
+      max_expenses,
+      min_expenses,
+      avg_expenses,
     })
   }
   componentWillReceiveProps(nextProps) {
@@ -651,40 +599,173 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
-    function showAnalysis(expenses:number[], label:string) {
-      if (!expenses.length) {
-        return <div>-</div>
+    function showAnalysis(state:BucketExpenseSummaryRowState) {
+      let blocks = [];
+      if (state.min_expenses >= computed.deposit) {
+        // just one above
+        blocks.push({
+          a: state.min_expenses,
+          b: state.max_expenses,
+          fill: 'red',
+          opacity: 0.4,
+        })
+      } else if (state.max_expenses <= computed.deposit) {
+        // just one below
+        blocks.push({
+          a: state.min_expenses,
+          b: state.max_expenses,
+          fill: 'green',
+          opacity: 0.4,
+        })
+      } else {
+        // span
+        blocks.push({
+          a: state.min_expenses,
+          b: computed.deposit,
+          fill: 'green',
+          opacity: 0.4,
+        })
+        blocks.push({
+          a: computed.deposit,
+          b: state.max_expenses,
+          fill: 'red',
+          opacity: 0.4,
+        })
       }
-      // let incdeclabel;
-      // let incdecamt;
-
-      let avg = d3.sum(expenses) / expenses.length;
-
-      // let diff = computed.deposit - avg;
-      // let percent = diff / computed.deposit;
-      // let cls = cx('incdeclabel', 'nominal', {
-      //   bad: percent < 0,
-      //   good: percent > 0,
-      //   // reallybad: percent < -0.4,
-      //   // reallygood: percent > 0.4,
-      // })
-      // incdecamt = <span className={cls}><Money value={diff} /></span>;
-      // if (percent < 0) {
-      //   incdeclabel = <span className={cls}>&#x25B2;{Math.abs(Math.ceil(percent*100))}%</span>
-      // } else if (percent > 0) {
-      //   incdeclabel = <span className={cls}>&#x25BC;{Math.abs(Math.ceil(percent*100))}%</span>
-      // }
       return <div>
-        <div className="right">
-          <Money value={-avg} round />
-        </div>
+        <NumberlineChart
+          width={500}
+          height={15}
+          center={computed.deposit}
+          points={[
+            {
+              value: computed.deposit,
+              fill: 'black',
+              r: 2,
+            },
+            {
+              value: state.avg_expenses,
+              fill: state.avg_expenses > computed.deposit ? 'red' : 'green',
+            },
+            {
+              value: 107100,
+              fill: 'transparent',
+            }
+          ]}
+          blocks={blocks}
+        />
+        
       </div>
     }
     return <tr className="hover">
       <th className="right-border">{bucket.name}</th>
       <td className="right-border"><Money value={computed.deposit} /></td>
-      <td>{showAnalysis(this.state.last18, 'last18')}</td>
+      <td>{showAnalysis(this.state)}</td>
     </tr>
   }
 }
 
+
+interface NumberlineChartProps {
+  height?: number;
+  width?: number;
+  center?: number;
+  className?: string;
+  points?: Array<{
+    value: number;
+    symbol?: 'tick' | 'circle';
+    className?: string;
+    [k:string]: any;
+  }>;
+  blocks?: Array<{
+    a: number;
+    b: number;
+    className?: string;
+    [k:string]: any;
+  }>;
+}
+class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
+  render() {
+    let { height, width, center, points, blocks, className } = this.props;
+    const radius = 4;
+    const hpadding = radius * 2 + radius;
+    const vpadding = 1;
+    height = height || 6;
+    width = width || 150;
+    points = points || [];
+    blocks = blocks || [];
+
+    let min = points[0].value;
+    let max = points[0].value;
+    points.forEach(point => {
+      min = Math.min(min, point.value);
+      max = Math.max(max, point.value);
+    })
+    blocks.forEach(block => {
+      min = Math.min(min, block.a, block.b);
+      max = Math.max(max, block.a, block.b);
+    })
+
+    if (center) {
+      let r = Math.max(Math.abs(center - min), Math.abs(center - max));
+      min = center - r;
+      max = center + r;
+    }
+    const x = d3.scaleLinear()
+      .domain([min, max])
+      .range([hpadding, width-hpadding]);
+    const y = height / 2;
+
+    return <div
+      className={cx("numberline", className)}
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+      }}>
+      <svg viewBox={`0 0 ${width} ${height}`}>
+        {points.map((point, idx) => {
+          let { symbol, value, className, ...rest } = point;
+          if (symbol === 'tick') {
+            return <line
+              key={idx}
+              x1={x(value)}
+              x2={x(value)}
+              y1={0}
+              y2={height}
+              className={className}
+              {...rest}
+            />
+          } else {
+            return <circle
+              key={idx}
+              cx={x(value)}
+              cy={y}
+              r={radius}
+              className={className}
+              {...rest}
+            />
+          }
+        })}
+        {blocks.map((block, idx) => {
+          let { a, b, className, ...rest } = block;
+          if (b < a) {
+            let tmp = a;
+            a = b;
+            b = tmp;
+          }
+          let w = x(b) - x(a);
+          console.log('w', w);
+          return <rect
+            key={idx}
+            x={x(a)}
+            width={w}
+            y={height/2-3}
+            height={6}
+            className={className}
+            {...rest}
+          />
+        })}
+      </svg>
+    </div>
+  }
+}

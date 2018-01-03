@@ -1327,3 +1327,8 @@ table.props th {
   top: 0;
   left: 0;
 }
+
+/* Charts */
+.numberline {
+  display: inline-block;
+}
