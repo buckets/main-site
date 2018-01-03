@@ -7,7 +7,9 @@ import {cents2decimal, decimal2cents} from './money';
 describe("cents2decimal", function() {
   it("should leave null null", function() {
     expect(cents2decimal(null)).to.eq(null);
-    expect(cents2decimal(null, true)).to.eq(null);
+    expect(cents2decimal(null, {
+      show_decimal: true,
+    })).to.eq(null);
   });
   it("should make undefined null", function() {
     expect(cents2decimal(undefined)).to.eq(null);
@@ -15,11 +17,15 @@ describe("cents2decimal", function() {
   });
   it("should convert '' to null", function() {
     expect(cents2decimal('')).to.eq(null);
-    expect(cents2decimal('', true)).to.eq(null);
+    expect(cents2decimal('', {
+      show_decimal: true,
+    })).to.eq(null);
   });
   it("should convert 'foo' to 0", function() {
     expect(cents2decimal('foo')).to.eq('0');
-    expect(cents2decimal('foo', true)).to.eq('0.00');
+    expect(cents2decimal('foo', {
+      show_decimal: true,
+    })).to.eq('0.00');
   });
   it("should convert positive numbers", function() {
     expect(cents2decimal(123)).to.eq('1.23');
@@ -31,7 +37,9 @@ describe("cents2decimal", function() {
     expect(cents2decimal(1000)).to.eq('10');
   });
   it("should let you force decimals", function() {
-    expect(cents2decimal(1000, true)).to.eq('10.00');
+    expect(cents2decimal(1000, {
+      show_decimal: true,
+    })).to.eq('10.00');
   });
   it("should show two decimals if any", function() {
     expect(cents2decimal(110)).to.eq('1.10');
@@ -40,7 +48,9 @@ describe("cents2decimal", function() {
     expect(cents2decimal(150012)).to.eq('1,500.12');
   });
   it("should let you leave commas out", function() {
-    expect(cents2decimal(150012, undefined, false)).to.eq('1500.12');
+    expect(cents2decimal(150012, {
+      show_sep: false,
+    })).to.eq('1500.12');
   })
 });
 

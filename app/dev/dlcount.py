@@ -9,16 +9,16 @@ GH_TOKEN = os.environ['GH_TOKEN']
 GH_USER = os.environ.get('GH_USERNAME', 'iffy')
 
 # Get the most recent N releases
-number = 5
+number = 4
 r = requests.get('https://api.github.com/repos/buckets/application/releases',
     auth=(GH_USER, GH_TOKEN))
 releases = r.json()
-for release in releases[:number]:
+for release in reversed(releases[:number]):
     name = release['name']
     dlcount = defaultdict(lambda:0)
     for asset in release['assets']:
         asset_name = asset['name']
-        if asset_name in ['latest-mac.yml', 'latest.yml']:
+        if asset_name.endswith('.json') or asset_name.endswith('.yml'):
             continue
         dlcount[asset_name] += asset['download_count']
     total = sum(dlcount.values())
@@ -27,8 +27,8 @@ for release in releases[:number]:
         v = dlcount[k]
         if v:
             parts.append('{v} {k}'.format(**locals()))
-    print('\n{version} tot={total}'.format(
-        version=name,
-        total=total))
+    print('\n{version}'.format(
+        version=name))
     for part in parts:
         print('  {part}'.format(part=part))
+    print('  {total} total'.format(total=total))

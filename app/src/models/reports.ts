@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as moment from 'moment'
 import { IStore } from '../store'
-import { ts2db, Interval, chunkTime } from '../time'
+import { ts2db, tsfromdb, Interval, chunkTime } from '../time'
 
 export interface IncomeExpenseSum {
   interval: Interval;
@@ -110,12 +110,13 @@ export class ReportStore {
   }
 
   /**
-   *  
+   *  Get some historical averages and other data for a bucket
    */
   async bucketExpenseHistory(args:{
-    interval: Interval;
+    end: moment.Moment;
     bucket_id: number;
   }):Promise<{
+    interval: Interval;
     intervals: Array<{
       interval: Interval;
       expenses: number;
@@ -125,8 +126,37 @@ export class ReportStore {
       }
     }>
   }> {
-    const { bucket_id, interval } = args;
-    const { start, end } = interval;
+    const MIN_SAMPLE = 3;
+    const MAX_MONTHS = 24;
+
+    const { bucket_id, end } = args;
+    const max_back = end.clone().subtract(MAX_MONTHS, 'months');
+
+    // How far back should we go?
+    let latest_expenses = await this.store.buckets.listTransactions({
+      bucket_id,
+      limit: MIN_SAMPLE,
+      where: `coalesce(transfer, 0) = 0 AND amount <= 0`,
+    })
+    let farback_expense = latest_expenses.slice(-1)[0];
+    if (farback_expense === undefined) {
+      return null;
+    }
+    let start = tsfromdb(farback_expense.posted);
+    let diff = end.diff(start, 'months');
+    if (diff < MIN_SAMPLE) {
+      // monthly expense
+      start = end.clone().subtract(MIN_SAMPLE, 'months').startOf('month');
+    } else {
+      // not a monthly expense
+      start.add(1, 'month').startOf('month');
+      let latest_expenses_in_range = latest_expenses.filter(x => {
+        return tsfromdb(x.posted).isSameOrAfter(max_back);
+      })
+      if (latest_expenses_in_range.length) {
+        start = tsfromdb(latest_expenses_in_range.slice(-1)[0].posted);
+      }
+    }
 
     let running_bal = (await this.store.buckets.balances(start, bucket_id))[bucket_id];
     let intervals = await Promise.all(chunkTime({
@@ -154,6 +184,10 @@ export class ReportStore {
     }));
 
     return {
+      interval: {
+        start,
+        end,
+      },
       intervals,
     }
   }

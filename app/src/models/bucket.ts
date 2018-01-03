@@ -285,7 +285,6 @@ export class BucketStore {
     return ret;
   }
 
-
   async listTransactions(args:{
     bucket_id?: number,
     account_trans_id?: number,

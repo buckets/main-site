@@ -194,10 +194,10 @@ export class Money extends React.Component<MoneyProps, {
       going_up = value > this.state.current_value;
       value = this.state.current_value;
     }
-    if (round) {
-      value = value - value % 100;
-    }
-    let display = cents2decimal(value, this.state.anim_show_decimal) || '0';
+    let display = cents2decimal(value, {
+      round: round,
+      show_decimal: this.state.anim_show_decimal,
+    }) || '0';
     if (hidezero && !value) {
       display = '';
     }
@@ -235,13 +235,18 @@ export class Money extends React.Component<MoneyProps, {
 export let thousand_sep = ',';
 export let decimal_sep = '.';
 
-export function cents2decimal(cents:number|null|string, show_decimal?:boolean, show_sep?:boolean):string {
+export function cents2decimal(cents:number|null|string, args:{
+    show_decimal?:boolean,
+    show_sep?:boolean,
+    round?:boolean,
+  } = {}):string {
   if (cents === null || cents === undefined || cents === '') {
     return null;
   }
   if (cents === Infinity) {
     return '∞'
   }
+  let { show_decimal, show_sep, round } = args;
   if (show_decimal === undefined) {
     show_decimal = false;
   }
@@ -251,7 +256,10 @@ export function cents2decimal(cents:number|null|string, show_decimal?:boolean, s
   if (typeof cents === 'string') {
     cents = parseInt(cents);
   }
-  var x = Math.abs(cents);
+  if (round) {
+    cents = cents - cents % 100;
+  }
+  var x = Math.abs(Math.round(cents));
   if (isNaN(x)) {
     x = 0;
     cents = 0;

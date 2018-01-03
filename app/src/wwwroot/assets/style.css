@@ -559,10 +559,13 @@ table.summary td,
 table.summary th {
   padding: .5rem 0rem;
 }
-table.summary thead th {
+table.summary thead th,
+table.summary tr.divider th,
+table.summary tbody.line-below tr:last-child td,
+table.summary tbody.line-below tr:last-child th {
   border-bottom: 1px solid var(--lighter-grey);
 }
-table.summary thead th.right-border {
+table.summary .right-border {
   padding: .5rem 1rem;
 }
 table.summary tfoot th {
@@ -570,6 +573,9 @@ table.summary tfoot th {
 }
 table.summary .right-padded {
   padding-right: 1rem;
+}
+table.summary .left-padded {
+  padding-left: 1rem;
 }
 table.summary th.right-border,
 table.summary td.right-border {

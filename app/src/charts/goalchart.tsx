@@ -157,7 +157,9 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
                   dx={0}
                   dy={-10}
                   textAnchor="end">
-                  {cents2decimal(last_datapoint.balance, false)}
+                  {cents2decimal(last_datapoint.balance, {
+                    show_decimal: false,
+                  })}
                 </text>
                 <text
                   x={last_x}
@@ -202,7 +204,9 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
                   dx={0}
                   dy={35}
                   textAnchor="end">
-                  {cents2decimal(computed[bucket_id].goal, false)}
+                  {cents2decimal(computed[bucket_id].goal, {
+                    show_decimal: false,
+                  })}
                 </text>
                 <text
                   x={goal_x}
