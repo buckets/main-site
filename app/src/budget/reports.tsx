@@ -513,6 +513,10 @@ interface BucketExpenseSummaryState {
     [key:number]: {
       interval: Interval;
       avg_expenses: number;
+      min_expenses: number;
+      max_expenses: number;
+      deviation: number;
+      last_month_expenses: number;
     },
   },
   segments: {
@@ -565,6 +569,11 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           return -i.expenses;
         });
       let avg_expenses = d3.sum(expenses) / expenses.length;
+      let deviation = d3.deviation(expenses) || 0;
+      let min_expenses = d3.min(expenses);
+      let max_expenses = d3.max(expenses);
+
+      let last_month_expenses = -(history.intervals.slice(-1)[0].expenses || 0);
 
       let magnitude = Math.floor(logbase(computed.deposit, 7));
       if (!segments[magnitude]) {
@@ -577,11 +586,15 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
       let segment = segments[magnitude];
       segment.buckets.push(bucket);
 
-      segment.min = Math.min(avg_expenses, segment.min);
-      segment.max = Math.max(avg_expenses, segment.max);
+      segment.min = Math.min(avg_expenses, last_month_expenses, segment.min);
+      segment.max = Math.max(avg_expenses, last_month_expenses, segment.max);
 
       data[bucket.id] = {
         avg_expenses,
+        deviation,
+        min_expenses,
+        max_expenses,
+        last_month_expenses,
         interval: history.interval,
       }
     }))
@@ -628,7 +641,8 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           <tr>
             <th className="right right-padded">{sss('Bucket')}</th>
             <th className="right right-padded">{sss('Budgeted')}</th>
-            <th colSpan={3} className="">{sss('Average expenses')}
+            <th colSpan={2} className="right right-padded">{sss('Last month')}</th>
+            <th colSpan={3} className="">{sss('Average')}
             &nbsp;<Help>
               <div>{sss('The center dot shows the budgeted amount per month.')}</div>
               <div>{sss('The end of the bar is the average amount you spent above or below the budgeted amount for the given period.')}</div>
@@ -655,6 +669,10 @@ interface BucketExpenseSummaryRowProps {
   max: number;
   data: {
     avg_expenses: number;
+    min_expenses: number;
+    max_expenses: number;
+    deviation: number;
+    last_month_expenses: number;
     interval: Interval;  
   }
 }
@@ -665,43 +683,79 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
-    let amount_over = data.avg_expenses - computed.deposit;
-    let overspend = amount_over > 0;
+    let avg_over = data.avg_expenses - computed.deposit;
+    let avg_overspend = avg_over > 0;
+    let last_over = data.last_month_expenses - computed.deposit;
+    let last_overspend = last_over > 0;
 
     function showAnalysis() {
       let blocks = [];
+      let points = [];
       if (!data) {
         return <div></div>
       }
-      if (overspend) {
-        blocks.push({
-          a: computed.deposit,
-          b: data.avg_expenses,
-          fill: 'var(--red)',
-          opacity: 1,
-        })
-      } else {
-        blocks.push({
-          a: data.avg_expenses,
-          b: computed.deposit,
-          fill: 'var(--green)',
-          opacity: 1,
+      // blocks.push({
+      //   a: data.avg_expenses - data.deviation,
+      //   b: data.avg_expenses + data.deviation,
+      //   fill: 'var(--grey)',
+      //   opacity: 0.5,
+      //   h: 2,
+      // })
+      blocks.push({
+        a: data.min_expenses,
+        b: data.max_expenses,
+        fill: 'var(--lighter-grey)',
+        opacity: 0.5,
+        h: 2,
+      })
+      // if (avg_overspend) {
+      //   blocks.push({
+      //     a: computed.deposit,
+      //     b: data.avg_expenses,
+      //     fill: 'var(--red)',
+      //     opacity: 1,
+      //     h: 4,
+      //   })
+      // } else {
+      //   blocks.push({
+      //     a: data.avg_expenses,
+      //     b: computed.deposit,
+      //     fill: 'var(--green)',
+      //     opacity: 1,
+      //     h: 4,
+      //   })
+      // }
+      points.push({
+        value: computed.deposit,
+        fill: 'var(--darker-darkblue)',
+      });
+      
+      points.push({
+        value: data.avg_expenses,
+        stroke: avg_overspend ? 'var(--red)' : 'var(--green)',
+        fill: 'white',
+        strokeWidth: 2,
+      })
+
+      
+      console.log('last_month_expenses', data.last_month_expenses);
+      if (data.last_month_expenses) {
+        points.push({
+          value: data.last_month_expenses,
+          fill: last_overspend ? 'var(--red)' : 'var(--green)',
         })
       }
+
+      
       
       return <div>
         <NumberlineChart
-          width={450}
+          width={400}
           height={15}
           min={min}
           max={max}
           center={computed.deposit}
-          points={[
-            {
-              value: computed.deposit,
-              fill: 'var(--darker-darkblue)',
-            },
-          ]}
+          points={points}
           blocks={blocks}
         />
         
@@ -710,10 +764,15 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
     return <tr className="hover">
       <th className="right-border">{bucket.name}</th>
       <td className="right-border"><Money value={computed.deposit} /></td>
+      <td className="right left-padded"><Money value={data.last_month_expenses} round /></td>
+      <td className={cx("nobr incdeclabel right-border left-padded", {
+        bad: last_overspend,
+      })}>{last_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(last_over)} round /></td>
+
       <td className="right left-padded"><Money value={data.avg_expenses} round /></td>
       <td className={cx("nobr incdeclabel right left-padded", {
-        bad: overspend,
-      })}>{overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(amount_over)} round /></td>
+        bad: avg_overspend,
+      })}>{avg_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(avg_over)} round /></td>
       <td className="right-border center">{showAnalysis()}</td>
       <td className="right-border">{data.interval ? data.interval.end.diff(data.interval.start, 'months') : ''}</td>
     </tr>
@@ -743,6 +802,7 @@ interface NumberlineChartProps {
     a: number;
     b: number;
     className?: string;
+    h?: number;
     [k:string]: any;
   }>;
 }
@@ -785,21 +845,22 @@ class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
       }}>
       <svg viewBox={`0 0 ${width} ${height}`}>
         {blocks.map((block, idx) => {
-          let { a, b, className, ...rest } = block;
+          let { a, b, className, h, ...rest } = block;
           if (b < a) {
             let tmp = a;
             a = b;
             b = tmp;
           }
           let w = x(b) - x(a);
+          h = h || 4;
           return <rect
             key={idx}
             x={x(a)}
             rx={2}
             ry={2}
             width={w}
-            y={height/2-2}
-            height={4}
+            y={height/2-h/2}
+            height={h}
             className={className}
             {...rest}
           />
