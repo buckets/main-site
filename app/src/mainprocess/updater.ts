@@ -40,6 +40,12 @@ export function checkForUpdates() {
       error: err,
     }, true);
   })
+  autoUpdater.on('download-progress', (progress) => {
+    log.info('progress', progress);
+    setUpdateWindowStatus({
+      percent: progress.percent,
+    })
+  })
   autoUpdater.on('update-downloaded', (info) => {
     log.info('update downloaded', info);
     setUpdateWindowStatus({
@@ -59,6 +65,7 @@ interface IUpdateStatus {
   new_version: string;
   releaseNotes: string;
   error: string;
+  percent: number;
   state: 'idle' | 'checking' | 'update-available' | 'not-available' | 'downloading' | 'downloaded';
 }
 let CURRENT_UPDATE_STATUS:IUpdateStatus = {
@@ -67,6 +74,7 @@ let CURRENT_UPDATE_STATUS:IUpdateStatus = {
   new_version: null,
   releaseNotes: null,
   error: null,
+  percent: 0,
 }
 export function setUpdateWindowStatus(status:Partial<IUpdateStatus>, ensureOpen:boolean=false) {
   if (!CURRENT_UPDATE_STATUS.current_version) {
@@ -87,10 +95,11 @@ export function openUpdateWindow() {
     return;
   }
   win = new BrowserWindow({
+    frame: false,
     width: 350,
-    height: 150,
+    height: 120,
     minWidth: 350,
-    minHeight: 150,
+    minHeight: 120,
     show: false,
   });
   win.once('ready-to-show', () => {

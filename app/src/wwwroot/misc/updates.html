@@ -5,33 +5,13 @@
   <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
   <link rel="stylesheet" type="text/css" href="../assets/style.css" />
   <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/singlepane.css" />
   <style type="text/css">
-    html {
-      height: 100%;
-    }
-    body {
-      height: 100%;
-    }
-    .wrap {
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      height: 90%;
-    }
-    .image {
-      background-image: url(../assets/img/logo_med.png);
-      background-repeat: no-repeat;
-      background-size: contain;
-      height: 64px;
-      width: 64px;
-      flex-shrink: 0;
-    }
-    .content {
-      padding-left: 1rem;
-    }
     .title {
       margin-bottom: .5rem;
+    }
+    .progress-bar {
+      margin-top: .2rem;
     }
     #error {
       color: var(--red);
@@ -40,15 +20,14 @@
   <style type="text/css">
   </style>
 </head>
-<body>
-  <div class="wrap">
-    <div class="image"></div>
-    <div class="content">
-      <div class="title">Buckets <span id="current-version"></span></div>
-      <div id="message"></div>
-      <div id="error"></div>
-    </div>
+<body class="singlepane">
+  <div class="singlepane-handle"></div>
+  <div class="singlepane-guts">
+    <div class="title">Buckets <span id="current-version"></span></div>
+    <div id="message"></div>
+    <div id="error"></div>
   </div>
+  <div id="singlepane-close"></div>
 <script>
 const {remote} = require('electron');
 const Path = require('path');
@@ -62,7 +41,7 @@ const req = function() {
     }
   }
 }();
-
+req('./src/wwwroot/misc/singlepane.js');
 req('./src/wwwroot/misc/updates.js');
 </script>
 </body>

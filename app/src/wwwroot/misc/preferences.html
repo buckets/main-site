@@ -1,21 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title data-translate>Preferences</title>
+  <title></title>
   <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
   <link rel="stylesheet" type="text/css" href="../assets/style.css" />
   <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/singlepane.css" />
   <style type="text/css">
-    html {
-      height: 100%;
-    }
-    body {
-      height: 100%;
-      background-color: rgba(236,236,236,1.0);
-    }
-    .pane-body {
-      padding: 2rem;
-    }
     .helptext {
       padding: .25rem 1rem .25rem;
       font-size: .8rem;
@@ -25,8 +16,13 @@
   <style type="text/css">
   </style>
 </head>
-<body>
-  <div id="root"></div>
+<body class="singlepane">
+  <div class="singlepane-handle"></div>
+  <div class="singlepane-guts">
+    <h1 data-translate>Preferences</h1>
+    <div id="root"></div>
+  </div>
+  <div id="singlepane-close"></div>
 <script>
 const {remote} = require('electron');
 const Path = require('path');
@@ -41,6 +37,8 @@ const req = function() {
   }
 }();
 
+
+req('./src/wwwroot/misc/singlepane.js');
 const {start} = req('./src/wwwroot/misc/preferences.js');
 start(document.getElementById('root'))
 </script>

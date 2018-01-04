@@ -1,0 +1,54 @@
+html {
+  height: 100%;
+}
+body.singlepane {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.singlepane-handle {
+  background-color: var(--lightest-grey);
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  height: 100%;
+  cursor: move;
+  flex-shrink: 0;
+  flex-basis: 100px;
+  background-image: url(../assets/img/logo_med.png);
+  background-size: 72px;
+  background-repeat: no-repeat;
+  background-position: center 1rem;
+}
+.singlepane-handle img {
+  height: 100%;
+  width: 72px;
+  height: 72px;
+}
+.singlepane-guts {
+  flex-grow: 1;
+  padding: 1rem;
+}
+.singlepane h1 {
+  font-size: 1.5rem;
+  font-weight: normal;
+}
+#singlepane-close {
+  top: 0;
+  right: 0;
+  padding: .1rem .5rem;
+  font-size: 2rem;
+  color: black;
+  opacity: .4;
+  cursor: pointer;
+  flex-grow: 0;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+#singlepane-close:after {
+  content: '\00d7';
+}
+#singlepane-close:hover {
+  opacity: 1;
+}

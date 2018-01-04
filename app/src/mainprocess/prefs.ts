@@ -15,6 +15,7 @@ export function openPreferences() {
     minWidth: 400,
     minHeight: 200,
     show: false,
+    frame: false,
   })
   win.once('ready-to-show', () => {
     win.show();

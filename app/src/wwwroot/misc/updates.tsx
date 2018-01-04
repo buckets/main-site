@@ -13,7 +13,7 @@ ipcRenderer.on('buckets:update-status', (ev, data) => {
 })
 
 function setStatus(data) {
-  let {current_version, error, new_version, state} = data;
+  let {current_version, error, new_version, state, percent} = data;
   el_current_version.innerText = current_version;
   if (state === 'idle' || !state) {
     el_message.innerText = '';
@@ -42,7 +42,15 @@ function setStatus(data) {
   } else if (state === 'not-available') {
     el_message.innerText = sss("You are running the latest version!");
   } else if (state === 'downloading') {
-    el_message.innerHTML = '<span class="fa fa-refresh fa-spin"></span> ' + sss('Downloading update...');
+    console.log('percent', percent);
+    el_message.innerHTML = `<div>
+      ${sss('Downloading update...')} <span class="fa fa-refresh fa-spin"></span>
+    </div>
+    <div>
+      <div class="progress-bar">
+        <div class="bar" style="width: ${percent}%"></div>
+      </div>
+    </div>`;
   } else if (state === 'downloaded') {
     el_message.innerText = '';
     
