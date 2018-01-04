@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { manager, AppState } from './appstate'
 import { ObjectEvent, isObj } from '../store'
-import { Money } from '../money'
+import { Money, cents2decimal } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
@@ -642,12 +642,9 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
             <th className="right right-padded">{sss('Bucket')}</th>
             <th className="right right-padded">{sss('Budgeted')}</th>
             <th colSpan={2} className="right right-padded">{sss('Last month')}</th>
-            <th colSpan={3} className="">{sss('Average')}
-            &nbsp;<Help>
-              <div>{sss('The center dot shows the budgeted amount per month.')}</div>
-              <div>{sss('The end of the bar is the average amount you spent above or below the budgeted amount for the given period.')}</div>
-            </Help></th>
+            <th colSpan={2} className="">{sss('Average')}</th>
             <th className="right right-padded">{sss('Period (months)')}</th>
+            <th></th>
           </tr>
         </thead>
         {sections}
@@ -694,42 +691,24 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       if (!data) {
         return <div></div>
       }
-      // blocks.push({
-      //   a: data.avg_expenses - data.deviation,
-      //   b: data.avg_expenses + data.deviation,
-      //   fill: 'var(--grey)',
-      //   opacity: 0.5,
-      //   h: 2,
-      // })
       blocks.push({
-        a: data.min_expenses,
-        b: data.max_expenses,
+        a: Math.min(computed.deposit, data.avg_expenses, data.last_month_expenses),
+        b: Math.max(computed.deposit, data.avg_expenses, data.last_month_expenses),
         fill: 'var(--lighter-grey)',
         opacity: 0.5,
         h: 2,
       })
-      // if (avg_overspend) {
-      //   blocks.push({
-      //     a: computed.deposit,
-      //     b: data.avg_expenses,
-      //     fill: 'var(--red)',
-      //     opacity: 1,
-      //     h: 4,
-      //   })
-      // } else {
-      //   blocks.push({
-      //     a: data.avg_expenses,
-      //     b: computed.deposit,
-      //     fill: 'var(--green)',
-      //     opacity: 1,
-      //     h: 4,
-      //   })
-      // }
       points.push({
         value: computed.deposit,
         fill: 'var(--darker-darkblue)',
+        label: cents2decimal(computed.deposit, {round: true}),
+        label_options: {
+          textAnchor: 'middle',
+          dy: 24,
+          fontSize: 10,
+        }
       });
-      
+
       points.push({
         value: data.avg_expenses,
         stroke: avg_overspend ? 'var(--red)' : 'var(--green)',
@@ -737,24 +716,18 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
         strokeWidth: 2,
       })
 
-      
-      console.log('last_month_expenses', data.last_month_expenses);
-      if (data.last_month_expenses) {
-        points.push({
-          value: data.last_month_expenses,
-          fill: last_overspend ? 'var(--red)' : 'var(--green)',
-        })
-      }
-
-      
+      points.push({
+        value: data.last_month_expenses,
+        fill: last_overspend ? 'var(--red)' : 'var(--green)',
+      })
       
       return <div>
         <NumberlineChart
           width={400}
-          height={15}
+          height={30}
+          yaxis={10}
           min={min}
           max={max}
-          center={computed.deposit}
           points={points}
           blocks={blocks}
         />
@@ -773,8 +746,8 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       <td className={cx("nobr incdeclabel right left-padded", {
         bad: avg_overspend,
       })}>{avg_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(avg_over)} round /></td>
-      <td className="right-border center">{showAnalysis()}</td>
       <td className="right-border">{data.interval ? data.interval.end.diff(data.interval.start, 'months') : ''}</td>
+      <td className="right-border center novpadding">{showAnalysis()}</td>
     </tr>
   }
 }
@@ -784,6 +757,7 @@ interface NumberlineChartProps {
   height?: number;
   width?: number;
   center?: number;
+  yaxis?: number;
   min?: number;
   max?: number;
   className?: string;
@@ -796,6 +770,8 @@ interface NumberlineChartProps {
     label_options?: {
       [k:string]: any;
     };
+    mouseEnter?:()=>void;
+    mouseLeave?:()=>void;
     [k:string]: any;
   }>;
   blocks?: Array<{
@@ -808,10 +784,11 @@ interface NumberlineChartProps {
 }
 class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
   render() {
-    let { height, width, center, points, blocks, className, min, max } = this.props;
+    let { height, width, center, yaxis, points, blocks, className, min, max } = this.props;
     const radius = 4;
     const hpadding = 30;
     height = height || 6;
+    yaxis = yaxis || height / 2;
     width = width || 150;
     points = points || [];
     blocks = blocks || [];
@@ -835,7 +812,6 @@ class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
     const x = d3.scaleLinear()
       .domain([min, max])
       .range([hpadding, width-hpadding]);
-    const y = height / 2;
 
     return <div
       className={cx("numberline", className)}
@@ -859,7 +835,7 @@ class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
             rx={2}
             ry={2}
             width={w}
-            y={height/2-h/2}
+            y={yaxis-h/2}
             height={h}
             className={className}
             {...rest}
@@ -882,14 +858,13 @@ class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
             elem = <circle
               key={idx}
               cx={x(value)}
-              cy={y}
+              cy={yaxis}
               r={r === undefined ? radius : r}
               className={className}
               {...rest}
             />
           }
           if (label) {
-            let { textAnchor } = label_options;
             return <g key={idx}>
               {elem}
               <text
@@ -897,7 +872,6 @@ class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
                 y={0}
                 dy={12}
                 fontSize={12}
-                textAnchor={textAnchor}
                 {...label_options}
               >{label}</text>
             </g>

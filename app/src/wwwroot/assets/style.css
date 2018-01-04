@@ -566,7 +566,8 @@ table.summary tbody.line-below tr:last-child th {
   border-bottom: 1px solid var(--lighter-grey);
 }
 table.summary .right-border {
-  padding: .5rem 1rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
 }
 table.summary tfoot th {
   border-top: 1px solid var(--lighter-grey);
@@ -588,6 +589,10 @@ table.summary th.total {
 }
 table.summary td.border-right {
   border-right: 1px solid var(--lighter-grey);
+}
+table.summary td.novpadding {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 
