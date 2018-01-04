@@ -6,6 +6,7 @@ import { shell, app, dialog, BrowserWindow, ipcMain } from 'electron'
 import { APP_ROOT } from './globals'
 import { autoUpdater } from 'electron-updater'
 import { sss } from '../i18n';
+import { readState, modifyState } from './persistent'
 
 let win:Electron.BrowserWindow;
 
@@ -25,14 +26,20 @@ export function checkForUpdates() {
       state: 'not-available',
     })
   })
-  autoUpdater.on('update-available', (info) => {
+  autoUpdater.on('update-available', async (info) => {
     log.info('update available', info);
     let new_version = info.version;
+    let persistent_state = await readState();
+    let alert_user = true;
+    if (new_version === persistent_state.skipVersion) {
+      // ignore it
+      alert_user = false;
+    }
     setUpdateWindowStatus({
       state: 'update-available',
       new_version: new_version,
       releaseNotes: info.releaseNotes,
-    }, true)
+    }, alert_user)
   })
   autoUpdater.on('error', (err) => {
     log.error(err);
@@ -60,7 +67,7 @@ export function checkForUpdates() {
   }
 }
 
-interface IUpdateStatus {
+export interface IUpdateStatus {
   current_version: string;
   new_version: string;
   releaseNotes: string;
@@ -68,7 +75,7 @@ interface IUpdateStatus {
   percent: number;
   state: 'idle' | 'checking' | 'update-available' | 'not-available' | 'downloading' | 'downloaded';
 }
-let CURRENT_UPDATE_STATUS:IUpdateStatus = {
+export let CURRENT_UPDATE_STATUS:IUpdateStatus = {
   state: 'idle',
   current_version: null,
   new_version: null,
@@ -109,6 +116,10 @@ export function openUpdateWindow() {
   win.on('close', ev => {
     win = null;
   });
+  win.webContents.on('will-navigate', (ev, url) => {
+    ev.preventDefault();
+    shell.openExternal(url);
+  })
 
   let path = Path.join(APP_ROOT, 'src/wwwroot/misc/updates.html');
   path = `file://${path}`
@@ -130,7 +141,15 @@ if (ipcMain) {
   ipcMain.on('buckets:install-update', () => {
     log.info('install update clicked');
     autoUpdater.quitAndInstall();
-  })  
+  })
+  ipcMain.on('buckets:skip-version', (ev, version) => {
+    log.info('Skipping version', version);
+    modifyState((state) => {
+      state.skipVersion = version;
+      return state;
+    })
+    win.close();
+  })
 }
 
 export async function linux_checkForUpdates() {

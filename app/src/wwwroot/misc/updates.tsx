@@ -1,73 +1,91 @@
+import * as React from 'react'
+import { ipcRenderer, remote } from 'electron'
+
 import { sss, localizeThisPage } from '../../i18n'
-import { ipcRenderer } from 'electron'
-import * as log from 'electron-log'
+import { Renderer } from '../../budget/render'
+import { IUpdateStatus, CURRENT_UPDATE_STATUS } from '../../mainprocess/updater'
 
-let el_current_version = document.getElementById('current-version');
-let el_message = document.getElementById('message');
-let el_error = document.getElementById('error');
-localizeThisPage();
+let STATUS:IUpdateStatus = CURRENT_UPDATE_STATUS;
+let renderer:Renderer = new Renderer();
+let current_window = remote.getCurrentWindow();
+const original_size = current_window.getContentSize();
 
-ipcRenderer.on('buckets:update-status', (ev, data) => {
-  console.log('data', data);
-  setStatus(data);
-})
+export async function start(base_element) {
+  localizeThisPage();
 
-function setStatus(data) {
-  let {current_version, error, new_version, state, percent} = data;
-  el_current_version.innerText = current_version;
-  if (state === 'idle' || !state) {
-    el_message.innerText = '';
+  renderer.registerRendering(() => {
+    return <UpdateApp status={STATUS} />
+  }, base_element);
+  renderer.doUpdate();
+  
+  ipcRenderer.on('buckets:update-status', (ev, data) => {
+    STATUS = data;
+    renderer.doUpdate();
+  })
+}
 
-    let el = document.createElement('button');
-    el.innerText = sss('Check for Updates');
-    el.addEventListener('click', () => {
-      ipcRenderer.send('buckets:check-for-updates');
-    }, false)
-    el_message.appendChild(el);
-  } else if (state === 'checking') {
-    el_message.innerHTML = '<span class="fa fa-refresh fa-spin"></span> ' + sss('Checking for updates...');
-  } else if (state === 'update-available') {
-    el_message.innerText = '';
+function backToNormalSize() {
+  current_window.setContentSize(original_size[0], original_size[1]);
+}
+
+class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
+  render() {
+    let { current_version, error, new_version, state, percent, releaseNotes } = this.props.status;
+    let guts;
+    let error_el = error ? <div className="error">{sss('There was an error.  Maybe try again?')}</div> : null;
     
-    let el = document.createElement('div');
-    el.innerText = sss('version-available', (newv:string) => `Version ${newv} available.`)(new_version);
-    el_message.appendChild(el);
-
-    let button = document.createElement('button');
-    button.innerText = sss('Download Update');
-    button.addEventListener('click', () => {
-      ipcRenderer.send('buckets:download-update');
-    }, false);
-    el_message.appendChild(button);
-  } else if (state === 'not-available') {
-    el_message.innerText = sss("You are running the latest version!");
-  } else if (state === 'downloading') {
-    console.log('percent', percent);
-    el_message.innerHTML = `<div>
-      ${sss('Downloading update...')} <span class="fa fa-refresh fa-spin"></span>
-    </div>
-    <div>
-      <div class="progress-bar">
-        <div class="bar" style="width: ${percent}%"></div>
+    if (state === 'idle' || !state) {
+      guts = <div className="buttons">
+        <button onClick={() => {
+          ipcRenderer.send('buckets:check-for-updates');
+        }}>{sss('Check for Updates')}</button>
       </div>
-    </div>`;
-  } else if (state === 'downloaded') {
-    el_message.innerText = '';
-    
-    let el = document.createElement('div');
-    el.innerText = sss('Update downloaded.');
-    el_message.appendChild(el);
-
-    let button = document.createElement('button');
-    button.innerText = sss('Install and Relaunch Buckets');
-    button.addEventListener('click', () => {
-      ipcRenderer.send('buckets:install-update');
-    }, false);
-    el_message.appendChild(button);
-  } else {
-    log.error(`Unknown update state: ${state}`);
-  }
-  if (error) {
-    el_error.innerText = sss('There was an error.  Maybe try again?');
+    } else if (state === 'checking') {
+      guts = <div>
+        {sss('Checking for updates...')} <span className="fa fa-refresh fa-spin" />
+      </div>
+    } else if (state === 'update-available') {
+      guts = <div>
+        <div>{sss('version-available', (newv:string) => `Version ${newv} available.`)(new_version)}</div>
+        <div className="buttons">
+          <button onClick={() => {
+            ipcRenderer.send('buckets:skip-version', new_version);
+          }}>{sss('Skip This Version')}</button>
+          <button onClick={() => {
+            ipcRenderer.send('buckets:download-update');
+          }}>{sss('Download Update')}</button>
+        </div>
+        <div className="release-notes" dangerouslySetInnerHTML={{__html: releaseNotes}}></div>
+      </div>
+      current_window.setContentSize(500, 350);
+    } else if (state === 'not-available') {
+      guts = sss("You are running the latest version!");
+    } else if (state === 'downloading') {
+      guts = <div>
+        {sss('Downloading update...')} <span className="fa fa-refresh fa-spin" />
+        <div>
+          <div className="progress-bar">
+            <div className="bar" style={{
+              width: `${percent}%`,
+            }}/>
+          </div>
+        </div>
+      </div>
+      backToNormalSize();
+    } else if (state === 'downloaded') {
+      guts = <div>
+        <div>{sss('Update downloaded.')}</div>
+        <div className="button">
+          <button onClick={() => {
+            ipcRenderer.send('buckets:install-update');    
+          }}>{sss('Install and Relaunch Buckets')}</button>
+        </div>
+      </div>
+    }
+    return <div className="update-app">
+      <div className="title">Buckets {current_version}</div>
+      {error_el}
+      {guts}
+    </div>
   }
 }

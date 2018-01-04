@@ -9,6 +9,7 @@ export interface PersistentState {
   recentFiles: string[];
   firstUseDate: string;
   locale: string;
+  skipVersion: string;
 }
 
 function stateFilename() {
@@ -23,6 +24,7 @@ export async function readState():Promise<PersistentState> {
         recentFiles: [],
         firstUseDate: null,
         locale: '',
+        skipVersion: null,
       };
       if (!err) {
         try {

@@ -13,8 +13,24 @@
     .progress-bar {
       margin-top: .2rem;
     }
-    #error {
+    .error {
       color: var(--red);
+    }
+    .update-app {
+      padding: 1rem;
+      height: 100%;
+    }
+    .buttons {
+      margin-top: .5rem;
+    }
+    .release-notes h3 {
+      flex-grow: 1;
+      font-size: 1rem;
+      max-height: 60%;
+      overflow: auto;
+    }
+    .release-notes .buttons {
+      padding: 1rem 0 .5rem;
     }
   </style>
   <style type="text/css">
@@ -22,12 +38,7 @@
 </head>
 <body class="singlepane">
   <div class="singlepane-handle"></div>
-  <div class="singlepane-guts">
-    <div class="title">Buckets <span id="current-version"></span></div>
-    <div id="message"></div>
-    <div id="error"></div>
-  </div>
-  <div id="singlepane-close"></div>
+  <div class="singlepane-guts scrollinner" id="root"></div>
 <script>
 const {remote} = require('electron');
 const Path = require('path');
@@ -42,7 +53,8 @@ const req = function() {
   }
 }();
 req('./src/wwwroot/misc/singlepane.js');
-req('./src/wwwroot/misc/updates.js');
+const { start } = req('./src/wwwroot/misc/updates.js');
+start(document.getElementById('root'))
 </script>
 </body>
 </html>

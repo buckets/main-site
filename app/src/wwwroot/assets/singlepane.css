@@ -30,6 +30,11 @@ body.singlepane {
   flex-grow: 1;
   padding: 1rem;
 }
+.singlepane-guts.scrollinner {
+  padding: 0;
+  height: 100%;
+  overflow: auto;
+}
 .singlepane h1 {
   font-size: 1.5rem;
   font-weight: normal;
