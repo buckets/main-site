@@ -13,6 +13,7 @@ import { BudgetFile } from './files'
 import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
+import { reportErrorToUser } from '../errors'
 
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
@@ -24,8 +25,10 @@ app.on('ready', () => {
 });
 
 process.on('uncaughtException' as any, (err) => {
-  log.error('uncaughtException', err);
-  log.error(err.stack);
+  log.error('uncaughtException', err.stack);
+  reportErrorToUser(null, {
+    err: err,
+  })
 })
 
 // Make accessing '/' access the expected place

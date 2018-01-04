@@ -12,7 +12,7 @@ import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
-import { APP_ROOT } from './globals'
+import { APP_ROOT, IS_DEBUG } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
 
 export async function updateMenu(show_budget:boolean=false) {
@@ -249,6 +249,14 @@ export async function updateMenu(show_budget:boolean=false) {
       }
     ],
   };
+  if (IS_DEBUG) {
+    HelpMenu.submenu.push({
+      label: 'CAUSE AN ERROR',
+      click() {
+        throw new Error('This is an intentionally caused error');
+      }
+    })
+  }
 
   let RegisterMenu = {
       label: sss('Trial Version'),

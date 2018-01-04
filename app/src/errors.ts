@@ -1,12 +1,31 @@
-import { dialog, shell } from 'electron'
+import * as os from 'os'
+import * as querystring from 'querystring'
+import * as Path from 'path'
+import { app, dialog, shell, BrowserWindow } from 'electron'
 import { sss } from './i18n'
+import { APP_ROOT } from './mainprocess/globals'
 
 export function reportBug(body?:string) {
-  let url = 'mailto:hello@budgetwithbuckets.com?subject=Bug%20Report';
-  if (body) {
-    url = `${url}&body=${encodeURIComponent(body)}`;
+  // if (electron_is.windows()) {
+  // windows mailto: doesn't work right now
+  // XXX but let's just do this for everyone
+  let win = new BrowserWindow({
+    modal: true,
+    show: true,
+    width: 400,
+    height: 400,
+  })
+  let qs = {
+    body: body,
   }
-  shell.openExternal(url);
+  win.loadURL(`file://${Path.join(APP_ROOT, 'src/wwwroot/misc/reportbug.html')}?${querystring.stringify(qs)}`)
+  // } else {
+  //   let url = 'mailto:hello@budgetwithbuckets.com?subject=Bug%20Report';
+  //   if (body) {
+  //     url = `${url}&body=${encodeURIComponent(body)}`;
+  //   }
+  //   shell.openExternal(url);  
+  // }
 }
 
 export function reportErrorToUser(text?:string, args?:{
@@ -33,7 +52,10 @@ export function reportErrorToUser(text?:string, args?:{
     } else if (indexClicked === 2) {
       // Report Bug
       if (args.err) {
-        let body = '\n\n---' + sss('bug-include-line', 'Include anything else you want to add above this line') + `---\n${args.err.stack}`;
+        let body = '\n\n---' + sss('bug-include-line', 'Include anything else you think might be helpful above this line') + `---
+app: ${app.getVersion()} (node: ${process.version})
+os: ${process.platform} ${os.release()} ${process.arch}
+${args.err.stack}`;
         reportBug(body);
       } else {
         reportBug();  

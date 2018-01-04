@@ -244,6 +244,9 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
       .map(x => x.name);
 
     // SubCategories -> Buckets
+    if (!mcat.subCategories) {
+      continue;
+    }
     for (let cat of mcat.subCategories.sort(sortByIndex)) {
       categories[cat.entityId] = cat;
       let idx = bucket_names.indexOf(cat.name);
@@ -287,67 +290,71 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
   }
 
   // Account -> Account
-  for (let yaccount of budget.accounts.sort(sortByIndex)) {
-    yaccounts[yaccount.entityId] = yaccount;
+  if (budget.accounts) {
+    for (let yaccount of budget.accounts.sort(sortByIndex)) {
+      yaccounts[yaccount.entityId] = yaccount;
 
-    let idx = account_names.indexOf(yaccount.accountName);
-    let account;
-    if (idx === -1) {
-      // make a new account
-      account = await store.accounts.add(yaccount.accountName);
-    } else {
-      account = accounts.filter(x => x.name === yaccount.accountName)[0];
-    }
-    acc2acc[yaccount.entityId] = account;
+      let idx = account_names.indexOf(yaccount.accountName);
+      let account;
+      if (idx === -1) {
+        // make a new account
+        account = await store.accounts.add(yaccount.accountName);
+      } else {
+        account = accounts.filter(x => x.name === yaccount.accountName)[0];
+      }
+      acc2acc[yaccount.entityId] = account;
+    }  
   }
-
+  
   // Transaction -> Transaction
-  for (let ytrans of budget.transactions
-      .sort((a, b) => {
-        return compare(a.date, b.date);
-      })) {
-    if (ytrans.isTombstone) {
-      continue;
-    }
-    let fi_id = ytrans.FITID || ytrans.YNABID || ytrans.entityId;
+  if (budget.transactions) {
+    for (let ytrans of budget.transactions
+        .sort((a, b) => {
+          return compare(a.date, b.date);
+        })) {
+      if (ytrans.isTombstone) {
+        continue;
+      }
+      let fi_id = ytrans.FITID || ytrans.YNABID || ytrans.entityId;
 
-    let buckets_account = acc2acc[ytrans.accountId];
-    let memo = ytrans.memo;
-    if (!memo && ytrans.payeeId) {
-      let payee = payees[ytrans.payeeId];
-      memo = payee.name;
-    }
-    let { transaction } = await store.accounts.importTransaction({
-      account_id: buckets_account.id,
-      amount: number2cents(ytrans.amount),
-      memo,
-      posted: ensureLocalMoment(ytrans.date),
-      fi_id,
-    })
-
-    // Now categorize
-    if (ytrans.categoryId === "Category/__ImmediateIncome__") {
-      // Income
-      await store.accounts.categorizeGeneral(transaction.id, 'income');
-    } else if (ytrans.categoryId === "Category/__Split__") {
-      // Split category
-      let cats = ytrans.subTransactions.map(sub => {
-        let bucket_id = cat2bucket[sub.categoryId].id;
-        let amount = number2cents(sub.amount);
-        return {
-          bucket_id,
-          amount,
-        }
+      let buckets_account = acc2acc[ytrans.accountId];
+      let memo = ytrans.memo;
+      if (!memo && ytrans.payeeId) {
+        let payee = payees[ytrans.payeeId];
+        memo = payee.name;
+      }
+      let { transaction } = await store.accounts.importTransaction({
+        account_id: buckets_account.id,
+        amount: number2cents(ytrans.amount),
+        memo,
+        posted: ensureLocalMoment(ytrans.date),
+        fi_id,
       })
-      await store.accounts.categorize(transaction.id, cats);
-    } else {
-      // Single category
-      let bucket = cat2bucket[ytrans.categoryId];
-      if (bucket) {
-        await store.accounts.categorize(transaction.id, [{
-          bucket_id: bucket.id,
-          amount: transaction.amount,
-        }])
+
+      // Now categorize
+      if (ytrans.categoryId === "Category/__ImmediateIncome__") {
+        // Income
+        await store.accounts.categorizeGeneral(transaction.id, 'income');
+      } else if (ytrans.categoryId === "Category/__Split__") {
+        // Split category
+        let cats = ytrans.subTransactions.map(sub => {
+          let bucket_id = cat2bucket[sub.categoryId].id;
+          let amount = number2cents(sub.amount);
+          return {
+            bucket_id,
+            amount,
+          }
+        })
+        await store.accounts.categorize(transaction.id, cats);
+      } else {
+        // Single category
+        let bucket = cat2bucket[ytrans.categoryId];
+        if (bucket) {
+          await store.accounts.categorize(transaction.id, [{
+            bucket_id: bucket.id,
+            amount: transaction.amount,
+          }])
+        }
       }
     }
   }
