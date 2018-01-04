@@ -14,28 +14,31 @@ listtype() {
         ls "${CHANGE_ROOT}"/${type}-*.md 2>/dev/null | sort
     done
 }
+catlinkified() {
+    cat $1 | python ${thisdir}/linkifyissues.py
+}
 
 #---------------------------------------------------------------
 # Change body
 #---------------------------------------------------------------
 
 for changefile in $(listtype break); do
-    echo "- **BACKWARD INCOMPATIBLE:** $(cat $changefile)"
+    echo "- **BACKWARD INCOMPATIBLE:** $(catlinkified $changefile)"
     echo
 done
 
 for changefile in $(listtype fix); do
-    echo "- **FIX:** $(cat $changefile)"
+    echo "- **FIX:** $(catlinkified $changefile)"
     echo
 done
 
 for changefile in $(listtype feature new); do
-    echo "- NEW: $(cat $changefile)"
+    echo "- NEW: $(catlinkified $changefile)"
     echo
 done
 
 for changefile in $(listtype refactor info doc); do
-    echo "- $(cat $changefile)"
+    echo "- $(catlinkified $changefile)"
     echo
 done
 

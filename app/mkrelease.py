@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import sys
 import os
+import re
 import subprocess
 import json
 import io
@@ -68,12 +69,42 @@ def getLatestReleaseVersion():
             continue
         return release['name']
 
+r_issuelink = re.compile(r'https://github.com/buckets/application/issues/([0-9]+)')
+def extractIssueNumbers(changelog):
+    links = r_issuelink.findall(changelog)
+    return links
+
+def labelIssue(issue_number, labels):
+    r = requests.post('https://api.github.com/repos/buckets/application/issues/{0}/labels'.format(issue_number),
+        data=json.dumps(labels),
+        auth=(GH_USER, GH_TOKEN))
+    if not r.ok:
+        raise Exception('Error labelling on issue {0}: {1}'.format(issue_number, r.text))
+
+
+def commentOnIssue(issue_number, comment):
+    r = requests.post('https://api.github.com/repos/buckets/application/issues/{0}/comments'.format(issue_number),
+        data=json.dumps({
+            'body': comment,
+        }),
+        auth=(GH_USER, GH_TOKEN))
+    if not r.ok:
+        raise Exception('Error commenting on issue {0}: {1}'.format(issue_number, r.text))
+
+def closeIssue(issue_number):
+    r = requests.patch('https://api.github.com/repos/buckets/application/issues/{0}'.format(issue_number),
+        data=json.dumps({
+            'state': 'closed',
+        }),
+        auth=(GH_USER, GH_TOKEN))
+    if not r.ok:
+        raise Exception('Error closing issue {0}: {1}'.format(issue_number, r.text))
+
 def abort():
     sys.stderr.write('Aborting...\n')
     print('Revert changes with:')
     print('  git checkout -- package.json CHANGELOG.md changes/')
     sys.exit(1)
-
 
 
 # choose version
@@ -93,7 +124,9 @@ next_version = prompt('Next version?',
 
 # verify CHANGELOG
 print('=== CHANGELOG ===')
-subprocess.check_call(['dev/changelog/combine_changes.sh'])
+new_changelog = subprocess.check_output(['dev/changelog/combine_changes.sh'])
+issue_numbers = extractIssueNumbers(new_changelog)
+print(new_changelog)
 if not yesno('Does this look correct?', default=True):
     abort()
 
@@ -129,3 +162,9 @@ subprocess.check_call(['git', 'tag', 'v{0}'.format(target_version)])
 updatePackageVersion(next_version)
 subprocess.check_call(['git', 'commit', '-a', '-m', 'Start v{0}'.format(next_version)])
 print('Updated version to {0}'.format(next_version))
+
+# close issues
+if yesno('Close issues ({0}) on GitHub?'.format(','.join(issue_numbers)), default=True):
+    for issue_number in issue_numbers:
+        commentOnIssue(issue_number, 'RELEASE BOT: Included in v{0} release'.format(target_version))
+        closeIssue(issue_number)
