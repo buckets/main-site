@@ -95,7 +95,7 @@ export function openUpdateWindow() {
     return;
   }
   win = new BrowserWindow({
-    frame: false,
+    frame: true,
     width: 350,
     height: 120,
     minWidth: 350,
