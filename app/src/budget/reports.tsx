@@ -692,21 +692,27 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
         return <div></div>
       }
       blocks.push({
-        a: Math.min(computed.deposit, data.avg_expenses, data.last_month_expenses),
-        b: Math.max(computed.deposit, data.avg_expenses, data.last_month_expenses),
+        a: Math.min(computed.deposit, data.avg_expenses),
+        b: Math.max(computed.deposit, data.avg_expenses),
         fill: 'var(--lighter-grey)',
         opacity: 0.5,
         h: 2,
       })
+      blocks.push({
+        a: Math.min(data.avg_expenses, data.last_month_expenses),
+        b: Math.max(data.avg_expenses, data.last_month_expenses),
+        fill: data.last_month_expenses > data.avg_expenses ? 'var(--red)' : 'var(--green)',
+        opacity: 0.5,
+      })
       points.push({
         value: computed.deposit,
         fill: 'var(--darker-darkblue)',
-        label: cents2decimal(computed.deposit, {round: true}),
-        label_options: {
-          textAnchor: 'middle',
-          dy: 24,
-          fontSize: 10,
-        }
+        // label: cents2decimal(computed.deposit, {round: true}),
+        // label_options: {
+        //   textAnchor: 'middle',
+        //   dy: 24,
+        //   fontSize: 10,
+        // }
       });
 
       points.push({
