@@ -4,6 +4,7 @@ Bugs:
   ☐ Remove docs and other things from packaged app.
 
 v1.0.0:
+ ☐ You should be able to scroll left/right on a smaller window
  ☐ Timeout syncing (like if there's no internet connection)
  ☐ Make all icon buttons into class="icon" <buttons>
  ☐ Handle OFX files with more than one account in them

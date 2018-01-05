@@ -560,10 +560,13 @@ table.summary th {
   padding: .5rem 0rem;
 }
 table.summary thead th,
-table.summary tr.divider th,
 table.summary tbody.line-below tr:last-child td,
 table.summary tbody.line-below tr:last-child th {
   border-bottom: 1px solid var(--lighter-grey);
+}
+table.summary tbody.thickline-below tr:last-child td,
+table.summary tbody.thickline-below tr:last-child th {
+  border-bottom: 2px solid var(--lighter-grey);
 }
 table.summary .right-border {
   padding-right: 1rem;
@@ -1342,4 +1345,11 @@ table.props th {
 /* Charts */
 .numberline {
   display: inline-block;
+}
+.labels-on-hover g text {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.labels-on-hover g:hover text {
+  opacity: 1;
 }
