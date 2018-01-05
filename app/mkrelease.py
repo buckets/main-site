@@ -142,7 +142,9 @@ def doit(no_publish):
     subprocess.check_call(['dev/changelog/updatechangelog.sh'])
     print('[X] Updated CHANGELOG.')
 
-    if not no_publish:
+    if no_publish:
+        print('\nSKIPPING PUBLISH\n')
+    else:
         # publish
         print('Publishing draft release to GitHub...')
         subprocess.check_call(['./publish.sh'])
