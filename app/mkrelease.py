@@ -8,6 +8,7 @@ import subprocess
 import json
 import io
 import requests
+import click
 
 GH_TOKEN = os.environ['GH_TOKEN']
 GH_USER = os.environ.get('GH_USERNAME', 'iffy')
@@ -107,64 +108,72 @@ def abort():
     sys.exit(1)
 
 
-# choose version
-package_version = getPackageVersion()
-guess_target_version = package_version
-if guess_target_version.count('-'):
-    guess_target_version = guess_target_version.split('-')[0]
-latest_version = getLatestReleaseVersion()
-print('package.json version:', package_version)
-print('Latest released version on GitHub:', latest_version)
-target_version = prompt('Version to release?',
-    default=guess_target_version)
-parts = map(int, target_version.split('.'))
-next_version = '.'.join(map(str, [parts[0], parts[1]+1, 0])) + '-dev'
-next_version = prompt('Next version?',
-    default=next_version)
+@click.command()
+@click.option('--no-publish', is_flag=True)
+def doit(no_publish):
+    # choose version
+    package_version = getPackageVersion()
+    guess_target_version = package_version
+    if guess_target_version.count('-'):
+        guess_target_version = guess_target_version.split('-')[0]
+    latest_version = getLatestReleaseVersion()
+    print('package.json version:', package_version)
+    print('Latest released version on GitHub:', latest_version)
+    target_version = prompt('Version to release?',
+        default=guess_target_version)
+    parts = map(int, target_version.split('.'))
+    next_version = '.'.join(map(str, [parts[0], parts[1]+1, 0])) + '-dev'
+    next_version = prompt('Next version?',
+        default=next_version)
 
-# verify CHANGELOG
-print('=== CHANGELOG ===')
-new_changelog = subprocess.check_output(['dev/changelog/combine_changes.sh'])
-issue_numbers = extractIssueNumbers(new_changelog)
-print(new_changelog)
-if not yesno('Does this look correct?', default=True):
-    abort()
+    # verify CHANGELOG
+    print('=== CHANGELOG ===')
+    new_changelog = subprocess.check_output(['dev/changelog/combine_changes.sh'])
+    issue_numbers = extractIssueNumbers(new_changelog)
+    print(new_changelog)
+    if not yesno('Does this look correct?', default=True):
+        abort()
 
-# update version
-updatePackageVersion(target_version)
-print('[X] Updated package.json version to {0}'.format(target_version))
+    # update version
+    updatePackageVersion(target_version)
+    print('[X] Updated package.json version to {0}'.format(target_version))
 
-# update CHANGELOG
-subprocess.check_call(['dev/changelog/updatechangelog.sh'])
-print('[X] Updated CHANGELOG.')
+    # update CHANGELOG
+    subprocess.check_call(['dev/changelog/updatechangelog.sh'])
+    print('[X] Updated CHANGELOG.')
 
-# publish
-print('Publishing draft release to GitHub...')
-subprocess.check_call(['./publish.sh'])
-print('[X] Done uploading to GitHub.')
+    if not no_publish:
+        # publish
+        print('Publishing draft release to GitHub...')
+        subprocess.check_call(['./publish.sh'])
+        print('[X] Done uploading to GitHub.')
 
-# publish CHANGELOG
-subprocess.check_call(['dev/changelog/publishchangelog.py'])
-print('[X] Updated release notes on GitHub')
+    # publish CHANGELOG
+    subprocess.check_call(['dev/changelog/publishchangelog.py'])
+    print('[X] Updated release notes on GitHub')
 
-# Manually publish it
-print('Go to https://github.com/buckets/application/releases to publish the draft')
-if not yesno('Have you clicked the Publish button on GitHub?'):
-    abort()
+    # Manually publish it
+    print('Go to https://github.com/buckets/application/releases to publish the draft')
+    if not yesno('Have you clicked the Publish button on GitHub?'):
+        abort()
 
-# tag it
-if not yesno('Proceed with git commit and tag?', default=True):
-    abort()
-subprocess.check_call(['git', 'commit', '-a', '-m', 'Published v{0}'.format(target_version)])
-subprocess.check_call(['git', 'tag', 'v{0}'.format(target_version)])
+    # tag it
+    if not yesno('Proceed with git commit and tag?', default=True):
+        abort()
+    subprocess.check_call(['git', 'commit', '-a', '-m', 'Published v{0}'.format(target_version)])
+    subprocess.check_call(['git', 'tag', 'v{0}'.format(target_version)])
 
-# prepare for next version
-updatePackageVersion(next_version)
-subprocess.check_call(['git', 'commit', '-a', '-m', 'Start v{0}'.format(next_version)])
-print('Updated version to {0}'.format(next_version))
+    # prepare for next version
+    updatePackageVersion(next_version)
+    subprocess.check_call(['git', 'commit', '-a', '-m', 'Start v{0}'.format(next_version)])
+    print('Updated version to {0}'.format(next_version))
 
-# close issues
-if yesno('Close issues ({0}) on GitHub?'.format(','.join(issue_numbers)), default=True):
-    for issue_number in issue_numbers:
-        commentOnIssue(issue_number, 'RELEASE BOT: Included in v{0} release'.format(target_version))
-        closeIssue(issue_number)
+    # close issues
+    if yesno('Close issues ({0}) on GitHub?'.format(','.join(issue_numbers)), default=True):
+        for issue_number in issue_numbers:
+            commentOnIssue(issue_number, 'RELEASE BOT: Included in v{0} release'.format(target_version))
+            closeIssue(issue_number)
+
+
+if __name__ == '__main__':
+    doit()
