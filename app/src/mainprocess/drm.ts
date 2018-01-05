@@ -7,6 +7,7 @@ import * as fs from 'fs'
 import * as moment from 'moment'
 import { readState, modifyState } from './persistent'
 import { onlyRunInMain } from '../rpc'
+import { sss } from '../i18n'
 
 let ISREGISTERED = null;
 export function isRegistered():boolean {
@@ -81,16 +82,16 @@ export function enterLicense(license:string) {
 export function nag() {
   if (!isRegistered()) {
     dialog.showMessageBox({
-      title: 'Unregistered Version',
-      message: `Hello! Thanks for trying out Buckets.
+      title: sss('Unregistered Version'),
+      message: sss('nag-message', () => `Hello! Thanks for trying out Buckets.
 
 This is an unregistered trial version, and although the trial is untimed,
 a license must be purchased for continued use.
 
-Would you like to purchase a license now?`,
+Would you like to purchase a license now?`),
       buttons: [
-        'Cancel',
-        'Purchase',
+        sss('Cancel'),
+        sss('Purchase'),
       ],
       defaultId: 1,
     }, (indexClicked) => {
@@ -162,8 +163,3 @@ DYbdTet5pDmTpcDkuLE++fOAwGGiNRcRO5E05hRfDrS5utXkcK3BbsfLTAXT9CVT
 cLTH3Kyxux83y2wLlmFzaQfYN2eNY8sD/hFxUNxISps3cFvMrq9L44LoqH0xF7cz
 E9ocvbXaPIAKtbUbbIRg06sCAwEAAQ==
 -----END PUBLIC KEY-----`;
-
-// function initial
-
-// let userdatapath = app.getPath('userData');
-//   return Path.join(userdatapath, 'preferences.json');

@@ -87,6 +87,12 @@ const messages:IMessages = {
     src: ["src/budget/accounts.tsx line 164"],
     h: "zCYN8vtLT3Hhb9CbDDSL2xOOjqhzmmhMa5yWDTR7bCE=",
   },
+  "toast.updated-trans": {
+    val: count => `Updated/created ${count} transactions`,
+    translated: false,
+    src: ["src/budget/appstate.ts line 257"],
+    h: "bBKDE3rQIV5P80cYEL6mkLmIvgxjzVHCIf3aFa+KtmU=",
+  },
   "sync.toast.syncing": {
     val: (start:moment.Moment, end:moment.Moment) => {
         return `Sincronizando transacciones de ${start.format('ll')} a ${end.format('ll')}`;
@@ -95,29 +101,23 @@ const messages:IMessages = {
     src: ["src/budget/appstate.ts line 238"],
     h: "f7R9zSdK0q5+lZ8I9QRhiwN5ENKyWFnrmUG6Gltegfs=",
   },
-  "sync.status.week": {
-    val: (sync_start:moment.Moment) => {
-        return `sem. de ${sync_start.format('ll')}`;
-      },
-    translated: true,
-    src: ["src/budget/appstate.ts line 245"],
-    h: "PDBHTH/ocFsAZ2tQBdsDt9agGKjcgYvqJLlYn/lwZeU=",
+  "Sync complete": {
+    val: "Sync complete",
+    translated: false,
+    src: ["src/budget/appstate.ts line 285"],
+    h: "e2VXpLTi1mhVSVqDkExwdM5j8PhfW0MHeOqBwabU4Zo=",
   },
-  "sync.cancelled": {
-    val: (trans_count:number) => {
-          return `Sincronizado ${trans_count} transacciones antes de ser cancelado.`;
-        },
-    translated: true,
-    src: ["src/budget/appstate.ts line 252"],
-    h: "vKPTjoWpzYT7nXd/1E8Hklltu1+GqPNCLKpPvhQCMjI=",
+  "Account created: ": {
+    val: "Account created: ",
+    translated: false,
+    src: ["src/budget/appstate.ts line 314"],
+    h: "AJEfsK8U+n7xnyBkG2FG3cmZZipr4kpQX5mgCZ0Qwi4=",
   },
-  "sync.done": {
-    val: (trans_count:number, start:moment.Moment, end:moment.Moment) => {
-          return `Sincronizado ${trans_count} transacciones de ${start.format('ll')} a ${end.format('ll')}`;
-        },
-    translated: true,
-    src: ["src/budget/appstate.ts line 256"],
-    h: "G02Wh4RjKpcx6OWMrzrWbWH2OBPaLf3kaUffUt0FeYY=",
+  "Unknown account: ": {
+    val: "Unknown account: ",
+    translated: false,
+    src: ["src/budget/appstate.ts line 367"],
+    h: "1pPv2ePlW/PBrqgYgGCM3lU9qnmnbplR3AzSDDG4TLs=",
   },
   "Un-kick": {
     val: "Des-echar",
@@ -469,12 +469,6 @@ const messages:IMessages = {
     src: ["src/budget/budget.tsx line 124"],
     h: "yDp5Agru+QzDSy583s3kjOdZbbe6X1WDfMeSNXsYlaY=",
   },
-  "Connections": {
-    val: "Conexiones",
-    translated: true,
-    src: ["src/budget/budget.tsx line 127"],
-    h: "1hPfKAqhO0JhEGc2rQ8tee2sqrIAP38KrxQcfLF3I1Y=",
-  },
   "Import": {
     val: "Importar",
     translated: true,
@@ -533,6 +527,14 @@ const messages:IMessages = {
     src: ["src/budget/budget.tsx line 192"],
     h: "7gl7ZdgJ3HfhOcQMiU7hVkFpXIR3KFxXtlMhKyE/Irw=",
   },
+  "match-count": {
+    val: (current_match:number, total_matches:number) => {
+        return `${current_match} de ${total_matches}`;
+      },
+    translated: true,
+    src: ["src/budget/finding.tsx line 129"],
+    h: "gGpkwXhLiDpxY0YOCXAFl6Q8D6sb7BX93TqgFRObOqo=",
+  },
   "Sync": {
     val: "Sinc",
     translated: true,
@@ -545,11 +547,30 @@ const messages:IMessages = {
     src: ["src/budget/connections.tsx line 27"],
     h: "kuwg7vpvp082IqBtRakekOVu7bqB4PYxhnFVsoBDt/g=",
   },
+  "A sync is already in progress": {
+    val: "A sync is already in progress",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 39"],
+    h: "z6CqgxENo0xxB0LPp8P8rmnLPp1m2NElecEaJM8GDfI=",
+  },
+  "Error running sync": {
+    val: "Error running sync",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 45"],
+    h: "LB/WNzHp4orPsbCVEJuDzUPsQUfNRDNXw7sFnbzfguw=",
+  },
+  "Sync has not yet been set up.": {
+    val: "Sync has not yet been set up.",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 50"],
+    h: "B5XIfqqMdt0gMHz2zsZr9GTj9vSRAS5R2akgGce+fsg=",
+  },
   "simplefin-connect-intro": {
     val: "Conectarse a su cuenta bancaria hará que sea más fácil extraer historial de transacciones de su banco a Buckets.  Para conectarse, haga lo siguiente::",
     translated: true,
     src: ["src/budget/connections.tsx line 75"],
-    h: "QyrzIPdjiuD+b5YSn7kbPRbYYDDwryIuscSYpL+TgJw=",
+    h: "421gz/BziKZhsIy2YKRFNtwoqPcbQ7uhFZWWfd6ReBg=",
+    newval: "To connect, do the following:",
   },
   "simplefin-get-token": {
     val: (mklink) => {
@@ -577,6 +598,18 @@ const messages:IMessages = {
     src: ["src/budget/connections.tsx line 109"],
     h: "BPAjsiEkATiwSf9f6kde3yZwSmmyiPDLiZ7Rr+3Zv/A=",
   },
+  "Macros": {
+    val: "Macros",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 129"],
+    h: "yo4VuLKqBNhvEBgUZKyI2WypDrv1loL/wA1qO3u4Zq4=",
+  },
+  "SimpleFIN Connections": {
+    val: "SimpleFIN Connections",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 140"],
+    h: "yzXdwvSSNy+FUFHW5+bAqRMq+j6krsNUFb/uFreKPNY=",
+  },
   "Cancel sync": {
     val: "Cancelar sinc",
     translated: true,
@@ -589,17 +622,53 @@ const messages:IMessages = {
     src: ["src/budget/connections.tsx line 140"],
     h: "5SbiliirLaAKLdgRThX+cO2RwGuC87t3Z1O0xT2WsAE=",
   },
+  "Create macro": {
+    val: "Create macro",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 188"],
+    h: "9xZZAswDH8zePPUhfsaSEDJ21GU1yhILKhDWtvnUlr0=",
+  },
+  "Connect": {
+    val: "Connect",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 209"],
+    h: "pCLQy6ZAsZnJ3ff5r+iD+O2vHQhIJEEUHUhiY1NrMP0=",
+  },
+  "": {
+    val: "",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 270"],
+    h: "Eq4yyx7ALQHto1gbEnwf7jsNxTVy7WuvI5choD2C4SY=",
+  },
   "Connection saved!": {
     val: "¡Conexión guardado!",
     translated: true,
     src: ["src/budget/connections.tsx line 168"],
     h: "wAgyeIQsbaI/kFPgBf8sWlKK1mf/VcP7BjHpC9TNYuc=",
   },
-  "Delete": {
-    val: "Borrar",
+  "On": {
+    val: "On",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 300"],
+    h: "nMAfqtecKNqqRD1YLNX1F32SXJy1exEgm1QvpnZLBQQ=",
+  },
+  "When \"On\" this macro will be run during a normal sync.": {
+    val: "When \"On\" this macro will be run during a normal sync.",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 300"],
+    h: "HnJ7qVSPXxIg3/lygw1Ln/VvBMBs8roJwXlCpP2KnMw=",
+  },
+  "Name": {
+    val: "Nombre",
     translated: true,
-    src: ["src/budget/connections.tsx line 184"],
-    h: "sm3jcrSw6qxgICiEpy25imvm6QNueF6oZ+oBxfeSEJg=",
+    src: ["src/budget/importing.tsx line 182"],
+    h: "bMXfNfAzjiMOnmM+rZmR8I9iyrRaMmSXja7cZ0eGcwU=",
+  },
+  "Confirm delete?": {
+    val: "Confirm delete?",
+    translated: false,
+    src: ["src/budget/importpage.tsx line 359","src/budget/importpage.tsx line 383"],
+    h: "m+7d5sl049xaPiNCOrhWnQKaw3HfiPQOZ5x7tuKVVd8=",
   },
   "ID": {
     val: "ID",
@@ -630,60 +699,6 @@ const messages:IMessages = {
     translated: true,
     src: ["src/budget/connections.tsx line 258","src/budget/importing.tsx line 155"],
     h: "unfAYQpjuyuTjjRCodr+S+jNjRmz3nahjZ91u/j5HfE=",
-  },
-  "Account created:": {
-    val: "Cuenta fue creada:",
-    translated: true,
-    src: ["src/budget/connections.tsx line 267","src/budget/importing.tsx line 101"],
-    h: "3akIYFguLafrrZub6+2XJ3aY6DNEQ95QP5aIT64aov4=",
-  },
-  "Account linked": {
-    val: "Cuenta fue vinculada",
-    translated: true,
-    src: ["src/budget/connections.tsx line 271","src/budget/importing.tsx line 105"],
-    h: "6BIwDJOD6nTFkAPNFUFkl5FadqIUsOu2NiXhkqUBfec=",
-  },
-  "match-count": {
-    val: (current_match:number, total_matches:number) => {
-        return `${current_match} de ${total_matches}`;
-      },
-    translated: true,
-    src: ["src/budget/finding.tsx line 129"],
-    h: "gGpkwXhLiDpxY0YOCXAFl6Q8D6sb7BX93TqgFRObOqo=",
-  },
-  "Open Transaction File": {
-    val: "Abrir archivo de transacciones",
-    translated: true,
-    src: ["src/budget/importing.tsx line 40"],
-    h: "8teUT2P/KToCDoMTqS88JNVtG9PTE/5PojtS1SGmokw=",
-  },
-  "imported X trans": {
-    val: (trans_count:number) => {
-          return `${trans_count} transacciones fueron importadas.`;
-        },
-    translated: true,
-    src: ["src/budget/importing.tsx line 81"],
-    h: "VXbRvtaAKzRwSAIJE5VPPrQxzJLGUyjjCmde8Y4/hGs=",
-  },
-  "imported n trans": {
-    val: (num_trans:number) => {
-      return `${num_trans} transacciones fueron importadas.`;
-    },
-    translated: true,
-    src: ["src/budget/importing.tsx line 116"],
-    h: "fKPnz16l9WkD5o21rN0yPtBFwuaTyHbAiz1rQ5Aj5Nk=",
-  },
-  "Name": {
-    val: "Nombre",
-    translated: true,
-    src: ["src/budget/importing.tsx line 182"],
-    h: "bMXfNfAzjiMOnmM+rZmR8I9iyrRaMmSXja7cZ0eGcwU=",
-  },
-  "Import transaction file": {
-    val: "Importar archivo de transacciones",
-    translated: true,
-    src: ["src/budget/importing.tsx line 198"],
-    h: "gzuSikXZDG8MBMTly4ipzOZIG7lfvL/JbSX4eNJEfMw=",
   },
   "Month to Month": {
     val: "Mes a mes",
@@ -733,23 +748,73 @@ const messages:IMessages = {
     src: ["src/budget/reports.tsx line 432"],
     h: "bwan2qqqdDloluCkgp+UPYWSAeOQk9zkaNwb2p0kUDk=",
   },
+  "Yearly expenses": {
+    val: "Yearly expenses",
+    translated: false,
+    src: ["src/budget/reports.tsx line 648"],
+    h: "W3uzJb/bdMxa/o4IKEKVOWp7OQOGS7ry0h2rz8iPzoM=",
+  },
+  "Monthly expenses": {
+    val: "Monthly expenses",
+    translated: false,
+    src: ["src/budget/reports.tsx line 648"],
+    h: "lRQupgq3/amJQmfkf9uUeT0IsRZu/ItiYG/EpDFhpbg=",
+  },
   "Budgeted": {
     val: "Presupuestado",
     translated: true,
     src: ["src/budget/reports.tsx line 534"],
     h: "aP72arzLN/j79zGtL8DWE7wcBGciRcWqMOR1aTHJmNo=",
   },
-  "Prior 12 months": {
-    val: "12 meses anteriores",
-    translated: true,
-    src: ["src/budget/reports.tsx line 535"],
-    h: "0M7KePS3rfMQeASk2IqHTYGXTAj0v1V27kPVHCsgPaY=",
+  "This year": {
+    val: "This year",
+    translated: false,
+    src: ["src/budget/reports.tsx line 654"],
+    h: "tyLfSOqGxN8pzOFyp86CGrYZjNShj7I5+Jt+cZf1sow=",
   },
-  "Prior 3 months": {
-    val: "3 meses anteriores",
-    translated: true,
-    src: ["src/budget/reports.tsx line 536"],
-    h: "spZsVyneGnwmYcYcv5FAET+76DRv205SW2FspmtvKpI=",
+  "Last month": {
+    val: "Last month",
+    translated: false,
+    src: ["src/budget/reports.tsx line 654"],
+    h: "1sq1B50c3wJfgKUL6HnwzskKsFcpjdWvyeQX1/HmS9g=",
+  },
+  "Average": {
+    val: "Average",
+    translated: false,
+    src: ["src/budget/reports.tsx line 655"],
+    h: "zLxQhptvlIYtt0l/prvWMqnsQHh7N1gxh33WeorRi2w=",
+  },
+  "Period": {
+    val: "Period",
+    translated: false,
+    src: ["src/budget/reports.tsx line 656"],
+    h: "hfDqPEJ79UozdsoxEfonMjVDqZQXPzQBbmDwoKYutvo=",
+  },
+  "Budgeted:": {
+    val: "Budgeted:",
+    translated: false,
+    src: ["src/budget/reports.tsx line 733"],
+    h: "bTtWXmUkwbhbFLeckHBWA4GKlgok1A9UhOuat+uSsyU=",
+  },
+  "Average:": {
+    val: "Average:",
+    translated: false,
+    src: ["src/budget/reports.tsx line 747"],
+    h: "cjkXL/zpI+dQWkGrhO9+31XBHKDYu26Sb2ce60wR8+w=",
+  },
+  "Last:": {
+    val: "Last:",
+    translated: false,
+    src: ["src/budget/reports.tsx line 758"],
+    h: "vd4w6yiveUoFIgWprGJfN0nrT8tNDMck5dOojPgHQNs=",
+  },
+  "period-display": {
+    val: (n:number, unit:'year'|'month') => {
+        return `${n}${unit === 'year' ? 'yr' : 'mo'}`;
+    },
+    translated: false,
+    src: ["src/budget/reports.tsx line 813"],
+    h: "fK5jMz0cZJ/y+/XlVn62srIYfD9sHxqK0lOBExYeM1o=",
   },
   "Delete selected": {
     val: "Eliminar seleccionado",
@@ -765,17 +830,17 @@ const messages:IMessages = {
     src: ["src/budget/transactions.tsx line 86"],
     h: "/u86qzz5nT6n9ZqcgDLwC0GHmjDy0cELJjSzjBAim5g=",
   },
-  "Import from file": {
-    val: "Importar del archivo",
-    translated: true,
-    src: ["src/budget/transactions.tsx line 98"],
-    h: "pFUUU47IsBM4t150vlDrtZPYmzaQTNFLynl5hVnyaWI=",
-  },
   "Show uncategorized": {
     val: "Mostrarlas sin clasificar",
     translated: true,
     src: ["src/budget/transactions.tsx line 108"],
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
+  },
+  "Import file": {
+    val: "Import file",
+    translated: false,
+    src: ["src/budget/transactions.tsx line 112"],
+    h: "iaQvPnsbTKu/ItmjoC8ctwpVbyumVe15GLL8nCbe25Q=",
   },
   "sync-symbol help": {
     val: "Esta transacción provenía de una importación o sincronización",
@@ -871,7 +936,8 @@ const messages:IMessages = {
     val: "Incluye algo más, si quiere, sobre esta línea",
     translated: true,
     src: ["src/errors.ts line 35"],
-    h: "rn0WG7RYQFy1lbX3RhGEuTns0lNN14OcJzHTVx2eOMo=",
+    h: "B/FkYjyhsvX0rS2nzmKJ2hNdLjSYb68vU9BBH14oiOg=",
+    newval: "Include anything else you think might be helpful above this line",
   },
   "OK": {
     val: "OK",
@@ -885,11 +951,40 @@ const messages:IMessages = {
     src: ["src/mainprocess/dbstore.ts line 31","src/mainprocess/dbstore.ts line 65"],
     h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
   },
+  "Unregistered Version": {
+    val: "Unregistered Version",
+    translated: false,
+    src: ["src/mainprocess/drm.ts line 84"],
+    h: "x9ekMClqI57T6jREU5VJurBCzlD+hBNJ8pHNQ0zMB1U=",
+  },
+  "nag-message": {
+    val: () => `Hello! Thanks for trying out Buckets.
+
+This is an unregistered trial version, and although the trial is untimed,
+a license must be purchased for continued use.
+
+Would you like to purchase a license now?`,
+    translated: false,
+    src: ["src/mainprocess/drm.ts line 85"],
+    h: "q/aC5/bxA3Spi/Gt0bnWtOT7Epd3Q1CSTZYajbIjnEE=",
+  },
+  "Purchase": {
+    val: "Purchase",
+    translated: false,
+    src: ["src/mainprocess/drm.ts line 92"],
+    h: "SfwhUMXO5ckJhwUkBjdC9n17k8zH4+hoAlFoUdOwE/g=",
+  },
   "Unable to open the file:": {
     val: "No se puede abrir el archivo:",
     translated: true,
     src: ["src/mainprocess/files.ts line 44"],
     h: "MxbgnQR4Cyi549ltzzIDDAI1qRGqoeRm0zOApQMS2DY=",
+  },
+  "Open Transaction File": {
+    val: "Abrir archivo de transacciones",
+    translated: true,
+    src: ["src/budget/importing.tsx line 40"],
+    h: "8teUT2P/KToCDoMTqS88JNVtG9PTE/5PojtS1SGmokw=",
   },
   "File does not exist:": {
     val: "Archivo no existe:",
@@ -986,6 +1081,12 @@ const messages:IMessages = {
     translated: true,
     src: ["src/mainprocess/menu.ts line 108"],
     h: "w8hRIxBBNWtXNPcYtQ4t/mTHfPF66U/mJbVpOiIDgYE=",
+  },
+  "Delete": {
+    val: "Borrar",
+    translated: true,
+    src: ["src/budget/connections.tsx line 184"],
+    h: "sm3jcrSw6qxgICiEpy25imvm6QNueF6oZ+oBxfeSEJg=",
   },
   "Select All": {
     val: "Seleccionar todo",
@@ -1275,11 +1376,35 @@ const messages:IMessages = {
     src: ["src/mainprocess/updater.ts line 162"],
     h: "QVM3NKWnuJ19cWUaN3y9fVCbkiQTygWbOYuFMklAwNc=",
   },
+  "Confirm password:": {
+    val: "Confirm password:",
+    translated: false,
+    src: ["src/models/bankmacro.ts line 41"],
+    h: "Px/rLFgkE/Sv1Z+Xm0frULVV3lxvrEc7ABJaDzmv670=",
+  },
+  "Passwords did not match": {
+    val: "Passwords did not match",
+    translated: false,
+    src: ["src/models/bankmacro.ts line 47"],
+    h: "PyUeXNOVYhNDM/De1HIPLeiwy6d+x7bkZphOo5ZqR6Q=",
+  },
+  "Create budget password:": {
+    val: "Create budget password:",
+    translated: false,
+    src: ["src/models/bankmacro.ts line 85"],
+    h: "Bf9XVrpN9UpVSKpZNRpBUw/IaFjMkNCmH4gpAfhYFkY=",
+  },
   "Sync failed": {
     val: "Sincronización ha fallado",
     translated: true,
     src: ["src/models/simplefin.ts line 159"],
     h: "jBGq60u/Y2WKAulnVvspUq9tLPFtXOnQYczjXXViGA0=",
+  },
+  "Unexpected sync error": {
+    val: "Unexpected sync error",
+    translated: false,
+    src: ["src/models/simplefin.ts line 117"],
+    h: "78kYsQMTfGS8BNaZVuqYaRojJlTpcmN6CF9PQKKO0ME=",
   },
   "Invalid SimpleFIN Token": {
     val: "SimpleFIN Token es inválido",
@@ -1377,11 +1502,47 @@ const messages:IMessages = {
     src: ["src/wwwroot/misc/preferences.tsx line 47"],
     h: "IYHFL+R57iN4UW8AS35balApUouS8GdkRIQ3uEa6wT8=",
   },
-  "Buckets Updates": {
-    val: "Buckets - Actualizaciones",
-    translated: true,
-    src: ["src/wwwroot/misc/updates.html line 0"],
-    h: "/bdGAwJm/rYxsxx+n8mZcZ2R8TvkVU+hfEC7Acda0nk=",
+  "Prompt": {
+    val: "Prompt",
+    translated: false,
+    src: ["src/wwwroot/misc/prompt.html line 0"],
+    h: "56HrS6R0zfyg5ruiVb/J04UP3T8O2V99V+mXHvVfEZ0=",
+  },
+  "Report Bug": {
+    val: "Report Bug",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "RxuE9Dh0Dadda2PtjUPD0dQ7b8aQok84Ytvw31ABBRU=",
+  },
+  "\n    Please send an email with the following information:\n  ": {
+    val: "\n    Please send an email with the following information:\n  ",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "bcYSMazDmAXDjArw/7cRY+vSJ5QaTrzQA9zEfzojdJk=",
+  },
+  "To:": {
+    val: "To:",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "DVh8SrVIfQ4PFpWvSiPNX3CY+zU26tPWECRSPJ2nWDI=",
+  },
+  "Subject:": {
+    val: "Subject:",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "4NO6gJ/cwlZSrpged8g/ImP/TOvfZNIlbhR10NWMgGw=",
+  },
+  "Bug Report": {
+    val: "Bug Report",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "SDIv5SKYHaQgY6Qz1XGyCARZeTJamrznKswe2yArLF8=",
+  },
+  "Body:": {
+    val: "Body:",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "dbjKAH21xRnLrRsWOprzkV2mByF7N2bPX+rl8sWDl9w=",
   },
   "Check for Updates": {
     val: "Buscar actualizaciones",
@@ -1389,11 +1550,23 @@ const messages:IMessages = {
     src: ["src/wwwroot/misc/updates.tsx line 20"],
     h: "6vtxqhyfiDaIXgTBH0pdoPzTGftDDEoRFNGU082PhRk=",
   },
+  "There was an error.  Maybe try again?": {
+    val: "Habia error.  ¿Inténtelo de nuevo?",
+    translated: true,
+    src: ["src/wwwroot/misc/updates.tsx line 61"],
+    h: "l+W2GSV3tl8Gx19ZW+wOCziBj5/UeMCVO8tvh4P7LEo=",
+  },
   "Checking for updates...": {
     val: "Buscando actualizaciones...",
     translated: true,
     src: ["src/wwwroot/misc/updates.tsx line 26"],
     h: "wjjhyYhYEFdJWUmwdJIEdxm0iAq2bwrWU79ANObzzZY=",
+  },
+  "Skip This Version": {
+    val: "Skip This Version",
+    translated: false,
+    src: ["src/wwwroot/misc/updates.tsx line 52"],
+    h: "YnC7GSI4QITirt1GGV/Tc1FvTbJYICkEeF3zj4u4eak=",
   },
   "Download Update": {
     val: "Descargar la actualización",
@@ -1425,17 +1598,71 @@ const messages:IMessages = {
     src: ["src/wwwroot/misc/updates.tsx line 52"],
     h: "bzusTDIT831mqEwmmM59eT12mfoNMYiGPbUfoIzaCwo=",
   },
-  "There was an error.  Maybe try again?": {
-    val: "Habia error.  ¿Inténtelo de nuevo?",
-    translated: true,
-    src: ["src/wwwroot/misc/updates.tsx line 61"],
-    h: "l+W2GSV3tl8Gx19ZW+wOCziBj5/UeMCVO8tvh4P7LEo=",
-  },
   "Recently used": {
     val: "Recientes",
     translated: true,
     src: ["src/wwwroot/misc/wizard.html line 0"],
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
+  },
+  "EXPERIMENTAL Buckets Macro Maker": {
+    val: "EXPERIMENTAL Buckets Macro Maker",
+    translated: false,
+    src: ["src/wwwroot/record/record.html line 0","src/wwwroot/record/record.tsx line 839"],
+    h: "NZPVXQ+Dw1vv0fLXY+Z4R1KiEkXjDZtSmY3tVz5L1VI=",
+  },
+  "navigatestep": {
+    val: (url) => `Go to ${url}`,
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 355"],
+    h: "nI/J4GfYlL6BgRZRSiPFfA5o7ASdx2VVYW6x3vgCuKE=",
+  },
+  "off": {
+    val: "off",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 362"],
+    h: "nzvsum5LFYOz4ZRB3eTVliJTfZvVSpTSImJ4XkhThNA=",
+  },
+  "on": {
+    val: "on",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 364"],
+    h: "mQwjhouWWBSxF8+abE3+RUUurcIXHh+YGGXr/ITxByQ=",
+  },
+  "Paused": {
+    val: "Paused",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 528"],
+    h: "sMAADusAjpKEUapa7bSzeAnEAbEGpH+NKBgGh068Ifw=",
+  },
+  "Recording": {
+    val: "Recording",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 534"],
+    h: "s1hytW8ZlaU8eRtoTfV+4aCpW5biiyifheE3t0kouUo=",
+  },
+  "Playing": {
+    val: "Playing",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 540"],
+    h: "69elN/r6NyshRWtcjLOKso9OmdOJhvg/ix+Xy/fE+Z0=",
+  },
+  "notify-downloaded-file": {
+    val: filename => `Downloaded file: ${filename}`,
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 750"],
+    h: "HwxJ2TVx57Qef6bXYySekL/eoBzvIEFUqBxQdxgcyCs=",
+  },
+  "Step took too long": {
+    val: "Step took too long",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 773"],
+    h: "Py3rsk0guEg0d8Ce9Lbfwzf1zP7E4Z8YPSOu165mOc0=",
+  },
+  "Error running recording": {
+    val: "Error running recording",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 777"],
+    h: "eE9Fw8G4vQpND3fFWnfGNvtN5LxCcQQecWO6fQgBmpM=",
   },
   "Open YNAB4 File": {
     val: "Abrir archivo de YNAB4",
