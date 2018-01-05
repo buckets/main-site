@@ -1,1 +1,1 @@
-Made regular expense analysis more accurate (and less busy too look at)
+Under *Analysis* the *Regular Expenses* section includes helpful number line charts and groups buckets according to whether expenses appear monthly v. yearly (or somewhat yearly) and groups them by relative budgeted amount.  In short, it's prettier :)

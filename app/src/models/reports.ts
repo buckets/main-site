@@ -117,6 +117,7 @@ export class ReportStore {
     bucket_id: number;
   }):Promise<{
     interval: Interval;
+    unit: 'month'|'year';
     intervals: Array<{
       interval: Interval;
       expenses: number;
@@ -126,16 +127,15 @@ export class ReportStore {
       }
     }>
   }> {
-    const MIN_SAMPLE = 3;
-    const MAX_MONTHS = 24;
-
+    const SAMPLE = 12;
+    const MONTHS = 3;
+    const YEARS = 3;
     const { bucket_id, end } = args;
-    const max_back = end.clone().subtract(MAX_MONTHS, 'months');
 
     // How far back should we go?
     let latest_expenses = await this.store.buckets.listTransactions({
       bucket_id,
-      limit: MIN_SAMPLE,
+      limit: SAMPLE,
       where: `coalesce(transfer, 0) = 0 AND amount <= 0`,
     })
     let farback_expense = latest_expenses.slice(-1)[0];
@@ -144,32 +144,30 @@ export class ReportStore {
     }
     let start = tsfromdb(farback_expense.posted);
     let diff = end.diff(start, 'months');
-    if (diff < MIN_SAMPLE) {
+    let unit:moment.unitOfTime.DurationConstructor = 'month';
+    if (diff <= SAMPLE) {
       // monthly expense
-      start = end.clone().subtract(MIN_SAMPLE, 'months').startOf('month');
+      start = end.clone().subtract(MONTHS, 'months').startOf('month');
     } else {
       // not a monthly expense
-      start.add(1, 'month').startOf('month');
-      let latest_expenses_in_range = latest_expenses.filter(x => {
-        return tsfromdb(x.posted).isSameOrAfter(max_back);
-      })
-      if (latest_expenses_in_range.length) {
-        start = tsfromdb(latest_expenses_in_range.slice(-1)[0].posted);
-      }
+      unit = 'year';
+      start = end.clone().subtract(YEARS, 'years').startOf('year');
     }
 
     let running_bal = (await this.store.buckets.balances(start, bucket_id))[bucket_id];
     let intervals = await Promise.all(chunkTime({
       start,
       end,
-      unit: 'month',
+      unit,
+      clipEnd: true,
     })
     .map(async chunk => {
+      let months = chunk.end.diff(chunk.start, 'month') || 1;
       const expenses = await this.bucketExpenses({
         start: chunk.start,
         end: chunk.end,
         bucket_id,
-      })
+      }) / months;
       const end_bal = (await this.store.buckets.balances(chunk.end, bucket_id))[bucket_id];
       const start_bal = running_bal;
       running_bal = end_bal;
@@ -188,6 +186,7 @@ export class ReportStore {
         start,
         end,
       },
+      unit,
       intervals,
     }
   }

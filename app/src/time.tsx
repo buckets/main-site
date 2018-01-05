@@ -115,13 +115,19 @@ export function chunkTime(args: {
   end: moment.Moment,
   unit?: string,
   step?: number,
+  clipEnd?: boolean,
 }):Interval[] {
   let ret = [];
   args.unit = args.unit || 'month';
   args.step = args.step || 1
   let p = args.start.clone()
-  while (p.isSameOrBefore(args.end)) {
+  let done = false;
+  while (p.isSameOrBefore(args.end) && !done) {
     let er = p.clone().add(args.step as any, args.unit);
+    if (args.clipEnd && er.isAfter(args.end)) {
+      er = args.end.clone();
+      done = true;
+    }
     ret.push({
       start: p.clone(),
       end: er.clone(),
