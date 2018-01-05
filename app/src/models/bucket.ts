@@ -202,6 +202,9 @@ export class BucketStore {
     account_trans_id?: number,
     transfer?: boolean,
   }):Promise<Transaction> {
+    if (!args.amount) {
+      return null;
+    }
     let data:any = {
       bucket_id: args.bucket_id,
       amount: args.amount,
