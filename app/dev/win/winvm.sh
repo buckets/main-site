@@ -308,6 +308,14 @@ snapshot_genesis() {
 snapshot_guestadditions() {
     ensure_on
     echo "Please install guest additions"
+    echo "1. Open machine in VirtualBox GUI"
+    echo "2. Sign in w/"
+    echo "   User: $WIN_USER"
+    echo "   Pass: ${WIN_PASS}"
+    echo "3. Devices > Insert Guest Additions CD image..."
+    echo "4. Eventually run the .exe on the CD and click through the installer."
+    echo "5. Reboot when prompted by the installer"
+    echo "6. Wait for this script to detect changes and take control again"
     ensure_booted
 }
 
@@ -316,9 +324,11 @@ snapshot_admin() {
     ensure_on
     echo
     echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
-    echo "1. Click Start"
-    echo "2. Right click 'Computer'"
-    echo "3. Click 'Manage'"
+    echo "1. Sign in w/"
+    echo "   User: $WIN_USER"
+    echo "   Pass: ${WIN_PASS}"
+    echo "2. Right click Windows Icon (bottom left)"
+    echo "3. Click 'Computer Management'"
     echo "4. Expand 'Local Users and Groups'"
     echo "5. Click 'Users' folder"
     echo "6. Right click 'Administrator'"
@@ -331,6 +341,8 @@ snapshot_admin() {
     echo "2. Click 'Properties'"
     echo "3. Uncheck 'Account is disabled'"
     echo "4. Click 'OK'"
+    echo ""
+    echo "Wait for this script to take control again..."
 
     while true; do
         if vboxmanage guestcontrol "$VMNAME" --username Administrator --password 'admin' run cmd.exe /c echo hey 2>/dev/null | grep hey; then
