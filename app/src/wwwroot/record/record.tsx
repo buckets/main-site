@@ -563,10 +563,10 @@ class RecordPage extends React.Component<RecordPageProps, {
         <div className="instructions">
           To create a macro:
           <ol>
-            <li>Sign in to your bank.  Make sure you have this computer remembered if asked.</li>
+            <li>Sign in to your bank.  If your bank has a "remember this computer" option, check it.</li>
             <li>Sign out</li>
             <li>Click {record_button}</li>
-            <li>For each account, download a file <Help>
+            <li>For each account, download a supported file <Help>
               Supported formats
               <ul>
                 <li>Quicken</li>

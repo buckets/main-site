@@ -215,7 +215,7 @@ export class ImportPage extends React.Component<{
                 <li><i className="fa-li fa fa-check" /> One-click sync</li>
                 <li><i className="fa-li fa fa-check" /> Fast</li>
                 <li><i className="fa-li fa fa-check" /> Least amount of work</li>
-                <li><i className="fa-li fa fa-close" /> Works with U.S. banks</li>
+                <li><i className="fa-li fa fa-close" /> Not all banks supported</li>
               </ul>
 
               <p>
