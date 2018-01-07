@@ -21,6 +21,12 @@ export class Account implements IObject {
   balance: number;
   import_balance: number;
   currency: string;
+  closed: boolean;
+
+  static fromdb(obj:Account) {
+    obj.closed == !!obj.closed;
+    return obj;
+  }
 }
 registerClass(Account);
 
@@ -98,12 +104,57 @@ export class AccountStore {
       currency: 'USD',
     });
   }
+  async get(account_id: number):Promise<Account> {
+    return this.store.getObject(Account, account_id);
+  }
   async update(account_id:number, data:{
       name?:string,
       balance?:number,
       import_balance?:number,
   }):Promise<any> {
     return this.store.updateObject(Account, account_id, data);
+  }
+  async close(account_id:number):Promise<Account> {
+    if (await this.hasTransactions(account_id)) {
+      // mark as close
+      return this.store.updateObject(Account, account_id, {closed: true});
+    } else {
+      // actually delete it
+      let old_account = await this.get(account_id);
+      await this.store.deleteObject(Account, account_id);
+      return old_account;
+    }
+  }
+  async unclose(account_id:number):Promise<Account> {
+    return this.store.updateObject(Account, account_id, {closed: false});
+  }
+  /**
+   *  Delete an account and all its transactions
+   */
+  async deleteWholeAccount(account_id:number) {
+    // This is not very efficient, but is done this way so that everything is properly notified about the deletions
+
+    // Delete bucket transactions first before we lose the ids
+    let btrans_ids = (await this.store.query(`SELECT id FROM bucket_transaction WHERE
+      account_trans_id IN (SELECT id FROM account_transaction WHERE account_id=$id)`, {$id: account_id}))
+      .map(x=>x.id);
+    await this.store.buckets.deleteTransactions(btrans_ids)
+
+    // Delete account transactions
+    let atrans_ids = (await this.store.query(`SELECT id FROM account_transaction WHERE account_id=$id;`, {$id: account_id}))
+      .map(x=>x.id);
+    console.log('atrans_ids', atrans_ids);
+    await this.deleteTransactions(atrans_ids)
+
+    // Delete misc other stuff connected to accounts
+    let mapping_ids = (await this.store.query(`SELECT id FROM account_mapping WHERE account_id=$id;`, {$id: account_id}))
+      .map(x=>x.id);
+    for (let mapping_id of mapping_ids) {
+      await this.store.deleteObject(AccountMapping, mapping_id);
+    }
+
+    // Delete the account itself
+    await this.store.deleteObject(Account, account_id);
   }
   // posted is a UTC time
   async transact(args:{
@@ -142,7 +193,15 @@ export class AccountStore {
         })
     return rows.length !== 0;
   }
-
+  async countTransactions(account_id:number):Promise<number> {
+    let rows = await this.store.query(`SELECT count(*) FROM
+      account_transaction
+      WHERE
+        account_id = $account_id`, {
+          $account_id: account_id,
+        })
+    return rows[0][0];
+  }
   async importTransactions(transactions:ImportArgs[]) {
     let num_new = 0;
     let num_updated = 0;
@@ -286,7 +345,9 @@ export class AccountStore {
 
   // asof is a UTC time
   async balances(asof?:Timestamp):Promise<Balances> {
-    return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof);
+    let where = 'a.closed <> 1'
+    let params = {};
+    return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }
   async list():Promise<Account[]> {
     return this.store.listObjects(Account, {

@@ -6,7 +6,7 @@ import * as _ from 'lodash'
 import * as cx from 'classnames'
 import { sss } from '../i18n'
 import {Renderer} from './render'
-import {AccountsPage} from './accounts'
+import { AccountsPage, ClosedAccountsPage } from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
 import { ImportPage, SyncWidget } from './importpage'
@@ -117,7 +117,10 @@ class Navbar extends React.Component<{
     return (
       <div className="nav">
         <div>
-          <Link relative to="/accounts" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Accounts')}</span></Link>
+          <Link relative to="/accounts" exactMatchClass="selected"><span>{sss('Accounts')}</span></Link>
+          <Route path="/accounts">
+            <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed')}</Link>
+          </Route>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Transactions')}</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets')}</span>{buckets_badge}</Link>
           <Route path="/buckets">
@@ -252,6 +255,9 @@ class Application extends React.Component<ApplicationProps, any> {
                 </header>
                 <div className="page">
                   <Switch>
+                    <Route path="/accounts/closed">
+                      <ClosedAccountsPage appstate={appstate} />
+                    </Route>
                     <Route path="/accounts">
                       <AccountsPage appstate={appstate} />
                     </Route>

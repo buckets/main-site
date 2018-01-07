@@ -417,7 +417,7 @@ class RecordingStep extends React.Component<RecordingStepProps, {
             second={<button className="delete"
               onClick={(ev) => {
                 director.recording.removeStep(step);
-              }}>Confirm delete</button>}
+              }}>{sss('Confirm delete')}</button>}
           />
         </div>
       </div>

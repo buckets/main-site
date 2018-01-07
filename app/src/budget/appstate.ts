@@ -36,6 +36,9 @@ interface IComputedAppState {
   unkicked_buckets: Bucket[];
   kicked_buckets: Bucket[];
 
+  open_accounts: Account[];
+  closed_accounts: Account[];
+
   can_sync: boolean;
 }
 
@@ -94,6 +97,9 @@ export class AppState implements IComputedAppState {
   unkicked_buckets: Bucket[] = [];
   kicked_buckets: Bucket[] = [];
 
+  open_accounts: Account[] = [];
+  closed_accounts: Account[] = [];
+
   can_sync = false;
 
   get defaultPostingDate() {
@@ -123,7 +129,7 @@ export class AppState implements IComputedAppState {
 function computeTotals(appstate:AppState):IComputedAppState {
   let bucket_neg_balance = 0;
   let bucket_pos_balance = 0;
-  _.values(appstate.bucket_balances)
+  Object.values(appstate.bucket_balances)
     .forEach(bal => {
       if (bal <= 0) {
         bucket_neg_balance += bal;
@@ -132,20 +138,20 @@ function computeTotals(appstate:AppState):IComputedAppState {
       }
     })
   let bucket_total_balance = bucket_pos_balance + bucket_neg_balance;
-  let account_total_balance = _.values(appstate.account_balances)
+  let account_total_balance = Object.values(appstate.account_balances)
     .reduce((a,b) => a+b, 0);
   let income = 0;
   let expenses = 0;
   let transfers_in = 0;
   let transfers_out = 0;
   let trans_with_buckets = {};
-  _.values(appstate.btransactions)
+  Object.values(appstate.btransactions)
   .forEach((btrans:BTrans) => {
     trans_with_buckets[btrans.account_trans_id] = true;
   })
   let uncategorized_trans = [];
   let num_uncategorized_trans = 0;
-  _.values(appstate.transactions)
+  Object.values(appstate.transactions)
   .forEach((trans:ATrans) => {
     if (trans.general_cat === 'transfer') {
       if (trans.amount > 0) {
@@ -172,7 +178,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
   let kicked_buckets = [];
   let unkicked_buckets = [];
   let nodebt_balances = {};
-  _.values(appstate.buckets).forEach(bucket => {
+  Object.values<Bucket>(appstate.buckets).forEach(bucket => {
     if (bucket.kicked) {
       kicked_buckets.push(bucket);
     } else {
@@ -188,9 +194,16 @@ function computeTotals(appstate:AppState):IComputedAppState {
     }
   })
   let unmatched_account_balances = 0;
-  _.values(appstate.accounts).forEach((account:Account) => {
-    if (expectedBalance(account) !== account.balance) {
-      unmatched_account_balances += 1;
+  let open_accounts = [];
+  let closed_accounts = [];
+  Object.values<Account>(appstate.accounts).forEach(account => {
+    if (account.closed) {
+      closed_accounts.push(account);
+    } else {
+      open_accounts.push(account);
+      if (expectedBalance(account) !== account.balance) {
+        unmatched_account_balances += 1;
+      }  
     }
   })
   let can_sync = 
@@ -210,6 +223,8 @@ function computeTotals(appstate:AppState):IComputedAppState {
     uncategorized_trans,
     kicked_buckets,
     unkicked_buckets,
+    open_accounts,
+    closed_accounts,
     unmatched_account_balances,
     nodebt_balances,
     can_sync,
