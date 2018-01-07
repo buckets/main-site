@@ -197,7 +197,7 @@ export class SimpleFINStore {
         } else {
           // no matching account
           let unknown = await this.store.accounts.getOrCreateUnknownAccount({
-            description: `${account.org.name || account.org.domain} ${account.name}`,
+            description: `${account.org.name || account.org.domain} ${account.name} (${account.id}) ${account.balance}`,
             account_hash: hash,
           })
           unknowns.push(unknown);
