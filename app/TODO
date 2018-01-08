@@ -12,7 +12,6 @@ v1.0.0:
  ☐ Encryption: http://atom.github.io/node-keytar/
  ☐ Encrypt simplefin connection stuff
  ☐ Prompt to be added to newsletter
- ✘ Show bucket group totals @cancelled (18-01-05 08:35)
 
 Videos:
   ☐ "Doing" the budget (categorize, make it rain, adjust)
@@ -24,7 +23,6 @@ Videos:
 
 Backlog:
  ☐ Make Toasts their own width instead of matching the width of the widest current toast
- ☐ Don't upload the application code to Heroku
  ☐ When categorizing, it would be nice to be able to create a new bucket sometimes.
  ☐ Support bitcoin as a currency (with no decimal places)
  ☐ Align the warning triangle on account balance mismatch.
@@ -43,7 +41,9 @@ Backlog:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Don't upload the application code to Heroku @done (18-01-08 16:01) @project(Backlog)
  ✘ Sign the code @cancelled (18-01-05 08:35) @project(v1.0.0)
+ ✘ Show bucket group totals @cancelled (18-01-05 08:35) @project(v1.0.0)
  ✘ Remove "Test Toast" button :) @cancelled (18-01-05 08:35) @project(v1.0.0)
  ✘ Show running balance in bucket transactions list @cancelled (18-01-05 08:34) @project(v1.0.0)
  ✘ Accessibility: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA @cancelled (18-01-05 08:34) @project(v1.0.0)
