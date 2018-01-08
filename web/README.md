@@ -1,3 +1,5 @@
+# Dev server
+
 To run the server:
 
     docker-compose up --build
@@ -5,8 +7,6 @@ To run the server:
 Then go to:
 
     http://${DOCKER_IP}
-
-See app/README.md for everything else
 
 # I18N and L10N
 
@@ -24,3 +24,7 @@ Add a new language:
 
     dev/dolangs.sh new es
 
+
+# Deploy
+
+./deploy2heroku.sh
