@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>
+File Format
+</title>
+  <link rel="stylesheet" type="text/css" href="/css/buckets.css" />
+  <link rel="stylesheet" type="text/css" href="/css/theme.css" />
+</head>
+<body>
+  <div class="main-wrap">
+    <div class="main-nav">
+      <div class="logo-wrap">
+        <img class="logo" src="/img/logo.png" />
+      </div>
+      
+      
+      
+
+      
+        
+          <a href="/fileformat/" class="active">File Format</a>
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="main-body">
+
+<h1>File Format</h1>
+
+
+
+<p>Buckets budget files are SQLite databases.  The schema is mostly self-explanatory, but this document points out some things that aren&rsquo;t.</p>
+
+<p><warning>
+<strong>WARNING:</strong> The schema is not final and may change without warning in future versions of Buckets.
+</warning></p>
+
+<p>If you still have questions after reading this, feel free to chat with me.</p>
+
+<h2 id="concurrency">Concurrency</h2>
+
+<p>It&rsquo;s not a good idea to do data-manipulating operations (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, etc&hellip;) on the same budget file from more than one process at a time.  So before you manipulate data outside of Buckets, close the budget file inside Buckets.</p>
+
+<h2 id="amounts">Amounts</h2>
+
+<p>Amounts are stored as integers, not floats.  For USD (and most other currencies), this means that amounts are integer cents.</p>
+
+<p>In this example, account 1 has a balance of $6,500:</p>
+
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sqlite&gt; SELECT balance FROM account WHERE id=1;
+650000
+sqlite&gt; SELECT printf(&#34;%.2f&#34;, balance/100.0) AS balance FROM account WHERE id=1;
+6500.00</code></pre></div>
+
+<h2 id="inserting-transactions">Inserting transactions</h2>
+
+<p>Insert bank/account transactions into the <code>account_transaction</code> table.  Be aware of the following:</p>
+
+<ul>
+<li>The <code>fi_id</code> column represents an account-unique ID (typically assigned by the bank) for a transaction.</li>
+<li><code>general_cat</code> should be one of the strings <code>&quot;&quot;</code>, <code>&quot;income&quot;</code>, or <code>&quot;transfer&quot;</code>.</li>
+</ul>
+
+<p>Account and bucket balances are automatically updated (by SQLite triggers) when transactions are inserted/updated/deleted.</p>
+
+</div>
+  </div>
+</body>
+</html>
