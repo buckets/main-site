@@ -1,0 +1,9 @@
+footer {
+  background-color: rgba(52, 73, 94,1.0);
+  padding: .5rem;
+}
+footer .footer-inner {
+  width: 50rem;
+  margin: 0 auto;
+  color: white;
+}

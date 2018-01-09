@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+  <link rel="stylesheet" type="text/css" href="/css/buckets.css" />
+  <link rel="stylesheet" type="text/css" href="/css/buckets-theme.css" />
+</head>
+<body>
+  {{ partial "navbar.html" }}
+  {{ block "main" . }}{{ end }}
+  <footer>
+  </footer>
+</body>
+</html>
