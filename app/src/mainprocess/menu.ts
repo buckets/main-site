@@ -242,20 +242,6 @@ export async function updateMenu(show_budget:boolean=false) {
           reportBug(`Language: ${langname}\n` + sss('It says:') + '\n' + sss('It should say:'));
         }
       },
-      {type: 'separator'},
-
-      {
-        label: sss('API/File Format'),
-        click() {
-          let win = new BrowserWindow({
-            width: 600,
-            height: 400,
-          })
-          let path = Path.join(APP_ROOT, 'src/wwwroot/misc/fileformat.html');
-          path = `file://${path}`;
-          win.loadURL(path);
-        }
-      }
     ],
   };
   if (IS_DEBUG) {
