@@ -9,3 +9,7 @@
     
     hugo server -D
     hugo server --theme buckets-trimmed -D
+
+- Build and embed
+
+    ./embed.sh

@@ -14,6 +14,7 @@ import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
 import { APP_ROOT, IS_DEBUG } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
+import { openDocs } from '../docs'
 
 export async function updateMenu(show_budget:boolean=false) {
   let recent_files = await getRecentFiles();
@@ -206,15 +207,22 @@ export async function updateMenu(show_budget:boolean=false) {
         label: sss('Getting Started...'),
         click() {
           shell.openExternal('https://www.budgetwithbuckets.com/gettingstarted');
+          // openDocs('getting-started');
         }
       },
+      {
+        label: sss('Buckets Guide'),
+        click() {
+          openDocs();
+        }
+      },
+      {type: 'separator'},
       {
         label: sss('Chat...'),
         click() {
           shell.openExternal('https://www.budgetwithbuckets.com/chat');
         }
       },
-      {type: 'separator'},
       {
         label: sss('Show Log Files...'),
         click() {
@@ -235,6 +243,7 @@ export async function updateMenu(show_budget:boolean=false) {
         }
       },
       {type: 'separator'},
+
       {
         label: sss('API/File Format'),
         click() {

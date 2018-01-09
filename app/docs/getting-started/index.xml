@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Getting Started on Buckets Tips</title>
+    <link>https://docs.budgetwithbuckets.com/getting-started/</link>
+    <description>Recent content in Getting Started on Buckets Tips</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 09 Jan 2018 11:36:13 -0700</lastBuildDate>
+    
+	<atom:link href="https://docs.budgetwithbuckets.com/getting-started/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Accounts</title>
+      <link>https://docs.budgetwithbuckets.com/getting-started/accounts/</link>
+      <pubDate>Tue, 09 Jan 2018 11:36:13 -0700</pubDate>
+      
+      <guid>https://docs.budgetwithbuckets.com/getting-started/accounts/</guid>
+      <description>Hello</description>
+    </item>
+    
+  </channel>
+</rss>
