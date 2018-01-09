@@ -53,12 +53,18 @@ h1,h2,h3,h4,h5 {
   color: rgba(52, 73, 94,1.0);
 }
 
+code {
+  font-family: monospace;
+  background-color: rgba(236, 240, 241,1.0);
+  padding: 1px 4px;
+}
 .highlight pre {
   padding: .5rem;
   font-family: monospace;
 }
-code {
-  font-family: monospace;
+.highlight code {
+  background-color: transparent;
+  padding: 0;
 }
 
 warning {
