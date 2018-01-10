@@ -73,3 +73,26 @@ warning {
   margin: 1rem 0;
   display: block;
 }
+
+table {
+  border-collapse: collapse;
+}
+td, th {
+  padding: .5rem .5rem;
+  border: 1px solid lightgrey;
+  border-width: 1px 0;
+  font-size: .9rem;
+}
+th {
+  font-weight: bold;
+  background-color: lightgrey;
+  border-color: grey;
+}
+td:last-child,
+th:last-child {
+  border-right-width: 1px;
+}
+td:first-child,
+th:first-child {
+  border-left-width: 1px;
+}
