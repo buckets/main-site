@@ -3,29 +3,12 @@
 <head>
   <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
   <link rel="stylesheet" type="text/css" href="/css/buckets.css" />
-  <link rel="stylesheet" type="text/css" href="/css/buckets-theme.css" />
+  <link rel="stylesheet" type="text/css" href="/css/common.css" />
 </head>
 <body>
-  {{ partial "navbar.html" }}
+  {{ partial "navbar.html" . }}
   <div class="main-wrap">
-    <div class="main-nav">
-      {{ $currentPage := . }}
-      
-      {{ range .Site.Sections }}
-        <a href="{{ .RelPermalink }}" class="subheading {{ if .InSection $currentPage }}active{{ end }}">{{ .LinkTitle }}</a>
-        <div class="sub">
-          {{ range .Pages }}
-            <a href="{{ .RelPermalink }}" class="{{ if eq $currentPage . }}active{{ end }}">{{ .LinkTitle }}</a>
-          {{ end }}
-        </div>
-      {{ end }}
-
-      {{ range .Site.Pages }}
-        {{ if and (eq .Section "") (ne .Kind "home") }}
-          <a href="{{ .RelPermalink }}" class="{{ if eq $currentPage . }}active{{ end }}">{{ .LinkTitle }}</a>
-        {{ end }}
-      {{ end }}
-    </div>
+    <div class="main-nav">{{ partial "pagenav.html" . }}</div>
     <div class="main-body">{{ block "main" . }}{{ end }}</div>
   </div>
 </body>

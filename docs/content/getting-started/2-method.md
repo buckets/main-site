@@ -1,7 +1,8 @@
 ---
-title: "Budgeting with Buckets"
+title: "Buckets Method"
 date: 2018-01-09T10:00:00-07:00
 draft: false
+order: 2
 ---
 
 

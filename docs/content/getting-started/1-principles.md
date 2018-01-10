@@ -1,28 +1,25 @@
 ---
-title: "General Principles"
+title: "Principles"
 date: 2018-01-09T10:00:00-07:00
-draft: true
+draft: false
+order: 1
 ---
 
-Here are some guiding principles to help you budget well.  *How* to do each of these is explored in more detail in this guide.
+Here are some guiding principles to help you budget well.  *How* to do each of these is explored in more detail in other pages in this guide.
 
-## Give Generously
+## Give generously
 
 Your life will be better when you give some amount of money away.  It doesn't have to be much, but build charitable giving *into* your budget.
 
-## Live on Last Month's Income
+## Live on last month's income
 
-Ideally, you should live on last month's income.  If you're not able to do it yet, make it a goal.  You can do it!
+Spend this month what you earned last month.  If you're not able to do it yet, make it a goal.  You really can do it&mdash;Buckets can help you!
 
-## Get Out of Debt
+## Build a supply
 
-XXX
+After you start living on a month's supply of income, make it two months.  Then three.  All the way up to a year.
 
-## Build a Supply
-
-Make a goal to save up a month's supply of income.  Then make it two months.  Then three.  All the way up to 12.
-
-## Tools Are Just Tools
+## Tools are just tools
 
 Hammers don't build houses.  People do.
 
@@ -44,3 +41,8 @@ Budgeting tools are not good at:
 - putting that candy bar back at the grocery store checkout
 
 Tools are just tools.  Effective budgeting is all about **you.**
+
+
+## Next
+
+<a href="{{< relref "2-method.md" >}}">Learn the Bucket method.</a>

@@ -22,12 +22,8 @@
   font-weight: bold;
 }
 .main-nav a.active {
-  background-color: rgba(52, 73, 94,1.0);
+  background-color: rgba(52, 152, 219,1.0);
   color: white;
-}
-.main-nav .subheading.active {
-  background-color: rgba(189, 195, 199,1.0);
-  color: rgba(52, 73, 94,1.0);
 }
 .main-nav .sub a {
   padding-left: 2rem;
@@ -47,10 +43,19 @@
 }
 .main-body p {
   line-height: 1.25rem;
+  max-width: 30rem;
+}
+.main-body ul {
+  max-width: 30rem;
 }
 
 h1,h2,h3,h4,h5 {
   color: rgba(52, 73, 94,1.0);
+}
+h2 {
+  margin-top: 5rem;
+  padding-bottom: 10px;
+  border-bottom: 1px solid lightgrey;
 }
 
 code {
