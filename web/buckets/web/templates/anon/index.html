@@ -28,6 +28,22 @@
   white-space: nowrap;
   display: block;
 }
+.buttonish.buy {
+  text-align: center;
+  font-size: 1.75rem;
+  padding: 1rem 3rem;
+  border: 0;
+  background-color: rgba(241, 196, 15,1.0);
+  background: linear-gradient(15deg, rgba(230, 126, 34,1.0), rgba(241, 196, 15,1.0));
+  
+  transition: transform 0.2s;
+  /*border: 3px solid rgba(230, 126, 34,1.0);
+  background-color: rgba(230, 126, 34,0.1);
+  color: rgba(230, 126, 34,1.0);*/
+}
+.buttonish.buy:hover {
+  background: rgba(26, 188, 156,1.0);
+}
 .download-section {
   padding: 1rem;
   border-radius: 3px;
@@ -125,20 +141,24 @@ img.main-shot {
 </div>
 <div class="wrap">
 
-  <div class="callout para">
-    {% trans %}Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  <em>Ever wonder who's combing through your cloud-stored transaction history?</em>  With Buckets, your personal data stays on your computer.{% endtrans %}
+  <div style="text-align: center;">
+    <a class="buttonish buy" href="{{ url_for('.buy') }}">{% trans %}Buy $29{% endtrans %}</a>
   </div>
 
   <div class="callout para">
-    {% trans %}Buckets is <em>affordable</em> with <em>no monthly fee.</em>  A single license may be used on all your computers and all the computers of family members living in your home.  You can afford to teach your kids how to budget now.{% endtrans %}
+    {% trans %}Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Really.{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets is <em>private</em>.  Other budgeting apps make you store all your financial information on their servers.  Ever wonder who's combing through your cloud-stored transaction history?  With Buckets, your personal data stays on your computer.{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets has <em>no monthly fee.</em>  It costs $29.  Once.  We're trying to help you save money, not shackle you to another monthly service.  A single license may be used on all your computers and all the computers of family members living in your home.{% endtrans %}
   </div>
 
   <div class="callout para">
     {% trans %}Buckets is for <em>both of you.</em>  Ditch that old spreadsheet budget that only one of you knows how to use.  From now on, you can stay on the same financial page.{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    {% trans %}Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Why, yes, that is ridiculously generous.{% endtrans %}
   </div>
 
   <div class="leftimg">
@@ -159,12 +179,8 @@ img.main-shot {
     {% trans %}Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.{% endtrans %}
   </div>
 
-  <div class="callout para">
-    {% trans %}Buckets costs <em>$29.</em>  Once.  Not monthly.  We're trying to help you save money, not shackle you to another monthly service.{% endtrans %}
-  </div>
-
-  <div style="text-align: center; margin: 2rem; margin-bottom: 8rem;">
-    <a class="buttonish" href="{{ url_for('.buy') }}">{% trans %}Buy Now &mdash; $29{% endtrans %}</a>
+  <div style="text-align: center; margin-bottom: 4rem;"">
+    <a class="buttonish buy" href="{{ url_for('.buy') }}">{% trans %}Buy $29{% endtrans %}</a>
   </div>
 
 </div>
