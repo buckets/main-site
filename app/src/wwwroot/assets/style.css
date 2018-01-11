@@ -1299,14 +1299,15 @@ table.props th {
   top: 0;
   left: 0;
   min-width: 10rem;
-  background-color: var(--blackish);
+  background-color: var(--darker-darkblue);
   color: white;
-  padding: .3rem .5rem;
+  padding: .5rem .8rem;
   border-radius: 2px;
   box-shadow: 1px 1px 5px var(--grey);
   user-select: none;
   pointer-events: none;
   text-align: start;
+  font-weight: 300;
 }
 .help table {
   width: 100%;
@@ -1314,24 +1315,7 @@ table.props th {
 .help td.total-line {
   border-top: 2px solid white;
 }
-.tooltip {
-  opacity: 0;
-  position: fixed;
-  top: 100px;
-  left: 100px;
-  background-color: var(--blackish);
-  color: white;
-  padding: .3rem .5rem;
-  border-radius: 2px;
-  box-shadow: 1px 1px 5px var(--grey);
-  user-select: none;
-  pointer-events: none;
-  transition: opacity .2s;
-  text-align: start;
-}
-.tooltip.showing {
-  opacity: 1;
-}
+
 
 /*https://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js*/
 .svg-container {
