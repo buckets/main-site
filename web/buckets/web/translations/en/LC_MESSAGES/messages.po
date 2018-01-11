@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-01-02 08:36-0700\n"
+"POT-Creation-Date: 2018-01-02 08:44-0700\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -192,17 +192,13 @@ msgid "Family budgeting app"
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:29
-msgid "Buckets is half off from now until January 10, 2018."
-msgstr ""
-
-#: buckets/web/templates/anon/buy.html:30
 msgid ""
-"For a <em>one-time $15 payment,</em> you will be emailed a Buckets "
+"For a <em>one-time $29 payment,</em> you will be emailed a Buckets "
 "License which may be used on any number of computers belonging to you and"
 " your immediate family members living in your home."
 msgstr ""
 
-#: buckets/web/templates/anon/buy.html:33
+#: buckets/web/templates/anon/buy.html:32
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr ""
 
@@ -289,33 +285,27 @@ msgstr ""
 
 #: buckets/web/templates/anon/index.html:163
 msgid ""
-"Buckets costs <em>$15.</em>  Once.  Not monthly.  We're trying to help "
+"Buckets costs <em>$29.</em>  Once.  Not monthly.  We're trying to help "
 "you save money, not shackle you to another monthly service."
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:164
-msgid ""
-"This is the special introductory price.  After January 10, 2018 it will "
-"cost $29."
+#: buckets/web/templates/anon/index.html:167
+msgid "Buy Now &mdash; $29"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:168
-msgid "Buy Now &mdash; $15"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:200
+#: buckets/web/templates/anon/index.html:199
 msgid "Subscribe to the Never-More-Than-Monthly Buckets Newsletter"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:202
+#: buckets/web/templates/anon/index.html:201
 msgid "Email Address"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:206
+#: buckets/web/templates/anon/index.html:205
 msgid "First Name"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:214
+#: buckets/web/templates/anon/index.html:213
 msgid "Subscribe"
 msgstr ""
 
@@ -467,5 +457,23 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Buckets is half off from now until January 2018."
+#~ msgstr ""
+
+#~ msgid "Buckets is half off from now until January 10, 2018."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For a <em>one-time $15 payment,</em> "
+#~ "you will be emailed a Buckets "
+#~ "License which may be used on any"
+#~ " number of computers belonging to you"
+#~ " and your immediate family members "
+#~ "living in your home."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This is the special introductory price."
+#~ "  After January 10, 2018 it will "
+#~ "cost $29."
 #~ msgstr ""
 

@@ -91,7 +91,7 @@ def buy():
         # charge the card
         try:
             stripe.Charge.create(
-                amount=1500,
+                amount=2900,
                 currency='usd',
                 description='Buckets v1 License',
                 statement_descriptor=gettext('Buckets Budgeting App'),
