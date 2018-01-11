@@ -1,0 +1,15 @@
+
+- Install [hugo](https://gohugo.io/)
+
+- New page:
+    
+    hugo new posts/something.md
+
+- Server:
+    
+    hugo server -D
+    hugo server --theme buckets-trimmed -D
+
+- Build and embed
+
+    ./embed.sh

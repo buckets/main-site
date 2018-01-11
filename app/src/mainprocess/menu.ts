@@ -1,6 +1,5 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
-import * as Path from 'path'
 import { openBudgetFileDialog,
          newBudgetFileDialog,
          duplicateWindow,
@@ -12,8 +11,9 @@ import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
-import { APP_ROOT, IS_DEBUG } from './globals'
+import { IS_DEBUG } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
+import { openDocs } from '../docs'
 
 export async function updateMenu(show_budget:boolean=false) {
   let recent_files = await getRecentFiles();
@@ -206,15 +206,22 @@ export async function updateMenu(show_budget:boolean=false) {
         label: sss('Getting Started...'),
         click() {
           shell.openExternal('https://www.budgetwithbuckets.com/gettingstarted');
+          // openDocs('getting-started');
         }
       },
+      {
+        label: sss('Buckets Guide'),
+        click() {
+          openDocs();
+        }
+      },
+      {type: 'separator'},
       {
         label: sss('Chat...'),
         click() {
           shell.openExternal('https://www.budgetwithbuckets.com/chat');
         }
       },
-      {type: 'separator'},
       {
         label: sss('Show Log Files...'),
         click() {
@@ -234,29 +241,8 @@ export async function updateMenu(show_budget:boolean=false) {
           reportBug(`Language: ${langname}\n` + sss('It says:') + '\n' + sss('It should say:'));
         }
       },
-      {type: 'separator'},
-      {
-        label: sss('API/File Format'),
-        click() {
-          let win = new BrowserWindow({
-            width: 600,
-            height: 400,
-          })
-          let path = Path.join(APP_ROOT, 'src/wwwroot/misc/fileformat.html');
-          path = `file://${path}`;
-          win.loadURL(path);
-        }
-      }
     ],
   };
-  if (IS_DEBUG) {
-    HelpMenu.submenu.push({
-      label: 'CAUSE AN ERROR',
-      click() {
-        throw new Error('This is an intentionally caused error');
-      }
-    })
-  }
 
   let RegisterMenu = {
       label: sss('Trial Version'),
@@ -382,6 +368,19 @@ export async function updateMenu(show_budget:boolean=false) {
   }
   if (!isRegistered()) {
     template.push(RegisterMenu);
+  }
+  if (IS_DEBUG) {
+    template.push({
+      label: 'DEBUG',
+      submenu: [
+        {
+          label: 'Throw an error',
+          click() {
+            throw new Error('This is an intentionally caused error');
+          }
+        },
+      ],
+    })
   }
   template.push(HelpMenu);
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));

@@ -1,0 +1,17 @@
+{{ define "title" }}
+{{ .Title }}
+{{ end }}
+
+{{ define "main" }}
+
+<h1>{{ .Title }}</h1>
+
+{{ .Content }}
+
+<ul>
+{{ range (.Data.Pages.ByParam "order") }}
+  <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
+{{ end }}
+</ul>
+
+{{ end }}

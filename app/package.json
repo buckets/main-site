@@ -9,7 +9,7 @@
     "email": "hello@budgetwithbuckets.com"
   },
   "scripts": {
-    "docs": "typedoc --tsconfig tsconfig.json --theme minimal --exclude '**/*.{test,spec}.*' --out docs/ src/",
+    "docs": "typedoc --tsconfig tsconfig.json --theme minimal --exclude '**/*.{test,spec}.*' --out devdocs/ src/",
     "start": "electron .",
     "compile": "tsc",
     "test": "./test.sh",
@@ -86,9 +86,11 @@
       "!*.sh",
       "!.dockerignore",
       "!.taprc",
+      "!.nyc_output",
       "!buckets.sublime-*",
       "!coverage${/*}",
       "!dev${/*}",
+      "!devdocs${/*}",
       "!mocha.opts",
       "!README.md",
       "!test${/*}",

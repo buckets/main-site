@@ -40,6 +40,13 @@ app.on('ready', () => {
     if (bf || parsed.hostname === 'main') {
       let path = Path.join(APP_ROOT, 'src/wwwroot/', parsed.pathname);
       callback(path);
+    } else if (parsed.hostname === 'docs') {
+      // docs
+      let path = Path.join(APP_ROOT, 'docs/', parsed.pathname);
+      if (path.endsWith('/')) {
+        path = `${path}/index.html`;
+      }
+      callback(path);
     } else {
       // No a known host
       callback()

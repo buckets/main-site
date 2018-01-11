@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+  <link rel="stylesheet" type="text/css" href="/css/buckets.css" />
+  <link rel="stylesheet" type="text/css" href="/css/common.css" />
+</head>
+<body>
+  {{ partial "navbar.html" . }}
+  <div class="main-wrap">
+    <div class="main-nav">{{ partial "pagenav.html" . }}</div>
+    <div class="main-body">{{ block "main" . }}{{ end }}</div>
+  </div>
+</body>
+</html>
