@@ -1,6 +1,5 @@
 import { shell, app, Menu, BrowserWindow } from 'electron'
 import * as log from 'electron-log'
-import * as Path from 'path'
 import { openBudgetFileDialog,
          newBudgetFileDialog,
          duplicateWindow,
@@ -12,7 +11,7 @@ import { sss, tx } from '../i18n'
 import { reportBug } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
-import { APP_ROOT, IS_DEBUG } from './globals'
+import { IS_DEBUG } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
 import { openDocs } from '../docs'
 
@@ -244,14 +243,6 @@ export async function updateMenu(show_budget:boolean=false) {
       },
     ],
   };
-  if (IS_DEBUG) {
-    HelpMenu.submenu.push({
-      label: 'CAUSE AN ERROR',
-      click() {
-        throw new Error('This is an intentionally caused error');
-      }
-    })
-  }
 
   let RegisterMenu = {
       label: sss('Trial Version'),
@@ -377,6 +368,19 @@ export async function updateMenu(show_budget:boolean=false) {
   }
   if (!isRegistered()) {
     template.push(RegisterMenu);
+  }
+  if (IS_DEBUG) {
+    template.push({
+      label: 'DEBUG',
+      submenu: [
+        {
+          label: 'Throw an error',
+          click() {
+            throw new Error('This is an intentionally caused error');
+          }
+        },
+      ],
+    })
   }
   template.push(HelpMenu);
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
