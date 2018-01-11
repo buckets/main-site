@@ -791,8 +791,7 @@ class GroupRow extends React.Component<{
       </tr>
       {bucket_rows}
       <tr className="action-row">
-        <td colSpan={6}></td>
-        <td><button onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button></td>
+        <td colSpan={100} className="right"><button onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button></td>
       </tr>
     </tbody>);
   }
