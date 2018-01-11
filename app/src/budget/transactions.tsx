@@ -11,6 +11,7 @@ import { Help } from '../tooltip'
 import { onKeys } from '../input'
 import { sss } from '../i18n'
 import { current_file } from '../mainprocess/files'
+import { makeToast } from './toast'
 
 
 interface TransactionPageProps {
@@ -151,189 +152,258 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
       'id',
     ])
     .map(trans => {
-      let select_cell;
-      if (onSelectChange) {
-        select_cell = <td>
-          <input
-            type="checkbox"
-            checked={selected.has(trans.id)}
-            onChange={ev => {
-              let newset = new Set(selected)
-              if (ev.target.checked) {
-                newset.add(trans.id);
-              } else {
-                newset.delete(trans.id);
-              }
-              this.setState({
-                selected: newset,
-              })
-              onSelectChange(newset);
-            }} />
-        </td>
-      }
-      let source_icon;
-      if (trans.fi_id) {
-        source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>{sss('sync-symbol help', "This symbol means the transaction came from an import/sync")}</Help>
-      }
-      return <tr key={trans.id}>
-        {select_cell}
-        <td className="nobr">{source_icon}<Date value={trans.posted} /></td>
-        {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
-        <td>{trans.memo}</td>
-        <td className="right"><Money value={trans.amount} /></td>
-        <td><Categorizer
-          transaction={trans}
-          appstate={appstate} /></td>
-      </tr>
+      return <TransRow
+        key={trans.id}
+        trans={trans}
+        appstate={appstate}
+        selected={selected.has(trans.id)}
+        onSelectChange={checked => {
+          let newset = new Set(selected)
+          if (checked) {
+            newset.add(trans.id);
+          } else {
+            newset.delete(trans.id);
+          }
+          this.setState({
+            selected: newset,
+          })
+          onSelectChange(newset);
+        }}
+        hideAccount={hideAccount}
+      />
     })
     return <table className="ledger transaction-list">
       <thead>
         <tr>
-          {onSelectChange ? <th></th> : null}
+          <th></th>
           <th className="nobr">{sss('Posted')}</th>
           {hideAccount ? null : <th>{sss('Account')}</th>}
           <th style={{width: '40%'}}>{sss('Memo')}</th>
           <th>{sss('Amount')}</th>
+          <th></th>
           <th>{sss('Category')}</th>
         </tr>
       </thead>
       <tbody>
-        {noCreate ? null : <CreateTransRow
-          hideAccount={hideAccount}
+        {noCreate ? null : <TransRow
           account={account}
           appstate={appstate}
-          showSelectCol={!!onSelectChange} />}
+          hideAccount={hideAccount}
+          noCheckbox
+        />}
         {elems}
       </tbody>
     </table>
   }
 }
 
-class CreateTransRow extends React.Component<{
+
+interface TransRowProps {
+  appstate: AppState;
+  trans?: Transaction;
   account?: Account;
   hideAccount?: boolean;
-  appstate: AppState
-  showSelectCol?: boolean;
-}, {
+  noCheckbox?: boolean;
+  selected?: boolean;
+  onSelectChange?: (selected:boolean)=>any;
+}
+interface TransRowState {
+  editing: boolean;
   amount: number;
   memo: string;
   posted: moment.Moment;
   account_id: number;
-}> {
+}
+class TransRow extends React.Component<TransRowProps, TransRowState> {
   private memo_elem = null;
-  private amount_elem = null;
   constructor(props) {
     super(props);
     this.state = {
-      amount: 0,
+      editing: false,
+      amount: null,
       memo: '',
       posted: ensureUTCMoment(props.appstate.defaultPostingDate),
-      account_id: props.account ? props.account.id : null,
+      account_id: null,
     }
+    Object.assign(this.state, this.recomputeState(props));
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.account) {
-      this.setState({
-        account_id: nextProps.account.id,
-      })
-    }
-    let pd = nextProps.appstate.defaultPostingDate;
-    if (pd.month() !== this.state.posted.month()
-      || pd.year() !== this.state.posted.year()) {
-      this.setState({
-        posted: pd,
-      })
+    this.setState(this.recomputeState(nextProps) as TransRowState);
+  }
+  recomputeState(props):Partial<TransRowState> {
+    if (props.trans) {
+      // An existing transaction is being show
+      let state:Partial<TransRowState> = {
+        editing: this.state.editing,
+        amount: props.trans.amount,
+        memo: props.trans.memo,
+        posted: props.trans.posted,
+        account_id: props.trans.account_id,
+      };
+      if (props.account) {
+        state.account_id = props.account.id;
+      }
+      return state;
+    } else {
+      // No transaction; in edit mode
+      return {
+        editing: true,
+      };
     }
   }
-  doTransaction = () => {
-    if (this.state.amount) {
-      manager.store.accounts.transact({
+  doTransaction = async () => {
+    if (this.props.trans) {
+      // update
+      await manager.store.accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
         memo: this.state.memo,
         posted: this.state.posted,
       })
       this.setState({
-        amount: 0,
-        memo: '',
-      }, () => {
-        this.memo_elem.focus();
+        editing: false,
       })
+    } else {
+      // create
+      if (this.state.amount) {
+        try {
+          await manager.store.accounts.transact({
+            account_id: this.state.account_id,
+            amount: this.state.amount,
+            memo: this.state.memo,
+            posted: this.state.posted,
+          })
+          this.setState({
+            amount: 0,
+            memo: '',
+          }, () => {
+            this.memo_elem.focus();
+          })
+        } catch(err) {
+          makeToast(err.toString(), {className: 'error'})
+        }
+      }
     }
   }
   render() {
-    let { account, hideAccount, appstate, showSelectCol } = this.props;
-    let account_cell;
-    let transact_label = sss('action.deposit', 'Deposit');
-    if (this.state.amount < 0) {
-      transact_label = sss('action.withdraw', 'Withdraw');
+    let { trans, account, noCheckbox, selected, hideAccount, onSelectChange, appstate } = this.props;
+    let checkbox;
+    if (!noCheckbox) {
+      checkbox = <input
+          type="checkbox"
+          checked={selected}
+          onChange={ev => {
+            onSelectChange(ev.target.checked);
+          }} />
     }
-    if (!hideAccount) {
-      // show accounts
-      if (account) {
-        account_cell = <td>
-          {account.name}
-        </td>
-      } else {
-        let value = this.state.account_id;
-        if (value === null) {
-          value = undefined;
-        }
-        account_cell = <td>
-          <select value={value} onChange={(ev) => {
-            this.setState({account_id: parseInt(ev.target.value) || null})
-          }}>
-            <option></option>
-            {Object.values<Account>(appstate.accounts).map(acc => {
-              return <option key={acc.id} value={acc.id}>{acc.name}</option>
-            })}
-          </select>
-        </td>
+    let source_icon;
+    if (trans && trans.fi_id) {
+      source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>{sss('sync-symbol help', "This symbol means the transaction came from an import/sync")}</Help>
+    }
+    if (this.state.editing) {
+      // editing
+      let deposit_withdrawl;
+      if (this.state.amount > 0) {
+        deposit_withdrawl = sss('Deposit');
+      } else if (this.state.amount < 0) {
+        deposit_withdrawl = sss('Withdrawl');
       }
+      let account_cell;
+      if (!hideAccount) {
+        // show accounts
+        if (account) {
+          account_cell = <td>
+            {account.name}
+          </td>
+        } else {
+          let value = this.state.account_id;
+          if (value === null) {
+            value = undefined;
+          }
+          account_cell = <td>
+            <select value={value} onChange={(ev) => {
+              this.setState({account_id: parseInt(ev.target.value) || null})
+            }}>
+              <option></option>
+              {Object.values<Account>(appstate.accounts).map(acc => {
+                return <option key={acc.id} value={acc.id}>{acc.name}</option>
+              })}
+            </select>
+          </td>
+        }
+      }
+      let postOnEnter = (ev) => {
+        if (ev.key === 'Enter') {
+          this.doTransaction();
+        }
+      }
+      return (
+        <tr className="action-row">
+          <td></td>
+          <td>
+            <DateInput
+              value={this.state.posted}
+              onChange={(new_posting_date) => {
+                this.setState({posted: new_posting_date});
+              }} />
+          </td>
+          {account_cell}
+          <td>
+            <input
+              type="text"
+              value={this.state.memo}
+              onChange={(ev) => {
+                this.setState({memo: ev.target.value})
+              }}
+              onKeyDown={postOnEnter}
+              ref={(elem) => {
+                if (elem) {
+                  this.memo_elem = elem;  
+                }
+              }}
+            />
+          </td>
+          <td className="right">
+            <MoneyInput
+              value={this.state.amount}
+              onKeyDown={postOnEnter}
+              onChange={(amount) => {
+                this.setState({amount: amount})
+              }}
+            />
+          </td>
+          <td className="icon-wrap center">
+            <button
+              className="icon"
+              onClick={this.doTransaction}>
+                <span className="fa fa-check" /></button>
+          </td>
+          <td className="center">
+            {deposit_withdrawl}
+          </td>
+        </tr>
+        )
+    } else {
+      // viewing
+      return <tr>
+        <td>{checkbox}</td>
+        <td className="nobr">{source_icon}<Date value={trans.posted} /></td>
+        {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
+        <td>{trans.memo}</td>
+        <td className="right"><Money value={trans.amount} /></td>
+        <td className="icon-button-wrap">
+          <button className="icon show-on-row-hover"
+            onClick={() => {
+              this.setState({editing: true});
+            }}><span className="fa fa-pencil" /></button>
+        </td>
+        <td>
+          <Categorizer
+            transaction={trans}
+            appstate={appstate} />
+        </td>
+      </tr>  
     }
-    return (
-      <tr className="action-row">
-        {showSelectCol ? <td></td> : null}
-        <td>
-          <DateInput
-            value={this.state.posted}
-            onChange={(new_posting_date) => {
-              this.setState({posted: new_posting_date});
-            }} />
-        </td>
-        {account_cell}
-        <td>
-          <input
-            type="text"
-            value={this.state.memo}
-            onChange={(ev) => {
-              this.setState({memo: ev.target.value})
-            }}
-            ref={(elem) => {
-              if (elem) {
-                this.memo_elem = elem;  
-              }
-            }}
-          />
-        </td>
-        <td className="right">
-          <MoneyInput
-            value={this.state.amount}
-            onChange={(amount) => {
-              this.setState({amount: amount})
-            }}
-            ref={(elem) => {
-              if (elem) {
-                this.amount_elem = elem;
-              }
-            }}
-          />
-        </td>
-        <td className="center">
-          <button onClick={this.doTransaction}>{transact_label}</button>
-        </td>
-      </tr>
-      )
   }
 }
 

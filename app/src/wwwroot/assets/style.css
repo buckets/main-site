@@ -552,6 +552,14 @@ table tr.hover:hover th {
   background-color: var(--hover-highlight-color);
 }
 
+.show-on-row-hover {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+table tr:hover .show-on-row-hover {
+  opacity: 1;
+}
+
 table.summary {
   border-collapse: collapse;
 }

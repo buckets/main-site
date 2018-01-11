@@ -183,6 +183,39 @@ export class AccountStore {
     this.store.publishObject('update', account);
     return trans;
   }
+  async updateTransaction(trans_id:number, args:{
+    account_id?: number,
+    amount?: number,
+    memo?: string,
+    posted?: Timestamp,
+    fi_id?: string,
+  }):Promise<Transaction> {
+    let affected_account_ids = new Set<number>();
+    let existing = await this.store.getObject(Transaction, trans_id);
+
+    if (args.account_id !== undefined && existing.account_id !== args.account_id) {
+      affected_account_ids.add(existing.account_id);
+      affected_account_ids.add(args.account_id);
+    }
+    if (args.amount !== undefined && existing.amount !== args.amount) {
+      affected_account_ids.add(existing.account_id);
+      this.removeCategorization(trans_id);
+    }
+    let trans = await this.store.updateObject(Transaction, trans_id, {
+      account_id: args.account_id,
+      amount: args.amount,
+      memo: args.memo,
+      posted: args.posted ? ts2db(args.posted) : undefined,
+      fi_id: args.fi_id,
+    });
+
+    // publish affected accounts
+    await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
+      let account = await this.store.getObject(Account, account_id);
+      this.store.publishObject('update', account);
+    }));
+    return trans;
+  }
 
   async hasTransactions(account_id:number):Promise<boolean> {
     let rows = await this.store.query(`SELECT id FROM account_transaction
