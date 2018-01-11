@@ -11,6 +11,7 @@
 
   <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
+  <link rel="stylesheet" type="text/css" href="/static/buckets.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
   <meta name="description" content="{% trans %}Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.{% endtrans %}" />
   {% block extrahead %}{% endblock %}
@@ -107,6 +108,7 @@
   <script src="/static/js/vend/raven-2.3.0.min.js"></script>
 </head>
 <body>
+  {% include 'navbar.html' %}
   {% block header %}
   <div class="hero mini">
     <a href="{{ url_for('anon.index') }}"><img src="/static/img/logo.svg" border="0"/></a>
@@ -140,7 +142,6 @@
         <div><a href="{{ url_for('anon.gettingstarted') }}">{% trans %}Getting Started{% endtrans %}</a></div>
         <div><a href="{{ url_for('anon.buy') }}">{% trans %}Pricing{% endtrans %}</a></div>
         <div><a href="{{ url_for('anon.buy') }}">{% trans %}Buy{% endtrans %}</a></div>
-        <div><a href="https://blog.budgetwithbuckets.com">{% trans %}Blog{% endtrans %}</a></div>
         {%- if request.endpoint not in ['static'] -%}
         <div>
           <details>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-01-11 09:12-0700\n"
+"POT-Creation-Date: 2018-01-11 14:50-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,14 +69,14 @@ msgstr ""
 msgid "Private Family Budgeting App"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:12 buckets/web/templates/base.html:15
+#: buckets/web/templates/anon/index.html:12 buckets/web/templates/base.html:16
 msgid ""
 "Buckets is a private, personal finance app for family budgeting.  Track "
 "expenses, make savings goals, get out of debt all from the privacy of "
 "your own computer."
 msgstr ""
 
-#: buckets/web/templates/base.html:133
+#: buckets/web/templates/base.html:135
 msgid ""
 "Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
 "Haggard</a>"
@@ -84,19 +84,19 @@ msgstr ""
 
 #: buckets/web/templates/anon/gettingstarted.html:3
 #: buckets/web/templates/anon/gettingstarted.html:9
-#: buckets/web/templates/base.html:140
+#: buckets/web/templates/base.html:142
 msgid "Getting Started"
 msgstr ""
 
-#: buckets/web/templates/base.html:141
+#: buckets/web/templates/base.html:143
 msgid "Pricing"
 msgstr ""
 
-#: buckets/web/templates/base.html:142
+#: buckets/web/templates/base.html:144
 msgid "Buy"
 msgstr ""
 
-#: buckets/web/templates/base.html:143
+#: buckets/web/templates/base.html:145 buckets/web/templates/navbar.html:8
 msgid "Blog"
 msgstr ""
 
@@ -133,6 +133,10 @@ msgstr ""
 msgid ""
 "If you do email Matt (hello@budgetwithbuckets.com), include this chunk of"
 " information in your email:"
+msgstr ""
+
+#: buckets/web/templates/navbar.html:7
+msgid "Guide"
 msgstr ""
 
 #: buckets/web/templates/anon/bought.html:33
