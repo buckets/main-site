@@ -179,41 +179,43 @@ class Application extends React.Component<ApplicationProps, any> {
                       <name>
                         <Help icon={<span><span className="fa fa-tint" /> {sss('Rain')}</span>}>
                           <table>
-                            <tr>
-                              <td>{sss('Accounts')}</td>
-                              <td></td>
-                              <td className="right"><Money value={appstate.account_total_balance} /></td>
-                            </tr>
-                            <tr>
-                              <td>{sss('Buckets')}</td>
-                              <td>-</td>
-                              <td className="right"><Money value={appstate.bucket_total_balance} /></td>
-                            </tr>
-                            <tr>
-                              <td colSpan={3} className="total-line">
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>{sss('Rain')}</td>
-                              <td></td>
-                              <td className="right"><Money value={appstate.rain} /></td>
-                            </tr>
-                            <tr>
-                              <td colSpan={3}>
-                                {appstate.rain >= 0
-                                  ? sss('rain.help.pos', (abs_amount:JSX.Element) => {
-                                    return <span>
-                                    You have {abs_amount} left to put into buckets.
-                                    </span>
-                                  })(<Money value={Math.abs(appstate.rain)} />)
-                                  : sss('rain.help.neg', (abs_amount:JSX.Element) => {
-                                    return <span>
-                                    You have put {abs_amount} too much money into buckets.  If all transactions have been categorized this month, remove {abs_amount} from buckets of your choosing.
-                                    </span>
-                                  })(<Money value={Math.abs(appstate.rain)} />)
-                                }
-                              </td>
-                            </tr>
+                            <tbody>
+                              <tr>
+                                <td>{sss('Accounts')}</td>
+                                <td></td>
+                                <td className="right"><Money value={appstate.account_total_balance} /></td>
+                              </tr>
+                              <tr>
+                                <td>{sss('Buckets')}</td>
+                                <td>-</td>
+                                <td className="right"><Money value={appstate.bucket_total_balance} /></td>
+                              </tr>
+                              <tr>
+                                <td colSpan={3} className="total-line">
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>{sss('Rain')}</td>
+                                <td></td>
+                                <td className="right"><Money value={appstate.rain} /></td>
+                              </tr>
+                              <tr>
+                                <td colSpan={3}>
+                                  {appstate.rain >= 0
+                                    ? sss('rain.help.pos', (abs_amount:JSX.Element) => {
+                                      return <span>
+                                      You have {abs_amount} left to put into buckets.
+                                      </span>
+                                    })(<Money value={Math.abs(appstate.rain)} />)
+                                    : sss('rain.help.neg', (abs_amount:JSX.Element) => {
+                                      return <span>
+                                      You have put {abs_amount} too much money into buckets.  If all transactions have been categorized this month, remove {abs_amount} from buckets of your choosing.
+                                      </span>
+                                    })(<Money value={Math.abs(appstate.rain)} />)
+                                  }
+                                </td>
+                              </tr>
+                            </tbody>
                           </table>
                         </Help>
                       </name>

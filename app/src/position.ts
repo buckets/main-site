@@ -7,6 +7,13 @@ export interface IBounds {
   h: number;
 }
 
+export function screenSize():{h:number, w:number} {
+  return {
+    h: document.body.offsetHeight,
+    w: document.body.offsetWidth,
+  }
+}
+
 export function pageCoords(elem):{x:number,y:number} {
   let y = elem.offsetTop;
   let x = elem.offsetLeft;

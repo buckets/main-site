@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { pageCoords, dimensions } from './position'
+import { pageCoords, dimensions, screenSize } from './position'
 
 export class Help extends React.Component<{
   icon?:any;
@@ -37,8 +37,12 @@ export class Help extends React.Component<{
 export class TooltipDisplay extends React.Component<any,{
   showing: boolean;
   contents: any;
-  left: number;
-  top: number;
+  style: {
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
+  }
 }> {
   elem: HTMLElement = null;
   constructor(props) {
@@ -46,8 +50,10 @@ export class TooltipDisplay extends React.Component<any,{
     this.state = {
       showing: false,
       contents: '',
-      left: 0,
-      top: 0,
+      style: {
+        left: 0,
+        top: 0,  
+      },
     }
   }
   componentWillMount() {
@@ -61,10 +67,7 @@ export class TooltipDisplay extends React.Component<any,{
       className={cx('tooltip', {
         showing: this.state.showing,
       })}
-      style={{
-        top: this.state.top,
-        left: this.state.left,
-      }}
+      style={this.state.style}
       ref={(elem) => {
         if (elem) {
           this.elem = elem;
@@ -74,14 +77,31 @@ export class TooltipDisplay extends React.Component<any,{
 
   static display:TooltipDisplay;
   static show(element, contents) {
-    let anchor_coords = pageCoords(element);
-    let anchor_dims = dimensions(element);
+    const anchor_coords = pageCoords(element);
+    const anchor_dims = dimensions(element);
+    const page_dims = screenSize();
+
+    let style:any = {};
+    if (anchor_coords.x <= page_dims.w/2) {
+      // left side of screen
+      style.left = anchor_coords.x + anchor_dims.w;
+    } else {
+      // right side of screen
+      console.log('right');
+    }
+
+    if (anchor_coords.y <= page_dims.h/2) {
+      // top of screen
+      style.top = anchor_coords.y;
+    } else {
+      // bottom of screen
+      console.log('bottom');
+    }
 
     TooltipDisplay.display.setState({
       showing: true,
       contents: contents,
-      top: anchor_coords.y,
-      left: anchor_coords.x + anchor_dims.w,
+      style,
    })
   }
   static hide() {
