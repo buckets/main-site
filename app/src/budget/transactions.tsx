@@ -390,7 +390,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         <td className="nobr">{source_icon}<Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
-        <td className="right"><Money value={trans.amount} /></td>
+        <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
         <td className="icon-button-wrap">
           <button className="icon show-on-row-hover"
             onClick={() => {

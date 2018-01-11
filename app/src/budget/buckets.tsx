@@ -560,7 +560,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         <Money value={balance + pending} />
       </span>
     } else {
-      balance_el = <Money value={balance} />
+      balance_el = <Money value={balance} className="faint-cents" alwaysShowDecimal />
     }
     let computed = computeBucketData(bucket.kind, bucket, {
       today: posting_date,
@@ -616,7 +616,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td className="right">{balance_el}</td>
-      {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} noanimate /></td> : null }
+      {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
       <td className="left">
         <MoneyInput
           value={pending || null}
