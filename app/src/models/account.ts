@@ -1,6 +1,7 @@
 import {IObject, registerClass, IStore} from '../store';
 import {Timestamp, ts2db} from '../time';
 import {Balances, computeBalances} from './balances';
+import { INotable } from '../budget/notes'
 
 export class Failure extends Error {
 
@@ -12,13 +13,14 @@ export type GeneralCatType =
   | 'transfer';
 
 
-export class Account implements IObject {
+export class Account implements IObject, INotable {
   static type: string = 'account';
   id: number;
   created: string;
   readonly _type: string = Account.type;
   name: string;
   balance: number;
+  notes: string;
   import_balance: number;
   currency: string;
   closed: boolean;
@@ -30,10 +32,11 @@ export class Account implements IObject {
 }
 registerClass(Account);
 
-export class Transaction implements IObject {
+export class Transaction implements IObject, INotable {
   static type: string = 'account_transaction';
   id: number;
   created: string;
+  notes: string;
   posted: string;
   readonly _type: string = Transaction.type;
   account_id: number;

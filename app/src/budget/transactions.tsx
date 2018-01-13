@@ -14,6 +14,7 @@ import { current_file } from '../mainprocess/files'
 import { makeToast } from './toast'
 import { isNil } from '../util'
 import { findPotentialDupes } from './dupes'
+import { NoteMaker } from './notes'
 
 interface TransactionPageProps {
   appstate: AppState;
@@ -424,9 +425,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         )
     } else {
       // viewing
-      return <tr>
+      return <tr className="note-hover-trigger">
         <td>{checkbox}</td>
-        <td className="nobr">{source_icon}<Date value={trans.posted} /></td>
+        <td className="nobr"><NoteMaker obj={trans} />{source_icon}<Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>

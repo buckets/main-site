@@ -16,6 +16,7 @@ import { Help } from '../tooltip'
 import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
 import { isNil } from '../util'
+import { NoteMaker } from './notes'
 
 const NOGROUP = -1;
 
@@ -584,7 +585,7 @@ class BucketRow extends React.Component<BucketRowProps, {
       onDragOver={this.onDragOver}
       onDrop={this.onDrop}
       onDragLeave={this.onDragLeave}
-      className={cx({
+      className={cx('note-hover-trigger', {
         underDrag: this.state.underDrag,
         isDragging: this.state.isDragging,
         dropTopHalf: this.state.underDrag && this.state.dropHalf === 'top',
@@ -607,6 +608,9 @@ class BucketRow extends React.Component<BucketRowProps, {
           onChange={(val) => {
             manager.store.buckets.update(bucket.id, {color: val})
           }} />
+        <NoteMaker
+          obj={bucket}
+        />
         <DebouncedInput
           blendin
           value={bucket.name}
@@ -752,7 +756,7 @@ class GroupRow extends React.Component<{
         onDrop={this.onDrop}
         onDragLeave={this.onDragLeave}
         >
-      <tr className="group-row">
+      <tr className="group-row note-hover-trigger">
         <td className={cx(
           'nopad',
           'noborder', 
@@ -771,6 +775,7 @@ class GroupRow extends React.Component<{
           </div>
         </td>
         <td colSpan={100} className="group-name">
+        <NoteMaker obj={group} />
         <DebouncedInput
           blendin
           value={group.name}
@@ -1055,8 +1060,8 @@ class TransactionList extends React.Component<{
           account_name = appstate.accounts[account_id].name;
         }
       }
-      return <tr key={trans.id}>
-        <td className="nobr"><Date value={trans.posted} /></td>
+      return <tr key={trans.id} className="note-hover-trigger">
+        <td className="nobr"><NoteMaker obj={trans} /><Date value={trans.posted} /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
         {ending_balance === null ? null : <td className="right"><Money value={running_bal} /></td>}

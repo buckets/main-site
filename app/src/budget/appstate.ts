@@ -270,7 +270,9 @@ export class StateManager {
     this.appstate = new AppState();
     this.store = null;
     this.updated_trans_counter.done.on(count => {
-      makeToast(sss('toast.updated-trans', count => `Updated/created ${count} transactions`)(count));
+      if (count > 1) {
+        makeToast(sss('toast.updated-trans', count => `Updated/created ${count} transactions`)(count));  
+      }
     })
   }
   attach(store: IStore, file:IBudgetFile) {

@@ -58,9 +58,20 @@ export function debounceChange(func:(...args)=>any) {
   return _.debounce(func, 250, {leading: false, trailing: true});
 }
 
+/**
+ * Run mapper every time, but only call actor debounced-like
+ */
+export function debounceOnChange(mapper:Function, actor:Function) {
+  let debounced = _.debounce(actor, 250, {leading: false, trailing: true});
+  return (...args) => {
+    return debounced(mapper(...args));
+  }
+}
+
 
 interface DebouncedInputProps {
   value: any;
+  element?: string;
   onChange: (newval:any)=>void;
   blendin?: boolean;
   [k:string]: any;
@@ -91,15 +102,22 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
     this.props.onChange(this.state.value);
   })
   render() {
-    let { value, onChange, className, blendin, ...rest } = this.props;
+    let { element, value, onChange, className, blendin, ...rest } = this.props;
+    element = element || 'input'
     className = cx(className, {
       'ctx-matching-input': blendin,
     })
-    return <input
-      onChange={this.onChange}
-      value={this.state.value}
-      className={className}
-      {...rest} />
+    let props = Object.assign({
+      onChange: this.onChange,
+      value: this.state.value,
+      className: className,
+    }, rest)
+    return React.createElement(element, props)
+    // return <input
+    //   onChange={this.onChange}
+    //   value={this.state.value}
+    //   className={className}
+    //   {...rest} />
   }
 }
 

@@ -1367,3 +1367,51 @@ table.props th {
 .labels-on-hover g:hover text {
   opacity: 1;
 }
+
+
+.note-maker {
+  display: inline;
+}
+.note-maker.inline {
+  padding-left: .25rem;
+  padding-right: .5rem;
+}
+.note-maker .icon {
+  opacity: 0;
+}
+.note-hover-trigger:hover .icon {
+  opacity: 0.5;
+}
+.note-maker.has-note .icon {
+  opacity: 1;
+}
+.note-maker .icon:hover,
+.note-maker.showing .icon {
+  opacity: 1;
+}
+.note-maker .note-wrap {
+  display: inline;
+  position: relative;
+}
+.note-maker .note-inner {
+  z-index: 5;
+  position: absolute;
+  top: 1.25rem;
+  left: 0;
+  display: flex;
+}
+.note-maker .note-inner textarea {
+  border: none;
+  padding: 0.5rem;
+  min-height: 4rem;
+  min-width: 15rem;
+  margin: 0;
+  background-color: white;
+  border: 3px solid var(--lighter-grey);
+  box-shadow: 1px 1px 14px rgba(0,0,0,0.2);
+  border-radius: 3px;
+  outline: none;
+}
+.note-maker .note-inner textarea:focus {
+  border-color: var(--blue);
+}

@@ -13,6 +13,7 @@ import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
 import { Date } from '../time'
+import { NoteMaker } from './notes'
 
 function getImportBalance(account:Account, balance:number):number {
   return expectedBalance(account) - (account.balance - balance);
@@ -78,7 +79,8 @@ export class AccountList extends React.Component<AccountListProps,any> {
         </div>}>{sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click more for more information.')}</Help>
 
       }
-      return (<tr key={account.id}>
+      return (<tr key={account.id} className="note-hover-trigger">
+          <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
           <td><DebouncedInput
             blendin
             value={account.name}
@@ -94,6 +96,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
     return (<table className="ledger">
       <thead>
         <tr>
+          <th></th>
           <th>{sss('Account')}</th>
           <th>{sss('Balance')}</th>
           <th></th>

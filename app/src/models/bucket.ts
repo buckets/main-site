@@ -4,6 +4,7 @@ import { ensureLocalMoment, ts2db, Timestamp, Interval } from '../time'
 import { Balances, computeBalances } from './balances'
 import { rankBetween } from '../ranking'
 import { DEFAULT_COLORS } from '../color'
+import { INotable } from '../budget/notes'
 
 export type BucketKind =
   ''
@@ -12,13 +13,12 @@ export type BucketKind =
   | 'goal-date'
   | 'deposit-date';
 
-export class Bucket implements IObject {
+export class Bucket implements IObject, INotable {
   static type: string = 'bucket';
   id: number;
   created: string;
   readonly _type: string = Bucket.type;
   name: string;
-  notes: string;
   balance: number = 0;
   kicked: boolean;
   group_id: number;
@@ -29,6 +29,7 @@ export class Bucket implements IObject {
   goal: number;
   end_date: string;
   deposit: number;
+  notes: string;
 
   static fromdb(obj:Bucket) {
     // convert to boolean
@@ -38,7 +39,7 @@ export class Bucket implements IObject {
 }
 registerClass(Bucket);
 
-export class Transaction implements IObject {
+export class Transaction implements IObject, INotable {
   static type: string = 'bucket_transaction';
   id: number;
   created: string;
@@ -50,6 +51,7 @@ export class Transaction implements IObject {
   posted: string;
   account_trans_id: number;
   transfer: boolean;
+  notes: string;
 
   static fromdb(obj:Transaction) {
     // convert to boolean
@@ -59,13 +61,14 @@ export class Transaction implements IObject {
 }
 registerClass(Transaction);
 
-export class Group implements IObject {
+export class Group implements IObject, INotable {
   static type: string = 'bucket_group';
   id: number;
   created: string;
   readonly _type: string = Group.type;
   name: string;
   ranking: string;
+  notes: string;
 }
 registerClass(Group);
 
