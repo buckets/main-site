@@ -110,7 +110,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
             'amount',
             item => -ensureUTCMoment(item.posted).unix(),
             'account_id',
-            'id',
+            item => -item.id,
           ]}
         />
       </div>
@@ -177,7 +177,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
     sortFunc = sortFunc || [
       item => -ensureUTCMoment(item.posted).unix(),
       'account_id',
-      'id',
+      item => -item.id,
     ]
     let elems = _.sortBy(this.props.transactions, sortFunc)
     .map(trans => {
@@ -429,8 +429,8 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         <td className="nobr">{source_icon}<Date value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
-        <td className="right"><Money value={trans.amount} /></td>
-        {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} /></td> }
+        <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
+        {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} alwaysShowDecimal className="faint-cents" /></td> }
         <td className="icon-button-wrap">
           <button className="icon show-on-row-hover"
             onClick={() => {

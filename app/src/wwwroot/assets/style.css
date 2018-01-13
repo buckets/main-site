@@ -439,6 +439,11 @@ h2 {
   padding-top: 4%;
 }
 
+.money.faint-cents .decimal.zero,
+.money.faint-cents .cents.zero {
+  opacity: 0.1;
+}
+
 
 .incdeclabel {
   padding-left: .5rem;
