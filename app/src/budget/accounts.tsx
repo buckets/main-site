@@ -172,7 +172,7 @@ export class AccountView extends React.Component<AccountViewProps, {
         </p>
       </div>
     }
-    return (<div className="padded" key={account.id}>
+    return (<div className="padded flex-grow-2" key={account.id}>
       {closed_ribbon}
       <h1>
         <DebouncedInput
@@ -203,6 +203,7 @@ export class AccountView extends React.Component<AccountViewProps, {
         transactions={this.props.transactions}
         appstate={this.props.appstate}
         account={account}
+        ending_balance={balance}
         hideAccount
       />
 

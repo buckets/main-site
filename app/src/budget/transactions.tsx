@@ -140,11 +140,12 @@ interface TransactionListProps {
   hideAccount?: boolean;
   account?: Account;
   selected?: Set<number>;
+  ending_balance?: number;
   onSelectChange?: (selected:Set<number>)=>any;
 }
 export class TransactionList extends React.Component<TransactionListProps, {}> {
   render() {
-    let { appstate, account, selected, onSelectChange, noCreate } = this.props;
+    let { appstate, account, selected, onSelectChange, noCreate, ending_balance } = this.props;
     let hideAccount = this.props.hideAccount || false;
     let elems = _.sortBy(this.props.transactions, [
       item => -ensureUTCMoment(item.posted).unix(),
@@ -152,11 +153,17 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
       'id',
     ])
     .map(trans => {
+      let balance;
+      if (ending_balance !== undefined) {
+        balance = ending_balance;
+        ending_balance -= trans.amount;  
+      }
       return <TransRow
         key={trans.id}
         trans={trans}
         appstate={appstate}
-        selected={selected.has(trans.id)}
+        selected={selected && selected.has(trans.id)}
+        running_bal={balance}
         onSelectChange={checked => {
           let newset = new Set(selected)
           if (checked) {
@@ -180,6 +187,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           {hideAccount ? null : <th>{sss('Account')}</th>}
           <th style={{width: '40%'}}>{sss('Memo')}</th>
           <th>{sss('Amount')}</th>
+          {ending_balance !== undefined ? <th>{sss('Balance')}</th> : null}
           <th></th>
           <th>{sss('Category')}</th>
         </tr>
@@ -189,6 +197,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           account={account}
           appstate={appstate}
           hideAccount={hideAccount}
+          running_bal={ending_balance === undefined ? null : 1}
           noCheckbox
         />}
         {elems}
@@ -202,6 +211,7 @@ interface TransRowProps {
   appstate: AppState;
   trans?: Transaction;
   account?: Account;
+  running_bal?: number;
   hideAccount?: boolean;
   noCheckbox?: boolean;
   selected?: boolean;
@@ -286,7 +296,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     }
   }
   render() {
-    let { trans, account, noCheckbox, selected, hideAccount, onSelectChange, appstate } = this.props;
+    let { trans, account, noCheckbox, selected, hideAccount, running_bal, onSelectChange, appstate } = this.props;
     let checkbox;
     if (!noCheckbox) {
       checkbox = <input
@@ -372,6 +382,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               }}
             />
           </td>
+          { running_bal === null ? null : <td></td> }
           <td className="icon-wrap center">
             <button
               className="icon"
@@ -391,6 +402,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
+        {running_bal === undefined ? null : <td className="right"><Money value={running_bal} /></td> }
         <td className="icon-button-wrap">
           <button className="icon show-on-row-hover"
             onClick={() => {
