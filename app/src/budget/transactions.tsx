@@ -154,7 +154,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
     ])
     .map(trans => {
       let balance;
-      if (ending_balance !== undefined) {
+      if (ending_balance !== null) {
         balance = ending_balance;
         ending_balance -= trans.amount;  
       }
@@ -187,7 +187,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           {hideAccount ? null : <th>{sss('Account')}</th>}
           <th style={{width: '40%'}}>{sss('Memo')}</th>
           <th>{sss('Amount')}</th>
-          {ending_balance !== undefined ? <th>{sss('Balance')}</th> : null}
+          {ending_balance !== null ? <th>{sss('Balance')}</th> : null}
           <th></th>
           <th>{sss('Category')}</th>
         </tr>
@@ -197,7 +197,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           account={account}
           appstate={appstate}
           hideAccount={hideAccount}
-          running_bal={ending_balance === undefined ? null : 1}
+          running_bal={ending_balance === null ? null : 1}
           noCheckbox
         />}
         {elems}

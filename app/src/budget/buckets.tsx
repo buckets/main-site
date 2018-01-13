@@ -1021,10 +1021,11 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               />
             </h1>
             <div>{sss('Balance:')} <Money value={balance} /></div>
-            <div>{sss('Rainfall:')} <Money value={rainfall} /></div>
+            <div>{sss('Rainfall this month:')} <Money value={rainfall} /></div>
             <hr/>
             <TransactionList
               transactions={transactions}
+              ending_balance={balance}
               appstate={appstate} />
           </div>
         </div>
@@ -1036,10 +1037,16 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
 class TransactionList extends React.Component<{
   transactions: Transaction[];
   appstate: AppState;
+  ending_balance: number;
 }, {}> {
   render() {
-    let { transactions, appstate } = this.props;
+    let { transactions, appstate, ending_balance } = this.props;
     let rows = transactions.map(trans => {
+      let running_bal;
+      if (ending_balance !== null) {
+        running_bal = ending_balance;
+        ending_balance -= trans.amount;
+      }
       let account_name;
       if (trans.account_trans_id) {
         let account_id = appstate.transactions[trans.account_trans_id].account_id;
@@ -1050,7 +1057,8 @@ class TransactionList extends React.Component<{
       return <tr key={trans.id}>
         <td className="nobr"><Date value={trans.posted} /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
-        <td><Money value={trans.amount} /></td>
+        <td className="right"><Money value={trans.amount} /></td>
+        {ending_balance === null ? null : <td className="right"><Money value={running_bal} /></td>}
         <td className="center">
           <input
             type="checkbox"
@@ -1069,8 +1077,9 @@ class TransactionList extends React.Component<{
         <tr>
           <th>{sss('Posted')}</th>
           <th>{sss('Memo')}</th>
-          <th>{sss('Amount')}</th>
-          <th>{sss('noun.transfer', 'Transfer')} <Help>{sss('bucket.transfer.help', "A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.")}</Help></th>
+          <th className="right">{sss('Amount')}</th>
+          {ending_balance === null ? null : <th className="right">{sss('Balance')}</th> }
+          <th className="nobr">{sss('noun.transfer', 'Transfer')} <Help>{sss('bucket.transfer.help', "A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.")}</Help></th>
           <th>{sss('Misc')}</th>
         </tr>
       </thead>
