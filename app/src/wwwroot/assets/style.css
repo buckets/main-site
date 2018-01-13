@@ -272,6 +272,11 @@ hr.page {
 .padded {
   padding: 1rem;
 }
+.padded h2 {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 1rem;
+}
 .flex-grow-2 {
   flex-grow: 2;
 }
@@ -284,6 +289,7 @@ h1 {
 h2 {
   font-weight: 400;
   color: var(--darkblue);
+  background: var(--lightest-grey);
 }
 
 

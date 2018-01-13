@@ -13,6 +13,7 @@ import { sss } from '../i18n'
 import { current_file } from '../mainprocess/files'
 import { makeToast } from './toast'
 import { isNil } from '../util'
+import { findPotentialDupes } from './dupes'
 
 interface TransactionPageProps {
   appstate: AppState;
@@ -90,6 +91,30 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
         return `Delete selected (${size})`
       })(selected.size);
     }
+    let dupes = findPotentialDupes(transactions);
+    let dupe_list;
+    if (dupes.length) {
+      dupe_list = <div>
+        <h2>{sss('Possible Duplicates')}</h2>
+        <TransactionList
+          noCreate
+          appstate={appstate}
+          transactions={dupes}
+          selected={selected}
+          onSelectChange={selected => {
+            this.setState({
+              selected: new Set(selected),
+            })
+          }}
+          sortFunc={[
+            'amount',
+            item => -ensureUTCMoment(item.posted).unix(),
+            'account_id',
+            'id',
+          ]}
+        />
+      </div>
+    }
     return (
     <div className="rows">
       <div className="subheader">
@@ -127,6 +152,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
               })
             }}
           />
+          {dupe_list}
         </div>
       </div>
     </div>);
@@ -141,17 +167,19 @@ interface TransactionListProps {
   account?: Account;
   selected?: Set<number>;
   ending_balance?: number;
+  sortFunc?: Array<Function|string>;
   onSelectChange?: (selected:Set<number>)=>any;
 }
 export class TransactionList extends React.Component<TransactionListProps, {}> {
   render() {
-    let { appstate, account, selected, onSelectChange, noCreate, ending_balance } = this.props;
+    let { appstate, account, selected, onSelectChange, noCreate, ending_balance, sortFunc } = this.props;
     let hideAccount = this.props.hideAccount || false;
-    let elems = _.sortBy(this.props.transactions, [
+    sortFunc = sortFunc || [
       item => -ensureUTCMoment(item.posted).unix(),
       'account_id',
       'id',
-    ])
+    ]
+    let elems = _.sortBy(this.props.transactions, sortFunc)
     .map(trans => {
       let balance;
       if (!isNil(ending_balance)) {
