@@ -669,9 +669,13 @@ table.ledger .icon-button-wrap button.icon,
 .categorizer {
 
 }
+.categorizer select {
+  height: 1.5rem;
+}
 .categorizer .tag {
   display: inline-flex;
   justify-content: space-between;
+  align-items: center;
   background-color: var(--blue);
   color: white;
   border-radius: 2px;
@@ -686,7 +690,11 @@ table.ledger .icon-button-wrap button.icon,
 .categorizer .tag .amount {
   padding: .1rem .5rem .2rem;
   flex-grow: 1;
+  align-self: stretch;
   vertical-align: middle;
+  display: flex;
+  align-content: center;
+  justify-content: center;
   background-color: rgba(255,255,255,0.2);
 }
 .categorizer .general-tag {

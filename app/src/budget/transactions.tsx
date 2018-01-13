@@ -12,7 +12,7 @@ import { onKeys } from '../input'
 import { sss } from '../i18n'
 import { current_file } from '../mainprocess/files'
 import { makeToast } from './toast'
-
+import { isNil } from '../util'
 
 interface TransactionPageProps {
   appstate: AppState;
@@ -154,7 +154,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
     ])
     .map(trans => {
       let balance;
-      if (ending_balance !== null) {
+      if (!isNil(ending_balance)) {
         balance = ending_balance;
         ending_balance -= trans.amount;  
       }
@@ -187,7 +187,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           {hideAccount ? null : <th>{sss('Account')}</th>}
           <th style={{width: '40%'}}>{sss('Memo')}</th>
           <th>{sss('Amount')}</th>
-          {ending_balance !== null ? <th>{sss('Balance')}</th> : null}
+          {isNil(ending_balance) ? null : <th>{sss('Balance')}</th>}
           <th></th>
           <th>{sss('Category')}</th>
         </tr>
@@ -197,7 +197,7 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           account={account}
           appstate={appstate}
           hideAccount={hideAccount}
-          running_bal={ending_balance === null ? null : 1}
+          running_bal={isNil(ending_balance) ? null : 1}
           noCheckbox
         />}
         {elems}
@@ -402,7 +402,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
-        {running_bal === undefined ? null : <td className="right"><Money value={running_bal} /></td> }
+        {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} /></td> }
         <td className="icon-button-wrap">
           <button className="icon show-on-row-hover"
             onClick={() => {

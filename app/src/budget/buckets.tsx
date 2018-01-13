@@ -15,6 +15,7 @@ import { pageY } from '../position'
 import { Help } from '../tooltip'
 import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
+import { isNil } from '../util'
 
 const NOGROUP = -1;
 
@@ -1043,7 +1044,7 @@ class TransactionList extends React.Component<{
     let { transactions, appstate, ending_balance } = this.props;
     let rows = transactions.map(trans => {
       let running_bal;
-      if (ending_balance !== null) {
+      if (!isNil(ending_balance)) {
         running_bal = ending_balance;
         ending_balance -= trans.amount;
       }
