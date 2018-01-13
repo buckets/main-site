@@ -410,7 +410,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               }}
             />
           </td>
-          { running_bal === null ? null : <td></td> }
+          { isNil(running_bal) ? null : <td></td> }
           <td className="icon-wrap center">
             <button
               className="icon"
