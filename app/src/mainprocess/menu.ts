@@ -15,7 +15,9 @@ import { IS_DEBUG } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
 import { openDocs } from '../docs'
 
-export async function updateMenu(show_budget:boolean=false) {
+export async function updateMenu(args:{
+    budget?:boolean,
+  }={}) {
   let recent_files = await getRecentFiles();
   let FileMenu = {
     label: sss('File'),
@@ -363,7 +365,7 @@ export async function updateMenu(show_budget:boolean=false) {
     ViewMenu,
     WindowMenu,
   ]
-  if (show_budget) {
+  if (args.budget) {
     template.push(BudgetMenu);
   }
   if (!isRegistered()) {

@@ -184,7 +184,6 @@ span.experimental {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  overflow: auto;
 }
 .app .content .header {
   display: flex;
@@ -194,6 +193,7 @@ span.experimental {
   background-color: var(--lightest-grey);
   border-bottom: 1px solid var(--lighter-grey);;
   flex-shrink: 0;
+  min-width: 100%;
 }
 .os-windows .app .content .header {
   border-top: 1px solid var(--lighter-grey);
@@ -203,6 +203,7 @@ span.experimental {
   flex-basis: 1px;
   width: 100%;
   display: flex;
+  overflow: auto;
 }
 
 .rows {

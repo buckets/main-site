@@ -107,7 +107,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   } else {
-    updateMenu(false);
+    updateMenu();
   }
 });
 app.on('activate', () => {
@@ -142,12 +142,13 @@ app.on('browser-window-created', (ev, win) => {
   }
 })
 app.on('browser-window-focus', (ev, win) => {
-  if (win.webContents.getURL().startsWith('buckets://')) {
+  const url = URL.parse(win.webContents.getURL());
+  if (url.protocol === 'buckets:' && url.path === '/budget/index.html') {
     // budget window
-    updateMenu(true);
+    updateMenu({budget:true});
   } else {
     // non-budget window
-    updateMenu(false);
+    updateMenu();
   }
 })
 
