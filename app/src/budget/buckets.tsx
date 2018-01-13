@@ -791,7 +791,7 @@ class GroupRow extends React.Component<{
         <th className="right">{sss('Balance')}</th>
         {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</Help></th> : null}
         <th className="left">{sss('action.transact', 'Transact')}</th>
-        <th className="right"><span className="fa fa-tint"/> {sss('Rain')} <Help>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</Help></th>
+        <th className="right nobr"><span className="fa fa-tint"/> {sss('Rain')} <Help>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</Help></th>
         <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>
       </tr>

@@ -173,7 +173,7 @@ class Application extends React.Component<ApplicationProps, any> {
             <div className="app">
               <Navbar appstate={appstate} />
               <div className="content">
-                <header>
+                <div className="header">
                   <div className="totals">
                     <total>
                       <name>
@@ -254,7 +254,7 @@ class Application extends React.Component<ApplicationProps, any> {
                       />);
                     }} />
                   </div>
-                </header>
+                </div>
                 <div className="page">
                   <Switch>
                     <Route path="/accounts/closed">

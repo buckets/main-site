@@ -68,7 +68,6 @@ a:hover {
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
 }
 .app .nav {
   background-color: var(--darker-darkblue);
@@ -185,16 +184,18 @@ span.experimental {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 }
-.app .content header {
+.app .content .header {
   display: flex;
+  align-self: flex-start;
   align-items: center;
   justify-content: space-between;
   background-color: var(--lightest-grey);
   border-bottom: 1px solid var(--lighter-grey);;
   flex-shrink: 0;
 }
-.os-windows .app .content header {
+.os-windows .app .content .header {
   border-top: 1px solid var(--lighter-grey);
 }
 .app .content .page {
@@ -209,7 +210,6 @@ span.experimental {
   flex-basis: 1px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .subheader {
@@ -255,15 +255,12 @@ hr.page {
   align-items: stretch;
   justify-content: space-between;
   flex-grow: 1;
-  overflow-x: hidden;
 }
 .panes > * {
   flex-grow: 1;
   flex-shrink: 1;
   flex-basis: 1px;
   border-left: 1px solid var(--lightest-grey);
-  overflow-x: auto;
-  overflow-y: auto;
 }
 .panes > *:first-child {
   border: 0;
@@ -1345,7 +1342,6 @@ table.props th {
   position: relative;
   width: 100%;
   min-height: 1rem;
-  spadding-bottom: 100%;
   vertical-align: top;
   overflow: hidden;
 }
