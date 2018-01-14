@@ -22,18 +22,19 @@ catlinkified() {
 # Change body
 #---------------------------------------------------------------
 
+
 for changefile in $(listtype break); do
     echo "- **BACKWARD INCOMPATIBLE:** $(catlinkified $changefile)"
     echo
 done
 
-for changefile in $(listtype fix); do
-    echo "- **FIX:** $(catlinkified $changefile)"
+for changefile in $(listtype feature new); do
+    echo "- **NEW:** $(catlinkified $changefile)"
     echo
 done
 
-for changefile in $(listtype feature new); do
-    echo "- NEW: $(catlinkified $changefile)"
+for changefile in $(listtype fix); do
+    echo "- **FIX:** $(catlinkified $changefile)"
     echo
 done
 
