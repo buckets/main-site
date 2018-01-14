@@ -10,6 +10,7 @@ import { AccountsPage, ClosedAccountsPage } from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
 import {TransactionPage} from './transactions'
 import { ImportPage, SyncWidget } from './importpage'
+import { SearchPage } from './searchpage'
 import { ReportsPage } from './reports'
 import {Money} from '../money'
 import { MonthSelector } from '../input'
@@ -135,6 +136,7 @@ class Navbar extends React.Component<{
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected"><span>{sss('Import')}</span>{import_badge}</Link>
         </div>
         <div>
+          <Link relative to="/search" exactMatchClass="selected" matchClass="selected"><span><span className="fa fa-fw fa-search"></span> {sss('Search')}</span></Link>
           <SyncWidget appstate={appstate} />
           <a href="#" onClick={(ev) => {
             ev.preventDefault();
@@ -277,6 +279,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/import">
                       <ImportPage appstate={appstate} />
+                    </Route>
+                    <Route path="/search">
+                      <SearchPage appstate={appstate} />
                     </Route>
                   </Switch>
                 </div>

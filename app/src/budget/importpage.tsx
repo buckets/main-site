@@ -326,7 +326,7 @@ class BankMacroList extends React.Component<{
               <input
                 type="checkbox"
                 checked={macro.enabled}
-                onClick={(ev) => {
+                onChange={(ev) => {
                   manager.store.bankmacro.update(macro.id, {enabled: (ev.target as any).checked});
                 }}
               />
