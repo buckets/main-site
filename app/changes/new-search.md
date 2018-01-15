@@ -1,1 +1,0 @@
-There's now a search tab, for searching for transactions, accounts and buckets.  (Issue #30)

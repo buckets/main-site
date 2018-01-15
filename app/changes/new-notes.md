@@ -1,1 +1,0 @@
-Now you can add notes to accounts, buckets, transactions and groups.  (Issue #31)
