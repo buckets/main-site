@@ -175,9 +175,16 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
     log.warn(`Unexpected files/dirs in YNAB budget: ${filenames}`)
   }
 
-  const budget_dir = Path.resolve(path, ymeta.relativeDataFolderName, filenames.filter(x => x !== 'devices')[0])
-
-  const budget = await loadJSONFile<YNAB.Budget>(Path.resolve(budget_dir, 'Budget.yfull'));
+  let budget_files = filenames.filter(x => x !== 'devices')
+    .map(x => Path.resolve(path, ymeta.relativeDataFolderName, x, 'Budget.yfull'))
+    .filter(x => fs.existsSync(x))
+  if (budget_files.length > 1) {
+    log.info("More than one Budget.yfull found.  Choosing the first of:", budget_files)
+  } else if (budget_files.length !== 1) {
+    throw new Error("No Budget.yfull found");
+  }
+  
+  const budget = await loadJSONFile<YNAB.Budget>(budget_files[0]);
 
   let payees:{[k:string]: YNAB.Payee} = {};
   let yaccounts:{[k:string]: YNAB.Account} = {};
