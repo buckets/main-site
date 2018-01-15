@@ -173,7 +173,7 @@ def doit(no_publish):
     # close issues
     if yesno('Close issues ({0}) on GitHub?'.format(','.join(issue_numbers)), default=True):
         for issue_number in issue_numbers:
-            commentOnIssue(issue_number, 'RELEASE BOT: Included in v{0} release'.format(target_version))
+            commentOnIssue(issue_number, 'Included in v{0} release'.format(target_version))
             closeIssue(issue_number)
 
 
