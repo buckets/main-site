@@ -1,4 +1,10 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+### v0.25.1
+
+- **FIX:** Hopefully fix issue [#39](https://github.com/buckets/application/issues/39) so that importing from YNAB4 works.
+
+- **FIX:** Make month selector more resilient to different timezones.  (Issue [#40](https://github.com/buckets/application/issues/40))
+
 ## v0.25.0
 
 - **NEW:** Numbers in most tables are now always dollar-aligned with faded cents when it's an even dollar.
