@@ -4,7 +4,7 @@ import * as cx from 'classnames'
 import * as moment from 'moment'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
-import { ts2db, Timestamp, Date, ensureUTCMoment, PerMonth } from '../time'
+import { ts2db, Timestamp, Date, ensureLocalMoment, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
 import { onKeys, DebouncedInput, MonthSelector } from '../input'
@@ -376,22 +376,17 @@ class BucketKindDetails extends React.Component<{
   }
   targetDateRow() {
     let { bucket } = this.props;
-    let dt = ensureUTCMoment(bucket.end_date);
+    let dt = ensureLocalMoment(bucket.end_date);
     if (!dt || !dt.isValid()) {
-      dt = moment.utc();
+      dt = moment();
     }
-    let year = dt.year();
-    let mon = dt.month() + 1;
     return <tr key="end_date">
       <td>{sss('Target date:')}</td>
       <td>
         <MonthSelector
-          year={year}
-          month={mon}
-          onChange={(year, month) => {
-            let ms = ('0' + month);
-            let newmonth = moment(`${year}-${ms.substr(ms.length-2)}-01`);
-            manager.store.buckets.update(bucket.id, {end_date: ts2db(newmonth)})
+          date={dt}
+          onChange={newdate => {
+            manager.store.buckets.update(bucket.id, {end_date: ts2db(newdate)})
           }} />
       </td>
     </tr>

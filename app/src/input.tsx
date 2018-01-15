@@ -125,38 +125,42 @@ const LEFT_ARROW = '\u25c0'
 const RIGHT_ARROW = '\u25b6'
 
 interface MonthSelectorProps {
-  year: number;
-  month: number;
-  onChange: (year, month)=>void;
+  date: moment.Moment;
+  onChange: (date:moment.Moment)=>void;
   className?: string;
 }
-export class MonthSelector extends React.Component<MonthSelectorProps, any> {
+export class MonthSelector extends React.Component<MonthSelectorProps, {
+  date: moment.Moment;
+  year: string;
+}> {
   private minyear = 1900;
-  constructor(props) {
-    super(props)
+  constructor(props:MonthSelectorProps) {
+    super(props);
+    const date = props.date.clone().startOf('month');
     this.state = {
-      year: props.year,
-      month: props.month,
+      date: date,
+      year: date.year().toString(),
     }
   }
   componentWillReceiveProps(nextProps) {
+    const date = nextProps.date.clone().startOf('month');
     this.setState({
-      year: nextProps.year,
-      month: nextProps.month,
+      date: date,
+      year: date.year().toString(),
     })
   }
   render() {
     let { className } = this.props;
-    let months = moment.monthsShort();
-    let current_month = this.state.month - 1;
-    let options = months.map((name, idx) => {
+    let month_names = moment.monthsShort();
+    let current_month = this.state.date.month();
+    let options = month_names.map((name, idx) => {
       return <option key={idx} value={idx}>{name.toUpperCase()}</option>
     })
-    let cls = cx(`month-selector bg-${this.state.month}`, className);
+    let cls = cx(`month-selector bg-${current_month+1}`, className);
     return (<div className={cls}>
       <button onClick={this.increment(-1)}>{tx.langpack.dir === 'ltr' ? LEFT_ARROW : RIGHT_ARROW}</button>
       <select
-        className={`month color-${this.state.month}`}
+        className={`month color-${current_month+1}`}
         value={current_month}
         onChange={this.monthChanged}>
         {options}
@@ -170,25 +174,10 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
       <button onClick={this.increment(1)}>{tx.langpack.dir === 'ltr' ? RIGHT_ARROW : LEFT_ARROW}</button>
     </div>);
   }
-  increment(amount) {
-    return (ev) => {
-      let month = this.state.month + amount;
-      month--; // move to 0-based indexing
-      let year = this.state.year;
-      while (month < 0) {
-        month = 12 + month;
-        if (!isNaN(year)) {
-          year -= 1;  
-        }
-      }
-      while (month >= 12) {
-        month = month - 12;
-        if (!isNaN(year)) {
-          year += 1;
-        }
-      }
-      month++; // return to 1-based indexing
-      this.setDate(year, month);
+  increment(amount:number) {
+    return () => {
+      const new_date = this.state.date.clone().add(amount, 'months');
+      this.setDate(new_date);
     }
   }
   isValidYear(year):boolean {
@@ -199,24 +188,24 @@ export class MonthSelector extends React.Component<MonthSelectorProps, any> {
     }
   }
   monthChanged = (ev) => {
-    let new_month = parseInt(ev.target.value) + 1;
-    this.setDate(this.state.year, new_month);
+    const new_month = parseInt(ev.target.value);
+    const new_date = this.state.date.clone().month(new_month);
+    this.setDate(new_date);
   }
   yearChanged = (ev) => {
-    let new_year = parseInt(ev.target.value);
-    this.setDate(new_year, this.state.month);
+    const new_year = parseInt(ev.target.value);
+    this.setState({year: ev.target.value});
+    if (this.isValidYear(new_year)) {
+      const new_date = this.state.date.clone().year(new_year);
+      this.setDate(new_date);
+    }
   }
-  setDate(year:number, month:number) {
-    let newstate:any = {year, month};
-    if (isNaN(year)) {
-      newstate = {year:'', month};
-      this.setState(newstate);
-      return;
-    }
-    if (this.isValidYear(year)) {
-      this.props.onChange(year, month);
-    }
-    this.setState(newstate);
+  setDate(date:moment.Moment) {
+    this.props.onChange(date);
+    this.setState({
+      date,
+      year: date.year().toString(),
+    });
   }
 }
 

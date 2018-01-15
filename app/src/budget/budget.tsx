@@ -246,12 +246,12 @@ class Application extends React.Component<ApplicationProps, any> {
                   </div>
                   <div>
                     <WithRouting func={(routing) => {
+                      let date = moment().month(routing.params.month-1).year(routing.params.year).startOf('month');
                       return (<MonthSelector
                         className="big"
-                        month={routing.params.month}
-                        year={routing.params.year}
-                        onChange={(year, month) => {
-                          routing.setPath(`/y${year}m${month}${routing.rest}`);
+                        date={date}
+                        onChange={newdate => {
+                          routing.setPath(`/y${newdate.year()}m${newdate.month()+1}${routing.rest}`);
                         }}
                       />);
                     }} />
