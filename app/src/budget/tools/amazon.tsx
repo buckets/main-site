@@ -150,7 +150,6 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
         refunds.forEach(refund => {
           total += refund.refund_amount;
         })
-        console.log('refunds', refunds);
         let matching_transactions = [];
         return (<div className="record-list-item" key={order_id}>
             <h3>Refund Summary</h3>
@@ -213,7 +212,6 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
                     this.setState({
                       reportset,
                     })
-                    console.log('parse result', result);
                   });
                 }
               })
@@ -354,9 +352,7 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
     refunds: [],
   };
   for (const path of paths) {
-    console.log('path', path);
     const parsed = await parseCSVFile(path);
-    console.log('parsed', parsed);
     if (parsed.headers.indexOf('Refund Amount') !== -1) {
       // Refund
       ret.refunds = ret.refunds.concat(parsed.rows.map((row):Refund => {
@@ -438,11 +434,9 @@ async function parseCSVFile<T>(path:string):Promise<ParsedCSV<T>> {
   return new Promise<ParsedCSV<T>>((resolve, reject) => {
     let headers:string[] = [];
     csv.parse(guts, {columns: (header_row:string[]) => {
-      console.log('header_row', header_row);
       headers = header_row
       return header_row;
     }}, (err, data) => {
-      console.log('data', data);
       resolve({
         headers,
         rows: data as T[],
