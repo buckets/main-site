@@ -20,6 +20,7 @@ import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
 import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
+import { ToolsPage } from './tools/toolspage'
 
 import { manager, AppState } from './appstate'
 
@@ -133,6 +134,7 @@ class Navbar extends React.Component<{
             </div>
           </Route>
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected"><span>{sss('Import')}</span>{import_badge}</Link>
+          <Link relative to="/tools" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Tools')}</span></Link>
         </div>
         <div>
           <SyncWidget appstate={appstate} />
@@ -277,6 +279,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/import">
                       <ImportPage appstate={appstate} />
+                    </Route>
+                    <Route path="/tools">
+                      <ToolsPage appstate={appstate} />
                     </Route>
                   </Switch>
                 </div>
