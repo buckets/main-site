@@ -21,6 +21,7 @@ import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
 import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
+import { ToolsPage } from './tools/toolspage'
 
 import { manager, AppState } from './appstate'
 
@@ -134,6 +135,7 @@ class Navbar extends React.Component<{
             </div>
           </Route>
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected"><span>{sss('Import')}</span>{import_badge}</Link>
+          <Link relative to="/tools" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Tools')}</span></Link>
         </div>
         <div>
           <Link relative to="/search" exactMatchClass="selected" matchClass="selected"><span><span className="fa fa-fw fa-search"></span> {sss('Search')}</span></Link>
@@ -282,6 +284,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/search">
                       <SearchPage appstate={appstate} />
+                    </Route>
+                    <Route path="/tools">
+                      <ToolsPage appstate={appstate} />
                     </Route>
                   </Switch>
                 </div>

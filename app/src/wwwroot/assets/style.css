@@ -289,6 +289,9 @@ h2 {
   color: var(--darkblue);
   background: var(--lightest-grey);
 }
+h3:first-child {
+  margin-top: 0;
+}
 
 
 
@@ -503,6 +506,11 @@ a.back-button {
 
 table.full-width {
   width: 100%;
+}
+
+table.vertical-align-top th,
+table.vertical-align-top td {
+  vertical-align: top;
 }
 
 
@@ -1061,6 +1069,7 @@ table.props {
 table.props td,
 table.props th {
   border: 0;
+  text-align: left;
 }
 .goal-summary {
   display: flex;
@@ -1365,7 +1374,6 @@ table.props th {
   opacity: 1;
 }
 
-
 .note-maker {
   display: inline;
 }
@@ -1411,4 +1419,11 @@ table.props th {
 }
 .note-maker .note-inner textarea:focus {
   border-color: var(--blue);
+}
+
+.record-list-item {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--lighter-grey);
+  border-radius: 3px;
 }
