@@ -15,6 +15,15 @@ import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 
+import * as csv from 'csv'
+
+csv.parse("hello,how,are,you\na,12,14,15", {columns: (header_row:string[]) => {
+  console.log('header_row', header_row);
+  return header_row;
+}}, (err, data) => {
+  console.log('data', data);
+})
+
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;

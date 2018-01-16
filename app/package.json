@@ -19,6 +19,7 @@
   "dependencies": {
     "bluebird": "3.5.0",
     "classnames": "2.2.5",
+    "csv": "^2.0.0",
     "d3": "^4.10.0",
     "electron-is": "^2.4.0",
     "electron-log": "^2.2.7",
