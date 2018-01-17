@@ -75,6 +75,7 @@
   }
   .section.copyright {
     opacity: .5;
+    font-size: .7rem;
     color: white;
     text-align: center;
     flex-shrink: 0;
@@ -176,7 +177,7 @@
       <div class="label" data-translate>Recently used</div>
     </div>
     <div class="section copyright">
-      <span class="fa fa-copyright"></span> Buckets, LLC
+      <span id="version"></span> <span class="fa fa-copyright"></span> Buckets, LLC
     </div>
   </div>
   <script>
@@ -210,6 +211,7 @@
   document.getElementById('open-file-dialog').addEventListener('click', () => {
     openBudgetFileDialog();
   })
+  document.getElementById('version').innerHTML = `v${remote.app.getVersion()}`;
   
   let recent_list = document.getElementById('recent-list');
   getRecentFiles()

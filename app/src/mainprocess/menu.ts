@@ -274,29 +274,33 @@ export async function updateMenu(args:{
 
   let preMenus = [];
 
+  const about = {
+    role: 'about',
+    label: sss('About Buckets'),
+  }
+  const check_for_updates = {
+    label: sss('Check For Updates...'),
+    click() {
+      openUpdateWindow();
+    },
+  }
+  const preferences = {
+    label: sss('Preferences...'),
+    accelerator: 'CmdOrCtrl+,',
+    click() {
+      openPreferences();
+    }
+  }
+
   if (process.platform === 'darwin') {
     // Buckets Menu
     preMenus.push({
       label: app.getName(),
       submenu: [
-        {
-          role: 'about',
-          label: sss('About Buckets'),
-        },
-        {
-          label: sss('Check For Updates...'),
-          click() {
-            openUpdateWindow();
-          },
-        },
+        about,
+        check_for_updates,
         {type: 'separator'},
-        {
-          label: sss('Preferences...'),
-          accelerator: 'CmdOrCtrl+,',
-          click() {
-            openPreferences();
-          }
-        },
+        preferences,
         {type: 'separator'},
         {
           role: 'services', submenu: [],
@@ -357,6 +361,11 @@ export async function updateMenu(args:{
         label: sss('Bring All to Front'),
       }
     ]
+  } else {
+    // mac/linux
+    HelpMenu.submenu.unshift(about as any, check_for_updates, {type: 'separator'})
+    EditMenu.submenu.push({type: 'separator'})
+    EditMenu.submenu.push(preferences)
   }
   template = [
     ...preMenus,
