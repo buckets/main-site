@@ -1,1 +1,1 @@
-Fix a bug that prevented adding transactions in the account view.
+Fix a bug that prevented adding transactions in the account view.  (Issue #44)
