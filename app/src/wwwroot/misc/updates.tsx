@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ipcRenderer, remote } from 'electron'
+import { documentDimensions } from '../../position'
 
 import { sss, localizeThisPage } from '../../i18n'
 import { Renderer } from '../../budget/render'
@@ -8,7 +9,7 @@ import { IUpdateStatus, CURRENT_UPDATE_STATUS } from '../../mainprocess/updater'
 let STATUS:IUpdateStatus = CURRENT_UPDATE_STATUS;
 let renderer:Renderer = new Renderer();
 let current_window = remote.getCurrentWindow();
-const original_size = current_window.getContentSize();
+fitToContent();
 
 export async function start(base_element) {
   localizeThisPage();
@@ -24,8 +25,13 @@ export async function start(base_element) {
   })
 }
 
-function backToNormalSize() {
-  current_window.setContentSize(original_size[0], original_size[1]);
+function fitToContent() {
+  setTimeout(() => {
+    let dims = documentDimensions();
+    const width = dims.w > 600 ? 600 : dims.w;
+    const height = dims.h > 350 ? 350 : dims.h;
+    current_window.setContentSize(width, height, true);
+  }, 0);
 }
 
 class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
@@ -57,7 +63,7 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
         </div>
         <div className="release-notes" dangerouslySetInnerHTML={{__html: releaseNotes}}></div>
       </div>
-      current_window.setContentSize(500, 350);
+      fitToContent();
     } else if (state === 'not-available') {
       guts = sss("You are running the latest version!");
     } else if (state === 'downloading') {
@@ -71,7 +77,7 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
           </div>
         </div>
       </div>
-      backToNormalSize();
+      fitToContent();
     } else if (state === 'downloaded') {
       guts = <div>
         <div>{sss('Update downloaded.')}</div>

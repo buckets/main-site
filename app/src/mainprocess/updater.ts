@@ -102,7 +102,7 @@ export function openUpdateWindow() {
     return;
   }
   win = new BrowserWindow({
-    frame: true,
+    frame: false,
     width: 350,
     height: 120,
     minWidth: 350,

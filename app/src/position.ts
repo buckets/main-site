@@ -50,6 +50,19 @@ function getScrollOffset(elem):{x:number, y:number} {
   return {x,y}
 }
 
+export function documentDimensions():{w:number, h:number} {
+  return Array.from(document.getElementsByTagName('*'))
+  .map(elem => {
+    return {w: elem.scrollWidth, h: elem.scrollHeight};
+  })
+  .reduce((prev, curr) => {
+    return {
+      w: Math.max(prev.w, curr.w),
+      h: Math.max(prev.h, curr.h),
+    }
+  })
+}
+
 export function getBounds(elem):IBounds {
   const { left, top, width, height } = elem.getBoundingClientRect();
   const scrolloffset = getScrollOffset(elem);
