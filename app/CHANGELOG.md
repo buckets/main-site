@@ -1,4 +1,10 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.26.0
+
+- **NEW:** Added Amazon reconciliation tool.  (Issue [#33](https://github.com/buckets/application/issues/33))
+
+- **FIX:** Database migrations are less flakey now.
+
 ### v0.25.1
 
 - **FIX:** Hopefully fix issue [#39](https://github.com/buckets/application/issues/39) so that importing from YNAB4 works.
