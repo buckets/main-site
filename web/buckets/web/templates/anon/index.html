@@ -126,7 +126,7 @@ img.main-shot {
           </a>
         </div>
         <div>
-          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v0.21.0/Buckets-{{ latest_version }}-x86_64.AppImage{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}-x86_64.AppImage{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
             <span class="fa fa-linux"></span>
             {% trans %}Linux{% endtrans %}
           </a>
