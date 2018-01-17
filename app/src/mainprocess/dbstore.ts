@@ -1,6 +1,9 @@
 import * as Path from 'path'
 import * as sqlite from 'sqlite'
 import * as log from 'electron-log'
+import * as fs from 'fs-extra-promise'
+
+import { PrefixLogger } from '../logging'
 
 import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass } from '../store'
 import {APP_ROOT} from './globals'
@@ -81,6 +84,78 @@ export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
 
+async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promise<any> {
+
+  let logger = new PrefixLogger('(dbup)');
+  await db.run(`CREATE TABLE IF NOT EXISTS _schema_version (
+  id INTEGER PRIMARY KEY,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  name TEXT UNIQUE
+)`)
+
+  // old style of migrations
+  let old_migrations = [];
+  try {
+    old_migrations = await db.all('SELECT id,name FROM migrations');
+    logger.info('Old migrations present');
+  } catch(err) {
+
+  }
+  if (old_migrations.length) {
+    logger.info('Switching to new migrations method');
+    // old style of migrations
+    for (const row of old_migrations) {
+      let name = `000${row.id}-${row.name}`.toLowerCase();
+      logger.info('Inserting', name);
+      await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name})
+    }
+    logger.info('Dropping migrations');
+    await db.run('DROP TABLE migrations')
+  }
+
+  const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
+
+  // apply patches as needed
+  const migrations = await fs.readdirAsync(migrations_path);
+  migrations.sort();
+  let encountered = new Set<string>();
+  for (const path of migrations) {
+    const name = path.split('.')[0].toLowerCase();
+    if (encountered.has(name)) {
+      throw new Error('Duplicate schema patch name not allowed');
+    }
+    encountered.add(name);
+    if (!applied.has(name)) {
+      logger.info('Applying patch', name);
+      let fullpath = Path.resolve(migrations_path, path);
+      const sql = (await fs.readFileAsync(fullpath)).toString();
+      try {
+        await db.run('BEGIN');
+        await db.run(sql);
+        await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
+        await db.run('COMMIT');
+      } catch(err) {
+        logger.error('Error while running patch', name);
+        await db.run('ROLLBACK');
+
+        // hold over from prior flakey migrations
+        if (name === '0007-notes' && err.toString().indexOf('duplicate column name: notes') !== -1) {
+          // we'll pretend it succeeded
+          await db.run('BEGIN');
+          await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
+          await db.run('COMMIT');
+          logger.info('Pretending to have succeeded');
+        } else {
+          // legitimate error
+          throw err;
+        }
+      }
+      logger.info('Applied patch', name);
+    }
+  }
+  logger.info('schema is in sync');
+}
+
 /**
  * The IStore for the main process
  */
@@ -105,9 +180,7 @@ export class DBStore implements IStore {
     // upgrade database
     try {
       log.info('Doing database migrations');
-      await this._db.migrate({
-        migrationsPath: Path.join(APP_ROOT, 'migrations'),
-      })
+      await upgradeDatabase(this._db, Path.join(APP_ROOT, 'migrations'));
     } catch(err) {
       log.error('Error during database migrations');
       log.error(err.stack);

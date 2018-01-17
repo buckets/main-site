@@ -1,5 +1,3 @@
--- Up
-
 CREATE TABLE bank_macro (
     id INTEGER PRIMARY KEY,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -10,5 +8,3 @@ CREATE TABLE bank_macro (
 );
 
 CREATE UNIQUE INDEX account_mapping_hash ON account_mapping(account_hash);
-
--- Down

@@ -1,5 +1,3 @@
--- Up
-
 -- -----------------------------------------------------
 -- Accounts
 -- -----------------------------------------------------
@@ -129,5 +127,3 @@ CREATE TABLE unknown_account (
     account_hash TEXT
 );
 CREATE UNIQUE INDEX unknown_account_hash ON unknown_account(account_hash);
-
--- Down
