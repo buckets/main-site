@@ -27,7 +27,6 @@ export async function start(base_element) {
 
 function fitToContent() {
   setTimeout(() => {
-    current_window.setContentSize(10, 10);
     let dims = documentDimensions();
     const width = dims.w > 600 ? 600 : dims.w;
     const height = dims.h > 350 ? 350 : dims.h;
@@ -64,6 +63,7 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
         </div>
         <div className="release-notes" dangerouslySetInnerHTML={{__html: releaseNotes}}></div>
       </div>
+      fitToContent();
     } else if (state === 'not-available') {
       guts = sss("You are running the latest version!");
     } else if (state === 'downloading') {
@@ -87,7 +87,6 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
         </div>
       </div>
     }
-    fitToContent();
     return <div className="update-app">
       <div className="title">Buckets {current_version}</div>
       {error_el}
