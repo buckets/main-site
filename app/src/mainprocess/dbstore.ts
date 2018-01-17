@@ -128,12 +128,12 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
     if (!applied.has(name)) {
       logger.info('Applying patch', name);
       let fullpath = Path.resolve(migrations_path, path);
-      const sql = (await fs.readFileAsync(fullpath)).toString();
+      const fullsql = (await fs.readFileAsync(fullpath)).toString();
       try {
-        await db.run('BEGIN');
-        await db.run(sql);
+        await db.run('BEGIN EXCLUSIVE TRANSACTION');
+        await db.exec(fullsql);
         await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
-        await db.run('COMMIT');
+        await db.run('COMMIT TRANSACTION');
       } catch(err) {
         logger.error('Error while running patch', name);
         await db.run('ROLLBACK');

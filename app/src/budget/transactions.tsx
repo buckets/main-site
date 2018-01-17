@@ -284,10 +284,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       }
       return state;
     } else {
-      // No transaction; in edit mode
-      return {
+      // No transaction, so we're in edit mode by virtue of creating a transaction
+      let ret:Partial<TransRowState> = {
         editing: true,
-      };
+      }
+      if (props.account) {
+        ret.account_id = props.account.id;
+      }
+      return ret;
     }
   }
   doTransaction = async () => {
