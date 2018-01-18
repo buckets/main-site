@@ -105,7 +105,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
     logger.info('Switching to new migrations method');
     // old style of migrations
     for (const row of old_migrations) {
-      let name = `000${row.id}-${row.name}`.toLowerCase();
+      const name = `000${row.id}-${row.name}`.toLowerCase();
       logger.info('Inserting', name);
       await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name})
     }
@@ -114,9 +114,12 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
   }
 
   const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
+  logger.silly('Applied migrations:', applied)
 
   // apply patches as needed
+  logger.silly('migrations_path', migrations_path);
   const migrations = await fs.readdirAsync(migrations_path);
+  logger.silly('All migrations:', migrations);
   migrations.sort();
   let encountered = new Set<string>();
   for (const path of migrations) {
@@ -125,10 +128,22 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
       throw new Error('Duplicate schema patch name not allowed');
     }
     encountered.add(name);
-    if (!applied.has(name)) {
+    if (applied.has(name)) {
+      logger.debug('Patch already applied:', name);
+    } else {
       logger.info('Applying patch', name);
       let fullpath = Path.resolve(migrations_path, path);
-      const fullsql = (await fs.readFileAsync(fullpath)).toString();
+      logger.silly(name, 'patch fullpath', fullpath)
+      const fullsql = await new Promise<string>((resolve, reject) => {
+        fs.readFile(fullpath, 'utf-8', (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data.toString());
+          }
+        });
+      });
+      logger.silly(name, 'fullsql', fullsql);
       try {
         await db.run('BEGIN EXCLUSIVE TRANSACTION');
         await db.exec(fullsql);
@@ -138,13 +153,17 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
         logger.error('Error while running patch', name);
         await db.run('ROLLBACK');
 
+        const patch_num = Number(name.split('-')[0]);
+
         // hold over from prior flakey migrations
-        if (name === '0007-notes' && err.toString().indexOf('duplicate column name: notes') !== -1) {
+        if (patch_num <= 7 && (
+            err.toString().indexOf('duplicate column name') !== -1
+            || err.toString().indexOf('already exists') !== -1
+          )) {
           // we'll pretend it succeeded
-          await db.run('BEGIN');
           await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
-          await db.run('COMMIT');
-          logger.info('Pretending to have succeeded');
+          logger.warn(err.toString());
+          logger.info(name, 'Assuming patch was already applied');
         } else {
           // legitimate error
           throw err;

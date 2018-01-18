@@ -11,15 +11,16 @@ import * as moment from 'moment'
 import { startLocalizing } from '../i18n'
 import { updateMenu } from './menu'
 import { BudgetFile } from './files'
-import { APP_ROOT } from './globals'
+import { APP_ROOT, IS_DEBUG } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 
 autoUpdater.logger = log;
-log.transports.file.level = 'info';
+log.transports.file.level = IS_DEBUG ? 'silly' : 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
-log.info(`App v${app.getVersion()} starting...`);
+log.info(`STARTING v${app.getVersion()}`);
+log.info(`Log level: ${log.transports.file.level}...`);
 log.info(`Local time: ${moment().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
 
@@ -100,7 +101,7 @@ app.on('ready', function() {
     while (openfirst.length) {
       BudgetFile.openFile(openfirst.shift());  
     }
-  } else if (process.env.DEBUG) {
+  } else if (process.env.BUCKETS_DEVMODE) {
     BudgetFile.openFile('/tmp/test.buckets', true);  
   } else {
     openWizard();
