@@ -1,4 +1,10 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+### v0.27.1
+
+- **NEW:** Added some options in the Help menu to allow for more verbose log reports.
+
+- **FIX:** Fix some database schema issues.
+
 ## v0.27.0
 
 - **FIX:** Check for updates, and version information is now available for Windows and Linux users.  (Issue [#43](https://github.com/buckets/application/issues/43))

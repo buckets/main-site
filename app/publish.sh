@@ -12,16 +12,16 @@ fi
 tsc
 
 # macOS
-if [ ! -z "$SKIP_MAC" ]; then
+if [ -z "$SKIP_MAC" ]; then
     node_modules/.bin/build --mac -p always
 fi
 
 # linux
-if [ ! -z "$SKIP_LINUX" ]; then
+if [ -z "$SKIP_LINUX" ]; then
     dev/linux/linux_build.sh publish
 fi
 
 # windows
-if [ ! -z "$SKIP_WIN" ]; then
+if [ -z "$SKIP_WIN" ]; then
     dev/win/winvm.sh publish "$(pwd)"
 fi

@@ -149,7 +149,7 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
         print('\nSKIPPING PUBLISH\n')
     else:
         # publish
-        env = {}
+        env = os.environ.copy()
         if skip_win:
             env['SKIP_WIN'] = 'yes'
         if skip_mac:
