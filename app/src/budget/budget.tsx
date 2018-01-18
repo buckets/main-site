@@ -1,5 +1,4 @@
 import { shell, ipcRenderer } from 'electron'
-import * as log from 'electron-log'
 import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
@@ -22,14 +21,19 @@ import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(budget.r)');
 
 import { manager, AppState } from './appstate'
 
 export function setPath(x:string) {
   window.location.hash = '#' + x;
+  log.silly(`window.location.hash = ${window.location.hash}`);
 }
 
 export async function start(base_element, room) {
+  log.silly(`local time: ${moment().format()} -- utc time: ${moment.utc().format()}`);
   // listen for uncaught exceptions
   window.addEventListener('error', (ev:ErrorEvent) => {
     log.error('Uncaught error:', ev.message);
@@ -69,7 +73,7 @@ export async function start(base_element, room) {
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
-    console.log('RENDERING');
+    log.silly('RENDERING');
     let path = window.location.hash.substr(1);
     return <Application
       path={path}
@@ -80,6 +84,7 @@ export async function start(base_element, room) {
   renderer.doUpdate();
 
   if (!window.location.hash) {
+    log.silly('No hash, going to #/accounts');
     window.location.hash = `#/accounts`;
   }
 }
@@ -249,10 +254,12 @@ class Application extends React.Component<ApplicationProps, any> {
                   <div>
                     <WithRouting func={(routing) => {
                       let date = moment().month(routing.params.month-1).year(routing.params.year).startOf('month');
+                      log.silly('rendering monthselector with date', date.format());
                       return (<MonthSelector
                         className="big"
                         date={date}
                         onChange={newdate => {
+                          log.silly('monthselector newdate', newdate.format());
                           routing.setPath(`/y${newdate.year()}m${newdate.month()+1}${routing.rest}`);
                         }}
                       />);
@@ -297,7 +304,9 @@ class Application extends React.Component<ApplicationProps, any> {
             let dft_path = routing.fullpath || '/accounts';
             let year = appstate.year || today.year();
             let month = appstate.month || today.month()+1
-            return (<Redirect to={`/y${year}m${month}${dft_path}`} />)
+            const dst = `/y${year}m${month}${dft_path}`;
+            log.silly(`Redirect to ${dst}`)
+            return (<Redirect to={dst} />)
           }} />
         </Switch>
       </Router>);

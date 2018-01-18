@@ -7,6 +7,7 @@ import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
+import * as moment from 'moment'
 import { startLocalizing } from '../i18n'
 import { updateMenu } from './menu'
 import { BudgetFile } from './files'
@@ -18,7 +19,9 @@ import { reportErrorToUser } from '../errors'
 autoUpdater.logger = log;
 log.transports.file.level = 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
-log.info('App starting...');
+log.info(`App v${app.getVersion()} starting...`);
+log.info(`Local time: ${moment().format()}`);
+log.info(`  UTC time: ${moment.utc().format()}`);
 
 app.on('ready', () => {
   startLocalizing();

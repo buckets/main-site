@@ -14,6 +14,7 @@ import { openPreferences } from './prefs'
 import { IS_DEBUG } from './globals'
 import { findYNAB4FileAndImport } from '../ynab'
 import { openDocs } from '../docs'
+import { setFileLogLevel, getFileLogLevel } from '../logging'
 
 export async function updateMenu(args:{
     budget?:boolean,
@@ -243,6 +244,35 @@ export async function updateMenu(args:{
           reportBug(`Language: ${langname}\n` + sss('It says:') + '\n' + sss('It should say:'));
         }
       },
+      {
+        label: sss('Logging Level'),
+        submenu: [
+          {
+            label: sss('Normal'),
+            type: 'radio',
+            checked: getFileLogLevel() === 'info',
+            click() {
+              setFileLogLevel('info');
+            }
+          },
+          {
+            label: sss('Debug'),
+            type: 'radio',
+            checked: getFileLogLevel() === 'debug',
+            click() {
+              setFileLogLevel('debug');
+            }
+          },
+          {
+            label: sss('Silly'),
+            type: 'radio',
+            checked: getFileLogLevel() === 'silly',
+            click() {
+              setFileLogLevel('silly');
+            }
+          }
+        ]
+      }
     ],
   };
 

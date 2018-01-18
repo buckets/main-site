@@ -29,11 +29,11 @@ class TranslationContext {
     if (packs[x]) {
       this._langpack = packs[x];
       this._locale = x;
-      log.info(`locale set to: ${x}`);
+      log.debug(`locale set to: ${x}`);
     } else if (packs[x.substr(0, 2)]) {
       this._locale = x.substr(0, 2);
       this._langpack = packs[this._locale];
-      log.info(`locale set to: ${this._locale}`);
+      log.debug(`locale set to: ${this._locale}`);
     } else {
       log.warn(`Not setting locale to unknown: ${x}`);
       was_set = false;
@@ -80,7 +80,7 @@ class TranslationContext {
     })
     if (!args.skipwatch) {
       this.localechanged.on(() => {
-        log.info('Re-localizing page', this.locale);
+        log.debug('Re-localizing page', this.locale);
         this.localizeThisPage({skipwatch:true});
       })
     }
