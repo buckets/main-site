@@ -118,7 +118,15 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
 
   // apply patches as needed
   logger.silly('migrations_path', migrations_path);
-  const migrations = await fs.readdirAsync(migrations_path);
+  const migrations = await new Promise<string[]>((resolve, reject) => {
+    fs.readdir(migrations_path, (err, files) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(files);
+      }
+    })
+  })
   logger.silly('All migrations:', migrations);
   migrations.sort();
   let encountered = new Set<string>();
