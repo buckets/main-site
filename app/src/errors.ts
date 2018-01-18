@@ -28,6 +28,13 @@ export function reportBug(body?:string) {
   // }
 }
 
+export function errorBody(err?:Error) {
+  return '\n\n---' + sss('bug-include-line', 'Write details above this line') + `---
+app: ${app.getVersion()} (node: ${process.version})
+os: ${process.platform} ${os.release()} ${process.arch}
+${err ? err.stack : ''}`;
+}
+
 export function reportErrorToUser(text?:string, args?:{
   title?:string,
   err?:Error,
@@ -52,10 +59,7 @@ export function reportErrorToUser(text?:string, args?:{
     } else if (indexClicked === 2) {
       // Report Bug
       if (args.err) {
-        let body = '\n\n---' + sss('bug-include-line', 'Include anything else you think might be helpful above this line') + `---
-app: ${app.getVersion()} (node: ${process.version})
-os: ${process.platform} ${os.release()} ${process.arch}
-${args.err.stack}`;
+        let body = errorBody(args.err);
         reportBug(body);
       } else {
         reportBug();  

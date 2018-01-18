@@ -25,10 +25,13 @@ export async function start(base_element) {
   })
 }
 
-function fitToContent(width:number) {
+function fitToContent(width?:number) {
   setTimeout(() => {
     let dims = documentDimensions();
     const height = dims.h > 350 ? 350 : dims.h;
+    if (!width) {
+      width = dims.w > 600 ? 600 : dims.w;
+    }
     current_window.setContentSize(width, height);
   }, 0);
 }
