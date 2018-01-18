@@ -20,6 +20,7 @@ body.singlepane {
   background-size: 72px;
   background-repeat: no-repeat;
   background-position: center 1rem;
+  border-right: 1px solid var(--lighter-grey);
 }
 .singlepane-handle img {
   height: 100%;
