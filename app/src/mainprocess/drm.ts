@@ -23,6 +23,8 @@ export function isRegistered():boolean {
   return ISREGISTERED;
 }
 
+
+
 export function openBuyPage() {
   shell.openExternal("https://www.budgetwithbuckets.com/buy");
 }

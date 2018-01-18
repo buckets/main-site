@@ -8,7 +8,7 @@ import {startFindInPage, findNext, findPrev} from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from './drm'
 import { getRecentFiles, PersistEvents } from './persistent'
 import { sss, tx } from '../i18n'
-import { reportBug, errorBody } from '../errors'
+import { openBugReporter } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
 import { IS_DEBUG } from './globals'
@@ -234,14 +234,15 @@ export async function updateMenu(args:{
       {
         label: sss('Report Bug...'),
         click() {
-          reportBug(errorBody());
+          openBugReporter();
         }
       },
       {
         label: sss('Report Translation Error...'),
         click() {
-          let langname = tx.langpack.name;
-          reportBug(`Language: ${langname}\n` + sss('It says:') + '\n' + sss('It should say:'));
+          openBugReporter({
+            template: sss('It says:') + '\n' + sss('It should say:'),
+          });
         }
       },
       {

@@ -5,36 +5,45 @@
   <link rel="stylesheet" type="text/css" href="../assets/fonts.css" />
   <link rel="stylesheet" type="text/css" href="../assets/style.css" />
   <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/font-awesome.min.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/singlepane.css" />
   <style type="text/css">
-    html {
-      height: 100%;
-    }
-    body {
-      padding: 1rem;
-      background-color: rgba(236,236,236,1.0);
-    }
     textarea {
       width: 100%;
-      height: 15rem;
+      height: 5rem;
     }
   </style>
   <style type="text/css">
   </style>
 </head>
-<body>
-  <p data-translate>
-    Please send an email with the following information:
-  </p>
-  <div>
-    <b data-translate>To:</b> hello@budgetwithbuckets.com
+<body class="singlepane">
+  <div class="singlepane-handle"></div>
+  <div class="singlepane-guts scrollinner">
+    <div class="padded">
+      <div>
+        <b data-translate>Your email address:</b> <input autofocus type="email" id="from_email">
+      </div>
+      <div>
+        <b data-translate>Message:</b>
+        <div><textarea id="message"></textarea></div>
+      </div>
+      <div>
+        <b data-translate>Other details:</b>
+        <div><textarea id="details" disabled></textarea></div>
+      </div>
+      <div>
+        <label><input type="checkbox" checked id="include_log" /> <span data-translate>Include log file</span></label>
+      </div>
+      <br/>
+      <div>
+        <button id="button" type="submit" data-translate>Send Report</button>
+      </div>
+      <br/>
+      <p data-translate>
+        If you wish to provide screenshots or other information, email bugs@budgetwithbuckets.com
+      </p>
+    </div>
   </div>
-  <div>
-    <b data-translate>Subject:</b> <span data-translate>Bug Report</span>
-  </div>
-  <div>
-    <b data-translate>Body:</b>
-    <div><textarea id="emailbody"></textarea></div>
-  </div>
+  <div id="singlepane-close"></div>
 <script>
 const {remote} = require('electron');
 const Path = require('path');
@@ -48,13 +57,68 @@ const req = function() {
     }
   }
 }();
+req('./src/wwwroot/misc/singlepane.js');
+const log = require('electron-log')
+const fs = require('fs-extra-promise')
+const { submitBugReport } = req('./src/errors.js');
 
 const { localizeThisPage } = req('./src/i18n');
 const querystring = req('querystring');
 localizeThisPage();
 let qs = querystring.parse(window.location.search.substr(1));
 
-document.getElementById('emailbody').value = qs.body;
+const theform = document.getElementById('theform');
+const email_el = document.getElementById('from_email');
+const message_el = document.getElementById('message');
+const details_el = document.getElementById('details');
+const log_el = document.getElementById('include_log');
+const button = document.getElementById('button');
+
+email_el.value = qs.email || '';
+message_el.value = qs.template;
+details_el.value = qs.nittygritty;
+const logfile_path = qs.logfile_path;
+
+if (qs.email) {
+  message_el.focus();
+}
+
+button.addEventListener('click', () => {
+  let attachments = [];
+  let p;
+  if (log_el.checked) {
+    p = new Promise((resolve, reject) => {
+      fs.readFile(logfile_path, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          attachments.push({
+            Name: "buckets.log",
+            Content: new Buffer(data).toString('base64'),
+            ContentType: 'text/plain',
+          })
+          resolve(null);
+        }
+      });
+    });
+  } else {
+    p = Promise.resolve(null);
+  }
+  p.then(() => {
+    let data = {
+      from_email: email_el.value,
+      body: `${message_el.value}\n\n---\n\n${qs.nittygritty}`,
+      attachments,
+    }
+    log.silly('submitting bug report', data.from_email, data.body);
+    return submitBugReport(data);
+  })
+  .then(() => {
+    remote.getCurrentWindow().close();
+  })
+})
+
+
 </script>
 </body>
 </html>

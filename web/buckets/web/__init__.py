@@ -177,6 +177,9 @@ def warning():
     logger.warning('Test warning', name='the test')
     return 'warning'
 
+from buckets.web import api
+f.register_blueprint(api.blue, url_prefix='/_api')
+
 from buckets.web import anon
 f.register_blueprint(anon.blue, url_prefix='/<lang:lang_code>')
 

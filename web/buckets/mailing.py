@@ -12,7 +12,7 @@ class PostmarkMailer(object):
     def __init__(self, api_key):
         self.api_key = api_key
 
-    def send(self, to_email, (from_name, from_email), subject, body=None, html=None):
+    def send(self, to_email, (from_name, from_email), subject, body=None, html=None, attachments=None, reply_to=None):
         if type(to_email) not in (tuple, list):
             to_email = [to_email]
         data = {
@@ -24,6 +24,10 @@ class PostmarkMailer(object):
             data['TextBody'] = body
         if html:
             data['HtmlBody'] = html
+        if attachments:
+            data['Attachments'] = attachments
+        if reply_to:
+            data['ReplyTo'] = reply_to
         return requests.post(
             self.api_root + '/email',
             headers={
@@ -83,9 +87,11 @@ class PostmarkMailer(object):
 
 class NoMailer(object):
 
-    def sendPlain(self, to_email, (from_name, from_email), subject, body=None, html=None):
-        logger.info('sendPlain', system='NoMailer', to_email=to_email, from_name=from_name, from_email=from_email, subject=subject, body=body, html=html)
+    def sendPlain(self, to_email, (from_name, from_email), subject, body=None, html=None, attachments=None, reply_to=None):
+        logger.info('sendPlain', system='NoMailer', to_email=to_email, from_name=from_name, from_email=from_email, subject=subject, body=body, html=html, attachments=len(attachments) if attachments else None, reply_to=reply_to)
         return 'No mail'
+
+    send = sendPlain
 
     def sendTemplate(self, template_name, to_email, data):
         """
@@ -106,3 +112,4 @@ class DebugMailer(object):
     def sendTemplate(self, *args, **kwargs):
         self.calls.append(('sendTemplate', args, kwargs))
 
+    send = sendPlain
