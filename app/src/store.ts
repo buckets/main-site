@@ -31,13 +31,6 @@ export function registerClass(cls:IObjectClass<any>) {
   TABLE2CLASS[cls.type] = cls;
 }
 
-/**
- *  Update/delete event for database-stored objects.
- */
-export class ObjectEvent<T extends IObject> {
-  constructor(readonly event:ObjectEventType, readonly obj:T) {
-  }
-}
 
 /**
   Store interface used in both main and renderer processes
@@ -75,6 +68,13 @@ export type ObjectEventType =
   'update'
   | 'delete';
 
+/**
+ *  Update/delete event for database-stored objects.
+ */
+export class ObjectEvent<T extends IObject> {
+  constructor(readonly event:ObjectEventType, readonly obj:T) {
+  }
+}
 
 /**
  *  A bus for budget-related events.

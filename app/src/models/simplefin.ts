@@ -6,7 +6,7 @@ import { ts2db, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { sss } from '../i18n'
-import { hashStrings } from '../importing'
+import { hashStrings } from '../util'
 import { UnknownAccount } from './account'
 import { PrefixLogger } from '../logging'
 

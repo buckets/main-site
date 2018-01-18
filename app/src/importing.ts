@@ -1,31 +1,24 @@
 import * as fs from 'fs-extra-promise'
 import * as moment from 'moment'
-import * as crypto from 'crypto'
 
 import { Transaction, AccountMapping } from './models/account'
 import { ofx2importable } from './ofx'
+import { csv2importable } from './csvimport'
 import { IStore } from './store'
+import { isNil, hashStrings } from './util'
 
-/**
- *  Hash a list of strings in a consistent way.
- */
-export function hashStrings(strings:string[]):string {
-  let ret = crypto.createHash('sha256');
-  strings.forEach(s => {
-    let hash = crypto.createHash('sha256');
-    hash.update(s)
-    ret.update(hash.digest('hex'))
-  });
-  return ret.digest('hex');
-}
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(importing)');
 
 export interface ImportableAccountSet {
   accounts: ImportableAccount[];
 }
 export interface ImportableAccount {
-  label: string;
+  label?: string;
   transactions: ImportableTrans[];
   currency?:string;
+  account_id?: number;
 }
 export interface ImportableTrans {
   amount:number;
@@ -57,9 +50,21 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
   try {
     set = await ofx2importable(data);
   } catch(err) {
-    // XXX in the future (when there are more supported file types)
-    // This will try the next file type instead of throwing.
-    throw err;
+    log.debug('Error reading file as OFX');
+    log.debug(err);
+  }
+
+  if (!set && path.toLowerCase().endsWith('.csv')) {
+    try {
+      set = await csv2importable(store, data);
+    } catch(err) {
+      log.debug('Error reading file as CSV');
+      log.debug(err);
+    }
+  }
+
+  if (!set) {
+    throw new Error('File type not recognized as importable.');
   }
   // The file has been parsed, can we match it up with 
 
@@ -67,8 +72,15 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
   let pendings:PendingImport[] = [];
 
   for (let account of set.accounts) {
-    let hash = hashStrings([account.label]);
-    let account_id = await store.accounts.hashToAccountId(hash);
+    let account_id;
+    let hash;
+    if (isNil(account.account_id)) {
+      hash = hashStrings([account.label]);
+      account_id = await store.accounts.hashToAccountId(hash);  
+    } else {
+      account_id = account.account_id;
+    }
+    
     if (account_id) {
       // matching account
       let results = await store.accounts.importTransactions(account.transactions.map(trans => {
@@ -82,7 +94,7 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
         })
       )
       imported = imported.concat(results.transactions);
-    } else {
+    } else if (hash) {
       // no matching account
       await store.accounts.getOrCreateUnknownAccount({
         description: account.label,

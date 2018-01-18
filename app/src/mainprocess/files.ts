@@ -21,6 +21,7 @@ import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
 import { SimpleFINSyncer } from '../models/simplefin'
 import { MacroSyncer } from '../models/bankmacro'
+import { CSVNeedsMapping, CSVHasMapping, CSVNeedsAccountAssigned, CSVHasAccountAssigned } from '../csvimport'
 
 const log = new PrefixLogger('(files)')
 
@@ -40,6 +41,10 @@ interface BudgetFileEvents {
   macro_stopped: {
     id: number;
   };
+  csv_needs_mapping: CSVNeedsMapping;
+  csv_has_mapping: CSVHasMapping;
+  csv_needs_account_assigned: CSVNeedsAccountAssigned;
+  csv_has_account_assigned: CSVHasAccountAssigned;
 }
 
 export interface IBudgetFile {
@@ -394,6 +399,7 @@ export class BudgetFile implements IBudgetFile {
       title: sss('Open Transaction File'),
       filters: [
         {name: 'OFX/QFX', extensions: ['ofx', 'qfx']},
+        {name: 'CSV', extensions: ['csv']},
       ],
     }, paths => {
       if (paths) {
@@ -523,7 +529,6 @@ if (electron_is.renderer()) {
   let hostname = window.location.hostname;
   current_file = new RendererBudgetFile(hostname);
 }
-
 
 //------------------------------------------------------------------------------
 // Global functions
