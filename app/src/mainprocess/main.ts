@@ -20,7 +20,7 @@ autoUpdater.logger = log;
 log.transports.file.level = IS_DEBUG ? 'silly' : 'info';
 log.transports.file.maxSize = 10 * 1024 * 1024;
 log.info(`STARTING v${app.getVersion()}`);
-log.info(`Log level: ${log.transports.file.level}...`);
+log.info(`Log level: ${log.transports.file.level}`);
 log.info(`Local time: ${moment().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
 
