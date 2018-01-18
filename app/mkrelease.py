@@ -109,8 +109,11 @@ def abort():
 
 
 @click.command()
+@click.option('--skip-mac', is_flag=True)
+@click.option('--skip-linux', is_flag=True)
+@click.option('--skip-win', is_flag=True)
 @click.option('--no-publish', is_flag=True)
-def doit(no_publish):
+def doit(no_publish, skip_mac, skip_linux, skip_win):
     # choose version
     package_version = getPackageVersion()
     guess_target_version = package_version
@@ -146,8 +149,15 @@ def doit(no_publish):
         print('\nSKIPPING PUBLISH\n')
     else:
         # publish
+        env = {}
+        if skip_win:
+            env['SKIP_WIN'] = 'yes'
+        if skip_mac:
+            env['SKIP_MAC'] = 'yes'
+        if skip_linux:
+            env['SKIP_LINUX'] = 'yes'
         print('Publishing draft release to GitHub...')
-        subprocess.check_call(['./publish.sh'])
+        subprocess.check_call(['./publish.sh'], env=env)
         print('[X] Done uploading to GitHub.')
 
     # publish CHANGELOG
