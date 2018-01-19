@@ -1,4 +1,8 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.28.0
+
+- **NEW:** Now there's a way to submit bugs from within Buckets. (Issue [#43](https://github.com/buckets/application/issues/43))
+
 ### v0.27.1
 
 - **NEW:** Added some options in the Help menu to allow for more verbose log reports.

@@ -11,6 +11,8 @@ if [ "$CMD" == "publish" ]; then
     ARGS="--env GH_TOKEN=$GH_TOKEN"
 fi
 
+docker-clean -i -c
+
 TAG="buckets/linuxbuilder"
 echo "BUILDING..."
 docker build --file dev/linux/linuxbuilder.Dockerfile -t $TAG .
