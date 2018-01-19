@@ -164,9 +164,20 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     subprocess.check_call(['dev/changelog/publishchangelog.py'])
     print('[X] Updated release notes on GitHub')
 
+    # Do some testing
+    print('Opening the app for testing...')
+    subprocess.check_call(['open', 'dist/mac/Buckets.app'])
+
+    if not yesno('Can you create a new budget?'):
+        abort()
+    if not yesno('Can you submit a bug report?'):
+        abort()
+    if not yesno('Can you open your own budget?'):
+        abort()
+
     # Manually publish it
     print('Go to https://github.com/buckets/application/releases to publish the draft')
-    if not yesno('Have you clicked the Publish button on GitHub?'):
+    if not yesno('Have you clicked the Publish button on GitHub ( https://github.com/buckets/application/releases )?'):
         abort()
 
     # tag it
