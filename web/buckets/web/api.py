@@ -19,6 +19,9 @@ def bugreport():
         bugid = json_data['bugid']
         attachments = json_data.get('attachments', None)
     except Exception as e:
+        logger.exception(exc_info=e)
+        sentry = current_app.extensions['sentry']
+        sentry.captureException()
         return jsonify(error='Error parsing input.'), 400
     try:
         current_app.mailer.send('bugs@budgetwithbuckets.com',

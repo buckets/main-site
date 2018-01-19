@@ -51,9 +51,9 @@ export async function submitBugReport(body:{
     ContentType: string;
   }>
 }) {
-  log.silly('submitting bug report')
+  log.debug('Submitting bug report to', SUBMIT_URL)
   try {
-    await rp({
+    let r = await rp({
       method: 'POST',
       uri: SUBMIT_URL,
       body: Object.assign({
@@ -61,7 +61,11 @@ export async function submitBugReport(body:{
       }, body),
       json: true,
     })
-  } catch(err) {
+    log.debug('Bug reported submitted', r);
+  } catch (err) {
+    log.error('Error submitting bug report');
+    log.error(err);
+    log.warn('Error submitting bug report', err);
     reportErrorToUser('Error submitting report :(  Would you mind sending an email to bugs@budgetwithbuckets.com instead?', {err: err})
   }
 }

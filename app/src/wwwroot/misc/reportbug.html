@@ -106,15 +106,19 @@ button.addEventListener('click', () => {
   }
   p.then(() => {
     let data = {
-      from_email: email_el.value,
+      from_email: email_el.value || '',
       body: `${message_el.value}\n\n---\n\n${qs.nittygritty}`,
       attachments,
     }
     log.silly('submitting bug report', data.from_email, data.body);
-    return submitBugReport(data);
-  })
-  .then(() => {
-    remote.getCurrentWindow().close();
+    submitBugReport(data)
+    .then(() => {
+      remote.getCurrentWindow().close();  
+    })
+    .catch(() => {
+      remote.getCurrentWindow().hide();
+    });
+    remote.getCurrentWindow().hide();
   })
 })
 
