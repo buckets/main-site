@@ -67,7 +67,7 @@ export async function start(base_element, room) {
   }, false);
 
   // watch for the main process to tell me where to go
-  ipcRenderer.on('buckets:goto', (path:string) => {
+  ipcRenderer.on('buckets:goto', (ev, path:string) => {
     setPath(path);
   })
 
@@ -106,10 +106,14 @@ class Navbar extends React.Component<{
     if (isRegistered()) {
       trial_version = null;
     }
-    let import_badge;
-    if (appstate.num_unknowns) {
-      import_badge = <div className="badge">{appstate.num_unknowns}</div>
-    }
+    
+    let import_badge_count = (
+      appstate.num_unknowns
+      + appstate.csvs_needing_mapping.length
+      + appstate.csvs_needing_account.length
+    );
+    let import_badge = import_badge_count ? <div className="badge">{import_badge_count}</div> : null;
+
     let transactions_badge;
     if (appstate.num_uncategorized_trans) {
       transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>

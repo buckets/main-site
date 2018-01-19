@@ -1,13 +1,15 @@
 import * as fs from 'fs-extra-promise'
-import * as moment from 'moment'
 
+import { sss } from './i18n'
 import { Transaction, AccountMapping } from './models/account'
 import { ofx2importable } from './ofx'
 import { csv2importable } from './csvimport'
 import { IStore } from './store'
 import { isNil, hashStrings } from './util'
-
+import { IBudgetFile } from './mainprocess/files'
+import { displayError } from './errors'
 import { PrefixLogger } from './logging'
+import { ensureLocalMoment, Timestamp } from './time'
 
 const log = new PrefixLogger('(importing)');
 
@@ -21,10 +23,10 @@ export interface ImportableAccount {
   account_id?: number;
 }
 export interface ImportableTrans {
-  amount:number;
-  memo:string;
-  posted:moment.Moment;
-  fi_id?:string;
+  amount: number;
+  memo: string;
+  posted: Timestamp;
+  fi_id?: string;
 }
 export interface PendingImport {
   account: ImportableAccount;
@@ -44,10 +46,14 @@ export interface ImportResult {
  *  can't be found, then creating an AccountMapping will
  *  automatically finish the import.
  */
-export async function importFile(store:IStore, path:string):Promise<ImportResult> {
+export async function importFile(store:IStore, bf:IBudgetFile, path:string):Promise<ImportResult> {
+  log.silly('importFile', path);
   let set:ImportableAccountSet;
+  
   let data = await fs.readFileAsync(path, {encoding:'utf8'});
+  log.silly('read data', data.length);
   try {
+    log.silly('Trying OFX/QFX parser');
     set = await ofx2importable(data);
   } catch(err) {
     log.debug('Error reading file as OFX');
@@ -55,8 +61,9 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
   }
 
   if (!set && path.toLowerCase().endsWith('.csv')) {
+    log.silly('Trying CSV parser');
     try {
-      set = await csv2importable(store, data);
+      set = await csv2importable(store, bf, data);
     } catch(err) {
       log.debug('Error reading file as CSV');
       log.debug(err);
@@ -64,7 +71,9 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
   }
 
   if (!set) {
-    throw new Error('File type not recognized as importable.');
+    log.warn('Unrecognized import file type', path);
+    displayError(sss('File type not recognized.', 'Import Failed'));
+    return;
   }
   // The file has been parsed, can we match it up with 
 
@@ -88,7 +97,7 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
             account_id,
             amount: trans.amount,
             memo: trans.memo,
-            posted: trans.posted,
+            posted: ensureLocalMoment(trans.posted),
             fi_id: trans.fi_id,
           }
         })

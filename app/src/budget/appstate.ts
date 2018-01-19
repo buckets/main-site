@@ -13,6 +13,7 @@ import { makeToast } from './toast'
 import { sss } from '../i18n'
 import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
+import { CSVNeedsMapping, CSVNeedsAccountAssigned } from '../csvimport'
 
 const log = new PrefixLogger('(appstate)')
 
@@ -67,6 +68,8 @@ export class AppState implements IComputedAppState {
   bank_macros: {
     [k: number]: BankMacro;
   } = {};
+  csvs_needing_mapping: CSVNeedsMapping[] = [];
+  csvs_needing_account: CSVNeedsAccountAssigned[] = [];
   running_bank_macros = new Set<number>();
   account_balances: Balances = {};
   bucket_balances: Balances = {};
@@ -312,6 +315,23 @@ export class StateManager {
     })
     file.room.events('macro_stopped').on(message => {
       this.appstate.running_bank_macros.delete(message.id);
+      this.signalChange();
+    })
+
+    file.room.events('csv_needs_mapping').on(obj => {
+      this.appstate.csvs_needing_mapping.push(obj);
+      this.signalChange();
+    });
+    file.room.events('csv_has_mapping').on(obj => {
+      this.appstate.csvs_needing_mapping = this.appstate.csvs_needing_mapping.filter(x => x.id !== obj.id);
+      this.signalChange();
+    })
+    file.room.events('csv_needs_account_assigned').on(obj => {
+      this.appstate.csvs_needing_account.push(obj);
+      this.signalChange();
+    })
+    file.room.events('csv_has_account_assigned').on(obj => {
+      this.appstate.csvs_needing_account = this.appstate.csvs_needing_account.filter(x => x.id !== obj.id);
       this.signalChange();
     })
   }

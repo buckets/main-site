@@ -386,7 +386,7 @@ export class BudgetFile implements IBudgetFile {
 
   async importFile(path:string):Promise<ImportResult> {
     try {
-      return await importFile(this.store, path);  
+      return await importFile(this.store, this, path);  
     } catch(err) {
       reportErrorToUser("Error importing file");
       log.error(`Error importing file: ${path}`);

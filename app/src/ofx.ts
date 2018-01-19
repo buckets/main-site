@@ -3,6 +3,9 @@ import * as moment from 'moment'
 import { parse as parseOFX } from 'ofx-js'
 import { decimal2cents } from './money'
 import { ImportableTrans, ImportableAccountSet } from './importing'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(ofx)')
 
 
 let formats = [
@@ -17,7 +20,11 @@ function parseOFXDate(x:string):moment.Moment {
 
 export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
   // XXX this does not handle the case where there are multiple accounts in a single file.
+  log.silly('Parsing OFX data', ofx.length);
   let parsed = await parseOFX(ofx);
+  if (parsed.header.OFXHEADER === undefined) {
+    throw new Error('Not a valid OFX file');
+  }
   let ret:ImportableAccountSet = {
     accounts: [],
   };
