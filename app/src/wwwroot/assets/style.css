@@ -293,7 +293,9 @@ h3:first-child {
   margin-top: 0;
 }
 
-
+.instructions {
+  max-width: 40rem;
+}
 
 .month-selector {
   display: inline-flex;

@@ -11,7 +11,7 @@ import { ImportableAccountSet, ImportableTrans } from './importing'
 import { Account, CSVImportMapping } from './models/account'
 import { IStore } from './store'
 import { IBudgetFile, current_file } from './mainprocess/files'
-import { hashStrings, isNil } from './util'
+import { hashStrings } from './util'
 import { PrefixLogger } from './logging'
 import { makeToast } from './budget/toast'
 
@@ -47,11 +47,10 @@ export function csvFieldToCents(x:string) {
 }
 
 export interface CSVMapping {
-  amount: string;
-  memo: string;
-  posted: string;
+  fields: {
+    [field:string]: 'amount'|'memo'|'posted'|'fi_id';
+  }
   posted_format?: string;
-  fi_id?: string;
 }
 export interface CSVNeedsMapping {
   id: string;
@@ -103,15 +102,27 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string):
   const mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   log.silly(mapping);
   let hashcount = {};
+  let inverted_mapping = {
+    amount: [],
+    memo: [],
+    posted: [],
+    fi_id: [],
+  };
+  Object.keys(mapping.fields).sort().forEach(header => {
+    const val = mapping.fields[header];
+    inverted_mapping[val].push(header);
+  })
   const transactions = parsed.rows.map((row):ImportableTrans => {
-    const amount = csvFieldToCents(row[mapping.amount]);
-    const memo = row[mapping.memo];
-    const posted = serializeTimestamp(moment(row[mapping.posted], mapping.posted_format));
-    let fi_id;
-    if (mapping.fi_id) {
-      fi_id = row[mapping.fi_id];
+    const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
+    const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
+    log.silly('memo', inverted_mapping.memo, mapping.fields, memo);
+    const posted = serializeTimestamp(moment(row[inverted_mapping.posted[0]], mapping.posted_format));
+    let fi_id:string;
+    if (inverted_mapping.fi_id.length) {
+      fi_id = inverted_mapping.fi_id.map(key=>row[key]).join(' ')
     } else {
       // Generate an id based on transaction details
+      log.silly('hashing to make fi_id', amount.toString(), memo, posted);
       let rowhash = hashStrings([amount.toString(), memo, posted])
       
       // If there are dupes within a CSV, they should have different fi_ids
@@ -168,74 +179,72 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
     super(props);
     this.state = {
       mapping: {
-        amount: null,
-        memo: null,
-        posted: null,
+        fields: {},
         posted_format: null,
-        fi_id: null,
       }
     }
   }
   render() {
     let { obj } = this.props;
-    let inverse_mapping = {};
     let { mapping } = this.state;
-    Object.keys(mapping).forEach(key => {
-      let val = mapping[key];
-      if (!isNil(val)) {
-        inverse_mapping[val] = key;
-      }
-    })
+
+    let mapped_fields = Object.values(mapping.fields);
+    const mapping_acceptable = (
+      mapped_fields.indexOf('amount') !== -1
+      && mapped_fields.indexOf('memo') !== -1
+      && mapped_fields.filter(x=>x==='posted').length === 1
+      && mapping.posted_format
+    );
     return <div>
-      <button onClick={() => {
-        current_file.room.broadcast('csv_has_mapping', {
-          id: obj.id,
-          mapping: this.state.mapping,
-        })
-      }}>
-        {sss('Set mapping')}
-      </button>
+      <ol className="instructions">
+        <li>{sss('Identify the data each column contains using the drop downs below.')}</li>
+        <li>{sss('You must have at least one column each set to Amount, Memo and Date Posted.')}</li>
+        <li>{sss('For Date Posted, you must also choose the date format.')}</li>
+        <li>{sss('If multiple columns are selected for Amount, the first non-zero value will be used.  This is helpful if the CSV contains separate Credit and Debit columns.')}</li>
+        <li>{sss('Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.')}</li>
+        <li>{sss('Click the "Set mapping" to continue.')}</li>
+      </ol>
       <table className="ledger">
         <thead>
           <tr>
             {obj.parsed_data.headers.map(header => {
-              let value = inverse_mapping[header] || '' 
-              return <th key={header}>
+              let value = mapping.fields[header] || '';
+              return <th
+                  key={header}
+                  colSpan={value==='posted' ? 2 : 1 }>
                 <div>
                   <select
                     value={value}
                     onChange={ev => {
+                      let new_fields = Object.assign(mapping.fields, {
+                        [header]: ev.target.value,
+                      })
                       this.setState({mapping: Object.assign(mapping, {
-                        [ev.target.value]: header,
+                        fields: new_fields,
                       })})
                     }}
                   >
                     <option value=""></option>
                     <option value="amount">{sss('Amount')}</option>
                     <option value="memo">{sss('Memo')}</option>
-                    <option value="posted">{sss('Date')}</option>
-                    <option value="fi_id">{sss('ID')}</option>
+                    <option value="posted">{sss('Date Posted')}</option>
+                    <option value="fi_id">{sss('Unique ID')} {sss('(optional)')}</option>
                   </select>
                 </div>
                 {value === 'posted' ? <div>
                   <select
-                      value={mapping.posted_format}
+                      value={mapping.posted_format || ''}
                       onChange={ev => {
                         this.setState({mapping: Object.assign(mapping, {
                           posted_format: ev.target.value,
                         })})
                       }}>
-                    <option value="">---</option>
+                    <option value="">{sss('(date format)')}</option>
                     <option>YYYY-MM-DD</option>
                     <option>YYYY-DD-MM</option>
-                    
-                    <option>M/D/YYYY</option>
-                    <option>M/D/YY</option>
+
                     <option>MM/DD/YYYY</option>
                     <option>MM/DD/YY</option>
-
-                    <option>D/M/YYYY</option>
-                    <option>D/M/YY</option>
                     <option>DD/MM/YYYY</option>
                     <option>DD/MM/YY</option>
                     
@@ -244,10 +253,27 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                 </div> : null}
               </th>
             })}
+            <th>
+              <button
+                className="primary"
+                disabled={!mapping_acceptable}
+                onClick={() => {
+                  current_file.room.broadcast('csv_has_mapping', {
+                    id: obj.id,
+                    mapping: this.state.mapping,
+                  })
+                }}>
+                {sss('Set mapping')}
+              </button>
+            </th>
           </tr>
           <tr>
             {obj.parsed_data.headers.map(header => {
-              return <th key={header}>{header}</th>
+              let value = mapping.fields[header] || '' 
+              return <th
+                key={header}
+                colSpan={value === 'posted' ? 2 : 1}
+              >{header}</th>
             })}
           </tr>
         </thead>
@@ -255,7 +281,30 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
           {obj.parsed_data.rows.map((row, idx) => {
             return <tr key={idx}>
               {obj.parsed_data.headers.map(header => {
-                return <td key={header}>{row[header]}</td>
+                let value = mapping.fields[header] || '';
+                let extra_cell;
+                if (value === 'posted') {
+                  let datevalue;
+                  if (mapping.posted_format) {
+                    try {
+                      let dt = moment(row[header], mapping.posted_format);
+                      if (dt.isValid()) {
+                        datevalue = <Date value={dt} />  
+                      } else {
+                        datevalue = <span className="error">{sss('Invalid')}</span>
+                      }
+                    } catch(err) {
+                      datevalue = <span className="error">{sss('Invalid')}</span>
+                    }  
+                  }
+                  extra_cell = <td key={header+'formatted'} className="nobr">
+                    {datevalue}
+                  </td>
+                }
+                return [
+                  <td key={header}>{row[header]}</td>,
+                  extra_cell,
+                ]
               })}
             </tr>
           })}
@@ -285,58 +334,71 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
   render() {
     let { obj, accounts } = this.props;
     let { account_id, new_name } = this.state;
-    return <table className="ledger">
-      <thead>
-        <tr>
-          <th>{sss('Posted')}</th>
-          <th>{sss('Memo')}</th>
-          <th>{sss('Amount')}</th>
-          <th>
-            <select value={account_id || ''}
-              onChange={ev => {
-                let val = ev.target.value;
-                if (val === 'NEW') {
-                  this.setState({account_id: 'NEW'})
-                } else {
-                  this.setState({account_id: Number(ev.target.value)})
-                }
-              }}>
-              <option value="NEW">{sss('Create new account')}</option>
-              <option value=""></option>
-              {accounts.map(account => {
-                return <option value={account.id} key={account.id}>{account.name}</option>
-              })}
-            </select>
-          </th>
-          <th>
-            <button onClick={async () => {
-              if (account_id === 'NEW') {
-                if (!new_name) {
-                  makeToast(sss('Provide a name for the new account.'), {className:'error'})
-                  return;
-                }
-                let new_account = await manager.store.accounts.add(new_name);
-                account_id = new_account.id;
+    return <div>
+      <p className="instructions">
+        {sss('Select the account these transactions belong to:')}
+      </p>
+      <p>
+        <select
+          value={account_id || ''}
+          onChange={ev => {
+            let val = ev.target.value;
+            if (val === 'NEW') {
+              this.setState({account_id: 'NEW'})
+            } else {
+              this.setState({account_id: Number(ev.target.value)})
+            }
+          }}>
+          <option value="NEW">{sss('Create new account')}</option>
+          <option value=""></option>
+          {accounts.map(account => {
+            return <option value={account.id} key={account.id}>{account.name}</option>
+          })}
+        </select>
+        {account_id !== 'NEW' ? null : <input
+          type="text"
+          value={new_name}
+          placeholder={sss('Account name')}
+          onChange={ev => {
+            this.setState({new_name: ev.target.value});
+          }}/>}
+        <button
+          disabled={!account_id}
+          onClick={async () => {
+            if (account_id === 'NEW') {
+              if (!new_name) {
+                makeToast(sss('Provide a name for the new account.'), {className:'error'})
+                return;
               }
-              current_file.room.broadcast('csv_has_account_assigned', {
-                id: obj.id,
-                account_id,
-              })
-            }}>
-              {sss('Finish import')}
-            </button>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {obj.transactions.map((trans, idx) => {
-          return <tr key={idx}>
-            <td><Date value={trans.posted} /></td>
-            <td>{trans.memo}</td>
-            <td><Money value={trans.amount} /></td>
+              let new_account = await manager.store.accounts.add(new_name);
+              account_id = new_account.id;
+            }
+            current_file.room.broadcast('csv_has_account_assigned', {
+              id: obj.id,
+              account_id,
+            })
+          }}>
+          {sss('Finish import')}
+        </button>
+      </p>
+      <table className="ledger">
+        <thead>
+          <tr>
+            <th>{sss('Posted')}</th>
+            <th>{sss('Memo')}</th>
+            <th>{sss('Amount')}</th>
           </tr>
-        })}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {obj.transactions.map((trans, idx) => {
+            return <tr key={idx}>
+              <td><Date value={trans.posted} /></td>
+              <td>{trans.memo}</td>
+              <td><Money value={trans.amount} /></td>
+            </tr>
+          })}
+        </tbody>
+      </table>
+    </div>
   }
 }
