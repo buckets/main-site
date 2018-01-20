@@ -1,37 +1,32 @@
 import * as fs from 'fs-extra-promise'
-import * as moment from 'moment'
-import * as crypto from 'crypto'
 
+import { sss } from './i18n'
 import { Transaction, AccountMapping } from './models/account'
 import { ofx2importable } from './ofx'
+import { csv2importable } from './csvimport'
 import { IStore } from './store'
+import { isNil, hashStrings } from './util'
+import { IBudgetFile } from './mainprocess/files'
+import { displayError } from './errors'
+import { PrefixLogger } from './logging'
+import { ensureLocalMoment, Timestamp } from './time'
 
-/**
- *  Hash a list of strings in a consistent way.
- */
-export function hashStrings(strings:string[]):string {
-  let ret = crypto.createHash('sha256');
-  strings.forEach(s => {
-    let hash = crypto.createHash('sha256');
-    hash.update(s)
-    ret.update(hash.digest('hex'))
-  });
-  return ret.digest('hex');
-}
+const log = new PrefixLogger('(importing)');
 
 export interface ImportableAccountSet {
   accounts: ImportableAccount[];
 }
 export interface ImportableAccount {
-  label: string;
+  label?: string;
   transactions: ImportableTrans[];
   currency?:string;
+  account_id?: number;
 }
 export interface ImportableTrans {
-  amount:number;
-  memo:string;
-  posted:moment.Moment;
-  fi_id?:string;
+  amount: number;
+  memo: string;
+  posted: Timestamp;
+  fi_id?: string;
 }
 export interface PendingImport {
   account: ImportableAccount;
@@ -51,15 +46,34 @@ export interface ImportResult {
  *  can't be found, then creating an AccountMapping will
  *  automatically finish the import.
  */
-export async function importFile(store:IStore, path:string):Promise<ImportResult> {
+export async function importFile(store:IStore, bf:IBudgetFile, path:string):Promise<ImportResult> {
+  log.silly('importFile', path);
   let set:ImportableAccountSet;
+  
   let data = await fs.readFileAsync(path, {encoding:'utf8'});
+  log.silly('read data', data.length);
   try {
+    log.silly('Trying OFX/QFX parser');
     set = await ofx2importable(data);
   } catch(err) {
-    // XXX in the future (when there are more supported file types)
-    // This will try the next file type instead of throwing.
-    throw err;
+    log.debug('Error reading file as OFX');
+    log.debug(err);
+  }
+
+  if (!set && path.toLowerCase().endsWith('.csv')) {
+    log.silly('Trying CSV parser');
+    try {
+      set = await csv2importable(store, bf, data);
+    } catch(err) {
+      log.debug('Error reading file as CSV');
+      log.debug(err);
+    }
+  }
+
+  if (!set) {
+    log.warn('Unrecognized import file type', path);
+    displayError(sss('File type not recognized.', 'Import Failed'));
+    return;
   }
   // The file has been parsed, can we match it up with 
 
@@ -67,8 +81,15 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
   let pendings:PendingImport[] = [];
 
   for (let account of set.accounts) {
-    let hash = hashStrings([account.label]);
-    let account_id = await store.accounts.hashToAccountId(hash);
+    let account_id;
+    let hash;
+    if (isNil(account.account_id)) {
+      hash = hashStrings([account.label]);
+      account_id = await store.accounts.hashToAccountId(hash);  
+    } else {
+      account_id = account.account_id;
+    }
+    
     if (account_id) {
       // matching account
       let results = await store.accounts.importTransactions(account.transactions.map(trans => {
@@ -76,13 +97,13 @@ export async function importFile(store:IStore, path:string):Promise<ImportResult
             account_id,
             amount: trans.amount,
             memo: trans.memo,
-            posted: trans.posted,
+            posted: ensureLocalMoment(trans.posted),
             fi_id: trans.fi_id,
           }
         })
       )
       imported = imported.concat(results.transactions);
-    } else {
+    } else if (hash) {
       // no matching account
       await store.accounts.getOrCreateUnknownAccount({
         description: account.label,

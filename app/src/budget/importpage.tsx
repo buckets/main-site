@@ -12,6 +12,7 @@ import { DebouncedInput, Confirmer } from '../input'
 import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { setPath } from './budget'
+import { CSVMapper, CSVAssigner } from '../csvimport'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
@@ -143,6 +144,29 @@ export class ImportPage extends React.Component<{
       </div>
     }
 
+    let csvmappers;
+    if (appstate.csvs_needing_mapping.length) {
+      csvmappers = <div>
+        <h2>{sss('CSV Fields')}</h2>
+        {appstate.csvs_needing_mapping.map(csv => {
+          return <CSVMapper key={csv.id} obj={csv} />
+        })}
+      </div>
+    }
+
+    let csvassigners;
+    if (appstate.csvs_needing_account.length) {
+      csvassigners = <div>
+        <h2>{sss('CSV Account')}</h2>
+        {appstate.csvs_needing_account.map(csv => {
+          return <CSVAssigner
+            key={csv.id}
+            accounts={appstate.open_accounts}
+            obj={csv} />
+        })}
+      </div>
+    }
+
     return (
       <div className="rows">
         <div className="subheader">
@@ -170,6 +194,8 @@ export class ImportPage extends React.Component<{
         </div>
         <div className="padded section">
           
+          {csvassigners}
+          {csvmappers}
           <div className="connection-steps">{steps}</div>
           {unknown}
           {conns}

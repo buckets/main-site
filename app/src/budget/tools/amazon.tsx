@@ -1,16 +1,16 @@
 
 import { remote, shell } from 'electron'
 import * as React from 'react'
-import * as csv from 'csv'
 import * as querystring from 'querystring'
 import * as fs from 'fs-extra-promise'
 import { sss } from '../../i18n'
 import { AppState } from '../appstate'
 import { Interval } from '../../time'
-import { Money, decimal2cents } from '../../money'
+import { Money } from '../../money'
 import { TransactionList } from '../transactions'
 import { Transaction } from '../../models/account'
 import { makeToast } from '../toast'
+import { parseCSVStringWithHeader, csvFieldToCents } from '../../csvimport'
 
 
 interface AmazonPageProps {
@@ -340,11 +340,6 @@ interface Refund {
   refund_tax: number;
 }
 
-function tocents(x:string) {
-  let result = decimal2cents(x.replace(/[^0-9\.,]/g, ''));
-  return result;
-}
-
 async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
   let ret = {
     orders: [],
@@ -352,7 +347,8 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
     refunds: [],
   };
   for (const path of paths) {
-    const parsed = await parseCSVFile(path);
+    const guts = (await fs.readFileAsync(path)).toString();
+    const parsed = await parseCSVStringWithHeader(guts);
     if (parsed.headers.indexOf('Refund Amount') !== -1) {
       // Refund
       ret.refunds = ret.refunds.concat(parsed.rows.map((row):Refund => {
@@ -360,8 +356,8 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
           order_date: row['Order Date'],
           order_id: row['Order ID'],
           refund_date: row['Refund Date'],
-          refund_amount: tocents(row['Refund Amount']),
-          refund_tax: tocents(row['Refund Tax Amount']),
+          refund_amount: csvFieldToCents(row['Refund Amount']),
+          refund_tax: csvFieldToCents(row['Refund Tax Amount']),
         }
       }))
     } else if (parsed.headers.indexOf('Item Total') !== -1) {
@@ -372,12 +368,12 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
           order_id: row['Order ID'],
           title: row['Title'],
           asin_isbn: row['ASIN/ISBN'],
-          price_per_unit: tocents(row['Purchase Price Per Unit']),
+          price_per_unit: csvFieldToCents(row['Purchase Price Per Unit']),
           quantity: Number(row['Quantity']),
           shipment_date: row['Shipment Date'],
-          item_subtotal: tocents(row['Item Subtotal']),
-          item_subtotal_tax: tocents(row['Item Subtotal Tax']),
-          item_total: tocents(row['Item Total']),
+          item_subtotal: csvFieldToCents(row['Item Subtotal']),
+          item_subtotal_tax: csvFieldToCents(row['Item Subtotal Tax']),
+          item_total: csvFieldToCents(row['Item Total']),
         }
       }))
     } else if (parsed.headers.indexOf('Total Charged') !== -1) {
@@ -387,10 +383,10 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
           order_date: row['Order Date'],
           order_id: row['Order ID'],
           shipment_date: row['Shipment Date'],
-          subtotal: tocents(row['Subtotal']),
-          shipping_charge: tocents(row['Shipping Charge']),
-          tax_charged: tocents(row['Tax Charged']),
-          total_charged: tocents(row['Total Charged']),
+          subtotal: csvFieldToCents(row['Subtotal']),
+          shipping_charge: csvFieldToCents(row['Shipping Charge']),
+          tax_charged: csvFieldToCents(row['Tax Charged']),
+          total_charged: csvFieldToCents(row['Total Charged']),
         }
       }))
     } else {
@@ -425,22 +421,4 @@ function combineReportSets(a:ReportSet, b:ReportSet):ReportSet {
   }
 }
 
-interface ParsedCSV<T> {
-  headers: string[];
-  rows: T[];
-}
-async function parseCSVFile<T>(path:string):Promise<ParsedCSV<T>> {
-  const guts = await fs.readFileAsync(path)
-  return new Promise<ParsedCSV<T>>((resolve, reject) => {
-    let headers:string[] = [];
-    csv.parse(guts, {columns: (header_row:string[]) => {
-      headers = header_row
-      return header_row;
-    }}, (err, data) => {
-      resolve({
-        headers,
-        rows: data as T[],
-      })
-    })
-  })
-}
+

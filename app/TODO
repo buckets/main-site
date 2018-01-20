@@ -11,6 +11,7 @@ v1.0.0:
  ☐ Bug: Why do account balances get out of sync so often?
  ☐ Encryption: http://atom.github.io/node-keytar/
  ☐ Encrypt simplefin connection stuff
+ ☐ Let people ignore accounts instead of having to map them (like from OFX)
  ☐ Prompt to be added to newsletter
 
 Videos:

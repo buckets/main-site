@@ -69,6 +69,17 @@ export class AccountMapping implements IObject {
 }
 registerClass(AccountMapping);
 
+export class CSVImportMapping implements IObject {
+  static type: string = 'csv_import_mapping'
+  id: number;
+  created: string;
+  readonly _type: string = CSVImportMapping.type;
+
+  fingerprint_hash: string;
+  mapping_json: string;
+}
+registerClass(CSVImportMapping);
+
 
 export interface Category {
   bucket_id: number;
@@ -377,7 +388,28 @@ export class AccountStore {
     })
     await Promise.all(promises);
   }
-
+  async getCSVMapping(fingerprint:string) {
+    let rows = await this.store.query(`SELECT id FROM csv_import_mapping WHERE fingerprint_hash=$fingerprint`, {$fingerprint: fingerprint});
+    if (rows.length) {
+      return this.store.getObject(CSVImportMapping, rows[0].id);
+    } else {
+      return null;
+    }
+  }
+  async setCSVMapping(fingerprint:string, mapping:object) {
+    let obj = await this.getCSVMapping(fingerprint);
+    if (obj === null) {
+      // does not exist
+      return await this.store.createObject(CSVImportMapping, {
+        fingerprint_hash: fingerprint,
+        mapping_json: JSON.stringify(mapping),
+      })
+    } else {
+      return await this.store.updateObject(CSVImportMapping, obj.id, {
+        mapping_json: JSON.stringify(mapping),
+      })
+    }
+  }
 
   // asof is a UTC time
   async balances(asof?:Timestamp):Promise<Balances> {

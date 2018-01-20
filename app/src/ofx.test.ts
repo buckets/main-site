@@ -1,6 +1,7 @@
 import { test } from 'tap'
 import { ofx2importable } from './ofx'
 import * as moment from 'moment'
+import { ensureLocalMoment } from './time'
 
 
 test('sample1', async t => {
@@ -105,27 +106,27 @@ NEWFILEUID:NONE
   t.equal(t0.amount, 1990)
   t.equal(t0.memo, 'Credit Interest Paid')
   t.equal(t0.fi_id, '20120928.0')
-  t.equal(t0.posted.format(), moment.utc({y:2012,M:9-1,d:28}).format())
+  t.equal(ensureLocalMoment(t0.posted).format(), moment.utc({y:2012,M:9-1,d:28}).format())
 
   t.equal(t1.amount, -101)
   t.equal(t1.memo, 'Withholding Tax')
   t.equal(t1.fi_id, '20120928.1')
-  t.equal(t1.posted.format(), moment.utc({y:2012,M:9-1,d:28}).format())
+  t.equal(ensureLocalMoment(t1.posted).format(), moment.utc({y:2012,M:9-1,d:28}).format())
 
   t.equal(t2.amount, -10000)
   t.equal(t2.memo, 'Debit Transfer: Bike')
   t.equal(t2.fi_id, '20120907.0')
-  t.equal(t2.posted.format(), moment.utc({y:2012,M:9-1,d:7}).format())
+  t.equal(ensureLocalMoment(t2.posted).format(), moment.utc({y:2012,M:9-1,d:7}).format())
 
   t.equal(t3.amount, -7199)
   t.equal(t3.memo, 'Debit Transfer: Postage')
   t.equal(t3.fi_id, '201209071')
-  t.equal(t3.posted.format(), moment.utc({y:2012,M:9-1,d:7}).format())
+  t.equal(ensureLocalMoment(t3.posted).format(), moment.utc({y:2012,M:9-1,d:7}).format())
 
   t.equal(t4.amount, -2001)
   t.equal(t4.memo, 'Debit Transfer Party')
   t.equal(t4.fi_id, '20120104.6')
-  t.equal(t4.posted.format(), moment.utc({y:2012,M:1-1,d:4}).format())
+  t.equal(ensureLocalMoment(t4.posted).format(), moment.utc({y:2012,M:1-1,d:4}).format())
 })
 
 test('sample2', async t => {
@@ -210,7 +211,7 @@ NEWFILEUID:NONE
   t.equal(t0.amount, 17)
   t.equal(t0.memo, 'DIVIDEND EARNED FOR PERIOD OF 04/01/2016 THROUGH 04/30/2016 ANNUAL PERCENTAGE YIELD EARNED IS 0.10%')
   t.equal(t0.fi_id, '0000760')
-  t.equal(t0.posted.format(), moment.utc({y:2016, M:4-1, d:30, h:12}).format())
+  t.equal(ensureLocalMoment(t0.posted).format(), moment.utc({y:2016, M:4-1, d:30, h:12}).format())
 })
 
 test('sample3', async t => {
@@ -298,11 +299,11 @@ NEWFILEUID:NONE
   t.equal(t0.amount, -1299)
   t.equal(t0.memo, 'ETSY SELLER FEES')
   t.equal(t0.fi_id, '2016050124224436122105002709067')
-  t.equal(t0.posted.format(), moment.utc({y:2016, M:5-1, d:1, h:12}).format())
+  t.equal(ensureLocalMoment(t0.posted).format(), moment.utc({y:2016, M:5-1, d:1, h:12}).format())
 
   let t1 = transactions[1];
   t.equal(t1.amount, -3622)
   t.equal(t1.memo, 'BARNES & NOBLE #2626')
   t.equal(t1.fi_id, '2016050624445006126100312436287')
-  t.equal(t1.posted.format(), moment.utc({y:2016, M:5-1, d:6, h:12}).format())
+  t.equal(ensureLocalMoment(t1.posted).format(), moment.utc({y:2016, M:5-1, d:6, h:12}).format())
 })
