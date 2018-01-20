@@ -70,7 +70,7 @@ export class AccountMapping implements IObject {
 registerClass(AccountMapping);
 
 export class CSVImportMapping implements IObject {
-  static type: string = 'csvimportmapping'
+  static type: string = 'csv_import_mapping'
   id: number;
   created: string;
   readonly _type: string = CSVImportMapping.type;
@@ -389,7 +389,7 @@ export class AccountStore {
     await Promise.all(promises);
   }
   async getCSVMapping(fingerprint:string) {
-    let rows = await this.store.query(`SELECT id FROM csvimportmapping WHERE fingerprint_hash=$fingerprint`, {$fingerprint: fingerprint});
+    let rows = await this.store.query(`SELECT id FROM csv_import_mapping WHERE fingerprint_hash=$fingerprint`, {$fingerprint: fingerprint});
     if (rows.length) {
       return this.store.getObject(CSVImportMapping, rows[0].id);
     } else {
