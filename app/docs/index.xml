@@ -17,10 +17,9 @@
       <pubDate>Tue, 09 Jan 2018 11:36:13 -0700</pubDate>
       
       <guid>https://docs.budgetwithbuckets.com/fileformat/</guid>
-      <description>Buckets budget files are SQLite databases. The schema is mostly self-explanatory, but this document points out some things that aren&amp;rsquo;t.
- WARNING: The schema is not final and may change without warning in future versions of Buckets. 
-If you still have questions after reading this, feel free to chat with me.
-Concurrency It&amp;rsquo;s not a good idea to do data-manipulating operations (INSERT, UPDATE, DELETE, etc&amp;hellip;) on the same budget file from more than one process at a time.</description>
+      <description>NOTE: This article is intended for programmers who want to write programs that interface with budget files. You don&amp;rsquo;t need this if you just want to use the Buckets app. 
+Buckets budget files are SQLite databases. The schema is mostly self-explanatory, but this document points out some things that aren&amp;rsquo;t.
+ WARNING: The schema is not final and may change without warning in future versions of Buckets.</description>
     </item>
     
     <item>
@@ -29,8 +28,9 @@ Concurrency It&amp;rsquo;s not a good idea to do data-manipulating operations (I
       <pubDate>Tue, 09 Jan 2018 10:00:00 -0700</pubDate>
       
       <guid>https://docs.budgetwithbuckets.com/getting-started/2-method/</guid>
-      <description>Steps I&amp;rsquo;ve been using this Bucket method to budget my money since I was 15 years old. Turns out, it&amp;rsquo;s a variation of what&amp;rsquo;s called &amp;ldquo;Envelope Budgeting.&amp;rdquo; I didn&amp;rsquo;t invent this method. I don&amp;rsquo;t even consider it an invented thing. It just seems like a logical thing to do with money. You could do this with physical envelopes or the Buckets app.
-In essence, you do this every month:</description>
+      <description>I&amp;rsquo;ve been using this Bucket budgeting method since I was 15 years old. Turns out, it&amp;rsquo;s a variation of what&amp;rsquo;s called &amp;ldquo;Envelope Budgeting.&amp;rdquo; I didn&amp;rsquo;t invent this method. I don&amp;rsquo;t even consider it an invented thing. It just seems like a logical thing to do with money. You could do this with physical envelopes or the Buckets app.
+Steps In essence, you do this every month:
+ Get a bucket Make it rain!</description>
     </item>
     
     <item>

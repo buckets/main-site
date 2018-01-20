@@ -45,7 +45,9 @@
   line-height: 1.25rem;
   max-width: 30rem;
 }
-.main-body ul {
+.main-body ul,
+.main-body ol {
+  line-height: 1.25rem;
   max-width: 30rem;
 }
 
@@ -74,6 +76,12 @@ code {
 
 warning {
   background-color: rgba(243, 156, 18,0.5);
+  padding: 1rem;
+  margin: 1rem 0;
+  display: block;
+}
+notice {
+  background-color: rgba(52, 152, 219, 0.25);
   padding: 1rem;
   margin: 1rem 0;
   display: block;

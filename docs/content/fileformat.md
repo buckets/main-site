@@ -4,6 +4,10 @@ date: 2018-01-09T11:36:13-07:00
 draft: false
 ---
 
+<notice>
+**NOTE:** This article is intended for programmers who want to write programs that interface with budget files.  You don't need this if you just want to use the Buckets app.
+</notice>
+
 Buckets budget files are SQLite databases.  The schema is mostly self-explanatory, but this document points out some things that aren't.
 
 <warning>

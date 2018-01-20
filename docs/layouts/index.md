@@ -1,49 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta name="generator" content="Hugo 0.32.3" />
-  <title>Buckets Guide</title>
-  <link rel="stylesheet" type="text/css" href="/css/buckets.css" />
-  <link rel="stylesheet" type="text/css" href="/css/common.css" />
-</head>
-<body>
-  <div class="main-wrap">
-    <div class="main-nav">
-      <div class="logo-wrap">
-        <img class="logo" src="/img/logo.png" />
-      </div>
-      
+---
+title: "The Buckets Guide"
+date: 2018-01-19T10:00:00-07:00
+draft: false
+order: 1
+---
 
-
-  <a href="/getting-started/" class="subheading ">Getting Started</a>
-  <div class="sub">
-    
-      <a href="/getting-started/1-principles/" class="">Principles</a>
-    
-      <a href="/getting-started/2-method/" class="">Buckets Method</a>
-    
-  </div>
-
-
-
-  
-    <a href="/fileformat/" class="">File Format</a>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-    </div>
-    <div class="main-body">
+{{ define "main" }}
 
 <h1>The Buckets Guide</h1>
 
@@ -63,7 +25,4 @@
     This guide is available within the Buckets app as well as online at <a href="https://docs.budgetwithbuckets.com">docs.budgetwithbuckets.com</a>.  <strong>And,</strong> any articles you print out will be available to read on paper :)
 </p>
 
-</div>
-  </div>
-</body>
-</html>
+{{ end }}

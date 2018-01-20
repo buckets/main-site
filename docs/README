@@ -5,11 +5,12 @@
     
     hugo new posts/something.md
 
-- Server:
+- Server (for app/web versions):
     
-    hugo server -D
-    hugo server --theme buckets-trimmed -D
+    ./app-server.sh -D
+    ./web-server.sh -D
 
-- Build and embed
+- Build and embed into app/web
 
-    ./embed.sh
+    ./app-publish.sh
+    ./web-publish.sh

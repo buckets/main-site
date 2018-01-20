@@ -5,11 +5,9 @@ draft: false
 order: 2
 ---
 
-
+I've been using this Bucket budgeting method since I was 15 years old.  Turns out, it's a variation of what's called "Envelope Budgeting."  I didn't invent this method.  I don't even consider it an invented thing.  It just seems like a logical thing to do with money.  You could do this with physical envelopes or the Buckets app.
 
 ## Steps
-
-I've been using this Bucket method to budget my money since I was 15 years old.  Turns out, it's a variation of what's called "Envelope Budgeting."  I didn't invent this method.  I don't even consider it an invented thing.  It just seems like a logical thing to do with money.  You could do this with physical envelopes or the Buckets app.
 
 In essence, you do this every month:
 
