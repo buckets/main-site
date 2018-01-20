@@ -18,7 +18,7 @@ order: 1
 </p>
 
 <p>
-    A good first step would be to start with the <a href="./getting-started/1-principles">Getting Started</a> articles.
+    A good first step would be to start with the <a href="/getting-started/1-principles/">Getting Started</a> articles.
 </p>
 
 <p>
