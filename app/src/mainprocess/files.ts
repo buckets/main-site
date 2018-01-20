@@ -21,7 +21,7 @@ import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
 import { SimpleFINSyncer } from '../models/simplefin'
 import { MacroSyncer } from '../models/bankmacro'
-import { CSVNeedsMapping, CSVHasMapping, CSVNeedsAccountAssigned, CSVHasAccountAssigned } from '../csvimport'
+import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
 
 const log = new PrefixLogger('(files)')
 
@@ -42,9 +42,9 @@ interface BudgetFileEvents {
     id: number;
   };
   csv_needs_mapping: CSVNeedsMapping;
-  csv_has_mapping: CSVHasMapping;
+  csv_mapping_response: CSVMappingResponse;
   csv_needs_account_assigned: CSVNeedsAccountAssigned;
-  csv_has_account_assigned: CSVHasAccountAssigned;
+  csv_account_response: CSVAssignAccountResponse;
 }
 
 export interface IBudgetFile {

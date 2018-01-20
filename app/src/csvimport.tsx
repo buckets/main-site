@@ -17,7 +17,6 @@ import { makeToast } from './budget/toast'
 
 const log = new PrefixLogger('(csv)')
 
-
 interface ParsedCSV<T> {
   headers: string[];
   rows: T[];
@@ -55,8 +54,9 @@ export interface CSVMapping {
 export interface CSVNeedsMapping {
   id: string;
   parsed_data: ParsedCSV<any>;
+  current_mapping?: CSVMapping;
 }
-export interface CSVHasMapping {
+export interface CSVMappingResponse {
   id: string;
   mapping: CSVMapping;
 }
@@ -64,27 +64,30 @@ export interface CSVNeedsAccountAssigned {
   id: string;
   transactions: ImportableTrans[];
 }
-export interface CSVHasAccountAssigned {
+export interface CSVAssignAccountResponse {
   id: string;
   account_id: number;
+  redo_mapping?: boolean;
 }
 
-export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string):Promise<ImportableAccountSet> {
+export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, args:{
+  force_mapping?:boolean,
+} = {}):Promise<ImportableAccountSet> {
   log.silly('csv2importable', guts.length);
   const parsed = await parseCSVStringWithHeader(guts);
   const fingerprint = hashStrings(parsed.headers);
   log.silly('fingerprint', fingerprint);
   let csv_mapping = await store.accounts.getCSVMapping(fingerprint);
-  if (csv_mapping === null) {
+  if (csv_mapping === null || args.force_mapping) {
     // no current mapping
-    log.debug('no current mapping')
     let need:CSVNeedsMapping = {
       id: uuid(),
       parsed_data: parsed,
+      current_mapping: csv_mapping ? JSON.parse(csv_mapping.mapping_json) : undefined,
     };
     bf.room.broadcast('csv_needs_mapping', need);
     csv_mapping = await new Promise<CSVImportMapping>((resolve, reject) => {
-      bf.room.events('csv_has_mapping').onceSuccessfully(async message => {
+      bf.room.events('csv_mapping_response').onceSuccessfully(async message => {
         if (message.id === need.id) {
           // now there's a mapping
           let new_mapping = await store.accounts.setCSVMapping(fingerprint, message.mapping);
@@ -115,14 +118,12 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string):
   const transactions = parsed.rows.map((row):ImportableTrans => {
     const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
-    log.silly('memo', inverted_mapping.memo, mapping.fields, memo);
     const posted = serializeTimestamp(moment(row[inverted_mapping.posted[0]], mapping.posted_format));
     let fi_id:string;
     if (inverted_mapping.fi_id.length) {
       fi_id = inverted_mapping.fi_id.map(key=>row[key]).join(' ')
     } else {
       // Generate an id based on transaction details
-      log.silly('hashing to make fi_id', amount.toString(), memo, posted);
       let rowhash = hashStrings([amount.toString(), memo, posted])
       
       // If there are dupes within a CSV, they should have different fi_ids
@@ -148,16 +149,28 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string):
     transactions,
   }
   bf.room.broadcast('csv_needs_account_assigned', need);
-  log.debug('csv_needs_account_assigned', need.id);
-  const account_id = await new Promise<number>((resolve, reject) => {
-    bf.room.events('csv_has_account_assigned').onceSuccessfully(msg => {
+  log.silly('csv_needs_account_assigned', need.id);
+  const {account_id, redo_mapping} = await new Promise<CSVAssignAccountResponse>((resolve, reject) => {
+    bf.room.events('csv_account_response').onceSuccessfully(msg => {
       if (msg.id === need.id) {
-        resolve(msg.account_id);
+        resolve(msg);
         return true;
       }
       return false;
     })
   });
+  log.debug('csv_account_response', account_id, redo_mapping);
+
+  if (redo_mapping) {
+    // It's probably better to not do this recursively, but how many
+    // times are people going to recurse?  Famous last words? :)
+    log.debug('redoing mapping');
+    return await csv2importable(store, bf, guts, {force_mapping: true});
+  }
+
+  if (account_id === null) {
+    return null;
+  }
 
   return {
     accounts: [{
@@ -175,10 +188,10 @@ interface CSVMapperState {
   mapping: CSVMapping;
 }
 export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
-  constructor(props) {
+  constructor(props:CSVMapperProps) {
     super(props);
     this.state = {
-      mapping: {
+      mapping: props.obj.current_mapping || {
         fields: {},
         posted_format: null,
       }
@@ -258,7 +271,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                 className="primary"
                 disabled={!mapping_acceptable}
                 onClick={() => {
-                  current_file.room.broadcast('csv_has_mapping', {
+                  current_file.room.broadcast('csv_mapping_response', {
                     id: obj.id,
                     mapping: this.state.mapping,
                   })
@@ -336,7 +349,16 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
     let { account_id, new_name } = this.state;
     return <div>
       <p className="instructions">
-        {sss('Select the account these transactions belong to:')}
+        <span>{sss('Select the account these transactions belong to.')}</span> <span>{sss('edit.mapping', (onClick) => {
+          return <span>Or <a href="#" onClick={onClick}>edit the mapping.</a></span>
+        })((ev) => {
+          ev.preventDefault();
+          current_file.room.broadcast('csv_account_response', {
+            id: obj.id,
+            account_id: null,
+            redo_mapping: true,
+          })
+        })}</span>
       </p>
       <p>
         <select
@@ -373,7 +395,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
               let new_account = await manager.store.accounts.add(new_name);
               account_id = new_account.id;
             }
-            current_file.room.broadcast('csv_has_account_assigned', {
+            current_file.room.broadcast('csv_account_response', {
               id: obj.id,
               account_id,
             })

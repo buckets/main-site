@@ -322,7 +322,7 @@ export class StateManager {
       this.appstate.csvs_needing_mapping.push(obj);
       this.signalChange();
     });
-    file.room.events('csv_has_mapping').on(obj => {
+    file.room.events('csv_mapping_response').on(obj => {
       this.appstate.csvs_needing_mapping = this.appstate.csvs_needing_mapping.filter(x => x.id !== obj.id);
       this.signalChange();
     })
@@ -330,7 +330,7 @@ export class StateManager {
       this.appstate.csvs_needing_account.push(obj);
       this.signalChange();
     })
-    file.room.events('csv_has_account_assigned').on(obj => {
+    file.room.events('csv_account_response').on(obj => {
       this.appstate.csvs_needing_account = this.appstate.csvs_needing_account.filter(x => x.id !== obj.id);
       this.signalChange();
     })

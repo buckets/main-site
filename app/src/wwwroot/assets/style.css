@@ -55,6 +55,9 @@ button {
   text-align: center !important;
 }
 
+.error {
+  color: var(--red);
+}
 
 a {
   text-decoration: none;
