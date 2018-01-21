@@ -5,7 +5,7 @@ draft: false
 order: 2
 ---
 
-I've been using this Bucket budgeting method since I was 15 years old.  Turns out, it's a variation of what's called "Envelope Budgeting."  I didn't invent this method.  I don't even consider it an invented thing.  It just seems like a logical thing to do with money.  You could do this with physical envelopes or the Buckets app.
+The Buckets method is a variation of what's called "Envelope Budgeting."  I didn't invent this method.  I don't even consider it an invented thing.  It just seems like a logical thing to do with money.  You could do this with physical envelopes or the Buckets app.
 
 ## Steps
 
@@ -48,7 +48,7 @@ Then write down things you want to save for:
 
 Now make a bucket for each thing on your lists.
 
-A good rule of thumb is: if you know ahead of time how much an expense will be, make a separate bucket for it.  For instance, I know that my rent is $1000 per month.  Or, I know that $5000 in tuition will be due in September.
+A good rule of thumb is: if you know ahead of time how much an expense will be, make a separate bucket for it.  For instance, I know that my rent is $1000 per month, so I have a *Rent* bucket.  And I know that $5000 in tuition will be due in September so I make a *Tuition* bucket.
 
 ## 2. Make it rain!
 
@@ -66,24 +66,6 @@ Throughout the month, as you spend money, take it out of the corresponding bucke
 
 **At the end of the month**, move money between buckets so that none of the buckets have a negative balance.
 
-For instance, if this was how my buckets looked at the end of the month:
-
-| Bucket | Balance |
-|---|--:|
-| Groceries | -125 |
-| Eating out | -30 |
-| Gas | 5 |
-| Savings | 4000 |
-| Total | 3850 |
-
-I could do the following to eliminate negative balances:
-
-| Bucket | Balance | Withdraw | Deposit | Ending balance |
-|---|--:|--:|--:|--:|
-| Groceries | -125 | | 125 | 0 |
-| Eating out | -30 | | 30 | 0 |
-| Gas | 5 | -5 | | 0 |
-| Savings | 4000 | -150 | | 3850 |
-| Total | 3850 | -155 | 155 | 3850 |
-
 Start the process over again by making any new buckets you need, kicking buckets you don't, and filling them back up.
+
+
