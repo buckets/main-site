@@ -1,11 +1,9 @@
 ---
 title: "Accounts"
 date: 2018-01-20T22:15:02-07:00
-draft: true
+draft: false
 order: 2
 ---
-
-XXX video
 
 The very first thing we did when setting up our budget was to enter all our bank account names and balances in the **Accounts** tab.
 

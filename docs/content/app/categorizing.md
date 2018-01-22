@@ -1,7 +1,7 @@
 ---
 title: "Categorizing"
 date: 2018-01-20T15:35:19-07:00
-draft: true
+draft: false
 order: 5
 ---
 

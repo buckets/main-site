@@ -1,7 +1,7 @@
 ---
 title: "General"
 date: 2018-01-20T22:29:35-07:00
-draft: true
+draft: false
 order: 1
 ---
 
