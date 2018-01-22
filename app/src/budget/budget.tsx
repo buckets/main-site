@@ -263,7 +263,7 @@ class Application extends React.Component<ApplicationProps, any> {
                         className="big"
                         date={date}
                         onChange={newdate => {
-                          log.silly('monthselector newdate', newdate.format());
+                          log.silly('monthselector newdate', newdate && newdate.format());
                           routing.setPath(`/y${newdate.year()}m${newdate.month()+1}${routing.rest}`);
                         }}
                       />);
