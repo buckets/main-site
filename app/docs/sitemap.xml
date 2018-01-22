@@ -3,12 +3,32 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://docs.budgetwithbuckets.com/app/general/</loc>
+    <lastmod>2018-01-20T22:29:35-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://docs.budgetwithbuckets.com/app/accounts/</loc>
+    <lastmod>2018-01-20T22:15:02-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://docs.budgetwithbuckets.com/app/categorizing/</loc>
+    <lastmod>2018-01-20T15:35:19-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://docs.budgetwithbuckets.com/fileformat/</loc>
     <lastmod>2018-01-09T11:36:13-07:00</lastmod>
   </url>
   
   <url>
     <loc>https://docs.budgetwithbuckets.com/getting-started/</loc>
+    <lastmod>2018-01-09T11:36:13-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://docs.budgetwithbuckets.com/app/</loc>
     <lastmod>2018-01-09T11:36:13-07:00</lastmod>
   </url>
   
@@ -24,7 +44,7 @@
   
   <url>
     <loc>https://docs.budgetwithbuckets.com/</loc>
-    <lastmod>2018-01-09T11:36:13-07:00</lastmod>
+    <lastmod>2018-01-20T22:29:35-07:00</lastmod>
   </url>
   
   <url>
