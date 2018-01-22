@@ -1,4 +1,10 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.29.0
+
+- **NEW:** Added a preference to disable money animations
+
+- **NEW:** CSV importing is now supported.  (Issue [#5](https://github.com/buckets/application/issues/5))
+
 ## v0.28.0
 
 - **NEW:** Now there's a way to submit bugs from within Buckets. (Issue [#43](https://github.com/buckets/application/issues/43))

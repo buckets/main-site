@@ -9,6 +9,7 @@ import json
 import io
 import requests
 import click
+import webbrowser
 
 GH_TOKEN = os.environ['GH_TOKEN']
 GH_USER = os.environ.get('GH_USERNAME', 'iffy')
@@ -166,7 +167,7 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
 
     # Do some testing
     print('Opening the app for testing...')
-    subprocess.check_call(['open', 'dist/mac/Buckets.app'])
+    subprocess.check_call(['open', 'dist/mac/Buckets.app'], env={})
 
     if not yesno('Can you create a new budget?'):
         abort()
@@ -177,7 +178,8 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
 
     # Manually publish it
     print('Go to https://github.com/buckets/application/releases to publish the draft')
-    if not yesno('Have you clicked the Publish button on GitHub ( https://github.com/buckets/application/releases )?'):
+    webbrowser.open('https://github.com/buckets/application/releases')
+    if not yesno('Have you clicked the Publish button on GitHub?'):
         abort()
 
     # tag it
