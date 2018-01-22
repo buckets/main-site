@@ -5,7 +5,7 @@ import { APP_ROOT } from './globals'
 import * as jwt from 'jsonwebtoken'
 import * as fs from 'fs'
 import * as moment from 'moment'
-import { readState, modifyState } from './persistent'
+import { PSTATE, updateState } from './persistent'
 import { onlyRunInMain } from '../rpc'
 import { sss } from '../i18n'
 
@@ -110,11 +110,10 @@ Would you like to purchase a license now?`),
 }
 
 export async function eventuallyNag() {
-  let state = await readState();
+  let state = PSTATE;
   if (!state.firstUseDate) {
-    state = await modifyState(s => {
-      s.firstUseDate = moment.utc().format();
-      return s;
+    state = await updateState({
+      firstUseDate: moment.utc().format(),
     })
   }
   if (!isRegistered()) {

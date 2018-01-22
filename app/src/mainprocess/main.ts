@@ -15,6 +15,7 @@ import { APP_ROOT, IS_DEBUG } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
+import { loadState } from './persistent'
 
 autoUpdater.logger = log;
 log.transports.file.level = IS_DEBUG ? 'silly' : 'info';
@@ -82,7 +83,9 @@ if (electron_is.windows()) {
   })
 }
 
-app.on('ready', function() {
+app.on('ready', async () => {
+  await loadState();
+  
   // Create the Menu
   updateMenu();
 

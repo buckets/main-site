@@ -2,7 +2,7 @@ import * as log from 'electron-log'
 import * as moment from 'moment'
 import { EventSource } from './events'
 import { remote, app } from 'electron'
-import { readState } from './mainprocess/persistent'
+import { PSTATE } from './mainprocess/persistent'
 
 import { IMessages, ILangPack } from './langs/spec'
 
@@ -94,9 +94,8 @@ async function getLocale():Promise<string> {
     return env.LANG;
   } else {
     // Application preference
-    let pstate = await readState();
-    if (pstate.locale) {
-      return pstate.locale;
+    if (PSTATE.locale) {
+      return PSTATE.locale;
     } else {
       // Ask the OS
       let realapp = app || remote.app;

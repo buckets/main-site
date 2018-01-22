@@ -6,7 +6,7 @@ import { shell, app, dialog, BrowserWindow, ipcMain } from 'electron'
 import { APP_ROOT } from './globals'
 import { autoUpdater } from 'electron-updater'
 import { sss } from '../i18n';
-import { readState, modifyState } from './persistent'
+import { PSTATE, updateState } from './persistent'
 
 let win:Electron.BrowserWindow;
 
@@ -29,9 +29,8 @@ export function checkForUpdates() {
   autoUpdater.on('update-available', async (info) => {
     log.info('update available', info);
     let new_version = info.version;
-    let persistent_state = await readState();
     let alert_user = true;
-    if (new_version === persistent_state.skipVersion) {
+    if (new_version === PSTATE.skipVersion) {
       // ignore it
       alert_user = false;
     }
@@ -142,11 +141,10 @@ if (ipcMain) {
     log.info('install update clicked');
     autoUpdater.quitAndInstall();
   })
-  ipcMain.on('buckets:skip-version', (ev, version) => {
+  ipcMain.on('buckets:skip-version', async (ev, version) => {
     log.info('Skipping version', version);
-    modifyState((state) => {
-      state.skipVersion = version;
-      return state;
+    await updateState({
+      skipVersion: version,
     })
     win.close();
   })

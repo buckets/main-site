@@ -11,9 +11,9 @@ import {TransactionPage} from './transactions'
 import { ImportPage, SyncWidget } from './importpage'
 import { SearchPage } from './searchpage'
 import { ReportsPage } from './reports'
-import {Money} from '../money'
+import { Money, setAnimationEnabled } from '../money'
 import { MonthSelector } from '../input'
-import {Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
+import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
@@ -32,8 +32,18 @@ export function setPath(x:string) {
   log.silly(`window.location.hash = ${window.location.hash}`);
 }
 
-export async function start(base_element, room) {
+export async function start(base_element, room, args: {
+  noanimation?:boolean,
+} = {}) {
   log.silly(`local time: ${moment().format()} -- utc time: ${moment.utc().format()}`);
+
+  if (args) {
+    if (args.noanimation) {
+      log.info('Disabling money animation');
+      setAnimationEnabled(false);
+    }
+  }
+
   // listen for uncaught exceptions
   window.addEventListener('error', (ev:ErrorEvent) => {
     log.error('Uncaught error:', ev.message);

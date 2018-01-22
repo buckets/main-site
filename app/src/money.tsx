@@ -2,11 +2,16 @@ import * as React from 'react';
 import * as cx from 'classnames';
 import * as math from 'mathjs';
 
-const ANIMATION_ENABLED = true;
+
+let ANIMATION_ENABLED = true;
 const _groupregex = new RegExp(',', "g");
 function fancyEval(x:string) {
   x = x.replace(_groupregex, '');
   return math.eval(x).toString();
+}
+
+export function setAnimationEnabled(value:boolean) {
+  ANIMATION_ENABLED = value;
 }
 
 interface MoneyInputProps {

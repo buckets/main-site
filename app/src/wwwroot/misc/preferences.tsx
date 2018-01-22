@@ -1,19 +1,17 @@
 import * as React from 'react'
 import { sss, localizeThisPage } from '../../i18n'
-import { readState, modifyState, PersistentState } from '../../mainprocess/persistent'
+import { PSTATE, updateState, PersistentState } from '../../mainprocess/persistent'
 import { Renderer } from '../../budget/render'
 
-let PSTATE:PersistentState; 
+let CURRENT_PSTATE = PSTATE;
 let renderer:Renderer = new Renderer();
 
 export async function start(base_element) {
-  PSTATE = await readState();
-
   localizeThisPage();
 
   renderer.registerRendering(() => {
     return <PreferencesApp
-      pstate={PSTATE}
+      pstate={CURRENT_PSTATE}
     />;
   }, base_element);
   renderer.doUpdate();
@@ -31,18 +29,31 @@ class PreferencesApp extends React.Component<{
           value={pstate.locale}
           onChange={(ev) => {
             let new_locale = ev.target.value;
-            renderer.doUpdate(() => {
-              return modifyState((state:PersistentState) => {
-                state.locale = new_locale;
-                PSTATE = state;
-                return state;
-              })
+            renderer.doUpdate(async () => {
+              CURRENT_PSTATE = await updateState({
+                locale: new_locale,
+              });
             })
           }}>
           <option value="">{sss('System Default')}</option>
           <option value="en">English</option>
           <option value="es">español</option>
         </select>
+      </div>
+      <div>
+        {sss('Animation:')} <input
+          type="checkbox"
+          checked={pstate.animation}
+          onChange={ev => {
+            let new_animation = ev.target.checked;
+            renderer.doUpdate(async () => {
+              CURRENT_PSTATE = await updateState({
+                animation: new_animation,
+              })
+            })
+          }} />
+      </div>
+      <div>
         <div className="helptext">{sss('(Restart Buckets for the change to take effect.)')}</div>
       </div>
     </div>
