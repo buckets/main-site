@@ -256,6 +256,9 @@ hr.page {
   margin: 2rem 0;
 }
 
+.rows .panes {
+  overflow: auto;
+}
 .panes {
   display: flex;
   align-items: stretch;
