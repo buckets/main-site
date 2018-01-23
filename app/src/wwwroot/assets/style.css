@@ -865,6 +865,7 @@ table.ledger .icon-button-wrap button.icon,
 .color-picker .pallete {
   position: absolute;
   border-radius: 3px;
+  z-index: 5;
   top: -10px;
   left: .5rem;
   display: flex;
@@ -1354,6 +1355,7 @@ table.props th {
   border: 3px solid var(--darker-darkblue);
   box-shadow: var(--drop-shadow);
   text-align: start;
+  font-size: 1rem;
   font-weight: 400;
 }
 .help.clicked-open .note {

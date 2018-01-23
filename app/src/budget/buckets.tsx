@@ -765,24 +765,25 @@ class GroupRow extends React.Component<{
             dropTopHalf: this.state.underDrag && this.state.dropHalf === 'top',
             dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
           })}>
-          <div
+          {group.id === NOGROUP ? null : <div
             className="drophandle"
             draggable={group.id !== NOGROUP}
             onDragStart={this.onDragStart}
             onDragEnd={this.onDragEnd}>
               <span className="fa fa-bars"/>
-          </div>
+          </div>}
         </td>
         <td colSpan={100} className="group-name">
-        <NoteMaker obj={group} />
-        <DebouncedInput
+        {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <DebouncedInput
           blendin
           value={group.name}
           placeholder="no name"
           onChange={(val) => {
             manager.store.buckets.updateGroup(group.id, {name: val});
           }}
-        /></td>
+        />}
+        {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
+        </td>
       </tr>
       <tr>
         <th className="nopad noborder"></th>
