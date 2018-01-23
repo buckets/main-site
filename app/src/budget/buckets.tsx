@@ -95,39 +95,45 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let { pending } = this.state;
     let { to_deposit, to_withdraw } = this.getPending();
 
-    let doPendingLabel = null;
-    if (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0)) {
-      // transfer
-      doPendingLabel = sss('action.transfermoney', (money:JSX.Element) => {
-          return <span>Transfer {money}</span>
-        })(<Money value={to_deposit} symbol nocolor />)
-    } else if (to_deposit || to_withdraw) {
-      doPendingLabel = sss('action.transactmoney', (deposit:JSX.Element, withdraw:JSX.Element) => {
-        if (deposit && withdraw) {
-          return <span>Deposit {deposit} and withdraw {withdraw}</span>
-        } else if (deposit) {
-          return <span>Deposit {deposit}</span>
-        } else {
-          return <span>Withdraw {withdraw}</span>
-        }
-      })(
-        to_deposit ? <Money value={to_deposit} symbol nocolor /> : null,
-        to_withdraw ? <Money value={to_withdraw} symbol nocolor /> : null,
-      )
+    let pendingInfo = [];
+    if (to_deposit) {
+      pendingInfo.push(<div key="deposit" className="labeled-number">
+        <div className="label">{sss('In')}</div>
+        <div className="value"><Money value={to_deposit} symbol alwaysShowDecimal/></div>
+      </div>);
+    }
+    if (to_withdraw) {
+      pendingInfo.push(<div key="withdraw" className="labeled-number">
+        <div className="label">{sss('Out')}</div>
+        <div className="value"><Money value={to_withdraw} symbol alwaysShowDecimal /></div>
+      </div>)
+    }
+    if (to_deposit && to_withdraw) {
+      let amount;
+      if (to_deposit + to_withdraw) {
+        amount = <Money value={to_deposit + to_withdraw} symbol alwaysShowDecimal />
+      } else {
+        amount = <span className="fa fa-fw fa-check" />
+      }
+      pendingInfo.push(<div key="net" className="labeled-number">
+        <div className="label">{sss('Net')} <Help className="right">{sss('If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.')}</Help></div>
+        <div className="value">{amount}</div>
+      </div>)
     }
     
     let rainleft;
     if (appstate.rain > 0 && to_deposit) {
-      rainleft = <div>({sss('rain left', (money:JSX.Element) => {
-        return <span>{money} rain left</span>
-      })(<Money symbol nocolor value={appstate.rain - (to_deposit + to_withdraw)} />)})</div>;
+      rainleft = <div className="labeled-number">
+        <div className="label">{sss('Rain left')}</div>
+        <div className="value"><Money value={appstate.rain - (to_deposit + to_withdraw)} symbol nocolor alwaysShowDecimal /></div>
+      </div>;
     }
 
     let doPendingButton;
-    if (doPendingLabel) {
-      doPendingButton = <button className="primary" onClick={this.doPending}>{doPendingLabel}</button>;
+    if (to_deposit || to_withdraw) {
+      doPendingButton = <button className="primary" onClick={this.doPending}>{sss('Make it so')}</button>;
     } else {
-      doPendingButton = <button disabled>{sss('Deposit/Withdraw')}</button>;
+      doPendingButton = <button disabled>{sss('Make it so')}</button>;
     }
 
     let self_debt_amount = 0;
@@ -152,7 +158,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         <div className="label">
           {sss('Self debt')} <Help>{sss('Amount of money over-allocated in buckets.')}</Help>
         </div>
-        <div className="value"><Money value={self_debt_amount} /></div>
+        <div className="value"><Money value={self_debt_amount} className="faint-cents" alwaysShowDecimal /></div>
       </div>
       show_nodebt_balance = true;
     }
@@ -190,12 +196,13 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   <div className="label">
                     {sss('Rain')}<PerMonth/>&nbsp;<Help>{sss('Total amount your buckets expect each month.')}</Help>
                   </div>
-                  <div className="value"><Money value={total_rain_needed} /></div>
+                  <div className="value"><Money value={total_rain_needed} className="faint-cents" alwaysShowDecimal /></div>
                 </div>
                 {self_debt}
               </div>
               <div className="group">
                 {rainleft}
+                {pendingInfo}
                 {doPendingButton}
               </div>
             </div>
@@ -790,7 +797,7 @@ class GroupRow extends React.Component<{
         <th>{sss('Bucket')}</th>
         <th className="right">{sss('Balance')}</th>
         {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
-        <th className="left">{sss('action.transact', 'Transact')}</th>
+        <th className="left">{sss('In/Out')}</th>
         <th className="right nobr"><span className="fa fa-tint"/> {sss('Rain')} <Help><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
         <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>

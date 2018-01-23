@@ -2,7 +2,8 @@ import * as React from 'react'
 import * as cx from 'classnames'
 
 export class Help extends React.Component<{
-  icon?:any;
+  icon?: any;
+  className?: string;
 }, {
   showing: boolean;
   method: 'click' | 'hover';
@@ -16,6 +17,7 @@ export class Help extends React.Component<{
   }
   render() {
     let note;
+    let { className } = this.props;
     let { showing, method } = this.state;
     if (showing) {
       note = <div className="note-outer"><div className="note-inner">
@@ -24,7 +26,7 @@ export class Help extends React.Component<{
     }
     let icon = this.props.icon ? this.props.icon : <span className="icon fa fa-question-circle"></span>;
     return <div
-      className={cx("help", {
+      className={cx("help", className, {
         'showing': showing,
         'clicked-open': method === 'click',
       })}

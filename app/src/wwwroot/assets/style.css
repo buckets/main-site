@@ -234,7 +234,7 @@ span.experimental {
 }
 .subheader > div,
 .subheader .group > div {
-  margin: 0 .5rem;
+  margin: 0 .25rem;
 }
 .subheader > div:first-child,
 .subheader .group > div:first-child {
@@ -1360,6 +1360,10 @@ table.props th {
 }
 .help.clicked-open .note {
   background-color: white;
+}
+.help.right .note-inner {
+  right: 100%;
+  left: initial;
 }
 .help table {
   width: 100%;
