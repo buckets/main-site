@@ -148,10 +148,12 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let self_debt;
     let show_nodebt_balance = false;
     if (self_debt_amount) {
-      self_debt = <Help icon={<div className="labeled-number">
-        <div className="label">{sss('Self debt')}</div>
+      self_debt = <div className="labeled-number">
+        <div className="label">
+          {sss('Self debt')} <Help>{sss('Amount of money over-allocated in buckets.')}</Help>
+        </div>
         <div className="value"><Money value={self_debt_amount} /></div>
-      </div>}>{sss('Amount of money over-allocated in buckets.')}</Help>
+      </div>
       show_nodebt_balance = true;
     }
         
@@ -184,10 +186,12 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   className="makeitrain">{sss('Make it rain!')} <span className="fa fa-tint"/></button>
                 <button onClick={this.addBucket}>{sss('action.New bucket', 'New bucket')}</button>
                 <button onClick={this.addGroup}>{sss('action.New group', 'New group')}</button>
-                <Help icon={<div className="labeled-number">
-                  <div className="label">{sss('Rain')}<PerMonth/></div>
+                <div className="labeled-number">
+                  <div className="label">
+                    {sss('Rain')}<PerMonth/>&nbsp;<Help>{sss('Total amount your buckets expect each month.')}</Help>
+                  </div>
                   <div className="value"><Money value={total_rain_needed} /></div>
-                </div>}>{sss('Total amount your buckets expect each month.')}</Help>
+                </div>
                 {self_debt}
               </div>
               <div className="group">
@@ -784,9 +788,9 @@ class GroupRow extends React.Component<{
         <th className="nopad noborder"></th>
         <th>{sss('Bucket')}</th>
         <th className="right">{sss('Balance')}</th>
-        {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</Help></th> : null}
+        {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
         <th className="left">{sss('action.transact', 'Transact')}</th>
-        <th className="right nobr"><span className="fa fa-tint"/> {sss('Rain')} <Help>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</Help></th>
+        <th className="right nobr"><span className="fa fa-tint"/> {sss('Rain')} <Help><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
         <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>
       </tr>

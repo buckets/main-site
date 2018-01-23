@@ -39,6 +39,8 @@ body {
   --blackish: rgba(37, 35, 35, 1.0);
 
   --highlighter: rgb(255,255,204);
+
+  --drop-shadow: 1px 1px 14px rgba(0,0,0,0.2);
 }
 
 *,
@@ -866,7 +868,7 @@ table.ledger .icon-button-wrap button.icon,
   flex-wrap: wrap;
   width: 9rem;
   background-color: white;
-  box-shadow: 1px 1px 14px rgba(0,0,0,0.2);
+  box-shadow: var(--drop-shadow);
   padding: 0.5rem;
   align-items: flex-start;
   justify-content: space-around;
@@ -1221,7 +1223,7 @@ table.props th {
   color: white;
   border: 3px solid var(--darker-blue);
   border-radius: 3px;
-  box-shadow: 1px 1px 14px -4px rgba(0,0,0,0.5);
+  box-shadow: var(--drop-shadow);
   transition: right 200ms ease-in, left 200ms ease-in, opacity 200ms ease-in;
 }
 .toasts .toast.error {
@@ -1319,35 +1321,46 @@ table.props th {
   display: inline-block;
   cursor: help;
 }
-.help .note-wrap {
+.help .icon {
+  color: var(--lighter-grey);
+}
+.help .note-outer {
   position: relative;
-  display: inline;
+  display: inline-block;
   height: 0;
   width: 0;
   margin: 0;
   padding: 0;
-  z-index: 3;
+  z-index: 6;
 }
-.help .note-wrap .note {
+.help .note-inner {
   position: absolute;
   top: 0;
   left: 0;
-  min-width: 10rem;
-  background-color: var(--darker-darkblue);
-  color: white;
+  min-width: 12rem;
+  max-width: 20rem;
+}
+.help .note {
+  position: relative;
+  width: 100%;
+  white-space: pre-wrap;
+  background-color: var(--lightest-grey);
+  color: var(--darker-darkblue);
   padding: .5rem .8rem;
-  border-radius: 2px;
-  box-shadow: 1px 1px 5px var(--grey);
-  user-select: none;
-  pointer-events: none;
+  border-radius: 4px;
+  border: 3px solid var(--darker-darkblue);
+  box-shadow: var(--drop-shadow);
   text-align: start;
-  font-weight: 300;
+  font-weight: 400;
+}
+.help.clicked-open .note {
+  background-color: white;
 }
 .help table {
   width: 100%;
 }
 .help td.total-line {
-  border-top: 2px solid white;
+  border-top: 1px solid var(--darker-darkblue);
 }
 
 
@@ -1418,8 +1431,8 @@ table.props th {
   margin: 0;
   background-color: white;
   border: 3px solid var(--lighter-grey);
-  box-shadow: 1px 1px 14px rgba(0,0,0,0.2);
-  border-radius: 3px;
+  box-shadow: var(--drop-shadow);
+  border-radius: 4px;
   outline: none;
 }
 .note-maker .note-inner textarea:focus {
