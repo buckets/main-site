@@ -5,7 +5,7 @@ import * as crypto from 'crypto'
 import { EventSource } from './events'
 import { PrefixLogger } from './logging'
 
-const log = new PrefixLogger(electron_is.renderer() ? '(rpc.rend)' : '(rpc.main)')
+const log = new PrefixLogger(electron_is.renderer() ? '(rpc.r)' : '(rpc)')
 
 //--------------------------------------------------------------------------------
 // General purpose RPC from renderer to main and back

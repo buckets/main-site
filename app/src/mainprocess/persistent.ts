@@ -1,11 +1,12 @@
 import { app, remote } from 'electron'
+import * as electron_is from 'electron-is'
 import * as Path from 'path'
 import * as fs from 'fs'
 import { EventSource } from '../events'
 import { onlyRunInMain } from '../rpc'
 import { PrefixLogger } from '../logging'
 
-const log = new PrefixLogger('(persistent)');
+const log = new PrefixLogger(electron_is.renderer() ? '(persistent.r)' : '(persistent)');
 
 export interface PersistentState {
   recentFiles: string[];

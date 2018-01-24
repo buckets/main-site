@@ -23,7 +23,7 @@ electron_log.transports.file.maxSize = 10 * 1024 * 1024;
 
 const log = new PrefixLogger('(main)')
 
-log.info(`STARTING v${app.getVersion()}`);
+log.info(`\n\nSTARTING v${app.getVersion()}\n`);
 log.info(`Log level: ${electron_log.transports.file.level}`);
 log.info(`Local time: ${moment().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
