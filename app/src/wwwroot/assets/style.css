@@ -1020,6 +1020,13 @@ button.makeitrain[disabled] {
   }
 }
 
+textarea.paragraph {
+  width: 30rem;
+  min-height: 6rem;
+  padding: .5rem;
+  font-size: 1rem;
+}
+
 
 
 /* Buckets */

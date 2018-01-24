@@ -249,6 +249,30 @@ export class AccountStore {
         })
     return rows[0][0];
   }
+  async exportTransactions() {
+    return await this.store.query(`SELECT
+      t.id as t_id,
+      t.amount as t_amount,
+      t.memo as t_memo,
+      t.posted as t_posted,
+      a.name as a_name,
+      bt.id as bt_id,
+      bt.amount as bt_amount,
+      b.name as b_name
+    FROM
+      account_transaction as t
+      LEFT JOIN account as a
+        ON t.account_id = a.id
+      LEFT JOIN bucket_transaction as bt
+        ON t.id = bt.account_trans_id
+      LEFT JOIN bucket as b
+        ON bt.bucket_id = b.id
+    ORDER BY
+      t.posted DESC,
+      t.id DESC`, {
+    });
+  }
+
   async importTransactions(transactions:ImportArgs[]) {
     let num_new = 0;
     let num_updated = 0;
