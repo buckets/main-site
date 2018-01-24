@@ -48,6 +48,55 @@ export function csvFieldToCents(x:string) {
   return decimal2cents(x);
 }
 
+function guessDateFormat(formats:string[], dates:string[]):string[] {
+  let ret = new Set<string>(formats);
+  let results:{
+    [format:string]: number[],
+  } = {};
+  formats.forEach(format => {
+    results[format] = [];
+  })
+  for (let date of dates) {
+    ret.forEach(format => {
+      let dt = moment(date, format);
+      if (!dt.isValid()) {
+        ret.delete(format);
+      } else {
+        results[format].push(dt.unix());
+      }
+    })
+  }
+  let ranges:{
+    [format:string]: number,
+  } = {};
+  ret.forEach(format => {
+    let numbers = results[format]
+    ranges[format] = Math.max(...numbers) - Math.min(...numbers);
+  })
+  return Array.from(ret).sort((a,b) => {
+    return ranges[a] - ranges[b]
+  });
+}
+
+function invertMapping(mapping:CSVMapping):{
+  amount?: string[],
+  memo?: string[],
+  posted?: string[],
+  fi_id?: string[],
+} {
+  let inverted_mapping = {
+    amount: [],
+    memo: [],
+    posted: [],
+    fi_id: [],
+  };
+  Object.keys(mapping.fields).sort().forEach(header => {
+    const val = mapping.fields[header];
+    inverted_mapping[val].push(header);
+  })
+  return inverted_mapping;
+}
+
 export interface CSVMapping {
   fields: {
     [field:string]: 'amount'|'memo'|'posted'|'fi_id';
@@ -107,16 +156,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   const mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   log.info('mapping', mapping);
   let hashcount = {};
-  let inverted_mapping = {
-    amount: [],
-    memo: [],
-    posted: [],
-    fi_id: [],
-  };
-  Object.keys(mapping.fields).sort().forEach(header => {
-    const val = mapping.fields[header];
-    inverted_mapping[val].push(header);
-  })
+  let inverted_mapping = invertMapping(mapping);
   const transactions = parsed.rows.map((row):ImportableTrans => {
     const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
@@ -182,26 +222,65 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   }
 }
 
+const DATE_FORMATS = [
+  "YYYY-MM-DD",
+  "YYYY-DD-MM",
+  "MM/DD/YYYY",
+  "MM/DD/YY",
+  "DD/MM/YYYY",
+  "DD/MM/YY",
+  "MMM DD, YYYY",
+]
+
 
 interface CSVMapperProps {
   obj: CSVNeedsMapping;
 }
 interface CSVMapperState {
   mapping: CSVMapping;
+  format_options: string[];
 }
 export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
   constructor(props:CSVMapperProps) {
     super(props);
+    let mapping = props.obj.current_mapping || {
+      fields: {},
+      posted_format: null,
+    }
+    let guess = this.computeFormatOptionsAndBestGuess(mapping, props.obj);
+    if (guess.posted_format !== undefined) {
+      mapping.posted_format = guess.posted_format;
+    }
     this.state = {
-      mapping: props.obj.current_mapping || {
-        fields: {},
-        posted_format: null,
+      mapping: mapping,
+      format_options: guess.format_options,
+    }
+  }
+  computeFormatOptionsAndBestGuess(mapping:CSVMapping, obj:CSVNeedsMapping) {
+    let ret:{
+      posted_format?: string,
+      format_options?: string[],
+    } = {};
+    let format_options = DATE_FORMATS;
+    let inverted_mapping = invertMapping(mapping);
+    if (inverted_mapping.posted.length) {
+      let date_strings = obj.parsed_data.rows.map(row => {
+        return row[inverted_mapping.posted[0]]
+      })
+      format_options = guessDateFormat(DATE_FORMATS, date_strings);
+      if (format_options.length) {
+        if (!mapping.posted_format) {
+          // XXX you really shouldn't be setting state in here
+          ret.posted_format = format_options[0]
+        }
+        ret.format_options = format_options;
       }
     }
+    return ret;
   }
   render() {
     let { obj } = this.props;
-    let { mapping } = this.state;
+    let { mapping, format_options } = this.state;
 
     let mapped_fields = Object.values(mapping.fields);
     const mapping_acceptable = (
@@ -210,6 +289,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
       && mapped_fields.filter(x=>x==='posted').length === 1
       && mapping.posted_format
     );
+
     return <div>
       <ol className="instructions">
         <li>{sss('Identify the data each column contains using the drop downs below.')}</li>
@@ -234,9 +314,20 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                       let new_fields = Object.assign(mapping.fields, {
                         [header]: ev.target.value,
                       })
-                      this.setState({mapping: Object.assign(mapping, {
+                      let new_mapping = Object.assign(mapping, {
                         fields: new_fields,
-                      })})
+                      })
+
+                      let newstate:any = {mapping: new_mapping}
+
+                      if (ev.target.value === 'posted') {
+                        let guess = this.computeFormatOptionsAndBestGuess(new_mapping, obj)
+                        if (!new_mapping.posted_format && guess.posted_format) {
+                          new_mapping.posted_format = guess.posted_format
+                        }
+                        newstate.format_options = guess.format_options;
+                      }
+                      this.setState(newstate);
                     }}
                   >
                     <option value=""></option>
@@ -254,16 +345,9 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                           posted_format: ev.target.value,
                         })})
                       }}>
-                    <option value="">{sss('(date format)')}</option>
-                    <option>YYYY-MM-DD</option>
-                    <option>YYYY-DD-MM</option>
-
-                    <option>MM/DD/YYYY</option>
-                    <option>MM/DD/YY</option>
-                    <option>DD/MM/YYYY</option>
-                    <option>DD/MM/YY</option>
-                    
-                    <option>MMM DD, YYYY</option>
+                    {format_options.map(option => {
+                      return <option key={option}>{option}</option>
+                    })}
                   </select>
                 </div> : null}
               </th>
