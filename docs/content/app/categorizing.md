@@ -2,7 +2,7 @@
 title: "Categorizing"
 date: 2018-01-20T15:35:19-07:00
 draft: false
-order: 5
+order: 4
 ---
 
 Every real life transaction for your accounts should cause a corresponding transaction in one or more Buckets.  So if you charged $1 to your credit card to buy a doughnut, you should take $1 out of your *Doughnut* bucket.
@@ -47,3 +47,7 @@ For instance, if you transfer $100 from Savings and put it into Checking, you'll
 - +$100 into Checking
 
 Categorize both of those as *Transfers* and then your income won't be artificially inflated.
+
+# Next
+
+Read about <a href="{{< relref "general.md" >}}">app-wide stuff.</a>

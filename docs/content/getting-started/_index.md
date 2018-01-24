@@ -5,4 +5,4 @@ draft: false
 order: 1
 ---
 
-Do you want to manage your money well?  Start here to learn about a simple method for budgeting your money.  Then check out the <strong>Using Buckets</strong> section to begin using Buckets effectively.
+Do you want to manage your money well?  Start here to learn a simple method for budgeting your money.  Then check out the <strong>Using Buckets</strong> section to begin using Buckets effectively.

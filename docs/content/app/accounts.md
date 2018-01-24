@@ -2,8 +2,10 @@
 title: "Accounts"
 date: 2018-01-20T22:15:02-07:00
 draft: false
-order: 2
+order: 1
 ---
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/fa6HwFYDySA?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 The very first thing we did when setting up our budget was to enter all our bank account names and balances in the **Accounts** tab.
 
@@ -33,3 +35,6 @@ Closed accounts are hidden in certain places, but all existing transactions will
 If you want to delete an account *and* all its transactions, first close it, then click the **Delete** button.
 
 
+# Next
+
+Learn about <a href="{{< relref "buckets.md" >}}">Buckets.</a>

@@ -7,19 +7,17 @@ order: 1
 
 Here are some guiding principles to help you budget well.  *How* to do each of these is explored in more detail in other pages in this guide.
 
-## Give generously
+## 1. Give generously
 
 Your life will be better when you give some amount of money away.  It doesn't have to be much, but build charitable giving *into* your budget.
 
-## Live on last month's income
+## 2. Live on last month's income
 
 Spend this month what you earned last month.  If you're not able to do it yet, make it a goal.  You really can do it&mdash;Buckets can help you!
 
-## Build a supply
-
 After you start living on a month's supply of income, make it two months.  Then three.  All the way up to a year.
 
-## Tools are just tools
+## 3. Tools are just tools
 
 Hammers don't build houses.  People do.
 

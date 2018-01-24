@@ -1,11 +1,11 @@
 ---
 title: "Buckets"
 date: 2018-01-20T22:41:51-07:00
-draft: true
-order: 3
+draft: false
+order: 2
 ---
 
-XXX video
+<iframe width="560" height="315" src="https://www.youtube.com/embed/yYw8WPrJseI?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 After entering our accounts, we clicked on the **Buckets** tab to divide up our money into useful categories&mdash;buckets.  It's useful to think of buckets as literal buckets, filled with money, sitting around your house (or pretend they're envelopes, if you prefer).
 
@@ -29,7 +29,11 @@ We make a bucket for every independent expense or goal.  We currently have 63 bu
 - Redo wood floors
 - Costco membership
 
+
+
 ## Bucket types
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/nRKWODed11I?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 There are 5 different kinds of buckets.  Change a bucket's type by clicking the gear icon.
 
@@ -67,6 +71,11 @@ With this type, choose a target amount you want saved and how much you can affor
 Choose a target date and how much you can afford per month and Buckets will compute how much you'll end up with by the date.
 
 
+## Rain
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/fZR6Hw6yoEI?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<!-- 
 XXX Groups
 XXX Bucket Types
 XXX Colors
@@ -74,3 +83,8 @@ XXX Reordering
 XXX Detail page
 XXX Putting money in/out
 XXX Transfers
+ -->
+
+# Next
+
+Learn about <a href="{{< relref "transactions.md" >}}">Transactions.</a>

@@ -3,6 +3,16 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://docs.budgetwithbuckets.com/app/transactions/</loc>
+    <lastmod>2018-01-24T13:08:44-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://docs.budgetwithbuckets.com/app/buckets/</loc>
+    <lastmod>2018-01-20T22:41:51-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://docs.budgetwithbuckets.com/app/general/</loc>
     <lastmod>2018-01-20T22:29:35-07:00</lastmod>
   </url>
@@ -44,7 +54,7 @@
   
   <url>
     <loc>https://docs.budgetwithbuckets.com/</loc>
-    <lastmod>2018-01-20T22:29:35-07:00</lastmod>
+    <lastmod>2018-01-24T13:08:44-07:00</lastmod>
   </url>
   
   <url>

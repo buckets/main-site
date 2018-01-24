@@ -6,10 +6,29 @@
     <description>Recent content on Buckets Guide</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 20 Jan 2018 22:29:35 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 24 Jan 2018 13:08:44 -0700</lastBuildDate>
     
 	<atom:link href="https://docs.budgetwithbuckets.com/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Transactions</title>
+      <link>https://docs.budgetwithbuckets.com/app/transactions/</link>
+      <pubDate>Wed, 24 Jan 2018 13:08:44 -0700</pubDate>
+      
+      <guid>https://docs.budgetwithbuckets.com/app/transactions/</guid>
+      <description>Next Learn about Categorizing</description>
+    </item>
+    
+    <item>
+      <title>Buckets</title>
+      <link>https://docs.budgetwithbuckets.com/app/buckets/</link>
+      <pubDate>Sat, 20 Jan 2018 22:41:51 -0700</pubDate>
+      
+      <guid>https://docs.budgetwithbuckets.com/app/buckets/</guid>
+      <description>After entering our accounts, we clicked on the Buckets tab to divide up our money into useful categories&amp;mdash;buckets. It&amp;rsquo;s useful to think of buckets as literal buckets, filled with money, sitting around your house (or pretend they&amp;rsquo;re envelopes, if you prefer).
+We make a bucket for every independent expense or goal. We currently have 63 buckets, but we didn&amp;rsquo;t start with that many. Don&amp;rsquo;t feel pressured to make a bunch.</description>
+    </item>
     
     <item>
       <title>General</title>
@@ -75,8 +94,8 @@ Steps In essence, you do this every month:
       
       <guid>https://docs.budgetwithbuckets.com/getting-started/1-principles/</guid>
       <description>Here are some guiding principles to help you budget well. How to do each of these is explored in more detail in other pages in this guide.
-Give generously Your life will be better when you give some amount of money away. It doesn&amp;rsquo;t have to be much, but build charitable giving into your budget.
-Live on last month&amp;rsquo;s income Spend this month what you earned last month. If you&amp;rsquo;re not able to do it yet, make it a goal.</description>
+1. Give generously Your life will be better when you give some amount of money away. It doesn&amp;rsquo;t have to be much, but build charitable giving into your budget.
+2. Live on last month&amp;rsquo;s income Spend this month what you earned last month.</description>
     </item>
     
   </channel>
