@@ -499,6 +499,22 @@ h3:first-child {
   outline: none;
 }
 
+.click-to-edit {
+  display: inline;
+}
+.click-to-edit:hover {
+  background-color: var(--faint-blue);
+}
+.click-to-edit.editing:hover {
+  background-color: initial;
+}
+.click-to-edit .wrap {
+  display: inline-flex;
+}
+.click-to-edit input {
+  border: 1px solid var(--blue);
+}
+
 a.subtle {
   color: var(--lighter-grey);
   text-decoration: none;
@@ -1408,17 +1424,17 @@ table.props th {
   padding-left: .25rem;
   padding-right: .5rem;
 }
-.note-maker .icon {
+.note-maker .note-icon {
   opacity: 0;
 }
-.note-hover-trigger:hover .icon {
+.note-hover-trigger:hover .note-icon {
   opacity: 0.5;
 }
-.note-maker.has-note .icon {
+.note-maker.has-note .note-icon {
   opacity: 1;
 }
-.note-maker .icon:hover,
-.note-maker.showing .icon {
+.note-maker .note-icon:hover,
+.note-maker.showing .note-icon {
   opacity: 1;
 }
 .note-maker .note-wrap {

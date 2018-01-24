@@ -8,7 +8,7 @@ import { Route, Link, WithRouting, Redirect } from './routing'
 import { Money, MoneyInput } from '../money'
 import { makeToast } from './toast'
 import {TransactionList} from './transactions'
-import { Confirmer, DebouncedInput, debounceChange} from '../input';
+import { Confirmer, ClickToEdit, debounceChange} from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
@@ -81,8 +81,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
       }
       return (<tr key={account.id} className="note-hover-trigger">
           <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
-          <td><DebouncedInput
-            blendin
+          <td><ClickToEdit
             value={account.name}
             placeholder={sss('accounts.name_placeholder', 'no name')}
             onChange={(val) => {
@@ -178,8 +177,7 @@ export class AccountView extends React.Component<AccountViewProps, {
     return (<div className="padded flex-grow-2" key={account.id}>
       {closed_ribbon}
       <h1>
-        <DebouncedInput
-          blendin
+        <ClickToEdit
           value={account.name}
           placeholder={sss('accounts.name_placeholder', 'no name')}
           onChange={(val) => {

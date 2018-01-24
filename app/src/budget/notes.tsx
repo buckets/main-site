@@ -22,11 +22,11 @@ export class NoteMaker extends React.Component<NoteProps, {
   render() {
     let { obj } = this.props;
     let button = <button
-        className="icon"
+        className="icon note-icon"
         onClick={() => {
           this.setState({showing: !this.state.showing});
         }}>
-        <span className="fa fa-sticky-note icon"/>
+        <span className="fa fa-sticky-note"/>
       </button>
     
     let guts;

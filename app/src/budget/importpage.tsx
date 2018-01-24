@@ -8,7 +8,7 @@ import { BankMacro } from '../models/bankmacro'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
-import { DebouncedInput, Confirmer } from '../input'
+import { ClickToEdit, Confirmer } from '../input'
 import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { setPath } from './budget'
@@ -358,8 +358,7 @@ class BankMacroList extends React.Component<{
               />
             </td>
             <td>
-              <DebouncedInput
-                blendin
+              <ClickToEdit
                 value={macro.name}
                 placeholder="no name"
                 onChange={(val) => {

@@ -123,6 +123,99 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
   }
 }
 
+interface ClickToEditProps {
+  value: string;
+  placeholder?: string;
+  onChange: (newval:string)=>void;
+}
+interface ClickToEditState {
+  editing: boolean;
+  saving: boolean;
+  cursor: number;
+  value: string;
+}
+export class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editing: false,
+      saving: false,
+      cursor: null,
+      value: props.value,
+    }
+  }
+  componentWillReceiveProps(nextProps:ClickToEditProps) {
+    this.setState({value: nextProps.value, saving: false})
+  }
+  render() {
+    let { value, placeholder } = this.props;
+    let { editing, saving } = this.state;
+    if (saving) {
+      // to prevent flicker
+      value = this.state.value;
+    }
+    let guts;
+    if (editing) {
+      guts = <div className="wrap">
+        <input
+          className={cx("ctx-matching-input")}
+          value={this.state.value}
+          placeholder={placeholder}
+          onChange={(ev) => {
+            this.setState({value: ev.target.value});
+          }}
+          onKeyDown={(ev) => {
+            if (ev.key === 'Enter') {
+              ev.preventDefault();
+              this.save();
+            } else if (ev.key === 'Escape') {
+              ev.preventDefault();
+              this.close();
+            }
+          }}
+          ref={elem => {
+            if (elem) {
+              setTimeout(() => {
+                if (this.state.cursor !== null) {
+                  elem.setSelectionRange(this.state.cursor, this.state.cursor);
+                  elem.focus()
+                  this.setState({cursor: null})
+                }
+              }, 0)
+            }
+          }}
+        />
+        <button className="icon" onClick={this.save}><span className="fa fa-check" /></button>
+        <button className="icon" onClick={this.close}><span className="fa fa-close" /></button>
+      </div>
+    } else {
+      guts = value;
+    }
+    return <div
+      className={cx("click-to-edit", {
+        'editing': editing,
+      })}
+      onClick={this.onClick}>
+      {guts}
+    </div>
+  }
+  onClick = (ev) => {
+    if (!this.state.editing) {
+      let s = window.getSelection();
+      let range = s.getRangeAt(0);
+      this.setState({editing: true, cursor: range.startOffset})
+    }
+  }
+  save = () => {
+    this.setState({editing: false, saving: true}, () => {
+      this.props.onChange(this.state.value);
+    })
+  }
+  close = () => {
+    this.setState({editing: false});
+  }
+}
+
 const LEFT_ARROW = '\u25c0'
 const RIGHT_ARROW = '\u25b6'
 

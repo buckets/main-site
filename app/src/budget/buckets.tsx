@@ -7,7 +7,7 @@ import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../mo
 import { ts2db, Timestamp, Date, ensureLocalMoment, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
-import { onKeys, DebouncedInput, MonthSelector } from '../input'
+import { onKeys, MonthSelector, ClickToEdit } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 import { makeToast } from './toast'
@@ -617,8 +617,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         <NoteMaker
           obj={bucket}
         />
-        <DebouncedInput
-          blendin
+        <ClickToEdit
           value={bucket.name}
           placeholder="no name"
           onChange={(val) => {
@@ -781,8 +780,7 @@ class GroupRow extends React.Component<{
           </div>}
         </td>
         <td colSpan={100} className="group-name">
-        {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <DebouncedInput
-          blendin
+        {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <ClickToEdit
           value={group.name}
           placeholder="no name"
           onChange={(val) => {
@@ -1024,8 +1022,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               onChange={(val) => {
                 manager.store.buckets.update(bucket.id, {color: val})
               }} />
-              <DebouncedInput
-                blendin
+              <ClickToEdit
                 value={bucket.name}
                 placeholder="no name"
                 onChange={(val) => {
