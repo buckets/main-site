@@ -220,34 +220,33 @@ const LEFT_ARROW = '\u25c0'
 const RIGHT_ARROW = '\u25b6'
 
 interface MonthSelectorProps {
-  date: moment.Moment;
-  onChange: (date:moment.Moment)=>void;
+  month: number;
+  year: number;
+  onChange: (args:{month:number,year:number})=>void;
   className?: string;
 }
 export class MonthSelector extends React.Component<MonthSelectorProps, {
-  date: moment.Moment;
+  month: number;
   year: string;
 }> {
   private minyear = 1900;
   constructor(props:MonthSelectorProps) {
     super(props);
-    const date = props.date.clone().startOf('month');
     this.state = {
-      date: date,
-      year: date.year().toString(),
+      month: props.month,
+      year: props.year.toString(),
     }
   }
-  componentWillReceiveProps(nextProps) {
-    const date = nextProps.date.clone().startOf('month');
+  componentWillReceiveProps(nextProps:MonthSelectorProps) {
     this.setState({
-      date: date,
-      year: date.year().toString(),
+      month: nextProps.month,
+      year: nextProps.year.toString(),
     })
   }
   render() {
     let { className } = this.props;
     let month_names = moment.monthsShort();
-    let current_month = this.state.date.month();
+    let current_month = this.state.month;
     let options = month_names.map((name, idx) => {
       return <option key={idx} value={idx}>{name.toUpperCase()}</option>
     })
@@ -272,10 +271,18 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
   increment(amount:number) {
     return () => {
       log.info('click increment', amount);
-      log.info('current date', this.state.date && this.state.date.format());
-      const new_date = this.state.date.clone().add(amount, 'months');
-      log.info('new_date', new_date && new_date.format());
-      this.setDate(new_date);
+      let new_month = this.state.month + amount;
+      let new_year = this.props.year;
+      while (new_month < 0) {
+        new_year -= 1;
+        new_month += 12;
+      }
+      while (new_month >= 12) {
+        new_year += 1;
+        new_month -= 12;
+      }
+      log.info('new', new_month, new_year);
+      this.setDate({month: new_month, year:new_year});
     }
   }
   isValidYear(year):boolean {
@@ -286,24 +293,30 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     }
   }
   monthChanged = (ev) => {
+    log.info('monthChanged', ev.target.value);
     const new_month = parseInt(ev.target.value);
-    const new_date = this.state.date.clone().month(new_month);
-    this.setDate(new_date);
+    this.setDate({
+      month: new_month,
+      year: this.props.year,
+    });
   }
   yearChanged = (ev) => {
+    log.info('yearChanged', ev.target.value);
     const new_year = parseInt(ev.target.value);
     this.setState({year: ev.target.value});
     if (this.isValidYear(new_year)) {
-      const new_date = this.state.date.clone().year(new_year);
-      this.setDate(new_date);
+      this.setDate({
+        month: this.state.month,
+        year: new_year,
+      });
     }
   }
-  setDate(date:moment.Moment) {
-    log.info('setDate', date && date.format());
-    this.props.onChange(date);
+  setDate(args:{month:number, year:number}) {
+    log.info('setDate', args);
+    this.props.onChange(args);
     this.setState({
-      date,
-      year: date.year().toString(),
+      month: args.month,
+      year: args.year.toString(),
     });
   }
 }

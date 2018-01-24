@@ -36,6 +36,11 @@ export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
   log.info(`local time: ${moment().format()} -- utc time: ${moment.utc().format()}`);
+  log.info((new Date()).toString())
+  log.info((new Date()).toLocaleString())
+  log.info((new Date()).getTimezoneOffset())
+  log.info(navigator.userAgent)
+  log.info(moment.version)
 
   if (args) {
     if (args.noanimation) {
@@ -267,14 +272,13 @@ class Application extends React.Component<ApplicationProps, any> {
                   </div>
                   <div>
                     <WithRouting func={(routing) => {
-                      let date = moment().month(routing.params.month-1).year(routing.params.year).startOf('month');
-                      log.info('rendering monthselector with date', date.format());
                       return (<MonthSelector
                         className="big"
-                        date={date}
-                        onChange={newdate => {
-                          log.info('monthselector newdate', newdate && newdate.format());
-                          routing.setPath(`/y${newdate.year()}m${newdate.month()+1}${routing.rest}`);
+                        month={routing.params.month-1}
+                        year={routing.params.year}
+                        onChange={({month, year}) => {
+                          log.info('monthselector newdate', month, year);
+                          routing.setPath(`/y${year}m${month+1}${routing.rest}`);
                         }}
                       />);
                     }} />

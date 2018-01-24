@@ -395,9 +395,11 @@ class BucketKindDetails extends React.Component<{
       <td>{sss('Target date:')}</td>
       <td>
         <MonthSelector
-          date={dt}
-          onChange={newdate => {
-            manager.store.buckets.update(bucket.id, {end_date: ts2db(newdate)})
+          month={dt.month()}
+          year={dt.year()}
+          onChange={({month, year}) => {
+            let new_date = moment().month(month).year(year).startOf('month');
+            manager.store.buckets.update(bucket.id, {end_date: ts2db(new_date)})
           }} />
       </td>
     </tr>
