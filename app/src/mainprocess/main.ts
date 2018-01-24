@@ -153,7 +153,7 @@ app.on('browser-window-created', (ev, win) => {
 })
 app.on('browser-window-focus', (ev, win) => {
   const url = URL.parse(win.webContents.getURL());
-  if (url.protocol === 'buckets:' && url.path === '/budget/index.html') {
+  if (url.protocol === 'buckets:' && url.path.startsWith('/budget/index.html')) {
     // budget window
     updateMenu({budget:true});
   } else {

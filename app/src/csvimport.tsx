@@ -41,8 +41,11 @@ export async function parseCSVStringWithHeader<T>(guts:string):Promise<ParsedCSV
 }
 
 export function csvFieldToCents(x:string) {
-  let result = decimal2cents(x.replace(/[^-0-9\.,]/g, ''));
-  return result;
+  x = x.replace(/[^-\(\)0-9\.,]/g, '')
+  if (x.startsWith('(') && x.endsWith(')')) {
+    x = `-${x.substr(1, x.length-1)}`;
+  }
+  return decimal2cents(x);
 }
 
 export interface CSVMapping {
@@ -223,7 +226,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
               let value = mapping.fields[header] || '';
               return <th
                   key={header}
-                  colSpan={value==='posted' ? 2 : 1 }>
+                  colSpan={value==='posted'||value==='amount' ? 2 : 1 }>
                 <div>
                   <select
                     value={value}
@@ -284,7 +287,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
               let value = mapping.fields[header] || '' 
               return <th
                 key={header}
-                colSpan={value === 'posted' ? 2 : 1}
+                colSpan={value === 'posted'|| value === 'amount' ? 2 : 1}
               >{header}</th>
             })}
           </tr>
@@ -311,6 +314,16 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   }
                   extra_cell = <td key={header+'formatted'} className="nobr">
                     {datevalue}
+                  </td>
+                } else if (value === 'amount') {
+                  let money;
+                  try {
+                    money = <Money value={csvFieldToCents(row[header])} />
+                  } catch(err) {
+                    money = <span className="error">{sss('Invalid')}</span>
+                  }
+                  extra_cell = <td key={header+'parsed'} className="nobr">
+                    {money}
                   </td>
                 }
                 return [
