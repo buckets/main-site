@@ -86,7 +86,8 @@ if (electron_is.windows()) {
   })
 }
 
-app.on('ready', function() {
+app.on('ready', async () => {
+  
   // Create the Menu
   updateMenu();
 

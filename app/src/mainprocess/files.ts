@@ -12,7 +12,7 @@ import { Timestamp, serializeTimestamp, ensureLocalMoment } from '../time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
-import { addRecentFile } from './persistent'
+import { addRecentFile, PSTATE } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import { onlyRunInMain, Room } from '../rpc'
@@ -201,7 +201,12 @@ export class BudgetFile implements IBudgetFile {
    *  It might open the set of last-opened windows.
    */
   openDefaultWindows() {
-    this.openWindow(`/budget/index.html`);
+    const qs = querystring.stringify({
+      args: JSON.stringify({
+        noanimation: !PSTATE.animation,
+      })
+    })
+    this.openWindow(`/budget/index.html?${qs}`);
   }
 
   /**

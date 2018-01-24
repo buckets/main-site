@@ -214,39 +214,38 @@
   document.getElementById('version').innerHTML = `v${remote.app.getVersion()}`;
   
   let recent_list = document.getElementById('recent-list');
-  getRecentFiles()
-  .then(recentFiles => {
-    recentFiles.slice(0,4).forEach(path => {
-      let parsed = Path.parse(path);
-      let a = document.createElement('a');
-      a.setAttribute('href', '#');
-      a.classList.add('document');
-      a.addEventListener('click', (ev) => {
-        openBudgetFile(path)
-        ev.preventDefault();
-        return false;
-      }, false);
+  let recentFiles = getRecentFiles();
+  
+  recentFiles.slice(0,4).forEach(path => {
+    let parsed = Path.parse(path);
+    let a = document.createElement('a');
+    a.setAttribute('href', '#');
+    a.classList.add('document');
+    a.addEventListener('click', (ev) => {
+      openBudgetFile(path)
+      ev.preventDefault();
+      return false;
+    }, false);
 
-      let icon = document.createElement('img');
-      icon.src = '../assets/img/doc_icon.png';
-      a.appendChild(icon);
+    let icon = document.createElement('img');
+    icon.src = '../assets/img/doc_icon.png';
+    a.appendChild(icon);
 
-      let guts = document.createElement('div');
-      guts.classList.add('guts');
-      a.appendChild(guts);
+    let guts = document.createElement('div');
+    guts.classList.add('guts');
+    a.appendChild(guts);
 
-      let title = document.createElement('span');
-      title.classList.add('title');
-      title.innerText = parsed.name;
-      guts.appendChild(title);
+    let title = document.createElement('span');
+    title.classList.add('title');
+    title.innerText = parsed.name;
+    guts.appendChild(title);
 
-      let details = document.createElement('span');
-      details.classList.add('details');
-      details.innerText = parsed.dir;
-      guts.appendChild(details);
+    let details = document.createElement('span');
+    details.classList.add('details');
+    details.innerText = parsed.dir;
+    guts.appendChild(details);
 
-      recent_list.appendChild(a);
-    })
+    recent_list.appendChild(a);
   })
   </script>
 </body>

@@ -27,6 +27,7 @@ const req = function() {
 }();
 
 const hostname = window.location.hostname;
+const querystring = require('querystring');
 const { start } = req('./src/wwwroot/budget/index.js');
 const electron_is = req('electron-is');
 let body = document.body;
@@ -37,7 +38,14 @@ if (electron_is.windows()) {
 } else if (electron_is.linux()) {
   document.body.classList.add('os-linux');
 }
-start(document.getElementById('root'), hostname);
+
+const qs = querystring.parse(window.location.search.substr(1));
+const args = JSON.parse(qs.args);
+console.log('args', args);
+
+start(document.getElementById('root'), hostname, {
+  noanimation: args.noanimation,
+});  
 </script>
 </body>
 </html>
