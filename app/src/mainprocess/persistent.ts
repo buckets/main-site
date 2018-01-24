@@ -2,8 +2,10 @@ import { app, remote, ipcMain, ipcRenderer } from 'electron'
 import * as electron_is from 'electron-is'
 import * as Path from 'path'
 import * as fs from 'fs'
-import * as log from 'electron-log'
 import { EventSource } from '../events'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(persistent)');
 
 export interface PersistentState {
   recentFiles: string[];

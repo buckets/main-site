@@ -2,14 +2,17 @@ import * as os from 'os'
 import * as querystring from 'querystring'
 import * as Path from 'path'
 import * as rp from 'request-promise'
-import * as log from 'electron-log'
 import * as moment from 'moment'
+import * as electron_log from 'electron-log'
 import * as _ from 'lodash'
 import { app, dialog, shell, BrowserWindow } from 'electron'
 import { sss, tx } from './i18n'
 import { APP_ROOT } from './mainprocess/globals'
 import { onlyRunInMain } from './rpc'
 import { isRegistered } from './mainprocess/drm'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(errors)');
 
 const SUBMIT_URL = process.env.BUCKETS_BUGREPORT_URL || 'https://www.budgetwithbuckets.com/_api/bugreport';
 
@@ -37,7 +40,7 @@ export function openBugReporter(args:{
   let qs = {
     template: args.template || '',
     nittygritty: nittyGritty(args.err),
-    logfile_path: log.transports.file.file,
+    logfile_path: electron_log.transports.file.file,
   }
   win.loadURL(`file://${Path.join(APP_ROOT, 'src/wwwroot/misc/reportbug.html')}?${querystring.stringify(qs)}`)
 }
@@ -51,7 +54,7 @@ export async function submitBugReport(body:{
     ContentType: string;
   }>
 }) {
-  log.debug('Submitting bug report to', SUBMIT_URL)
+  log.info('Submitting bug report to', SUBMIT_URL)
   try {
     let r = await rp({
       method: 'POST',
@@ -61,7 +64,7 @@ export async function submitBugReport(body:{
       }, body),
       json: true,
     })
-    log.debug('Bug reported submitted', r);
+    log.info('Bug reported submitted', r);
   } catch (err) {
     log.error('Error submitting bug report');
     log.error(err);

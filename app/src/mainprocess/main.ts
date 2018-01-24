@@ -2,7 +2,7 @@
 // See LICENSE for details.
 
 import {app, session, protocol, BrowserWindow} from 'electron'
-import * as log from 'electron-log'
+import * as electron_log from 'electron-log'
 import * as electron_is from 'electron-is'
 import {autoUpdater} from 'electron-updater'
 import * as URL from 'url'
@@ -11,16 +11,20 @@ import * as moment from 'moment'
 import { startLocalizing } from '../i18n'
 import { updateMenu } from './menu'
 import { BudgetFile } from './files'
-import { APP_ROOT, IS_DEBUG } from './globals'
+import { APP_ROOT } from './globals'
 import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
+import { PrefixLogger } from '../logging'
 
-autoUpdater.logger = log;
-log.transports.file.level = IS_DEBUG ? 'silly' : 'info';
-log.transports.file.maxSize = 10 * 1024 * 1024;
+autoUpdater.logger = electron_log;
+electron_log.transports.file.level = 'silly';
+electron_log.transports.file.maxSize = 10 * 1024 * 1024;
+
+const log = new PrefixLogger('(main)')
+
 log.info(`STARTING v${app.getVersion()}`);
-log.info(`Log level: ${log.transports.file.level}`);
+log.info(`Log level: ${electron_log.transports.file.level}`);
 log.info(`Local time: ${moment().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
 
@@ -133,17 +137,18 @@ function eventuallyGetURL(win:Electron.BrowserWindow):Promise<string> {
   });
 }
 app.on('browser-window-created', (ev, win) => {
-  if (win !== wiz_win) {
-    eventuallyGetURL(win)
-    .then(url => {
+  eventuallyGetURL(win)
+  .then(url => {
+    log.info('window opened to', url);
+    if (win !== wiz_win) {
       if (url.startsWith('buckets://')) {
         // budget window
         closeWizard();
       } else {
         // non-budget utility window
       }
-    })
-  }
+    }
+  })
 })
 app.on('browser-window-focus', (ev, win) => {
   const url = URL.parse(win.webContents.getURL());

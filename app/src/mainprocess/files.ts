@@ -119,6 +119,7 @@ export class BudgetFile implements IBudgetFile {
   readonly id:string;
   readonly filename:string;
   constructor(filename?:string) {
+    log.info('opening', filename);
     this.id = uuid();
     this.room = new Room<BudgetFileEvents>(this.id);
     this.filename = filename || '';
@@ -304,7 +305,7 @@ export class BudgetFile implements IBudgetFile {
             if (item.isPaused()) {
               logger.info(`${state} - Download is paused`)
             } else {
-              logger.debug(`${state} - received bytes: ${item.getReceivedBytes()}`)
+              logger.info(`${state} - received bytes: ${item.getReceivedBytes()}`)
             }
           }
         })

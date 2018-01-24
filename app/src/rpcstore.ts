@@ -1,4 +1,3 @@
-import * as log from 'electron-log'
 import { v4 as uuid } from 'uuid';
 import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
 import { ipcMain, ipcRenderer } from 'electron'
@@ -7,6 +6,9 @@ import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
 import { BankMacroStore } from './models/bankmacro'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(rpcstore)')
 
 //--------------------------------------------------------------------------------
 // serializing

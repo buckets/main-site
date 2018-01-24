@@ -453,7 +453,6 @@ class RecordPage extends React.Component<RecordPageProps, {
     };
   }
   componentWillReceiveProps(nextProps) {
-    console.log('will receive props', nextProps);
     this.setState({
       recording: nextProps.recording,
     })
@@ -659,7 +658,6 @@ class RecordPage extends React.Component<RecordPageProps, {
             first={<button>Delete all</button>}
             second={<button className="delete"
               onClick={(ev) => {
-                console.log('clearing director');
                 director.clear();
               }}>Confirm delete</button>}
           />
@@ -812,7 +810,7 @@ export async function start(args:{
             }
           })
           .then(() => {
-            log.debug('autoplay done', sync_result);
+            log.info('autoplay done', sync_result);
             if (args.response_id) {
               ipcRenderer.send('buckets:playback-response', sync_result)
             }

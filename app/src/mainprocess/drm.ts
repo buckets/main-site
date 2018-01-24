@@ -1,5 +1,4 @@
 import * as Path from 'path'
-import * as log from 'electron-log'
 import { app, remote, shell, BrowserWindow, dialog } from 'electron'
 import { APP_ROOT } from './globals'
 import * as jwt from 'jsonwebtoken'
@@ -8,6 +7,9 @@ import * as moment from 'moment'
 import { readState, modifyState } from './persistent'
 import { onlyRunInMain } from '../rpc'
 import { sss } from '../i18n'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(drm)')
 
 let ISREGISTERED = null;
 export function isRegistered():boolean {

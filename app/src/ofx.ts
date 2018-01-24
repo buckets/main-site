@@ -20,7 +20,7 @@ function parseOFXDate(x:string):moment.Moment {
 
 export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
   // XXX this does not handle the case where there are multiple accounts in a single file.
-  log.silly('Parsing OFX data', ofx.length);
+  log.info('Parsing OFX data', ofx.length);
   let parsed = await parseOFX(ofx);
   if (parsed.header.OFXHEADER === undefined) {
     throw new Error('Not a valid OFX file');

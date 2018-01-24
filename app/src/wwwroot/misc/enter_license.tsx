@@ -1,8 +1,10 @@
 import { sss, localizeThisPage } from '../../i18n'
 import { remote } from 'electron'
-const {app} = remote;
-import * as log from 'electron-log';
+import { PrefixLogger } from '../../logging'
 import { enterLicense, openBuyPage } from '../../mainprocess/drm';
+
+const log = new PrefixLogger('(enter_license)')
+const { app } = remote;
 
 let state = 'init';
 let textarea_box = document.getElementById('license-input');
@@ -32,6 +34,7 @@ button.addEventListener('click', () => {
       status_div.classList.add('error');
     }
   } else if (state === 'success') {
+    log.info('Entered license');
     app.relaunch();
     app.quit();
   }

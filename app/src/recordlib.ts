@@ -438,13 +438,13 @@ export class Recording {
           || last_step.keys[0].key === 'Tab')) {
         // stick the change before the Enter/Tab
         this.steps.splice(this.steps.length-1, 0, step);
-        log.debug('swap change and keypress');
+        log.info('swap change and keypress');
         this.events.change.emit(true);
         return;
       } else if (isChangeStep(last_step)) {
         if (_.isEqual(last_step.element, step.element)) {
           // remove double change
-          log.debug('removing double change');
+          log.info('removing double change');
           this.steps.splice(this.steps.length-1, 1, step);
           this.events.change.emit(true);
           return;
@@ -459,7 +459,7 @@ export class Recording {
           && !last_step.keys.slice(-1)[0].input_delimiter) {
           // combine keypresses
           last_step.keys = last_step.keys.concat(step.keys);
-          log.debug('combine keys');
+          log.info('combine keys');
           this.events.change.emit(true);
           return;
         }
@@ -471,13 +471,13 @@ export class Recording {
         if (isKeyPressStep(last_step) && last_step.keys[0].key === 'Enter') {
           // pressed enter on a form element that caused a submit
           // don't record the click
-          log.debug('skip click step caused by pressing Enter');
+          log.info('skip click step caused by pressing Enter');
           return;
         }
       } else {
         // actual mouse click
         if (isFocusStep(last_step) && _.isEqual(last_step.element, step.element)) {
-          log.debug('removing focus before click');
+          log.info('removing focus before click');
           this.steps.splice(this.steps.length-1, 1, step);
           this.events.change.emit(true);
           return;
@@ -722,7 +722,7 @@ export class Recorder {
       childList: true,
       subtree: true,
     })
-    log.debug('Started observing document for mutations');
+    log.info('Started observing document for mutations');
     const checkInputsForChanges = (emit:boolean=true) => {
       // console.log('checkInputsForChanges', input_elements.length);
       setTimeout(() => {
@@ -1020,7 +1020,7 @@ export class RecordingDirector<T> {
     tab.rpc.addHandlers({
       'echo': () => 'echo',
       'rec:step': (step:RecStep) => {
-        logger.debug(`rec:step state=${this.state} type=${step.type}`);
+        logger.info(`rec:step state=${this.state} type=${step.type}`);
         let tab_step:TabRecStep = Object.assign(step, {
           tab_id
         })
@@ -1075,7 +1075,7 @@ export class RecordingDirector<T> {
     })
 
     if (tab.init_url) {
-      logger.debug('navigating to init_url', tab.id, tab.init_url);
+      logger.info('navigating to init_url', tab.id, tab.init_url);
       webview.src = tab.init_url;
     }
   }
@@ -1209,7 +1209,7 @@ export class RecordingDirector<T> {
 
       // Move to next step
       this.events.step_finished.emit({step_number: this.step_index});
-      log.debug(`done #${this.step_index} tab#${step.tab_id} ${step.type}`);
+      log.info(`done #${this.step_index} tab#${step.tab_id} ${step.type}`);
       this.step_index++;
 
       return true;
@@ -1291,7 +1291,7 @@ export class RecordingDirector<T> {
 
       let { webview } = this.tabs[step.tab_id];
       this.events.child_ready_for_control.onceSuccessfully(tab_id => {
-        log.debug('got child_ready_for_control', tab_id, step.tab_id);
+        log.info('got child_ready_for_control', tab_id, step.tab_id);
         if (tab_id === step.tab_id) {
           if (timer) {
             clearTimeout(timer);
@@ -1472,7 +1472,7 @@ function sendClick(webview:Electron.WebviewTag, pos:{x:number, y:number}) {
     clickCount: 1,
     button: 'left',
   };
-  log.debug('sending click', {x: send.x, y: send.y});
+  log.info('sending click', {x: send.x, y: send.y});
   webview.sendInputEvent(send)
   webview.sendInputEvent({
     type: 'mouseUp',

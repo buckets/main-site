@@ -1,4 +1,3 @@
-import * as log from 'electron-log'
 import * as electron_is from 'electron-is'
 import * as https from 'https'
 import * as Path from 'path'
@@ -7,6 +6,9 @@ import { APP_ROOT } from './globals'
 import { autoUpdater } from 'electron-updater'
 import { sss } from '../i18n';
 import { readState, modifyState } from './persistent'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(updater)');
 
 let win:Electron.BrowserWindow;
 
@@ -21,13 +23,13 @@ export function checkForUpdates() {
     })
   })
   autoUpdater.on('update-not-available', info => {
-    log.info('update not available', info);
+    log.info('Update not available');
     setUpdateWindowStatus({
       state: 'not-available',
     })
   })
   autoUpdater.on('update-available', async (info) => {
-    log.info('update available', info);
+    log.info('Update available', info.version, info.releaseDate);
     let new_version = info.version;
     let persistent_state = await readState();
     let alert_user = true;

@@ -73,7 +73,7 @@ export class Room<T> {
     if (this.isrenderer) {
       // renderer process
       ipcRenderer.send(`${this.key}.join`);
-      log.silly(this.key, 'joining');
+      log.info(this.key, 'joining');
       ipcRenderer.on(`${this.key}.message`, (ev, channel, message) => {
         let es = this.eventSources[channel];
         if (es) {
@@ -89,7 +89,7 @@ export class Room<T> {
         }
 
         let wc = webContents.fromId(wc_id);
-        log.silly(this.key, 'renderer joined:', wc_id)
+        log.info(this.key, 'renderer joined:', wc_id)
         this.webContents.set(wc_id, wc);
         wc.on('destroyed', () => {
           this.webContents.delete(wc_id);

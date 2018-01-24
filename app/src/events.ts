@@ -1,4 +1,5 @@
-import * as log from 'electron-log'
+import { PrefixLogger } from './logging'
+const log = new PrefixLogger('(events)')
 
 /**
  * Generic EventSource interface.

@@ -206,7 +206,7 @@ class MacroSync implements ASyncening {
 
   }
   async start():Promise<SyncResult> {
-    log.debug('MacroSync start', this.onOrAfter.format('l'), this.before.format('l'))
+    log.info('MacroSync start', this.onOrAfter.format('l'), this.before.format('l'))
     let macros = (await this.store.bankmacro.list()).filter(macro => macro.enabled);
     let { onOrAfter, before } = this;
     let errors = [];

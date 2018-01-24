@@ -178,10 +178,10 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
   }
   increment(amount:number) {
     return () => {
-      log.silly('click increment', amount);
-      log.silly('current date', this.state.date && this.state.date.format());
+      log.info('click increment', amount);
+      log.info('current date', this.state.date && this.state.date.format());
       const new_date = this.state.date.clone().add(amount, 'months');
-      log.silly('new_date', new_date && new_date.format());
+      log.info('new_date', new_date && new_date.format());
       this.setDate(new_date);
     }
   }
@@ -206,7 +206,7 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     }
   }
   setDate(date:moment.Moment) {
-    log.silly('setDate', date && date.format());
+    log.info('setDate', date && date.format());
     this.props.onChange(date);
     this.setState({
       date,

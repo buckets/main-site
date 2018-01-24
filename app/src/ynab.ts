@@ -2,7 +2,6 @@ import * as fs from 'fs-extra-promise'
 import * as Path from 'path'
 
 import { dialog } from 'electron'
-import * as log from 'electron-log'
 
 import { sss } from './i18n'
 import { IStore } from './store'
@@ -12,6 +11,10 @@ import { decimal2cents } from './money'
 import { ensureLocalMoment } from './time'
 
 import { reportErrorToUser } from './errors'
+
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(ynab)')
 
 function number2cents(n:number):number {
   return decimal2cents(n.toString());

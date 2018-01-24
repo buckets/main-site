@@ -1,5 +1,5 @@
-import * as log from 'electron-log'
 import * as moment from 'moment'
+import { PrefixLogger} from './logging'
 import { EventSource } from './events'
 import { remote, app } from 'electron'
 import { readState } from './mainprocess/persistent'
@@ -9,6 +9,8 @@ import { IMessages, ILangPack } from './langs/spec'
 import {pack as en} from './langs/en';
 import {pack as es} from './langs/es';
 import {pack as he} from './langs/he';
+
+const log = new PrefixLogger('(i18n)')
 
 const packs:{[x:string]:ILangPack} = {en, es, he};
 
@@ -29,11 +31,11 @@ class TranslationContext {
     if (packs[x]) {
       this._langpack = packs[x];
       this._locale = x;
-      log.debug(`locale set to: ${x}`);
+      log.info(`locale set to: ${x}`);
     } else if (packs[x.substr(0, 2)]) {
       this._locale = x.substr(0, 2);
       this._langpack = packs[this._locale];
-      log.debug(`locale set to: ${this._locale}`);
+      log.info(`locale set to: ${this._locale}`);
     } else {
       log.warn(`Not setting locale to unknown: ${x}`);
       was_set = false;
@@ -80,7 +82,7 @@ class TranslationContext {
     })
     if (!args.skipwatch) {
       this.localechanged.on(() => {
-        log.debug('Re-localizing page', this.locale);
+        log.info('Re-localizing page', this.locale);
         this.localizeThisPage({skipwatch:true});
       })
     }

@@ -1,6 +1,5 @@
 import * as Path from 'path'
 import * as sqlite from 'sqlite'
-import * as log from 'electron-log'
 import * as fs from 'fs-extra-promise'
 
 import { PrefixLogger } from '../logging'
@@ -17,6 +16,8 @@ import { BankMacroStore } from '../models/bankmacro'
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
 import { sss } from '../i18n'
+
+const log = new PrefixLogger('(dbstore)')
 
 export class NotFound extends Error {
   toString() {
@@ -99,8 +100,8 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
     old_migrations = await db.all('SELECT id,name FROM migrations');
     logger.info('Old migrations present');
   } catch(err) {
-
   }
+
   if (old_migrations.length) {
     logger.info('Switching to new migrations method');
     // old style of migrations
@@ -114,10 +115,9 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
   }
 
   const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
-  logger.silly('Applied migrations:', applied)
+  logger.info('Applied migrations:', applied)
 
   // apply patches as needed
-  logger.silly('migrations_path', migrations_path);
   const migrations = await new Promise<string[]>((resolve, reject) => {
     fs.readdir(migrations_path, (err, files) => {
       if (err) {
@@ -127,7 +127,6 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
       }
     })
   })
-  logger.silly('All migrations:', migrations);
   migrations.sort();
   let encountered = new Set<string>();
   for (const path of migrations) {
@@ -135,13 +134,14 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
     if (encountered.has(name)) {
       throw new Error('Duplicate schema patch name not allowed');
     }
+    const plog = logger.child(`(patch ${name})`)
     encountered.add(name);
     if (applied.has(name)) {
-      logger.debug('Patch already applied:', name);
+      plog.info('already applied');
     } else {
-      logger.info('Applying patch', name);
+      plog.info('applying');
       let fullpath = Path.resolve(migrations_path, path);
-      logger.silly(name, 'patch fullpath', fullpath)
+      plog.info('fullpath', fullpath)
       const fullsql = await new Promise<string>((resolve, reject) => {
         fs.readFile(fullpath, 'utf-8', (err, data) => {
           if (err) {
@@ -151,14 +151,16 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
           }
         });
       });
-      logger.silly(name, 'fullsql', fullsql);
+      plog.info('sql', fullsql);
       try {
         await db.run('BEGIN EXCLUSIVE TRANSACTION');
         await db.exec(fullsql);
         await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
         await db.run('COMMIT TRANSACTION');
+        plog.info('commit');
       } catch(err) {
-        logger.error('Error while running patch', name);
+        plog.error('Error while running patch');
+        plog.warn(err);
         await db.run('ROLLBACK');
 
         const patch_num = Number(name.split('-')[0]);
@@ -170,17 +172,23 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
           )) {
           // we'll pretend it succeeded
           await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
-          logger.warn(err.toString());
-          logger.info(name, 'Assuming patch was already applied');
+          plog.warn(err.toString());
+          plog.info('Assuming patch was already applied');
         } else {
           // legitimate error
           throw err;
         }
       }
-      logger.info('Applied patch', name);
+      plog.info('Applied');
     }
   }
   logger.info('schema is in sync');
+
+  logger.info('schema list:')
+  let sqlite_master = await db.all('SELECT * FROM sqlite_master');
+  sqlite_master.forEach(item => {
+    logger.info(`${item.type} ${item.name}`);
+  })
 }
 
 /**

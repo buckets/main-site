@@ -73,10 +73,10 @@ export interface CSVAssignAccountResponse {
 export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, args:{
   force_mapping?:boolean,
 } = {}):Promise<ImportableAccountSet> {
-  log.silly('csv2importable', guts.length);
+  log.info('csv2importable', guts.length);
   const parsed = await parseCSVStringWithHeader(guts);
   const fingerprint = hashStrings(parsed.headers);
-  log.silly('fingerprint', fingerprint);
+  log.info('fingerprint', fingerprint);
   let csv_mapping = await store.accounts.getCSVMapping(fingerprint);
   if (csv_mapping === null || args.force_mapping) {
     // no current mapping
@@ -101,9 +101,8 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   }
 
   // Use the mapping
-  log.silly('there is a mapping');
   const mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
-  log.silly(mapping);
+  log.info('mapping', mapping);
   let hashcount = {};
   let inverted_mapping = {
     amount: [],
@@ -141,7 +140,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       fi_id,
     }
   })
-  log.silly('transactions', transactions.length);
+  log.info('transactions', transactions.length);
 
   // Get an account id
   const need:CSVNeedsAccountAssigned = {
@@ -149,7 +148,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     transactions,
   }
   bf.room.broadcast('csv_needs_account_assigned', need);
-  log.silly('csv_needs_account_assigned', need.id);
+  log.info('csv_needs_account_assigned', need.id);
   const {account_id, redo_mapping} = await new Promise<CSVAssignAccountResponse>((resolve, reject) => {
     bf.room.events('csv_account_response').onceSuccessfully(msg => {
       if (msg.id === need.id) {
@@ -159,12 +158,12 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       return false;
     })
   });
-  log.debug('csv_account_response', account_id, redo_mapping);
+  log.info('csv_account_response', account_id, redo_mapping);
 
   if (redo_mapping) {
     // It's probably better to not do this recursively, but how many
     // times are people going to recurse?  Famous last words? :)
-    log.debug('redoing mapping');
+    log.info('redoing mapping');
     return await csv2importable(store, bf, guts, {force_mapping: true});
   }
 

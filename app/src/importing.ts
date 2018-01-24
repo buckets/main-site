@@ -47,26 +47,26 @@ export interface ImportResult {
  *  automatically finish the import.
  */
 export async function importFile(store:IStore, bf:IBudgetFile, path:string):Promise<ImportResult> {
-  log.silly('importFile', path);
+  log.info('importFile', path);
   let set:ImportableAccountSet;
   
   let data = await fs.readFileAsync(path, {encoding:'utf8'});
-  log.silly('read data', data.length);
+  log.info('read data', data.length);
   try {
-    log.silly('Trying OFX/QFX parser');
+    log.info('Trying OFX/QFX parser');
     set = await ofx2importable(data);
   } catch(err) {
-    log.debug('Error reading file as OFX');
-    log.debug(err);
+    log.info('Error reading file as OFX');
+    log.info(err);
   }
 
   if (!set && path.toLowerCase().endsWith('.csv')) {
-    log.silly('Trying CSV parser');
+    log.info('Trying CSV parser');
     try {
       set = await csv2importable(store, bf, data);
     } catch(err) {
-      log.debug('Error reading file as CSV');
-      log.debug(err);
+      log.info('Error reading file as CSV');
+      log.info(err);
     }
   }
 
