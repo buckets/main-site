@@ -249,7 +249,35 @@ export class AccountStore {
         })
     return rows[0][0];
   }
-  async exportTransactions() {
+  async exportTransactions(args:{
+    onOrAfter?: Timestamp,
+    before?: Timestamp,
+  } = {}):Promise<Array<{
+    t_id: number,
+    t_amount: number,
+    t_memo: string,
+    t_posted: string,
+    a_name: string,
+    bt_id: number,
+    bt_amount: number,
+    b_name: string,
+  }>> {
+    let params:any = {};
+    let where_parts = [];
+
+    if (args.onOrAfter) {
+      where_parts.push('t.posted >= $onOrAfter');
+      params.$onOrAfter = ts2db(args.onOrAfter);
+    }
+    if (args.before) {
+      where_parts.push('t.posted < $before');
+      params.$before = ts2db(args.before);
+    }
+
+    let where = '';
+    if (where_parts.length) {
+      where = `WHERE ${where_parts.join(' AND ')}`;
+    }
     return await this.store.query(`SELECT
       t.id as t_id,
       t.amount as t_amount,
@@ -267,6 +295,7 @@ export class AccountStore {
         ON t.id = bt.account_trans_id
       LEFT JOIN bucket as b
         ON bt.bucket_id = b.id
+    ${where}
     ORDER BY
       t.posted DESC,
       t.id DESC`, {

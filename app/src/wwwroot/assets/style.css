@@ -522,6 +522,10 @@ table.vertical-align-top th,
 table.vertical-align-top td {
   vertical-align: top;
 }
+td.top,
+th.top {
+  vertical-align: top;
+}
 
 
 table.ledger {
