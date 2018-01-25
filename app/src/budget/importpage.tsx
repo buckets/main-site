@@ -294,7 +294,7 @@ export class ImportPage extends React.Component<{
     })
   }
   createMacro = async () => {
-    let macro = await manager.store.bankmacro.add({name: sss('')});
+    let macro = await manager.store.bankmacro.add({name: ''});
     current_file.openRecordWindow(macro.id);
   }
   connect = async () => {
