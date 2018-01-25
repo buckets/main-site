@@ -16,9 +16,14 @@ Meticulous
 
 Buckets exists because existing budgeting offerings are too expensive, too privacy-invasive and not flexible enough for what I want to do.
 
+Because we like budgeting and we ... why does it exist?  And we hope other people like budgeting, too.  And we want to make money.
+
 **What mission is my business attempting to accomplish?**
 
-Buckets wants to provide private, beautiful budgeting that you'll stick with to pull yourself out of debt and toward achieving your financial goals.
+Buckets wants to provide private, beautiful budgeting that you'll stick with to pull yourself out of debt and toward achieving financial goals you didn't think were in reach.
+
+Facilitate people using their money wisely.  And keep track of their money.
+
 
 ## Approach
 
@@ -26,8 +31,14 @@ Buckets wants to provide private, beautiful budgeting that you'll stick with to 
 
 - Installable app (privacy/control)
 - Exceptional, human support
-- Inexpensive products
+- Inexpensive product
 - Fun
+
+- It's private.
+- I feel like it's simpler than others, but I haven't tried.
+- It's simple and straightforward
+- It's easy to use.
+
 
 **What makes my service or product better or unique?**
 
@@ -35,7 +46,13 @@ Buckets wants to provide private, beautiful budgeting that you'll stick with to 
 - The privacy
 - Cross-platform
 - Friendly, effective support
-- The little extras (Amazon)
+- The little extras (Amazon, Split transactions super easy)
+
+- It's with buckets
+- You can keep track of money in multiple accounts
+- It's thorough (unlike a lot of free offerings).
+- We're not selling information
+- We're not trying to sell them other stuff.
 
 ## Customer
 
@@ -48,11 +65,18 @@ Buckets wants to provide private, beautiful budgeting that you'll stick with to 
 - Dads
 - Students
 
+- All adults.
+- English speaking (or Spanish)
+- Mostly American.  You could do Canadian.
+
 **What type of lifestyle does my business encourage and promote?**
 
 - Frugal living
 - Giving
 - Accommodating (don't make fun of other companies)
+
+- Making conscious choices about your money.
+- It also, I love that we know that we can go to Florida twice this year because we are saving for it every month.   There's something liberating about that.  Exciting, peace of mind.  Knowing that there's money for the things that are important.
 
 ## Values
 
@@ -62,6 +86,11 @@ Buckets wants to provide private, beautiful budgeting that you'll stick with to 
 - Kind
 - Smart
 - Effective
+
+- Moneywise
+- Planning
+- Budgeting
+- Optimistic
 
 
 # To do
