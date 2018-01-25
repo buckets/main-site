@@ -194,11 +194,11 @@ export class SearchPage extends React.Component<{
     let status;
     if (this.state.query.length >= this.min_query_len && !running && !accounts_table && !buckets_table && !atrans_table && !btrans_table) {
       status = <div>
-        Nothing found matching: <code>{this.state.query}</code>
+        {sss('Nothing found matching:')} <code>{this.state.query}</code>
       </div>
     } else if (running) {
       status = <div>
-        <span className="fa fa-refresh fa-spin"></span> Searching for: <code>{this.state.query}</code>
+        <span className="fa fa-refresh fa-spin"></span> {sss('Searching...')}
       </div>
     }
 
@@ -206,7 +206,7 @@ export class SearchPage extends React.Component<{
       <div className="rows">
         <div className="subheader">
           <div>
-            Search: <DebouncedInput
+            {sss('Search:')} <DebouncedInput
               autoFocus
               value={this.state.query}
               onChange={val => {

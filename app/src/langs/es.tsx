@@ -60,7 +60,7 @@ const messages:IMessages = {
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
   },
   "Delete account": {
-    val: "Borrar cuenta",
+    val: "Eliminar cuenta",
     translated: true,
     src: ["src/budget/accounts.tsx line 132"],
     h: "aJP8/jR9vxjzpjDV69qVSi1XWSXKUhiJJUOrI1iunMg=",
@@ -72,7 +72,7 @@ const messages:IMessages = {
     h: "iwS2+dAqfDOEtU5SUm1d1oPFTe0+JT5NCm4nH2SrglE=",
   },
   "Confirm delete": {
-    val: "Confirmar borrar",
+    val: "Confirmar eliminar",
     translated: true,
     src: ["src/budget/accounts.tsx line 140","src/wwwroot/record/record.tsx line 419"],
     h: "dKo5kMigc5p6w58RgAMwEVjNB+uwU3D0zse0HbHbiQU=",
@@ -855,7 +855,7 @@ const messages:IMessages = {
     h: "bMXfNfAzjiMOnmM+rZmR8I9iyrRaMmSXja7cZ0eGcwU=",
   },
   "Confirm delete?": {
-    val: "Confirmar borrar?",
+    val: "Confirmar eliminar?",
     translated: true,
     src: ["src/budget/importpage.tsx line 359","src/budget/importpage.tsx line 383"],
     h: "m+7d5sl049xaPiNCOrhWnQKaw3HfiPQOZ5x7tuKVVd8=",
@@ -1436,7 +1436,7 @@ Would you like to purchase a license now?`,
     h: "w8hRIxBBNWtXNPcYtQ4t/mTHfPF66U/mJbVpOiIDgYE=",
   },
   "Delete": {
-    val: "Borrar",
+    val: "Eliminar",
     translated: true,
     src: ["src/budget/connections.tsx line 184"],
     h: "sm3jcrSw6qxgICiEpy25imvm6QNueF6oZ+oBxfeSEJg=",
