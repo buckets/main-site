@@ -538,6 +538,10 @@ table.vertical-align-top th,
 table.vertical-align-top td {
   vertical-align: top;
 }
+td.top,
+th.top {
+  vertical-align: top;
+}
 
 
 table.ledger {
@@ -1034,6 +1038,13 @@ button.makeitrain[disabled] {
   100% {
     box-shadow: 0px 0px 34px 2px var(--yellow)
   }
+}
+
+textarea.paragraph {
+  width: 30rem;
+  min-height: 6rem;
+  padding: .5rem;
+  font-size: 1rem;
 }
 
 

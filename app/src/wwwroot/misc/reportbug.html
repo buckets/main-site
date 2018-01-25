@@ -60,7 +60,7 @@ const req = function() {
 req('./src/wwwroot/misc/singlepane.js');
 const log = require('electron-log')
 const fs = require('fs-extra-promise')
-const { submitBugReport } = req('./src/errors.js');
+const { submitFeedback } = req('./src/errors.js');
 
 const { localizeThisPage } = req('./src/i18n');
 const querystring = req('querystring');
@@ -111,7 +111,7 @@ button.addEventListener('click', () => {
       attachments,
     }
     log.silly('submitting bug report', data.from_email, data.body);
-    submitBugReport(data)
+    submitFeedback(data)
     .then(() => {
       remote.getCurrentWindow().close();  
     })

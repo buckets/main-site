@@ -45,7 +45,7 @@ export function openBugReporter(args:{
   win.loadURL(`file://${Path.join(APP_ROOT, 'src/wwwroot/misc/reportbug.html')}?${querystring.stringify(qs)}`)
 }
 
-export async function submitBugReport(body:{
+export async function submitFeedback(body:{
   from_email: string;
   body: string;
   attachments?: Array<{
@@ -53,8 +53,10 @@ export async function submitBugReport(body:{
     Content: string;
     ContentType: string;
   }>
-}) {
-  log.info('Submitting bug report to', SUBMIT_URL)
+}, options:{
+  throwerr?: boolean;
+} = {}) {
+  log.info('Submitting feedback to', SUBMIT_URL)
   try {
     let r = await rp({
       method: 'POST',
@@ -64,12 +66,14 @@ export async function submitBugReport(body:{
       }, body),
       json: true,
     })
-    log.info('Bug reported submitted', r);
+    log.info('Feedback submitted', r);
   } catch (err) {
-    log.error('Error submitting bug report');
+    log.error('Error submitting feedback');
     log.error(err);
-    log.warn('Error submitting bug report', err);
     reportErrorToUser('Error submitting report :(  Would you mind sending an email to bugs@budgetwithbuckets.com instead?', {err: err})
+    if (options.throwerr) {
+      throw err;  
+    }
   }
 }
 

@@ -5,6 +5,7 @@ import sys
 import os
 import json
 
+
 try:
     filename = sys.argv[1]
 except:
