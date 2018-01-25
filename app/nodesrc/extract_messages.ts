@@ -195,16 +195,6 @@ function walk(f:string):string[] {
   return ret;
 }
 
-let MSGS:IMessageSpec = {};
-walk(process.argv[2]).forEach(filename => {
-  if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
-    let fh = openFile(filename);
-    extractMessagesFromTS(MSGS, fh);
-  } else if (filename.endsWith('.html')) {
-    extractMessagesFromHTML(MSGS, filename);
-  }  
-})
-
 function displayInterface(msgs:IMessageSpec) {
   let lines = [];
   lines.push(`interface IMsg<T> {
@@ -243,14 +233,25 @@ function displayDefaults(msgs:IMessageSpec) {
   return lines.join('\n');
 }
 
-console.log('// Auto-generated file');
-console.log(IMPORTS);
-console.log(displayInterface(MSGS));
-console.log(displayDefaults(MSGS));
-
-if (ERRORS.length) {
-  ERRORS.forEach(err => {
-    console.error(err);
+export function extract(directory:string) {
+  let MSGS:IMessageSpec = {};
+  walk(directory).forEach(filename => {
+    if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
+      let fh = openFile(filename);
+      extractMessagesFromTS(MSGS, fh);
+    } else if (filename.endsWith('.html')) {
+      extractMessagesFromHTML(MSGS, filename);
+    }  
   })
-  process.exit(1)
+  console.log('// Auto-generated file');
+  console.log(IMPORTS);
+  console.log(displayInterface(MSGS));
+  console.log(displayDefaults(MSGS));
+
+  if (ERRORS.length) {
+    ERRORS.forEach(err => {
+      console.error(err);
+    })
+    throw new Error('Error')
+  }
 }

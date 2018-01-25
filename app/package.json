@@ -93,6 +93,7 @@
       "!dev${/*}",
       "!devdocs${/*}",
       "!mocha.opts",
+      "!nodesrc${/*}",
       "!README.md",
       "!test${/*}",
       "!TODO",

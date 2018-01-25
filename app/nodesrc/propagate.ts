@@ -2,12 +2,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import * as ts from "typescript"
 import * as _ from 'lodash'
 
-let fromfile = process.argv[2];
-let tofile = process.argv[3];
-
-// console.log('from', fromfile, 'to', tofile);
-
-async function copyEm(fromfile, tofile) {
+export async function copyEm(fromfile, tofile) {
   let fromdata = openFile(fromfile);
   let newstate = readMessages(fromdata, 'DEFAULTS');
 
@@ -125,13 +120,13 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
   return lines.join('\n');
 }
 
-try {
-  copyEm(fromfile, tofile);  
-} catch(err) {
-  console.log(err);
-  console.error(err.stack);
-  throw err;
-}
+// try {
+//   copyEm(fromfile, tofile);  
+// } catch(err) {
+//   console.log(err);
+//   console.error(err.stack);
+//   throw err;
+// }
 
 
 function openFile(filename:string):ts.SourceFile {

@@ -1,16 +1,24 @@
 #!/bin/bash
 
-set -e
-echo "extracting messages..."
-./dev/extract_translations.sh
+set -xe
+echo
+echo "Compiling..."
+tsc -p nodesrc
+
+echo
+echo "Extracting..."
+node nodesrc/dist/langutil.js extract src > src/langs/base.tsx
 
 for langfile in $(ls src/langs/??.tsx); do
     if [ $(basename "$langfile") == "en.tsx" ]; then
         echo "(skipping en.tsx)"
         continue
     fi
-    echo "updating $langfile"
-    node src/langutil/propagate.js src/langs/base.tsx "$langfile" >/dev/null
+    echo
+    echo "Updating ${langfile}..."
+    set -x
+    node nodesrc/dist/langutil.js updatelang src/langs/base.tsx "$langfile"
+    set +x
 done
 
-echo "you should run 'tsc' again"
+tsc
