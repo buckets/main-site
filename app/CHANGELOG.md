@@ -1,4 +1,30 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.30.0
+
+- **NEW:** Date format is now suggested when importing from CSV
+
+- **NEW:** Added a preference to disable money animations.
+
+- **NEW:** When doing multiple buckets transactions at once, the math regarding what is happening now appears in the top action bar.  (Issue [#54](https://github.com/buckets/application/issues/54))
+
+- **NEW:** Renamed 'Transact' to 'In/Out' on Buckets page.
+
+- **FIX:** Long bucket/group names are no longer cut off (Issue [#14](https://github.com/buckets/application/issues/14))
+
+- **FIX:** Fixed help prompt text-wrapping issue on Buckets tab Rain header.  (Issue [#57](https://github.com/buckets/application/issues/57))
+
+- **FIX:** Default logging is more verbose
+
+- **FIX:** Special misc group is no longer editable.  (Issue [#41](https://github.com/buckets/application/issues/41))
+
+- **FIX:** Maybe fixed off by one month issue.  (Issue [#40](https://github.com/buckets/application/issues/40))
+
+- **FIX:** Account-style parenthesis-delimited negative numbers are supported in CSV importing.  (Issue [#60](https://github.com/buckets/application/issues/60))
+
+- **FIX:** Subheader on Buckets/Transactions/Accounts page is now always visible even when your scroll down.  (Issue [#58](https://github.com/buckets/application/issues/58))
+
+- The Guide mentions that it's a work in progress now.  (Issue [#48](https://github.com/buckets/application/issues/48))
+
 ## v0.29.0
 
 - **NEW:** Added a preference to disable money animations
