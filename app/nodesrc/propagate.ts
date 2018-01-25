@@ -38,7 +38,9 @@ function getSrcValue(thing, src:ts.SourceFile):string {
       return `[${guts.join(',')}]`;
     }
     default: {
+      let context = src.getFullText().slice(thing.pos-50, thing.end+50);
       console.error('Unknown value type:', thing);
+      console.error('Context:', context);
       throw new Error(`Unknown value type: ${thing}`);
     }
   }

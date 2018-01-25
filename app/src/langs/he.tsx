@@ -565,6 +565,12 @@ const messages:IMessages = {
     src: ["src/budget/budget.tsx line 164"],
     h: "vembE+Cp1aKCKR2j2LCJD29QyiQxfGPUcGI1I8l5/5Y=",
   },
+  "Export": {
+    val: "Export",
+    translated: false,
+    src: ["src/budget/budget.tsx line 166","src/budget/exportpage.tsx line 101"],
+    h: "mZJs0iE089tMZ5BWqTUBp+2aJ90wKL4act4hUPt7zkA=",
+  },
   "Chat with Matt": {
     val: "לשוחח עם מאט",
     translated: true,
@@ -626,6 +632,78 @@ const messages:IMessages = {
     translated: false,
     src: ["src/budget/budget.tsx line 204"],
     h: "7gl7ZdgJ3HfhOcQMiU7hVkFpXIR3KFxXtlMhKyE/Irw=",
+  },
+  "I'm exporting data so that I can ": {
+    val: "I'm exporting data so that I can ",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 25"],
+    h: "I5s/a+WZelEoEbDU6z2RwMHJGBkfJJ7zZEZcw89IBck=",
+  },
+  "daterange.all": {
+    val: "All time",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 46"],
+    h: "Fz1lBhxlewLJ5bSKTiIzzaW3CAtAPxkUWWKU0BVqgAA=",
+  },
+  "daterange.thismonth": {
+    val: "This month",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 51"],
+    h: "jqSPxB9W3Xqmvb/7MIrwKgcCTUR0zgU3qqTqJFET1e0=",
+  },
+  "daterange.fromlastmonth": {
+    val: "From last month",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 56"],
+    h: "tIBgx9VgMgV21a9XhH7L7TIe/PfdgcW3fdfGaGOeVMo=",
+  },
+  "daterange.from2monthsago": {
+    val: "From 2 months ago",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 61"],
+    h: "zb4vtJXSL+UcXZTjSbkQueS8khVvJO2MDoFKKPuuDPM=",
+  },
+  "daterange.from3monthsago": {
+    val: "From 3 months ago",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 66"],
+    h: "4957XI6fjMtXcCqj3IRSUSQzX4ZlEucDTuwgu2krTLw=",
+  },
+  "export.why": {
+    val: "Perhaps what you're doing with exported data could be built into Buckets.  Mind sending a note?",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 74"],
+    h: "mv9GxRVjWShYHYo8kb/wvNU8eEYBGE2QtfUTxTsdP0I=",
+  },
+  "Thank you for the feedback!": {
+    val: "Thank you for the feedback!",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 92"],
+    h: "8bEPNAScct0pvqY775nF665zylB3/fKo1h3MqoWzXIQ=",
+  },
+  "Submit feedback": {
+    val: "Submit feedback",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 98"],
+    h: "ksa09D0YEXUycx+K+ZODvbWRCP78R2W7ClHhOaX4LmM=",
+  },
+  "From": {
+    val: "From",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 105"],
+    h: "cCFAY2/zl3pq5fMwrP/2LBsrrL36SYzS+6in7mvWyvY=",
+  },
+  "To": {
+    val: "To",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 122"],
+    h: "syFKIORaeu0FezL85oAbo76XXa8k7bxITMbNowi8ba0=",
+  },
+  "File saved: ": {
+    val: "File saved: ",
+    translated: false,
+    src: ["src/budget/exportpage.tsx line 146"],
+    h: "e6UDV8UzF5qqysQpN3OrcspjD8zPNn72zKd1CH1lFe8=",
   },
   "match-count": {
     val: (current_match:number, total_matches:number) => {

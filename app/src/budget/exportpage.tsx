@@ -72,7 +72,7 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
     return <div className="rows">
       <div className="padded">
         <p className="instructions">
-          {sss('export.why', `Perhaps what you're doing with exported data could be built into Buckets.  Mind sending a note?`)}
+          {sss('export.why', "Perhaps what you're doing with exported data could be built into Buckets.  Mind sending a note?")}
         </p>
         <div className="instructions">
           <textarea
