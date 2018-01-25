@@ -262,6 +262,38 @@ export class BucketStore {
       asof, where, params)
   }
 
+  async combinedRainfall(args:{
+    onOrAfter?:Timestamp,
+    before?:Timestamp,
+  }={}):Promise<number> {
+    let wheres = [
+      'account_trans_id IS NULL',
+    ];
+    let params:any = {};
+    if (args.onOrAfter) {
+      wheres.push('posted >= $onOrAfter')
+      params.$onOrAfter = ts2db(args.onOrAfter);
+    }
+    if (args.before) {
+      wheres.push('posted < $before')
+      params.$before = ts2db(args.before);
+    }
+    const qry = `
+      SELECT
+        sum(amount) as rainfall
+      FROM
+        bucket_transaction
+      WHERE
+        ${wheres.join(' AND ')}
+    `;
+    let rows = await this.store.query(qry, params)
+    if (rows.length) {
+      return rows[0].rainfall || 0
+    } else {
+      return 0;
+    }
+  }
+
   //
   // Return how much rain each bucket has received in a given time period
   async rainfall(onOrAfter:Timestamp, before:Timestamp):Promise<Balances> {

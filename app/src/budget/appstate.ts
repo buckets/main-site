@@ -77,6 +77,8 @@ export class AppState implements IComputedAppState {
 
   // The rain each bucket has received this month.
   rainfall: Balances = {};
+  // The amount of rain used in future months
+  future_rain: number = 0;
   month: number = null;
   year: number = null;
 
@@ -174,7 +176,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
       }
     }
   })
-  let rain = account_total_balance - bucket_total_balance;
+  let rain = account_total_balance - bucket_total_balance - appstate.future_rain;
   let gain = income + expenses;
   let num_unknowns = _.values(appstate.unknown_accounts).length;
 
@@ -447,6 +449,7 @@ export class StateManager {
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
       this.fetchRainfall(),
+      this.fetchFutureRainfall(),
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
       this.fetchConnections(),
@@ -506,6 +509,15 @@ export class StateManager {
       .then(rainfall => {
         this.appstate.rainfall = rainfall;
       })
+  }
+  fetchFutureRainfall() {
+    return this.store.buckets.combinedRainfall({
+      onOrAfter: this.appstate.viewDateRange.before,
+    })
+    .then(rainfall => {
+      this.appstate.future_rain = rainfall;
+      console.log('future rain', rainfall);
+    })
   }
   fetchTransactions() {
     let range = this.appstate.viewDateRange;
