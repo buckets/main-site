@@ -151,7 +151,6 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
           }
         });
       });
-      plog.info('sql', fullsql);
       try {
         await db.run('BEGIN EXCLUSIVE TRANSACTION');
         await db.exec(fullsql);
