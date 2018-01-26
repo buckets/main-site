@@ -25,6 +25,12 @@ import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssign
 
 const log = new PrefixLogger('(files)')
 
+export interface IOpenWindow {
+  path: string,
+  bounds: Electron.Rectangle,
+  focused: boolean,
+}
+
 interface BudgetFileEvents {
   sync_started: {
     onOrAfter: string;
@@ -133,6 +139,39 @@ export class BudgetFile implements IBudgetFile {
   }
 
   /**
+   *  Get a serializable set of the files and windows currently
+   *  open.  Useful for restoring what windows were open before
+   *  the application was closed.
+   */
+  static currentWindowSet() {
+    let ret:{
+      [filename:string]: Array<IOpenWindow>;
+    } = {};
+    Object.keys(BudgetFile.WIN2FILE)
+    .forEach((win_string:string) => {
+      const win_id = Number(win_string)
+      const win = BrowserWindow.fromId(win_id);
+      const url = win.webContents.getURL();
+      const parsed = URL.parse(url);
+      if (parsed.pathname.startsWith('/record')) {
+        // Don't reopen macro windows
+        return;
+      }
+      const bf = BudgetFile.fromWindowId(win_id);
+      const filename = bf.filename;
+      if (!ret[filename]) {
+        ret[filename] = [];
+      }
+      ret[filename].push({
+        path: `${parsed.path}${parsed.hash}`,
+        bounds: win.getBounds(),
+        focused: win.isFocused(),
+      })
+    })
+    return ret;
+  }
+
+  /**
    *  Get a BudgetFile from its id
    */
   static fromId(id:string):BudgetFile {
@@ -149,7 +188,7 @@ export class BudgetFile implements IBudgetFile {
   /**
 
    */
-  async start() {
+  async start(windows:Array<IOpenWindow>=[]) {
     // connect to database
     try {
       await this.store.open();  
@@ -181,7 +220,7 @@ export class BudgetFile implements IBudgetFile {
     addRecentFile(this.filename);
 
     // open default windows
-    this.openDefaultWindows();
+    this.openDefaultWindows(windows);
     return this;
   }
 
@@ -200,13 +239,37 @@ export class BudgetFile implements IBudgetFile {
    *  Currently, this just opens the accounts page, but in the future
    *  It might open the set of last-opened windows.
    */
-  openDefaultWindows() {
-    const qs = querystring.stringify({
-      args: JSON.stringify({
-        noanimation: !PSTATE.animation,
+  async openDefaultWindows(windows:Array<IOpenWindow>=[]) {
+    if (windows.length) {
+      let promises = [];
+      let window_to_focus:Electron.BrowserWindow;
+      windows.forEach(window => {
+        let win = this.openWindow(window.path, {
+          bounds: window.bounds,
+        });
+        if (window.focused) {
+          window_to_focus = win;
+        }
+        promises.push(new Promise((resolve, reject) => {
+          win.once('ready-to-show', () => {
+            resolve(true);
+          });
+        }))
       })
-    })
-    this.openWindow(`/budget/index.html?${qs}`);
+      await Promise.all(promises);
+      if (window_to_focus) {
+        setTimeout(() => {
+          window_to_focus.focus();
+        }, 0);
+      }
+    } else {
+      const qs = querystring.stringify({
+        args: JSON.stringify({
+          noanimation: !PSTATE.animation ? true : undefined,
+        })
+      })
+      this.openWindow(`/budget/index.html?${qs}`);
+    }
   }
 
   /**
@@ -219,6 +282,7 @@ export class BudgetFile implements IBudgetFile {
   openWindow(path:string, args: {
       hide?: boolean;
       options?: Partial<Electron.BrowserWindowConstructorOptions>;
+      bounds?: Electron.Rectangle;
     } = {}):Electron.BrowserWindow {
     log.info('opening new window to', path);
     const parsed = Path.parse(this.filename);
@@ -236,15 +300,24 @@ export class BudgetFile implements IBudgetFile {
       })  
     }
 
+    if (args.bounds) {
+      win.setBounds(args.bounds);
+    }
+
     // Link this instance and the window
     BudgetFile.WIN2FILE[win.id] = this;
 
-    if (!path.startsWith('/')) {
-      path = '/' + path;
+    let url:string;
+    if (path.startsWith('buckets://')) {
+      url = path;
+    } else {
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+      url = `buckets://${this.id}${path}`;  
     }
-    let url = `buckets://${this.id}${path}`;
+    
     win.loadURL(url);
-    // win.setRepresentedFilename(this.filename);
     win.on('close', ev => {
       // unlink from this instance
       delete BudgetFile.WIN2FILE[win.id];
@@ -416,8 +489,11 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
-  static async openFile(filename:string, create:boolean=false):Promise<BudgetFile> {
-    if (!create) {
+  static async openFile(filename:string, args:{
+    create?:boolean,
+    windows?:Array<IOpenWindow>,
+  } = {}):Promise<BudgetFile> {
+    if (!args.create) {
       // open the file or fail if it doesn't exist
       if (! await fs.existsAsync(filename)) {
         displayError(sss('File does not exist:') + ` ${filename}`)
@@ -425,7 +501,7 @@ export class BudgetFile implements IBudgetFile {
       }
     }
     let bf = new BudgetFile(filename);
-    return bf.start();
+    return bf.start(args.windows);
   }
 
 
@@ -553,8 +629,7 @@ export const duplicateWindow = onlyRunInMain(() => {
     return;
   }
   let url = win.webContents.getURL();
-  let parsed = URL.parse(url);
-  bf.openWindow(`${parsed.pathname}${parsed.hash}`);
+  bf.openWindow(url);
 })
 
 /**
@@ -585,7 +660,7 @@ export const newBudgetFileDialog = onlyRunInMain(() => {
       defaultPath: Path.resolve(app.getPath('documents'), 'My Budget.buckets'),
     }, (filename) => {
       if (filename) {
-        resolve(BudgetFile.openFile(filename, true));  
+        resolve(BudgetFile.openFile(filename, {create:true}));  
       } else {
         reject(new Error(sss('No file chosen')));
       }

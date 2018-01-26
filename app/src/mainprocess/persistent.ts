@@ -5,6 +5,7 @@ import * as fs from 'fs'
 import { EventSource } from '../events'
 import { onlyRunInMain } from '../rpc'
 import { PrefixLogger } from '../logging'
+import { IOpenWindow } from './files'
 
 const log = new PrefixLogger(electron_is.renderer() ? '(persistent.r)' : '(persistent)');
 
@@ -14,6 +15,10 @@ export interface PersistentState {
   locale: string;
   skipVersion: string;
   animation: boolean;
+  last_opened_windows: Array<{
+    filename: string;
+    windows: Array<IOpenWindow>;
+  }>;
 }
 
 export let PSTATE:PersistentState = {
@@ -22,6 +27,7 @@ export let PSTATE:PersistentState = {
   locale: '',
   skipVersion: null,
   animation: true,
+  last_opened_windows: [],
 };
 
 function loadState():PersistentState {
@@ -48,9 +54,9 @@ function stateFilename() {
 }
 
 export const updateState = onlyRunInMain(async (update:Partial<PersistentState>):Promise<PersistentState> => {
-    let new_state = Object.assign(await loadState(), update);
+    let new_state = Object.assign({}, PSTATE, update);
     PSTATE = await new Promise<PersistentState>((resolve, reject) => {
-      fs.writeFile(stateFilename(), JSON.stringify(new_state), 'utf8' as any, err => {
+      fs.writeFile(stateFilename(), JSON.stringify(new_state, null, 2), 'utf8' as any, err => {
         if (err) {
           throw err;
         }

@@ -16,6 +16,7 @@ import { eventuallyNag } from './drm'
 import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 import { PrefixLogger } from '../logging'
+import { PSTATE, updateState } from './persistent'
 
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
@@ -101,14 +102,30 @@ app.on('ready', async () => {
     log.info('Not checking for updates in DEV mode.');
   }
 
-  // For now, open a standard file for testing
   if (openfirst.length) {
     while (openfirst.length) {
       BudgetFile.openFile(openfirst.shift());  
     }
   } else if (process.env.BUCKETS_DEVMODE) {
-    BudgetFile.openFile('/tmp/test.buckets', true);  
-  } else {
+    // Open a file for easy testing
+    BudgetFile.openFile('/tmp/test.buckets', {create: true});
+  } else if (PSTATE.last_opened_windows.length) {
+    // Try to open the last set of windows
+    log.info('Attempting to open last known set of windows:', PSTATE.last_opened_windows);
+    try {
+      PSTATE.last_opened_windows.forEach(window_set => {
+        log.info('Opening', window_set.filename);
+        BudgetFile.openFile(window_set.filename, {
+          windows: window_set.windows,
+        })
+      })
+    } catch(err) {
+      log.error('Error opening last set of windows');
+      log.error(err);
+    }
+  }
+
+  if (BrowserWindow.getAllWindows().length === 0) {
     openWizard();
   }
 });
@@ -119,6 +136,19 @@ app.on('window-all-closed', () => {
     updateMenu();
   }
 });
+app.on('before-quit', () => {
+  const window_map = BudgetFile.currentWindowSet();
+  const last_opened_windows = Object.keys(window_map).map(filename => {
+    return {
+      filename,
+      windows: window_map[filename],
+    }
+  });
+  log.info('saving last_opened_windows', JSON.stringify(last_opened_windows));
+  updateState({
+    last_opened_windows,
+  })
+})
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     openWizard();
