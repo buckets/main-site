@@ -223,7 +223,7 @@ class Application extends React.Component<ApplicationProps, any> {
                               <tr>
                                 <td>{sss('Used in future')}</td>
                                 <td>-</td>
-                                <td className="right"><Money value={appstate.future_rain} alwaysShowDecimal /></td>
+                                <td className="right"><Money value={appstate.adjusted_future_rain} alwaysShowDecimal /></td>
                               </tr>
                               <tr>
                                 <td colSpan={3} className="total-line">

@@ -20,6 +20,8 @@ const log = new PrefixLogger('(appstate)')
 
 interface IComputedAppState {
   rain: number;
+  // Amount of this month's rain used in the future
+  adjusted_future_rain: number;
   bucket_total_balance: number;
   account_total_balance: number;
   transfers_in: number;
@@ -78,7 +80,9 @@ export class AppState implements IComputedAppState {
   // The rain each bucket has received this month.
   rainfall: Balances = {};
   // The amount of rain used in future months
-  future_rain: number = 0;
+  actual_future_rain: number = 0;
+  // The amount of this month's rain used in future months.
+  adjusted_future_rain: number = 0;
   month: number = null;
   year: number = null;
 
@@ -176,7 +180,23 @@ function computeTotals(appstate:AppState):IComputedAppState {
       }
     }
   })
-  let rain = account_total_balance - bucket_total_balance - appstate.future_rain;
+  let rain = account_total_balance - bucket_total_balance;
+  let adjusted_future_rain = 0;
+
+  if (rain > 0) {
+    // Some of this rain might be used in future months
+    if (appstate.actual_future_rain > 0) {
+      if (rain >= appstate.actual_future_rain) {
+        // future rain being used is less than the rain available this month.
+        adjusted_future_rain = appstate.actual_future_rain;
+      } else {
+        // future rain being used exceeds rain available this month
+        adjusted_future_rain = rain;
+      }
+      rain -= adjusted_future_rain;
+    }
+  }
+  
   let gain = income + expenses;
   let num_unknowns = _.values(appstate.unknown_accounts).length;
 
@@ -218,6 +238,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     bucket_total_balance,
     account_total_balance,
     rain,
+    adjusted_future_rain,
     transfers_in,
     transfers_out,
     income,
@@ -515,8 +536,7 @@ export class StateManager {
       onOrAfter: this.appstate.viewDateRange.before,
     })
     .then(rainfall => {
-      this.appstate.future_rain = rainfall;
-      console.log('future rain', rainfall);
+      this.appstate.actual_future_rain = rainfall;
     })
   }
   fetchTransactions() {
