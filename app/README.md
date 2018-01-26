@@ -16,6 +16,10 @@ To run:
     tsc && yarn start
 
 
+# Get issues
+
+    dev/getissues.py && dev/formatissues.py
+
 # Internationalization
 
 1. Use `sss()` from `i18n.ts` package
