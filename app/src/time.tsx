@@ -7,7 +7,7 @@ const tzoffset = (new Date()).getTimezoneOffset();
 
 export function ensureUTCMoment(x:Timestamp):moment.Moment {
   if (moment.isMoment(x)) {
-    return x.utc().clone()
+    return x.clone().utc()
   } else {
     return moment.utc(x)
   }
@@ -77,13 +77,8 @@ export class DateDisplay extends React.Component<DateDisplayProps, any> {
   render() {
     let { value, className, format, ...rest } = this.props;
     format = format || 'll';
-    let mom:moment.Moment;
-    if (!moment.isMoment(value)) {
-      mom = moment.utc(value);
-    } else {
-      mom = value;
-    }
-    let display = mom.local().format(format);
+    let mom:moment.Moment = ensureUTCMoment(value);
+    let display = utcToLocal(mom).format(format);
     if (!mom.isValid()) {
       display = '';
     }
