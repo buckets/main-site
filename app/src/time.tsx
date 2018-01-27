@@ -3,6 +3,8 @@ import * as moment from 'moment';
 import * as cx from 'classnames';
 import { sss } from './i18n'
 
+const tzoffset = (new Date()).getTimezoneOffset();
+
 export function ensureUTCMoment(x:Timestamp):moment.Moment {
   if (moment.isMoment(x)) {
     return x.utc().clone()
@@ -12,16 +14,16 @@ export function ensureUTCMoment(x:Timestamp):moment.Moment {
 }
 export function ensureLocalMoment(x:Timestamp):moment.Moment {
   if (moment.isMoment(x)) {
-    return x.local().clone()
+    return x.clone().utcOffset(tzoffset)
   } else {
-    return moment(x)
+    return moment(x).utcOffset(tzoffset)
   } 
 }
 export function serializeTimestamp(x:Timestamp):string {
   if (typeof x === 'string') {
     return x;
   } else {
-    return x.format('YYYY-MM-DD HH:mm:ss');
+    return x.toISOString();
   }
 }
 export function ts2db(x:Timestamp):string {
@@ -29,6 +31,26 @@ export function ts2db(x:Timestamp):string {
 }
 export function tsfromdb(x:Timestamp):moment.Moment {
   return ensureUTCMoment(x);
+}
+
+export function localNow() {
+  return moment().utcOffset(tzoffset);
+}
+export function makeLocalDate(year:number, month:number, day:number) {
+  return localNow().year(year).month(month).date(day).startOf('day');
+}
+export function parseLocalTime(...args) {
+  return moment(...args).utcOffset(tzoffset);
+}
+export function utcNow() {
+  return moment.utc();
+}
+export function utcToLocal(d:Timestamp) {
+  if (moment.isMoment(d)) {
+    return d.clone().utcOffset(tzoffset);
+  } else {
+    return moment.utc(d).utcOffset(tzoffset);
+  }
 }
 
 export function isBetween(x:Timestamp, start:Timestamp, end:Timestamp):boolean {
@@ -46,12 +68,12 @@ export class PerMonth extends React.Component<{}, {}> {
 
 export type Timestamp = string | moment.Moment;
 
-interface DateProps {
+interface DateDisplayProps {
   value: string|moment.Moment;
   className?: string;
   format?: string;
 }
-export class Date extends React.Component<DateProps, any> {
+export class DateDisplay extends React.Component<DateDisplayProps, any> {
   render() {
     let { value, className, format, ...rest } = this.props;
     format = format || 'll';
@@ -70,10 +92,10 @@ export class Date extends React.Component<DateProps, any> {
   }
 }
 
-export class DateTime extends React.Component<DateProps, any> {
+export class DateTime extends React.Component<DateDisplayProps, any> {
   render() {
     let { value, ...rest } = this.props;
-    return <Date
+    return <DateDisplay
       value={value}
       format="lll"
       {...rest} />
@@ -81,6 +103,7 @@ export class DateTime extends React.Component<DateProps, any> {
 }
 
 interface DateInputProps {
+  // UTC time
   value: string|moment.Moment;
   onChange: (val:moment.Moment)=>void;
 }
@@ -88,18 +111,18 @@ export class DateInput extends React.Component<DateInputProps, {value:moment.Mom
   constructor(props) {
     super(props)
     this.state = {
-      value: moment.utc(props.value),
+      value: ensureUTCMoment(props.value),
     }
   }
   componentWillReceiveProps(nextProps) {
-    this.setState({value: moment.utc(nextProps.value)});
+    this.setState({value: ensureUTCMoment(nextProps.value)});
   }
   render() {
-    let value = this.state.value.local().format('YYYY-MM-DD');
+    let value = ensureLocalMoment(this.state.value).format('YYYY-MM-DD');
     return <input type="date" value={value} onChange={this.onChange} />
   }
   onChange = (ev) => {
-    let newval = moment(ev.target.value).utc()
+    let newval = parseLocalTime(ev.target.value).utc()
     this.setState({value: newval})
     this.props.onChange(newval)
   }

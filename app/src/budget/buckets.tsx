@@ -1,10 +1,9 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import * as moment from 'moment'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../models/bucket'
-import { ts2db, Timestamp, Date, ensureLocalMoment, PerMonth } from '../time'
+import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
 import { onKeys, MonthSelector, ClickToEdit } from '../input'
@@ -387,9 +386,9 @@ class BucketKindDetails extends React.Component<{
   }
   targetDateRow() {
     let { bucket } = this.props;
-    let dt = ensureLocalMoment(bucket.end_date);
+    let dt = utcToLocal(bucket.end_date);
     if (!dt || !dt.isValid()) {
-      dt = moment();
+      dt = localNow();
     }
     return <tr key="end_date">
       <td>{sss('Target date:')}</td>
@@ -398,7 +397,7 @@ class BucketKindDetails extends React.Component<{
           month={dt.month()}
           year={dt.year()}
           onChange={({month, year}) => {
-            let new_date = moment().month(month).year(year).startOf('month');
+            let new_date = makeLocalDate(year, month, 1);
             manager.store.buckets.update(bucket.id, {end_date: ts2db(new_date)})
           }} />
       </td>
@@ -453,7 +452,7 @@ class BucketKindDetails extends React.Component<{
           edit_rows.push(<tr key="end-date">
               <td>{sss('Goal completion:')}</td>
               <td>
-                {computed.end_date ? <Date value={computed.end_date} format="MMM YYYY" /> : sss("some day...")}
+                {computed.end_date ? <DateDisplay value={computed.end_date} format="MMM YYYY" /> : sss("some day...")}
               </td>
             </tr>)
           break;
@@ -497,13 +496,13 @@ class BucketKindDetails extends React.Component<{
       if (computed.goal === 0) {
         summary = <div className="goal-summary">
           <span>{sss('Goal: 0')}</span>
-          <Date value={computed.end_date} format="MMM YYYY" />
+          <DateDisplay value={computed.end_date} format="MMM YYYY" />
         </div>
       } else {
         summary = <div className="goal-summary">
           <ProgressBar percent={percent} color={bucket.color} />
           <span>{sss('Goal:')} <Money value={computed.goal} /></span>
-          <Date value={computed.end_date} format="MMM YYYY" />
+          <DateDisplay value={computed.end_date} format="MMM YYYY" />
         </div>;
       }
     }
@@ -1067,7 +1066,7 @@ class TransactionList extends React.Component<{
         }
       }
       return <tr key={trans.id} className="note-hover-trigger">
-        <td className="nobr"><NoteMaker obj={trans} /><Date value={trans.posted} /></td>
+        <td className="nobr"><NoteMaker obj={trans} /><DateDisplay value={trans.posted} /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
         {ending_balance === null ? null : <td className="right"><Money value={running_bal} /></td>}

@@ -1,7 +1,6 @@
 import * as React from 'react'
-import * as moment from 'moment'
 import * as cx from 'classnames'
-import { Timestamp, ensureLocalMoment } from '../../time'
+import { Timestamp, ensureLocalMoment, localNow } from '../../time'
 import { remote, ipcRenderer } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankMacro } from '../../models/bankmacro'
@@ -253,7 +252,7 @@ class StepValueSelect extends React.Component<ValueSelectProps, any> {
         try {
           example = <tr>
             <th></th>
-            <td>e.g. {moment().format(options.variation)}</td>
+            <td>e.g. {localNow().format(options.variation)}</td>
           </tr>
         } catch(err) {
         }  
@@ -511,7 +510,7 @@ class RecordPage extends React.Component<RecordPageProps, {
     .filter(x => x);
 
     let dummyLookup = (options:ValueOptions) => {
-      let today = moment();
+      let today = localNow();
       if (options.key === 'start-date') {
         let date = today.clone().subtract(2, 'months').startOf('month');
         return date.format(options.variation);

@@ -9,6 +9,7 @@ import { sss } from '../i18n'
 import { ISyncChannel, ASyncening, SyncResult } from '../sync'
 import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
+import { localNow } from '../time'
 
 const log = new PrefixLogger('(bankmacro)');
 
@@ -160,7 +161,7 @@ export class BankMacroStore {
     return this.store.deleteObject(BankMacro, macro_id);
   }
   async runMacro(file:IBudgetFile, macro_id:number, onOrAfter:moment.Moment, before:moment.Moment):Promise<SyncResult> {
-    let today = moment();
+    let today = localNow();
     if (today.isBefore(onOrAfter)) {
       // We're in the future
       onOrAfter = today.clone().startOf('month');

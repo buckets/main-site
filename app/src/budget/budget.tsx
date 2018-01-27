@@ -23,6 +23,7 @@ import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
 import { PrefixLogger } from '../logging'
+import { utcNow, localNow } from '../time'
 
 const log = new PrefixLogger('(budget.r)');
 
@@ -36,7 +37,8 @@ export function setPath(x:string) {
 export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
-  log.info(`local time: ${moment().format()} -- utc time: ${moment.utc().format()}`);
+  log.info(`  localNow(): ${localNow().format()}`);
+  log.info(`    utcNow(): ${utcNow().format()}`);
   log.info((new Date()).toString())
   log.info((new Date()).toLocaleString())
   log.info((new Date()).getTimezoneOffset())
@@ -184,7 +186,7 @@ interface ApplicationProps {
 }
 class Application extends React.Component<ApplicationProps, any> {
   render() {
-    let today = moment();
+    let today = localNow();
     let { appstate } = this.props;
     return (
       <Router

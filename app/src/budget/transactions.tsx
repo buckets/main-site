@@ -3,10 +3,10 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment'
-import {manager, AppState} from './appstate'
-import {Account, Category, Transaction} from '../models/account'
-import {Date, DateInput, ensureUTCMoment} from '../time'
-import {Money, MoneyInput} from '../money'
+import { manager, AppState } from './appstate'
+import { Account, Category, Transaction } from '../models/account'
+import { DateDisplay, DateInput, ensureUTCMoment } from '../time'
+import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys } from '../input'
 import { sss } from '../i18n'
@@ -431,7 +431,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // viewing
       return <tr className="note-hover-trigger">
         <td>{checkbox}</td>
-        <td className="nobr"><NoteMaker obj={trans} />{source_icon}<Date value={trans.posted} /></td>
+        <td className="nobr"><NoteMaker obj={trans} />{source_icon}<DateDisplay value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>

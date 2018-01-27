@@ -6,7 +6,7 @@ import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
 import { Connection } from '../models/simplefin'
-import { isBetween, ensureLocalMoment } from '../time'
+import { isBetween, ensureLocalMoment, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
 import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
@@ -83,8 +83,8 @@ export class AppState implements IComputedAppState {
   actual_future_rain: number = 0;
   // The amount of this month's rain used in future months.
   adjusted_future_rain: number = 0;
-  month: number = null;
-  year: number = null;
+  month: number = localNow().month();
+  year: number = localNow().year();
 
   syncing: number = 0;
 
@@ -112,21 +112,19 @@ export class AppState implements IComputedAppState {
   can_sync = false;
 
   get defaultPostingDate() {
-    let today = moment();
-    let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
+    let today = localNow();
+    let d = this.viewDateRange.onOrAfter;
     if (d.month() == today.month() && d.year() == today.year()) {
       d = today;
-    } else if (d < today) {
+    } else if (d.isBefore(today)) {
       d = d.endOf('month').startOf('day');
     } else {
       d = d.startOf('month').startOf('day');
     }
-    d = d.utc();
     return d.utc();
   }
   get viewDateRange():{onOrAfter:moment.Moment, before:moment.Moment} {
-    let d = moment(`${this.year}-${this.month}-1`, 'YYYY-MM-DD');
-    let start = d.startOf('month').startOf('day');
+    let start = makeLocalDate(this.year, this.month-1, 1);
     let end = start.clone().add(1, 'month').startOf('month').startOf('day');
     return {
       onOrAfter: start,
@@ -452,6 +450,10 @@ export class StateManager {
     this.events.change.emit(this.appstate);
   }, 50, {leading: true, trailing: true});
 
+  /**
+   *  @param year: Local year (as opposed to UTC year)
+   *  @param month: Local month (as opposed to UTC month)
+   */
   async setDate(year:number, month:number):Promise<any> {
     if (this.appstate.year !== year || this.appstate.month !== month) {
       this.appstate.year = year;

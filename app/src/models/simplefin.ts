@@ -2,7 +2,7 @@ import * as req from 'request-promise'
 import * as moment from 'moment'
 
 import { IObject, IStore, registerClass } from '../store'
-import { ts2db, Timestamp, ensureUTCMoment } from '../time'
+import { ts2db, localNow, Timestamp, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { sss } from '../i18n'
@@ -205,7 +205,7 @@ export class SimpleFINStore {
       }))
       if (got_data) {
         return this.store.updateObject(Connection, conn.id, {
-          last_used: ts2db(moment())
+          last_used: ts2db(localNow())
         })
       }
     })
@@ -273,15 +273,4 @@ class SimpleFINClient {
       throw new SimpleFinError(sss('Error parsing response'));
     }
   }
-}
-
-if (require.main === module) {
-  async function test() {
-    let client = new SimpleFINClient();
-    let token = await client.consumeToken('aHR0cHM6Ly9icmlkZ2Uuc2ltcGxlZmluLm9yZy9zaW1wbGVmaW4vY2xhaW0vZGVtbw==')
-    console.log('token', token);
-    let data = await client.fetchAccounts(token, moment().subtract(30, 'days'), moment().add(1, 'day'));
-    console.log('data', data);
-  }
-  test()
 }

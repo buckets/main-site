@@ -12,7 +12,7 @@ import { Confirmer, ClickToEdit, debounceChange} from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
-import { Date } from '../time'
+import { DateDisplay } from '../time'
 import { NoteMaker } from './notes'
 
 function getImportBalance(account:Account, balance:number):number {
@@ -196,7 +196,7 @@ export class AccountView extends React.Component<AccountViewProps, {
             manager.store.accounts.update(account.id, {balance: computed_balance});
           })}/> ({sss('balance-as-of', (date:JSX.Element) => {
             return <span>as of {date}</span>
-          })(<Date value={appstate.defaultPostingDate} />)})
+          })(<DateDisplay value={appstate.defaultPostingDate} />)})
         </div>
         {import_balance_field}
       </div>

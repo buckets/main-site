@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as csv from 'csv'
 import * as fs from 'fs-extra-promise'
-import * as moment from 'moment'
 import { remote } from 'electron'
 import { AppState, manager } from './appstate'
 import { IStore } from '../store'
@@ -9,7 +8,7 @@ import { sss } from '../i18n'
 import { submitFeedback } from '../errors'
 import { makeToast } from './toast'
 import { cents2decimal } from '../money'
-import { tsfromdb, Timestamp, DateInput } from '../time'
+import { tsfromdb, localNow, Timestamp, DateInput } from '../time'
 
 interface ExportPageProps {
   appstate: AppState
@@ -39,9 +38,6 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
   }
   render() {
     let { reason } = this.state;
-    function today() {
-      return moment();
-    }
     const ranges = [
       {
         label: sss('daterange.all', 'All time'),
@@ -50,23 +46,23 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
       },
       {
         label: sss('daterange.thismonth', 'This month'),
-        s: today().startOf('month'),
-        e: today().add(1, 'month').startOf('month'),
+        s: localNow().startOf('month'),
+        e: localNow().add(1, 'month').startOf('month'),
       },
       {
         label: sss('daterange.fromlastmonth', 'From last month'),
-        s: today().subtract(1, 'month').startOf('month'),
-        e: today().add(1, 'month').startOf('month'),
+        s: localNow().subtract(1, 'month').startOf('month'),
+        e: localNow().add(1, 'month').startOf('month'),
       },
       {
         label: sss('daterange.from2monthsago', 'From 2 months ago'),
-        s: today().subtract(2, 'month').startOf('month'),
-        e: today().add(1, 'month').startOf('month'),
+        s: localNow().subtract(2, 'month').startOf('month'),
+        e: localNow().add(1, 'month').startOf('month'),
       },
       {
         label: sss('daterange.from3monthsago', 'From 3 months ago'),
-        s: today().subtract(3, 'month').startOf('month'),
-        e: today().add(1, 'month').startOf('month'),
+        s: localNow().subtract(3, 'month').startOf('month'),
+        e: localNow().add(1, 'month').startOf('month'),
       },
     ]
     return <div className="rows">
