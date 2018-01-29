@@ -1,4 +1,8 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.31.1
+
+- **FIX:** Fix error in want-to-buy message
+
 ## v0.31.0
 
 - **NEW:** Added a transaction export tool.  (Issue [#28](https://github.com/buckets/application/issues/28))
