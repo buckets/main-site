@@ -1,4 +1,14 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.31.0
+
+- **NEW:** Added a transaction export tool.  (Issue [#28](https://github.com/buckets/application/issues/28))
+
+- **NEW:** Rain in the current month now takes into account any amount spoken for in future months.  This allows for budgeting future months.  (Issue [#38](https://github.com/buckets/application/issues/38))
+
+- **NEW:** When reopening buckets, the last set of opened windows is restored.  (Issue [#59](https://github.com/buckets/application/issues/59))
+
+- **FIX:** Another attempt at the off by one problem.  (Issue [#40](https://github.com/buckets/application/issues/40))
+
 ## v0.30.0
 
 - **NEW:** Date format is now suggested when importing from CSV
