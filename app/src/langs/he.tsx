@@ -577,6 +577,12 @@ const messages:IMessages = {
     src: ["src/budget/budget.tsx line 148"],
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
   },
+  "Used in future": {
+    val: "Used in future",
+    translated: false,
+    src: ["src/budget/budget.tsx line 225"],
+    h: "O0zGsqv23d44/pWJqCSt+qkDtG/nBrBI2W0aRA9XoDw=",
+  },
   "rain.help.pos": {
     val: (abs_amount:JSX.Element) => {
                                     return <span>
@@ -824,12 +830,6 @@ const messages:IMessages = {
     src: ["src/budget/importpage.tsx line 209"],
     h: "pCLQy6ZAsZnJ3ff5r+iD+O2vHQhIJEEUHUhiY1NrMP0=",
   },
-  "": {
-    val: "",
-    translated: false,
-    src: ["src/budget/importpage.tsx line 270"],
-    h: "Eq4yyx7ALQHto1gbEnwf7jsNxTVy7WuvI5choD2C4SY=",
-  },
   "Connection saved!": {
     val: "Connection saved!",
     translated: false,
@@ -1023,6 +1023,24 @@ const messages:IMessages = {
     translated: false,
     src: ["src/budget/searchpage.tsx line 167"],
     h: "5hMoGWO5uTeCOujLdFnRx4w3D6Zka/avSxnH14UmJiI=",
+  },
+  "Nothing found matching:": {
+    val: "Nothing found matching:",
+    translated: false,
+    src: ["src/budget/searchpage.tsx line 196"],
+    h: "NF10b/Nmjj8holFGK7KIiaJhSb8bsL9Zt/Fa8fFy4gk=",
+  },
+  "Searching...": {
+    val: "Searching...",
+    translated: false,
+    src: ["src/budget/searchpage.tsx line 200"],
+    h: "7gAp07Zv3EjrgHoWJ04wEdRefy/aQ0zT8Y2EgQrnbHo=",
+  },
+  "Search:": {
+    val: "Search:",
+    translated: false,
+    src: ["src/budget/searchpage.tsx line 208"],
+    h: "OHBHBOVnuMjmjWHZURDrna8FWv+geQYMQuobRo4tkq0=",
   },
   "No matches found": {
     val: "No matches found",
@@ -1310,6 +1328,12 @@ const messages:IMessages = {
     src: ["src/mainprocess/drm.ts line 84"],
     h: "x9ekMClqI57T6jREU5VJurBCzlD+hBNJ8pHNQ0zMB1U=",
   },
+  "Hello!  Thanks for trying out Buckets.": {
+    val: "Hello!  Thanks for trying out Buckets.",
+    translated: false,
+    src: ["src/mainprocess/drm.ts line 89"],
+    h: "0m9VvMGwLCqD3lmZ24GbzlkRxPX1kf/DsbWA9kkBWX0=",
+  },
   "nag-message": {
     val: () => `Hello! Thanks for trying out Buckets.
 
@@ -1319,7 +1343,16 @@ a license must be purchased for continued use.
 Would you like to purchase a license now?`,
     translated: false,
     src: ["src/mainprocess/drm.ts line 85"],
-    h: "q/aC5/bxA3Spi/Gt0bnWtOT7Epd3Q1CSTZYajbIjnEE=",
+    h: "cugeP6FVXqdiCtOers5rslG0mDD5t/Rfl1ZWslfhD48=",
+    newval: () => `This is an unregistered trial version, and although the trial is untimed, a license must be purchased for continued use.
+
+Would you like to purchase a license now?`,
+  },
+  "Later": {
+    val: "Later",
+    translated: false,
+    src: ["src/mainprocess/updater.ts line 161"],
+    h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
   },
   "Purchase": {
     val: "Purchase",
@@ -1716,12 +1749,6 @@ Would you like to purchase a license now?`,
     translated: false,
     src: ["src/mainprocess/updater.ts line 160","src/wwwroot/misc/updates.tsx line 32"],
     h: "YCoofx1v0tRUHkHfhFnm6bV2xXfnsNT6QAyXqgkUa9c=",
-  },
-  "Later": {
-    val: "Later",
-    translated: false,
-    src: ["src/mainprocess/updater.ts line 161"],
-    h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
   },
   "Download": {
     val: "Download",

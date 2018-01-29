@@ -87,14 +87,12 @@ export function nag() {
   if (!isRegistered()) {
     dialog.showMessageBox({
       title: sss('Unregistered Version'),
-      message: sss('nag-message', () => `Hello! Thanks for trying out Buckets.
+      message: sss('Hello!  Thanks for trying out Buckets.'),
+      detail: sss('nag-message', () => `This is an unregistered trial version, and although the trial is untimed, a license must be purchased for continued use.
 
-This is an unregistered trial version, and although the trial is untimed,
-a license must be purchased for continued use.
-
-Would you like to purchase a license now?`),
+Would you like to purchase a license now?`)(),
       buttons: [
-        sss('Cancel'),
+        sss('Later'),
         sss('Purchase'),
       ],
       defaultId: 1,

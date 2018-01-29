@@ -96,9 +96,15 @@ export function generateBugID():string {
 
 export function nittyGritty(err?:Error) {
   let loc;
-  if (last_focused_window && last_focused_window.webContents) {
-    loc = last_focused_window.webContents.getURL();  
+  try {
+    if (last_focused_window && !last_focused_window.isDestroyed() && last_focused_window.webContents) {
+      loc = last_focused_window.webContents.getURL();  
+    }  
+  } catch(err) {
+    log.error('Error trying to get the error url', err.toString());
+    log.error(err.stack);
   }
+  
   return `Version: ${app.getVersion()} (node: ${process.version})
 OS: ${process.platform} ${os.release()} ${process.arch}
 Lang: ${tx.locale} ${tx.langpack.name} 
