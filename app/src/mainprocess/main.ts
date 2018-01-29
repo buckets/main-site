@@ -160,16 +160,18 @@ function eventuallyGetURL(win:Electron.BrowserWindow):Promise<string> {
     if (url) {
       resolve(url);
     } else {
-      win.webContents.once('did-navigate', () => {
-        url = win.webContents.getURL();
+      win.webContents.once('did-navigate', (ev, url) => {
         resolve(url);
+      })
+      win.webContents.once('destroyed', (ev) => {
+        reject('webcontents destroyed');
       })
     }
   });
 }
-app.on('browser-window-created', (ev, win) => {
-  eventuallyGetURL(win)
-  .then(url => {
+app.on('browser-window-created', async (ev, win) => {
+  try {
+    let url = await eventuallyGetURL(win);
     log.info('window opened to', url);
     if (win !== wiz_win) {
       if (url.startsWith('buckets://')) {
@@ -179,7 +181,9 @@ app.on('browser-window-created', (ev, win) => {
         // non-budget utility window
       }
     }
-  })
+  } catch(err) {
+    log.error("Error getting URL to close wizard");
+  }
 })
 app.on('browser-window-focus', (ev, win) => {
   const url = URL.parse(win.webContents.getURL());
