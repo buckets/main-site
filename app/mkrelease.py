@@ -10,12 +10,11 @@ import io
 import requests
 import click
 import webbrowser
+from dev.changelog import trello as trellolib
 
 GH_TOKEN = os.environ['GH_TOKEN']
 GH_USER = os.environ.get('GH_USERNAME', 'iffy')
 
-TRELLO_KEY = os.environ['TRELLO_KEY']
-TRELLO_TOKEN = os.environ['TRELLO_TOKEN']
 
 def prompt(text, default=None, validate=lambda x:x, required=True):
     full_prompt = text
@@ -77,51 +76,7 @@ def getLatestReleaseVersion():
 #------------------------------------------------------------------------------
 # Trello stuff
 #------------------------------------------------------------------------------
-TRELLO_BOARD = '0VAYcWff'
-
-class TrelloData(object):
-
-    def __init__(self, board_id):
-        self.board_id = board_id
-
-
-    def req(self, method, path, data=None):
-        data = data or {}
-        data.update({
-            'key': TRELLO_KEY,
-            'token': TRELLO_TOKEN,
-        })
-        r = requests.request(method, 'https://api.trello.com/1{0}'.format(path),
-            params=data)
-        return r
-
-    _labels = None
-    @property
-    def labels(self):
-        if self._labels is None:
-            r = self.req('GET', '/boards/{0}/labels'.format(self.board_id))
-            self._labels = r.json()
-        return self._labels
-
-    def labelIdFor(self, name):
-        for label in self.labels:
-            if label['name'].lower() == name.lower():
-                return label['id']
-
-    _lists = None
-    @property
-    def lists(self):
-        if self._lists is None:
-            r = self.req('GET', '/boards/{0}/lists'.format(self.board_id))
-            self._lists = r.json()
-        return self._lists
-
-    def listIdFor(self, name):
-        for l in self.lists:
-            if l['name'].lower() == name.lower():
-                return l['id']
-
-trello = TrelloData(TRELLO_BOARD)
+trello = trellolib.TrelloData()
 
 
 r_cardlink = re.compile(r'https://trello.com/c/([^\)]+?)')
@@ -129,34 +84,7 @@ def extractCardIds(changelog):
     links = r_cardlink.findall(changelog)
     return links
 
-def labelCard(card_id, labels):
-    for label in labels:
-        label_id = trello.labelIdFor(label)
-        r = trello.req('POST', '/cards/{card_id}/idLabels'.format(**locals()), {
-            'value': label_id,
-        })
-        if not r.ok:
-            print('Error adding label {0} to card {1}: {2}'.format(
-                label, card_id, r.text))
 
-
-def commentOnCard(card_id, comment):
-    r = trello.req('POST', '/cards/{card_id}/actions/comments'.format(**locals()),
-        {
-            'text': comment,
-        })
-    if not r.ok:
-        raise Exception('Error commenting on card {0}: {1}'.format(card_id, r.text))
-
-def moveCardToList(card_id, list_name):
-    list_id = trello.listIdFor(list_name)
-    r = trello.req('/cards/{card_id}'.format(card_id),
-        {
-            'idList': list_id,
-        })
-    if not r.ok:
-        raise Exception('Error moving card {0} to list {1}: {2}'.format(
-            card_id, list_id, r.text))
 
 #------------------------------------------------------------------------------
 
@@ -256,8 +184,8 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     # close issues
     if yesno('Close issues ({0}) on GitHub?'.format(','.join(card_ids)), default=True):
         for card_id in card_ids:
-            commentOnCard(card_id, 'Included in v{0} release (AUTOMATED COMMENT)'.format(target_version))
-            moveCardToList(card_id, 'Done')
+            trello.commentOnCard(card_id, 'Included in v{0} release (AUTOMATED COMMENT)'.format(target_version))
+            trello.moveCardToList(card_id, 'Done')
 
 
 if __name__ == '__main__':
