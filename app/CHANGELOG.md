@@ -1,4 +1,12 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.31.2
+
+- **FIX:** Fixed *Used in future* to not include kicked buckets.
+
+- **FIX:** Fixed future rain missed update with multiple windows ([#dXwraTOl](https://trello.com/c/dXwraTOl))
+
+- Moved to Trello for issue/bug tracking ([#JeaRIFN9](https://trello.com/c/JeaRIFN9))
+
 ## v0.31.1
 
 - **FIX:** Fix error in want-to-buy message
