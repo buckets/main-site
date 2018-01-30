@@ -79,7 +79,7 @@ def getLatestReleaseVersion():
 trello = trellolib.TrelloData()
 
 
-r_cardlink = re.compile(r'https://trello.com/c/([^\)]+?)')
+r_cardlink = re.compile(r'https://trello.com/c/([^\)]+)')
 def extractCardIds(changelog):
     links = r_cardlink.findall(changelog)
     return links
@@ -181,8 +181,8 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     subprocess.check_call(['git', 'commit', '-a', '-m', 'Start v{0}'.format(next_version)])
     print('Updated version to {0}'.format(next_version))
 
-    # close issues
-    if yesno('Close issues ({0}) on GitHub?'.format(','.join(card_ids)), default=True):
+    # close cards
+    if yesno('Move Trello cards to done ({0})?'.format(','.join(card_ids)), default=True):
         for card_id in card_ids:
             trello.commentOnCard(card_id, 'Included in v{0} release (AUTOMATED COMMENT)'.format(target_version))
             trello.moveCardToList(card_id, 'Done')
