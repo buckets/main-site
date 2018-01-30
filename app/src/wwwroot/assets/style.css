@@ -577,6 +577,12 @@ table.ledger th {
   padding-right: 1rem;*/
 }
 
+table.ledger .actions td {
+  border: none;
+  padding: 0.25rem 0;
+}
+
+
 tr.group-row .group-name {
   font-size: 1.25rem;
 }

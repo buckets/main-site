@@ -1045,11 +1045,20 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
 }
 
 
+interface TransactionListState {
+  selected: Set<number>;
+}
 class TransactionList extends React.Component<{
   transactions: Transaction[];
   appstate: AppState;
   ending_balance: number;
-}, {}> {
+}, TransactionListState> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected: new Set<number>(),
+    }
+  }
   render() {
     let { transactions, appstate, ending_balance } = this.props;
     let rows = transactions.map(trans => {
@@ -1066,6 +1075,20 @@ class TransactionList extends React.Component<{
         }
       }
       return <tr key={trans.id} className="note-hover-trigger">
+        <td>
+          <input
+            type="checkbox"
+            checked={this.state.selected.has(trans.id)}
+            onChange={ev => {
+              let newset = new Set(this.state.selected);
+              if (ev.target.checked) {
+                newset.add(trans.id)
+              } else {
+                newset.delete(trans.id);
+              }
+              this.setState({selected: newset})
+            }}/>
+        </td>
         <td className="nobr"><NoteMaker obj={trans} /><DateDisplay value={trans.posted} /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
@@ -1083,9 +1106,32 @@ class TransactionList extends React.Component<{
         <td>{account_name}</td>
       </tr>
     })
+
+    let delete_label = sss('Delete selected')
+    if (this.state.selected.size) {
+      delete_label = sss('transactions.delete', (size:number) => {
+        return `Delete selected (${size})`
+      })(this.state.selected.size);
+    }
+
     return <table className="ledger">
+      <thead className="actions">
+        <tr>
+          <td colSpan={100}>
+            <button
+              className="delete"
+              disabled={!this.state.selected.size}
+              onClick={ev => {
+                manager.store.buckets.deleteTransactions(Array.from(this.state.selected));
+                this.setState({selected: new Set<number>()})
+              }}
+            >{delete_label}</button>
+          </td>
+        </tr>
+      </thead>
       <thead>
         <tr>
+          <th></th>
           <th>{sss('Posted')}</th>
           <th>{sss('Memo')}</th>
           <th className="right">{sss('Amount')}</th>
