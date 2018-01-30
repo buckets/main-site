@@ -268,6 +268,7 @@ export class BucketStore {
   }={}):Promise<number> {
     let wheres = [
       'account_trans_id IS NULL',
+      'b.kicked <> 1',
     ];
     let params:any = {};
     if (args.onOrAfter) {
@@ -280,9 +281,11 @@ export class BucketStore {
     }
     const qry = `
       SELECT
-        sum(amount) as rainfall
+        sum(amount) AS rainfall
       FROM
-        bucket_transaction
+        bucket_transaction AS t
+        LEFT JOIN bucket AS b
+          ON t.bucket_id = b.id
       WHERE
         ${wheres.join(' AND ')}
     `;
