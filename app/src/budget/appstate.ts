@@ -281,7 +281,7 @@ export class StateManager {
 
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
-  private posttick: Set<string> = new Set();
+  private posttick: Set<keyof StateManager> = new Set();
 
   private updated_trans_counter = new DelayingCounter();
 
@@ -382,6 +382,7 @@ export class StateManager {
         this.appstate.buckets[obj.id] = obj;
         this.posttick.add('fetchBucketBalances');
         this.posttick.add('fetchRainfall');
+        this.posttick.add('fetchFutureRainfall');
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
       }
@@ -444,7 +445,7 @@ export class StateManager {
     let posttick = Array.from(this.posttick.values());
     this.posttick.clear();
     await Promise.all(posttick.map(funcname => {
-      return this[funcname]();
+      return (this[funcname] as any)();
     }));
     this.recomputeTotals();
     this.events.change.emit(this.appstate);
