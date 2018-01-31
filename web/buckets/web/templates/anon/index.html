@@ -188,11 +188,11 @@ img.main-shot {
   </div>
 
   <div class="callout para">
-    &mdash; Matt
+    {% trans href=url_for('.gettingstarted') %}<a href="#download">Download it now</a> for free!{% endtrans %}
   </div>
 
-  <div style="text-align: center; margin-bottom: 4rem;"">
-    <a class="buttonish buy" href="{{ url_for('.buy') }}">{% trans %}Buy $29{% endtrans %}</a>
+  <div class="callout para">
+    &mdash; Matt
   </div>
 
 </div>
@@ -204,13 +204,18 @@ img.main-shot {
   #mc_embed_signup{
     background: #fff;
     clear: left;
-    background-repeat: no-repeat;
-    background-size: contain;
     width: 100%;
     padding: 0rem 2rem;
     margin: 1rem auto;
-    border: 1px solid lightgrey;
-    border-width: 1px 0 0;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.5);
+
+    background-color: #eee;
+    background-image: url(/static/img/mail.png);
+    background-repeat: no-repeat;
+    background-size: 30%;
+    background-position: bottom 2rem right 3rem;
   }
   #mc_embed_signup form {
     padding: 1rem 0;

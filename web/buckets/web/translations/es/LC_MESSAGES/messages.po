@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-01-25 07:36-0700\n"
-"PO-Revision-Date: 2018-01-25 07:43-0700\n"
+"POT-Creation-Date: 2018-01-31 11:59-0700\n"
+"PO-Revision-Date: 2018-01-31 12:01-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -109,15 +109,15 @@ msgstr ""
 
 #: buckets/web/templates/anon/gettingstarted.html:3
 #: buckets/web/templates/anon/gettingstarted.html:9
-#: buckets/web/templates/base.html:142
+#: buckets/web/templates/base.html:143
 msgid "Getting Started"
 msgstr "Empezando"
 
-#: buckets/web/templates/base.html:143
+#: buckets/web/templates/base.html:144
 msgid "Pricing"
 msgstr "Precios"
 
-#: buckets/web/templates/base.html:144
+#: buckets/web/templates/base.html:145
 msgid "Buy"
 msgstr "Comprar"
 
@@ -288,7 +288,6 @@ msgid "Other"
 msgstr "Otro"
 
 #: buckets/web/templates/anon/index.html:145
-#: buckets/web/templates/anon/index.html:195
 msgid "Buy $29"
 msgstr "Comprar $29"
 
@@ -391,19 +390,23 @@ msgstr ""
 "Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
 "aquí por mucho tiempo."
 
-#: buckets/web/templates/anon/index.html:227
+#: buckets/web/templates/anon/index.html:191
+msgid "<a href=\"#download\">Download it now</a> for free!"
+msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
+
+#: buckets/web/templates/anon/index.html:232
 msgid "Subscribe to the Monthly Newsletter"
 msgstr "Suscríbete al boletín de Buckets"
 
-#: buckets/web/templates/anon/index.html:229
+#: buckets/web/templates/anon/index.html:234
 msgid "Email Address"
 msgstr "Dirección de correo electrónico"
 
-#: buckets/web/templates/anon/index.html:233
+#: buckets/web/templates/anon/index.html:238
 msgid "First Name"
 msgstr "Nombre de pila"
 
-#: buckets/web/templates/anon/index.html:241
+#: buckets/web/templates/anon/index.html:246
 msgid "Subscribe"
 msgstr "Suscribir"
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-01-25 07:36-0700\n"
+"POT-Creation-Date: 2018-01-31 11:59-0700\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -85,15 +85,15 @@ msgstr ""
 
 #: buckets/web/templates/anon/gettingstarted.html:3
 #: buckets/web/templates/anon/gettingstarted.html:9
-#: buckets/web/templates/base.html:142
+#: buckets/web/templates/base.html:143
 msgid "Getting Started"
 msgstr ""
 
-#: buckets/web/templates/base.html:143
+#: buckets/web/templates/base.html:144
 msgid "Pricing"
 msgstr ""
 
-#: buckets/web/templates/base.html:144
+#: buckets/web/templates/base.html:145
 msgid "Buy"
 msgstr ""
 
@@ -247,7 +247,6 @@ msgid "Other"
 msgstr ""
 
 #: buckets/web/templates/anon/index.html:145
-#: buckets/web/templates/anon/index.html:195
 msgid "Buy $29"
 msgstr ""
 
@@ -335,19 +334,23 @@ msgid ""
 "haul."
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:227
+#: buckets/web/templates/anon/index.html:191
+msgid "<a href=\"#download\">Download it now</a> for free!"
+msgstr ""
+
+#: buckets/web/templates/anon/index.html:232
 msgid "Subscribe to the Monthly Newsletter"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:229
+#: buckets/web/templates/anon/index.html:234
 msgid "Email Address"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:233
+#: buckets/web/templates/anon/index.html:238
 msgid "First Name"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:241
+#: buckets/web/templates/anon/index.html:246
 msgid "Subscribe"
 msgstr ""
 
