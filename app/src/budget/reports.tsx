@@ -676,11 +676,15 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           </tfoot>
         </table>
       </div>
-    })
+    }).filter(x => x);
 
-    return <div>
-      {tables}
-    </div>
+    if (tables.length) {
+      return <div>
+        {tables}
+      </div>  
+    } else {
+      return <div>{sss("You don't have any recurring expense buckets yet.")}</div>
+    }
   }
 }
 
