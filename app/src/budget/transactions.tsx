@@ -267,9 +267,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
   componentWillReceiveProps(nextProps) {
     this.setState(this.recomputeState(nextProps) as TransRowState);
   }
-  recomputeState(props):Partial<TransRowState> {
+  recomputeState(props:TransRowProps):Partial<TransRowState> {
     if (props.trans) {
-      // An existing transaction is being show
+      // An existing transaction is being shown
       let state:Partial<TransRowState> = {
         editing: this.state.editing,
         amount: props.trans.amount,
@@ -288,6 +288,12 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       }
       if (props.account) {
         ret.account_id = props.account.id;
+      }
+      let vr = props.appstate.viewDateRange
+      if (this.state.posted.isBefore(vr.onOrAfter)) {
+        ret.posted = ensureUTCMoment(props.appstate.defaultPostingDate);
+      } else if (this.state.posted.isSameOrAfter(vr.before)) {
+        ret.posted = ensureUTCMoment(props.appstate.defaultPostingDate);
       }
       return ret;
     }
