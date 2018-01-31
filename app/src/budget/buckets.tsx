@@ -6,7 +6,7 @@ import { Bucket, BucketKind, Group, Transaction, computeBucketData } from '../mo
 import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput } from '../money'
-import { onKeys, MonthSelector, ClickToEdit } from '../input'
+import { onKeys, MonthSelector, ClickToEdit, SafetySwitch } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 import { makeToast } from './toast'
@@ -1107,25 +1107,26 @@ class TransactionList extends React.Component<{
       </tr>
     })
 
-    let delete_label = sss('Delete selected')
+    let delete_count;
     if (this.state.selected.size) {
-      delete_label = sss('transactions.delete', (size:number) => {
-        return `Delete selected (${size})`
-      })(this.state.selected.size);
+      delete_count = this.state.selected.size;
     }
 
     return <table className="ledger">
       <thead className="actions">
         <tr>
           <td colSpan={100}>
-            <button
-              className="delete"
+            <SafetySwitch
               disabled={!this.state.selected.size}
               onClick={ev => {
                 manager.store.buckets.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}
-            >{delete_label}</button>
+            >
+              <span><span className="fa fa-trash" /> {delete_count}</span>
+            </SafetySwitch>
+            <button>Test</button>
+            <SafetySwitch onClick={() => {}}>Hello</SafetySwitch>
           </td>
         </tr>
       </thead>

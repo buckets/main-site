@@ -322,12 +322,13 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
 }
 
 
-interface ConfirmerProps {
+interface SafetySwitchProps {
   timeout?: number;
-  first: JSX.Element;
-  second: JSX.Element;
+  disabled?: boolean;
+  onClick?: (ev)=>void;
+  className?: string;
 }
-export class Confirmer extends React.Component<ConfirmerProps, {
+export class SafetySwitch extends React.Component<SafetySwitchProps, {
   clicked: boolean;
 }> {
   private timer;
@@ -338,28 +339,49 @@ export class Confirmer extends React.Component<ConfirmerProps, {
     }
   }
   render() {
-    let { first, second } = this.props;
-    if (!this.state.clicked) {
-      return React.cloneElement(first, {
-        onClick: this.firstClick,
-      });
-    } else {
-      return React.cloneElement(second, {
-        onClick: (ev) => {
-          this.revert();
-          return second.props.onClick(ev);
+    let { children, className, disabled, onClick } = this.props;
+    return <div
+      onClick={ev => {
+        if (disabled) {
+          ev.preventDefault();
+          return;
         }
-      })
-    }
+        if (this.state.clicked) {
+          this.setState({clicked: false});
+          onClick && onClick(ev);
+        } else {
+          this.open();
+        }
+      }}
+      className={cx(
+        "safety-switch",
+        {
+          open: this.state.clicked,
+        }
+      )}>
+      <button
+        disabled={disabled}
+        className={cx(
+          className,
+          "under delete", {
+            pulse: this.state.clicked
+        })}>{children}</button>
+      <button
+        disabled={disabled}
+        className={cx(
+          className,
+          "cover")
+        }>{children}</button>
+    </div>
   }
-  firstClick = () => {
+  open = () => {
     this.timer = setTimeout(this.revert, this.props.timeout || 5000);
     this.setState({clicked: true});
   }
   revert = () => {
     this.setState({clicked: false});
     if (this.timer) {
-      clearTimeout(this.timer)
+      clearTimeout(this.timer);
     }
     this.timer = null;
   }

@@ -8,7 +8,7 @@ import { Route, Link, WithRouting, Redirect } from './routing'
 import { Money, MoneyInput } from '../money'
 import { makeToast } from './toast'
 import {TransactionList} from './transactions'
-import { Confirmer, ClickToEdit, debounceChange} from '../input';
+import { ClickToEdit, debounceChange, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
@@ -129,32 +129,28 @@ export class AccountView extends React.Component<AccountViewProps, {
         manager.store.accounts.unclose(account.id);
       }}>{sss('Reopen')}</button>
       closed_ribbon = <div className="kicked-ribbon">{sss('single-account Closed', 'Closed')}</div>
-      delete_all_transactions_button = <Confirmer
-        first={<button className="delete">{sss('Delete account')}</button>}
-        second={<button className="delete"
-          onClick={ev => {
-            manager.store.accounts.deleteWholeAccount(account.id)
-            .then(() => {
-              makeToast(sss('Account and transactions deleted'));
-            });
-          }}
-        >{sss('Confirm delete')} {sss("(This can't be undone)")}</button>}
-      />
+      delete_all_transactions_button = <SafetySwitch
+        onClick={ev => {
+          manager.store.accounts.deleteWholeAccount(account.id)
+          .then(() => {
+            makeToast(sss('Account and transactions deleted'));
+          });
+        }}>
+        {sss('Permanently delete account')}
+        </SafetySwitch>
     } else {
-      close_button = <Confirmer
-          first={<button className="delete">{sss('Close account')}</button>}
-          second={<button className="delete"
-            onClick={ev => {
-              manager.store.accounts.close(account.id)
-              .then(new_account => {
-                if (!new_account.closed) {
-                  // it was deleted
-                  makeToast(sss('Account deleted completely'));
-                } else {
-                  makeToast(sss('Account closed'));  
-                }
-              });
-            }}>{sss('Confirm close')}</button>} />
+      close_button = <SafetySwitch
+        onClick={ev => {
+          manager.store.accounts.close(account.id)
+          .then(new_account => {
+            if (!new_account.closed) {
+              // it was deleted
+              makeToast(sss('Account deleted completely'));
+            } else {
+              makeToast(sss('Account closed'));  
+            }
+          });
+        }}>{sss('Close account')}</SafetySwitch>
     }
 
     if (import_balance !== balance) {

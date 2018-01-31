@@ -8,7 +8,7 @@ import { Account, Category, Transaction } from '../models/account'
 import { DateDisplay, DateInput, ensureUTCMoment } from '../time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
-import { onKeys } from '../input'
+import { onKeys, SafetySwitch } from '../input'
 import { sss } from '../i18n'
 import { current_file } from '../mainprocess/files'
 import { makeToast } from './toast'
@@ -23,14 +23,12 @@ interface TransactionPageProps {
 export class TransactionPage extends React.Component<TransactionPageProps, {
   show_subset: boolean;
   subset: number[];
-  selected: Set<number>;
 }> {
   constructor(props) {
     super(props)
     this.state = {
       show_subset: false,
       subset: [],
-      selected: new Set<number>(),
     }
   }
   componentWillReceiveProps(nextProps:TransactionPageProps) {
@@ -69,16 +67,9 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
       subset: subset,
     })
   }
-  deleteSelected = (ev) => {
-    manager.store.accounts.deleteTransactions([...this.state.selected])
-    this.setState({
-      selected: new Set(),
-    })
-  }
   render() {
     let transactions;
     let { appstate } = this.props;
-    let { selected } = this.state;
     if (this.state.show_subset) {
       transactions = this.state.subset
         .map(id => appstate.transactions[id])
@@ -86,12 +77,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     } else {
       transactions = _.values(appstate.transactions);
     }
-    let delete_label = sss('Delete selected');
-    if (selected.size) {
-      delete_label = sss('transactions.delete', (size:number) => {
-        return `Delete selected (${size})`
-      })(selected.size);
-    }
+
     let dupes = findPotentialDupes(transactions);
     let dupe_list;
     if (dupes.length) {
@@ -101,12 +87,6 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
           noCreate
           appstate={appstate}
           transactions={dupes}
-          selected={selected}
-          onSelectChange={selected => {
-            this.setState({
-              selected: new Set(selected),
-            })
-          }}
           sortFunc={[
             'amount',
             item => -ensureUTCMoment(item.posted).unix(),
@@ -120,10 +100,6 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
     <div className="rows">
       <div className="subheader">
         <div className="group">
-          <button
-            className="delete"
-            disabled={!selected.size}
-            onClick={this.deleteSelected}>{delete_label}</button>  
           <div className="control">
             <input
               type="checkbox"
@@ -146,12 +122,6 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
           <TransactionList
             appstate={appstate}
             transactions={transactions}
-            selected={selected}
-            onSelectChange={selected => {
-              this.setState({
-                selected: new Set(selected),
-              })
-            }}
           />
           {dupe_list}
         </div>
@@ -166,14 +136,22 @@ interface TransactionListProps {
   noCreate?: boolean;
   hideAccount?: boolean;
   account?: Account;
-  selected?: Set<number>;
   ending_balance?: number;
   sortFunc?: Array<Function|string>;
-  onSelectChange?: (selected:Set<number>)=>any;
 }
-export class TransactionList extends React.Component<TransactionListProps, {}> {
+interface TransactionListState {
+  selected: Set<number>;
+}
+export class TransactionList extends React.Component<TransactionListProps, TransactionListState> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected: new Set<number>(),
+    }
+  }
   render() {
-    let { appstate, account, selected, onSelectChange, noCreate, ending_balance, sortFunc } = this.props;
+    let { appstate, account, noCreate, ending_balance, sortFunc } = this.props;
+    let { selected } = this.state;
     let hideAccount = this.props.hideAccount || false;
     sortFunc = sortFunc || [
       item => -ensureUTCMoment(item.posted).unix(),
@@ -203,12 +181,32 @@ export class TransactionList extends React.Component<TransactionListProps, {}> {
           this.setState({
             selected: newset,
           })
-          onSelectChange(newset);
         }}
         hideAccount={hideAccount}
       />
     })
+
+    let delete_count;
+    if (this.state.selected.size) {
+      delete_count = this.state.selected.size;
+    }
+
     return <table className="ledger transaction-list">
+      <thead className="actions">
+        <tr>
+          <td colSpan={100}>
+            <SafetySwitch
+              disabled={!this.state.selected.size}
+              onClick={ev => {
+                manager.store.accounts.deleteTransactions(Array.from(this.state.selected));
+                this.setState({selected: new Set<number>()})
+              }}
+            >
+              <span><span className="fa fa-trash" /> {delete_count}</span>
+            </SafetySwitch>
+          </td>
+        </tr>
+      </thead>
       <thead>
         <tr>
           <th></th>

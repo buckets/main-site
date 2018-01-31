@@ -8,7 +8,7 @@ import { BankMacro } from '../models/bankmacro'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
-import { ClickToEdit, Confirmer } from '../input'
+import { ClickToEdit, SafetySwitch } from '../input'
 import { current_file } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { setPath } from './budget'
@@ -378,12 +378,11 @@ class BankMacroList extends React.Component<{
               {play_button}
             </td>
             <td className="icon-button-wrap">
-              <Confirmer
-                first={<button className="icon"><span className="fa fa-trash"></span></button>}
-                second={<button className="delete" onClick={(ev) => {
+              <SafetySwitch
+                className="icon"
+                onClick={(ev) => {
                   manager.store.bankmacro.delete(macro.id);
-                }}>{sss('Confirm delete?')}</button>}
-              />
+                }}><span className="fa fa-trash"></span></SafetySwitch>
             </td>
           </tr>
         })}
@@ -402,12 +401,14 @@ class ConnectionList extends React.Component<{
         <td>{conn.id}</td>
         <td><DateTime value={conn.last_used} /></td>
         <td className="icon-button-wrap">
-          <Confirmer
-            first={<button className="icon"><span className="fa fa-trash"></span></button>}
-            second={<button className="delete" onClick={(ev) => {
+          <SafetySwitch
+            className="icon"
+            onClick={(ev) => {
               manager.store.deleteObject(Connection, conn.id);
-            }}>{sss('Confirm delete?')}</button>}
-          />
+            }}
+          >
+            <span className="fa fa-trash"></span>
+          </SafetySwitch>
         </td>
       </tr>
     })

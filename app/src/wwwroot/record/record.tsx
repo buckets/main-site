@@ -9,7 +9,7 @@ import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
 import { sss } from '../../i18n'
-import { Confirmer } from '../../input'
+import { SafetySwitch } from '../../input'
 import { IncorrectPassword } from '../../error'
 import { makeToast, ToastDisplay } from '../../budget/toast'
 import { PrefixLogger } from '../../logging'
@@ -411,13 +411,12 @@ class RecordingStep extends React.Component<RecordingStepProps, {
         })}>
         {guts}{debug}
         <div className="step-actions">
-          <Confirmer
-            first={<button className="icon"><span className="fa fa-trash" /></button>}
-            second={<button className="delete"
-              onClick={(ev) => {
-                director.recording.removeStep(step);
-              }}>{sss('Confirm delete')}</button>}
-          />
+          <SafetySwitch
+            onClick={(ev) => {
+              director.recording.removeStep(step);
+            }}>
+            <span className="fa fa-trash" />
+          </SafetySwitch>
         </div>
       </div>
     } else {
@@ -558,7 +557,7 @@ class RecordPage extends React.Component<RecordPageProps, {
 
     return <div className="record-page">
       <div className="browser-wrap">
-        <div className="instructions">
+        <div className="record-instructions">
           To create a macro:
           <ol>
             <li>Sign in to your bank.  If your bank has a "remember this computer" option, check it.</li>
@@ -653,13 +652,12 @@ class RecordPage extends React.Component<RecordPageProps, {
                 /> Show click markers
               </label> : null }
           </div>
-          <Confirmer
-            first={<button>Delete all</button>}
-            second={<button className="delete"
-              onClick={(ev) => {
-                director.clear();
-              }}>Confirm delete</button>}
-          />
+          <SafetySwitch
+            onClick={(ev) => {
+              director.clear();
+            }}>
+            {sss('Delete all')}
+          </SafetySwitch>
         </div>
       </div>
     </div>
