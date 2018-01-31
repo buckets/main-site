@@ -5,7 +5,7 @@ import * as cx from 'classnames'
 import * as moment from 'moment'
 import { manager, AppState } from './appstate'
 import { Account, Category, Transaction } from '../models/account'
-import { DateDisplay, DateInput, ensureUTCMoment } from '../time'
+import { DateDisplay, DateInput, ensureUTCMoment, tsfromdb } from '../time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
@@ -274,7 +274,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         editing: this.state.editing,
         amount: props.trans.amount,
         memo: props.trans.memo,
-        posted: props.trans.posted,
+        posted: tsfromdb(props.trans.posted),
         account_id: props.trans.account_id,
       };
       if (props.account) {
