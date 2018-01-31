@@ -228,17 +228,24 @@ export class BucketStore {
   }
   async deleteTransactions(trans_ids:number[]) {
     let affected_buckets = new Set();
+    let affected_atrans = new Set();
 
     // This could be optimized later
     await Promise.all(trans_ids.map(async (transid) => {
       let trans = await this.store.getObject(Transaction, transid);
       affected_buckets.add(trans.bucket_id)
+      if (trans.account_trans_id) {
+        affected_atrans.add(trans.account_trans_id)
+      }
       await this.store.deleteObject(Transaction, transid);
     }));
     await Promise.all(Array.from(affected_buckets).map(async (bucket_id) => {
-      let account = await this.store.getObject(Bucket, bucket_id);
-      this.store.publishObject('update', account);
+      let bucket = await this.store.getObject(Bucket, bucket_id);
+      this.store.publishObject('update', bucket);
     }));
+    await Promise.all(Array.from(affected_atrans).map(async (atrans_id) => {
+      await this.store.accounts.removeCategorization(atrans_id);
+    }))
   }
   async updateTransaction(transid:number, data:Partial<Transaction>):Promise<Transaction> {
     let trans = await this.store.getObject(Transaction, transid);
