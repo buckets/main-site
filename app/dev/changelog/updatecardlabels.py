@@ -9,7 +9,7 @@ from trello import TrelloData
 
 trello = TrelloData()
 
-r_cardid = re.compile(r'\(#([a-zA-Z0-9]+)\)')
+r_cardid = re.compile(r'#([a-zA-Z0-9]+)')
 
 filenames = sys.argv[1:]
 if not filenames:
