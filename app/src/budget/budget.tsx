@@ -39,11 +39,11 @@ export async function start(base_element, room, args: {
 } = {}) {
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
-  log.info((new Date()).toString())
-  log.info((new Date()).toLocaleString())
-  log.info((new Date()).getTimezoneOffset())
+  log.info('         toString:', (new Date()).toString())
+  log.info('   toLocaleString:', (new Date()).toLocaleString())
+  log.info('getTimezoneOffset:', (new Date()).getTimezoneOffset())
   log.info(navigator.userAgent)
-  log.info(moment.version)
+  log.info(`moment: ${moment.version}`)
 
   if (args) {
     if (args.noanimation) {
@@ -333,7 +333,7 @@ class Application extends React.Component<ApplicationProps, any> {
           <WithRouting func={(routing) => {
             let dft_path = routing.fullpath || '/accounts';
             let year = appstate.year || today.year();
-            let month = appstate.month || today.month()+1
+            let month = (appstate.month || today.month())+1;
             const dst = `/y${year}m${month}${dft_path}`;
             log.info(`Redirect to ${dst}`)
             return (<Redirect to={dst} />)
