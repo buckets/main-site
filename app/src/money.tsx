@@ -5,6 +5,10 @@ import * as math from 'mathjs';
 
 let ANIMATION_ENABLED = true;
 const _groupregex = new RegExp(',', "g");
+math.config({
+  number: 'BigNumber',
+  precision: 64,
+})
 function fancyEval(x:string) {
   x = x.replace(_groupregex, '');
   return math.eval(x).toString();
