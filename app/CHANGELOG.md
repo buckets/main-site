@@ -1,4 +1,20 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.32.0
+
+- **NEW:** You can delete bucket transactions (Issue [#q2PpU2iV](https://trello.com/c/q2PpU2iV))
+
+- **NEW:** Added a 'Quit' option for Windows/Linux users.  ([#XjHhptE6](https://trello.com/c/XjHhptE6))
+
+- **FIX:** Budget always opened to the month before the current month, by default.  Now it opens to the current month.  ([#tE6BlTgh](https://trello.com/c/tE6BlTgh))
+
+- **FIX:** You can now adjust the Buckets License amount so that different currencies can be made to work ([#j8rA12Fu](https://trello.com/c/j8rA12Fu))
+
+- **FIX:** Fixed math being wrong on money inputs ([#wtnk1A92](https://trello.com/c/wtnk1A92))
+
+- **FIX:** When there are no recurring expense buckets, the analysis page no longer looks like a broken page.  ([#6snqIshs](https://trello.com/c/6snqIshs))
+
+- **FIX:** Posted date of newly created transactions will now always be (by default) in the month you are looking at.  ([#LauMJXLI](https://trello.com/c/LauMJXLI))
+
 ## v0.31.2
 
 - **FIX:** Fixed *Used in future* to not include kicked buckets.
