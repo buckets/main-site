@@ -1125,8 +1125,6 @@ class TransactionList extends React.Component<{
             >
               <span><span className="fa fa-trash" /> {delete_count}</span>
             </SafetySwitch>
-            <button>Test</button>
-            <SafetySwitch onClick={() => {}}>Hello</SafetySwitch>
           </td>
         </tr>
       </thead>
