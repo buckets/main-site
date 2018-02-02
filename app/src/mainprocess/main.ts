@@ -104,21 +104,21 @@ app.on('ready', async () => {
 
   if (openfirst.length) {
     while (openfirst.length) {
-      BudgetFile.openFile(openfirst.shift());  
+      await BudgetFile.openFile(openfirst.shift());  
     }
   } else if (process.env.BUCKETS_DEVMODE) {
     // Open a file for easy testing
-    BudgetFile.openFile('/tmp/test.buckets', {create: true});
+    await BudgetFile.openFile('/tmp/test.buckets', {create: true});
   } else if (PSTATE.last_opened_windows.length) {
     // Try to open the last set of windows
     log.info('Attempting to open last known set of windows:', PSTATE.last_opened_windows);
     try {
-      PSTATE.last_opened_windows.forEach(window_set => {
+      await Promise.all(PSTATE.last_opened_windows.map(window_set => {
         log.info('Opening', window_set.filename);
-        BudgetFile.openFile(window_set.filename, {
+        return BudgetFile.openFile(window_set.filename, {
           windows: window_set.windows,
         })
-      })
+      }))
     } catch(err) {
       log.error('Error opening last set of windows');
       log.error(err);
