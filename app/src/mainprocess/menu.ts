@@ -19,7 +19,7 @@ export async function updateMenu(args:{
     budget?:boolean,
   }={}) {
   let recent_files = await getRecentFiles();
-  let FileMenu = {
+  let FileMenu:any = {
     label: sss('File'),
     submenu: [
       {
@@ -292,6 +292,11 @@ export async function updateMenu(args:{
       openPreferences();
     }
   }
+  const quit = {
+    role: 'quit',
+    label: sss('Quit Buckets'),
+    accelerator: 'CmdOrCtrl+q',
+  }
 
   if (process.platform === 'darwin') {
     // Buckets Menu
@@ -321,10 +326,7 @@ export async function updateMenu(args:{
           label: sss('Show All'),
         },
         {type: 'separator'},
-        {
-          role: 'quit',
-          label: sss('Quit Buckets'),
-        }
+        quit,
       ]
     })
     EditMenu.submenu.push(
@@ -363,7 +365,9 @@ export async function updateMenu(args:{
       }
     ]
   } else {
-    // mac/linux
+    // windows/linux
+    FileMenu.submenu.push({type: 'separator'})
+    FileMenu.submenu.push(quit);
     HelpMenu.submenu.unshift(about as any, check_for_updates, {type: 'separator'})
     EditMenu.submenu.push({type: 'separator'})
     EditMenu.submenu.push(preferences)
