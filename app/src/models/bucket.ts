@@ -73,6 +73,16 @@ export class Group implements IObject, INotable {
 registerClass(Group);
 
 
+export interface BucketFlow {
+  in: number;
+  out: number;
+  transfer_in: number;
+  transfer_out: number;
+}
+export interface BucketFlowMap {
+  [bucket_id: number]: BucketFlow;
+}
+
 export class BucketStore {
   public store:IStore;
   constructor(store:IStore) {
@@ -304,33 +314,59 @@ export class BucketStore {
     }
   }
 
-  //
-  // Return how much rain each bucket has received in a given time period
-  async rainfall(onOrAfter:Timestamp, before:Timestamp):Promise<Balances> {
-    let rows = await this.store.query(`
-      SELECT
-        sum(amount) as rainfall,
-        bucket_id
+  async getFlow(onOrAfter:Timestamp, before:Timestamp):Promise<BucketFlowMap> {
+   let rows = await this.store.query(`
+        SELECT
+          SUM(CASE
+              WHEN
+                  amount >= 0
+                  AND COALESCE(transfer, 0) = 0
+              THEN amount
+              ELSE 0
+              END) as amount_in,
+          SUM(CASE
+              WHEN
+                  amount < 0
+                  AND COALESCE(transfer, 0) = 0
+              THEN amount
+              ELSE 0
+              END) as amount_out,
+          SUM(CASE
+              WHEN
+                  amount >= 0
+                  AND COALESCE(transfer, 0) = 1
+              THEN amount
+              ELSE 0
+              END) as transfer_in,
+          SUM(CASE
+              WHEN
+                  amount < 0
+                  AND COALESCE(transfer, 0) = 1
+              THEN amount
+              ELSE 0
+              END) as transfer_out,
+          bucket_id
       FROM
-        bucket_transaction
+          bucket_transaction
       WHERE
         posted >= $onOrAfter
         AND posted < $before
-        --AND (transfer IS NULL
-        --  OR transfer = 0)
-        AND account_trans_id IS NULL
-        --AND amount >= 0
       GROUP BY
         bucket_id
       `, {
         $onOrAfter: ts2db(onOrAfter),
         $before: ts2db(before),
       })
-    let ret = {};
+    let ret:BucketFlowMap = {};
     rows.forEach(row => {
-      ret[row.bucket_id] = row.rainfall;
+      ret[row.bucket_id] = {
+        in: row.amount_in,
+        out: row.amount_out,
+        transfer_in: row.transfer_in,
+        transfer_out: row.transfer_out,
+      }
     })
-    return ret;
+    return ret; 
   }
 
   async listTransactions(args:{

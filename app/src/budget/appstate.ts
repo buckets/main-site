@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
-import {Bucket, Group, Transaction as BTrans} from '../models/bucket'
+import {Bucket, Group, Transaction as BTrans, BucketFlowMap } from '../models/bucket'
 import { Connection } from '../models/simplefin'
 import { isBetween, ensureLocalMoment, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
@@ -77,8 +77,9 @@ export class AppState implements IComputedAppState {
   bucket_balances: Balances = {};
   nodebt_balances: Balances = {};
 
-  // The rain each bucket has received this month.
-  rainfall: Balances = {};
+  // The amount in/out for each bucket for this month.
+  bucket_flow: BucketFlowMap = {}
+
   // The amount of rain used in future months
   actual_future_rain: number = 0;
   // The amount of this month's rain used in future months.
@@ -381,7 +382,7 @@ export class StateManager {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
         this.posttick.add('fetchBucketBalances');
-        this.posttick.add('fetchRainfall');
+        this.posttick.add('fetchBucketFlow');
         this.posttick.add('fetchFutureRainfall');
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
@@ -472,7 +473,7 @@ export class StateManager {
       this.fetchAllGroups(),
       this.fetchAccountBalances(),
       this.fetchBucketBalances(),
-      this.fetchRainfall(),
+      this.fetchBucketFlow(),
       this.fetchFutureRainfall(),
       this.fetchTransactions(),
       this.fetchBucketTransactions(),
@@ -526,12 +527,12 @@ export class StateManager {
         this.appstate.bucket_balances = balances;
       })  
   }
-  fetchRainfall() {
-    return this.store.buckets.rainfall(
+  fetchBucketFlow() {
+    return this.store.buckets.getFlow(
       this.appstate.viewDateRange.onOrAfter,
       this.appstate.viewDateRange.before)
-      .then(rainfall => {
-        this.appstate.rainfall = rainfall;
+      .then(flow => {
+        this.appstate.bucket_flow = flow;
       })
   }
   fetchFutureRainfall() {
