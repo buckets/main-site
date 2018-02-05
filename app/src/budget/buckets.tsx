@@ -16,6 +16,7 @@ import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
 import { isNil } from '../util'
 import { NoteMaker } from './notes'
+import { ensureUTCMoment } from '../time'
 
 const NOGROUP = -1;
 
@@ -1045,15 +1046,16 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
 }
 
 
-interface TransactionListState {
-  selected: Set<number>;
-}
-class TransactionList extends React.Component<{
+interface TransactionListProps {
   transactions: Transaction[];
   appstate: AppState;
   ending_balance: number;
-}, TransactionListState> {
-  constructor(props) {
+}
+interface TransactionListState {
+  selected: Set<number>;
+}
+class TransactionList extends React.Component<TransactionListProps, TransactionListState> {
+  constructor(props:TransactionListProps) {
     super(props);
     this.state = {
       selected: new Set<number>(),
@@ -1061,7 +1063,11 @@ class TransactionList extends React.Component<{
   }
   render() {
     let { transactions, appstate, ending_balance } = this.props;
-    let rows = transactions.map(trans => {
+    const sortFunc = [
+      item => -ensureUTCMoment(item.posted).unix(),
+      'bucket_id',
+      item => -item.id]
+    let rows = _.sortBy(transactions, sortFunc).map(trans => {
       let running_bal;
       if (!isNil(ending_balance)) {
         running_bal = ending_balance;
