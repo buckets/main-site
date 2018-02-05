@@ -189,7 +189,7 @@ export class ImportPage extends React.Component<{
               </button>
           </div>
           <div>
-            <button onClick={() => { makeToast('Here is some toast')}}>{sss('Test Toast')}</button>
+            <button onClick={() => { makeToast(`Here are ${Math.ceil(1 + Math.random() * 1000)} pieces of ${'t'.repeat(Math.ceil(30*Math.random()))}toast`)}}>{sss('Test Toast')}</button>
           </div>
         </div>
         <div className="padded section">

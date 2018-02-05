@@ -5,7 +5,7 @@ import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 class Toast {
   public message: string;
-  public duration: number = 5000;
+  public duration: number = 8000;
   public className?: string;
   public id: number;
   static IDS: number = 0;

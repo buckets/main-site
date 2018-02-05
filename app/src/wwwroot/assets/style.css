@@ -1303,6 +1303,7 @@ table.props th {
   bottom: 0;
   right: 0;
   z-index: 2;
+  width: 30vw;
 }
 .toasts .toast {
   position: relative;
