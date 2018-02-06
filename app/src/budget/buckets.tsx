@@ -562,6 +562,7 @@ class BucketRow extends React.Component<BucketRowProps, {
   }
   render() {
     let { posting_date, bucket, balance, flow, nodebt_balance, show_nodebt_balance, onPendingChanged, pending } = this.props;
+    flow = flow || {total_in:0, total_out:0, in:0, out:0, transfer_in:0, transfer_out:0};
     let balance_el;
     if (pending) {
       balance_el = <span>
@@ -579,12 +580,12 @@ class BucketRow extends React.Component<BucketRowProps, {
 
     let rainfall_indicator;
     if (computed.deposit) {
-      let percent = flow.in/computed.deposit*100;
+      let percent = flow.total_in/computed.deposit*100;
       rainfall_indicator = <Help
         icon={<ProgressBubble height="1rem" percent={percent} />}>
         {sss('rainfall-received-this-month', (money:JSX.Element, percent:number) => {
           return <span>Rainfall received this month: {money} ({percent}%)</span>
-        })(<Money value={flow.in} alwaysShowDecimal />, Math.floor(percent))}
+        })(<Money value={flow.total_in} alwaysShowDecimal />, Math.floor(percent))}
       </Help>
     }
 
@@ -627,20 +628,17 @@ class BucketRow extends React.Component<BucketRowProps, {
           }}
         />
       </td>
-      <td className="right">
+      <td className="right div-right">
         <Money value={computed.deposit} hidezero />{computed.deposit ? <PerMonth/> : ''}
         {rainfall_indicator}
       </td>
       <td className="right">
-        <Money value={flow.in} alwaysShowDecimal className="faint-cents" />
+        <Money value={flow.total_in} alwaysShowDecimal className="faint-cents" />
       </td>
       <td className="right">
-        <Money value={Math.abs(flow.out)} alwaysShowDecimal className="faint-cents" nocolor />
+        <Money value={Math.abs(flow.total_out)} alwaysShowDecimal className="faint-cents" nocolor />
       </td>
-      <td className="right">
-        <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" />
-      </td>
-      <td className="right">{balance_el}</td>
+      <td className="right div-right">{balance_el}</td>
       {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
       <td className="left">
         <MoneyInput
@@ -758,7 +756,7 @@ class GroupRow extends React.Component<{
         key={bucket.id}
         bucket={bucket}
         balance={balances[bucket.id]}
-        flow={bucket_flow[bucket.id] || {in:0, out:0, transfer_in:0, transfer_out:0}}
+        flow={bucket_flow[bucket.id]}
         nodebt_balance={nodebt_balances[bucket.id]}
         show_nodebt_balance={show_nodebt_balance}
         onPendingChanged={onPendingChanged}
@@ -804,13 +802,12 @@ class GroupRow extends React.Component<{
       <tr>
         <th className="nopad noborder"></th>
         <th>{sss('Bucket')}</th>
-        <th className="right nobr">{sss('Want')} <Help><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
+        <th className="right nobr div-right">{sss('Want')} <Help><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
         <th className="center">{sss("In")}</th>
         <th className="center">{sss("Out")}</th>
-        <th className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
-        <th className="center">{sss('Balance')}</th>
+        <th className="center div-right">{sss('Balance')}</th>
         {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
-        <th className="left">{sss('In/Out')}</th>
+        <th className="left div-left">{sss('In/Out')}</th>
         <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>
       </tr>

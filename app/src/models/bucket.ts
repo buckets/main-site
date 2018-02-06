@@ -74,6 +74,8 @@ registerClass(Group);
 
 
 export interface BucketFlow {
+  total_in: number;
+  total_out: number;
   in: number;
   out: number;
   transfer_in: number;
@@ -364,6 +366,8 @@ export class BucketStore {
         out: row.amount_out,
         transfer_in: row.transfer_in,
         transfer_out: row.transfer_out,
+        total_in: row.amount_in + row.transfer_in,
+        total_out: row.amount_out + row.transfer_out,
       }
     })
     return ret; 

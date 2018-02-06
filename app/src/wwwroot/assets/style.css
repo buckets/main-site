@@ -581,7 +581,10 @@ table.ledger .actions td {
   border: none;
   padding: 0.25rem 0;
 }
-
+table.ledger td.div-right,
+table.ledger th.div-right {
+  border-right: 1px solid var(--darker-darkblue);
+}
 
 tr.group-row .group-name {
   font-size: 1.25rem;
