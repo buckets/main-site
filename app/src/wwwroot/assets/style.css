@@ -450,9 +450,9 @@ h3:first-child {
   padding-top: 4%;
 }
 
-.money.faint-cents .decimal.zero,
-.money.faint-cents .cents.zero {
-  opacity: 0.1;
+.money.faint-cents .decimal,
+.money.faint-cents .cents {
+  opacity: 0.2;
 }
 
 
@@ -1186,7 +1186,7 @@ table.props th {
 .progress-bar {
   display: inline-block;
   width: 10rem;
-  height: 14px;
+  height: 12px;
   border-radius: 1000px;
   overflow: hidden;
   border: 2px solid var(--blue);
@@ -1194,16 +1194,16 @@ table.props th {
 .progress-bar .bar {
   color: white;
   text-align: end;
-  height: 14px;
-  font-size: 9px;
-  line-height: 10px;
+  height: 12px;
+  font-size: 8px;
+  line-height: 8px;
   max-width: 100%;
   min-width: 0%;
   transition: width 0.3s;
   background-color: var(--blue);
   position: relative;
 }
-.progress-bar .bar .label {
+.progress-bar .bar .percent-label {
   position: absolute;
   right: -2.1rem;
   color: var(--darkblue);
@@ -1211,16 +1211,23 @@ table.props th {
   text-align: start;
   transition: right .2s, text-align .2s;
 }
-.progress-bar.overhalf .bar .label {
+.progress-bar.overhalf .bar .percent-label {
   text-align: end;
   color: white;
   right: .2rem;
 }
-.progress-bar.complete .bar .label {
+.progress-bar.complete .bar .percent-label {
   text-align: center;
   width: 100%;
   position: relative;
   right: 0;
+}
+.progress-bar-wrap .text-label {
+  font-size: 8px;
+  margin-top: 2px;
+  margin-right: 4px;
+  line-height: 0px;
+  text-align: end;
 }
 
 .progress-bubble {
@@ -1250,6 +1257,11 @@ table.props th {
   border-top-width: 0;
   background-color: var(--faint-green);
 }
+/*.progress-bubble.overfilled .bubble-fill {
+  border-top-width: 0;
+  background-color: var(--green);
+}*/
+
 
 
 .horiz-options {

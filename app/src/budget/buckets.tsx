@@ -5,7 +5,7 @@ import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap } from '../models/bucket'
 import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
-import { Money, MoneyInput } from '../money'
+import { Money, MoneyInput, cents2decimal } from '../money'
 import { onKeys, MonthSelector, ClickToEdit, SafetySwitch } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
@@ -320,6 +320,7 @@ class ProgressBubble extends React.Component<{
       className={cx("progress-bubble", className, {
         full: percent >= 100,
         empty: percent <= 0,
+        overfilled: percent > 100,
       })}
       style={outerStyle}>
       <div
@@ -333,9 +334,10 @@ class ProgressBar extends React.Component<{
   percent:number;
   color?:string;
   width?:string;
+  label?: string;
 },{}> {
   render() {
-    let { percent, color, width } = this.props;
+    let { percent, color, width, label } = this.props;
     let outerStyle:any = {};
     let innerStyle:any = {
       width: `${percent}%`,
@@ -347,14 +349,16 @@ class ProgressBar extends React.Component<{
     if (width) {
       outerStyle.width = width;
     }
-    let label = `${percent}%`
-    return <div className={cx("progress-bar", {
+    return <div className="progress-bar-wrap">
+      <div className={cx("progress-bar", {
           overhalf: percent >= 50,
           complete: percent >= 100,
         })} style={outerStyle}>
-      <div className="bar" style={innerStyle}>
-        <div className="label">{label}</div>
+        <div className="bar" style={innerStyle}>
+          <div className="percent-label">{percent}%</div>
+        </div>
       </div>
+      <div className="text-label">{label}</div>
     </div>
   }
 }
@@ -500,10 +504,17 @@ class BucketKindDetails extends React.Component<{
           <DateDisplay value={computed.end_date} format="MMM YYYY" />
         </div>
       } else {
+        let label_parts = [cents2decimal(computed.goal)];
+        if (computed.end_date && computed.end_date.isValid()) {
+          label_parts.push(computed.end_date.format('MMM YYYY'))
+        }
+
         summary = <div className="goal-summary">
-          <ProgressBar percent={percent} color={bucket.color} />
-          <Money value={computed.goal} />
-          <DateDisplay value={computed.end_date} format="MMM YYYY" />
+          <ProgressBar
+            percent={percent}
+            color={bucket.color} 
+            label={label_parts.join(' - ')}
+          />
         </div>;
       }
     }
