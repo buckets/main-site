@@ -531,7 +531,7 @@ a.back-button {
 
 
 table.full-width {
-  width: 100%;
+  min-width: 100%;
 }
 
 table.vertical-align-top th,

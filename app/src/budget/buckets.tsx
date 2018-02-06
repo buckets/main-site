@@ -650,7 +650,7 @@ class BucketRow extends React.Component<BucketRowProps, {
       <td className="right">
         <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" />
       </td>
-      <td className="right">{balance_el}</td>
+      <td className="right div-left">{balance_el}</td>
       {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
       <td className="left div-left">
         <MoneyInput
@@ -801,14 +801,15 @@ class GroupRow extends React.Component<{
           </div>}
         </td>
         <td colSpan={100} className="group-name">
-        {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <ClickToEdit
-          value={group.name}
-          placeholder="no name"
-          onChange={(val) => {
-            manager.store.buckets.updateGroup(group.id, {name: val});
-          }}
-        />}
-        {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
+          {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <ClickToEdit
+            value={group.name}
+            placeholder="no name"
+            onChange={(val) => {
+              manager.store.buckets.updateGroup(group.id, {name: val});
+            }}
+          />}
+          {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
+          <button style={{float: "right"}} onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button>
         </td>
       </tr>
       <tr>
@@ -818,16 +819,13 @@ class GroupRow extends React.Component<{
         <th className="center">{sss("In")}</th>
         <th className="center">{sss("Out")}</th>
         <th className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
-        <th className="center">{sss('Balance')}</th>
+        <th className="center div-left">{sss('Balance')}</th>
         {show_effective_bal ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
         <th className="left div-left">{sss('In/Out')}</th>
         <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>
       </tr>
       {bucket_rows}
-      <tr className="action-row">
-        <td colSpan={100} className="right"><button onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button></td>
-      </tr>
     </tbody>);
   }
   createBucket = () => {
@@ -936,7 +934,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           pending={pending}
           posting_date={posting_date} />
       })
-    return <table className="ledger">
+    return <table className="ledger full-width">
       {group_elems}
     </table>
   }
