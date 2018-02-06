@@ -583,7 +583,11 @@ table.ledger .actions td {
 }
 table.ledger td.div-right,
 table.ledger th.div-right {
-  border-right: 1px solid var(--darker-darkblue);
+  border-right: 2px solid var(--grey);
+}
+table.ledger td.div-left,
+table.ledger th.div-left {
+  border-left: 2px solid var(--grey);
 }
 
 tr.group-row .group-name {

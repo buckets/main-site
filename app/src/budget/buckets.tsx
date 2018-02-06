@@ -152,7 +152,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       })
 
     let self_debt;
-    let show_nodebt_balance = false;
+    let show_effective_bal = false;
     if (self_debt_amount) {
       self_debt = <div className="labeled-number">
         <div className="label">
@@ -160,7 +160,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         </div>
         <div className="value"><Money value={self_debt_amount} className="faint-cents" alwaysShowDecimal /></div>
       </div>
-      show_nodebt_balance = true;
+      show_effective_bal = true;
     }
         
     return (
@@ -212,8 +212,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   buckets={appstate.unkicked_buckets}
                   balances={appstate.bucket_balances}
                   bucket_flow={appstate.bucket_flow}
-                  nodebt_balances={appstate.nodebt_balances}
-                  show_nodebt_balance={show_nodebt_balance}
+                  effective_bals={appstate.nodebt_balances}
+                  show_effective_bal={show_effective_bal}
                   groups={_.values(appstate.groups)}
                   onPendingChanged={this.pendingChanged}
                   pending={pending}
@@ -530,8 +530,8 @@ interface BucketRowProps {
   bucket: Bucket;
   balance: number;
   flow: BucketFlow;
-  nodebt_balance: number;
-  show_nodebt_balance?: boolean;
+  effective_bal: number;
+  show_effective_bal?: boolean;
   posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
@@ -561,7 +561,7 @@ class BucketRow extends React.Component<BucketRowProps, {
     }
   }
   render() {
-    let { posting_date, bucket, balance, flow, nodebt_balance, show_nodebt_balance, onPendingChanged, pending } = this.props;
+    let { posting_date, bucket, balance, flow, effective_bal, show_effective_bal, onPendingChanged, pending } = this.props;
     flow = flow || {total_in:0, total_out:0, in:0, out:0, transfer_in:0, transfer_out:0};
     let balance_el;
     if (pending) {
@@ -580,12 +580,10 @@ class BucketRow extends React.Component<BucketRowProps, {
 
     let rainfall_indicator;
     if (computed.deposit) {
-      let percent = flow.total_in/computed.deposit*100;
+      let percent = flow.in/computed.deposit*100;
       rainfall_indicator = <Help
         icon={<ProgressBubble height="1rem" percent={percent} />}>
-        {sss('rainfall-received-this-month', (money:JSX.Element, percent:number) => {
-          return <span>Rainfall received this month: {money} ({percent}%)</span>
-        })(<Money value={flow.total_in} alwaysShowDecimal />, Math.floor(percent))}
+        {Math.floor(percent)}%
       </Help>
     }
 
@@ -633,14 +631,17 @@ class BucketRow extends React.Component<BucketRowProps, {
         {rainfall_indicator}
       </td>
       <td className="right">
-        <Money value={flow.total_in} alwaysShowDecimal className="faint-cents" />
+        <Money value={flow.in} alwaysShowDecimal className="faint-cents" />
       </td>
       <td className="right">
-        <Money value={Math.abs(flow.total_out)} alwaysShowDecimal className="faint-cents" nocolor />
+        <Money value={Math.abs(flow.out)} alwaysShowDecimal className="faint-cents" nocolor />
       </td>
-      <td className="right div-right">{balance_el}</td>
-      {show_nodebt_balance ? <td className="right"><Money value={nodebt_balance} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
-      <td className="left">
+      <td className="right">
+        <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" />
+      </td>
+      <td className="right">{balance_el}</td>
+      {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
+      <td className="left div-left">
         <MoneyInput
           value={pending || null}
           onChange={(val) => {
@@ -729,8 +730,8 @@ class GroupRow extends React.Component<{
   buckets: Bucket[];
   balances: Balances;
   bucket_flow: BucketFlowMap;
-  nodebt_balances: Balances;
-  show_nodebt_balance: boolean;
+  effective_bals: Balances;
+  show_effective_bal: boolean;
   posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
@@ -748,7 +749,7 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, bucket_flow, balances, nodebt_balances, show_nodebt_balance, onPendingChanged, pending, posting_date } = this.props;
+    let { buckets, group, bucket_flow, balances, effective_bals, show_effective_bal, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
@@ -757,8 +758,8 @@ class GroupRow extends React.Component<{
         bucket={bucket}
         balance={balances[bucket.id]}
         flow={bucket_flow[bucket.id]}
-        nodebt_balance={nodebt_balances[bucket.id]}
-        show_nodebt_balance={show_nodebt_balance}
+        effective_bal={effective_bals[bucket.id]}
+        show_effective_bal={show_effective_bal}
         onPendingChanged={onPendingChanged}
         pending={pending[bucket.id]}
         posting_date={posting_date} />
@@ -802,11 +803,12 @@ class GroupRow extends React.Component<{
       <tr>
         <th className="nopad noborder"></th>
         <th>{sss('Bucket')}</th>
-        <th className="right nobr div-right">{sss('Want')} <Help><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
+        <th className="right nobr div-right"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
         <th className="center">{sss("In")}</th>
         <th className="center">{sss("Out")}</th>
-        <th className="center div-right">{sss('Balance')}</th>
-        {show_nodebt_balance ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
+        <th className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
+        <th className="center">{sss('Balance')}</th>
+        {show_effective_bal ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
         <th className="left div-left">{sss('In/Out')}</th>
         <th>{sss('bucket.detailslabel', 'Details')}</th>
         <th></th>
@@ -889,8 +891,8 @@ interface GroupedBucketListProps {
   buckets: Bucket[];
   balances: Balances;
   bucket_flow: BucketFlowMap;
-  nodebt_balances: Balances;
-  show_nodebt_balance: boolean;
+  effective_bals: Balances;
+  show_effective_bal: boolean;
   posting_date: Timestamp;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
@@ -905,7 +907,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { balances, bucket_flow, nodebt_balances, show_nodebt_balance, pending, posting_date } = this.props;
+    let { balances, bucket_flow, effective_bals, show_effective_bal, pending, posting_date } = this.props;
     pending = pending || {};
 
     let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
@@ -917,8 +919,8 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           buckets={buckets}
           balances={balances}
           bucket_flow={bucket_flow}
-          nodebt_balances={nodebt_balances}
-          show_nodebt_balance={show_nodebt_balance}
+          effective_bals={effective_bals}
+          show_effective_bal={show_effective_bal}
           onPendingChanged={this.pendingChanged}
           pending={pending}
           posting_date={posting_date} />
