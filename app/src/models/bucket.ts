@@ -81,6 +81,14 @@ export interface BucketFlow {
   transfer_in: number;
   transfer_out: number;
 }
+export const emptyFlow:BucketFlow = {
+  total_in: 0,
+  total_out: 0,
+  in: 0,
+  out: 0,
+  transfer_in: 0,
+  transfer_out: 0,
+}
 export interface BucketFlowMap {
   [bucket_id: number]: BucketFlow;
 }

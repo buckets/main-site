@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
-import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap } from '../models/bucket'
+import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput, cents2decimal } from '../money'
@@ -172,7 +172,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               return <Redirect to='/buckets' />;
             }
             let balance = appstate.bucket_balances[bucket.id];
-            let rainfall = appstate.bucket_flow[bucket.id].in;
+            let rainfall = appstate.getBucketFlow(bucket.id).in;
             return (<BucketView
               bucket={bucket}
               rainfall={rainfall}
@@ -242,7 +242,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
           today: appstate.defaultPostingDate,
           balance: appstate.bucket_balances[bucket.id],
         })
-        let rainfall = appstate.bucket_flow[bucket.id].in || 0;
+        let rainfall = appstate.getBucketFlow(bucket.id).in;
         let ask = computed.deposit - rainfall;
         ask = ask < 0 ? 0 : ask;
         let amount = ask < left ? ask : left;
@@ -573,7 +573,6 @@ class BucketRow extends React.Component<BucketRowProps, {
   }
   render() {
     let { posting_date, bucket, balance, flow, effective_bal, show_effective_bal, onPendingChanged, pending } = this.props;
-    flow = flow || {total_in:0, total_out:0, in:0, out:0, transfer_in:0, transfer_out:0};
     let balance_el;
     if (pending) {
       balance_el = <span>
@@ -610,7 +609,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
       })}
     >
-      <td className="nopad noborder">
+      <td name="draghandle" className="nopad noborder">
         <div
           className="drophandle"
           draggable
@@ -619,7 +618,7 @@ class BucketRow extends React.Component<BucketRowProps, {
             <span className="fa fa-bars"/>
         </div>
       </td>
-      <td className="nobr">
+      <td name="color/note" className="nobr right">
         <ColorPicker
           className="small"
           value={bucket.color}
@@ -629,6 +628,8 @@ class BucketRow extends React.Component<BucketRowProps, {
         <NoteMaker
           obj={bucket}
         />
+      </td>
+      <td name="name" className="nobr right">
         <ClickToEdit
           value={bucket.name}
           placeholder="no name"
@@ -637,22 +638,22 @@ class BucketRow extends React.Component<BucketRowProps, {
           }}
         />
       </td>
-      <td className="right div-right">
+      <td name="want" className="right div-right">
         <Money value={computed.deposit} hidezero />{computed.deposit ? <PerMonth/> : ''}
         {rainfall_indicator}
       </td>
-      <td className="right">
-        <Money value={flow.in} alwaysShowDecimal className="faint-cents" />
+      <td name="in" className="right">
+        <Money value={flow.in} alwaysShowDecimal className="faint-cents" hidezero />
       </td>
-      <td className="right">
-        <Money value={Math.abs(flow.out)} alwaysShowDecimal className="faint-cents" nocolor />
+      <td name="out" className="right">
+        <Money value={flow.out} alwaysShowDecimal className="faint-cents" nocolor hidezero />
       </td>
-      <td className="right">
-        <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" />
+      <td name="transfers" className="right">
+        <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" hidezero />
       </td>
-      <td className="right div-left">{balance_el}</td>
+      <td name="balance" className="right div-left">{balance_el}</td>
       {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
-      <td className="left div-left">
+      <td name="in/out" className="left div-left">
         <MoneyInput
           value={pending || null}
           onChange={(val) => {
@@ -673,12 +674,14 @@ class BucketRow extends React.Component<BucketRowProps, {
           })}
         />
       </td>
-      <td className="nopad bucket-details-wrap"><BucketKindDetails
-          bucket={bucket}
-          balance={balance}
-          posting_date={posting_date} /></td>
-      <td>
-        <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-bar-chart"></span></Link>
+      <td name="details"
+          className="nopad bucket-details-wrap">
+            <BucketKindDetails
+            bucket={bucket}
+            balance={balance}
+            posting_date={posting_date} /></td>
+      <td name="more">
+        <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-ellipsis-h"></span></Link>
       </td>
     </tr>
   }
@@ -762,13 +765,25 @@ class GroupRow extends React.Component<{
   render() {
     let { buckets, group, bucket_flow, balances, effective_bals, show_effective_bal, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
+
+    let total_in = 0;
+    let total_out = 0;
+    let total_transfer = 0;
+    let total_balance = 0;
+    let total_effective_bal = 0;
+
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
+      let flow = bucket_flow[bucket.id] || Object.assign({}, emptyFlow)
+      total_in += flow.in;
+      total_out += flow.out;
+      total_balance += balances[bucket.id];
+      total_effective_bal += effective_bals[bucket.id];
       return <BucketRow
         key={bucket.id}
         bucket={bucket}
         balance={balances[bucket.id]}
-        flow={bucket_flow[bucket.id]}
+        flow={flow}
         effective_bal={effective_bals[bucket.id]}
         show_effective_bal={show_effective_bal}
         onPendingChanged={onPendingChanged}
@@ -783,7 +798,8 @@ class GroupRow extends React.Component<{
         onDragLeave={this.onDragLeave}
         >
       <tr className="group-row note-hover-trigger">
-        <td className={cx(
+        <td name="draghandle"
+          className={cx(
           'nopad',
           'noborder', 
           {
@@ -800,7 +816,10 @@ class GroupRow extends React.Component<{
               <span className="fa fa-bars"/>
           </div>}
         </td>
-        <td colSpan={100} className="group-name">
+        <td name="color/note" className="right">
+          {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
+        </td>
+        <td name="name" className="group-name">
           {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <ClickToEdit
             value={group.name}
             placeholder="no name"
@@ -808,22 +827,29 @@ class GroupRow extends React.Component<{
               manager.store.buckets.updateGroup(group.id, {name: val});
             }}
           />}
-          {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
-          <button style={{float: "right"}} onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button>
         </td>
-      </tr>
-      <tr>
-        <th className="nopad noborder"></th>
-        <th>{sss('Bucket')}</th>
-        <th className="right nobr div-right"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
-        <th className="center">{sss("In")}</th>
-        <th className="center">{sss("Out")}</th>
-        <th className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
-        <th className="center div-left">{sss('Balance')}</th>
-        {show_effective_bal ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
-        <th className="left div-left">{sss('In/Out')}</th>
-        <th>{sss('bucket.detailslabel', 'Details')}</th>
-        <th></th>
+        <td name="want" className="right">
+        </td>
+        <td name="in" className="right">
+          <Money value={total_in} alwaysShowDecimal className="faint-cents" hidezero/>
+        </td>
+        <td name="out" className="right">
+          <Money value={total_out} alwaysShowDecimal className="faint-cents" nocolor hidezero/>
+        </td>
+        <td name="transfers" className="right">
+          <Money value={total_transfer} alwaysShowDecimal className="faint-cents" hidezero/>
+        </td>
+        <td name="balance" className="right">
+          <Money value={total_balance} alwaysShowDecimal className="faint-cents" hidezero />
+        </td>
+        {show_effective_bal ? <td name="effective_bal" className="right">
+          <Money value={total_effective_bal} alwaysShowDecimal className="faint-cents" hidezero/>
+        </td> : null}
+        <td name="in/out"></td>
+        <td name="details">
+          <button onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button>
+        </td>
+        <td name="more"></td>
       </tr>
       {bucket_rows}
     </tbody>);
@@ -935,6 +961,22 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           posting_date={posting_date} />
       })
     return <table className="ledger full-width">
+      <thead>
+        <tr>
+          <th name="draghandle"></th>
+          <th name="color/note"></th>
+          <th name="name"></th>
+          <th name="want" className="right nobr div-right"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
+          <th name="in" className="center">{sss("In")}</th>
+          <th name="out" className="center">{sss("Out")}</th>
+          <th name="transfers" className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
+          <th name="balance" className="center div-left">{sss('Balance')}</th>
+          {show_effective_bal ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
+          <th name="in/out" className="left div-left">{sss('In/Out')}</th>
+          <th name="details">{sss('bucket.detailslabel', 'Details')}</th>
+          <th name="more"></th>
+        </tr>
+      </thead>
       {group_elems}
     </table>
   }

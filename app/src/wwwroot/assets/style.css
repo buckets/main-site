@@ -455,6 +455,10 @@ h3:first-child {
   opacity: 0.2;
 }
 
+.money.zero.hidezero {
+  display: none;
+}
+
 
 .incdeclabel {
   padding-left: .5rem;
@@ -561,8 +565,10 @@ table.ledger th.noborder {
 }
 table.ledger tr.group-row td {
   border: none;
-  padding-top: 1rem;
   vertical-align: bottom;
+  background-color: var(--lightest-grey);
+  border-bottom: 1px solid var(--grey);
+  border-top: 2px solid var(--grey);
 }
 
 table.ledger th {
@@ -588,10 +594,6 @@ table.ledger th.div-right {
 table.ledger td.div-left,
 table.ledger th.div-left {
   border-left: 2px solid var(--grey);
-}
-
-tr.group-row .group-name {
-  font-size: 1.25rem;
 }
 
 table.ledger tr.action-row td {

@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
-import {Bucket, Group, Transaction as BTrans, BucketFlowMap } from '../models/bucket'
+import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { Connection } from '../models/simplefin'
 import { isBetween, ensureLocalMoment, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
@@ -79,6 +79,9 @@ export class AppState implements IComputedAppState {
 
   // The amount in/out for each bucket for this month.
   bucket_flow: BucketFlowMap = {}
+  getBucketFlow(bucket_id:number):BucketFlow {
+    return this.bucket_flow[bucket_id] || Object.assign({}, emptyFlow);
+  }
 
   // The amount of rain used in future months
   actual_future_rain: number = 0;

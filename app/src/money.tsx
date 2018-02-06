@@ -208,9 +208,6 @@ export class Money extends React.Component<MoneyProps, {
       round: round,
       show_decimal: alwaysShowDecimal || this.state.anim_show_decimal,
     }) || '0';
-    if (hidezero && !value) {
-      display = '';
-    }
     if (symbol && display) {
       let symbol_display:string = symbol === true ? DEFAULT.symbol : symbol;
       if (value < 0) {
@@ -238,6 +235,8 @@ export class Money extends React.Component<MoneyProps, {
       className, {
         number: !nocolor,
         negative: value < 0 && !nocolor,
+        zero: value === 0,
+        hidezero: hidezero,
         animating: this.state.animating,
         up: this.state.animating && going_up,
         down: this.state.animating && !going_up,
