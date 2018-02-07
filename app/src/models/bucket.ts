@@ -98,6 +98,9 @@ export class BucketStore {
   constructor(store:IStore) {
     this.store = store;
   }
+  /**
+   *  Create a new bucket
+   */
   async add(args?:{name:string, group_id?:number}):Promise<Bucket> {
     let data:Partial<Bucket> = args || {};
     let group_id = args.group_id || null;
@@ -499,6 +502,29 @@ export class BucketStore {
   }
   async updateGroup(id:number, data:{name?:string, ranking?:string}):Promise<Group> {
     return this.store.updateObject(Group, id, data);
+  }
+  async deleteGroup(id:number):Promise<any> {
+    let rows = await this.store.query(`
+      SELECT
+        max(ranking) as maxrank
+      FROM bucket
+      WHERE coalesce(group_id, -1) = -1`, {})
+    let max_rank = rows[0].maxrank;
+
+    rows = await this.store.query(`
+        SELECT
+          id,
+          ranking
+        FROM bucket
+        WHERE coalesce(group_id, -1) = coalesce($group_id, -1)
+        ORDER BY ranking`, {
+          $group_id: id,
+        })
+    for (const row of rows) {
+      let new_rank = max_rank = rankBetween(max_rank, 'z');
+      await this.update(row.id, {ranking: new_rank, group_id: null})
+    }
+    return this.store.deleteObject(Group, id);
   }
   async moveGroup(moving_id:number, placement:'before'|'after', reference_id:number) {
     let where;

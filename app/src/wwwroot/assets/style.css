@@ -1009,6 +1009,9 @@ button.icon {
 button.icon.white {
   background-color: white;
 }
+button.icon.grey {
+  background-color: var(--lightest-grey);
+}
 
 button:hover,
 button.icon.white:hover {

@@ -864,7 +864,16 @@ class GroupRow extends React.Component<{
         <td name="in/out" className="div-left"></td>
         <td name="details">
         </td>
-        <td name="more"></td>
+        <td name="more">
+          <SafetySwitch
+            className="icon grey show-on-row-hover"
+            onClick={ev => {
+              manager.store.buckets.deleteGroup(group.id);
+            }}
+          >
+            <span className="fa fa-trash" />
+          </SafetySwitch>
+        </td>
       </tr>
       {bucket_rows}
     </tbody>);
