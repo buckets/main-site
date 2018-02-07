@@ -130,8 +130,16 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     }
 
     let doPendingButton;
+    let warning;
     if (to_deposit || to_withdraw) {
-      doPendingButton = <button className="primary" onClick={this.doPending}>{sss('Make it so')}</button>;
+      if (to_deposit && to_deposit + to_withdraw > appstate.rain) {
+        doPendingButton = <SafetySwitch
+          onClick={this.doPending}
+        >{sss('Make it so')}</SafetySwitch>
+        warning = <Help className="right" icon={<span className="error fa fa-exclamation-triangle" />}>{sss("Warning: Doing this will use rain you don't have and could steal rain from future months (if available).")}</Help>
+      } else {
+        doPendingButton = <button className="primary" onClick={this.doPending}>{sss('Make it so')}</button>;  
+      }
     } else {
       doPendingButton = <button disabled>{sss('Make it so')}</button>;
     }
@@ -203,6 +211,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               <div className="group">
                 {rainleft}
                 {pendingInfo}
+                {warning}
                 {doPendingButton}
               </div>
             </div>
