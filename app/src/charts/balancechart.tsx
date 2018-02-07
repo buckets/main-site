@@ -140,8 +140,15 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
       balance: bucket.balance,
     })
 
-    let startTime = tsfromdb(transactions[transactions.length-1].posted).valueOf();
-    let endTime = tsfromdb(transactions[0].posted).valueOf();
+    let startTime = tsfromdb(transactions[transactions.length-1].posted);
+    let startSeconds = startTime.valueOf();
+    let endTime = tsfromdb(transactions[0].posted);
+    let endSeconds = endTime.valueOf();
+
+    let date_tick_format = 'MMM YYYY';
+    if (endTime.diff(startTime, 'months') <= 2) {
+      date_tick_format = 'DD MMM';
+    }
     
     let lowval = 0;
     let highval = 0;
@@ -213,7 +220,7 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
         }
 
         let x = d3.scaleTime()
-          .domain([startTime, endTime])
+          .domain([startSeconds, endSeconds])
           .range([10, dims.width-10]);
         let y = d3.scaleLinear()
           .domain([lowval, highval])
@@ -239,40 +246,40 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
           </defs>
 
           <mask id="show-neg-balance-mask">
-            <rect x={x(startTime)} y={y(0)} width="100%" height="100%" fill="white" />
+            <rect x={x(startSeconds)} y={y(0)} width="100%" height="100%" fill="white" />
           </mask>
           <mask id="show-pos-balance-mask">
-            <rect x={x(startTime)} y="0" width="100%" height={y(0)} fill="white" />
+            <rect x={x(startSeconds)} y="0" width="100%" height={y(0)} fill="white" />
           </mask>
           <mask id="neg-fill-mask">
-            <rect x={x(startTime)} y="0" width="100%" height="100%" fill="black" />
+            <rect x={x(startSeconds)} y="0" width="100%" height="100%" fill="black" />
             <use
               xlinkHref="#balance-curve"
               fill="white" />
           </mask>
 
           <line
-            x1={x(startTime)}
-            x2={x(endTime)}
+            x1={x(startSeconds)}
+            x2={x(endSeconds)}
             y1={y(0)}
             y2={y(0)}
             style={CHART_STYLES.axis} />
           <line
-            x1={x(startTime)}
-            x2={x(startTime)}
+            x1={x(startSeconds)}
+            x2={x(startSeconds)}
             y1={y(lowval)}
             y2={y(highval)}
             style={CHART_STYLES.axis} />
           <line
-            x1={x(endTime)}
-            x2={x(endTime)}
+            x1={x(endSeconds)}
+            x2={x(endSeconds)}
             y1={y(lowval)}
             y2={y(highval)}
             style={CHART_STYLES.axis} />
 
           {date_ticks.map((tick, i) => {
             let xpos = x(tick);
-            let label = moment(tick).format('MMM YYYY');
+            let label = moment(tick).format(date_tick_format);
             return <g>
               <line
                 key={i}
@@ -292,18 +299,18 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
             </g>
           })}
 
-          <line x1={x(startTime)} y1={y(lowval)} x2={x(endTime)} y2={y(lowval)} style={CHART_STYLES.tracer} />
+          <line x1={x(startSeconds)} y1={y(lowval)} x2={x(endSeconds)} y2={y(lowval)} style={CHART_STYLES.tracer} />
           <text
-            x={x(startTime)}
+            x={x(startSeconds)}
             y={y(lowval)}
             dy={-3}
             dx={3}
             style={CHART_STYLES.axislabel}
           >{cents2decimal(lowval)}</text>
 
-          <line x1={x(startTime)} y1={y(highval)} x2={x(endTime)} y2={y(highval)} style={CHART_STYLES.tracer} />
+          <line x1={x(startSeconds)} y1={y(highval)} x2={x(endSeconds)} y2={y(highval)} style={CHART_STYLES.tracer} />
           <text
-            x={x(startTime)}
+            x={x(startSeconds)}
             y={y(highval)}
             dy={-3}
             dx={3}
@@ -312,9 +319,9 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
 
           <g>
             <rect
-              x={x(startTime)}
+              x={x(startSeconds)}
               y={y(0)}
-              width={x(endTime) - x(startTime)}
+              width={x(endSeconds) - x(startSeconds)}
               height={y(lowval) -  y(0)}
               fill={opacity(COLORS.red, 0.25)}
               mask="url(#neg-fill-mask)"
