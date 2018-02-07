@@ -259,6 +259,10 @@ hr.page {
 .rows .panes {
   overflow: auto;
 }
+.rows .single-pane {
+  flex-grow: 1;
+  overflow-x: auto;
+}
 .panes {
   display: flex;
   align-items: stretch;
@@ -547,11 +551,18 @@ th.top {
   vertical-align: top;
 }
 
+table.fixed-head thead {
+  table-layout: fixed;
+}
+table.fixed-head tbody {
+  overflow: auto;
+}
 
 table.ledger {
   border-collapse: collapse;
   border-spacing: 0 0;
 }
+
 table.ledger th,
 table.ledger td {
   border: 1px solid var(--lightest-grey);
@@ -587,12 +598,12 @@ table.ledger .actions td {
   border: none;
   padding: 0.25rem 0;
 }
-table.ledger td.div-right,
-table.ledger th.div-right {
+table.ledger tr td.div-right,
+table.ledger tr th.div-right {
   border-right: 2px solid var(--grey);
 }
-table.ledger td.div-left,
-table.ledger th.div-left {
+table.ledger tr td.div-left,
+table.ledger tr th.div-left {
   border-left: 2px solid var(--grey);
 }
 
@@ -985,7 +996,7 @@ button.primary {
   border-color: var(--darker-blue);
 }
 button.icon {
-  background-color: white;
+  background-color: transparent;
   border-color: transparent;
   font-size: 0.9rem;
   margin: 0;
@@ -995,8 +1006,12 @@ button.icon {
   padding: 0;
   text-align: center;
 }
+button.icon.white {
+  background-color: white;
+}
 
-button:hover {
+button:hover,
+button.icon.white:hover {
   background-color: var(--yellow);
   border-color: var(--yellow);
   color: var(--darker-darkblue);

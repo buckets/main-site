@@ -380,6 +380,7 @@ class BankMacroList extends React.Component<{
             <td className="icon-button-wrap">
               <SafetySwitch
                 className="icon"
+                coverClassName="white"
                 onClick={(ev) => {
                   manager.store.bankmacro.delete(macro.id);
                 }}><span className="fa fa-trash"></span></SafetySwitch>
@@ -403,6 +404,7 @@ class ConnectionList extends React.Component<{
         <td className="icon-button-wrap">
           <SafetySwitch
             className="icon"
+            coverClassName="white"
             onClick={(ev) => {
               manager.store.deleteObject(Connection, conn.id);
             }}

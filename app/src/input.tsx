@@ -327,6 +327,7 @@ interface SafetySwitchProps {
   disabled?: boolean;
   onClick?: (ev)=>void;
   className?: string;
+  coverClassName?: string;
 }
 export class SafetySwitch extends React.Component<SafetySwitchProps, {
   clicked: boolean;
@@ -339,7 +340,7 @@ export class SafetySwitch extends React.Component<SafetySwitchProps, {
     }
   }
   render() {
-    let { children, className, disabled, onClick } = this.props;
+    let { children, className, coverClassName, disabled, onClick } = this.props;
     return <div
       onClick={ev => {
         if (disabled) {
@@ -370,6 +371,7 @@ export class SafetySwitch extends React.Component<SafetySwitchProps, {
         disabled={disabled}
         className={cx(
           className,
+          coverClassName,
           "cover")
         }>{children}</button>
     </div>

@@ -206,8 +206,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                 {doPendingButton}
               </div>
             </div>
-            <div className="panes">
-              <div className="padded">
+            <div className="single-pane">
+              
                 <GroupedBucketList
                   buckets={appstate.unkicked_buckets}
                   balances={appstate.bucket_balances}
@@ -218,7 +218,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   onPendingChanged={this.pendingChanged}
                   pending={pending}
                   posting_date={appstate.defaultPostingDate} />
-              </div>
+              
             </div>
           </div>
         </Route>
@@ -763,6 +763,7 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
+    console.log("Rendering GroupRow");
     let { buckets, group, bucket_flow, balances, effective_bals, show_effective_bal, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
 
@@ -817,6 +818,10 @@ class GroupRow extends React.Component<{
           </div>}
         </td>
         <td name="color/note" className="right">
+          <button
+            className="icon"
+            title={sss("New bucket")}
+            onClick={this.createBucket}><span className="fa fa-plus" /></button>
           {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
         </td>
         <td name="name" className="group-name">
@@ -828,7 +833,7 @@ class GroupRow extends React.Component<{
             }}
           />}
         </td>
-        <td name="want" className="right">
+        <td name="want" className="right div-right">
         </td>
         <td name="in" className="right">
           <Money value={total_in} alwaysShowDecimal className="faint-cents" hidezero/>
@@ -839,15 +844,14 @@ class GroupRow extends React.Component<{
         <td name="transfers" className="right">
           <Money value={total_transfer} alwaysShowDecimal className="faint-cents" hidezero/>
         </td>
-        <td name="balance" className="right">
+        <td name="balance" className="right div-left">
           <Money value={total_balance} alwaysShowDecimal className="faint-cents" hidezero />
         </td>
         {show_effective_bal ? <td name="effective_bal" className="right">
           <Money value={total_effective_bal} alwaysShowDecimal className="faint-cents" hidezero/>
         </td> : null}
-        <td name="in/out"></td>
+        <td name="in/out" className="div-left"></td>
         <td name="details">
-          <button onClick={this.createBucket}>{sss('action.New bucket', 'New bucket')}</button>
         </td>
         <td name="more"></td>
       </tr>
