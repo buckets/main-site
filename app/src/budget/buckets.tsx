@@ -14,7 +14,7 @@ import { pageY } from '../position'
 import { Help } from '../tooltip'
 import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
-import { isNil } from '../util'
+import { isNil, isDifferent } from '../util'
 import { NoteMaker } from './notes'
 import { ensureUTCMoment } from '../time'
 
@@ -282,7 +282,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   }
 }
 
-class ProgressBubble extends React.Component<{
+class ProgressBubble extends React.PureComponent<{
   percent:number;
   color?:string;
   width?:string;
@@ -330,7 +330,7 @@ class ProgressBubble extends React.Component<{
   }
 }
 
-class ProgressBar extends React.Component<{
+class ProgressBar extends React.PureComponent<{
   percent:number;
   color?:string;
   width?:string;
@@ -571,6 +571,9 @@ class BucketRow extends React.Component<BucketRowProps, {
       onPendingChanged({[bucket.id]: 0});
     }
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return isDifferent(nextState, this.state) || isDifferent(nextProps, this.props);
+  }
   render() {
     let { posting_date, bucket, balance, flow, effective_bal, show_effective_bal, onPendingChanged, pending } = this.props;
     let balance_el;
@@ -763,7 +766,6 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    console.log("Rendering GroupRow");
     let { buckets, group, bucket_flow, balances, effective_bals, show_effective_bal, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
 

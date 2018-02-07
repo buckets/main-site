@@ -320,7 +320,7 @@ h3:first-child {
   color: rgba(0,0,0,0.1);
   font-size: 0.8rem;
   height: 100%;
-  transition: color 0.2s;
+  transition: color 0.1s;
   margin: initial;
   padding: initial;
 }
@@ -339,7 +339,7 @@ h3:first-child {
   border: 0;
   background-color: transparent;
   -webkit-appearance: none;
-  transition: color 0.2s;
+  transition: color 0.1s;
   text-align: end;
   text-align-last: end;
 }
@@ -351,7 +351,7 @@ h3:first-child {
   border: 0;
   background: transparent;
   text-align: start;
-  transition: color 0.2s, border-bottom-color 0.2s;
+  transition: color 0.1s, border-bottom-color 0.1s;
   border-bottom: 2px solid transparent;
   border-top: 2px solid transparent;
 }
@@ -419,7 +419,7 @@ h3:first-child {
 
 .number {
   display: inline-block;
-  transition: transform 0.2s, opacity 0.2s, color 0.2s;
+  transition: transform 0.1s, opacity 0.1s, color 0.1s;
 }
 .number.negative {
   color: var(--red);
@@ -500,7 +500,7 @@ h3:first-child {
   appearance: none;
   background-color: transparent;
   color: inherit;
-  transition: color 0.2s, border-bottom-color 0.2s;
+  transition: color 0.1s, border-bottom-color 0.1s;
 }
 .money-input.ctx-matching-input input:focus,
 .ctx-matching-input:focus {
@@ -526,7 +526,7 @@ h3:first-child {
 a.subtle {
   color: var(--lighter-grey);
   text-decoration: none;
-  transform: color 0.2s;
+  transform: color 0.1s;
   cursor: pointer;
 }
 a.subtle:hover {
@@ -630,7 +630,7 @@ table tr.hover:hover th {
 
 .show-on-row-hover {
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.1s;
 }
 table tr:hover .show-on-row-hover {
   opacity: 1;
@@ -947,7 +947,7 @@ table.ledger .icon-button-wrap button.icon,
   color: transparent;
   user-select: none;
   padding: 0 0.5rem;
-  transform: color 0.2s;
+  transform: color 0.1s;
 }
 .drophandle:hover {
   color: var(--grey);
@@ -1226,7 +1226,7 @@ table.props th {
   color: var(--darkblue);
   width: 2rem;
   text-align: start;
-  transition: right .2s, text-align .2s;
+  transition: right .1s, text-align .1s;
 }
 .progress-bar.overhalf .bar .percent-label {
   text-align: end;
@@ -1262,7 +1262,7 @@ table.props th {
   width: 100%;
   background-color: var(--blue);
   border-top: 1px solid var(--blue);
-  transition: height 0.2s;
+  transition: height 0.1s;
 }
 .progress-bubble.empty .bubble-fill {
   border-top-width: 0;
@@ -1517,7 +1517,7 @@ table.props th {
 }
 .labels-on-hover g text {
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.1s;
 }
 .labels-on-hover g:hover text {
   opacity: 1;

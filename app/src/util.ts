@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import * as crypto from 'crypto'
 
 export function isNil(x:any):boolean {
@@ -15,4 +16,11 @@ export function hashStrings(strings:string[]):string {
     ret.update(hash.digest('hex'))
   });
   return ret.digest('hex');
+}
+
+/**
+ *  Deep inequality comparison
+ */
+export function isDifferent(a:any, b:any) {
+  return !_.isEqual(a, b);
 }

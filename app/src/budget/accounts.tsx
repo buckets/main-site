@@ -30,7 +30,7 @@ export class ClosedAccountsPage extends React.Component<{appstate:AppState}, {}>
             manager.store.accounts.unclose(account.id);
           }}>{sss('Reopen')}</button></td>
           <td>
-            <Link relative to={`../${account.id}`} className="subtle">{sss('more')}</Link>
+            <Link relative to={`../${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link>
           </td>
         </tr>
       })
@@ -76,7 +76,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
       if (import_balance !== balances[account.id]) {
         import_balance_note = <Help icon={<div className="alert info">
           <span className="fa fa-exclamation-circle" />
-        </div>}>{sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click more for more information.')}</Help>
+        </div>}>{sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.')}</Help>
 
       }
       return (<tr key={account.id} className="note-hover-trigger">
@@ -89,7 +89,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
             }}
           /></td>
           <td className="right"><Money value={balances[account.id]} alwaysShowDecimal className="faint-cents" />{import_balance_note}</td>
-          <td><Link relative to={`/${account.id}`} className="subtle">{sss('accounts.more_link', 'more')}</Link></td>
+          <td><Link relative to={`/${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link></td>
         </tr>);
     })
     return (<table className="ledger">

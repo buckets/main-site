@@ -11,7 +11,7 @@
   "scripts": {
     "docs": "typedoc --tsconfig tsconfig.json --theme minimal --exclude '**/*.{test,spec}.*' --out devdocs/ src/",
     "start": "electron .",
-    "compile": "tsc",
+    "compile": "cross-env NODE_ENV=production tsc",
     "test": "./test.sh",
     "postinstall": "install-app-deps",
     "fakebank": "http-server -a localhost -p 8080 test/fakebank"
@@ -124,6 +124,7 @@
     "asar": "^0.13.0",
     "chai": "4.0.2",
     "cheerio": "^1.0.0-rc.2",
+    "cross-env": "^5.1.3",
     "electron": "1.7.9",
     "electron-builder": "19.43.3",
     "http-server": "^0.10.0",
