@@ -34,7 +34,7 @@ export function openBugReporter(args:{
     modal: true,
     show: true,
     width: 500,
-    height: 400,
+    height: 490,
   })
   
   let qs = {

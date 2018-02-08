@@ -20,7 +20,7 @@ import { PSTATE, updateState } from './persistent'
 
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
-electron_log.transports.file.maxSize = 10 * 1024 * 1024;
+electron_log.transports.file.maxSize = 5 * 1024 * 1024;
 
 const log = new PrefixLogger('(main)')
 
