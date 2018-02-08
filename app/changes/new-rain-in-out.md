@@ -1,1 +1,0 @@
-The Buckets view now shows the amounts put in and taken out of each bucket.  (#wU1gc6wz)

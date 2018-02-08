@@ -1,4 +1,26 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.33.0
+
+- **NEW:** You can now delete bucket groups ([#02VRaU99](https://trello.com/c/02VRaU99))
+
+- **NEW:** The Buckets view now shows the amounts put in and taken out of each bucket.  ([#wU1gc6wz](https://trello.com/c/wU1gc6wz))
+
+- **NEW:** If you attempt to use more rain than you have available, a warning is displayed and the 'Make it so' button requires confirmation.  ([#4T1eVgov](https://trello.com/c/4T1eVgov))
+
+- **FIX:** Bucket balance chart will divide into more than just months if it makes sense ([#fVPOUQzl](https://trello.com/c/fVPOUQzl))
+
+- **FIX:** The Buckets view is faster(less visual lag) when entering amounts to be deposited/withdrawn.
+
+- **FIX:** You can now edit blank group/bucket names ([#7krRuUOo](https://trello.com/c/7krRuUOo))
+
+- **FIX:** Fixed a timezone bug in Analysis > Recurring expenses that made 'Last month' always 0.  Also changed the labels to be explicit about which month is being shown.  ([#kxaoRW0W](https://trello.com/c/kxaoRW0W))
+
+- **FIX:** In the Transactions view, you can now click on the words 'Show uncategorized' instead of having to hit the small checkbox ([#oEuSlRsZ](https://trello.com/c/oEuSlRsZ))
+
+- **FIX:** Bucket transactions are now sorted the same (descending date) as account transactions ([#1y6rFkMD](https://trello.com/c/1y6rFkMD))
+
+- **FIX:** Include more verbose debugging when YNAB4 import fails.
+
 ## v0.32.0
 
 - **NEW:** You can delete bucket transactions (Issue [#q2PpU2iV](https://trello.com/c/q2PpU2iV))
