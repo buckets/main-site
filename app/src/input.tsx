@@ -125,7 +125,7 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
 
 interface ClickToEditProps {
   value: string;
-  placeholder?: string;
+  placeholder: string;
   onChange: (newval:string)=>void;
 }
 interface ClickToEditState {
@@ -189,7 +189,7 @@ export class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditSt
         <button className="icon" onClick={this.close}><span className="fa fa-close" /></button>
       </div>
     } else {
-      guts = value;
+      guts = value || placeholder;
     }
     return <div
       className={cx("click-to-edit", {

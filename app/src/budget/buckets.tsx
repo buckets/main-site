@@ -641,7 +641,7 @@ class BucketRow extends React.Component<BucketRowProps, {
           obj={bucket}
         />
       </td>
-      <td name="name" className="nobr right">
+      <td name="name" className="nobr">
         <ClickToEdit
           value={bucket.name}
           placeholder="no name"
