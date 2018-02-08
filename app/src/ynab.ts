@@ -255,9 +255,11 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
 
     // SubCategories -> Buckets
     if (!mcat.subCategories) {
+      log.info('no subcategories', mcat.entityId, mcat.entityType, mcat.entityVersion, mcat.name)
       continue;
     }
     for (let cat of mcat.subCategories.sort(sortByIndex)) {
+      log.info('subCategory', cat.entityId, cat.entityType, cat.entityVersion, cat.type, cat.name);
       categories[cat.entityId] = cat;
       let idx = bucket_names.indexOf(cat.name);
       let bucket:Bucket.Bucket;
@@ -268,6 +270,7 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
         // use existing bucket
         bucket = buckets.filter(x => x.name === cat.name)[0];
       }
+      log.info(`cat2bucket[${cat.entityId}] = ${bucket.name}`);
       cat2bucket[cat.entityId] = bucket;
 
       // Set up deposit amount
@@ -342,29 +345,35 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
       })
 
       // Now categorize
-      if (ytrans.categoryId === "Category/__ImmediateIncome__") {
-        // Income
-        await store.accounts.categorizeGeneral(transaction.id, 'income');
-      } else if (ytrans.categoryId === "Category/__Split__") {
-        // Split category
-        let cats = ytrans.subTransactions.map(sub => {
-          let bucket_id = cat2bucket[sub.categoryId].id;
-          let amount = number2cents(sub.amount);
-          return {
-            bucket_id,
-            amount,
+      try {
+        if (ytrans.categoryId === "Category/__ImmediateIncome__") {
+          // Income
+          await store.accounts.categorizeGeneral(transaction.id, 'income');
+        } else if (ytrans.categoryId === "Category/__Split__") {
+          // Split category
+          let cats = ytrans.subTransactions.map(sub => {
+            let bucket_id = cat2bucket[sub.categoryId].id;
+            let amount = number2cents(sub.amount);
+            return {
+              bucket_id,
+              amount,
+            }
+          })
+          await store.accounts.categorize(transaction.id, cats);
+        } else {
+          // Single category
+          let bucket = cat2bucket[ytrans.categoryId];
+          if (bucket) {
+            await store.accounts.categorize(transaction.id, [{
+              bucket_id: bucket.id,
+              amount: transaction.amount,
+            }])
           }
-        })
-        await store.accounts.categorize(transaction.id, cats);
-      } else {
-        // Single category
-        let bucket = cat2bucket[ytrans.categoryId];
-        if (bucket) {
-          await store.accounts.categorize(transaction.id, [{
-            bucket_id: bucket.id,
-            amount: transaction.amount,
-          }])
         }
+      } catch(err) {
+        log.error(err);
+        log.info(`ytrans: ${JSON.stringify(ytrans)}`);
+        throw err;
       }
     }
   }
