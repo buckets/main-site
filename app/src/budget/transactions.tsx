@@ -101,10 +101,10 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
       <div className="subheader">
         <div className="group">
           <div className="control">
-            <input
+            <label><input
               type="checkbox"
               checked={this.state.show_subset} 
-              onChange={this.showUncategorized} /> {sss('Show uncategorized')}
+              onChange={this.showUncategorized} /> {sss('Show uncategorized')}</label>
           </div>
         </div>
         <div className="group">
