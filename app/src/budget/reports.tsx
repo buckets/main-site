@@ -624,6 +624,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
       if (!freq_segment) {
         return;
       }
+      let last_label = unit === 'year' ? end_date.format('YYYY') : end_date.clone().subtract(1, 'month').format('MMM');
       let sections = (Object.keys(freq_segment)
       .map(x=>Number(x))
       .sort((a,b) => a - b)
@@ -634,6 +635,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           return <BucketExpenseSummaryRow
             key={bucket.id}
             bucket={bucket}
+            last_label={last_label}
             end_date={end_date}
             min={segment.min}
             max={segment.max}
@@ -651,8 +653,8 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           <thead>
             <tr>
               <th className="right right-padded">{sss('Bucket')}</th>
-              <th className="right right-padded">{sss('Budgeted')}</th>
-              <th colSpan={2} className="right right-padded">{unit === 'year' ? sss('This year') : sss('Last month')}</th>
+              <th className="center">{sss('Budgeted')}</th>
+              <th colSpan={2} className="center">{last_label}</th>
               <th colSpan={2} className="">{sss('Average')}</th>
               <th className="right right-padded">{sss('Period')}</th>
               <th>
@@ -660,6 +662,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
                   budgeted: 7500,
                   avg_expenses: 2500,
                   last_period_expenses: 5000,
+                  last_label,
                   min: 0,
                   max: 10000,
                   yaxis: 25,
@@ -691,13 +694,15 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
 function expenseNumberline(args:{
     budgeted:number,
     last_period_expenses:number,
+    last_label?:string,
     avg_expenses:number,
     min?:number,
     max?:number,
     yaxis?:number,
     alwaysShowLabels?: boolean;
   }) {
-  let { avg_expenses, budgeted, last_period_expenses, min, max, yaxis, alwaysShowLabels } = args;
+  let { avg_expenses, budgeted, last_period_expenses, last_label, min, max, yaxis, alwaysShowLabels } = args;
+  last_label = last_label || sss('Last');
   let avg_over = avg_expenses - budgeted;
   let avg_overspend = avg_over > 0;
   let last_over = last_period_expenses - budgeted;
@@ -760,7 +765,7 @@ function expenseNumberline(args:{
   points.push({
     value: last_period_expenses,
     fill: last_overspend ? 'var(--red)' : 'var(--green)',
-    label: `${sss('Last:')} ${cents2decimal(last_period_expenses, {round: true})}`,
+    label: `${last_label}: ${cents2decimal(last_period_expenses, {round: true})}`,
     label_options: {
       textAnchor: 'middle',
       dy: 12,
@@ -788,6 +793,7 @@ function expenseNumberline(args:{
 interface BucketExpenseSummaryRowProps {
   bucket: Bucket;
   end_date: moment.Moment;
+  last_label: string;
   balance: number;
   min: number;
   max: number;
@@ -803,7 +809,7 @@ interface BucketExpenseSummaryRowProps {
 }
 class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {}> {
   render() {
-    let { bucket, end_date, balance, data, min, max } = this.props;
+    let { bucket, end_date, last_label, balance, data, min, max } = this.props;
     let computed = computeBucketData(bucket.kind, bucket, {
       today: end_date.clone().add(1, 'day'),
       balance: balance,
@@ -836,6 +842,7 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       <td className="right-border center novpadding">{expenseNumberline({
         avg_expenses: data.avg_expenses,
         last_period_expenses: data.last_period_expenses,
+        last_label: last_label,
         budgeted: computed.deposit,
         min,
         max,

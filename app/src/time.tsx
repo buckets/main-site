@@ -140,7 +140,7 @@ export function chunkTime(args: {
   args.step = args.step || 1
   let p = args.start.clone()
   let done = false;
-  while (p.isSameOrBefore(args.end) && !done) {
+  while (p.isBefore(args.end) && !done) {
     let er = p.clone().add(args.step as any, args.unit);
     if (args.clipEnd && er.isAfter(args.end)) {
       er = args.end.clone();
