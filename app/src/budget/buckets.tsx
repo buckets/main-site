@@ -132,7 +132,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let doPendingButton;
     let warning;
     if (to_deposit || to_withdraw) {
-      if (to_deposit && to_deposit + to_withdraw > appstate.rain) {
+      const total = to_deposit + to_withdraw;
+      if (total > 0 && total > appstate.rain) {
         doPendingButton = <SafetySwitch
           onClick={this.doPending}
         >{sss('Make it so')}</SafetySwitch>
