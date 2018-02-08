@@ -163,6 +163,8 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
         abort()
     if not yesno('Can you open your own budget?'):
         abort()
+    if not yesno('Can you open the application on Windows?'):
+        abort()
 
     # Manually publish it
     print('Go to https://github.com/buckets/application/releases to publish the draft')
