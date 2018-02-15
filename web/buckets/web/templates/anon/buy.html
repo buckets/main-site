@@ -67,6 +67,11 @@ paypal.Button.render({
   env: 'sandbox', // Or 'production',
   commit: true, // Show a 'Pay Now' button
 
+  client: {
+    sandbox: 'AfjBs7f4I0tCvFnv0iYRsebyze7uf3agM8h-KrYXHfSrLNryf9Q9ghcocNPTgNnuqFNiTjfKJ0v0kwWl',
+    // production: '',
+  },
+
   style: {
     color: 'gold',
     size: 'small',
@@ -75,21 +80,31 @@ paypal.Button.render({
   },
 
   payment: function(data, actions) {
-    /* 
-     * Set up the payment here 
-     */
+    let amount = '29.00'
+    console.log('hey');
+    console.log('amount', amount);
+    return actions.payment.create({
+      payment: {
+        transactions: [
+          {
+            amount: {
+              total: amount,
+              currency: 'USD',
+            }
+          }
+        ]
+      }
+    })
   },
 
   onAuthorize: function(data, actions) {
-    /* 
-     * Execute the payment here 
-     */
+    return actions.payment.execute().then(payment => {
+      console.log('payment', payment);
+    })
   },
 
   onError: function(err) {
-    /* 
-     * An error occurred during the transaction 
-     */
+    console.log('error', err);
   }
 }, '#paypal-button');
 </script>
