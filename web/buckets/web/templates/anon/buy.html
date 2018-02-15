@@ -2,36 +2,95 @@
 
 {% block title %}{% trans %}Buy Buckets{% endtrans %}{% endblock %}
 
+{% block extrahead %}
+<script src="https://www.paypalobjects.com/api/checkout.js"></script>
+<style>
+.how-to-pay-label {
+  text-align: center;
+  padding-bottom: 1rem;
+}
+.payment-options {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.payment-options .option {
+  margin: .5rem;
+}
+</style>
+{% endblock %}
+
 {% block navlinks %}{% endblock %}
 
 {% block content %}
 <div class="wrap spaced">
-    <div style="text-align: center;">
-        <form action="{{ url_for('.buy') }}" method="POST">
-          <script
-            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-            data-image="{{ url_for('static', filename='img/main_logo.png') }}"
-            data-key="{{ config.STRIPE_PUBLIC_KEY }}"
-            data-amount="2900"
-            data-name="Buckets"
-            data-label="{% trans %}Purchase License{% endtrans %}"
-            data-description="{% trans %}Family budgeting app{% endtrans %}"
-            data-zip-code="true"
-            data-billing-address="false"
-            data-locale="auto"
-            data-allow-remember-me="false"
-          >
-          </script>
-        </form>
+  <p class="how-to-pay-label"">
+    {% trans %}How do you want to pay?{% endtrans %}
+  </p>
+  <div class="payment-options">
+    <div class="option">
+      <form action="{{ url_for('.buy') }}" method="POST">
+        <script
+          src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+          data-image="{{ url_for('static', filename='img/main_logo.png') }}"
+          data-key="{{ config.STRIPE_PUBLIC_KEY }}"
+          data-amount="2900"
+          data-name="Buckets"
+          data-label="{% trans %}Credit card{% endtrans %}"
+          data-description="{% trans %}Family budgeting app{% endtrans %}"
+          data-zip-code="true"
+          data-billing-address="false"
+          data-locale="auto"
+          data-allow-remember-me="false"
+        >
+        </script>
+      </form>
     </div>
-    <div class="callout para">
-        {% trans %}For a <em>one-time $29 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.{% endtrans %}
+    <div class="option">
+      <div id="paypal-button"></div>
     </div>
-    <div class="callout para">
-        {% trans %}If you've lost your license, email me at hello@budgetwithbuckets.com{% endtrans %}
-    </div>
-    <div class="callout para">
-        - Matt
-    </div>
+  </div>
+  <div class="callout para">
+    {% trans %}For a <em>one-time $29 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.{% endtrans %}
+  </div>
+  <div class="callout para">
+    {% trans %}If you've lost your license, email me at hello@budgetwithbuckets.com{% endtrans %}
+  </div>
+  <div class="callout para">
+    - Matt
+  </div>
 </div>
+
+<script>
+paypal.Button.render({
+  env: 'sandbox', // Or 'production',
+  commit: true, // Show a 'Pay Now' button
+
+  style: {
+    color: 'gold',
+    size: 'small',
+    tagline: false,
+    label: 'paypal',
+  },
+
+  payment: function(data, actions) {
+    /* 
+     * Set up the payment here 
+     */
+  },
+
+  onAuthorize: function(data, actions) {
+    /* 
+     * Execute the payment here 
+     */
+  },
+
+  onError: function(err) {
+    /* 
+     * An error occurred during the transaction 
+     */
+  }
+}, '#paypal-button');
+</script>
 {% endblock content %}
