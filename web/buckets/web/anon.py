@@ -2,6 +2,7 @@ import structlog
 import time
 import stripe
 import requests
+import json
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, flash
@@ -13,6 +14,8 @@ from buckets.drm import createLicense, formatLicense
 
 blue = Blueprint('anon', __name__)
 
+PRICE_CENTS = 2900
+PRICE_STRING = '29.00'
 
 _latest_version = None
 _latest_version_lastfetch = None
@@ -45,11 +48,6 @@ def pull_lang_code(endpoint, values):
     logger.debug('lang_code into g', lang_code=values.get('lang_code'))
     g.lang_code = values.pop('lang_code', 'en')
 
-# PRIVATE_KEY = os.environ.get('BUCKETS_LICENSE_KEY')
-# if not PRIVATE_KEY:
-#     if 'OPENSHIFT_DATA_DIR' in os.environ:
-#         with open(os.path.join(os.getenv('OPENSHIFT_DATA_DIR'), 'BUCKETS_LICENSE_KEY')) as fh:
-#             PRIVATE_KEY = fh.read()
 
 #----------------------------------------------------
 # application
@@ -72,6 +70,39 @@ def gettingstarted():
 def help():
     return redirect(url_for('.gettingstarted'))
 
+def generateLicense(email):
+    return formatLicense(createLicense(
+        email=email,
+        private_key=current_app.config['BUCKETS_LICENSE_KEY']))
+
+def emailLicense(email, license):
+    try:
+        current_app.mailer.sendPlain(email,
+            ('Buckets', 'hello@budgetwithbuckets.com'),
+            subject=gettext('Buckets v1 License'),
+            body=gettext('''Thank you for purchasing Buckets!
+
+    Below is your Buckets v1 License.  To use it:
+
+    1. Open the Buckets application (download at www.budgetwithbuckets.com)
+    2. Click the "Trial Version" menu
+    3. Click "Enter License..."
+    4. Copy and paste the following license into the box
+    5. Click the button
+
+    {license}
+
+    This license may be used on any number of computers belonging to you
+    and your immediate family members living in your home.
+
+    Happy budgeting!
+
+    - Matt
+    ''').format(license=license))
+    except Exception:
+        flash(gettext("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error'))
+        raise
+
 @blue.route('/buy', methods=['GET', 'POST'])
 def buy():
     if request.method == 'POST':
@@ -81,17 +112,15 @@ def buy():
 
         # generate the license
         try:
-            license = formatLicense(createLicense(
-                email=email,
-                private_key=current_app.config['BUCKETS_LICENSE_KEY']))
-        except Exception as e:
+            generateLicense(email)
+        except Exception:
             flash(gettext('Error generating license.  Your card was not charged.'), 'error')
             raise
 
         # charge the card
         try:
             stripe.Charge.create(
-                amount=2900,
+                amount=PRICE_CENTS,
                 currency='usd',
                 description='Buckets v1 License',
                 statement_descriptor=gettext('Buckets Budgeting App'),
@@ -108,34 +137,37 @@ def buy():
             raise
 
         # email the license
-        try:
-            current_app.mailer.sendPlain(email,
-                ('Buckets', 'hello@budgetwithbuckets.com'),
-                subject=gettext('Buckets v1 License'),
-                body=gettext('''Thank you for purchasing Buckets!
-
-Below is your Buckets v1 License.  To use it:
-
-1. Open the Buckets application (download at www.budgetwithbuckets.com)
-2. Click the "Trial Version" menu
-3. Click "Enter License..."
-4. Copy and paste the following license into the box
-5. Click the button
-
-{license}
-
-This license may be used on any number of computers belonging to you
-and your immediate family members living in your home.
-
-Happy budgeting!
-
-- Matt
-''').format(license=license))
-        except Exception as e:
-            flash(gettext("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error'))
-            raise
+        emailLicense(email, license)
         return render_template('anon/bought.html', license=license)
 
 
-    return render_template('anon/buy.html')
+    return render_template('anon/buy.html', PRICE_CENTS=PRICE_CENTS, PRICE_STRING=PRICE_STRING)
+
+
+@blue.route('/paypal-create-payment', methods=['POST'])
+def paypal_create_payment():
+    paypal = current_app.paypal
+    paymentID = paypal.createPayment(PRICE_STRING)
+    return json.dumps({
+        'paymentID': paymentID,
+    })
+    # tx = request.args.get('tx', '')
+    # if not tx:
+    #     flash(gettext("There was an error processing your transaction."), 'error')
+    #     raise Exception('Error processing transaction')
+
+    # try:
+    #     generateLicense(email)
+    # except Exception:
+    #     flash(gettext('Error generating license BUT YOU WERE CHARGED.  Please contact me at hello@budgetwithbuckets.com'), 'error')
+    #     raise
+    # emailLicense(email, license)
+    # return render_template('anon/bought.html', license=license)
+
+@blue.route('/paypal-execute-payment', methods=['POST'])
+def paypal_execute_payment():
+    pass
+
+
+
 

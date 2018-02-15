@@ -12,11 +12,16 @@
 .payment-options {
   text-align: center;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 .payment-options .option {
   margin: .5rem;
+  padding: 1rem;
+  border-radius: 6px;
+}
+.payment-options .option-label {
+  padding-bottom: 1rem;
 }
 </style>
 {% endblock %}
@@ -25,7 +30,7 @@
 
 {% block content %}
 <div class="wrap spaced">
-  <p class="how-to-pay-label"">
+  <p class="callout" style="text-align: center;">
     {% trans %}How do you want to pay?{% endtrans %}
   </p>
   <div class="payment-options">
@@ -35,9 +40,9 @@
           src="https://checkout.stripe.com/checkout.js" class="stripe-button"
           data-image="{{ url_for('static', filename='img/main_logo.png') }}"
           data-key="{{ config.STRIPE_PUBLIC_KEY }}"
-          data-amount="2900"
+          data-amount="{{ PRICE_CENTS }}"
           data-name="Buckets"
-          data-label="{% trans %}Credit card{% endtrans %}"
+          data-label="{% trans %}Credit Card{% endtrans %}"
           data-description="{% trans %}Family budgeting app{% endtrans %}"
           data-zip-code="true"
           data-billing-address="false"
@@ -46,6 +51,9 @@
         >
         </script>
       </form>
+      <div style="padding-top: .5rem;">
+        <a href="https://stripe.com" target="_blank"><img src="{{ url_for('static', filename='img/powered_by_stripe.svg') }}" /></a>
+      </div>
     </div>
     <div class="option">
       <div id="paypal-button"></div>
@@ -65,12 +73,7 @@
 <script>
 paypal.Button.render({
   env: 'sandbox', // Or 'production',
-  commit: true, // Show a 'Pay Now' button
-
-  client: {
-    sandbox: 'AfjBs7f4I0tCvFnv0iYRsebyze7uf3agM8h-KrYXHfSrLNryf9Q9ghcocNPTgNnuqFNiTjfKJ0v0kwWl',
-    // production: '',
-  },
+  commit: true,
 
   style: {
     color: 'gold',
@@ -80,26 +83,17 @@ paypal.Button.render({
   },
 
   payment: function(data, actions) {
-    let amount = '29.00'
-    console.log('hey');
-    console.log('amount', amount);
-    return actions.payment.create({
-      payment: {
-        transactions: [
-          {
-            amount: {
-              total: amount,
-              currency: 'USD',
-            }
-          }
-        ]
-      }
+    return paypal.request.post('{{ url_for(".paypal_create_payment") }}')
+    .then(data => {
+      return data.id;
     })
   },
 
   onAuthorize: function(data, actions) {
-    return actions.payment.execute().then(payment => {
-      console.log('payment', payment);
+    console.log('data', data);
+    return paypal.request.post('{{ url_for(".paypal_execute_payment") }}', {
+      paymentID: data.paymentID,
+      payerID: data.payerID,
     })
   },
 

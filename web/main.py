@@ -23,6 +23,8 @@ ap.add_argument('--sentry-dsn',
     default=os.environ.get('SENTRY_DSN', ''))
 ap.add_argument('-K', '--buckets-license-key',
     default=os.environ.get('BUCKETS_LICENSE_KEY', ''))
+ap.add_argument('--paypal-access-token',
+    default=os.environ.get('PAYPAL_ACCESS_TOKEN', ''))
 ap.add_argument('-H', '--host',
     default='127.0.0.1')
 ap.add_argument('-p', '--port',
@@ -37,7 +39,9 @@ app = configureApp(
     stripe_api_key=args.stripe_api_key,
     stripe_public_key=args.stripe_public_key,
     sentry_dsn=args.sentry_dsn,
-    buckets_license_key=args.buckets_license_key)
+    buckets_license_key=args.buckets_license_key,
+    paypal_access_token=args.paypal_access_token,
+)
 
 if __name__ == '__main__':
     threaded = not not args.debug

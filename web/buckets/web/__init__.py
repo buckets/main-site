@@ -16,6 +16,7 @@ from raven.contrib.flask import Sentry
 from buckets.mailing import PostmarkMailer, NoMailer
 from buckets.web.util import structlog_context, sentry_context
 from buckets.web.util import send_warnings_to_sentry
+from buckets.paypal import PayPal
 
 
 f = Flask(__name__)
@@ -69,6 +70,7 @@ def configureApp(flask_secret_key,
         postmark_key,
         stripe_api_key,
         stripe_public_key,
+        paypal_access_token,
         sentry_dsn,
         buckets_license_key,
         debug=False):
@@ -111,6 +113,16 @@ def configureApp(flask_secret_key,
         logger.info('Stripe: PRODUCTION')
     stripe.api_key = stripe_api_key
     stripe.api_version = '2016-07-06'
+
+    # paypal
+    if not paypal_access_token:
+        logger.info('PayPal NOT CONFIGURED')
+    else:
+        f.paypal = PayPal(
+            access_token=paypal_access_token,
+            sandbox=debug)
+        logger.info('PayPal: configured')
+
 
     structlog.configure(
         processors=[
