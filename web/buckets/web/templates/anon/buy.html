@@ -4,6 +4,14 @@
 
 {% block navlinks %}{% endblock %}
 
+{% block extrahead %}
+<style type="text/css">
+.security-notice {
+  padding-top: .5rem;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="wrap spaced">
     <div style="text-align: center;">
@@ -23,6 +31,9 @@
           >
           </script>
         </form>
+        <div class="security-notice">
+          <a href="https://stripe.com" target="_blank"><img src="{{ url_for('static', filename='img/powered_by_stripe.svg') }}" /></a>
+        </div>
     </div>
     <div class="callout para">
         {% trans %}For a <em>one-time $29 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.{% endtrans %}
