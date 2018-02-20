@@ -128,7 +128,7 @@ export class ReportStore {
     }>
   }> {
     const SAMPLE = 12;
-    const MONTHS = 3;
+    const MONTHS = 18;
     const YEARS = 3;
     const { bucket_id, end } = args;
 

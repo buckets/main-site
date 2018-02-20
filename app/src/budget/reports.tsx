@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { manager, AppState } from './appstate'
 import { ObjectEvent, isObj } from '../store'
-import { Money, cents2decimal } from '../money'
+import { Money } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
@@ -17,7 +17,7 @@ import { Bucket, computeBucketData } from '../models/bucket'
 import { IncomeExpenseSum } from '../models/reports'
 import { TransactionList } from './transactions'
 
-import { SizeAwareDiv, UPARROW, DOWNARROW } from '../charts/util'
+import { SizeAwareDiv } from '../charts/util'
 import { sss } from '../i18n'
 
 export class ReportsPage extends React.Component<{
@@ -509,22 +509,16 @@ interface BucketExpenseSummaryProps {
   appstate: AppState;
 }
 interface BucketExpenseSummaryState {
-  data: {
+  expensesByBucket: {
     [key:number]: {
-      interval: Interval;
-      unit: 'month'|'year';
-      avg_expenses: number;
-      min_expenses: number;
-      max_expenses: number;
-      deviation: number;
-      last_period_expenses: number;
+      expense_history: Array<{
+        expenses: number;
+      }>
     },
   },
   segments: {
     [frequency:string]: {
       [magnitude:number]: {
-        min: number;
-        max: number;
         buckets: Bucket[];
       }  
     }
@@ -534,7 +528,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
   constructor(props) {
     super(props)
     this.state = {
-      data: {},
+      expensesByBucket: {},
       segments: {},
     }
     this.recomputeState(props);
@@ -547,7 +541,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
       return bucket.kind === 'deposit';
     })
 
-    let data = {}
+    let expensesByBucket = {}
     let segments = {};
 
     await Promise.all(buckets.map(async bucket => {
@@ -555,8 +549,9 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
         end: end_date,
         bucket_id: bucket.id,
       });
+      console.log('history', history);
       if (!history) {
-        data[bucket.id] = null;
+        expensesByBucket[bucket.id] = null;
         return;
       }
       const balance = appstate.bucket_balances[bucket.id];
@@ -564,19 +559,9 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
         today: end_date.clone().add(1, 'day'),
         balance: balance,
       })
-      let expenses = history.intervals
-        .map(i => {
-          if (i.expenses === null) {
-            return 0;
-          }
-          return -i.expenses;
-        });
-      let avg_expenses = d3.sum(expenses) / expenses.length;
-      let deviation = d3.deviation(expenses) || 0;
-      let min_expenses = d3.min(expenses);
-      let max_expenses = d3.max(expenses);
-
-      let last_period_expenses = -(history.intervals.slice(-1)[0].expenses || 0);
+      let expense_history = history.intervals.map(item => {
+        return {expenses: item.expenses}
+      })
 
       let magnitude = Math.floor(logbase(computed.deposit, 10));
       if (!segments[history.unit]) {
@@ -587,29 +572,18 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
       if (!freq_segment[magnitude]) {
         freq_segment[magnitude] = {
           buckets: [],
-          min: avg_expenses,
-          max: avg_expenses,
         }
       }
       let segment = freq_segment[magnitude];
       segment.buckets.push(bucket);
 
-      segment.min = Math.min(avg_expenses, last_period_expenses, segment.min);
-      segment.max = Math.max(avg_expenses, last_period_expenses, segment.max);
-
-      data[bucket.id] = {
-        unit: history.unit,
-        avg_expenses,
-        deviation,
-        min_expenses,
-        max_expenses,
-        last_period_expenses,
-        interval: history.interval,
+      expensesByBucket[bucket.id] = {
+        expense_history,
       }
     }))
     this.setState({
       segments,
-      data,
+      expensesByBucket,
     })
   }
   componentWillReceiveProps(nextProps) {
@@ -619,12 +593,12 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
     let { appstate } = this.props;
     let end_date = appstate.viewDateRange.onOrAfter;
 
-    let tables = ['year', 'month'].map(unit => {
+    let tables = ['year', 'month'].map((unit:'year'|'month') => {
       let freq_segment = this.state.segments[unit];
       if (!freq_segment) {
         return;
       }
-      let last_label = unit === 'year' ? end_date.format('YYYY') : end_date.clone().subtract(1, 'month').format('MMM');
+      // let last_label = unit === 'year' ? end_date.format('YYYY') : end_date.clone().subtract(1, 'month').format('MMM');
       let sections = (Object.keys(freq_segment)
       .map(x=>Number(x))
       .sort((a,b) => a - b)
@@ -635,12 +609,10 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           return <BucketExpenseSummaryRow
             key={bucket.id}
             bucket={bucket}
-            last_label={last_label}
             end_date={end_date}
-            min={segment.min}
-            max={segment.max}
             balance={appstate.bucket_balances[bucket.id]}
-            data={this.state.data[bucket.id]}
+            unit={unit}
+            expenses={this.state.expensesByBucket[bucket.id].expense_history}
           />
         })
         return <tbody key={`${unit}-${magnitude}`} className="line-below">
@@ -654,20 +626,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
             <tr>
               <th className="right right-padded">{sss('Bucket')}</th>
               <th className="center">{sss('Budgeted')}</th>
-              <th colSpan={2} className="center">{last_label}</th>
-              <th colSpan={2} className="">{sss('Average')}</th>
-              <th className="right right-padded">{sss('Period')}</th>
               <th>
-                {expenseNumberline({
-                  budgeted: 7500,
-                  avg_expenses: 2500,
-                  last_period_expenses: 5000,
-                  last_label,
-                  min: 0,
-                  max: 10000,
-                  yaxis: 25,
-                  alwaysShowLabels: true,
-                })}
               </th>
             </tr>
           </thead>
@@ -691,226 +650,79 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
   }
 }
 
-function expenseNumberline(args:{
-    budgeted:number,
-    last_period_expenses:number,
-    last_label?:string,
-    avg_expenses:number,
-    min?:number,
-    max?:number,
-    yaxis?:number,
-    alwaysShowLabels?: boolean;
-  }) {
-  let { avg_expenses, budgeted, last_period_expenses, last_label, min, max, yaxis, alwaysShowLabels } = args;
-  last_label = last_label || sss('Last');
-  let avg_over = avg_expenses - budgeted;
-  let avg_overspend = avg_over > 0;
-  let last_over = last_period_expenses - budgeted;
-  let last_overspend = last_over > 0;
-  let blocks = [];
-  let points = [];
-  // blocks.push({
-  //   a: Math.min(computed.deposit, data.avg_expenses),
-  //   b: Math.max(computed.deposit, data.avg_expenses),
-  //   fill: 'var(--lighter-grey)',
-  //   opacity: 0.5,
-  //   h: 2,
-  // })
-  if (last_overspend) {
-    blocks.push({
-      a: budgeted,
-      b: last_period_expenses,
-      fill: 'var(--red)',
-      opacity: 0.5,
-    })
-  } else {
-    blocks.push({
-      a: last_period_expenses,
-      b: budgeted,
-      fill: 'var(--green)',
-      opacity: 0.5,
-    })
-  }
-  // blocks.push({
-  //   a: Math.min(data.avg_expenses, last_period_expenses),
-  //   b: Math.max(data.avg_expenses, last_period_expenses),
-  //   fill: last_period_expenses > data.avg_expenses ? 'var(--red)' : 'var(--green)',
-  //   opacity: 0.5,
-  // })
-  points.push({
-    value: budgeted,
-    fill: 'var(--darker-darkblue)',
-    label: `${sss('Budgeted:')} ${cents2decimal(budgeted, {round: true})}`,
-    label_options: {
-      textAnchor: 'middle',
-      dy: 12,
-      fontSize: 10,
-    }
-  });
-
-  points.push({
-    value: avg_expenses,
-    stroke: avg_overspend ? 'var(--red)' : 'var(--green)',
-    // fill: 'white',
-    strokeWidth: 2,
-    symbol: 'tick',
-    label: `${sss('Average:')} ${cents2decimal(avg_expenses, {round: true})}`,
-    label_options: {
-      textAnchor: 'middle',
-      dy: 12,
-      fontSize: 10,
-    }
-  })
-
-  points.push({
-    value: last_period_expenses,
-    fill: last_overspend ? 'var(--red)' : 'var(--green)',
-    label: `${last_label}: ${cents2decimal(last_period_expenses, {round: true})}`,
-    label_options: {
-      textAnchor: 'middle',
-      dy: 12,
-      fontSize: 10,
-    }
-  })
-  
-  return <div>
-    <NumberlineChart
-      className={cx({
-        'labels-on-hover': !alwaysShowLabels,
-      })}
-      width={400}
-      height={30}
-      yaxis={yaxis || 20}
-      min={min}
-      max={max}
-      points={points}
-      blocks={blocks}
-    />
-    
-  </div>
-}
 
 interface BucketExpenseSummaryRowProps {
   bucket: Bucket;
   end_date: moment.Moment;
-  last_label: string;
   balance: number;
-  min: number;
-  max: number;
-  data: {
-    unit: 'month'|'year';
-    avg_expenses: number;
-    min_expenses: number;
-    max_expenses: number;
-    deviation: number;
-    last_period_expenses: number;
-    interval: Interval;  
-  }
+  unit: 'month'|'year';
+  expenses: Array<{
+    expenses: number;
+  }>;
 }
 class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {}> {
   render() {
-    let { bucket, end_date, last_label, balance, data, min, max } = this.props;
+    let { bucket, end_date, balance, unit, expenses } = this.props;
     let computed = computeBucketData(bucket.kind, bucket, {
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
-    let avg_over = data.avg_expenses - computed.deposit;
-    let avg_overspend = avg_over > 0;
-    let last_over = data.last_period_expenses - computed.deposit;
-    let last_overspend = last_over > 0;
-      
-    let period;
-    if (data.interval) {
-      period = sss('period-display', (n:number, unit:'year'|'month') => {
-        return `${n}${unit === 'year' ? 'yr' : 'mo'}`;
-    })(data.interval.end.diff(data.interval.start, data.unit), data.unit);  
-    }
     
     return <tr className="hover">
       <th className="right-border">{bucket.name}</th>
       <td className="right-border"><Money value={computed.deposit} /></td>
-      <td className="right left-padded"><Money value={data.last_period_expenses} round /></td>
-      <td className={cx("nobr incdeclabel right-border left-padded", {
-        bad: last_overspend,
-      })}>{last_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(last_over)} round /></td>
-
-      <td className="right left-padded"><Money value={data.avg_expenses} round /></td>
-      <td className={cx("nobr incdeclabel right left-padded", {
-        bad: avg_overspend,
-      })}>{avg_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(avg_over)} round /></td>
-      <td className="right-border">{period}</td>
-      <td className="right-border center novpadding">{expenseNumberline({
-        avg_expenses: data.avg_expenses,
-        last_period_expenses: data.last_period_expenses,
-        last_label: last_label,
-        budgeted: computed.deposit,
-        min,
-        max,
-      })}</td>
+      <td className="right-border center novpadding">
+        <ExpenseChart
+          expected={computed.deposit}
+          data={expenses}
+          barsToShow={unit === 'year' ? 5 : 18}
+        />
+      </td>
     </tr>
   }
 }
 
-
-interface NumberlineChartProps {
-  height?: number;
+interface ExpenseChartProps {
   width?: number;
-  center?: number;
-  yaxis?: number;
-  min?: number;
-  max?: number;
+  height?: number;
   className?: string;
-  points?: Array<{
-    value: number;
-    symbol?: 'tick' | 'circle';
-    className?: string;
-    r?: number;
+  expected: number;
+  barsToShow?: number;
+
+  // Expense data with most recent time period first
+  data: Array<{
     label?: string;
-    label_options?: {
-      [k:string]: any;
-    };
-    mouseEnter?:()=>void;
-    mouseLeave?:()=>void;
-    [k:string]: any;
-  }>;
-  blocks?: Array<{
-    a: number;
-    b: number;
-    className?: string;
-    h?: number;
-    [k:string]: any;
-  }>;
+    expenses: number;
+  }>
 }
-class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
+
+class ExpenseChart extends React.Component<ExpenseChartProps, {}> {
   render() {
-    let { height, width, center, yaxis, points, blocks, className, min, max } = this.props;
-    const radius = 4;
-    const hpadding = 30;
-    height = height || 6;
-    yaxis = yaxis || height / 2;
-    width = width || 150;
-    points = points || [];
-    blocks = blocks || [];
+    let { width, height, data, expected, className } = this.props;
+    height = height || 20;
+    width = width || 200;
+    const padding = 3;
+    const vpadding = 1;
+    // barsToShow = barsToShow || 12;
 
-    min = min === undefined ? points[0].value : min;
-    max = max === undefined ? points[0].value : max;
-    points.forEach(point => {
-      min = Math.min(min, point.value);
-      max = Math.max(max, point.value);
-    })
-    blocks.forEach(block => {
-      min = Math.min(min, block.a, block.b);
-      max = Math.max(max, block.a, block.b);
-    })
+    let bar_spacing = 4;
+    let bar_width = 10;
+    let barsToShow = width / (bar_width + bar_spacing);
+    //Math.floor(width / barsToShow - bar_spacing);
 
-    if (center) {
-      let r = Math.max(Math.abs(center - min), Math.abs(center - max));
-      min = center - r;
-      max = center + r;
-    }
-    const x = d3.scaleLinear()
-      .domain([min, max])
-      .range([hpadding, width-hpadding]);
+    const expenses_list = data.map(item => {
+      return Math.abs(item.expenses);
+    })
+    let maxy = d3.max(expenses_list)
+    let miny = 0;
+    maxy = Math.max(Math.max(0, maxy), expected)
+
+    let x = d3.scaleLinear()
+      .domain([0, barsToShow])
+      .range([padding, width-padding]);
+    let y = d3.scaleLinear()
+      .domain([miny, maxy])
+      .range([height-vpadding, vpadding]);
 
     return <div
       className={cx("numberline", className)}
@@ -919,66 +731,77 @@ class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
         height: `${height}px`,
       }}>
       <svg viewBox={`0 0 ${width} ${height}`}>
-        {blocks.map((block, idx) => {
-          let { a, b, className, h, ...rest } = block;
-          if (b < a) {
-            let tmp = a;
-            a = b;
-            b = tmp;
+
+        {expenses_list.map((expenses, i) => {
+          let rects = [];
+          let xval = x(i)+bar_width/2 + bar_spacing/2;
+          if (expenses > expected) {
+            // overspend
+            rects.push(<rect
+              key="under"
+              width={bar_width}
+              x={xval}
+              y={y(expected)}
+              height={y(0) - y(expected)}
+              fill={COLORS.lighter_grey}
+            />)
+            rects.push(<rect
+              key="over"
+              width={bar_width}
+              x={xval}
+              y={y(expenses)}
+              height={y(expected) - y(expenses)}
+              fill={COLORS.red}
+            />)
+          } else if (expenses) {
+            // underspend
+            rects.push(<rect
+              key="under"
+              width={bar_width}
+              x={xval}
+              y={y(expenses)}
+              height={y(0) - y(expenses)}
+              fill={COLORS.lighter_grey}
+            />)
+            // rects.push(<line
+            //   key="extra"
+            //   x1={xval+bar_width/2}
+            //   x2={xval+bar_width/2}
+            //   y1={y(expected)}
+            //   y2={y(expenses)}
+            //   stroke={COLORS.green}
+            // />)
+            // rects.push(<rect
+            //   key="extra"
+            //   width={bar_width}
+            //   x={xval}
+            //   y={y(expected)}
+            //   height={y(expenses) - y(expected)}
+            //   fill={COLORS.green}
+            // />)
           }
-          let w = x(b) - x(a);
-          h = h || 4;
-          return <rect
-            key={idx}
-            x={x(a)}
-            rx={2}
-            ry={2}
-            width={w}
-            y={yaxis-h/2}
-            height={h}
-            className={className}
-            {...rest}
+          return <g key={i}>
+            {rects}
+          </g>
+        })}
+
+        <line
+          x1={padding}
+          x2={width-padding}
+          y1={y(expected)}
+          y2={y(expected)}
+          opacity={0}
+          stroke={COLORS.blue} />
+        <line
+          x1={padding}
+          x2={width-padding}
+          y1={y(0)}
+          y2={y(0)}
+          stroke={COLORS.lightest_grey} />
           />
-        })}
-        {points.map((point, idx) => {
-          let { symbol, value, className, r, label, label_options, ...rest } = point;
-          let elem;
-          if (symbol === 'tick') {
-            elem = <line
-              key={idx}
-              x1={x(value)}
-              x2={x(value)}
-              y1={yaxis-6}
-              y2={yaxis+6}
-              className={className}
-              {...rest}
-            />
-          } else {
-            elem = <circle
-              key={idx}
-              cx={x(value)}
-              cy={yaxis}
-              r={r === undefined ? radius : r}
-              className={className}
-              {...rest}
-            />
-          }
-          if (label) {
-            return <g key={idx}>
-              {elem}
-              <text
-                x={x(value)}
-                y={0}
-                dy={12}
-                fontSize={12}
-                {...label_options}
-              >{label}</text>
-            </g>
-          } else {
-            return elem;
-          }
-        })}
       </svg>
     </div>
+
   }
 }
+
