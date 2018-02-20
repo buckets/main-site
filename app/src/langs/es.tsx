@@ -11,12 +11,6 @@ const messages:IMessages = {
     src: ["src/budget/accounts.tsx line 30","src/budget/accounts.tsx line 129"],
     h: "5497b4yxPFO2M524tL0qmmNk47Qv/aca/7n0zMEeX/o=",
   },
-  "more": {
-    val: "más",
-    translated: true,
-    src: ["src/budget/buckets.tsx line 46"],
-    h: "uiqCMjSdL1TgDZHPNYXLnfN/yZq59+kDR/wKZSAP0hU=",
-  },
   "You have no closed accounts.": {
     val: "No tienes cuentas cerradas.",
     translated: true,
@@ -33,19 +27,14 @@ const messages:IMessages = {
     val: "El saldo sincronizado más reciente no coincide con el saldo calculado a partir de las transacciones.  Haga clic en \"más\" para obtener más información.",
     translated: true,
     src: ["src/budget/accounts.tsx line 32"],
-    h: "cMuGJ8vkjW+HMm8Ac01xULd9Lwf/iVtXYPi3WBC2JS4=",
+    h: "8xHas2SyXqC7roWhYQNIVhFVNvbvzMi6Y3mQce5sIbc=",
+    newval: "The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.",
   },
   "accounts.name_placeholder": {
     val: "desconocido",
     translated: true,
     src: ["src/budget/accounts.tsx line 39"],
     h: "UwMHboI9q49SZQkwMN8ps9zBi6YOSdtwakjLJwudtyA=",
-  },
-  "accounts.more_link": {
-    val: "más",
-    translated: true,
-    src: ["src/budget/accounts.tsx line 45"],
-    h: "uiqCMjSdL1TgDZHPNYXLnfN/yZq59+kDR/wKZSAP0hU=",
   },
   "Balance": {
     val: "Saldo",
@@ -59,35 +48,17 @@ const messages:IMessages = {
     src: ["src/budget/accounts.tsx line 130"],
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
   },
-  "Delete account": {
-    val: "Eliminar cuenta",
-    translated: true,
-    src: ["src/budget/accounts.tsx line 132"],
-    h: "aJP8/jR9vxjzpjDV69qVSi1XWSXKUhiJJUOrI1iunMg=",
-  },
   "Account and transactions deleted": {
     val: "Cuenta y transacciones fueron borrados",
     translated: true,
     src: ["src/budget/accounts.tsx line 137"],
     h: "iwS2+dAqfDOEtU5SUm1d1oPFTe0+JT5NCm4nH2SrglE=",
   },
-  "Confirm delete": {
-    val: "Confirmar eliminar",
-    translated: true,
-    src: ["src/budget/accounts.tsx line 140","src/wwwroot/record/record.tsx line 419"],
-    h: "dKo5kMigc5p6w58RgAMwEVjNB+uwU3D0zse0HbHbiQU=",
-  },
-  "(This can't be undone)": {
-    val: "(This can't be undone)",
+  "Permanently delete account": {
+    val: "Permanently delete account",
     translated: false,
-    src: ["src/budget/accounts.tsx line 140"],
-    h: "/4Il5W0T06BPrx7oYqwPwrgFgRrJmAM5Oa+80d9DxRg=",
-  },
-  "Close account": {
-    val: "Cerrar cuenta",
-    translated: true,
-    src: ["src/budget/accounts.tsx line 144"],
-    h: "7HdV8X8++teDNW33urE2eccDw3VLdSpvII89zC/sfu4=",
+    src: ["src/budget/accounts.tsx line 138"],
+    h: "fcpAc/TcJr/ayfOjnYZmGo2BIga/mx8UyuwCbh2BRFg=",
   },
   "Account deleted completely": {
     val: "Cuenta borrado completamente",
@@ -101,11 +72,11 @@ const messages:IMessages = {
     src: ["src/budget/accounts.tsx line 153"],
     h: "l9xs5wLKF3KIgunL1SJh9r9XDYpWkC7LYrL4KUUFm3M=",
   },
-  "Confirm close": {
-    val: "Confirmar cerrar",
+  "Close account": {
+    val: "Cerrar cuenta",
     translated: true,
-    src: ["src/budget/accounts.tsx line 156"],
-    h: "bUeSrlfpINVBumCe1M6dEwQcQTlnoe2bi4rmGjYP3QM=",
+    src: ["src/budget/accounts.tsx line 144"],
+    h: "7HdV8X8++teDNW33urE2eccDw3VLdSpvII89zC/sfu4=",
   },
   "Synced balance": {
     val: "Saldo sincronizado",
@@ -197,6 +168,12 @@ const messages:IMessages = {
     src: ["src/budget/buckets.tsx line 44","src/budget/buckets.tsx line 961"],
     h: "P5Z1ij4jmS06jNOQiHymi+/D+uYJktoalTdw+AHGukM=",
   },
+  "more": {
+    val: "más",
+    translated: true,
+    src: ["src/budget/buckets.tsx line 46"],
+    h: "uiqCMjSdL1TgDZHPNYXLnfN/yZq59+kDR/wKZSAP0hU=",
+  },
   "You haven't kicked the bucket yet...": {
     val: "Todavía, no has echado ningún cubo...",
     translated: true,
@@ -244,6 +221,12 @@ const messages:IMessages = {
     translated: true,
     src: ["src/budget/buckets.tsx line 133","src/budget/buckets.tsx line 135"],
     h: "XRTIWjylWKAy5BW8/0C0rOSW5S1QC+CxmgmFfhi81pk=",
+  },
+  "Warning: Doing this will use rain you don't have and could steal rain from future months (if available).": {
+    val: "Warning: Doing this will use rain you don't have and could steal rain from future months (if available).",
+    translated: false,
+    src: ["src/budget/buckets.tsx line 139"],
+    h: "YR+S0SMnFz4+K5vpXrMzMfSaBE5mHBrhQTalzgI0/7U=",
   },
   "Self debt": {
     val: "Auto deudas",
@@ -383,19 +366,35 @@ const messages:IMessages = {
     src: ["src/budget/buckets.tsx line 488"],
     h: "rtvJnJFYA7lHYjPjGpF27/h2So3pRdrRLjfnkg78woQ=",
   },
-  "rainfall-received-this-month": {
-    val: (money:JSX.Element, percent:number) => {
-          return <span>Lluvia este mes: {money} ({percent}%)</span>
-        },
-    translated: true,
-    src: ["src/budget/buckets.tsx line 574"],
-    h: "8WyxY5Vv9Dh9oCx1HkelgzuyfrAW/ynIxBz0ocmoEl4=",
+  "New bucket": {
+    val: "New bucket",
+    translated: false,
+    src: ["src/budget/buckets.tsx line 834"],
+    h: "aIKjDQtVbUMjIHU/6fccfiWBUIwUBnAofdzRJTCuytI=",
   },
   "This is a special group for all the buckets without a group.": {
     val: "Este grupo especial es para los cubos cuales no tienen grupo.",
     translated: true,
     src: ["src/budget/buckets.tsx line 784"],
     h: "QP5fEqFwlvHWJyjzrIWUJFlMvhFDxxSsl1vnej/p30I=",
+  },
+  "Want": {
+    val: "Want",
+    translated: false,
+    src: ["src/budget/buckets.tsx line 993"],
+    h: "lV/eDqkplJ/XKjHyCSE47yOWOl3t3Igj9S559wDKMZI=",
+  },
+  "bucketrain.help": {
+    val: "La cantidad que los cubos quieren cada mes.  La caja muestra cuanto han recibido ya.",
+    translated: true,
+    src: ["src/budget/buckets.tsx line 787"],
+    h: "3dbOFkUiGaEoD01CP7kIWDQHgUbULWexjdEKdEAF3sA=",
+  },
+  "Net transfers between buckets.": {
+    val: "Net transfers between buckets.",
+    translated: false,
+    src: ["src/budget/buckets.tsx line 996"],
+    h: "wRxoqvIxh/1UVZNHs+kwKhCJbdg0R5FFPaTVeHEEK3Y=",
   },
   "Effective": {
     val: "En efecto",
@@ -414,12 +413,6 @@ const messages:IMessages = {
     translated: true,
     src: ["src/budget/buckets.tsx line 799"],
     h: "G/e+QHikQOjTM9bcDBrmUZj6ONRstDFt17sNXu9zUd8=",
-  },
-  "bucketrain.help": {
-    val: "La cantidad que los cubos quieren cada mes.  La caja muestra cuanto han recibido ya.",
-    translated: true,
-    src: ["src/budget/buckets.tsx line 787"],
-    h: "3dbOFkUiGaEoD01CP7kIWDQHgUbULWexjdEKdEAF3sA=",
   },
   "bucket.detailslabel": {
     val: "Detalles",
@@ -854,12 +847,6 @@ const messages:IMessages = {
     src: ["src/budget/importing.tsx line 182"],
     h: "bMXfNfAzjiMOnmM+rZmR8I9iyrRaMmSXja7cZ0eGcwU=",
   },
-  "Confirm delete?": {
-    val: "Confirmar eliminar?",
-    translated: true,
-    src: ["src/budget/importpage.tsx line 359","src/budget/importpage.tsx line 383"],
-    h: "m+7d5sl049xaPiNCOrhWnQKaw3HfiPQOZ5x7tuKVVd8=",
-  },
   "ID": {
     val: "ID",
     translated: true,
@@ -956,18 +943,6 @@ const messages:IMessages = {
     src: ["src/budget/reports.tsx line 534"],
     h: "aP72arzLN/j79zGtL8DWE7wcBGciRcWqMOR1aTHJmNo=",
   },
-  "This year": {
-    val: "Este año",
-    translated: true,
-    src: ["src/budget/reports.tsx line 654"],
-    h: "tyLfSOqGxN8pzOFyp86CGrYZjNShj7I5+Jt+cZf1sow=",
-  },
-  "Last month": {
-    val: "Last month",
-    translated: false,
-    src: ["src/budget/reports.tsx line 654"],
-    h: "1sq1B50c3wJfgKUL6HnwzskKsFcpjdWvyeQX1/HmS9g=",
-  },
   "Average": {
     val: "Average",
     translated: false,
@@ -980,6 +955,18 @@ const messages:IMessages = {
     src: ["src/budget/reports.tsx line 656"],
     h: "hfDqPEJ79UozdsoxEfonMjVDqZQXPzQBbmDwoKYutvo=",
   },
+  "You don't have any recurring expense buckets yet.": {
+    val: "You don't have any recurring expense buckets yet.",
+    translated: false,
+    src: ["src/budget/reports.tsx line 688"],
+    h: "nq2IDCqs8m0MQJ5lO2TU1cnlj9nP1vwIMWMqi0WGOjk=",
+  },
+  "Last": {
+    val: "Last",
+    translated: false,
+    src: ["src/budget/reports.tsx line 704"],
+    h: "xO45HLK2A2r99KDcKviYdyxyl/sOcxrs9sURzIBqXWQ=",
+  },
   "Budgeted:": {
     val: "Budgeted:",
     translated: false,
@@ -991,12 +978,6 @@ const messages:IMessages = {
     translated: false,
     src: ["src/budget/reports.tsx line 747"],
     h: "cjkXL/zpI+dQWkGrhO9+31XBHKDYu26Sb2ce60wR8+w=",
-  },
-  "Last:": {
-    val: "Last:",
-    translated: false,
-    src: ["src/budget/reports.tsx line 758"],
-    h: "vd4w6yiveUoFIgWprGJfN0nrT8tNDMck5dOojPgHQNs=",
   },
   "period-display": {
     val: (n:number, unit:'year'|'month') => {
@@ -1083,20 +1064,6 @@ const messages:IMessages = {
     translated: false,
     src: ["src/budget/tools/toolspage.tsx line 21"],
     h: "SS/vhEAqfP5cTcprv5/4dDYZCEsTIMySGfXEngOoMj0=",
-  },
-  "Delete selected": {
-    val: "Eliminar seleccionado",
-    translated: true,
-    src: ["src/budget/transactions.tsx line 84"],
-    h: "bsJ1Vyhm8h3AT4g3iLkWOso1mGTLsIFexh1ymwKankw=",
-  },
-  "transactions.delete": {
-    val: (size:number) => {
-        return `Eliminar seleccionado (${size})`
-      },
-    translated: true,
-    src: ["src/budget/transactions.tsx line 86"],
-    h: "/u86qzz5nT6n9ZqcgDLwC0GHmjDy0cELJjSzjBAim5g=",
   },
   "Possible Duplicates": {
     val: "Possible Duplicates",
@@ -1678,6 +1645,12 @@ Would you like to purchase a license now?`,
     src: ["src/mainprocess/menu.ts line 280"],
     h: "6iQxyJ1WC9/Z0f0saApfwL5hmhgN5YgJeikLAYqCGBI=",
   },
+  "Quit Buckets": {
+    val: "Salir Buckets",
+    translated: true,
+    src: ["src/mainprocess/menu.ts line 308"],
+    h: "QILEHXgAk6vuNPV3rqkbn2QRZ8WKrPnAZnscp7n8WaM=",
+  },
   "Services": {
     val: "Servicios",
     translated: true,
@@ -1701,12 +1674,6 @@ Would you like to purchase a license now?`,
     translated: true,
     src: ["src/mainprocess/menu.ts line 303"],
     h: "Kng6HqlojyhuqEK6kaB3KPtAs1w0LcpFWkJYrscali0=",
-  },
-  "Quit Buckets": {
-    val: "Salir Buckets",
-    translated: true,
-    src: ["src/mainprocess/menu.ts line 308"],
-    h: "QILEHXgAk6vuNPV3rqkbn2QRZ8WKrPnAZnscp7n8WaM=",
   },
   "Speech": {
     val: "Voz",
@@ -1900,17 +1867,17 @@ Would you like to purchase a license now?`,
     src: ["src/wwwroot/misc/reportbug.html line 0"],
     h: "/ip+dZCEKXdLQFW5CAt/fB8OBf/rD+67pz8etOXlJXc=",
   },
-  "Message:": {
-    val: "Mensaje:",
-    translated: true,
+  "(If you want a response)": {
+    val: "(If you want a response)",
+    translated: false,
     src: ["src/wwwroot/misc/reportbug.html line 0"],
-    h: "diHIZWoENBF9rHrI1aF27cogBvFLnxRZpngijYudLEY=",
+    h: "Ij4mQm0L5WO4Iunvl3fKwbhLwjTodc3Chq81GsFM+T0=",
   },
-  "Other details:": {
-    val: "Otros detalles:",
-    translated: true,
+  "Optional message:": {
+    val: "Optional message:",
+    translated: false,
     src: ["src/wwwroot/misc/reportbug.html line 0"],
-    h: "Mbobi2Pa+QhvkyOnp84ysWorcKRCCEcNuiDS8w537WY=",
+    h: "zVM8610w5Mn1yRIYOsmOY5ZxBd2KLIudsimw610auYU=",
   },
   "Include log file": {
     val: "Incluir el log",
@@ -1918,17 +1885,35 @@ Would you like to purchase a license now?`,
     src: ["src/wwwroot/misc/reportbug.html line 0"],
     h: "rjy01ggb0uSRPn/tmrf/BVwGQiXaaSc6Nh+o92BIU3U=",
   },
+  "Screenshots:": {
+    val: "Screenshots:",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "Vl/m/PU/CoPSp/t+drAAfxlQ818VKjlWKN8fsB4/+V4=",
+  },
+  "(Drop files or click)": {
+    val: "(Drop files or click)",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "cn8vjUpkolK+X1qsHPyR11Qj7uQWZVR6eWnhPRb/zfw=",
+  },
+  "\n        Though filling out this form is preferrable, you can also email bugs@budgetwithbuckets.com\n      ": {
+    val: "\n        Though filling out this form is preferrable, you can also email bugs@budgetwithbuckets.com\n      ",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "05fPQ/cX0e4UXnYsbNTo8b6FUwq/WZ1URc7ixr6WlV8=",
+  },
+  "Attached files are too large.": {
+    val: "Attached files are too large.",
+    translated: false,
+    src: ["src/wwwroot/misc/reportbug.html line 0"],
+    h: "HfDI7uw+P4uLUPkDu0rxQhxJqjqcriWmD9EWYaiUqvY=",
+  },
   "Send Report": {
     val: "Mandar",
     translated: true,
     src: ["src/wwwroot/misc/reportbug.html line 0"],
     h: "aLgG0qubuw0p0tGIUYKjgxecVsL0e3AKvQ5+W2JZg18=",
-  },
-  "\n        If you wish to provide screenshots or other information, email bugs@budgetwithbuckets.com\n      ": {
-    val: "\n        If you wish to provide screenshots or other information, email bugs@budgetwithbuckets.com\n      ",
-    translated: false,
-    src: ["src/wwwroot/misc/reportbug.html line 0"],
-    h: "Xxt85SrdWlwACoTLSWWi71up1b4ga6B8UE9nGFFrpNA=",
   },
   "Check for Updates": {
     val: "Buscar actualizaciones",
@@ -2031,6 +2016,12 @@ Would you like to purchase a license now?`,
     translated: false,
     src: ["src/wwwroot/record/record.tsx line 540"],
     h: "69elN/r6NyshRWtcjLOKso9OmdOJhvg/ix+Xy/fE+Z0=",
+  },
+  "Delete all": {
+    val: "Delete all",
+    translated: false,
+    src: ["src/wwwroot/record/record.tsx line 658"],
+    h: "nKzti1takFUxZyWfLTGqgvdL3dJMx6CdNwVfBH1jUYE=",
   },
   "notify-downloaded-file": {
     val: filename => `Downloaded file: ${filename}`,

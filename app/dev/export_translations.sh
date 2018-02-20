@@ -6,3 +6,6 @@ if [ ! -e "$DST" ]; then
 fi
 
 rsync -vrut src/langs/*.tsx "${DST}/langs"
+
+echo
+echo "Now go to ${DST} to send to GitHub"
