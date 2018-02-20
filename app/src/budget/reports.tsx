@@ -1,15 +1,15 @@
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as React from 'react'
-import * as cx from 'classnames'
 import { manager, AppState } from './appstate'
 import { ObjectEvent, isObj } from '../store'
-import { Money } from '../money'
+import { Money, cents2decimal } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
 import { chunkTime, Interval } from '../time'
 
+import { debounceChange } from '../input'
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
 import { Transaction as ATrans } from '../models/account'
@@ -510,19 +510,13 @@ interface BucketExpenseSummaryProps {
 }
 interface BucketExpenseSummaryState {
   expensesByBucket: {
-    [key:number]: {
-      expense_history: Array<{
-        expenses: number;
-      }>
-    },
+    [key:number]: number[];
   },
   segments: {
-    [frequency:string]: {
-      [magnitude:number]: {
-        buckets: Bucket[];
-      }  
-    }
+    [magnitude:number]: number[];
   },
+  timeback_number: number;
+  timeback_unit: 'month'|'year';
 }
 class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, BucketExpenseSummaryState> {
   constructor(props) {
@@ -530,6 +524,8 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
     this.state = {
       expensesByBucket: {},
       segments: {},
+      timeback_number: 18,
+      timeback_unit: 'month',
     }
     this.recomputeState(props);
   }
@@ -540,47 +536,36 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
     .filter(bucket => {
       return bucket.kind === 'deposit';
     })
-
-    let expensesByBucket = {}
-    let segments = {};
-
-    await Promise.all(buckets.map(async bucket => {
-      let history = await manager.store.reports.bucketExpenseHistory({
+    
+    let unit = this.state.timeback_unit;
+    let start = end_date.clone()
+      .startOf(unit)
+      .add(1, unit)
+      .subtract(this.state.timeback_number + (unit === 'month' ? 1 : 0), unit);
+    let expensesByBucket = await manager.store.reports.bucketExpenseHistories({
+      interval: {
+        start,
         end: end_date,
-        bucket_id: bucket.id,
-      });
-      console.log('history', history);
-      if (!history) {
-        expensesByBucket[bucket.id] = null;
-        return;
-      }
+      },
+      unit: this.state.timeback_unit,
+      bucket_ids: buckets.map(x => x.id),
+    })
+
+    // Figure out where this bucket fits magnitude-wise
+    let segments = {};
+    buckets.forEach(bucket => {
       const balance = appstate.bucket_balances[bucket.id];
-      let computed = computeBucketData(bucket.kind, bucket, {
+      const computed = computeBucketData(bucket.kind, bucket, {
         today: end_date.clone().add(1, 'day'),
         balance: balance,
       })
-      let expense_history = history.intervals.map(item => {
-        return {expenses: item.expenses}
-      })
 
       let magnitude = Math.floor(logbase(computed.deposit, 10));
-      if (!segments[history.unit]) {
-        segments[history.unit] = {};
+      if (!segments[magnitude]) {
+        segments[magnitude] = [];
       }
-      let freq_segment = segments[history.unit];
-
-      if (!freq_segment[magnitude]) {
-        freq_segment[magnitude] = {
-          buckets: [],
-        }
-      }
-      let segment = freq_segment[magnitude];
-      segment.buckets.push(bucket);
-
-      expensesByBucket[bucket.id] = {
-        expense_history,
-      }
-    }))
+      segments[magnitude].push(bucket.id);
+    })
     this.setState({
       segments,
       expensesByBucket,
@@ -589,44 +574,77 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
   componentWillReceiveProps(nextProps) {
     this.recomputeState(nextProps);
   }
+  triggerReload = debounceChange(() => {
+    this.recomputeState(this.props);
+  })
   render() {
     let { appstate } = this.props;
     let end_date = appstate.viewDateRange.onOrAfter;
+    let showing_years = this.state.timeback_unit === 'year';
 
-    let tables = ['year', 'month'].map((unit:'year'|'month') => {
-      let freq_segment = this.state.segments[unit];
-      if (!freq_segment) {
-        return;
-      }
-      // let last_label = unit === 'year' ? end_date.format('YYYY') : end_date.clone().subtract(1, 'month').format('MMM');
-      let sections = (Object.keys(freq_segment)
+    let sections = (Object.keys(this.state.segments)
       .map(x=>Number(x))
       .sort((a,b) => a - b)
       .reverse()
       .map(magnitude => {
-        let segment = freq_segment[magnitude];
-        let rows = segment.buckets.map((bucket, idx) => {
+        let segment = this.state.segments[magnitude];
+        let rows = segment.map((bucket_id, idx) => {
           return <BucketExpenseSummaryRow
-            key={bucket.id}
-            bucket={bucket}
+            key={bucket_id}
+            bucket={appstate.buckets[bucket_id]}
             end_date={end_date}
-            balance={appstate.bucket_balances[bucket.id]}
-            unit={unit}
-            expenses={this.state.expensesByBucket[bucket.id].expense_history}
+            balance={appstate.bucket_balances[bucket_id]}
+            expenses={this.state.expensesByBucket[bucket_id]}
           />
         })
-        return <tbody key={`${unit}-${magnitude}`} className="line-below">
+        return <tbody key={`${magnitude}`} className="line-below">
           {rows}
         </tbody>
       }));
-      return <div key={unit}>
-        <h2 className="center">{unit === 'year' ? sss('Yearly expenses') : sss('Monthly expenses')}</h2>
+    if (sections.length) {
+      return <div>
+        <h2>{sss('Recurring Expenses')}</h2>
         <table className="summary full-width">
           <thead>
             <tr>
               <th className="right right-padded">{sss('Bucket')}</th>
               <th className="center">{sss('Budgeted')}</th>
-              <th>
+              <th className="center">{sss('Average')}</th>
+              <th className="left left-padded">
+                <input
+                  type="range"
+                  min="2"
+                  max={showing_years ? 20 : 36}
+                  value={this.state.timeback_number}
+                  onChange={ev => {
+                    let value = Number(ev.target.value);
+                    this.setState({
+                      timeback_number: value,
+                    }, () => {
+                      this.triggerReload();
+                    })
+                  }}
+                />
+                <span>{this.state.timeback_number}&nbsp;</span>
+
+                <select
+                  defaultValue={this.state.timeback_unit}
+                  onChange={ev => {
+                    let timeback_number = this.state.timeback_number;
+                    if (ev.target.value === 'year' && this.state.timeback_unit === 'month') {
+                      // switching from month -> year
+                      timeback_number = 5;
+                    }
+                    this.setState({
+                      timeback_unit: ev.target.value as any,
+                      timeback_number: timeback_number,
+                    }, () => {
+                      this.triggerReload();
+                    })
+                  }}>
+                  <option value="month">{sss('Months')}</option>
+                  <option value="year">{sss('Years')}</option>
+                </select>
               </th>
             </tr>
           </thead>
@@ -638,12 +656,6 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           </tfoot>
         </table>
       </div>
-    }).filter(x => x);
-
-    if (tables.length) {
-      return <div>
-        {tables}
-      </div>  
     } else {
       return <div>{sss("You don't have any recurring expense buckets yet.")}</div>
     }
@@ -655,27 +667,29 @@ interface BucketExpenseSummaryRowProps {
   bucket: Bucket;
   end_date: moment.Moment;
   balance: number;
-  unit: 'month'|'year';
-  expenses: Array<{
-    expenses: number;
-  }>;
+  expenses: number[];
 }
 class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {}> {
   render() {
-    let { bucket, end_date, balance, unit, expenses } = this.props;
+    let { bucket, end_date, balance, expenses } = this.props;
     let computed = computeBucketData(bucket.kind, bucket, {
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
+
+    let average = d3.sum(expenses) / expenses.length;
     
     return <tr className="hover">
       <th className="right-border">{bucket.name}</th>
-      <td className="right-border"><Money value={computed.deposit} /></td>
+      <td className="right-border"><Money value={computed.deposit} alwaysShowDecimal className="faint-cents" /></td>
+      <td className="right-border"><Money value={Math.abs(average)} alwaysShowDecimal className="faint-cents" hidezero /></td>
       <td className="right-border center novpadding">
         <ExpenseChart
           expected={computed.deposit}
-          data={expenses}
-          barsToShow={unit === 'year' ? 5 : 18}
+          expenses={expenses.map(x => {
+            return {amount: x}
+          })}
+          barsToShow={expenses.length}
         />
       </td>
     </tr>
@@ -688,31 +702,37 @@ interface ExpenseChartProps {
   className?: string;
   expected: number;
   barsToShow?: number;
+  barWidth?: number;
+  barSpacing?: number;
 
   // Expense data with most recent time period first
-  data: Array<{
+  expenses: Array<{
     label?: string;
-    expenses: number;
+    amount: number;
   }>
 }
 
-class ExpenseChart extends React.Component<ExpenseChartProps, {}> {
+class ExpenseChart extends React.PureComponent<ExpenseChartProps, {}> {
   render() {
-    let { width, height, data, expected, className } = this.props;
-    height = height || 20;
-    width = width || 200;
+    let { width, height, barsToShow, barWidth, barSpacing, expenses, expected, className } = this.props;
+    height = height || 30;
     const padding = 3;
     const vpadding = 1;
+    const label_height = 12;
+    const label_size = 10;
     // barsToShow = barsToShow || 12;
 
-    let bar_spacing = 4;
-    let bar_width = 10;
-    let barsToShow = width / (bar_width + bar_spacing);
-    //Math.floor(width / barsToShow - bar_spacing);
+    barSpacing = barSpacing || 4;
+    barWidth = barWidth || 10;
+    width = width || (barsToShow * (barSpacing + barWidth) + barSpacing);
 
-    const expenses_list = data.map(item => {
-      return Math.abs(item.expenses);
-    })
+    //Math.floor(width / barsToShow - barSpacing);
+
+    const expenses_list = expenses.map(item => {
+      return Math.abs(item.amount);
+    }).reverse().slice(0, barsToShow)
+    const numBars = expenses_list.length;
+
     let maxy = d3.max(expenses_list)
     let miny = 0;
     maxy = Math.max(Math.max(0, maxy), expected)
@@ -722,10 +742,10 @@ class ExpenseChart extends React.Component<ExpenseChartProps, {}> {
       .range([padding, width-padding]);
     let y = d3.scaleLinear()
       .domain([miny, maxy])
-      .range([height-vpadding, vpadding]);
+      .range([height-vpadding, vpadding+label_height]);
 
     return <div
-      className={cx("numberline", className)}
+      className={className}
       style={{
         width: `${width}px`,
         height: `${height}px`,
@@ -734,12 +754,13 @@ class ExpenseChart extends React.Component<ExpenseChartProps, {}> {
 
         {expenses_list.map((expenses, i) => {
           let rects = [];
-          let xval = x(i)+bar_width/2 + bar_spacing/2;
+          let xval = x(numBars - i) - barWidth;
           if (expenses > expected) {
             // overspend
             rects.push(<rect
               key="under"
-              width={bar_width}
+              className="highlight"
+              width={barWidth}
               x={xval}
               y={y(expected)}
               height={y(0) - y(expected)}
@@ -747,7 +768,8 @@ class ExpenseChart extends React.Component<ExpenseChartProps, {}> {
             />)
             rects.push(<rect
               key="over"
-              width={bar_width}
+              className="highlight"
+              width={barWidth}
               x={xval}
               y={y(expenses)}
               height={y(expected) - y(expenses)}
@@ -756,42 +778,34 @@ class ExpenseChart extends React.Component<ExpenseChartProps, {}> {
           } else if (expenses) {
             // underspend
             rects.push(<rect
+              className="highlight"
               key="under"
-              width={bar_width}
+              width={barWidth}
               x={xval}
               y={y(expenses)}
               height={y(0) - y(expenses)}
               fill={COLORS.lighter_grey}
             />)
-            // rects.push(<line
-            //   key="extra"
-            //   x1={xval+bar_width/2}
-            //   x2={xval+bar_width/2}
-            //   y1={y(expected)}
-            //   y2={y(expenses)}
-            //   stroke={COLORS.green}
-            // />)
-            // rects.push(<rect
-            //   key="extra"
-            //   width={bar_width}
-            //   x={xval}
-            //   y={y(expected)}
-            //   height={y(expenses) - y(expected)}
-            //   fill={COLORS.green}
-            // />)
           }
-          return <g key={i}>
+          const lefthalf = xval < width/2;
+          rects.push(<text
+            key="label"
+            x={
+              lefthalf ? xval : xval + barWidth
+            }
+            textAnchor={
+              lefthalf ? 'start' : 'end'
+            }
+            y={y(maxy)}
+            dy={-2}
+            fontSize={label_size}
+           className="label"
+          >{cents2decimal(expenses)}</text>)
+          return <g key={i} className="hover-labels">
             {rects}
           </g>
         })}
 
-        <line
-          x1={padding}
-          x2={width-padding}
-          y1={y(expected)}
-          y2={y(expected)}
-          opacity={0}
-          stroke={COLORS.blue} />
         <line
           x1={padding}
           x2={width-padding}
