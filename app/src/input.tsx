@@ -62,6 +62,13 @@ export function debounceChange(func:(...args)=>any) {
 
 /**
  * Run mapper every time, but only call actor debounced-like
+ *
+ * Use like this:
+ *
+ * onChange={debounceOnChange(
+ *    ev => ev.target.value,
+ *    value => { console.log('value', value) }
+ * )}
  */
 export function debounceOnChange(mapper:Function, actor:Function) {
   let debounced = _.debounce(actor, 250, {leading: false, trailing: true});

@@ -51,7 +51,10 @@ button {
   white-space: nowrap;
 }
 .right {
-  text-align: right !important;
+  text-align: end !important;
+}
+.left {
+  text-align: start !important;
 }
 .center {
   text-align: center !important;
@@ -1518,12 +1521,15 @@ table.props th {
 .numberline {
   display: inline-block;
 }
-.labels-on-hover g text {
+g.hover-labels text.label {
   opacity: 0;
-  transition: opacity 0.1s;
+  transition: opacity 0.05s;
 }
-.labels-on-hover g:hover text {
+g.hover-labels:hover text.label {
   opacity: 1;
+}
+g.hover-labels:hover rect.highlight {
+  fill: var(--blue);
 }
 
 .note-maker {
