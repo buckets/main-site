@@ -669,7 +669,11 @@ class BucketRow extends React.Component<BucketRowProps, {
       <td name="transfers" className="right">
         <Money value={flow.transfer_in + flow.transfer_out} hidezero />
       </td>
-      <td name="balance" className="right div-left">{balance_el}</td>
+      <td name="balance" className="right div-left clickable"
+        onClick={ev => {
+          onPendingChanged({[bucket.id]: -balance})
+        }}
+      >{balance_el}</td>
       {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate /></td> : null }
       <td name="in/out" className="left div-left">
         <MoneyInput

@@ -981,6 +981,10 @@ table.ledger .icon-button-wrap button.icon,
 }
 
 
+.clickable {
+  cursor: pointer;
+}
+
 /* Inputs */
 button {
   padding: 0.2rem 0.8rem 0.3rem;
