@@ -80,7 +80,8 @@ export function debounceOnChange(mapper:Function, actor:Function) {
 
 interface DebouncedInputProps {
   value: any;
-  element?: string;
+  element?: string|any;
+  changeArgIsValue?: boolean;
   onChange: (newval:any)=>void;
   blendin?: boolean;
   [k:string]: any;
@@ -88,6 +89,9 @@ interface DebouncedInputProps {
 export class DebouncedInput extends React.Component<DebouncedInputProps, {
   value: any;
 }> {
+  private propChangesInFlight = 0;
+  private stateChangedSinceProps = false;
+
   constructor(props) {
     super(props)
     this.state = {
@@ -95,19 +99,28 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
     }
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.state.value) {
+    this.propChangesInFlight -= 1;
+    if (nextProps.value !== this.state.value && !this.propChangesInFlight && !this.stateChangedSinceProps) {
       this.setState({value: nextProps.value});
+    }
+    this.stateChangedSinceProps = false;
+    if (this.propChangesInFlight < 0) {
+      log.warn('Too many prop changes');
     }
   }
   onChange = (ev) => {
-    let val = ev.target.value;
+    let val = this.props.changeArgIsValue ? ev : ev.target.value;
     if (val !== this.state.value) {
+      if (this.propChangesInFlight) {
+        this.stateChangedSinceProps = true;
+      }
       this.setState({value: val}, () => {
         this.emitChange();
       })
     }
   }
   emitChange = debounceChange(() => {
+    this.propChangesInFlight += 1;
     this.props.onChange(this.state.value);
   })
   render() {

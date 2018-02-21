@@ -8,7 +8,7 @@ import { Route, Link, WithRouting, Redirect } from './routing'
 import { Money, MoneyInput } from '../money'
 import { makeToast } from './toast'
 import {TransactionList} from './transactions'
-import { ClickToEdit, debounceChange, SafetySwitch } from '../input';
+import { ClickToEdit, DebouncedInput, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
@@ -183,14 +183,16 @@ export class AccountView extends React.Component<AccountViewProps, {
       </h1>
       <div className="fieldlist">
         <div>
-          {sss('Balance')}: <MoneyInput
-          value={balance}
-          onChange={debounceChange(this_months_balance => {
-            let diff = account.balance - balance;
+          {sss('Balance')}: <DebouncedInput
+            element={MoneyInput}
+            value={balance}
+            changeArgIsValue
+            onChange={this_months_balance => {
+              let diff = account.balance - balance;
 
-            let computed_balance = this_months_balance + diff;
-            manager.store.accounts.update(account.id, {balance: computed_balance});
-          })}/> ({sss('balance-as-of', (date:JSX.Element) => {
+              let computed_balance = this_months_balance + diff;
+              manager.store.accounts.update(account.id, {balance: computed_balance});
+            }}/> ({sss('balance-as-of', (date:JSX.Element) => {
             return <span>as of {date}</span>
           })(<DateDisplay value={appstate.defaultPostingDate} />)})
         </div>

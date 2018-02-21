@@ -6,7 +6,7 @@ import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, 
 import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput, cents2decimal } from '../money'
-import { onKeys, MonthSelector, ClickToEdit, SafetySwitch } from '../input'
+import { onKeys, MonthSelector, ClickToEdit, SafetySwitch, DebouncedInput } from '../input'
 import { manager, AppState } from './appstate'
 import { ColorPicker } from '../color'
 import { makeToast } from './toast'
@@ -391,11 +391,14 @@ class BucketKindDetails extends React.Component<{
     return <tr key="goal">
       <td>{sss('Goal:')}</td>
       <td>
-        <MoneyInput
+        <DebouncedInput
           value={bucket.goal}
-          onChange={_.debounce(val => {
+          element={MoneyInput}
+          changeArgIsValue
+          onChange={val => {
             manager.store.buckets.update(bucket.id, {goal: val});
-          }, 250)} />
+          }}
+        />
       </td>
     </tr>
   }
@@ -423,11 +426,13 @@ class BucketKindDetails extends React.Component<{
     return <tr key="deposit">
       <td>{sss('Monthly deposit:')}</td>
       <td>
-        <MoneyInput
+        <DebouncedInput
+          changeArgIsValue
+          element={MoneyInput}
           value={bucket.deposit}
-          onChange={_.debounce(val => {
+          onChange={val => {
             manager.store.buckets.update(bucket.id, {deposit: val});
-          }, 250)} /><PerMonth/>
+          }} /><PerMonth/>
       </td>
     </tr>
   }

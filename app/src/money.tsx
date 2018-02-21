@@ -55,7 +55,7 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
   onDisplayChanged(e) {
     var display = e.target.value;
     var value = this.display2Cents(display);
-    this.setState({display: display}, function() {
+    this.setState({display: display}, () => {
       if (this.props.onChange) {
         this.props.onChange(value);
       }
