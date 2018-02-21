@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { sss } from '../i18n'
+import { sss, localizeThisPage } from '../i18n'
 import {Renderer} from './render'
 import { AccountsPage, ClosedAccountsPage } from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
@@ -37,6 +37,7 @@ export function setPath(x:string) {
 export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
+  await localizeThisPage();
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())
