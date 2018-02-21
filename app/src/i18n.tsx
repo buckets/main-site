@@ -9,10 +9,11 @@ import { IMessages, ILangPack } from './langs/spec'
 import {pack as en} from './langs/en';
 import {pack as es} from './langs/es';
 import {pack as he} from './langs/he';
+import {pack as pt} from './langs/pt';
 
 const log = new PrefixLogger('(i18n)')
 
-const packs:{[x:string]:ILangPack} = {en, es, he};
+const packs:{[x:string]:ILangPack} = {en, es, he, pt};
 
 class TranslationContext {
   private _langpack:ILangPack = en;
