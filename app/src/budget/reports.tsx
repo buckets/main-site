@@ -447,7 +447,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
                 .domain([0, this.state.data.length])
                 .range([0, dims.width || 1]);
               let y = d3.scaleLinear()
-                .domain([Math.min(min_bal, 0), max_bal])
+                .domain([Math.min(min_bal), max_bal])
                 .range([dims.height-10, 10]);
 
               let balance_line = d3shape.line<IncomeExpenseSum>()
