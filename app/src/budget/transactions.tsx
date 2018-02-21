@@ -438,8 +438,8 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         <td className="nobr"><NoteMaker obj={trans} />{source_icon}<DateDisplay value={trans.posted} /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
-        <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
-        {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} alwaysShowDecimal className="faint-cents" /></td> }
+        <td className="right"><Money value={trans.amount} /></td>
+        {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} /></td> }
         <td className="icon-button-wrap">
           <button className="icon show-on-row-hover"
             onClick={() => {

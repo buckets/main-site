@@ -99,19 +99,19 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     if (to_deposit) {
       pendingInfo.push(<div key="deposit" className="labeled-number">
         <div className="label">{sss('In')}</div>
-        <div className="value"><Money value={to_deposit} symbol alwaysShowDecimal/></div>
+        <div className="value"><Money value={to_deposit} symbol/></div>
       </div>);
     }
     if (to_withdraw) {
       pendingInfo.push(<div key="withdraw" className="labeled-number">
         <div className="label">{sss('Out')}</div>
-        <div className="value"><Money value={to_withdraw} symbol alwaysShowDecimal /></div>
+        <div className="value"><Money value={to_withdraw} symbol /></div>
       </div>)
     }
     if (to_deposit && to_withdraw) {
       let amount;
       if (to_deposit + to_withdraw) {
-        amount = <Money value={to_deposit + to_withdraw} symbol alwaysShowDecimal />
+        amount = <Money value={to_deposit + to_withdraw} symbol />
       } else {
         amount = <span className="fa fa-fw fa-check" />
       }
@@ -125,7 +125,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     if (appstate.rain > 0 && to_deposit) {
       rainleft = <div className="labeled-number">
         <div className="label">{sss('Rain left')}</div>
-        <div className="value"><Money value={appstate.rain - (to_deposit + to_withdraw)} symbol nocolor alwaysShowDecimal /></div>
+        <div className="value"><Money value={appstate.rain - (to_deposit + to_withdraw)} symbol nocolor /></div>
       </div>;
     }
 
@@ -167,7 +167,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         <div className="label">
           {sss('Self debt')} <Help>{sss('Amount of money over-allocated in buckets.')}</Help>
         </div>
-        <div className="value"><Money value={self_debt_amount} className="faint-cents" alwaysShowDecimal /></div>
+        <div className="value"><Money value={self_debt_amount} /></div>
       </div>
       show_effective_bal = true;
     }
@@ -205,7 +205,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   <div className="label">
                     {sss('Rain')}<PerMonth/>&nbsp;<Help>{sss('Total amount your buckets expect each month.')}</Help>
                   </div>
-                  <div className="value"><Money value={total_rain_needed} className="faint-cents" alwaysShowDecimal /></div>
+                  <div className="value"><Money value={total_rain_needed} /></div>
                 </div>
                 {self_debt}
               </div>
@@ -599,7 +599,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         <Money value={balance + pending} />
       </span>
     } else {
-      balance_el = <Money value={balance} className="faint-cents" alwaysShowDecimal />
+      balance_el = <Money value={balance} />
     }
     let computed = computeBucketData(bucket.kind, bucket, {
       today: posting_date,
@@ -661,16 +661,16 @@ class BucketRow extends React.Component<BucketRowProps, {
         {rainfall_indicator}
       </td>
       <td name="in" className="right">
-        <Money value={flow.in} alwaysShowDecimal className="faint-cents" hidezero />
+        <Money value={flow.in} hidezero />
       </td>
       <td name="out" className="right">
-        <Money value={flow.out} alwaysShowDecimal className="faint-cents" nocolor hidezero />
+        <Money value={flow.out} nocolor hidezero />
       </td>
       <td name="transfers" className="right">
-        <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" hidezero />
+        <Money value={flow.transfer_in + flow.transfer_out} hidezero />
       </td>
       <td name="balance" className="right div-left">{balance_el}</td>
-      {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
+      {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate /></td> : null }
       <td name="in/out" className="left div-left">
         <MoneyInput
           value={pending || null}
@@ -853,19 +853,19 @@ class GroupRow extends React.Component<{
         <td name="want" className="right div-right">
         </td>
         <td name="in" className="right">
-          <Money value={total_in} alwaysShowDecimal className="faint-cents" hidezero/>
+          <Money value={total_in} hidezero/>
         </td>
         <td name="out" className="right">
-          <Money value={total_out} alwaysShowDecimal className="faint-cents" nocolor hidezero/>
+          <Money value={total_out} nocolor hidezero/>
         </td>
         <td name="transfers" className="right">
-          <Money value={total_transfer} alwaysShowDecimal className="faint-cents" hidezero/>
+          <Money value={total_transfer} hidezero/>
         </td>
         <td name="balance" className="right div-left">
-          <Money value={total_balance} alwaysShowDecimal className="faint-cents" hidezero />
+          <Money value={total_balance} hidezero />
         </td>
         {show_effective_bal ? <td name="effective_bal" className="right">
-          <Money value={total_effective_bal} alwaysShowDecimal className="faint-cents" hidezero/>
+          <Money value={total_effective_bal} hidezero/>
         </td> : null}
         <td name="in/out" className="div-left"></td>
         <td name="details">

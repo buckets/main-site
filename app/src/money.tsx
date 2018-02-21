@@ -109,7 +109,8 @@ interface MoneyProps {
   value: number;
   className?: string;
   hidezero?: boolean;
-  alwaysShowDecimal?: boolean;
+  hideCents?: boolean;
+  noFaintCents?: boolean;
   noanimate?: boolean;
   nocolor?: boolean;
   symbol?: string|boolean;
@@ -197,7 +198,7 @@ export class Money extends React.Component<MoneyProps, {
     })
   }
   render() {
-    let { value, className, hidezero, noanimate, nocolor, symbol, round, alwaysShowDecimal, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, symbol, round, hideCents, noFaintCents, ...rest } = this.props;
     let going_up = true;
     if (ANIMATION_ENABLED && !noanimate) {
       // animating
@@ -206,7 +207,7 @@ export class Money extends React.Component<MoneyProps, {
     }
     let display = cents2decimal(value, {
       round: round,
-      show_decimal: alwaysShowDecimal || this.state.anim_show_decimal,
+      show_decimal: !hideCents || this.state.anim_show_decimal,
     }) || '0';
     if (symbol && display) {
       let symbol_display:string = symbol === true ? DEFAULT.symbol : symbol;
@@ -237,6 +238,7 @@ export class Money extends React.Component<MoneyProps, {
         negative: value < 0 && !nocolor,
         zero: value === 0,
         hidezero: hidezero,
+        'faint-cents': !noFaintCents,
         animating: this.state.animating,
         up: this.state.animating && going_up,
         down: this.state.animating && !going_up,

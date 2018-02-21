@@ -88,7 +88,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
               manager.store.accounts.update(account.id, {name: val});
             }}
           /></td>
-          <td className="right"><Money value={balances[account.id]} alwaysShowDecimal className="faint-cents" />{import_balance_note}</td>
+          <td className="right"><Money value={balances[account.id]} />{import_balance_note}</td>
           <td><Link relative to={`/${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link></td>
         </tr>);
     })

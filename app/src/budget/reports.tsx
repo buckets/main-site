@@ -681,8 +681,8 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
     
     return <tr className="hover">
       <th className="right-border">{bucket.name}</th>
-      <td className="right-border"><Money value={computed.deposit} alwaysShowDecimal className="faint-cents" /></td>
-      <td className="right-border"><Money value={Math.abs(average)} alwaysShowDecimal className="faint-cents" hidezero /></td>
+      <td className="right-border"><Money value={computed.deposit} /></td>
+      <td className="right-border"><Money value={Math.abs(average)} hidezero /></td>
       <td className="right-border center novpadding">
         <ExpenseChart
           expected={computed.deposit}

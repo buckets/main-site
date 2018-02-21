@@ -153,7 +153,7 @@ export class SearchPage extends React.Component<{
                   <td className="nobr"><DateDisplay value={trans.posted} /></td>
                   <td className="nobr">{appstate.accounts[trans.account_id].name}</td>
                   <td>{trans.memo}</td>
-                  <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
+                  <td className="right"><Money value={trans.amount} /></td>
                   <td>{trans.notes}</td>
                 </tr>
               })}
@@ -182,7 +182,7 @@ export class SearchPage extends React.Component<{
                   <td className="nobr"><DateDisplay value={trans.posted} /></td>
                   <td className="nobr">{appstate.buckets[trans.bucket_id].name}</td>
                   <td>{trans.memo}</td>
-                  <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
+                  <td className="right"><Money value={trans.amount} /></td>
                   <td>{trans.notes}</td>
                 </tr>
               })}
