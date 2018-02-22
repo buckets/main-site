@@ -24,9 +24,9 @@ To run:
 
 To add a new language do:
 
-    cp src/langs/newlang.tsx.template src/langs/${LANG}.tsx
+    cp src/langs/en.tsx src/langs/${LANG}.tsx
 
-To add the language as an option in the dropdown do:
+To add the language as an option in the preferences dropdown do:
 
 - Import it in `i18n.tsx`
 - Add it as an option in `preferences.tsx`

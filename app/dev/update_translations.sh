@@ -10,10 +10,6 @@ echo "Extracting..."
 node nodesrc/dist/langutil.js extract src > src/langs/base.tsx
 
 for langfile in $(ls src/langs/??.tsx); do
-    if [ $(basename "$langfile") == "en.tsx" ]; then
-        echo "(skipping en.tsx)"
-        continue
-    fi
     echo
     echo "Updating ${langfile}..."
     set -x
