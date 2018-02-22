@@ -926,14 +926,14 @@ const messages:IMessages = {
     h: "zLxQhptvlIYtt0l/prvWMqnsQHh7N1gxh33WeorRi2w=",
   },
   "Months": {
-    val: "Months",
-    translated: false,
+    val: "Meses",
+    translated: true,
     src: ["src/budget/reports.tsx line 644"],
     h: "wW/jCiA3sxpdbZ8SZ50pYiOvxUk2Ix8T6WB3ZXkAS4s=",
   },
   "Years": {
-    val: "Years",
-    translated: false,
+    val: "Anos",
+    translated: true,
     src: ["src/budget/reports.tsx line 645"],
     h: "9bCZk+mcGxconx1JMhBZKdnRo4id89h4UiucsvMRAng=",
   },
