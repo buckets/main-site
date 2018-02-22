@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-01-31 11:59-0700\n"
-"PO-Revision-Date: 2018-01-31 12:01-0700\n"
+"POT-Creation-Date: 2018-02-21 13:34-0700\n"
+"PO-Revision-Date: 2018-02-21 13:35-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -219,15 +219,15 @@ msgstr "¡Feliz presupuestar!"
 msgid "Buy Buckets"
 msgstr "Comprar Buckets"
 
-#: buckets/web/templates/anon/buy.html:17
+#: buckets/web/templates/anon/buy.html:25
 msgid "Purchase License"
 msgstr "Comprar licencia"
 
-#: buckets/web/templates/anon/buy.html:18
+#: buckets/web/templates/anon/buy.html:26
 msgid "Family budgeting app"
 msgstr "Aplicación de presupuesto familiar"
 
-#: buckets/web/templates/anon/buy.html:28
+#: buckets/web/templates/anon/buy.html:39
 msgid ""
 "For a <em>one-time $29 payment,</em> you will be emailed a Buckets License "
 "which may be used on any number of computers belonging to you and your "
@@ -237,7 +237,7 @@ msgstr ""
 "Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que "
 "le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
-#: buckets/web/templates/anon/buy.html:31
+#: buckets/web/templates/anon/buy.html:42
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr "Si perdió su licencia, envíeme a hello@budgetwithbuckets.com"
 
@@ -380,33 +380,33 @@ msgid "Buckets is <em>multilingual</em>."
 msgstr "Buckets es <em>multilingüe</em>."
 
 #: buckets/web/templates/anon/index.html:181
-msgid "Currently English and Spanish are supported."
-msgstr "Actualmente, inglés y español están disponibles."
+msgid "Currently available languages:"
+msgstr "Idiomas disponibles actualmente:"
 
-#: buckets/web/templates/anon/index.html:187
+#: buckets/web/templates/anon/index.html:192
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul."
 msgstr ""
 "Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
 "aquí por mucho tiempo."
 
-#: buckets/web/templates/anon/index.html:191
+#: buckets/web/templates/anon/index.html:196
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
 
-#: buckets/web/templates/anon/index.html:232
+#: buckets/web/templates/anon/index.html:237
 msgid "Subscribe to the Monthly Newsletter"
 msgstr "Suscríbete al boletín de Buckets"
 
-#: buckets/web/templates/anon/index.html:234
+#: buckets/web/templates/anon/index.html:239
 msgid "Email Address"
 msgstr "Dirección de correo electrónico"
 
-#: buckets/web/templates/anon/index.html:238
+#: buckets/web/templates/anon/index.html:243
 msgid "First Name"
 msgstr "Nombre de pila"
 
-#: buckets/web/templates/anon/index.html:246
+#: buckets/web/templates/anon/index.html:251
 msgid "Subscribe"
 msgstr "Suscribir"
 
@@ -554,3 +554,6 @@ msgstr "Suscribir"
 #~ msgstr ""
 #~ "Buckets es <em>multilingüe</em>. Actualmente, inglés y español están "
 #~ "disponibles."
+
+#~ msgid "Currently English and Spanish are supported."
+#~ msgstr "Actualmente, inglés y español están disponibles."

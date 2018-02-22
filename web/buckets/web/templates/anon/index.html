@@ -89,7 +89,14 @@ img.main-shot {
   justify-content: flex-start;
   margin-left: -5rem;
 }
-
+.credit {
+  display: inline;
+  position: relative;
+  font-size: .5rem;
+  margin-left: .5rem;
+  line-height: .15rem;
+  color: grey;
+}
 </style>
 {% endblock %}
 
@@ -176,12 +183,22 @@ img.main-shot {
     </div>
   </div>
 
+  {% macro credit(names) %}
+  <div class="credit">{% trans %}Thanks{% endtrans %} {{ names }}!</div>
+  {% endmacro %}
+
   <div class="rightimg">
     <div class="callout para">
-      {% trans %}Buckets is <em>multilingual</em>.{% endtrans %}  {% trans %}Currently English and Spanish are supported.{% endtrans %}
+      {% trans %}Buckets is <em>multilingual</em>.{% endtrans %}  {% trans %}Currently available languages:{% endtrans %}
+      <ul>
+        <li>English</li>
+        <li>español</li>
+        <li>Português {{ credit('Carlos') }}</li>
+      </ul>
+      <a href="https://github.com/buckets/translations" target="_blank">{% trans %}Want to add your language?{% endtrans %}</a>
     </div>
     <img src="/static/img/shots/spanish.png" style="width: 300px;">
-  </div>
+  </div>  
 
   <div class="callout para">
     {% trans %}Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.{% endtrans %}

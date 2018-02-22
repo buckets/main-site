@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-01-31 11:59-0700\n"
+"POT-Creation-Date: 2018-02-21 13:34-0700\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -187,22 +187,22 @@ msgstr ""
 msgid "Buy Buckets"
 msgstr ""
 
-#: buckets/web/templates/anon/buy.html:17
+#: buckets/web/templates/anon/buy.html:25
 msgid "Purchase License"
 msgstr ""
 
-#: buckets/web/templates/anon/buy.html:18
+#: buckets/web/templates/anon/buy.html:26
 msgid "Family budgeting app"
 msgstr ""
 
-#: buckets/web/templates/anon/buy.html:28
+#: buckets/web/templates/anon/buy.html:39
 msgid ""
 "For a <em>one-time $29 payment,</em> you will be emailed a Buckets "
 "License which may be used on any number of computers belonging to you and"
 " your immediate family members living in your home."
 msgstr ""
 
-#: buckets/web/templates/anon/buy.html:31
+#: buckets/web/templates/anon/buy.html:42
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr ""
 
@@ -325,32 +325,32 @@ msgid "Buckets is <em>multilingual</em>."
 msgstr ""
 
 #: buckets/web/templates/anon/index.html:181
-msgid "Currently English and Spanish are supported."
+msgid "Currently available languages:"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:187
+#: buckets/web/templates/anon/index.html:192
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
 "haul."
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:191
+#: buckets/web/templates/anon/index.html:196
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:232
+#: buckets/web/templates/anon/index.html:237
 msgid "Subscribe to the Monthly Newsletter"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:234
+#: buckets/web/templates/anon/index.html:239
 msgid "Email Address"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:238
+#: buckets/web/templates/anon/index.html:243
 msgid "First Name"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:246
+#: buckets/web/templates/anon/index.html:251
 msgid "Subscribe"
 msgstr ""
 
@@ -585,5 +585,11 @@ msgstr ""
 #~ "  Record completely private macros, import"
 #~ " files or sign up with SimpleFIN "
 #~ "Bridge."
+#~ msgstr ""
+
+#~ msgid "Currently English and Spanish are supported."
+#~ msgstr ""
+
+#~ msgid "Currently available in:"
 #~ msgstr ""
 
