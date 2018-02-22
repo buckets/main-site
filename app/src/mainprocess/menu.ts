@@ -54,8 +54,19 @@ export async function updateMenu(args:{
     label: sss('Edit'),
     submenu: [
       {
-        role: 'undo',
         label: sss('Undo'),
+        accelerator: 'CmdOrCtrl+Z',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          let budgetfile = BudgetFile.fromWindowId(win.id);
+          if (budgetfile) {
+            console.log('undoing last action');
+            budgetfile.undoLastAction();
+          } else {
+            // do the default action
+            win.webContents.undo();
+          }
+        }
       },
       {
         role: 'redo',

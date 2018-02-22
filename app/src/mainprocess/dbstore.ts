@@ -320,6 +320,9 @@ export class DBStore implements IStore {
   async query(sql:string, params:{}):Promise<any> {
     return this.db.all(sql, params);
   }
+  async exec(sql:string):Promise<any> {
+    return this.db.exec(sql);
+  }
   async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     let obj = await this.getObject<T>(cls, id);
     let sql = `DELETE FROM ${cls.type} WHERE id=$id`;

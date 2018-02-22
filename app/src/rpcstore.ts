@@ -156,6 +156,9 @@ export class RPCRendererStore implements IStore {
   query(sql:string, params:{}):Promise<any> {
     return this.callRemote('query', sql, params);
   }
+  exec(sql:string):Promise<any> {
+    return this.callRemote('exec', sql);
+  }
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     return this.callRemote('deleteObject', serializeObjectClass(cls), id);
   }

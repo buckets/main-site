@@ -52,6 +52,7 @@ export interface IStore {
   listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[], limit?:number, offset?:number}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
+  exec(sql:string):Promise<any>;
 
   // model-specific stuff
   accounts:AccountStore;

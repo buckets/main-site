@@ -11,6 +11,7 @@ import { v4 as uuid } from 'uuid';
 import { Timestamp, serializeTimestamp, ensureLocalMoment } from '../time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
 import { DBStore } from './dbstore';
+import { UndoTracker } from '../undo'
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
 import { addRecentFile, PSTATE } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
@@ -81,6 +82,11 @@ export interface IBudgetFile {
    *  Cancel sync
    */
   cancelSync();
+
+  /**
+   *  Undo
+   */
+  undoLastAction();
 }
 
 interface IBudgetFileRPCMessage {
@@ -114,6 +120,7 @@ export class BudgetFile implements IBudgetFile {
   } = {};
 
   public store:DBStore;
+  readonly undo:UndoTracker;
   private rpc_store:RPCMainStore = null;
   
   readonly bus:BudgetBus;
@@ -131,6 +138,7 @@ export class BudgetFile implements IBudgetFile {
     this.filename = filename || '';
     this.bus = new BudgetBus(this.id);
     this.store = new DBStore(filename, this.bus, true);
+    this.undo = new UndoTracker(this.store);
     this.syncer = new MultiSyncer([
       new MacroSyncer(this.store, this),
       new SimpleFINSyncer(this.store),
@@ -198,6 +206,9 @@ export class BudgetFile implements IBudgetFile {
       reportErrorToUser(sss('Unable to open the file:') + ` ${this.filename}`, {err});
       return;
     }
+
+    // Start undo manager
+    await this.undo.start();
 
     // listen for child renderer processes
     ipcMain.on(`budgetfile.rpc.${this.id}`, async (ev, message:IBudgetFileRPCMessage) => {
@@ -270,6 +281,7 @@ export class BudgetFile implements IBudgetFile {
       })
       this.openWindow(`/budget/index.html?${qs}`);
     }
+
   }
 
   /**
@@ -529,6 +541,10 @@ export class BudgetFile implements IBudgetFile {
       sync.cancel();
     })
   }
+
+  async undoLastAction() {
+    this.undo.undoLastAction();
+  }
 }
 
 
@@ -577,6 +593,9 @@ class RendererBudgetFile implements IBudgetFile {
   }
   cancelSync() {
     return this.callInMain('cancelSync');
+  }
+  undoLastAction() {
+    return this.callInMain('undoLastAction');
   }
 
   /**
