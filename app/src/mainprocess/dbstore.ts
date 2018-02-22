@@ -16,6 +16,7 @@ import { BankMacroStore } from '../models/bankmacro'
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
 import { sss } from '../i18n'
+import { UndoTracker } from '../undo'
 
 const log = new PrefixLogger('(dbstore)')
 
@@ -195,6 +196,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
  */
 export class DBStore implements IStore {
   private _db:sqlite.Database;
+  readonly undo:UndoTracker;
 
   readonly accounts:AccountStore;
   readonly buckets:BucketStore;
@@ -207,6 +209,7 @@ export class DBStore implements IStore {
     this.simplefin = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankmacro = new BankMacroStore(this);
+    this.undo = new UndoTracker(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})
@@ -230,6 +233,9 @@ export class DBStore implements IStore {
       }
     }
     
+    // track undos
+    await this.undo.start();
+
     return this;
   }
   get db():sqlite.Database {
@@ -328,5 +334,9 @@ export class DBStore implements IStore {
     let sql = `DELETE FROM ${cls.type} WHERE id=$id`;
     await this.db.run(sql, {$id: id});
     this.publishObject('delete', obj);
+  }
+
+  async doAction<T>(label:string, func:((...args)=>T|Promise<T>)):Promise<T> {
+    return this.undo.doAction(label, func);
   }
 }

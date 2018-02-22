@@ -32,7 +32,7 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
   }
   async recomputeState(props:BucketGoalChartProps) {
     let promises = props.bucket_ids.map(async bucket_id => {
-      let rows = await manager.store.query(`
+      let rows = await manager.nocheckpoint.query(`
         SELECT
           amount,
           posted

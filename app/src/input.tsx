@@ -105,6 +105,8 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
     }
     this.stateChangedSinceProps = false;
     if (this.propChangesInFlight < 0) {
+       [info] (budget.r) RENDERING
+[23:54:07:0250] [warn] (input) Too many prop changes
       log.warn('Too many prop changes');
     }
   }

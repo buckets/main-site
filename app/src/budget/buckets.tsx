@@ -43,7 +43,9 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
         return <tr key={bucket.id}>
           <td>{bucket.name}</td>
           <td><button onClick={() => {
-            manager.store.buckets.unkick(bucket.id);
+            manager
+            .checkpoint(sss('Un-kick bucket'))
+            .buckets.unkick(bucket.id);
           }}>{sss('Un-kick')}</button></td>
           <td>
             <Link relative to={`../${bucket.id}`} className="subtle">{sss('more')}</Link>
@@ -235,10 +237,14 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       </Switch>);
   }
   addBucket = () => {
-    manager.store.buckets.add({name: sss('default new bucket name', 'New Bucket')})
+    manager
+    .checkpoint(sss('New bucket'))
+    .buckets.add({name: sss('default new bucket name', 'New Bucket')})
   }
   addGroup = () => {
-    manager.store.buckets.addGroup({name: sss('default new group name', 'New Group')})
+    manager
+    .checkpoint(sss('New group'))
+    .buckets.addGroup({name: sss('default new group name', 'New Group')})
   }
   makeItRain = () => {
     let { appstate } = this.props;
@@ -277,8 +283,9 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   doPending = async () => {
     let { to_deposit, to_withdraw } = this.getPending();
     let transfer = (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0));
+    const store = manager.checkpoint(sss('Transactions'));
     _.map(this.state.pending, (amount, bucket_id) => {
-      return manager.store.buckets.transact({
+      return store.buckets.transact({
         bucket_id: bucket_id,
         amount: amount,
         transfer: transfer,
@@ -396,7 +403,9 @@ class BucketKindDetails extends React.Component<{
           element={MoneyInput}
           changeArgIsValue
           onChange={val => {
-            manager.store.buckets.update(bucket.id, {goal: val});
+            manager
+            .checkpoint(sss('Update bucket goal'))
+            .buckets.update(bucket.id, {goal: val});
           }}
         />
       </td>
@@ -416,7 +425,9 @@ class BucketKindDetails extends React.Component<{
           year={dt.year()}
           onChange={({month, year}) => {
             let new_date = makeLocalDate(year, month, 1);
-            manager.store.buckets.update(bucket.id, {end_date: ts2db(new_date)})
+            manager
+            .checkpoint(sss('Update target date'))
+            .buckets.update(bucket.id, {end_date: ts2db(new_date)})
           }} />
       </td>
     </tr>
@@ -431,7 +442,9 @@ class BucketKindDetails extends React.Component<{
           element={MoneyInput}
           value={bucket.deposit}
           onChange={val => {
-            manager.store.buckets.update(bucket.id, {deposit: val});
+            manager
+            .checkpoint(sss('Update monthly deposit'))
+            .buckets.update(bucket.id, {deposit: val})
           }} /><PerMonth/>
       </td>
     </tr>
@@ -451,7 +464,9 @@ class BucketKindDetails extends React.Component<{
           <select
             value={bucket.kind}
             onChange={(ev) => {
-              manager.store.buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
+              manager
+              .checkpoint(sss('Update bucket type'))
+              .buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
             }}>
             <option value="">{sss('buckettype.plain', 'Plain old bucket')}</option>
             <option value="deposit">{sss('buckettype.deposit', 'Recurring expense')}</option>
@@ -578,7 +593,9 @@ class BucketRow extends React.Component<BucketRowProps, {
   doPending = async () => {
     let { pending, bucket, posting_date, onPendingChanged } = this.props;
     if (pending) {
-      await manager.store.buckets.transact({
+      await manager
+      .checkpoint(sss('Transaction'))
+      .buckets.transact({
         bucket_id: bucket.id,
         amount: pending,
         posted: posting_date,
@@ -641,7 +658,8 @@ class BucketRow extends React.Component<BucketRowProps, {
           className="small"
           value={bucket.color}
           onChange={(val) => {
-            manager.store.buckets.update(bucket.id, {color: val})
+            manager.checkpoint(sss('Update color'))
+            .buckets.update(bucket.id, {color: val})
           }} />
         <NoteMaker
           obj={bucket}
@@ -652,7 +670,9 @@ class BucketRow extends React.Component<BucketRowProps, {
           value={bucket.name}
           placeholder="no name"
           onChange={(val) => {
-            manager.store.buckets.update(bucket.id, {name: val});
+            manager
+            .checkpoint(sss('Update bucket name'))
+            .buckets.update(bucket.id, {name: val});
           }}
         />
       </td>
@@ -730,7 +750,9 @@ class BucketRow extends React.Component<BucketRowProps, {
         let bucket_id = ev.dataTransfer.getData(item.type);
         if (bucket_id !== this.props.bucket.id) {
           const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
-          manager.store.buckets.moveBucket(bucket_id, placement, this.props.bucket.id)
+          manager
+          .checkpoint(sss('Move bucket'))
+          .buckets.moveBucket(bucket_id, placement, this.props.bucket.id)
         }
       })
       this.setState({
@@ -850,7 +872,9 @@ class GroupRow extends React.Component<{
             value={group.name}
             placeholder="no name"
             onChange={(val) => {
-              manager.store.buckets.updateGroup(group.id, {name: val});
+              manager
+              .checkpoint(sss('Update name'))
+              .buckets.updateGroup(group.id, {name: val});
             }}
           />}
         </td>
@@ -878,7 +902,9 @@ class GroupRow extends React.Component<{
           <SafetySwitch
             className="icon grey show-on-row-hover"
             onClick={ev => {
-              manager.store.buckets.deleteGroup(group.id);
+              manager
+              .checkpoint(sss('Delete group'))
+              .buckets.deleteGroup(group.id);
             }}
           >
             <span className="fa fa-trash" />
@@ -889,7 +915,9 @@ class GroupRow extends React.Component<{
     </tbody>);
   }
   createBucket = () => {
-    manager.store.buckets.add({name: sss('default new bucket name', 'New Bucket'), group_id: this.props.group.id})
+    manager
+    .checkpoint(sss('New bucket'))
+    .buckets.add({name: sss('default new bucket name', 'New Bucket'), group_id: this.props.group.id})
   }
   //----------------------------------
   // Draggable
@@ -914,11 +942,15 @@ class GroupRow extends React.Component<{
           let group_id = ev.dataTransfer.getData(item.type);
           if (group_id !== this.props.group.id) {
             const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
-            manager.store.buckets.moveGroup(group_id, placement, this.props.group.id);
+            manager
+            .checkpoint(sss('Move group'))
+            .buckets.moveGroup(group_id, placement, this.props.group.id);
           }
         } else if (item.type === 'bucket') {
           let bucket_id = ev.dataTransfer.getData(item.type);
-          manager.store.buckets.update(bucket_id, {group_id: this.props.group.id})
+          manager
+          .checkpoint(sss('Move bucket'))
+          .buckets.update(bucket_id, {group_id: this.props.group.id})
         }
       })
       this.setState({
@@ -1066,13 +1098,17 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       kicked_ribbon = <div className="kicked-ribbon">{sss('single-bucket Kicked', 'Kicked')}</div>
       kick_button = <button
         onClick={() => {
-          manager.store.buckets.unkick(bucket.id);
+          manager
+          .checkpoint(sss('Un-kick bucket'))
+          .buckets.unkick(bucket.id);
         }}>{sss('Un-kick')}</button>
     } else {
       kick_button = <button
         className="delete"
         onClick={() => {
-          manager.store.buckets.kick(bucket.id)
+          manager
+          .checkpoint(sss('Kick bucket'))
+          .buckets.kick(bucket.id)
           .then(new_bucket => {
             if (!new_bucket.kicked) {
               // it was deleted
@@ -1118,13 +1154,17 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               <ColorPicker
               value={bucket.color}
               onChange={(val) => {
-                manager.store.buckets.update(bucket.id, {color: val})
+                manager
+                .checkpoint(sss('Update color'))
+                .buckets.update(bucket.id, {color: val})
               }} />
               <ClickToEdit
                 value={bucket.name}
                 placeholder="no name"
                 onChange={(val) => {
-                  manager.store.buckets.update(bucket.id, {name: val});
+                  manager
+                  .checkpoint(sss('Update name'))
+                  .buckets.update(bucket.id, {name: val});
                 }}
               />
             </h1>
@@ -1200,7 +1240,9 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
             type="checkbox"
             checked={trans.transfer}
             onChange={(ev) => {
-              manager.store.buckets.updateTransaction(trans.id, {
+              manager
+              .checkpoint(ev.target.checked ? sss('Make transfer') : sss('Make not transfer'))
+              .buckets.updateTransaction(trans.id, {
                 transfer: ev.target.checked,
               })
             }}/>
@@ -1221,7 +1263,9 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
             <SafetySwitch
               disabled={!this.state.selected.size}
               onClick={ev => {
-                manager.store.buckets.deleteTransactions(Array.from(this.state.selected));
+                manager
+                .checkpoint(sss('Delete transactions'))
+                .buckets.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}
             >

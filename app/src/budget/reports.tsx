@@ -112,7 +112,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
       return;
     }
     let { start, end } = props;
-    let transactions = await manager.store.accounts.listTransactions({
+    let transactions = await manager.nocheckpoint.accounts.listTransactions({
       posted: {
         onOrAfter: start,
         before: end,
@@ -167,7 +167,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
   async recomputeState(props:CashFlowComparisonProps) {
     let { intervals } = props;
     let summaries = await Promise.all(intervals.map(interval => {
-      return manager.store.reports.incomeAndExpenses({
+      return manager.nocheckpoint.reports.incomeAndExpenses({
         start: interval.start,
         end: interval.end,
       })  
@@ -542,7 +542,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
       .startOf(unit)
       .add(1, unit)
       .subtract(this.state.timeback_number + (unit === 'month' ? 1 : 0), unit);
-    let expensesByBucket = await manager.store.reports.bucketExpenseHistories({
+    let expensesByBucket = await manager.nocheckpoint.reports.bucketExpenseHistories({
       interval: {
         start,
         end: end_date,

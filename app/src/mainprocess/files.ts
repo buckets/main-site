@@ -9,9 +9,8 @@ import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
 import { Timestamp, serializeTimestamp, ensureLocalMoment } from '../time'
-import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
+import { IBudgetBus, BudgetBus, BudgetBusRenderer, TABLE2CLASS } from '../store'
 import { DBStore } from './dbstore';
-import { UndoTracker } from '../undo'
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
 import { addRecentFile, PSTATE } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
@@ -86,7 +85,9 @@ export interface IBudgetFile {
   /**
    *  Undo
    */
-  undoLastAction();
+  doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T>;
+  doUndo();
+  doRedo();
 }
 
 interface IBudgetFileRPCMessage {
@@ -120,7 +121,6 @@ export class BudgetFile implements IBudgetFile {
   } = {};
 
   public store:DBStore;
-  readonly undo:UndoTracker;
   private rpc_store:RPCMainStore = null;
   
   readonly bus:BudgetBus;
@@ -138,7 +138,6 @@ export class BudgetFile implements IBudgetFile {
     this.filename = filename || '';
     this.bus = new BudgetBus(this.id);
     this.store = new DBStore(filename, this.bus, true);
-    this.undo = new UndoTracker(this.store);
     this.syncer = new MultiSyncer([
       new MacroSyncer(this.store, this),
       new SimpleFINSyncer(this.store),
@@ -206,9 +205,6 @@ export class BudgetFile implements IBudgetFile {
       reportErrorToUser(sss('Unable to open the file:') + ` ${this.filename}`, {err});
       return;
     }
-
-    // Start undo manager
-    await this.undo.start();
 
     // listen for child renderer processes
     ipcMain.on(`budgetfile.rpc.${this.id}`, async (ev, message:IBudgetFileRPCMessage) => {
@@ -542,8 +538,37 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
-  async undoLastAction() {
-    this.undo.undoLastAction();
+  /**
+   *  Run a function, recording it as undo-able
+   */
+  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
+    return this.store.undo.doAction(label, func);
+  }
+  async doUndo() {
+    let result = await this.store.undo.undoLastAction();
+    let del_promises = result.deleted.map(({table_name, object_id}) => {
+      return this.store.publishObject('delete', {
+        _type: table_name,
+        id: object_id,
+        created: null,
+      })
+    })
+    let up_promises = result.updated.map(async ({table_name, object_id}) => {
+      let obj = await this.store.getObject(TABLE2CLASS[table_name], object_id);
+      return this.store.publishObject('update', obj);
+    })
+    return Promise.all([...del_promises, ...up_promises]);
+  }
+  async doRedo() {
+    throw new Error('Not implemented yet');
+  }
+
+  // These are for use by RendererBudgetFile
+  async startAction(label:string) {
+    return this.store.undo.startAction(label);
+  }
+  async finishAction(id:number) {
+    return this.store.undo.finishAction(id);
   }
 }
 
@@ -594,14 +619,28 @@ class RendererBudgetFile implements IBudgetFile {
   cancelSync() {
     return this.callInMain('cancelSync');
   }
-  undoLastAction() {
-    return this.callInMain('undoLastAction');
+
+  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
+    const action_id = await this.callInMain('startAction', label);
+    try {
+      return await func()
+    } catch(err) {
+      throw err;
+    } finally {
+      await this.callInMain('finishAction', action_id);
+    }
+  }
+  doUndo() {
+    return this.callInMain('doUndo');
+  }
+  doRedo() {
+    return this.callInMain('doRedo');
   }
 
   /**
    *  Call a function on this budget's corresponding main process BudgetFile.
    */
-  private callInMain(method:keyof IBudgetFile, ...args):Promise<any> {
+  private callInMain(method:keyof BudgetFile, ...args):Promise<any> {
     return new Promise((resolve, reject) => {
       const message:IBudgetFileRPCMessage = {
         reply_ch: `budgetfile.reply.${uuid()}`,

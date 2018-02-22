@@ -60,8 +60,7 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            console.log('undoing last action');
-            budgetfile.undoLastAction();
+            budgetfile.doUndo();
           } else {
             // do the default action
             win.webContents.undo();

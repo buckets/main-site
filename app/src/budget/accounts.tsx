@@ -27,7 +27,9 @@ export class ClosedAccountsPage extends React.Component<{appstate:AppState}, {}>
         return <tr key={account.id}>
           <td>{account.name}</td>
           <td><button onClick={() => {
-            manager.store.accounts.unclose(account.id);
+            manager
+            .checkpoint(sss('Reopen Account'))
+            .accounts.unclose(account.id)
           }}>{sss('Reopen')}</button></td>
           <td>
             <Link relative to={`../${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link>
@@ -85,7 +87,9 @@ export class AccountList extends React.Component<AccountListProps,any> {
             value={account.name}
             placeholder={sss('accounts.name_placeholder', 'no name')}
             onChange={(val) => {
-              manager.store.accounts.update(account.id, {name: val});
+              manager
+              .checkpoint(sss('Update account name'))
+              .accounts.update(account.id, {name: val});  
             }}
           /></td>
           <td className="right"><Money value={balances[account.id]} />{import_balance_note}</td>
@@ -126,12 +130,16 @@ export class AccountView extends React.Component<AccountViewProps, {
     let delete_all_transactions_button;
     if (account.closed) {
       close_button = <button onClick={() => {
-        manager.store.accounts.unclose(account.id);
+        manager
+        .checkpoint(sss('Reopen account'))
+        .accounts.unclose(account.id);  
       }}>{sss('Reopen')}</button>
       closed_ribbon = <div className="kicked-ribbon">{sss('single-account Closed', 'Closed')}</div>
       delete_all_transactions_button = <SafetySwitch
         onClick={ev => {
-          manager.store.accounts.deleteWholeAccount(account.id)
+          manager
+          .checkpoint(sss('Delete account'))
+          .accounts.deleteWholeAccount(account.id)
           .then(() => {
             makeToast(sss('Account and transactions deleted'));
           });
@@ -141,7 +149,9 @@ export class AccountView extends React.Component<AccountViewProps, {
     } else {
       close_button = <SafetySwitch
         onClick={ev => {
-          manager.store.accounts.close(account.id)
+          manager
+          .checkpoint(sss('Close account'))
+          .accounts.close(account.id)
           .then(new_account => {
             if (!new_account.closed) {
               // it was deleted
@@ -177,7 +187,9 @@ export class AccountView extends React.Component<AccountViewProps, {
           value={account.name}
           placeholder={sss('accounts.name_placeholder', 'no name')}
           onChange={(val) => {
-            manager.store.accounts.update(account.id, {name: val});
+            manager
+            .checkpoint(sss('Update account name'))
+            .accounts.update(account.id, {name: val});  
           }}
         />
       </h1>
@@ -188,10 +200,12 @@ export class AccountView extends React.Component<AccountViewProps, {
             value={balance}
             changeArgIsValue
             onChange={this_months_balance => {
+              
               let diff = account.balance - balance;
-
               let computed_balance = this_months_balance + diff;
-              manager.store.accounts.update(account.id, {balance: computed_balance});
+              manager
+              .checkpoint(sss('Update account balance'))
+              .accounts.update(account.id, {balance: computed_balance});
             }}/> ({sss('balance-as-of', (date:JSX.Element) => {
             return <span>as of {date}</span>
           })(<DateDisplay value={appstate.defaultPostingDate} />)})
@@ -262,7 +276,9 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
       </div>);
   }
   addAccount = () => {
-    manager.store.accounts.add(sss('default account name', 'Savings'));
+    manager
+    .checkpoint(sss('Create account'))
+    .accounts.add(sss('default account name', 'Savings'));  
   }
   createConnection = () => {
     setPath('/import')

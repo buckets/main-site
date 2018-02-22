@@ -68,7 +68,7 @@ export class SearchPage extends React.Component<{
   async doQuery(query:string) {
     let result:QueryResult;
     if (query.length >= this.min_query_len) {
-      result = await queryStore(manager.store, query);
+      result = await queryStore(manager.nocheckpoint, query);
     } else {
       result = {
         accounts: [],

@@ -281,7 +281,8 @@ class DelayingCounter {
 
 
 export class StateManager {
-  public store:IStore;
+  private store:IStore;
+  private file:IBudgetFile;
 
   public appstate:AppState;
   private queue: ObjectEvent<any>[] = [];
@@ -303,8 +304,16 @@ export class StateManager {
       }
     })
   }
+  checkpoint(label:string) {
+    this.file.doAction(label, () => {});
+    return this.store;
+  }
+  get nocheckpoint() {
+    return this.store;
+  }
   attach(store: IStore, file:IBudgetFile) {
     this.store = store;
+    this.file = file;
 
     // Syncing events
     file.room.events('sync_started').on(message => {

@@ -198,7 +198,9 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
             <SafetySwitch
               disabled={!this.state.selected.size}
               onClick={ev => {
-                manager.store.accounts.deleteTransactions(Array.from(this.state.selected));
+                manager
+                .checkpoint(sss('Delete transactions'))
+                .accounts.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}
             >
@@ -301,7 +303,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
   doTransaction = async () => {
     if (this.props.trans) {
       // update
-      await manager.store.accounts.updateTransaction(this.props.trans.id, {
+      await manager
+      .checkpoint(sss('Update transaction'))
+      .accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
         memo: this.state.memo,
@@ -314,7 +318,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // create
       if (this.state.amount) {
         try {
-          await manager.store.accounts.transact({
+          await manager
+          .checkpoint(sss('Create transaction'))
+          .accounts.transact({
             account_id: this.state.account_id,
             amount: this.state.amount,
             memo: this.state.memo,
@@ -480,7 +486,9 @@ class Categorizer extends React.Component<CategorizerProps, {
     this.refreshCategories(nextProps)
   }
   refreshCategories(props:CategorizerProps) {
-    return manager.store.accounts.getCategories(props.transaction.id)
+    return manager
+    .nocheckpoint
+    .accounts.getCategories(props.transaction.id)
     .then(cats => {
       this.setState({
         categories: cats,
@@ -497,7 +505,9 @@ class Categorizer extends React.Component<CategorizerProps, {
   saveChanges = async () => {
     let { transaction } = this.props;
 
-    await manager.store.accounts.categorize(transaction.id, this.state.clean_cats)
+    await manager
+    .checkpoint(sss('Categorization'))
+    .accounts.categorize(transaction.id, this.state.clean_cats)
     await this.refreshCategories(this.props);
     this.setState({open: false})
   }
@@ -505,7 +515,9 @@ class Categorizer extends React.Component<CategorizerProps, {
     return async () => {
       let { transaction } = this.props;
 
-      await manager.store.accounts.categorizeGeneral(transaction.id, name);
+      await manager
+      .checkpoint(sss('Categorization'))
+      .accounts.categorizeGeneral(transaction.id, name);
       await this.refreshCategories(this.props);
       this.setState({open: false})
     }

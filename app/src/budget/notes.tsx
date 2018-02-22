@@ -3,6 +3,7 @@ import * as cx from 'classnames'
 import { IObject, TABLE2CLASS } from '../store'
 import { manager } from './appstate'
 import { DebouncedInput } from '../input'
+import { sss } from '../i18n'
 
 export interface INotable {
   notes: string;
@@ -42,7 +43,9 @@ export class NoteMaker extends React.Component<NoteProps, {
               }
             }}
             onChange={(val) => {
-              manager.store.updateObject(TABLE2CLASS[obj._type], obj.id, {notes:val} as any)
+              manager
+              .checkpoint(sss('Update note'))
+              .updateObject(TABLE2CLASS[obj._type], obj.id, {notes:val} as any)
             }}
             element="textarea"
           />

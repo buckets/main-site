@@ -136,7 +136,7 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
                     buttonLabel: 'Export',
                   }, (path:string) => {
                     if (path) {
-                      exportTransactionsToCSV(manager.store, path, {
+                      exportTransactionsToCSV(manager.nocheckpoint, path, {
 
                       })
                       .then(() => {

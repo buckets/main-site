@@ -117,7 +117,7 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
     this.recomputeState(nextProps);
   }
   async recomputeState(props:BucketBalanceChartProps) {
-    let transactions = await manager.store.buckets.listTransactions({
+    let transactions = await manager.nocheckpoint.buckets.listTransactions({
       bucket_id: props.bucket_id,
       posted: {
         onOrAfter: props.appstate.viewDateRange.onOrAfter.clone().subtract(3, 'years'),

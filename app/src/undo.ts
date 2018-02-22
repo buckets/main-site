@@ -1,33 +1,8 @@
-import { IStore } from './store'
+import { DBStore } from './mainprocess/dbstore'
 import { PrefixLogger } from './logging'
 
 const log = new PrefixLogger('(undo)')
 
-// import { Account } from './models/account'
-
-
-// function trackChangeTriggers<T extends IObject>(cls:IObjectClass<T>, columns:Array<keyof T>) {
-//   return [
-//     `CREATE TEMP TABLE x_${cls.type} (
-//       x_id INTEGER PRIMARY KEY,
-//       x_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-//       x_op TEXT,
-
-//       ${columns.map(col => `${col} TEXT`).join(',')}
-//     )`,
-//     `CREATE TEMP TRIGGER x_${cls.type}_insert
-//       AFTER INSERT ON ${cls.type}
-//       BEGIN
-//         INSERT INTO x_${cls.type} (x_op, id) VALUES ('INSERT', NEW.id);
-//       END
-//     `,
-//     `CREATE TEMP TRIGGER x_${cls.type}_update
-//       AFTER UPDATE ON ${cls.type}
-//       BEGIN
-//         INSERT INTO x_${cls.type}
-//     `,
-//   ]
-// }
 
 interface SqliteTableInfoRow {
   cid: number;
@@ -41,8 +16,8 @@ interface SqliteTableInfoRow {
 export class UndoTracker {
 
   // milliseconds window that groups actions together
-  private threshold = 120;
-  constructor(private store:IStore) {
+  private checkpoint_id:number = null;
+  constructor(private store:DBStore) {
 
   }
   async start() {
@@ -51,6 +26,13 @@ export class UndoTracker {
         enabled TEXT
       );
       INSERT INTO undo_status (enabled) values (1);
+
+      CREATE TEMP TABLE undo_checkpoint (
+        id INTEGER PRIMARY KEY,
+        created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        undo_log_id INTEGER,
+        label TEXT
+      );
       
       CREATE TEMP TABLE undo_log (
         id INTEGER PRIMARY KEY,
@@ -60,7 +42,6 @@ export class UndoTracker {
         sql TEXT
       );
     `;
-    console.log('sql', sql);
     try {
       await this.store.exec(sql);  
     } catch(err) {
@@ -111,14 +92,45 @@ export class UndoTracker {
             'INSERT INTO ${table_name} (rowid,${columns.map(col => col.name).join(',')}) VALUES ('||old.rowid||',${columns.map(col => `'||quote(old.${col.name})||'`).join(',')})');
       END;
     `
-    console.log('sql', sql);
     await this.store.exec(sql);
   }
-  async disableUndoRecording() {
-    await this.store.query('UPDATE undo_status SET enabled=0', {});
+
+  /**
+   *  Run a function that can be undone.
+   */
+  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
+    const action_id = await this.startAction(label);
+    try {
+      return await func()
+    } catch(err) {
+      throw err;
+    } finally {
+      await this.finishAction(action_id);
+    }
   }
-  async enableUndoRecording() {
-    await this.store.query('UPDATE undo_status SET enabled=1', {});
+  async startAction(label:string):Promise<number> {
+    const nested = this.checkpoint_id !== null;
+
+    if (nested) {
+      // nested action
+      return null;
+    } else {
+      // outermost action
+      let result = await this.store.db.run('INSERT INTO undo_checkpoint (label, undo_log_id) VALUES ($label, (SELECT COALESCE(max(id), 0) FROM undo_log))', {$label: label})
+      this.checkpoint_id = result.lastID;  
+      log.info('Marking checkpoint', this.checkpoint_id, label);
+      return this.checkpoint_id;
+    }
+  }
+  async finishAction(id:number) {
+    if (id === null) {
+      return;
+    } else if (id === this.checkpoint_id) {
+      log.info('Finish action');
+      this.checkpoint_id = null;
+    } else {
+      log.error('Error finishing action.  Mismatched id', this.checkpoint_id, id);
+    }
   }
 
   /**
@@ -128,21 +140,9 @@ export class UndoTracker {
     console.log('undoing last action');
     let rows = await this.store.query(`
       SELECT id, table_name, object_id, sql
-      FROM undo_log,
-        (
-          WITH RECURSIVE
-            what(x) AS (
-                SELECT max(created) FROM undo_log
-                UNION
-                SELECT undo_log.created FROM what, undo_log
-                WHERE undo_log.created >= (what.x - $threshold)
-            )
-          SELECT max(x) as upper, min(x) as lower FROM what
-        ) as limits
-      WHERE
-        created >= limits.lower
-        AND created <= limits.upper
-      `, {$threshold: this.threshold})
+      FROM undo_log
+      WHERE id > (SELECT COALESCE(MAX(undo_log_id), 0) FROM undo_checkpoint)
+    `, {})
 
     console.log('rows', rows);
     
@@ -173,6 +173,7 @@ export class UndoTracker {
       }
     }
 
+    sqls.push('DELETE FROM undo_checkpoint WHERE id = (SELECT MAX(id) FROM undo_checkpoint)')
     sqls.push('UPDATE undo_status SET enabled=1')
 
     const full_sql = sqls.join(';');
