@@ -1259,26 +1259,26 @@ table.props th {
 
 .progress-bubble {
   width: .75rem;
-  height: .75rem;
+  height: 1rem;
   margin-left: 3px;
-  margin-right: 3px;
-  border: 1px solid var(--blue);
+  border: 1px solid var(--grey);
   border-radius: 2px;
   display: inline-flex;
   justify-content: flex-end;
   flex-direction: column;
+  transition: color 0.1s, border-color 0.1s;
 }
 .progress-bubble .bubble-fill {
   width: 100%;
   background-color: var(--blue);
   border-top: 1px solid var(--blue);
-  transition: height 0.1s;
+  transition: height 0.1s, color 0.1s, border-color 0.1s;
 }
 .progress-bubble.empty .bubble-fill {
   border-top-width: 0;
 }
 .progress-bubble.full {
-  border-color: var(--green);
+  border-color: var(--faint-green);
 }
 .progress-bubble.full .bubble-fill {
   border-top-width: 0;

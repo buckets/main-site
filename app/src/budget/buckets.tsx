@@ -688,7 +688,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         />
       </td>
       <td name="want" className="right div-right">
-        <Money value={computed.deposit} hidezero />{computed.deposit ? <PerMonth/> : ''}
+        <Money value={computed.deposit} hidezero />
         {rainfall_indicator}
       </td>
       <td name="in" className="right">
