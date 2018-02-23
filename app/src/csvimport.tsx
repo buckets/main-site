@@ -24,10 +24,13 @@ interface ParsedCSV<T> {
 export async function parseCSVStringWithHeader<T>(guts:string):Promise<ParsedCSV<T>> {
   return new Promise<ParsedCSV<T>>((resolve, reject) => {
     let headers:string[] = [];
-    csv.parse(guts, {columns: (header_row:string[]) => {
-      headers = header_row
-      return header_row;
-    }}, (err, data) => {
+    csv.parse(guts, {
+      relax_column_count: true,
+      columns(header_row:string[]) {
+        headers = header_row
+        return header_row;
+      }
+    }, (err, data) => {
       if (err) {
         reject(err);
       } else {
