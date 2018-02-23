@@ -17,6 +17,7 @@ import { sss } from '../i18n'
 import { isNil, isDifferent } from '../util'
 import { NoteMaker } from './notes'
 import { ensureUTCMoment } from '../time'
+import { createTemplateBucketSet } from './gettingstarted'
 
 const NOGROUP = -1;
 
@@ -173,6 +174,15 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       </div>
       show_effective_bal = true;
     }
+
+    let getting_started;
+    if (appstate.unkicked_buckets.length < 3) {
+      getting_started = <div className="notice">
+        {sss('Need ideas for getting started?')} <button
+          onClick={createTemplateBucketSet}
+        >{sss('Start with a template')}</button>
+      </div>
+    }
         
     return (
       <Switch>
@@ -218,6 +228,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                 {doPendingButton}
               </div>
             </div>
+            {getting_started}
             <div className="single-pane">
               
                 <GroupedBucketList
