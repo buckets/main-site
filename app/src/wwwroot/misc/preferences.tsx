@@ -38,6 +38,7 @@ class PreferencesApp extends React.Component<{
           <option value="">{sss('System Default')}</option>
           <option value="en">English</option>
           <option value="es">español</option>
+          <option value="pt">Português</option>
         </select>
       </div>
       <div>
