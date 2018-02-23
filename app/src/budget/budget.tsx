@@ -92,7 +92,6 @@ export async function start(base_element, room, args: {
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
-    log.info('RENDERING');
     let path = window.location.hash.substr(1);
     return <Application
       path={path}

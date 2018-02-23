@@ -488,7 +488,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
                 makeToast(sss('Provide a name for the new account.'), {className:'error'})
                 return;
               }
-              let new_account = await manager.checkpoint(sss('Create account')).accounts.add(new_name);
+              let new_account = await manager.checkpoint(sss('Create Account')).accounts.add(new_name);
               account_id = new_account.id;
             }
             current_file.room.broadcast('csv_account_response', {

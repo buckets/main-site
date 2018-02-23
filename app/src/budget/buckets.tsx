@@ -44,7 +44,7 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
           <td>{bucket.name}</td>
           <td><button onClick={() => {
             manager
-            .checkpoint(sss('Un-kick bucket'))
+            .checkpoint(sss('Un-kick Bucket'))
             .buckets.unkick(bucket.id);
           }}>{sss('Un-kick')}</button></td>
           <td>
@@ -238,12 +238,12 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   }
   addBucket = () => {
     manager
-    .checkpoint(sss('New bucket'))
+    .checkpoint(sss('New Bucket'))
     .buckets.add({name: sss('default new bucket name', 'New Bucket')})
   }
   addGroup = () => {
     manager
-    .checkpoint(sss('New group'))
+    .checkpoint(sss('New Group'))
     .buckets.addGroup({name: sss('default new group name', 'New Group')})
   }
   makeItRain = () => {
@@ -404,7 +404,7 @@ class BucketKindDetails extends React.Component<{
           changeArgIsValue
           onChange={val => {
             manager
-            .checkpoint(sss('Update bucket goal'))
+            .checkpoint(sss('Update Goal'))
             .buckets.update(bucket.id, {goal: val});
           }}
         />
@@ -426,7 +426,7 @@ class BucketKindDetails extends React.Component<{
           onChange={({month, year}) => {
             let new_date = makeLocalDate(year, month, 1);
             manager
-            .checkpoint(sss('Update target date'))
+            .checkpoint(sss('Update Target Date'))
             .buckets.update(bucket.id, {end_date: ts2db(new_date)})
           }} />
       </td>
@@ -443,7 +443,7 @@ class BucketKindDetails extends React.Component<{
           value={bucket.deposit}
           onChange={val => {
             manager
-            .checkpoint(sss('Update monthly deposit'))
+            .checkpoint(sss('Update Monthly Deposit'))
             .buckets.update(bucket.id, {deposit: val})
           }} /><PerMonth/>
       </td>
@@ -465,7 +465,7 @@ class BucketKindDetails extends React.Component<{
             value={bucket.kind}
             onChange={(ev) => {
               manager
-              .checkpoint(sss('Update bucket type'))
+              .checkpoint(sss('Update Bucket Type'))
               .buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
             }}>
             <option value="">{sss('buckettype.plain', 'Plain old bucket')}</option>
@@ -658,7 +658,7 @@ class BucketRow extends React.Component<BucketRowProps, {
           className="small"
           value={bucket.color}
           onChange={(val) => {
-            manager.checkpoint(sss('Update color'))
+            manager.checkpoint(sss('Update Color'))
             .buckets.update(bucket.id, {color: val})
           }} />
         <NoteMaker
@@ -671,7 +671,7 @@ class BucketRow extends React.Component<BucketRowProps, {
           placeholder="no name"
           onChange={(val) => {
             manager
-            .checkpoint(sss('Update bucket name'))
+            .checkpoint(sss('Update Bucket Name'))
             .buckets.update(bucket.id, {name: val});
           }}
         />
@@ -751,7 +751,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         if (bucket_id !== this.props.bucket.id) {
           const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
           manager
-          .checkpoint(sss('Move bucket'))
+          .checkpoint(sss('Move Bucket'))
           .buckets.moveBucket(bucket_id, placement, this.props.bucket.id)
         }
       })
@@ -873,7 +873,7 @@ class GroupRow extends React.Component<{
             placeholder="no name"
             onChange={(val) => {
               manager
-              .checkpoint(sss('Update name'))
+              .checkpoint(sss('Update Group Name'))
               .buckets.updateGroup(group.id, {name: val});
             }}
           />}
@@ -903,7 +903,7 @@ class GroupRow extends React.Component<{
             className="icon grey show-on-row-hover"
             onClick={ev => {
               manager
-              .checkpoint(sss('Delete group'))
+              .checkpoint(sss('Delete Group'))
               .buckets.deleteGroup(group.id);
             }}
           >
@@ -916,7 +916,7 @@ class GroupRow extends React.Component<{
   }
   createBucket = () => {
     manager
-    .checkpoint(sss('New bucket'))
+    .checkpoint(sss('New Bucket'))
     .buckets.add({name: sss('default new bucket name', 'New Bucket'), group_id: this.props.group.id})
   }
   //----------------------------------
@@ -943,13 +943,13 @@ class GroupRow extends React.Component<{
           if (group_id !== this.props.group.id) {
             const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
             manager
-            .checkpoint(sss('Move group'))
+            .checkpoint(sss('Move Group'))
             .buckets.moveGroup(group_id, placement, this.props.group.id);
           }
         } else if (item.type === 'bucket') {
           let bucket_id = ev.dataTransfer.getData(item.type);
           manager
-          .checkpoint(sss('Move bucket'))
+          .checkpoint(sss('Move Bucket'))
           .buckets.update(bucket_id, {group_id: this.props.group.id})
         }
       })
@@ -1099,7 +1099,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       kick_button = <button
         onClick={() => {
           manager
-          .checkpoint(sss('Un-kick bucket'))
+          .checkpoint(sss('Un-kick Bucket'))
           .buckets.unkick(bucket.id);
         }}>{sss('Un-kick')}</button>
     } else {
@@ -1107,7 +1107,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
         className="delete"
         onClick={() => {
           manager
-          .checkpoint(sss('Kick bucket'))
+          .checkpoint(sss('Kick Bucket'))
           .buckets.kick(bucket.id)
           .then(new_bucket => {
             if (!new_bucket.kicked) {
@@ -1155,7 +1155,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               value={bucket.color}
               onChange={(val) => {
                 manager
-                .checkpoint(sss('Update color'))
+                .checkpoint(sss('Update Color'))
                 .buckets.update(bucket.id, {color: val})
               }} />
               <ClickToEdit
@@ -1163,7 +1163,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
                 placeholder="no name"
                 onChange={(val) => {
                   manager
-                  .checkpoint(sss('Update name'))
+                  .checkpoint(sss('Update Name'))
                   .buckets.update(bucket.id, {name: val});
                 }}
               />
@@ -1241,7 +1241,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
             checked={trans.transfer}
             onChange={(ev) => {
               manager
-              .checkpoint(ev.target.checked ? sss('Make transfer') : sss('Make not transfer'))
+              .checkpoint(ev.target.checked ? sss('Make Transfer') : sss('Not Transfer'))
               .buckets.updateTransaction(trans.id, {
                 transfer: ev.target.checked,
               })
@@ -1264,7 +1264,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
               disabled={!this.state.selected.size}
               onClick={ev => {
                 manager
-                .checkpoint(sss('Delete transactions'))
+                .checkpoint(sss('Delete Transactions'))
                 .buckets.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}

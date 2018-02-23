@@ -190,7 +190,7 @@ app.on('browser-window-focus', (ev, win) => {
   const url = URL.parse(win.webContents.getURL());
   if (url.protocol === 'buckets:' && url.path.startsWith('/budget/index.html')) {
     // budget window
-    updateMenu({budget:true});
+    updateMenu({budget: BudgetFile.fromWindowId(win.id)});
   } else {
     // non-budget window
     updateMenu();

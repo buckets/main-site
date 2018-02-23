@@ -44,7 +44,7 @@ export class NoteMaker extends React.Component<NoteProps, {
             }}
             onChange={(val) => {
               manager
-              .checkpoint(sss('Update note'))
+              .checkpoint(sss('Update Note'))
               .updateObject(TABLE2CLASS[obj._type], obj.id, {notes:val} as any)
             }}
             element="textarea"

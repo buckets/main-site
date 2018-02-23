@@ -1,0 +1,1 @@
+You can now undo/redo *most* actions that modify your budget.  So if you accidentally deposited $500 into the wrong bucket, press Control/Command Z to reverse the last change.  (#JE9sINCG)

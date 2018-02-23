@@ -88,7 +88,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
             placeholder={sss('accounts.name_placeholder', 'no name')}
             onChange={(val) => {
               manager
-              .checkpoint(sss('Update account name'))
+              .checkpoint(sss('Update Account Name'))
               .accounts.update(account.id, {name: val});  
             }}
           /></td>
@@ -131,14 +131,14 @@ export class AccountView extends React.Component<AccountViewProps, {
     if (account.closed) {
       close_button = <button onClick={() => {
         manager
-        .checkpoint(sss('Reopen account'))
+        .checkpoint(sss('Reopen Account'))
         .accounts.unclose(account.id);  
       }}>{sss('Reopen')}</button>
       closed_ribbon = <div className="kicked-ribbon">{sss('single-account Closed', 'Closed')}</div>
       delete_all_transactions_button = <SafetySwitch
         onClick={ev => {
           manager
-          .checkpoint(sss('Delete account'))
+          .checkpoint(sss('Delete Account'))
           .accounts.deleteWholeAccount(account.id)
           .then(() => {
             makeToast(sss('Account and transactions deleted'));
@@ -150,7 +150,7 @@ export class AccountView extends React.Component<AccountViewProps, {
       close_button = <SafetySwitch
         onClick={ev => {
           manager
-          .checkpoint(sss('Close account'))
+          .checkpoint(sss('Close Account'))
           .accounts.close(account.id)
           .then(new_account => {
             if (!new_account.closed) {
@@ -188,7 +188,7 @@ export class AccountView extends React.Component<AccountViewProps, {
           placeholder={sss('accounts.name_placeholder', 'no name')}
           onChange={(val) => {
             manager
-            .checkpoint(sss('Update account name'))
+            .checkpoint(sss('Update Account Name'))
             .accounts.update(account.id, {name: val});  
           }}
         />
@@ -204,7 +204,7 @@ export class AccountView extends React.Component<AccountViewProps, {
               let diff = account.balance - balance;
               let computed_balance = this_months_balance + diff;
               manager
-              .checkpoint(sss('Update account balance'))
+              .checkpoint(sss('Update Account Balance'))
               .accounts.update(account.id, {balance: computed_balance});
             }}/> ({sss('balance-as-of', (date:JSX.Element) => {
             return <span>as of {date}</span>
@@ -277,7 +277,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   }
   addAccount = () => {
     manager
-    .checkpoint(sss('Create account'))
+    .checkpoint(sss('Create Account'))
     .accounts.add(sss('default account name', 'Savings'));  
   }
   createConnection = () => {

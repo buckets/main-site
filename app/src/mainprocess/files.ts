@@ -22,6 +22,8 @@ import { SyncResult, MultiSyncer, ASyncening } from '../sync'
 import { SimpleFINSyncer } from '../models/simplefin'
 import { MacroSyncer } from '../models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
+import { UndoRedoResult } from '../undo'
+import { updateMenu } from './menu'
 
 const log = new PrefixLogger('(files)')
 
@@ -222,6 +224,10 @@ export class BudgetFile implements IBudgetFile {
     // listen for child store requests
     this.rpc_store = new RPCMainStore(this.store, this.id);
     await this.rpc_store.start();
+
+    this.store.undo.events.stackchange.on(() => {
+      updateMenu({budget: this});
+    })
 
     // mark it as having been opened
     addRecentFile(this.filename);
@@ -546,6 +552,13 @@ export class BudgetFile implements IBudgetFile {
   }
   async doUndo() {
     let result = await this.store.undo.undoLastAction();
+    return this._handleUndoRedoResult(result)
+  }
+  async doRedo() {
+    let result = await this.store.undo.redoLastAction();
+    return this._handleUndoRedoResult(result);
+  }
+  private async _handleUndoRedoResult(result:UndoRedoResult) {
     let del_promises = result.deleted.map(({table_name, object_id}) => {
       return this.store.publishObject('delete', {
         _type: table_name,
@@ -558,9 +571,6 @@ export class BudgetFile implements IBudgetFile {
       return this.store.publishObject('update', obj);
     })
     return Promise.all([...del_promises, ...up_promises]);
-  }
-  async doRedo() {
-    throw new Error('Not implemented yet');
   }
 
   // These are for use by RendererBudgetFile

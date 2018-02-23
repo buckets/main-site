@@ -295,7 +295,7 @@ export class ImportPage extends React.Component<{
   }
   createMacro = async () => {
     let macro = await manager
-    .checkpoint(sss('Create macro'))
+    .checkpoint(sss('Create Macro'))
     .bankmacro.add({name: ''});
     current_file.openRecordWindow(macro.id);
   }
@@ -357,7 +357,7 @@ class BankMacroList extends React.Component<{
                 onChange={(ev) => {
                   const enabled = (ev.target as any).checked;
                   manager
-                  .checkpoint(enabled ? sss('Enable macro') : sss('Disable macro'))
+                  .checkpoint(enabled ? sss('Enable Macro') : sss('Disable Macro'))
                   .bankmacro.update(macro.id, {enabled});
                 }}
               />
@@ -368,7 +368,7 @@ class BankMacroList extends React.Component<{
                 placeholder="no name"
                 onChange={(val) => {
                   manager
-                  .checkpoint(sss('Update macro name'))
+                  .checkpoint(sss('Update Macro Name'))
                   .bankmacro.update(macro.id, {name: val});
                 }}
               />
@@ -390,7 +390,7 @@ class BankMacroList extends React.Component<{
                 coverClassName="white"
                 onClick={(ev) => {
                   manager
-                  .checkpoint(sss('Delete macro'))
+                  .checkpoint(sss('Delete Macro'))
                   .bankmacro.delete(macro.id);
                 }}><span className="fa fa-trash"></span></SafetySwitch>
             </td>
@@ -416,7 +416,7 @@ class ConnectionList extends React.Component<{
             coverClassName="white"
             onClick={(ev) => {
               manager
-              .checkpoint(sss('Delete connection'))
+              .checkpoint(sss('Delete Connection'))
               .deleteObject(Connection, conn.id);
             }}
           >
@@ -502,7 +502,7 @@ class UnknownAccountRow extends React.Component<{
     </tr>
   }
   link = async () => {
-    let store = manager.checkpoint(sss('Link account'))
+    let store = manager.checkpoint(sss('Link Account'))
     let { unknown } = this.props;
     let account_id = this.state.chosen_account_id;
     let numeric_account_id:number;

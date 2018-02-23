@@ -224,6 +224,15 @@ export class DBStore implements IStore {
       throw err;
     }
 
+    // ensure triggers are enabled
+    try {
+      await this.query('DELETE FROM x_trigger_disabled', {})
+    } catch(err) {
+      log.error('Error enabling triggers');
+      log.error(err.stack);
+      throw err;
+    }
+
     if (this.doTrialWork) {
       try {
         await ensureBucketsLicenseBucket(this);  

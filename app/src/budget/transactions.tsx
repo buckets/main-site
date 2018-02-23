@@ -199,7 +199,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
               disabled={!this.state.selected.size}
               onClick={ev => {
                 manager
-                .checkpoint(sss('Delete transactions'))
+                .checkpoint(sss('Delete Transactions'))
                 .accounts.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}
@@ -304,7 +304,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     if (this.props.trans) {
       // update
       await manager
-      .checkpoint(sss('Update transaction'))
+      .checkpoint(sss('Update Transaction'))
       .accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
@@ -319,7 +319,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       if (this.state.amount) {
         try {
           await manager
-          .checkpoint(sss('Create transaction'))
+          .checkpoint(sss('Create Transaction'))
           .accounts.transact({
             account_id: this.state.account_id,
             amount: this.state.amount,
