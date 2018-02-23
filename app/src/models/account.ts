@@ -135,8 +135,10 @@ export class AccountStore {
     } else {
       // actually delete it
       let old_account = await this.get(account_id);
-      await this.store.deleteObject(Account, account_id);
-      return old_account;
+      return this.deleteWholeAccount(account_id)
+      .then(() => {
+        return old_account
+      });
     }
   }
   async unclose(account_id:number):Promise<Account> {

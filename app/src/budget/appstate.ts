@@ -386,19 +386,19 @@ export class StateManager {
           makeToast(sss('Account created: ') + obj.name);
         }
         this.appstate.accounts[obj.id] = obj;
-        this.posttick.add('fetchAccountBalances');
       } else if (ev.event === 'delete') {
         delete this.appstate.accounts[obj.id];
       }
+      this.posttick.add('fetchAccountBalances');
     } else if (isObj(Bucket, obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
-        this.posttick.add('fetchBucketBalances');
-        this.posttick.add('fetchBucketFlow');
-        this.posttick.add('fetchFutureRainfall');
       } else if (ev.event === 'delete') {
         delete this.appstate.buckets[obj.id];
       }
+      this.posttick.add('fetchBucketBalances');
+      this.posttick.add('fetchBucketFlow');
+      this.posttick.add('fetchFutureRainfall');
     } else if (isObj(Group, obj)) {
       if (ev.event === 'update') {
         this.appstate.groups[obj.id] = obj;

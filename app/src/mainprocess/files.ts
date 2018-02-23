@@ -559,18 +559,19 @@ export class BudgetFile implements IBudgetFile {
     return this._handleUndoRedoResult(result);
   }
   private async _handleUndoRedoResult(result:UndoRedoResult) {
-    let del_promises = result.deleted.map(({table_name, object_id}) => {
-      return this.store.publishObject('delete', {
-        _type: table_name,
-        id: object_id,
-        created: null,
-      })
+    let promises = result.changes.map(async change => {
+      if (change.change === 'delete') {
+        return this.store.publishObject('delete', {
+          _type: change.table,
+          id: change.id,
+          created: null,
+        })
+      } else {
+        let obj = await this.store.getObject(TABLE2CLASS[change.table], change.id);
+        return this.store.publishObject('update', obj);
+      }
     })
-    let up_promises = result.updated.map(async ({table_name, object_id}) => {
-      let obj = await this.store.getObject(TABLE2CLASS[table_name], object_id);
-      return this.store.publishObject('update', obj);
-    })
-    return Promise.all([...del_promises, ...up_promises]);
+    return Promise.all(promises);
   }
 
   // These are for use by RendererBudgetFile

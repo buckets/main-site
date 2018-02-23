@@ -29,15 +29,13 @@ interface ILogEntry {
   sql: string;
 }
 
+interface IChange {
+  table: string;
+  id: number;
+  change: 'update'|'delete';
+}
 export interface UndoRedoResult {
-  deleted: Array<{
-    table_name: string;
-    object_id: number;
-  }>;
-  updated: Array<{
-    table_name: string;
-    object_id: number;
-  }>;
+  changes: IChange[];
 }
 
 export class UndoTracker {
@@ -98,14 +96,27 @@ export class UndoTracker {
       throw err;
     }
 
-    await this.enableTable('account');
-    await this.enableTable('account_transaction');
-    await this.enableTable('bucket');
-    await this.enableTable('bucket_transaction');
-    await this.enableTable('bucket_group');
+    // Decide which tables get undo tracking
+    const exclude_tables = new Set([
+      '_schema_version',
+      '_dear_hacker',
+      'x_trigger_disabled',
+    ])
+    const all_tables = await this.store.query(`SELECT name FROM sqlite_master WHERE type='table';`, {});
+    const sqls = await Promise.all(all_tables
+    .map(x => x.name)
+    .filter(table_name => !exclude_tables.has(table_name))
+    .map(table_name => this.enableTableSQL(table_name)))
 
-    // XXX switch so that you specify which tables NOT to track
-    log.error('HEY MATT, specify the tables NOT to track');
+    const full_sql = sqls.join('\n')
+
+    try {
+      await this.store.db.exec(full_sql)
+    } catch(err) {
+      log.error('Error enabling undo tracking')
+      log.info(full_sql)
+      throw err;
+    }
   }
 
   get nextUndoLabel() {
@@ -126,10 +137,10 @@ export class UndoTracker {
       return `${item.id} ${item.direction}: "${item.label}" ${item.undo_log_id}`;
     }).join('\n'))
   }
-  async enableTable(table_name:string) {
+  async enableTableSQL(table_name:string) {
     const columns = Array.from(await this.store.query(`pragma table_info(${table_name})`, {})) as SqliteTableInfoRow[];
 
-    const sql = `
+    return `
       -- INSERT
       CREATE TEMP TRIGGER x_${table_name}_insert
       AFTER INSERT ON ${table_name}
@@ -168,7 +179,6 @@ export class UndoTracker {
             'INSERT INTO ${table_name} (rowid,${columns.map(col => col.name).join(',')}) VALUES ('||old.rowid||',${columns.map(col => `'||quote(old.${col.name})||'`).join(',')})');
       END;
     `
-    await this.store.exec(sql);
   }
 
   /**
@@ -244,8 +254,7 @@ export class UndoTracker {
     if (!checkpoint) {
       // stack is empty
       return {
-        deleted: [],
-        updated: [],
+        changes: [],
       };
     }
 
@@ -255,6 +264,7 @@ export class UndoTracker {
       WHERE
         direction = $direction
         AND id > $undo_log_id
+      ORDER BY id DESC
     `, {
       $direction: direction,
       $undo_log_id: checkpoint.undo_log_id,
@@ -272,14 +282,16 @@ export class UndoTracker {
         $tmp_direction: tmp_direction,
       });
     
-    let deleted_objects:Array<{
-      table_name: string;
-      object_id: number;
-    }> = [];
-    let updated_objects:Array<{
-      table_name: string;
-      object_id: number;
-    }> = [];
+    let object_map:{
+      [key:string]: {
+        table: string;
+        id: number;
+        change: 'update'|'delete';
+      }
+    } = {};
+    let ret:UndoRedoResult = {
+      changes: [],
+    }
 
     // record the opposite
     await this.doAction(checkpoint.label, async () => {
@@ -289,7 +301,6 @@ export class UndoTracker {
       sqls.push(`INSERT INTO x_trigger_disabled (col) VALUES (1)`)
 
       for (const item of logitems) {
-
         // Perform action
         sqls.push(item.sql);
 
@@ -297,17 +308,19 @@ export class UndoTracker {
         sqls.push(`DELETE FROM undo_log WHERE id=${item.id}`);
         
         // Prepare to publish object change
-        if (item.sql.startsWith('DELETE')) {
-          deleted_objects.push({
-            table_name: item.table_name,
-            object_id: item.object_id,
-          })
-        } else {
-          updated_objects.push({
-            table_name: item.table_name,
-            object_id: item.object_id,
-          })
+        const key = `${item.table_name} ${item.object_id}`;
+        const existing_change = object_map[key]
+        if (existing_change) {
+          // A prior change is going to be overwritten
+          ret.changes.splice(ret.changes.indexOf(existing_change), 1)
         }
+        const change:IChange = {
+          table: item.table_name,
+          id: item.object_id,
+          change: (item.sql.startsWith('DELETE') ? 'delete' : 'update'),
+        }
+        ret.changes.push(change)
+        object_map[key] = change;
       }
 
       // Enable triggers
@@ -362,9 +375,6 @@ export class UndoTracker {
     })
     this.events.stackchange.emit(this.direction);
 
-    return {
-      deleted: deleted_objects,
-      updated: updated_objects,
-    }
+    return ret;
   }
 }

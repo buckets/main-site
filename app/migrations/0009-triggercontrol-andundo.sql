@@ -62,3 +62,4 @@ CREATE TRIGGER account_transaction_delete
     BEGIN
         DELETE FROM bucket_transaction WHERE account_trans_id=OLD.id;
     END;
+
