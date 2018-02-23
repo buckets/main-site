@@ -1,4 +1,26 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.34.0
+
+- **NEW:** Replaced confusing line and dot chart with a bar chart of historical expenses in Analysis > Recurring Expenses section.  Also, now you can choose the time period being shown.  ([#cY5uD7Y5](https://trello.com/c/cY5uD7Y5))
+
+- **NEW:** You can now click on a bucket's balance to quickly set it to 0.  For instance, if the balance is -54 and you click it, it will prepare to deposit 54 into the bucket.  ([#WLOgdR67](https://trello.com/c/WLOgdR67))
+
+- **NEW:** Now translated into Portuguese, graças a Carlos.  Obrigado!
+
+- **NEW:** You can now attach screenshots to bug reports
+
+- **NEW:** You can now undo/redo *most* actions that modify your budget.  So if you accidentally deposited $500 into the wrong bucket, press Control/Command Z to reverse the last change.  ([#JE9sINCG](https://trello.com/c/JE9sINCG))
+
+- **FIX:** Balance chart for high numbers is now more than just a flat line ([#rYUgiuQh](https://trello.com/c/rYUgiuQh))
+
+- **FIX:** Fixed bug where deleting an account would not always clean up associated records.
+
+- **FIX:** Cents are shown by default now for all numbers ([#yUin1iGJ](https://trello.com/c/yUin1iGJ))
+
+- **FIX:** Potentially fixed slowness when entering notes and goal/deposit amounts on buckets.  ([#AbqgETOV](https://trello.com/c/AbqgETOV))
+
+- Now only the language you are using is loaded (resulting in slightly faster load times)
+
 ## v0.33.0
 
 - **NEW:** You can now delete bucket groups ([#02VRaU99](https://trello.com/c/02VRaU99))
