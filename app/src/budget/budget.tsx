@@ -43,7 +43,6 @@ export async function start(base_element, room, args: {
   log.info('         toString:', (new Date()).toString())
   log.info('   toLocaleString:', (new Date()).toLocaleString())
   log.info('getTimezoneOffset:', (new Date()).getTimezoneOffset())
-  log.info(navigator.userAgent)
   log.info(`moment: ${moment.version}`)
 
   if (args) {
@@ -286,7 +285,6 @@ class Application extends React.Component<ApplicationProps, any> {
                         month={routing.params.month-1}
                         year={routing.params.year}
                         onChange={({month, year}) => {
-                          log.info('monthselector newdate', month, year);
                           routing.setPath(`/y${year}m${month+1}${routing.rest}`);
                         }}
                       />);

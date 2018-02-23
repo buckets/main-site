@@ -3,9 +3,9 @@ import * as cx from 'classnames'
 import * as _ from 'lodash'
 import * as moment from 'moment'
 import { tx } from './i18n'
-import { PrefixLogger } from './logging'
 
-const log = new PrefixLogger('(input)');
+// import { PrefixLogger } from './logging'
+// const log = new PrefixLogger('(input)');
 
 export function onKeys(mapping:object):((ev)=>void) {
   let actual_mapping = {};
@@ -290,7 +290,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
   }
   increment(amount:number) {
     return () => {
-      log.info('click increment', amount);
       let new_month = this.state.month + amount;
       let new_year = this.props.year;
       while (new_month < 0) {
@@ -301,7 +300,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
         new_year += 1;
         new_month -= 12;
       }
-      log.info('new', new_month, new_year);
       this.setDate({month: new_month, year:new_year});
     }
   }
@@ -313,7 +311,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     }
   }
   monthChanged = (ev) => {
-    log.info('monthChanged', ev.target.value);
     const new_month = parseInt(ev.target.value);
     this.setDate({
       month: new_month,
@@ -321,7 +318,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     });
   }
   yearChanged = (ev) => {
-    log.info('yearChanged', ev.target.value);
     const new_year = parseInt(ev.target.value);
     this.setState({year: ev.target.value});
     if (this.isValidYear(new_year)) {
@@ -332,7 +328,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     }
   }
   setDate(args:{month:number, year:number}) {
-    log.info('setDate', args);
     this.props.onChange(args);
     this.setState({
       month: args.month,

@@ -471,9 +471,7 @@ export class StateManager {
   async setDate(year:number, month:number):Promise<any> {
     if (this.appstate.year !== year || this.appstate.month !== month) {
       this.appstate.year = year;
-      log.info(`appstate.year = ${year}`);
       this.appstate.month = month;
-      log.info(`appstate.month = ${month}`);
       await this.refresh();
       this.events.change.emit(this.appstate);
     }
