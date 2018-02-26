@@ -5,7 +5,11 @@ if [ ! -e "$DST" ]; then
     exit 1
 fi
 
+set -e
+
 rsync -vrut src/langs/*.tsx "${DST}/langs"
 
-echo
-echo "Now go to ${DST} to send to GitHub"
+pushd "${DST}"
+git commit -a -m "Update app strings"
+git push origin master
+popd

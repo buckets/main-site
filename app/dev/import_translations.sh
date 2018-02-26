@@ -5,4 +5,11 @@ if [ ! -e "$SRC" ]; then
     exit 1
 fi
 
+set -e
+
+pushd "${SRC}"
+git fetch origin
+git merge origin/master
+popd
+
 rsync -vrut "${SRC}"/langs/*.tsx src/langs/
