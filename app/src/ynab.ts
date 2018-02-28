@@ -172,7 +172,7 @@ function sortByIndex(a, b) {
   return compare(a.sortableIndex, b.sortableIndex);
 }
 
-export async function importYNAB4(store:IStore, path:string):Promise<null> {
+export async function importYNAB4(store:IStore, path:string) {
   const ymeta = await loadJSONFile<YNAB.Meta>(Path.resolve(path, 'Budget.ymeta'));
 
   const datadir = Path.resolve(path, ymeta.relativeDataFolderName);
@@ -211,6 +211,10 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
   budget.payees.forEach(payee => {
     payees[payee.entityId] = payee;
   })
+
+  let ret = {
+    transactions_worth_looking_at: [],
+  }
 
   let monthly_budgets = budget.monthlyBudgets
     .filter(x => x.monthlySubCategoryBudgets.length)
@@ -355,11 +359,10 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
           await store.accounts.categorizeGeneral(transaction.id, 'income');
         } else if (ytrans.categoryId === "Category/__Split__") {
           // Split category
-          const nullCatCount = ytrans.subTransactions.filter(sub => sub.categoryId === null).length;
+          const nullCatCount = ytrans.subTransactions.filter(sub => !cat2bucket[sub.categoryId]).length;
           if (nullCatCount) {
-            // It's not completely categorized
-            // Why?  While waiting for an answer, I'll at least have it not break.
-            log.warn('Split transactions with null categories');
+            // It's not completely categorized or it's split between income and another category
+            ret.transactions_worth_looking_at.push(transaction);
           } else {
             let cats = ytrans.subTransactions.map(sub => {
               let bucket_id = cat2bucket[sub.categoryId].id;
@@ -389,7 +392,7 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
     }
   }
 
-  return null;
+  return ret;
 }
 
 export async function findYNAB4FileAndImport(store:IStore):Promise<any> {
