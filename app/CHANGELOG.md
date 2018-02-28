@@ -1,4 +1,8 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.35.1
+
+- **FIX:** Another fix for another kind of YNAB4 import failure.  ([#MpmFZutK](https://trello.com/c/MpmFZutK))
+
 ## v0.35.0
 
 - **NEW:** Added *Start with a template* button for getting started with Buckets.  ([#2kWWcMGa](https://trello.com/c/2kWWcMGa))
