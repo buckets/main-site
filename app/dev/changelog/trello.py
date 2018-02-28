@@ -69,7 +69,7 @@ class TrelloData(object):
 
     def moveCardToList(self, card_id, list_name):
         list_id = self.listIdFor(list_name)
-        r = self.req('/cards/{card_id}'.format(**locals()),
+        r = self.req('PUT', '/cards/{card_id}'.format(**locals()),
             {
                 'idList': list_id,
             })
