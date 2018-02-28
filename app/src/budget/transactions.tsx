@@ -676,7 +676,7 @@ class Categorizer extends React.Component<CategorizerProps, {
             {bucketName(cat)}
           </div>
           {cats.length === 1 ? null : <div className="amount">
-            <Money nocolor value={cat.amount} />
+            <Money nocolor value={cat.amount} hideZeroCents />
           </div>}
         </a>
       })

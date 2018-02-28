@@ -110,6 +110,7 @@ interface MoneyProps {
   className?: string;
   hidezero?: boolean;
   hideCents?: boolean;
+  hideZeroCents?: boolean;
   noFaintCents?: boolean;
   noanimate?: boolean;
   nocolor?: boolean;
@@ -198,7 +199,7 @@ export class Money extends React.Component<MoneyProps, {
     })
   }
   render() {
-    let { value, className, hidezero, noanimate, nocolor, symbol, round, hideCents, noFaintCents, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, symbol, round, hideCents, hideZeroCents, noFaintCents, ...rest } = this.props;
     let going_up = true;
     if (ANIMATION_ENABLED && !noanimate) {
       // animating
@@ -218,16 +219,21 @@ export class Money extends React.Component<MoneyProps, {
       }
     }
     let parts = display.split(decimal_sep, 2);
+    let zeroCents = true;
     let display_components = [];
     if (parts.length === 2) {
-      let zero_cls = parts[1] === '0'.repeat(parts[1].length);
+      zeroCents = parts[1] === '0'.repeat(parts[1].length);
       display_components.push(<span className="dollar" key="dollar">{parts[0]}</span>)
-      display_components.push(<span className={cx("decimal", {
-        "zero": zero_cls,
-      })} key="decimal">{decimal_sep}</span>);
-      display_components.push(<span className={cx("cents", {
-        "zero": zero_cls,
-      })} key="cents">{parts[1]}</span>)
+      if (zeroCents && hideZeroCents) {
+        // don't show cents
+      } else {
+        display_components.push(<span className={cx("decimal", {
+          "zero": zeroCents,
+        })} key="decimal">{decimal_sep}</span>);
+        display_components.push(<span className={cx("cents", {
+          "zero": zeroCents,
+        })} key="cents">{parts[1]}</span>)
+      }
     } else {
       display_components.push(<span className="dollar" key="dollar">{display}</span>)
     }
