@@ -1,4 +1,12 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.35.0
+
+- **NEW:** Added *Start with a template* button for getting started with Buckets.  ([#2kWWcMGa](https://trello.com/c/2kWWcMGa))
+
+- **FIX:** Handle CSV files that don't have a consistent number of columns throughout.  ([#TvFClGGM](https://trello.com/c/TvFClGGM))
+
+- **FIX:** Fixed a bug when importing YNAB4 files with transactions that are split, but not split into categories ([#rJgT119e](https://trello.com/c/rJgT119e))
+
 ## v0.34.0
 
 - **NEW:** Replaced confusing line and dot chart with a bar chart of historical expenses in Analysis > Recurring Expenses section.  Also, now you can choose the time period being shown.  ([#cY5uD7Y5](https://trello.com/c/cY5uD7Y5))
