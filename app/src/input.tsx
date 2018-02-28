@@ -124,7 +124,7 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
     this.props.onChange(this.state.value);
   })
   render() {
-    let { element, value, onChange, className, blendin, ...rest } = this.props;
+    let { element, value, onChange, className, blendin, changeArgIsValue, ...rest } = this.props;
     element = element || 'input'
     className = cx(className, {
       'ctx-matching-input': blendin,
