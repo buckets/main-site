@@ -55,7 +55,7 @@ namespace YNAB {
     accountId: string;
     payeeId: string;
     memo?: string;
-    cleared: "Cleared" | "Uncleared";
+    cleared: "Cleared" | "Uncleared" | "Reconciled";
     accepted: boolean;
     flag?: string;
     importedPayee?: string; // "DIVIDEND EARNED FOR PERIOD OF 10",
@@ -66,9 +66,13 @@ namespace YNAB {
   export interface Transaction extends CommonTransaction {
     entityType: "transaction";
     subTransactions?: SubTransaction[];
+    matchedTransactions?: Array<any>;
   }
   export interface SubTransaction extends CommonTransaction {
     parentTransactionId?: string;
+    // transfer
+    targetAccountId?: string;
+    transferTransactionId?: string;
   }
 
   export interface MonthlyBudget {
@@ -351,15 +355,22 @@ export async function importYNAB4(store:IStore, path:string):Promise<null> {
           await store.accounts.categorizeGeneral(transaction.id, 'income');
         } else if (ytrans.categoryId === "Category/__Split__") {
           // Split category
-          let cats = ytrans.subTransactions.map(sub => {
-            let bucket_id = cat2bucket[sub.categoryId].id;
-            let amount = number2cents(sub.amount);
-            return {
-              bucket_id,
-              amount,
-            }
-          })
-          await store.accounts.categorize(transaction.id, cats);
+          const nullCatCount = ytrans.subTransactions.filter(sub => sub.categoryId === null).length;
+          if (nullCatCount) {
+            // It's not completely categorized
+            // Why?  While waiting for an answer, I'll at least have it not break.
+            log.warn('Split transactions with null categories');
+          } else {
+            let cats = ytrans.subTransactions.map(sub => {
+              let bucket_id = cat2bucket[sub.categoryId].id;
+              let amount = number2cents(sub.amount);
+              return {
+                bucket_id,
+                amount,
+              }
+            })
+            await store.accounts.categorize(transaction.id, cats);
+          }
         } else {
           // Single category
           let bucket = cat2bucket[ytrans.categoryId];
