@@ -27,7 +27,10 @@ export class NoteMaker extends React.Component<NoteProps, {
         onClick={() => {
           this.setState({showing: !this.state.showing});
         }}>
-        <span className="fa fa-sticky-note"/>
+        <span className={cx("fa fa-fw", {
+          "fa-sticky-note": !this.state.showing,
+          "fa-check": this.state.showing,
+        })}/>
       </button>
     
     let guts;

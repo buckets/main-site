@@ -1563,7 +1563,7 @@ g.hover-labels:hover rect.highlight {
   z-index: 5;
   position: absolute;
   top: 1.25rem;
-  left: 0;
+  left: -.75rem;
   display: flex;
 }
 .note-maker .note-inner textarea {
