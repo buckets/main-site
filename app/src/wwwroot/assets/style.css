@@ -1565,6 +1565,7 @@ g.hover-labels:hover rect.highlight {
   top: 1.25rem;
   left: -.75rem;
   display: flex;
+  flex-direction: column;
 }
 .note-maker .note-inner textarea {
   border: none;
@@ -1580,6 +1581,18 @@ g.hover-labels:hover rect.highlight {
 }
 .note-maker .note-inner textarea:focus {
   border-color: var(--blue);
+}
+.note-maker.focused .note-help {
+  opacity: 1;
+}
+.note-maker .note-help {
+  font-size: .8rem;
+  color: var(--grey);
+  text-align: end;
+  background-color: white;
+  padding: 0 .25rem;
+  transition: opacity .1s;
+  opacity: 0;
 }
 
 .record-list-item {

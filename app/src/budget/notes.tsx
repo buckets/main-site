@@ -13,11 +13,13 @@ interface NoteProps {
 }
 export class NoteMaker extends React.Component<NoteProps, {
   showing: boolean;
+  focused: boolean;
 }> {
   constructor(props) {
     super(props)
     this.state = {
       showing: false,
+      focused: false,
     }
   }
   render() {
@@ -45,6 +47,12 @@ export class NoteMaker extends React.Component<NoteProps, {
                 this.setState({showing: false});
               }
             }}
+            onFocus={() => {
+              this.setState({focused: true});
+            }}
+            onBlur={() => {
+              this.setState({focused: false});
+            }}
             onChange={(val) => {
               manager
               .checkpoint(sss('Update Note'))
@@ -52,6 +60,7 @@ export class NoteMaker extends React.Component<NoteProps, {
             }}
             element="textarea"
           />
+          <div className="note-help">{sss('press Escape to close')}</div>
         </div>
       </div>
     }
@@ -59,6 +68,7 @@ export class NoteMaker extends React.Component<NoteProps, {
       className={cx("note-maker", {
         'has-note': obj.notes,
         'showing': this.state.showing,
+        'focused': this.state.focused,
       })}>{button}{guts}</div>
   }
 }
