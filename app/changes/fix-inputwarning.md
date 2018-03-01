@@ -1,1 +1,1 @@
-Fix warning on inputs (#LaBarRXx)
+Fixed an internal input warning. (#LaBarRXx)
