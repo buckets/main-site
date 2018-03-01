@@ -2469,5 +2469,11 @@ Você gostaria de comprar uma licença agora?`,
 export const pack:ILangPack = {
   name: 'Português',
   dir: 'ltr',
+  numbers: {
+    group: '.',
+    group_regex: /\./g,
+    decimal: ',',
+    decimal_regex: /,/g,
+  },
   messages
 }

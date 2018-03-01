@@ -4,14 +4,38 @@ import * as math from 'mathjs';
 
 
 let ANIMATION_ENABLED = true;
-const _groupregex = new RegExp(',', "g");
+
+export let seps = {
+  group: null,
+  decimal: null,
+  group_regex: null,
+  decimal_regex: null,
+}
+
+export function setSeparators(group:string, group_regex:RegExp, decimal:string, decimal_regex:RegExp) {
+  seps.group = group;
+  seps.decimal = decimal;
+  seps.group_regex = group_regex;
+  seps.decimal_regex = decimal_regex;
+}
+setSeparators(',', /,/g, '.', /\./g);
+
+// pt
+// setSeparators('.', /\./g, ',', /,/g);
+
 math.config({
   number: 'BigNumber',
   precision: 64,
 })
 function fancyEval(x:string) {
-  x = x.replace(_groupregex, '');
-  return math.eval(x).toString();
+  // convert from whatever locale it's in to en_us
+  // without thousand seps
+  x = x
+    .replace(seps.group_regex, '')
+    .replace(seps.decimal_regex, '.');
+  return math.eval(x)
+    .toString()
+    .replace(/\./g, seps.decimal);
 }
 
 export function setAnimationEnabled(value:boolean) {
@@ -218,7 +242,7 @@ export class Money extends React.Component<MoneyProps, {
         display = symbol_display + display;
       }
     }
-    let parts = display.split(decimal_sep, 2);
+    let parts = display.split(seps.decimal, 2);
     let zeroCents = true;
     let display_components = [];
     if (parts.length === 2) {
@@ -229,7 +253,7 @@ export class Money extends React.Component<MoneyProps, {
       } else {
         display_components.push(<span className={cx("decimal", {
           "zero": zeroCents,
-        })} key="decimal">{decimal_sep}</span>);
+        })} key="decimal">{seps.decimal}</span>);
         display_components.push(<span className={cx("cents", {
           "zero": zeroCents,
         })} key="cents">{parts[1]}</span>)
@@ -253,9 +277,6 @@ export class Money extends React.Component<MoneyProps, {
 
 }
 
-
-export let thousand_sep = ',';
-export let decimal_sep = '.';
 
 export function cents2decimal(cents:number|null|string, args:{
     show_decimal?:boolean,
@@ -301,7 +322,7 @@ export function cents2decimal(cents:number|null|string, args:{
       parts.push(d);
     }
     parts.reverse();
-    stem = parts.join(thousand_sep);
+    stem = parts.join(seps.group);
   }
 
   // After decimal
@@ -312,7 +333,7 @@ export function cents2decimal(cents:number|null|string, args:{
     if (suffix.length < 2) {
       suffix = '0' + suffix;
     }
-    suffix = decimal_sep + suffix;
+    suffix = seps.decimal + suffix;
   }
   return sign + stem + suffix;
 }
@@ -326,9 +347,8 @@ export function decimal2cents(string:string):number {
     negative = true;
   }
 
-  var re = new RegExp(thousand_sep, 'g');
-  string = string.replace(re, '');
-  var parts = string.split(decimal_sep);
+  string = string.replace(seps.group_regex, '');
+  var parts = string.split(seps.decimal);
 
   // cents
   var cents = 0;

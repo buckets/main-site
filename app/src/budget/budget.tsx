@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { sss, localizeThisPage } from '../i18n'
+import { sss, tx, localizeThisPage } from '../i18n'
 import {Renderer} from './render'
 import { AccountsPage, ClosedAccountsPage } from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
@@ -12,7 +12,7 @@ import { ImportPage, SyncWidget } from './importpage'
 import { ExportPage } from './exportpage'
 import { SearchPage } from './searchpage'
 import { ReportsPage } from './reports'
-import { Money, setAnimationEnabled } from '../money'
+import { Money, setAnimationEnabled, setSeparators } from '../money'
 import { MonthSelector } from '../input'
 import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
@@ -38,6 +38,10 @@ export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
   await localizeThisPage();
+  setSeparators(tx.langpack.numbers.group,
+      tx.langpack.numbers.group_regex,
+      tx.langpack.numbers.decimal,
+      tx.langpack.numbers.decimal_regex);
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())
