@@ -685,6 +685,7 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
       <td className="right-border"><Money value={Math.abs(average)} hidezero /></td>
       <td className="right-border center novpadding">
         <ExpenseChart
+          minWidth={100}
           expected={computed.deposit}
           expenses={expenses.map(x => {
             return {amount: x}
@@ -698,6 +699,7 @@ class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowPro
 
 interface ExpenseChartProps {
   width?: number;
+  minWidth?: number;
   height?: number;
   className?: string;
   expected: number;
@@ -714,7 +716,7 @@ interface ExpenseChartProps {
 
 class ExpenseChart extends React.PureComponent<ExpenseChartProps, {}> {
   render() {
-    let { width, height, barsToShow, barWidth, barSpacing, expenses, expected, className } = this.props;
+    let { width, minWidth, height, barsToShow, barWidth, barSpacing, expenses, expected, className } = this.props;
     height = height || 30;
     const padding = 3;
     const vpadding = 1;
@@ -744,17 +746,27 @@ class ExpenseChart extends React.PureComponent<ExpenseChartProps, {}> {
       .domain([miny, maxy])
       .range([height-vpadding, vpadding+label_height]);
 
+    const viewWidth = width < minWidth ? minWidth : width;
+
     return <div
       className={className}
       style={{
-        width: `${width}px`,
+        width: `${viewWidth}px`,
         height: `${height}px`,
       }}>
-      <svg viewBox={`0 0 ${width} ${height}`}>
+      <svg viewBox={`0 0 ${viewWidth} ${height}`}>
 
         {expenses_list.map((expenses, i) => {
           let rects = [];
           let xval = x(numBars - i) - barWidth;
+          rects.push(<rect
+            key="hover-target"
+            x={xval}
+            width={barWidth}
+            y={y(maxy)}
+            height={height}
+            fill="transparent"
+          />)
           if (expenses > expected) {
             // overspend
             rects.push(<rect
@@ -787,7 +799,7 @@ class ExpenseChart extends React.PureComponent<ExpenseChartProps, {}> {
               fill={COLORS.lighter_grey}
             />)
           }
-          const lefthalf = xval < width/2;
+          const lefthalf = xval < viewWidth/2;
           rects.push(<text
             key="label"
             x={
