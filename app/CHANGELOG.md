@@ -1,4 +1,18 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.36.0
+
+- **NEW:** Numbers are localized according to language now (i.e. in Portuguese and Spanish the decimal separator is now a comma) ([#0iXa6tJR](https://trello.com/c/0iXa6tJR))
+
+- **FIX:** It's more obvious how to close notes. ([#2qffJJW9](https://trello.com/c/2qffJJW9))
+
+- **FIX:** Emoji in Bucket names no longer causes height problems in macOS ([#XTu7f4EW](https://trello.com/c/XTu7f4EW))
+
+- **FIX:** Recurring expense chart labels aren't cut off anymore.  ([#dl6Rupnn](https://trello.com/c/dl6Rupnn))
+
+- **FIX:** Fixed an internal input warning. ([#LaBarRXx](https://trello.com/c/LaBarRXx))
+
+- **FIX:** If there's no internet connection, an error about not being able to update is no longer displayed on start ([#hjnugHpN](https://trello.com/c/hjnugHpN))
+
 ## v0.35.1
 
 - **FIX:** Another fix for another kind of YNAB4 import failure.  ([#MpmFZutK](https://trello.com/c/MpmFZutK))
