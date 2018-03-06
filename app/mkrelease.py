@@ -189,6 +189,17 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
             trello.commentOnCard(card_id, 'Included in v{0} release (AUTOMATED COMMENT)'.format(target_version))
             trello.moveCardToList(card_id, 'Done')
 
+    # publish CHANGELOG
+    if yesno('Publish CHANGELOG.md to https://github.com/buckets/application?', default=True):
+        github_dir = os.path.abspath('../../buckets-application')
+        subprocess.check_call(['git', 'fetch', 'origin'], cwd=github_dir)
+        subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
+        subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
+        subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
+        subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)])
+        subprocess.check_call(['git', 'push', 'origin', 'master'])
+
+
 
 if __name__ == '__main__':
     doit()
