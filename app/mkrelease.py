@@ -196,8 +196,8 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
         subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
         subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
         subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
-        subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)])
-        subprocess.check_call(['git', 'push', 'origin', 'master'])
+        subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
+        subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
 
 
 
