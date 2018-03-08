@@ -25,6 +25,10 @@ Add a new language:
     dev/dolangs.sh new es
 
 
+# Make a license by hand
+
+    buckets/drm.py
+
 # Deploy
 
 ./deploy2heroku.sh
