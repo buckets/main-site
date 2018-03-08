@@ -1,1 +1,1 @@
-The Accounts view uses horizontal space better now.  (#4MgmeJq9, #5oypmRTm)
+Several visual changes.  The Accounts view uses horizontal space better.  The Month-to-Month analysis view no longer includes the year on the first date.  (#4MgmeJq9, #5oypmRTm, #Ljy70cM6)

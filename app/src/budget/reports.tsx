@@ -68,13 +68,7 @@ export class ReportsPage extends React.Component<{
             <h2 className="center">{sss('Month to Month')}</h2>
             <CashFlowComparison
               intervals={month_intervals}
-              columnFormatter={(x:Interval, idx:number) => {
-                if (idx === 0) {
-                  return x.start.format('MMM YYYY');
-                } else {
-                  return x.start.format('MMM');
-                }
-              }}
+              columnFormatter={(x:Interval) => x.start.format('MMM')}
             />
 
             <h2 className="center">{sss('Year to Year')}</h2>
