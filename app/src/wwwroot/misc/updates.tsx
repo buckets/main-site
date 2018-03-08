@@ -78,6 +78,7 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
             }}/>
           </div>
         </div>
+        <div className="release-notes" dangerouslySetInnerHTML={{__html: releaseNotes}}></div>
       </div>
     } else if (state === 'downloaded') {
       guts = <div>
@@ -87,6 +88,7 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
             ipcRenderer.send('buckets:install-update');    
           }}>{sss('Install and Relaunch Buckets')}</button>
         </div>
+        <div className="release-notes" dangerouslySetInnerHTML={{__html: releaseNotes}}></div>
       </div>
     }
     return <div className="update-app padded">
