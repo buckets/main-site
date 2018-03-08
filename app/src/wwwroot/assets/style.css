@@ -214,6 +214,7 @@ span.experimental {
   overflow: auto;
 }
 
+
 .rows {
   flex-grow: 1;
   flex-basis: 1px;
@@ -292,6 +293,21 @@ hr.page {
 }
 .flex-grow-2 {
   flex-grow: 2;
+}
+
+.layout-two-col {
+  display: grid;
+  flex-grow: 1;
+  grid-template-columns: min-content auto;
+  grid-template-areas:
+    "first second";
+}
+.layout-two-col .first {
+  grid-area: first;
+}
+.layout-two-col .second {
+  grid-area: second;
+  border-left: 1px solid var(--lighter-grey);
 }
 
 h1 {

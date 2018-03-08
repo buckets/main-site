@@ -83,7 +83,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
       }
       return (<tr key={account.id} className="note-hover-trigger">
           <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
-          <td><ClickToEdit
+          <td className="nobr"><ClickToEdit
             value={account.name}
             placeholder={sss('accounts.name_placeholder', 'no name')}
             onChange={(val) => {
@@ -251,8 +251,8 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
           </div>
         </div>
         {getting_started}
-        <div className="panes">
-          <div className="padded">
+        <div className="layout-two-col">
+          <div className="padded first">
             <AccountList
               accounts={accounts_list}
               balances={appstate.account_balances} />
@@ -264,12 +264,12 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
                 return <Redirect to='/accounts' />;
               }
               let balance = appstate.account_balances[account.id];
-              return (<AccountView
+              return (<div className="second"><AccountView
                 account={account}
                 balance={balance}
                 transactions={_.values(appstate.transactions)
                   .filter(t => t.account_id == account.id)}
-                appstate={appstate} />);
+                appstate={appstate} /></div>);
             }} />
           </Route>
         </div>

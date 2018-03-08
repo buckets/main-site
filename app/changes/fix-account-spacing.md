@@ -1,0 +1,1 @@
+The Accounts view uses horizontal space better now.  (#4MgmeJq9, #5oypmRTm)

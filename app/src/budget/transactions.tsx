@@ -214,7 +214,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
           <th></th>
           <th className="nobr">{sss('Posted')}</th>
           {hideAccount ? null : <th>{sss('Account')}</th>}
-          <th style={{width: '40%'}}>{sss('Memo')}</th>
+          <th>{sss('Memo')}</th>
           <th>{sss('Amount')}</th>
           {isNil(ending_balance) ? null : <th>{sss('Balance')}</th>}
           <th></th>
@@ -404,6 +404,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           <td>
             <input
               type="text"
+              style={{width: "100%"}}
               value={this.state.memo}
               onChange={(ev) => {
                 this.setState({memo: ev.target.value})
