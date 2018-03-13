@@ -5,13 +5,7 @@ import { PrefixLogger } from '../logging'
 
 const log = new PrefixLogger('(jsmig)');
 
-TODO:
-- verify, month by month, that your budget matches
-- try out every date input
-- post new transactions in
-  - prior months
-  - current month
-  - next month
+
 
 export interface Migration {
   order: number;

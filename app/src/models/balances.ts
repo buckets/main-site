@@ -1,6 +1,6 @@
 import * as moment from 'moment-timezone'
 import {IStore} from '../store'
-import { ts2utcdb, localNow } from '../time'
+import { ts2localdb, localNow } from '../time'
 import {sanitizeDbFieldName} from '../mainprocess/dbstore'
 
 export class Balances {
@@ -36,7 +36,7 @@ export async function computeBalances(
     ${where}
     GROUP BY 1
   `;
-  prm.$asof = ts2utcdb(asof);
+  prm.$asof = ts2localdb(asof);
   let rows = await store.query(sql, prm);
   let ret:Balances = {};
   rows.forEach(row => {

@@ -402,7 +402,7 @@ export class BucketStore {
     return this.store.listObjects(Transaction, {
       where,
       params,
-      order: ['posted DESC', 'id'],
+      order: ['posted DESC', 'id DESC'],
       limit: args.limit,
       offset: args.offset,
     });

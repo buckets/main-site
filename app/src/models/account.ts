@@ -467,7 +467,6 @@ export class AccountStore {
     }
   }
 
-  // asof is a UTC time
   async balances(asof?:moment.Moment):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
@@ -538,7 +537,7 @@ export class AccountStore {
 
     let where = where_parts.join(' AND ');
     return this.store.listObjects(Transaction, {where, params,
-      order: ['posted DESC', 'id']});
+      order: ['posted DESC', 'id DESC']});
   }
 
   //------------------------------------------------------------
