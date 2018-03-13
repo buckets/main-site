@@ -194,7 +194,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
       try {
         await db.run('BEGIN EXCLUSIVE TRANSACTION');
         await migration.func(db);
-        await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
+        await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: fullname});
         await db.run('COMMIT TRANSACTION');
         plog.info('commit');
       } catch(err) {
