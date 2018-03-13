@@ -4,7 +4,7 @@ import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
-import { ensureUTCMoment } from '../time'
+import { parseLocalTime } from '../time'
 import { COLORS } from '../color'
 import { computeBucketData } from '../models/bucket'
 import { cents2decimal } from '../money'
@@ -47,7 +47,7 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
       let balance = props.appstate.bucket_balances[bucket_id];
       let history = rows.map(row => {
         let ret = {
-          time: ensureUTCMoment(row.posted),
+          time: parseLocalTime(row.posted),
           balance: balance
         }
         balance -= row.amount;

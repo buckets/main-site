@@ -6,6 +6,7 @@ import { PrefixLogger } from '../logging'
 
 import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass } from '../store'
 import {APP_ROOT} from './globals'
+import { Migration, migrations as jsmigrations } from './jsmigrations'
 
 import { BucketStore } from '../models/bucket'
 import { AccountStore } from '../models/account'
@@ -86,7 +87,7 @@ export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
 
-async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promise<any> {
+async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_migrations:Migration[]):Promise<any> {
 
   let logger = new PrefixLogger('(dbup)');
   await db.run(`CREATE TABLE IF NOT EXISTS _schema_version (
@@ -116,9 +117,12 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
   }
 
   const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
-  logger.info('Applied migrations:', applied)
+  logger.info('Applied migrations:', Array.from(applied).join(', '))
 
-  // apply patches as needed
+  // collect all migrations (first js)
+  let all_migrations:Migration[] = [...js_migrations];
+
+  // collect file-based migrations
   const migrations = await new Promise<string[]>((resolve, reject) => {
     fs.readdir(migrations_path, (err, files) => {
       if (err) {
@@ -128,33 +132,68 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
       }
     })
   })
-  migrations.sort();
-  let encountered = new Set<string>();
   for (const path of migrations) {
-    const name = path.split('.')[0].toLowerCase();
-    if (encountered.has(name)) {
-      throw new Error('Duplicate schema patch name not allowed');
-    }
-    const plog = logger.child(`(patch ${name})`)
-    encountered.add(name);
-    if (applied.has(name)) {
-      plog.info('already applied');
-    } else {
-      plog.info('applying');
-      let fullpath = Path.resolve(migrations_path, path);
-      plog.info('fullpath', fullpath)
-      const fullsql = await new Promise<string>((resolve, reject) => {
-        fs.readFile(fullpath, 'utf-8', (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data.toString());
-          }
-        });
+    const fullname = path.split('.')[0].toLowerCase();
+    const order = Number(fullname.split('-')[0]);
+    const name = fullname.split('-').slice(1).join('-');
+
+    const fullpath = Path.resolve(migrations_path, path);
+    const fullsql = await new Promise<string>((resolve, reject) => {
+      fs.readFile(fullpath, 'utf-8', (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data.toString());
+        }
       });
+    });
+    all_migrations.push({
+      order,
+      name,
+      func: (db) => {
+        return db.exec(fullsql);
+      },
+    })
+  }
+
+  // Check for duplicate patch names
+  let encountered_names = new Set<string>();
+  let encountered_orders = new Set<number>();
+  all_migrations.forEach(mig => {
+    if (encountered_names.has(mig.name)) {
+      throw new Error(`Duplicate schema patch name not allowed: ${mig.name} (${mig.order})`);
+    }
+    if (encountered_orders.has(mig.order)) {
+      throw new Error(`Duplicate schema order not allowed: ${mig.order}`);
+    }
+    encountered_names.add(mig.name);
+    encountered_orders.add(mig.order);
+  })
+
+  // Sort by order
+  all_migrations.sort((a,b) => {
+    if (a.order < b.order) {
+      return -1
+    } else if (a.order > b.order) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+
+  // Apply patches
+  for (const migration of all_migrations) {
+    const name = migration.name;
+    const padded = `0000${migration.order}`.slice(-4);
+    const fullname = `${padded}-${migration.name}`
+    const plog = logger.child(`(patch ${fullname})`)
+    if (applied.has(fullname)) {
+      // already applied
+    } else {
+      plog.info('applying...');
       try {
         await db.run('BEGIN EXCLUSIVE TRANSACTION');
-        await db.exec(fullsql);
+        await migration.func(db);
         await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
         await db.run('COMMIT TRANSACTION');
         plog.info('commit');
@@ -163,10 +202,8 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
         plog.warn(err);
         await db.run('ROLLBACK');
 
-        const patch_num = Number(name.split('-')[0]);
-
         // hold over from prior flakey migrations
-        if (patch_num <= 7 && (
+        if (migration.order <= 7 && (
             err.toString().indexOf('duplicate column name') !== -1
             || err.toString().indexOf('already exists') !== -1
           )) {
@@ -179,16 +216,16 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
           throw err;
         }
       }
-      plog.info('Applied');
+      plog.info('applied.');
     }
   }
   logger.info('schema is in sync');
 
-  logger.info('schema list:')
-  let sqlite_master = await db.all('SELECT * FROM sqlite_master');
-  sqlite_master.forEach(item => {
-    logger.info(`${item.type} ${item.name}`);
-  })
+  // logger.info('schema list:')
+  // let sqlite_master = await db.all('SELECT * FROM sqlite_master');
+  // sqlite_master.forEach(item => {
+  //   logger.info(`${item.type} ${item.name}`);
+  // })
 }
 
 /**
@@ -217,7 +254,7 @@ export class DBStore implements IStore {
     // upgrade database
     try {
       log.info('Doing database migrations');
-      await upgradeDatabase(this._db, Path.join(APP_ROOT, 'migrations'));
+      await upgradeDatabase(this._db, Path.join(APP_ROOT, 'migrations'), jsmigrations);
     } catch(err) {
       log.error('Error during database migrations');
       log.error(err.stack);

@@ -17,7 +17,7 @@ import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
 import { isNil, isDifferent } from '../util'
 import { NoteMaker } from './notes'
-import { ensureUTCMoment } from '../time'
+import { parseLocalTime } from '../time'
 import { createTemplateBucketSet } from './gettingstarted'
 
 const NOGROUP = -1;
@@ -1212,9 +1212,9 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
   render() {
     let { transactions, appstate, ending_balance } = this.props;
     const sortFunc = [
-      item => -ensureUTCMoment(item.posted).unix(),
+      (item:Transaction) => -parseLocalTime(item.posted).unix(),
       'bucket_id',
-      item => -item.id]
+      (item:Transaction) => -item.id]
     let rows = _.sortBy(transactions, sortFunc).map(trans => {
       let running_bal;
       if (!isNil(ending_balance)) {
@@ -1243,7 +1243,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
               this.setState({selected: newset})
             }}/>
         </td>
-        <td className="nobr"><NoteMaker obj={trans} /><DateDisplay value={trans.posted} /></td>
+        <td className="nobr"><NoteMaker obj={trans} /><DateDisplay value={trans.posted} islocal /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
         {ending_balance === null ? null : <td className="right"><Money value={running_bal} /></td>}

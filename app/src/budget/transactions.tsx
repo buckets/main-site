@@ -5,7 +5,7 @@ import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
 import { manager, AppState } from './appstate'
 import { Account, Category, Transaction } from '../models/account'
-import { DateDisplay, DateInput, ensureUTCMoment, parseUTCTime } from '../time'
+import { DateDisplay, DateInput, parseLocalTime } from '../time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
@@ -89,7 +89,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
           transactions={dupes}
           sortFunc={[
             'amount',
-            (item:Transaction) => -parseUTCTime(item.posted).unix(),
+            (item:Transaction) => -parseLocalTime(item.posted).unix(),
             'account_id',
             (item:Transaction) => -item.id,
           ]}
@@ -154,9 +154,9 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
     let { selected } = this.state;
     let hideAccount = this.props.hideAccount || false;
     sortFunc = sortFunc || [
-      item => -ensureUTCMoment(item.posted).unix(),
+      (item:Transaction) => -parseLocalTime(item.posted).unix(),
       'account_id',
-      item => -item.id,
+      (item:Transaction) => -item.id,
     ]
     let elems = _.sortBy(this.props.transactions, sortFunc)
     .map(trans => {
@@ -255,13 +255,13 @@ interface TransRowState {
 }
 class TransRow extends React.Component<TransRowProps, TransRowState> {
   private memo_elem = null;
-  constructor(props) {
+  constructor(props:TransRowProps) {
     super(props);
     this.state = {
       editing: false,
       amount: null,
       memo: '',
-      posted: ensureUTCMoment(props.appstate.defaultPostingDate),
+      posted: props.appstate.defaultPostingDate,
       account_id: null,
     }
     Object.assign(this.state, this.recomputeState(props));
@@ -276,7 +276,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         editing: this.state.editing,
         amount: props.trans.amount,
         memo: props.trans.memo,
-        posted: parseUTCTime(props.trans.posted),
+        posted: parseLocalTime(props.trans.posted),
         account_id: props.trans.account_id,
       };
       if (props.account) {
@@ -293,9 +293,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       }
       let vr = props.appstate.viewDateRange
       if (this.state.posted.isBefore(vr.onOrAfter)) {
-        ret.posted = ensureUTCMoment(props.appstate.defaultPostingDate);
+        ret.posted = props.appstate.defaultPostingDate;
       } else if (this.state.posted.isSameOrAfter(vr.before)) {
-        ret.posted = ensureUTCMoment(props.appstate.defaultPostingDate);
+        ret.posted = props.appstate.defaultPostingDate;
       }
       return ret;
     }
@@ -396,6 +396,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           <td>
             <DateInput
               value={this.state.posted}
+              islocal
               onChange={(new_posting_date) => {
                 this.setState({posted: new_posting_date});
               }} />
@@ -442,7 +443,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // viewing
       return <tr className="note-hover-trigger">
         <td>{checkbox}</td>
-        <td className="nobr"><NoteMaker obj={trans} />{source_icon}<DateDisplay value={trans.posted} /></td>
+        <td className="nobr"><NoteMaker obj={trans} />{source_icon}<DateDisplay value={trans.posted} islocal /></td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>

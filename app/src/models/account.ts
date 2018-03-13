@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone'
-import {IObject, registerClass, IStore} from '../store';
-import { ts2utcdb, parseLocalTime } from '../time';
-import {Balances, computeBalances} from './balances';
+import { IObject, registerClass, IStore } from '../store';
+import { ts2localdb, parseLocalTime } from '../time';
+import { Balances, computeBalances } from './balances';
 import { INotable } from '../budget/notes'
 
 export class Failure extends Error {
@@ -187,7 +187,7 @@ export class AccountStore {
       memo: args.memo,
     };
     if (args.posted) {
-      data.posted = ts2utcdb(args.posted)
+      data.posted = ts2localdb(args.posted)
     }
     if (args.account_id === null) {
       throw new Error('You must provide an account');
@@ -222,7 +222,7 @@ export class AccountStore {
       account_id: args.account_id,
       amount: args.amount,
       memo: args.memo,
-      posted: args.posted ? ts2utcdb(args.posted) : undefined,
+      posted: args.posted ? ts2localdb(args.posted) : undefined,
       fi_id: args.fi_id,
     });
 
@@ -270,11 +270,11 @@ export class AccountStore {
 
     if (args.onOrAfter) {
       where_parts.push('t.posted >= $onOrAfter');
-      params.$onOrAfter = ts2utcdb(args.onOrAfter);
+      params.$onOrAfter = ts2localdb(args.onOrAfter);
     }
     if (args.before) {
       where_parts.push('t.posted < $before');
-      params.$before = ts2utcdb(args.before);
+      params.$before = ts2localdb(args.before);
     }
 
     let where = '';
@@ -343,7 +343,7 @@ export class AccountStore {
         account_id: args.account_id,
         amount: args.amount,
         memo: args.memo,
-        posted: ts2utcdb(args.posted),
+        posted: ts2localdb(args.posted),
         fi_id: args.fi_id,
       })
       this.store.getObject(Account, args.account_id)
@@ -500,11 +500,11 @@ export class AccountStore {
       if (args.posted) {
         if (args.posted.onOrAfter) {
           where_parts.push('posted >= $onOrAfter');
-          params['$onOrAfter'] = ts2utcdb(args.posted.onOrAfter);
+          params['$onOrAfter'] = ts2localdb(args.posted.onOrAfter);
         }
         if (args.posted.before) {
           where_parts.push('posted < $before');
-          params['$before'] = ts2utcdb(args.posted.before);
+          params['$before'] = ts2localdb(args.posted.before);
         }
       }
 

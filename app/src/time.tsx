@@ -62,6 +62,12 @@ export type MaybeMoment =
 export function ts2utcdb(x:moment.Moment):string {
   return x.tz('UTC').format('YYYY-MM-DD HH:mm:ss');
 }
+/**
+ *  Convert a moment to Local string suitable for DB
+ */
+export function ts2localdb(x:moment.Moment):string {
+  return x.tz(mytz).format('YYYY-MM-DD HH:mm:ss');
+}
 
 /**
  *  Convert a UTC time string to moment in THIS timezone
@@ -159,26 +165,28 @@ export class DateTime extends React.Component<DateDisplayProps, any> {
 }
 
 interface DateInputProps {
-  // UTC time
   value: string|moment.Moment;
+  islocal?: boolean;
   onChange: (val:moment.Moment)=>void;
 }
 export class DateInput extends React.Component<DateInputProps, {value:moment.Moment}> {
-  constructor(props) {
+  constructor(props:DateInputProps) {
     super(props)
     this.state = {
-      value: ensureUTCMoment(props.value),
+      value: props.islocal ? parseLocalTime(props.value) : parseUTCTime(props.value),
     }
   }
-  componentWillReceiveProps(nextProps) {
-    this.setState({value: ensureUTCMoment(nextProps.value)});
+  componentWillReceiveProps(nextProps:DateInputProps) {
+    this.setState({
+      value: nextProps.islocal ? parseLocalTime(nextProps.value) : parseUTCTime(nextProps.value),
+    });
   }
   render() {
-    let value = ensureLocalMoment(this.state.value).format('YYYY-MM-DD');
+    let value = this.state.value.format('YYYY-MM-DD');
     return <input type="date" value={value} onChange={this.onChange} />
   }
   onChange = (ev) => {
-    let newval = parseLocalTime(ev.target.value).utc()
+    let newval = parseLocalTime(ev.target.value)
     this.setState({value: newval})
     this.props.onChange(newval)
   }

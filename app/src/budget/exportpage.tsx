@@ -9,7 +9,7 @@ import { sss } from '../i18n'
 import { submitFeedback } from '../errors'
 import { makeToast } from './toast'
 import { cents2decimal } from '../money'
-import { parseUTCTime, localNow, DateInput } from '../time'
+import { localNow, DateInput } from '../time'
 
 interface ExportPageProps {
   appstate: AppState
@@ -191,7 +191,7 @@ function exportTransactionsToCSV(store:IStore, path:string, args:{
           show_sep: false,
           show_decimal: true,
         }),
-        posted: parseUTCTime(t.t_posted).format(),
+        posted: t.t_posted,
         memo: t.t_memo,
         account: t.a_name,
         bt_id: t.bt_id,

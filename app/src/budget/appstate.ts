@@ -6,7 +6,7 @@ import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { Connection } from '../models/simplefin'
-import { isBetween, parseLocalTime, parseUTCTime, localNow, makeLocalDate } from '../time'
+import { isBetween, parseLocalTime, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
 import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
@@ -115,7 +115,7 @@ export class AppState implements IComputedAppState {
 
   can_sync = false;
 
-  get defaultPostingDate() {
+  get defaultPostingDate():moment.Moment {
     let today = localNow();
     let d = this.viewDateRange.onOrAfter;
     if (d.month() == today.month() && d.year() == today.year()) {
@@ -130,7 +130,6 @@ export class AppState implements IComputedAppState {
   get viewDateRange():{onOrAfter:moment.Moment, before:moment.Moment} {
     let start = makeLocalDate(this.year, this.month-1, 1);
     let end = start.clone().add(1, 'month').startOf('month').startOf('day');
-    log.info('MATT', start.isDST(), start.hours(), start.zone(), start.zoneName(), start.format())
     return {
       onOrAfter: start,
       before: end,
@@ -411,7 +410,7 @@ export class StateManager {
         this.updated_trans_counter.add();
       }
       let dr = this.appstate.viewDateRange;
-      let inrange = isBetween(parseUTCTime(obj.posted), dr.onOrAfter, dr.before)
+      let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
         if (this.appstate.transactions[obj.id]) {
           delete this.appstate.transactions[obj.id];  
@@ -421,7 +420,7 @@ export class StateManager {
       }
     } else if (isObj(BTrans, obj)) {
       let dr = this.appstate.viewDateRange;
-      let inrange = isBetween(parseUTCTime(obj.posted), dr.onOrAfter, dr.before)
+      let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
         if (this.appstate.btransactions[obj.id]) {
           delete this.appstate.btransactions[obj.id];  

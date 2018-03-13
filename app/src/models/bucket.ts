@@ -1,6 +1,6 @@
 import * as moment from 'moment-timezone'
 import { IObject, IStore, registerClass } from '../store'
-import { ensureLocalMoment, parseLocalTime, localNow, ts2utcdb, Interval } from '../time'
+import { ensureLocalMoment, parseUTCTime, parseLocalTime, localNow, Interval, ts2localdb } from '../time'
 import { Balances, computeBalances } from './balances'
 import { rankBetween } from '../ranking'
 import { DEFAULT_COLORS } from '../color'
@@ -159,7 +159,7 @@ export class BucketStore {
           $bucket_id: bucket_id,
         });
     }
-    return moment.utc(rows[0].d);
+    return parseUTCTime(rows[0].d);
   }
   /**
    *
@@ -178,45 +178,14 @@ export class BucketStore {
         AND posted < $end
         ${where}`, {
           $bucket_id: bucket_id,
-          $start: ts2utcdb(interval.start),
-          $end: ts2utcdb(interval.end),
+          $start: ts2localdb(interval.start),
+          $end: ts2localdb(interval.end),
         });
     if (rows.length) {
       // No transactions within this 
       return rows[0][0]
     } else {
       return 0;
-    }
-  }
-  /**
-   *  Return the dates of the earliest and latest transactions with a range
-   */
-  async transactionSpan(bucket_id:number, interval:Interval, where?:string):Promise<Interval> {
-    if (where) {
-      where = `AND ${where}`;
-    }
-    let rows = await this.store.query(`
-      SELECT
-        min(posted) as start,
-        max(posted) as end
-      FROM bucket_transaction
-      WHERE
-        bucket_id = $bucket_id
-        AND posted >= $start
-        AND posted < $end
-        ${where}`, {
-          $bucket_id: bucket_id,
-          $start: ts2utcdb(interval.start),
-          $end: ts2utcdb(interval.end),
-        });
-    if (rows.length) {
-      // No transactions within this 
-      return {
-        start: moment.utc(rows[0].start),
-        end: moment.utc(rows[0].end),
-      }
-    } else {
-      return null;
     }
   }
 
@@ -239,7 +208,7 @@ export class BucketStore {
       transfer: args.transfer || false,
     };
     if (args.posted) {
-      data.posted = ts2utcdb(args.posted)
+      data.posted = ts2localdb(args.posted)
     }
     if (args.bucket_id === null) {
       throw new Error('You must provide a bucket');
@@ -303,11 +272,11 @@ export class BucketStore {
     let params:any = {};
     if (args.onOrAfter) {
       wheres.push('posted >= $onOrAfter')
-      params.$onOrAfter = ts2utcdb(args.onOrAfter);
+      params.$onOrAfter = ts2localdb(args.onOrAfter);
     }
     if (args.before) {
       wheres.push('posted < $before')
-      params.$before = ts2utcdb(args.before);
+      params.$before = ts2localdb(args.before);
     }
     const qry = `
       SELECT
@@ -367,8 +336,8 @@ export class BucketStore {
       GROUP BY
         bucket_id
       `, {
-        $onOrAfter: ts2utcdb(onOrAfter),
-        $before: ts2utcdb(before),
+        $onOrAfter: ts2localdb(onOrAfter),
+        $before: ts2localdb(before),
       })
     let ret:BucketFlowMap = {};
     rows.forEach(row => {
@@ -415,11 +384,11 @@ export class BucketStore {
       if (args.posted) {
         if (args.posted.onOrAfter) {
           where_parts.push('posted >= $onOrAfter');
-          params['$onOrAfter'] = ts2utcdb(args.posted.onOrAfter);
+          params['$onOrAfter'] = ts2localdb(args.posted.onOrAfter);
         }
         if (args.posted.before) {
           where_parts.push('posted < $before');
-          params['$before'] = ts2utcdb(args.posted.before);
+          params['$before'] = ts2localdb(args.posted.before);
         }
       }
 

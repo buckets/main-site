@@ -17,6 +17,7 @@ import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 import { PrefixLogger } from '../logging'
 import { PSTATE, updateState } from './persistent'
+import { localNow } from '../time'
 
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
@@ -26,8 +27,9 @@ const log = new PrefixLogger('(main)')
 
 log.info(`\n\nSTARTING v${app.getVersion()}\n`);
 log.info(`Log level: ${electron_log.transports.file.level}`);
-log.info(`Local time: ${moment.tz().format()}`);
+log.info(`Local time: ${localNow().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
+log.info(`Timezone: ${moment.tz.guess()}`);
 log.info(`NODE_ENV: ${process.env.NODE_ENV}`);
 
 app.on('ready', () => {
