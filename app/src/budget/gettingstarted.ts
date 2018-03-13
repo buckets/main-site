@@ -1,6 +1,6 @@
 import { manager } from './appstate'
 import { sss } from '../i18n'
-import { localNow, ts2db } from '../time'
+import { localNow, parseLocalTime, ts2utcdb } from '../time'
 import { Bucket } from '../models/bucket'
 
 export async function createTemplateBucketSet() {
@@ -71,7 +71,7 @@ export async function createTemplateBucketSet() {
           name: sss("Tuition"),
           kind: 'goal-date',
           goal: 300000,
-          end_date: localNow().add(6, 'months').startOf('month'),
+          end_date: localNow().add(6, 'months').startOf('month').format(),
         },
         {
           name: sss("Any other monthly bills you have?"),
@@ -183,7 +183,7 @@ export async function createTemplateBucketSet() {
       })
       const update = btmpl as Partial<Bucket>;
       if (update.end_date) {
-        update.end_date = ts2db(update.end_date)
+        update.end_date = ts2utcdb(parseLocalTime(update.end_date))
       }
       await store.buckets.update(bucket.id, update)
     }

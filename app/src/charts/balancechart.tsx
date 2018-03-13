@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as cx from 'classnames'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
@@ -9,7 +9,7 @@ import { AppState, manager } from '../budget/appstate'
 import { COLORS, opacity } from '../color'
 import { cents2decimal } from '../money'
 import { Transaction, computeBucketData } from '../models/bucket'
-import { tsfromdb } from '../time'
+import { parseUTCTime } from '../time'
 
 interface SparklineProps {
   height?: number;
@@ -140,9 +140,9 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
       balance: bucket.balance,
     })
 
-    let startTime = tsfromdb(transactions[transactions.length-1].posted);
+    let startTime = parseUTCTime(transactions[transactions.length-1].posted);
     let startSeconds = startTime.valueOf();
-    let endTime = tsfromdb(transactions[0].posted);
+    let endTime = parseUTCTime(transactions[0].posted);
     let endSeconds = endTime.valueOf();
 
     let date_tick_format = 'MMM YYYY';
@@ -157,7 +157,7 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
     let balancehistory = transactions.map(trans => {
       let ret = {
         amount: trans.amount,
-        date: tsfromdb(trans.posted),
+        date: parseUTCTime(trans.posted),
         balance: balance,
       }
       lowval = Math.min(lowval, balance);

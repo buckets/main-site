@@ -2,10 +2,10 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { manager, AppState } from './appstate'
 import { Account, Category, Transaction } from '../models/account'
-import { DateDisplay, DateInput, ensureUTCMoment, tsfromdb } from '../time'
+import { DateDisplay, DateInput, ensureUTCMoment, parseUTCTime } from '../time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
@@ -89,9 +89,9 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
           transactions={dupes}
           sortFunc={[
             'amount',
-            item => -ensureUTCMoment(item.posted).unix(),
+            (item:Transaction) => -parseUTCTime(item.posted).unix(),
             'account_id',
-            item => -item.id,
+            (item:Transaction) => -item.id,
           ]}
         />
       </div>
@@ -276,7 +276,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         editing: this.state.editing,
         amount: props.trans.amount,
         memo: props.trans.memo,
-        posted: tsfromdb(props.trans.posted),
+        posted: parseUTCTime(props.trans.posted),
         account_id: props.trans.account_id,
       };
       if (props.account) {

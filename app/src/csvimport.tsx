@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as csv from 'csv'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
 import { Money, decimal2cents } from './money'
-import { DateDisplay, serializeTimestamp } from './time'
+import { DateDisplay, parseLocalTime } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
 import { Account, CSVImportMapping } from './models/account'
 import { IStore } from './store'
@@ -163,13 +163,13 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   const transactions = parsed.rows.map((row):ImportableTrans => {
     const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
-    const posted = serializeTimestamp(moment(row[inverted_mapping.posted[0]], mapping.posted_format));
+    const posted = parseLocalTime(row[inverted_mapping.posted[0]], mapping.posted_format);
     let fi_id:string;
     if (inverted_mapping.fi_id.length) {
       fi_id = inverted_mapping.fi_id.map(key=>row[key]).join(' ')
     } else {
       // Generate an id based on transaction details
-      let rowhash = hashStrings([amount.toString(), memo, posted])
+      let rowhash = hashStrings([amount.toString(), memo, posted.toISOString()])
       
       // If there are dupes within a CSV, they should have different fi_ids
       if (!hashcount[rowhash]) {

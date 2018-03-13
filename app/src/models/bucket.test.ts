@@ -1,7 +1,8 @@
 import {isObj} from '../store';
 import { getStore } from './testutil';
-import {test} from 'tap'
-import {Bucket} from './bucket';
+import { test } from 'tap'
+import { Bucket } from './bucket';
+import { parseLocalTime } from '../time'
 
 test('add bucket', async (t) => {
   let { store, events } = await getStore();
@@ -102,31 +103,31 @@ test('balances', async (t) => {
     bucket_id: b1.id,
     amount: 800,
     memo: 'something',
-    posted: '2000-01-01 00:00:00',
+    posted: parseLocalTime('2000-01-01 00:00:00'),
   });
   await store.buckets.transact({
     bucket_id: b2.id,
     amount: 750,
     memo: 'heyo',
-    posted: '2001-01-01 00:00:00',
+    posted: parseLocalTime('2001-01-01 00:00:00'),
   })
 
   // before any transactions
-  let bal = await store.buckets.balances('1999-01-01');
+  let bal = await store.buckets.balances(parseLocalTime('1999-01-01'));
   t.same(bal, {
     [b1.id]: 0,
     [b2.id]: 0,
   })
 
   // after the first transaction
-  bal = await store.buckets.balances('2000-06-06')
+  bal = await store.buckets.balances(parseLocalTime('2000-06-06'))
   t.same(bal, {
     [b1.id]: 800,
     [b2.id]: 0,
   })
 
   // after both transactions
-  bal = await store.buckets.balances('2001-06-06')
+  bal = await store.buckets.balances(parseLocalTime('2001-06-06'))
   t.same(bal, {
     [b1.id]: 800,
     [b2.id]: 750,

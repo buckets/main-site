@@ -8,7 +8,7 @@ import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'elect
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
-import { Timestamp, serializeTimestamp, ensureLocalMoment } from '../time'
+import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from '../time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer, TABLE2CLASS } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
@@ -35,12 +35,12 @@ export interface IOpenWindow {
 
 interface BudgetFileEvents {
   sync_started: {
-    onOrAfter: string;
-    before: string;
+    onOrAfter: SerializedTimestamp;
+    before: SerializedTimestamp;
   };
   sync_done: {
-    onOrAfter: string;
-    before: string;
+    onOrAfter: SerializedTimestamp;
+    before: SerializedTimestamp;
     result: SyncResult;
   };
   macro_started: {
@@ -64,8 +64,8 @@ export interface IBudgetFile {
    *  Cause the recording window to open for a particular recording
    */
   openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: Timestamp,
-    before: Timestamp,
+    onOrAfter: MaybeMoment;
+    before: MaybeMoment;
   }):Promise<SyncResult>;
   
   /**
@@ -77,7 +77,7 @@ export interface IBudgetFile {
   /**
    *  Start a sync
    */
-  startSync(onOrAfter:Timestamp, before:Timestamp);
+  startSync(onOrAfter:MaybeMoment, before:MaybeMoment);
 
   /**
    *  Cancel sync
@@ -424,8 +424,8 @@ export class BudgetFile implements IBudgetFile {
    *
    */
   async openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: Timestamp,
-    before: Timestamp,
+    onOrAfter: MaybeMoment,
+    before: MaybeMoment,
   }) {
     let win:Electron.BrowserWindow;
     const bankmacro = await this.store.bankmacro.get(macro_id);
@@ -435,12 +435,15 @@ export class BudgetFile implements IBudgetFile {
 
     let response_id:string;
     let hide:boolean = false;
+    let serialized_autoplay;
     if (autoplay) {
-      autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter)
-      autoplay.before = serializeTimestamp(autoplay.before)
       response_id = uuid();
       hide = true;
       this.room.broadcast('macro_started', {id: macro_id});
+      serialized_autoplay = JSON.stringify({
+        onOrAfter: dumpTS(autoplay.onOrAfter),
+        before: dumpTS(autoplay.before),
+      })
     }
 
     // Load the url
@@ -448,7 +451,7 @@ export class BudgetFile implements IBudgetFile {
       macro_id,
       partition,
       response_id,
-      autoplay: JSON.stringify(autoplay),
+      autoplay: serialized_autoplay,
     })
     win = this.openWindow(`/record/record.html?${qs}`, {
       hide,
@@ -519,21 +522,21 @@ export class BudgetFile implements IBudgetFile {
   }
 
 
-  async startSync(onOrAfter:Timestamp, before:Timestamp) {
-    let m_onOrAfter = ensureLocalMoment(onOrAfter);
-    let m_before = ensureLocalMoment(before);
+  async startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
+    let m_onOrAfter = loadTS(onOrAfter);
+    let m_before = loadTS(before);
     let sync = this.syncer.syncTransactions(m_onOrAfter, m_before);
     this.running_syncs.push(sync);
     let p = sync.start();
     this.room.broadcast('sync_started', {
-      onOrAfter: serializeTimestamp(onOrAfter),
-      before: serializeTimestamp(m_before),
+      onOrAfter: dumpTS(onOrAfter),
+      before: dumpTS(before),
     })
     let result = await p;
     this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
     this.room.broadcast('sync_done', {
-      onOrAfter: serializeTimestamp(onOrAfter),
-      before: serializeTimestamp(m_before),
+      onOrAfter: dumpTS(onOrAfter),
+      before: dumpTS(before),
       result,
     })
   }
@@ -602,15 +605,18 @@ class RendererBudgetFile implements IBudgetFile {
   }
 
   async openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: Timestamp,
-    before: Timestamp,
+    onOrAfter: MaybeMoment,
+    before: MaybeMoment,
   }) {
     try {
+      let serialized_autoplay;
       if (autoplay) {
-        autoplay.before = serializeTimestamp(autoplay.before);
-        autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter);
+        serialized_autoplay = {
+          onOrAfter: dumpTS(autoplay.onOrAfter),
+          before: dumpTS(autoplay.before),
+        }
       }
-      return await this.callInMain('openRecordWindow', macro_id, autoplay) 
+      return await this.callInMain('openRecordWindow', macro_id, serialized_autoplay)
     } catch(err) {
       log.error(err.stack)
       log.error(err);
@@ -624,8 +630,8 @@ class RendererBudgetFile implements IBudgetFile {
     return this.callInMain('openImportFileDialog');
   }
 
-  startSync(onOrAfter:Timestamp, before:Timestamp) {
-    return this.callInMain('startSync', serializeTimestamp(onOrAfter), serializeTimestamp(before));
+  startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
+    return this.callInMain('startSync', dumpTS(onOrAfter), dumpTS(before));
   }
   cancelSync() {
     return this.callInMain('cancelSync');

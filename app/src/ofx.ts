@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { parse as parseOFX } from 'ofx-js'
 import { decimal2cents } from './money'
 import { ImportableTrans, ImportableAccountSet } from './importing'

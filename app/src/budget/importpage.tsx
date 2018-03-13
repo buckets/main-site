@@ -16,9 +16,7 @@ import { CSVMapper, CSVAssigner } from '../csvimport'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
-  let onOrAfter = range.onOrAfter.clone();
-  let before = range.before.clone();
-  return current_file.startSync(onOrAfter, before)
+  return current_file.startSync(range.onOrAfter, range.before)
 }
 
 

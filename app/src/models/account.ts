@@ -1,5 +1,6 @@
+import * as moment from 'moment-timezone'
 import {IObject, registerClass, IStore} from '../store';
-import {Timestamp, ts2db} from '../time';
+import { ts2utcdb, parseLocalTime } from '../time';
 import {Balances, computeBalances} from './balances';
 import { INotable } from '../budget/notes'
 
@@ -99,7 +100,7 @@ interface ImportArgs {
   account_id: number,
   amount: number,
   memo: string,
-  posted: Timestamp,
+  posted: moment.Moment,
   fi_id: string,
 }
 
@@ -172,12 +173,12 @@ export class AccountStore {
     // Delete the account itself
     await this.store.deleteObject(Account, account_id);
   }
-  // posted is a UTC time
+
   async transact(args:{
     account_id:number,
     amount:number,
     memo:string,
-    posted?:Timestamp,
+    posted?:moment.Moment,
     fi_id?:string,
   }):Promise<Transaction> {
     let data:any = {
@@ -186,7 +187,7 @@ export class AccountStore {
       memo: args.memo,
     };
     if (args.posted) {
-      data.posted = ts2db(args.posted)
+      data.posted = ts2utcdb(args.posted)
     }
     if (args.account_id === null) {
       throw new Error('You must provide an account');
@@ -203,7 +204,7 @@ export class AccountStore {
     account_id?: number,
     amount?: number,
     memo?: string,
-    posted?: Timestamp,
+    posted?: moment.Moment,
     fi_id?: string,
   }):Promise<Transaction> {
     let affected_account_ids = new Set<number>();
@@ -221,7 +222,7 @@ export class AccountStore {
       account_id: args.account_id,
       amount: args.amount,
       memo: args.memo,
-      posted: args.posted ? ts2db(args.posted) : undefined,
+      posted: args.posted ? ts2utcdb(args.posted) : undefined,
       fi_id: args.fi_id,
     });
 
@@ -252,8 +253,8 @@ export class AccountStore {
     return rows[0][0];
   }
   async exportTransactions(args:{
-    onOrAfter?: Timestamp,
-    before?: Timestamp,
+    onOrAfter?: moment.Moment,
+    before?: moment.Moment,
   } = {}):Promise<Array<{
     t_id: number,
     t_amount: number,
@@ -269,11 +270,11 @@ export class AccountStore {
 
     if (args.onOrAfter) {
       where_parts.push('t.posted >= $onOrAfter');
-      params.$onOrAfter = ts2db(args.onOrAfter);
+      params.$onOrAfter = ts2utcdb(args.onOrAfter);
     }
     if (args.before) {
       where_parts.push('t.posted < $before');
-      params.$before = ts2db(args.before);
+      params.$before = ts2utcdb(args.before);
     }
 
     let where = '';
@@ -342,7 +343,7 @@ export class AccountStore {
         account_id: args.account_id,
         amount: args.amount,
         memo: args.memo,
-        posted: ts2db(args.posted),
+        posted: ts2utcdb(args.posted),
         fi_id: args.fi_id,
       })
       this.store.getObject(Account, args.account_id)
@@ -467,7 +468,7 @@ export class AccountStore {
   }
 
   // asof is a UTC time
-  async balances(asof?:Timestamp):Promise<Balances> {
+  async balances(asof?:moment.Moment):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
@@ -480,8 +481,8 @@ export class AccountStore {
   async listTransactions(args?:{
     account_id?:number,
     posted?:{
-      onOrAfter?:Timestamp,
-      before?:Timestamp,
+      onOrAfter?:moment.Moment,
+      before?:moment.Moment,
     },
     countedAsTransfer?: boolean,
   }):Promise<Transaction[]> {
@@ -499,11 +500,11 @@ export class AccountStore {
       if (args.posted) {
         if (args.posted.onOrAfter) {
           where_parts.push('posted >= $onOrAfter');
-          params['$onOrAfter'] = ts2db(args.posted.onOrAfter);
+          params['$onOrAfter'] = ts2utcdb(args.posted.onOrAfter);
         }
         if (args.posted.before) {
           where_parts.push('posted < $before');
-          params['$before'] = ts2db(args.posted.before);
+          params['$before'] = ts2utcdb(args.posted.before);
         }
       }
 
@@ -576,7 +577,7 @@ export class AccountStore {
         bucket_id: cat.bucket_id,
         amount: cat.amount,
         memo: trans.memo,
-        posted: trans.posted,
+        posted: parseLocalTime(trans.posted),
         account_trans_id: trans.id,
       })  
     }))

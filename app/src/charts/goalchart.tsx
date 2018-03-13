@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { SizeAwareDiv, CHART_STYLES } from './util'

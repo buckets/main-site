@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
 import { IObject, IStore, registerClass } from '../store'

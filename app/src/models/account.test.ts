@@ -3,6 +3,7 @@ import {Account, Transaction} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
 import {test} from 'tap';
 import { getStore } from './testutil';
+import { parseLocalTime } from '../time'
 
 //-----------------------------
 // Tests
@@ -114,31 +115,31 @@ test('balances', async (t) => {
     account_id: a1.id,
     amount: 800,
     memo: 'something',
-    posted: '2000-01-01 00:00:00',
+    posted: parseLocalTime('2000-01-01 00:00:00'),
   });
   await store.accounts.transact({
     account_id: a2.id,
     amount: 750,
     memo: 'heyo',
-    posted: '2001-01-01 00:00:00',
+    posted: parseLocalTime('2001-01-01 00:00:00'),
   })
 
   // before any transactions
-  let bal = await store.accounts.balances('1999-01-01');
+  let bal = await store.accounts.balances(parseLocalTime('1999-01-01'));
   t.same(bal, {
     [a1.id]: 0,
     [a2.id]: 0,
   })
 
   // after the first transaction
-  bal = await store.accounts.balances('2000-06-06')
+  bal = await store.accounts.balances(parseLocalTime('2000-06-06'))
   t.same(bal, {
     [a1.id]: 800,
     [a2.id]: 0,
   })
 
   // after both transactions
-  bal = await store.accounts.balances('2001-06-06')
+  bal = await store.accounts.balances(parseLocalTime('2001-06-06'))
   t.same(bal, {
     [a1.id]: 800,
     [a2.id]: 750,
@@ -226,19 +227,19 @@ test('listTransactions', async (t) => {
     account_id: acc1.id,
     amount: 1,
     memo: 'first',
-    posted: '2000-01-01',
+    posted: parseLocalTime('2000-01-01'),
   })
   let t2 = await store.accounts.transact({
     account_id: acc1.id,
     amount: 2,
     memo: 'second',
-    posted: '2000-02-01',
+    posted: parseLocalTime('2000-02-01'),
   })
   let t3 = await store.accounts.transact({
     account_id: acc2.id,
     amount: 3,
     memo: 'other',
-    posted: '2000-02-01',
+    posted: parseLocalTime('2000-02-01'),
   })
 
   await t.test('no args', async (tt) => {
@@ -246,11 +247,11 @@ test('listTransactions', async (t) => {
     tt.same(trans, [t2, t3, t1])
   })
   await t.test('onOrAfter', async (tt) => {
-    let trans = await store.accounts.listTransactions({posted: {onOrAfter: '2000-02-01 00:00:00'}})
+    let trans = await store.accounts.listTransactions({posted: {onOrAfter: parseLocalTime('2000-02-01 00:00:00')}})
     tt.same(trans, [t2, t3])
   })
   await t.test('before', async (tt) => {
-    let trans = await store.accounts.listTransactions({posted: {before: '2000-02-01 00:00:00'}})
+    let trans = await store.accounts.listTransactions({posted: {before: parseLocalTime('2000-02-01 00:00:00')}})
     tt.same(trans, [t1])
   })
   await t.test('account_id', async (tt) => {

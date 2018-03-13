@@ -9,7 +9,8 @@ import { isNil, hashStrings } from './util'
 import { IBudgetFile } from './mainprocess/files'
 import { displayError } from './errors'
 import { PrefixLogger } from './logging'
-import { ensureLocalMoment, Timestamp } from './time'
+import { ensureLocalMoment } from './time'
+import * as moment from 'moment-timezone'
 
 const log = new PrefixLogger('(importing)');
 
@@ -25,7 +26,7 @@ export interface ImportableAccount {
 export interface ImportableTrans {
   amount: number;
   memo: string;
-  posted: Timestamp;
+  posted: moment.Moment;
   fi_id?: string;
 }
 export interface PendingImport {

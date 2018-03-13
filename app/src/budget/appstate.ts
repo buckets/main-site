@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 
 import { EventSource } from '../events'
@@ -6,7 +6,7 @@ import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { Connection } from '../models/simplefin'
-import { isBetween, ensureLocalMoment, localNow, makeLocalDate } from '../time'
+import { isBetween, parseLocalTime, parseUTCTime, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
 import { BankMacro } from '../models/bankmacro'
 import { makeToast } from './toast'
@@ -130,6 +130,7 @@ export class AppState implements IComputedAppState {
   get viewDateRange():{onOrAfter:moment.Moment, before:moment.Moment} {
     let start = makeLocalDate(this.year, this.month-1, 1);
     let end = start.clone().add(1, 'month').startOf('month').startOf('day');
+    log.info('MATT', start.isDST(), start.hours(), start.zone(), start.zoneName(), start.format())
     return {
       onOrAfter: start,
       before: end,
@@ -317,8 +318,8 @@ export class StateManager {
 
     // Syncing events
     file.room.events('sync_started').on(message => {
-      let onOrAfter = ensureLocalMoment(message.onOrAfter);
-      let before = ensureLocalMoment(message.before);
+      let onOrAfter = parseLocalTime(message.onOrAfter);
+      let before = parseLocalTime(message.before);
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
       })(onOrAfter, before));
@@ -327,8 +328,8 @@ export class StateManager {
     })
     file.room.events('sync_done').on(message => {
       let { result } = message;
-      let onOrAfter = ensureLocalMoment(message.onOrAfter);
-      let before = ensureLocalMoment(message.before);
+      let onOrAfter = parseLocalTime(message.onOrAfter);
+      let before = parseLocalTime(message.before);
       log.info('Sync done', onOrAfter.format(), before.format(), 'errors:', result.errors.length, 'trans:', result.imported_count);
       this.appstate.syncing--;
       if (result.errors.length) {
@@ -410,7 +411,7 @@ export class StateManager {
         this.updated_trans_counter.add();
       }
       let dr = this.appstate.viewDateRange;
-      let inrange = isBetween(obj.posted, dr.onOrAfter, dr.before)
+      let inrange = isBetween(parseUTCTime(obj.posted), dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
         if (this.appstate.transactions[obj.id]) {
           delete this.appstate.transactions[obj.id];  
@@ -420,7 +421,7 @@ export class StateManager {
       }
     } else if (isObj(BTrans, obj)) {
       let dr = this.appstate.viewDateRange;
-      let inrange = isBetween(obj.posted, dr.onOrAfter, dr.before)
+      let inrange = isBetween(parseUTCTime(obj.posted), dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
         if (this.appstate.btransactions[obj.id]) {
           delete this.appstate.btransactions[obj.id];  

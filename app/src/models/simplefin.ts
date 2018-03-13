@@ -1,8 +1,8 @@
 import * as req from 'request-promise'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 
 import { IObject, IStore, registerClass } from '../store'
-import { ts2db, localNow, Timestamp, ensureUTCMoment } from '../time'
+import { ts2utcdb, localNow, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { sss } from '../i18n'
@@ -205,7 +205,7 @@ export class SimpleFINStore {
       }))
       if (got_data) {
         return this.store.updateObject(Connection, conn.id, {
-          last_used: ts2db(localNow())
+          last_used: ts2utcdb(localNow())
         })
       }
     })
@@ -251,7 +251,7 @@ class SimpleFINClient {
     }
     return access_url;
   }
-  async fetchAccounts(access_url:string, since:Timestamp, enddate:Timestamp):Promise<SFIN.AccountSet> {
+  async fetchAccounts(access_url:string, since:moment.Moment, enddate:moment.Moment):Promise<SFIN.AccountSet> {
     let result;
     let uri = `${access_url}/accounts`;
     try {

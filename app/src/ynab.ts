@@ -8,7 +8,7 @@ import { IStore } from './store'
 import * as Bucket from './models/bucket'
 import * as Account from './models/account'
 import { decimal2cents } from './money'
-import { ensureLocalMoment } from './time'
+import { parseLocalTime } from './time'
 
 import { reportErrorToUser } from './errors'
 
@@ -298,7 +298,7 @@ export async function importYNAB4(store:IStore, path:string) {
             bucket_id: bucket.id,
             amount: trans.rain,
             memo: 'Rain',
-            posted: ensureLocalMoment(trans.month),
+            posted: parseLocalTime(trans.month),
           })
         }
       }
@@ -348,7 +348,7 @@ export async function importYNAB4(store:IStore, path:string) {
         account_id: buckets_account.id,
         amount: number2cents(ytrans.amount),
         memo,
-        posted: ensureLocalMoment(ytrans.date),
+        posted: parseLocalTime(ytrans.date),
         fi_id,
       })
 

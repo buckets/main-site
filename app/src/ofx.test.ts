@@ -1,6 +1,6 @@
 import { test } from 'tap'
 import { ofx2importable } from './ofx'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { ensureLocalMoment } from './time'
 
 

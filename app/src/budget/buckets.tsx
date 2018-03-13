@@ -1,9 +1,10 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import * as moment from 'moment-timezone'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
-import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
+import { ts2utcdb, DateDisplay, parseUTCTime, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput, cents2decimal } from '../money'
 import { onKeys, MonthSelector, ClickToEdit, SafetySwitch, DebouncedInput } from '../input'
@@ -394,7 +395,7 @@ class ProgressBar extends React.PureComponent<{
 class BucketKindDetails extends React.Component<{
   bucket: Bucket;
   balance: number;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
 }, {
   open: boolean;
 }> {
@@ -424,7 +425,7 @@ class BucketKindDetails extends React.Component<{
   }
   targetDateRow() {
     let { bucket } = this.props;
-    let dt = utcToLocal(bucket.end_date);
+    let dt = parseUTCTime(bucket.end_date);
     if (!dt || !dt.isValid()) {
       dt = localNow();
     }
@@ -438,7 +439,7 @@ class BucketKindDetails extends React.Component<{
             let new_date = makeLocalDate(year, month, 1);
             manager
             .checkpoint(sss('Update Target Date'))
-            .buckets.update(bucket.id, {end_date: ts2db(new_date)})
+            .buckets.update(bucket.id, {end_date: ts2utcdb(new_date)})
           }} />
       </td>
     </tr>
@@ -584,7 +585,7 @@ interface BucketRowProps {
   flow: BucketFlow;
   effective_bal: number;
   show_effective_bal?: boolean;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
 }
@@ -801,7 +802,7 @@ class GroupRow extends React.Component<{
   bucket_flow: BucketFlowMap;
   effective_bals: Balances;
   show_effective_bal: boolean;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
 }, {
@@ -1005,7 +1006,7 @@ interface GroupedBucketListProps {
   bucket_flow: BucketFlowMap;
   effective_bals: Balances;
   show_effective_bal: boolean;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
 }

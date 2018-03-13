@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { IStore } from '../store'
-import { ts2db, Interval, chunkTime } from '../time'
+import { ts2utcdb, Interval, chunkTime } from '../time'
 
 export interface IncomeExpenseSum {
   interval: Interval;
@@ -41,8 +41,8 @@ export class ReportStore {
         AND posted >= $start
         AND posted < $end
         AND amount > 0`, {
-      $start: ts2db(start),
-      $end: ts2db(end),
+      $start: ts2utcdb(start),
+      $end: ts2utcdb(end),
     })
     item.income = rows[0].income;
 
@@ -56,8 +56,8 @@ export class ReportStore {
         AND posted >= $start
         AND posted < $end
         AND amount <= 0`, {
-      $start: ts2db(start),
-      $end: ts2db(end),
+      $start: ts2utcdb(start),
+      $end: ts2utcdb(end),
     })
     item.expenses = rows[0].expenses
 
@@ -69,8 +69,8 @@ export class ReportStore {
       WHERE
         posted >= $start
         AND posted < $end`, {
-      $start: ts2db(start),
-      $end: ts2db(end),
+      $start: ts2utcdb(start),
+      $end: ts2utcdb(end),
     })
     item.net_transfer = rows[0].total - item.income - item.expenses;
 
@@ -102,8 +102,8 @@ export class ReportStore {
     let params = {};
     let bucket_ids = args.bucket_ids.join(',');
     let queries = intervals.map((interval, i) => {
-      params[`$start${i}`] = ts2db(interval.start);
-      params[`$end${i}`] = ts2db(interval.end);
+      params[`$start${i}`] = ts2utcdb(interval.start);
+      params[`$end${i}`] = ts2utcdb(interval.end);
       return `SELECT
         ${i} as ago,
         bucket_id,

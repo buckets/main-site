@@ -1,6 +1,6 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import {IStore} from '../store'
-import {Timestamp, ts2db} from '../time'
+import { ts2utcdb, localNow } from '../time'
 import {sanitizeDbFieldName} from '../mainprocess/dbstore'
 
 export class Balances {
@@ -12,13 +12,13 @@ export async function computeBalances(
   account_table:string,
   transaction_table:string,
   join_column:string,
-  asof?:Timestamp,
+  asof?:moment.Moment,
   where?:string,
   params?:object):Promise<Balances> {
   let prm:any = params || {};
   if (!asof) {
     // get the balance as of tomorrow
-    asof = moment.utc().add(1, 'day')
+    asof = localNow().add(1, 'day')
   }
   if (where) {
     where = `WHERE ${where}`;
@@ -36,7 +36,7 @@ export async function computeBalances(
     ${where}
     GROUP BY 1
   `;
-  prm.$asof = ts2db(asof);
+  prm.$asof = ts2utcdb(asof);
   let rows = await store.query(sql, prm);
   let ret:Balances = {};
   rows.forEach(row => {

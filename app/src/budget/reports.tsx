@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import * as React from 'react'
 import { manager, AppState } from './appstate'

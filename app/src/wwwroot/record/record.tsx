@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { Timestamp, ensureLocalMoment, localNow } from '../../time'
+import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from '../../time'
 import { remote, ipcRenderer } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankMacro } from '../../models/bankmacro'
@@ -700,8 +700,8 @@ export async function start(args:{
     partition:string,
     response_id?:string,
     autoplay?: {
-      onOrAfter: Timestamp,
-      before: Timestamp,
+      onOrAfter: SerializedTimestamp,
+      before: SerializedTimestamp,
     }
   }) {
   const renderer = new Renderer();
@@ -799,10 +799,10 @@ export async function start(args:{
           log.info('Starting autoplay');
           director.playFromBeginning((options:ValueOptions) => {
             if (options.key === 'start-date') {
-              let date = ensureLocalMoment(args.autoplay.onOrAfter);
+              let date = ensureLocalMoment(loadTS(args.autoplay.onOrAfter));
               return date.format(options.variation);
             } else if (options.key === 'end-date') {
-              let date = ensureLocalMoment(args.autoplay.before);
+              let date = ensureLocalMoment(loadTS(args.autoplay.before));
               return date.format(options.variation);
             }
           })

@@ -4,6 +4,7 @@ import { getStore } from './testutil';
 import {Failure} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
 import {Transaction as ATrans} from './account';
+import { parseLocalTime } from '../time'
 
 async function setup(amount=1000) {
   let { store, events } = await getStore();
@@ -14,7 +15,7 @@ async function setup(amount=1000) {
     account_id: account.id,
     amount: amount,
     memo: 'foobar',
-    posted: '2001-01-01 00:00:00',
+    posted: parseLocalTime('2001-01-01 00:00:00'),
   });
   events.length = 0;
   return { store, events, b1, b2, account, trans }
