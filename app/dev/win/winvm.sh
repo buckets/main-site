@@ -175,6 +175,7 @@ do_build() {
     do_up
     ensure_shared_folder project "$APPDIR" y
     ensure_mount project y
+
     echo | cmd 'c:\builder\win_build.bat'
 }
 

@@ -96,6 +96,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
   name TEXT UNIQUE
 )`)
 
+  //--------------------------------------------------------
   // old style of migrations
   let old_migrations = [];
   try {
@@ -103,7 +104,6 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
     logger.info('Old migrations present');
   } catch(err) {
   }
-
   if (old_migrations.length) {
     logger.info('Switching to new migrations method');
     // old style of migrations
@@ -115,6 +115,8 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
     logger.info('Dropping migrations');
     await db.run('DROP TABLE migrations')
   }
+  // end old style of migrations
+  //--------------------------------------------------------
 
   const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
   logger.info('Applied migrations:', Array.from(applied).join(', '))
@@ -156,15 +158,15 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
     })
   }
 
-  // Check for duplicate patch names
+  // Check for duplicate patch names/orders
   let encountered_names = new Set<string>();
   let encountered_orders = new Set<number>();
   all_migrations.forEach(mig => {
     if (encountered_names.has(mig.name)) {
-      throw new Error(`Duplicate schema patch name not allowed: ${mig.name} (${mig.order})`);
+      throw new Error(`Duplicate schema patch name not allowed: ${mig.name} (${mig.order}) <${Array.from(encountered_names).join(',')}>`);
     }
     if (encountered_orders.has(mig.order)) {
-      throw new Error(`Duplicate schema order not allowed: ${mig.order}`);
+      throw new Error(`Duplicate schema order not allowed: ${mig.order} ${Array.from(encountered_orders)}`);
     }
     encountered_names.add(mig.name);
     encountered_orders.add(mig.order);
