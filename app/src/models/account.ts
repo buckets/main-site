@@ -183,7 +183,7 @@ export class AccountStore {
   }):Promise<Transaction> {
     let data:any = {
       account_id: args.account_id,
-      amount: args.amount,
+      amount: args.amount || 0,
       memo: args.memo,
     };
     if (args.posted) {
@@ -217,6 +217,7 @@ export class AccountStore {
     if (args.amount !== undefined && existing.amount !== args.amount) {
       affected_account_ids.add(existing.account_id);
       this.removeCategorization(trans_id);
+      args.amount = args.amount || 0;
     }
     let trans = await this.store.updateObject(Transaction, trans_id, {
       account_id: args.account_id,
@@ -341,7 +342,7 @@ export class AccountStore {
       let existing_id:number = rows[0].id;
       let ret = await this.store.updateObject(Transaction, existing_id, {
         account_id: args.account_id,
-        amount: args.amount,
+        amount: args.amount || 0,
         memo: args.memo,
         posted: ts2localdb(args.posted),
         fi_id: args.fi_id,
@@ -358,7 +359,7 @@ export class AccountStore {
       // Create new transaction
       let transaction = await this.store.accounts.transact({
         account_id: args.account_id,
-        amount: args.amount,
+        amount: args.amount || 0,
         posted: args.posted,
         memo: args.memo,
         fi_id: args.fi_id,
@@ -470,6 +471,7 @@ export class AccountStore {
   async balances(asof?:moment.Moment):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
+    console.log('MATT getting balance as of', asof.format());
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }
   async list():Promise<Account[]> {

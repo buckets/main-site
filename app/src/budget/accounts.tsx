@@ -71,6 +71,8 @@ interface AccountListProps {
 export class AccountList extends React.Component<AccountListProps,any> {
   render() {
     let balances = this.props.balances;
+    console.log('balances', balances);
+    console.log('accounts', this.props.accounts);
     let accounts = this.props.accounts
     .map((account:Account) => {
       let import_balance = getImportBalance(account, balances[account.id]);

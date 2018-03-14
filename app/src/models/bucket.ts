@@ -202,7 +202,7 @@ export class BucketStore {
     }
     let data:any = {
       bucket_id: args.bucket_id,
-      amount: args.amount,
+      amount: args.amount || 0,
       memo: args.memo || '',
       account_trans_id: args.account_trans_id || null,
       transfer: args.transfer || false,
