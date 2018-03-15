@@ -57,4 +57,5 @@ UPDATE bucket_transaction SET amount=0 WHERE amount IS NULL;
 UPDATE account
 SET balance = COALESCE((SELECT SUM(COALESCE(amount, 0))
                FROM account_transaction
-               WHERE account_id = account.id), 0);
+               WHERE account_id = account.id), 0)
+WHERE balance IS NULL;
