@@ -70,8 +70,11 @@ export const PersistEvents = {
   added_recent_file: new EventSource<string>(),
 }
 
+/**
+ *  Return a list of recently opened files, but only those that *  are accessible.
+ */
 export function getRecentFiles():string[] {
-  return PSTATE.recentFiles;
+  return PSTATE.recentFiles.filter(x => fs.existsSync(x));
 }
 export async function addRecentFile(path:string) {
   let recent_files = getRecentFiles();
