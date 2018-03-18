@@ -36,7 +36,6 @@ export async function computeBalances(
     ${where}
     GROUP BY 1
   `;
-  console.log('MATT sql', sql, prm);
   prm.$asof = ts2localdb(asof);
   let rows = await store.query(sql, prm);
   let ret:Balances = {};

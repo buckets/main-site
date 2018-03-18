@@ -619,17 +619,13 @@ class BucketRow extends React.Component<BucketRowProps, {
     return isDifferent(nextState, this.state) || isDifferent(nextProps, this.props);
   }
   render() {
-    let { posting_date, bucket, balance, flow, effective_bal, show_effective_bal, onPendingChanged, pending } = this.props;
-    let balance_el;
-    if (pending) {
-      balance_el = <span>
-        <Money value={balance} className="strikeout" />
-        <span className="fa fa-long-arrow-right change-arrow" />
-        <Money value={balance + pending} />
-      </span>
-    } else {
-      balance_el = <Money value={balance} />
-    }
+    let { posting_date, bucket, balance, flow, onPendingChanged, pending } = this.props;
+    let balance_el = <div className={cx("changing-value", {
+      changing: pending,
+    })}>
+      <div className="old-value"><Money value={balance} /></div>
+      {pending ? <div className="new-value"><Money value={balance + pending} /></div> : null}
+    </div>
     let computed = computeBucketData(bucket.kind, bucket, {
       today: posting_date,
       balance: balance,
@@ -656,7 +652,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
       })}
     >
-      <td name="draghandle" className="nopad noborder">
+      <td name="draghandle" className="nopad">
         <div
           className="drophandle"
           draggable
@@ -688,26 +684,12 @@ class BucketRow extends React.Component<BucketRowProps, {
           }}
         />
       </td>
-      <td name="want" className="right div-right">
-        <Money value={computed.deposit} hidezero />
-        {rainfall_indicator}
-      </td>
-      <td name="in" className="right">
-        <Money value={flow.in} hidezero />
-      </td>
-      <td name="out" className="right">
-        <Money value={flow.out} nocolor hidezero />
-      </td>
-      <td name="transfers" className="right">
-        <Money value={flow.transfer_in + flow.transfer_out} hidezero />
-      </td>
-      <td name="balance" className="right div-left clickable"
+      <td name="balance" className="right clickable"
         onClick={ev => {
           onPendingChanged({[bucket.id]: -balance})
         }}
       >{balance_el}</td>
-      {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate /></td> : null }
-      <td name="in/out" className="left div-left">
+      <td name="in/out" className="left">
         <MoneyInput
           value={pending || null}
           onChange={(val) => {
@@ -727,6 +709,16 @@ class BucketRow extends React.Component<BucketRowProps, {
             },
           })}
         />
+      </td>
+      <td name="want" className="right">
+        <Money value={computed.deposit} hidezero />
+        {rainfall_indicator}
+      </td>
+      <td name="in" className="right">
+        <Money value={flow.in} hidezero />
+      </td>
+      <td name="activity" className="right">
+        <Money value={flow.out + flow.transfer_in + flow.transfer_out} nocolor hidezero />
       </td>
       <td name="details"
           className="nopad bucket-details-wrap">
@@ -800,8 +792,6 @@ class GroupRow extends React.Component<{
   buckets: Bucket[];
   balances: Balances;
   bucket_flow: BucketFlowMap;
-  effective_bals: Balances;
-  show_effective_bal: boolean;
   posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
@@ -819,7 +809,7 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, bucket_flow, balances, effective_bals, show_effective_bal, onPendingChanged, pending, posting_date } = this.props;
+    let { buckets, group, bucket_flow, balances, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
 
     let total_in = 0;
@@ -840,8 +830,6 @@ class GroupRow extends React.Component<{
         bucket={bucket}
         balance={balances[bucket.id]}
         flow={flow}
-        effective_bal={effective_bals[bucket.id]}
-        show_effective_bal={show_effective_bal}
         onPendingChanged={onPendingChanged}
         pending={pending[bucket.id]}
         posting_date={posting_date} />
@@ -853,6 +841,18 @@ class GroupRow extends React.Component<{
         onDrop={this.onDrop}
         onDragLeave={this.onDragLeave}
         >
+      <tr className="section-divider">
+          <th name="draghandle"></th>
+          <th name="color/note"></th>
+          <th name="name"></th>
+          <th name="balance" className="right">{sss('Balance')}</th>
+          <th name="in/out" className="center"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
+          <th name="want" className="right nobr"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
+          <th name="in" className="center nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
+          <th name="activity" className="center nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
+          <th name="details">{sss('bucket.detailslabel', 'Details')}</th>
+          <th name="more"></th>
+        </tr>
       <tr className="group-row note-hover-trigger">
         <td name="draghandle"
           className={cx(
@@ -890,24 +890,18 @@ class GroupRow extends React.Component<{
             }}
           />}
         </td>
-        <td name="want" className="right div-right">
+        <td name="balance" className="right">
+          <Money value={total_balance} hidezero />
+        </td>
+        <td name="in/out"></td>
+        <td name="want" className="right">
         </td>
         <td name="in" className="right">
           <Money value={total_in} hidezero/>
         </td>
-        <td name="out" className="right">
-          <Money value={total_out} nocolor hidezero/>
+        <td name="activity" className="right">
+          <Money value={total_out + total_transfer} nocolor hidezero/>
         </td>
-        <td name="transfers" className="right">
-          <Money value={total_transfer} hidezero/>
-        </td>
-        <td name="balance" className="right div-left">
-          <Money value={total_balance} hidezero />
-        </td>
-        {show_effective_bal ? <td name="effective_bal" className="right">
-          <Money value={total_effective_bal} hidezero/>
-        </td> : null}
-        <td name="in/out" className="div-left"></td>
         <td name="details">
         </td>
         <td name="more">
@@ -1039,22 +1033,6 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           posting_date={posting_date} />
       })
     return <table className="ledger full-width">
-      <thead>
-        <tr>
-          <th name="draghandle"></th>
-          <th name="color/note"></th>
-          <th name="name"></th>
-          <th name="want" className="right nobr div-right"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
-          <th name="in" className="center">{sss("In")}</th>
-          <th name="out" className="center">{sss("Out")}</th>
-          <th name="transfers" className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
-          <th name="balance" className="center div-left">{sss('Balance')}</th>
-          {show_effective_bal ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
-          <th name="in/out" className="left div-left">{sss('In/Out')}</th>
-          <th name="details">{sss('bucket.detailslabel', 'Details')}</th>
-          <th name="more"></th>
-        </tr>
-      </thead>
       {group_elems}
     </table>
   }
