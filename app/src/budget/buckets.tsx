@@ -165,7 +165,6 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       })
 
     let self_debt;
-    let show_effective_bal = false;
     if (self_debt_amount) {
       self_debt = <div className="labeled-number">
         <div className="label">
@@ -173,7 +172,6 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         </div>
         <div className="value"><Money value={self_debt_amount} /></div>
       </div>
-      show_effective_bal = true;
     }
 
     let getting_started;
@@ -236,8 +234,6 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   buckets={appstate.unkicked_buckets}
                   balances={appstate.bucket_balances}
                   bucket_flow={appstate.bucket_flow}
-                  effective_bals={appstate.nodebt_balances}
-                  show_effective_bal={show_effective_bal}
                   groups={_.values(appstate.groups)}
                   onPendingChanged={this.pendingChanged}
                   pending={pending}
@@ -583,8 +579,6 @@ interface BucketRowProps {
   bucket: Bucket;
   balance: number;
   flow: BucketFlow;
-  effective_bal: number;
-  show_effective_bal?: boolean;
   posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
@@ -816,7 +810,6 @@ class GroupRow extends React.Component<{
     let total_out = 0;
     let total_transfer = 0;
     let total_balance = 0;
-    let total_effective_bal = 0;
 
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
@@ -824,7 +817,6 @@ class GroupRow extends React.Component<{
       total_in += flow.in;
       total_out += flow.out;
       total_balance += balances[bucket.id];
-      total_effective_bal += effective_bals[bucket.id];
       return <BucketRow
         key={bucket.id}
         bucket={bucket}
@@ -998,8 +990,6 @@ interface GroupedBucketListProps {
   buckets: Bucket[];
   balances: Balances;
   bucket_flow: BucketFlowMap;
-  effective_bals: Balances;
-  show_effective_bal: boolean;
   posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
@@ -1014,7 +1004,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { balances, bucket_flow, effective_bals, show_effective_bal, pending, posting_date } = this.props;
+    let { balances, bucket_flow, pending, posting_date } = this.props;
     pending = pending || {};
 
     let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
@@ -1026,8 +1016,6 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           buckets={buckets}
           balances={balances}
           bucket_flow={bucket_flow}
-          effective_bals={effective_bals}
-          show_effective_bal={show_effective_bal}
           onPendingChanged={this.pendingChanged}
           pending={pending}
           posting_date={posting_date} />

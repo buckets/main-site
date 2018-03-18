@@ -160,7 +160,6 @@ export class AccountStore {
     // Delete account transactions
     let atrans_ids = (await this.store.query(`SELECT id FROM account_transaction WHERE account_id=$id;`, {$id: account_id}))
       .map(x=>x.id);
-    console.log('atrans_ids', atrans_ids);
     await this.deleteTransactions(atrans_ids)
 
     // Delete misc other stuff connected to accounts
@@ -471,7 +470,6 @@ export class AccountStore {
   async balances(asof?:moment.Moment):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
-    console.log('MATT getting balance as of', asof.format());
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }
   async list():Promise<Account[]> {

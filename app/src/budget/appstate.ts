@@ -510,7 +510,6 @@ export class StateManager {
   fetchAccountBalances() {
     return this.store.accounts.balances(this.appstate.viewDateRange.before)
       .then(balances => {
-        console.log('account_balances', balances);
         this.appstate.account_balances = balances;
       })
   }
