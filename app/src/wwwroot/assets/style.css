@@ -612,7 +612,8 @@ table.ledger tr th.div-left {
 
 table.ledger tr.action-row td {
   border: 0;
-  padding: 8px 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 table.ledger > tbody > tr:hover > td {
@@ -752,42 +753,55 @@ table.ledger .icon-button-wrap button.icon,
   color: white;
   outline: none;
 }
-.category-input .tag {
+.category-input .tag,
+.category-tag {
   display: inline-grid;
   grid-template-columns: min-content min-content;
   align-content: stretch;
   background-color: var(--blue);
+  border: 1px solid var(--blue);
   color: white;
   font-size: .8rem;
   cursor: pointer;
   margin: .1rem;
   padding: 0;
-  min-height: 1.6rem; /* Emoji support*/
   border-radius: 4px;
+  overflow: hidden;
 }
-.category-input .tag .name {
-  padding: .25rem .5rem;
+.category-input .tag .name,
+.category-tag .name {
+  padding: 0 .5rem;
   white-space: nowrap;
   align-self: center;
 }
-.category-input .tag .amount {
+.category-tag .name {
+  padding: .1rem .3rem;
+  vertical-align: middle;
+}
+.category-input .tag .amount,
+.category-tag .amount {
   padding: .3rem .5rem;
-  background-color: rgba(255,255,255,0.2);
+  background-color: white;
+  color: black;
   white-space: nowrap;
   align-self: stretch;
+}
+.category-tag .amount {
+  padding: .1rem .3rem;
+  vertical-align: middle;
 }
 .category-input .category {
   display: flex;
   align-items: center;
 }
 .category-input .delete-button {
-  font-size: 2rem;
+  font-size: 1.6rem;
   padding: 0 .5rem;
   position: relative;
-  top: -3px;
+  top: -1px;
 }
 .category-input .tag.general-tag {
-  background-color: white;
+  background-color: transparent;
   color: black;
 }
 .category-input .tag.general-tag select {
@@ -795,86 +809,6 @@ table.ledger .icon-button-wrap button.icon,
   font-size: 1rem;
 }
 
-.categorizer {
-
-}
-.categorizer select {
-  height: 1.5rem;
-}
-.categorizer .tag {
-  display: inline-grid;
-  grid-template-columns: min-content min-content;
-  align-content: stretch;
-  background-color: var(--blue);
-  color: white;
-  border-radius: 2px;
-  font-size: .8rem;
-  cursor: pointer;
-  margin: .1rem;
-  padding: 0;
-  min-height: 1.6rem; /* Emoji support*/
-}
-.categorizer .tag .name {
-  padding: 0 .5rem;
-  white-space: nowrap;
-  align-self: center;
-}
-.categorizer .tag .amount {
-  padding: .3rem .5rem;
-  background-color: rgba(255,255,255,0.2);
-  white-space: nowrap;
-  align-self: stretch;
-}
-.categorizer .general-tag {
-  display: inline-block;
-  padding: .1rem .5rem;
-  cursor: pointer;
-  margin: 0;
-}
-
-.categorizer.open {
-  padding: .5rem 0;
-}
-.categorizer .tag.open {
-  border-radius: 4px;
-}
-.categorizer .tag.open .name {
-  padding: .25rem .5rem;
-}
-.categorizer .category {
-  display: flex;
-  align-items: center;
-}
-.categorizer .delete-button {
-  font-size: 2rem;
-  padding: 0 .5rem;
-  position: relative;
-  top: -3px;
-
-}
-.categorizer .bucket-buttons {
-  padding-bottom: .5rem;
-  padding-top: .5rem;
-  display: flex;
-  justify-content: space-between;
-}
-.categorizer .bucket-buttons button {
-  flex-basis: 50%;
-  flex-grow: 1;
-}
-.categorizer .general-cat-buttons {
-  border-top: 1px solid var(--lighter-grey);
-  padding-top: .5rem;
-  display: flex;
-  justify-content: space-between;
-}
-.categorizer .general-cat-buttons button {
-  flex-basis: 50%;
-  background-color: white;
-}
-.categorizer .general-cat-buttons button:hover {
-  background-color: var(--yellow);
-}
 
 /* Top total tags */
 .totals {

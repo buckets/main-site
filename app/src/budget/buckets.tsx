@@ -1273,7 +1273,8 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
 export class BucketStyles extends React.Component<{buckets: Bucket[]}, {}> {
   render() {
     let guts = this.props.buckets.map(bucket => {
-      return `.tag.custom-bucket-style-${bucket.id} { background-color: ${bucket.color || 'var(--blue)'}; }`
+      const color = bucket.color || 'var(--blue)';
+      return `.custom-bucket-style-${bucket.id} { border-color: ${color} !important; background-color: ${color} !important; }`
     })
     return <style>
       {guts.join('\n')}

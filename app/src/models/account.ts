@@ -599,6 +599,26 @@ export class AccountStore {
     await this.removeCategorization(trans_id)
     return this.store.updateObject(Transaction, trans_id, {general_cat: category})
   }
+  async getManyCategories(trans_ids:number[]):Promise<{[trans_id:number]:Category[]}> {
+    const row_promise = this.store.query(`
+      SELECT account_trans_id, bucket_id, amount
+      FROM bucket_transaction
+      WHERE account_trans_id in (${trans_ids.join(',')})
+      ORDER BY 1,2,3
+      `, {})
+    let ret = {};
+    trans_ids.forEach(id => {
+      ret[id] = [];
+    })
+    const rows = await row_promise;
+    rows.forEach(({account_trans_id, bucket_id, amount}) => {
+      ret[account_trans_id].push({
+        bucket_id,
+        amount,
+      })
+    })
+    return ret;
+  }
   async getCategories(trans_id:number):Promise<Category[]> {
     return this.store.query(
       `SELECT bucket_id, amount
