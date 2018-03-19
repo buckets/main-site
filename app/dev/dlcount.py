@@ -17,6 +17,8 @@ def getReleaseDate(release):
 SECONDS_PER_DAY = 60 * 60 * 24
 
 def perday(num, seconds):
+    if seconds < (SECONDS_PER_DAY / 2):
+        return 0
     return 1.0 * num * SECONDS_PER_DAY / seconds
 
 # Get the most recent N releases
@@ -44,8 +46,6 @@ for i,release in enumerate(releases):
             seconds = (datetime.now() - published).total_seconds()
     if not seconds:
         seconds = 1
-    if seconds < SECONDS_PER_DAY:
-        seconds = SECONDS_PER_DAY
     seconds *= 1.0
     dlcount = defaultdict(lambda:0)
     for asset in release['assets']:
