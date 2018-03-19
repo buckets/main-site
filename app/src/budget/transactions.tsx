@@ -4,7 +4,8 @@ import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
 import { manager, AppState } from './appstate'
-import { Account, Category, Transaction } from '../models/account'
+import { Bucket } from '../models/bucket'
+import { Account, Category, Transaction, GeneralCatType } from '../models/account'
 import { DateDisplay, DateInput, parseLocalTime } from '../time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
@@ -252,6 +253,7 @@ interface TransRowState {
   memo: string;
   posted: moment.Moment;
   account_id: number;
+  general_cat: GeneralCatType;
 }
 class TransRow extends React.Component<TransRowProps, TransRowState> {
   private memo_elem = null;
@@ -263,6 +265,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       memo: '',
       posted: props.appstate.defaultPostingDate,
       account_id: null,
+      general_cat: '',
     }
     Object.assign(this.state, this.recomputeState(props));
   }
@@ -359,7 +362,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       if (this.state.amount > 0) {
         deposit_withdrawl = sss('Deposit');
       } else if (this.state.amount < 0) {
-        deposit_withdrawl = sss('Withdrawl');
+        deposit_withdrawl = sss('Withdraw');
       }
       let account_cell;
       if (!hideAccount) {
@@ -419,6 +422,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             />
           </td>
           <td className="right">
+            {deposit_withdrawl}
             <MoneyInput
               value={this.state.amount}
               onKeyDown={postOnEnter}
@@ -434,8 +438,16 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               onClick={this.doTransaction}>
                 <span className="fa fa-check" /></button>
           </td>
-          <td className="center">
-            {deposit_withdrawl}
+          <td name="categorization" className="center">
+            <CategoryInput
+              buckets={appstate.unkicked_buckets}
+              amount={this.state.amount}
+              cats={[]}
+              general_cat={''}
+              onChange={(general_cat:GeneralCatType, cats:Category[]) => {
+                console.log('cats', general_cat, cats)
+              }}
+            />
           </td>
         </tr>
         )
@@ -456,7 +468,19 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         </td>
         <td>
           <Categorizer
-            transaction={trans}
+            transaction_id={trans.id}
+            amount={trans.amount}
+            general_cat={trans.general_cat}
+            onCategorize={async (cats:Category[]) => {
+              await manager
+              .checkpoint(sss('Categorization'))
+              .accounts.categorize(trans.id, cats)
+            }}
+            onGeneralCategorize={async (cat:GeneralCatType) => {
+              await manager
+              .checkpoint(sss('Categorization'))
+              .accounts.categorizeGeneral(trans.id, cat);
+            }}
             appstate={appstate} />
         </td>
       </tr>  
@@ -464,9 +488,258 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
   }
 }
 
+
+/**
+ *  Apply a change to a list of Categories.
+ */
+export function changeCats(total_amount:number, src:Category[], change?:{
+  action: 'update';
+  idx: number;
+  value: Category;
+}|{
+  action: 'delete';
+  idx: number;
+}):Category[] {
+  const sign = Math.sign(total_amount);
+  let left = Math.abs(total_amount);
+  let cats = src.map(cat => Object.assign({}, cat));
+
+  // Perform the change
+  if (!change) {
+    // no change, just sum things up
+  } else if (change.action === 'delete') {
+    cats.splice(change.idx, 1);
+  } else if (change.action === 'update') {
+    cats[change.idx] = change.value;
+  }
+
+  // Adjust amounts
+  cats = cats.map((cat, idx) => {
+    let cat_amount = Math.abs(cat.amount);
+    if (cat_amount > left) {
+      // The amount has been used up
+      cat_amount = left;
+    }
+    left -= cat_amount;
+    if (left && idx === cats.length-1) {
+      // There's some amount left and this is the last category
+      if (!change || change.action === 'delete') {
+        // Put all that's left into this bucket
+        cat_amount += left;
+        left = 0;
+      } else {
+        // update
+        if (idx !== change.idx) {
+          // This is the last category and something earlier was changed
+          // Put all that's left into this bucket
+          cat_amount += left;
+          left = 0;
+        }
+      }
+    }
+    if (!cat_amount) {
+      if (change && change.idx === idx) {
+        // leave this one alone
+      } else {
+        return null;
+      }
+    }
+    return {
+      bucket_id: cat.bucket_id,
+      amount: cat_amount,
+    }
+  })
+  .filter(x => x!==null);
+
+  if (left || !cats.length) {
+    cats.push({
+      bucket_id: null,
+      amount: left * sign,
+    })
+  }
+  return cats;
+}
+
+interface CategoryInputProps {
+  buckets: Bucket[];
+  amount: number;
+  cats: Category[];
+  general_cat: GeneralCatType;
+  onChange: (general_cat:GeneralCatType, cats:Category[])=>void;
+  onEnter?: ()=>void;
+}
+interface CategoryInputState {
+  cats: Category[];
+  general_cat: GeneralCatType;
+  did_focus: boolean;
+}
+class CategoryInput extends React.Component<CategoryInputProps, CategoryInputState> {
+  constructor(props:CategoryInputProps) {
+    super(props)
+    this.state = {
+      cats: this.catsStateFromProps(props),
+      general_cat: props.general_cat,
+      did_focus: false,
+    }
+  }
+  catsStateFromProps(props:CategoryInputProps):Category[] {
+    return changeCats(props.amount, props.cats);
+  }
+  componentWillReceiveProps(nextProps:CategoryInputProps) {
+    this.setState({
+      cats: changeCats(nextProps.amount, this.state.cats),
+      general_cat: nextProps.general_cat,
+    })
+  }
+  emitChange() {
+    if (this.state.general_cat) {
+      this.props.onChange(this.state.general_cat, []);
+    } else {
+      this.props.onChange(this.state.general_cat, this.state.cats);
+    }
+  }
+  render() {
+    const { buckets, amount } = this.props;
+    const { general_cat, cats } = this.state;
+    const bucket_options = _.sortBy(buckets, [bucket=>bucket.name.toLowerCase()])
+      .map(bucket => {
+        return <option key={bucket.id} value={bucket.id}>{bucket.name}</option>
+      })
+
+    let elems;
+    elems = cats.map((cat, idx) => {
+      let className;
+      let select_value;
+      if (general_cat) {
+        className = cx('tag', 'general-tag');
+        select_value = general_cat;
+      } else {
+        className = cx('tag', !_.isNil(cat.bucket_id) ? `custom-bucket-style-${cat.bucket_id}` : '');
+        select_value = _.isNil(cat.bucket_id) ? '' : cat.bucket_id;
+      }
+      let extra_options;
+      if (idx === 0) {
+        extra_options = [
+          <option key="transfer" value="transfer">⇄ {sss('Transfer')}</option>
+        ];
+        if (amount >= 0) {
+          extra_options.push(<option key="income" value="income">💰 {sss('Income')}</option>)
+        }
+      }
+      return <div className="category" key={idx}>
+        <div className={className}>
+          <div className="name">
+            <select
+              value={select_value}
+              ref={elem => {
+                if (elem && idx === 0 && !this.state.did_focus) {
+                  setTimeout(() => {
+                    elem.focus();
+                  }, 0);
+                  this.setState({did_focus: true});
+                }
+              }}
+              onKeyPress={onKeys({
+                Enter: () => {
+                  this.props.onEnter && this.props.onEnter();
+                },
+              })}
+              onChange={ev => {
+                if (ev.target.value === 'income' || ev.target.value === 'transfer') {
+                  // general_cat
+                  this.setState({
+                    general_cat: ev.target.value,
+                  })
+                } else {
+                  // buckets
+                  const bucket_id = ev.target.value ? parseInt(ev.target.value) : null;
+                  const new_cats = changeCats(this.props.amount, this.state.cats, {
+                    action: 'update',
+                    idx: idx,
+                    value: {
+                      bucket_id: bucket_id,
+                      amount: this.state.cats[idx].amount,
+                    }
+                  })
+                  this.setState({
+                    general_cat: '',
+                    cats: new_cats,
+                  }, () => {
+                    this.emitChange();
+                  })
+                }
+              }}>
+              {extra_options}
+              <option></option>
+              {bucket_options}
+            </select>
+          </div>
+          {general_cat ? null : <MoneyInput
+            value={Math.abs(cat.amount)}
+            className="amount ctx-matching-input"
+            onChange={val => {
+              const new_cats = changeCats(this.props.amount, this.state.cats, {
+                action: 'update',
+                idx: idx,
+                value: {
+                  bucket_id: this.state.cats[idx].bucket_id,
+                  amount: val,
+                }
+              })
+              this.setState({
+                cats: new_cats
+              }, () => {
+                this.emitChange();
+              })
+            }}
+            onKeyPress={onKeys({
+              Enter: () => {
+                this.props.onEnter && this.props.onEnter();
+              },
+            })}
+          />}
+        </div>
+        <a
+          className="subtle delete-button"
+          onClick={() => {
+            if (general_cat) {
+              this.setState({
+                general_cat: '',
+              }, () => {
+                this.emitChange();
+              })
+            } else {
+              const new_cats = changeCats(this.props.amount, this.state.cats, {
+                action: 'delete',
+                idx: idx,
+              })
+              this.setState({
+                cats: new_cats,
+              }, () => {
+                this.emitChange();
+              })
+            }
+          }}>&times;</a>
+      </div>
+    })
+
+    if (general_cat) {
+      elems = elems.slice(0, 1);
+    }
+    
+    return <div className="category-input">
+      {elems}
+    </div>
+  }
+}
+
 interface CategorizerProps {
-  transaction: Transaction;
+  transaction_id?: number;
+  amount: number;
+  general_cat: GeneralCatType;
   appstate: AppState;
+  onCategorize: (cats:Category[])=>void;
+  onGeneralCategorize: (cat:GeneralCatType)=>void;
 }
 class Categorizer extends React.Component<CategorizerProps, {
   categories: Category[];
@@ -488,15 +761,21 @@ class Categorizer extends React.Component<CategorizerProps, {
     this.refreshCategories(nextProps)
   }
   refreshCategories(props:CategorizerProps) {
-    return manager
-    .nocheckpoint
-    .accounts.getCategories(props.transaction.id)
-    .then(cats => {
+    if (props.transaction_id) {
+      return manager
+      .nocheckpoint
+      .accounts.getCategories(props.transaction_id)
+      .then(cats => {
+        this.setState({
+          categories: cats,
+          clean_cats: this.cleanCats(props.amount, cats),
+        })
+      })  
+    } else {
       this.setState({
-        categories: cats,
-        clean_cats: this.cleanCats(props.transaction, cats),
+        clean_cats: this.cleanCats(props.amount, this.state.categories),
       })
-    })
+    }
   }
   openCategorizer = () => {
     this.setState({open: true, did_focus: false})
@@ -505,35 +784,27 @@ class Categorizer extends React.Component<CategorizerProps, {
     this.setState({open: false})
   }
   saveChanges = async () => {
-    let { transaction } = this.props;
-
-    await manager
-    .checkpoint(sss('Categorization'))
-    .accounts.categorize(transaction.id, this.state.clean_cats)
+    await this.props.onCategorize(this.state.clean_cats);
     await this.refreshCategories(this.props);
     this.setState({open: false})
   }
   generalCat = (name) => {
     return async () => {
-      let { transaction } = this.props;
-
-      await manager
-      .checkpoint(sss('Categorization'))
-      .accounts.categorizeGeneral(transaction.id, name);
+      await this.props.onGeneralCategorize(name);
       await this.refreshCategories(this.props);
       this.setState({open: false})
     }
   }
   // Clean categories
-  // trans: Account Transaction being categorized
+  // trans_amount: Amount
   // categories: A list of Categorys
   // idx: The anchor index
   // replacement: Either the category that will replace
   //   the deleted
-  cleanCats(trans:Transaction, categories:Category[],
+  cleanCats(trans_amount:number, categories:Category[],
       idx?:number, replacement?:Category|'delete'):Category[] {
-    let left = Math.abs(trans.amount);
-    let sign = Math.sign(trans.amount);
+    let left = Math.abs(trans_amount);
+    let sign = Math.sign(trans_amount);
     let ret = categories.map((cat, i) => {
       if (idx !== undefined && i == idx) {
         if (replacement === 'delete') {
@@ -574,7 +845,7 @@ class Categorizer extends React.Component<CategorizerProps, {
     return ret;
   }
   renderOpen() {
-    let { transaction, appstate } = this.props;
+    let { amount, appstate } = this.props;
     let bucket_options = _.sortBy(appstate.unkicked_buckets, [bucket=>bucket.name.toLowerCase()])
       .map(bucket => {
         return <option key={bucket.id} value={bucket.id}>{bucket.name}</option>
@@ -603,7 +874,7 @@ class Categorizer extends React.Component<CategorizerProps, {
               onChange={ev => {
                 let bucket_id = ev.target.value ? parseInt(ev.target.value) : null;
                 this.setState({
-                  clean_cats: this.cleanCats(transaction, cats, idx, {
+                  clean_cats: this.cleanCats(amount, cats, idx, {
                     bucket_id: bucket_id,
                     amount: cat.amount,
                   }),
@@ -618,7 +889,7 @@ class Categorizer extends React.Component<CategorizerProps, {
             className="amount ctx-matching-input"
             onChange={val => {
               this.setState({
-                clean_cats: this.cleanCats(transaction, cats, idx, {
+                clean_cats: this.cleanCats(amount, cats, idx, {
                   bucket_id: cat.bucket_id,
                   amount: Math.abs(val),
                 }),
@@ -635,7 +906,7 @@ class Categorizer extends React.Component<CategorizerProps, {
           className="subtle delete-button"
           onClick={() => {
             this.setState({
-              clean_cats: this.cleanCats(transaction, cats, idx, 'delete'),
+              clean_cats: this.cleanCats(amount, cats, idx, 'delete'),
             })
           }}>&times;</a>
       </div>
@@ -647,21 +918,21 @@ class Categorizer extends React.Component<CategorizerProps, {
         <button onClick={this.saveChanges}>{sss('Save')}</button>
       </div>
       <div className="general-cat-buttons">
-        {transaction.amount >= 0 ? <button onClick={this.generalCat('income')}>💰 {sss('noun.income', 'Income')}</button> : null}
+        {amount >= 0 ? <button onClick={this.generalCat('income')}>💰 {sss('noun.income', 'Income')}</button> : null}
         <button onClick={this.generalCat('transfer')}>⇄ {sss('noun.transfer', 'Transfer')}</button>
       </div>
     </div>
   }
   renderClosed() {
-    let { appstate, transaction } = this.props;
+    let { appstate, general_cat } = this.props;
     let cats = this.state.categories;
     let guts;
-    if (transaction.general_cat === 'income') {
+    if (general_cat === 'income') {
       // income
       guts = <a className="general-tag" onClick={this.openCategorizer}>
           💰 {sss('noin.income', 'Income')}
         </a>
-    } else if (transaction.general_cat === 'transfer') {
+    } else if (general_cat === 'transfer') {
       // transfer
       guts = <a className="general-tag" onClick={this.openCategorizer}>
           ⇄ {sss('noun.transfer', 'Transfer')}
