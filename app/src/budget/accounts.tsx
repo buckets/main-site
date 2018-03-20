@@ -214,6 +214,7 @@ export class AccountView extends React.Component<AccountViewProps, {
       </div>
       <TransactionList
         transactions={this.props.transactions}
+        categories={this.props.appstate.categories}
         appstate={this.props.appstate}
         account={account}
         ending_balance={balance}

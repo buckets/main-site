@@ -135,6 +135,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
     return <TransactionList
       transactions={this.state.transactions}
       appstate={this.props.appstate}
+      categories={this.props.appstate.categories}
       noCreate
     />
   }

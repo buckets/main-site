@@ -506,27 +506,6 @@ h3:first-child {
   background-color: var(--green);
 }
 
-
-.money-input.ctx-matching-input input,
-.ctx-matching-input {
-  border: none;
-  outline: none;
-  font-family: inherit;
-  font-size: inherit;
-  padding: 0;
-  margin: 0;
-  font-weight: inherit;
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: transparent;
-  color: inherit;
-  transition: color 0.1s, border-bottom-color 0.1s;
-}
-.money-input.ctx-matching-input input:focus,
-.ctx-matching-input:focus {
-  outline: none;
-}
-
 .click-to-edit {
   display: inline;
 }
@@ -633,7 +612,8 @@ table.ledger tr th.div-left {
 
 table.ledger tr.action-row td {
   border: 0;
-  padding: 8px 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 table.ledger > tbody > tr:hover > td {
@@ -739,7 +719,6 @@ table.ledger .icon-button-wrap button.icon,
 }
 .money-input input:focus {
   outline: none;
-  sborder-color: var(--blue);
   background-color: var(--highlighter);
 }
 .money-input .computed-value {
@@ -762,87 +741,73 @@ table.ledger .icon-button-wrap button.icon,
 .transaction-list th {
   max-width: 40%;
 }
-/* Categories */
-.categorizer {
 
+
+/* Categories */
+.category-input {
 }
-.categorizer select {
+.category-input select {
   height: 1.5rem;
+  background-color: transparent;
+  border: none;
+  outline: none;
 }
-.categorizer .tag {
+.category-input select:focus {
+  outline: 2px solid var(--blue);
+}
+.category-input .tag,
+.category-tag {
   display: inline-grid;
   grid-template-columns: min-content min-content;
   align-content: stretch;
-  background-color: var(--blue);
-  color: white;
-  border-radius: 2px;
+  background-color: var(--lightest-grey);
+  border: 0px solid var(--lighter-grey);
+  color: black;
   font-size: .8rem;
   cursor: pointer;
   margin: .1rem;
   padding: 0;
-  min-height: 1.6rem; /* Emoji support*/
+  border-radius: 2px;
+  overflow: hidden;
 }
-.categorizer .tag .name {
+.category-input .tag .name,
+.category-tag .name {
   padding: 0 .5rem;
   white-space: nowrap;
   align-self: center;
 }
-.categorizer .tag .amount {
+.category-tag .name {
+  padding: .1rem .3rem;
+  vertical-align: middle;
+}
+.category-input .tag .amount,
+.category-tag .amount {
   padding: .3rem .5rem;
-  background-color: rgba(255,255,255,0.2);
+  sbackground-color: white;
+  scolor: black;
   white-space: nowrap;
   align-self: stretch;
 }
-.categorizer .general-tag {
-  display: inline-block;
-  padding: .1rem .5rem;
-  cursor: pointer;
-  margin: 0;
+.category-tag .amount {
+  padding: .1rem .3rem;
+  vertical-align: middle;
 }
-
-.categorizer.open {
-  padding: .5rem 0;
-}
-.categorizer .tag.open {
-  border-radius: 4px;
-}
-.categorizer .tag.open .name {
-  padding: .25rem .5rem;
-}
-.categorizer .category {
+.category-input .category {
   display: flex;
   align-items: center;
 }
-.categorizer .delete-button {
-  font-size: 2rem;
+.category-input .delete-button {
+  font-size: 1.6rem;
   padding: 0 .5rem;
   position: relative;
-  top: -3px;
+  top: -1px;
+}
+.category-input .tag.general-tag {
+}
+.category-input .tag.general-tag select {
+  
+}
 
-}
-.categorizer .bucket-buttons {
-  padding-bottom: .5rem;
-  padding-top: .5rem;
-  display: flex;
-  justify-content: space-between;
-}
-.categorizer .bucket-buttons button {
-  flex-basis: 50%;
-  flex-grow: 1;
-}
-.categorizer .general-cat-buttons {
-  border-top: 1px solid var(--lighter-grey);
-  padding-top: .5rem;
-  display: flex;
-  justify-content: space-between;
-}
-.categorizer .general-cat-buttons button {
-  flex-basis: 50%;
-  background-color: white;
-}
-.categorizer .general-cat-buttons button:hover {
-  background-color: var(--yellow);
-}
 
 /* Top total tags */
 .totals {
@@ -1630,4 +1595,30 @@ g.hover-labels:hover rect.highlight {
   padding: 1rem;
   border: 1px solid var(--lighter-grey);
   border-radius: 3px;
+}
+
+
+/* Blend in elements */
+.money-input.ctx-matching-input input,
+.ctx-matching-input {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  margin: 0;
+  font-weight: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  color: inherit;
+  transition: color 0.1s, border-bottom-color 0.1s;
+}
+.money-input.ctx-matching-input input:focus,
+.ctx-matching-input:focus {
+  outline: none;
+  border: none;
+  border-radius: none;
+  padding: 0;
+  background-color: transparent;
 }

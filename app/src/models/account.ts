@@ -215,7 +215,7 @@ export class AccountStore {
     }
     if (args.amount !== undefined && existing.amount !== args.amount) {
       affected_account_ids.add(existing.account_id);
-      this.removeCategorization(trans_id);
+      this.removeCategorization(trans_id, false);
       args.amount = args.amount || 0;
     }
     let trans = await this.store.updateObject(Transaction, trans_id, {
@@ -568,7 +568,7 @@ export class AccountStore {
     }
 
     // delete old
-    await this.removeCategorization(trans_id)
+    await this.removeCategorization(trans_id, false)
 
     // create new bucket transactions
     await Promise.all(categories.map(cat => {
@@ -584,7 +584,7 @@ export class AccountStore {
     await this.store.publishObject('update', trans);
     return categories;
   }
-  async removeCategorization(trans_id:number):Promise<any> {
+  async removeCategorization(trans_id:number, publish:boolean):Promise<any> {
     // delete old
     let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
       {$id: trans_id});
@@ -593,11 +593,35 @@ export class AccountStore {
       UPDATE account_transaction
       SET general_cat = ''
       WHERE id = $id`, {$id: trans_id})
+    if (publish) {
+      const trans = await this.store.getObject(Transaction, trans_id);
+      this.store.publishObject('update', trans);
+    }
   }
   async categorizeGeneral(trans_id:number, category:GeneralCatType):Promise<Transaction> {
     // delete old
-    await this.removeCategorization(trans_id)
+    await this.removeCategorization(trans_id, false)
     return this.store.updateObject(Transaction, trans_id, {general_cat: category})
+  }
+  async getManyCategories(trans_ids:number[]):Promise<{[trans_id:number]:Category[]}> {
+    const row_promise = this.store.query(`
+      SELECT account_trans_id, bucket_id, amount
+      FROM bucket_transaction
+      WHERE account_trans_id in (${trans_ids.join(',')})
+      ORDER BY 1,2,3
+      `, {})
+    let ret = {};
+    trans_ids.forEach(id => {
+      ret[id] = [];
+    })
+    const rows = await row_promise;
+    rows.forEach(({account_trans_id, bucket_id, amount}) => {
+      ret[account_trans_id].push({
+        bucket_id,
+        amount,
+      })
+    })
+    return ret;
   }
   async getCategories(trans_id:number):Promise<Category[]> {
     return this.store.query(

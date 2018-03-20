@@ -134,6 +134,7 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
             <TransactionList
               noCreate
               appstate={appstate}
+              categories={appstate.categories}
               transactions={matching_transactions}
             />}
         </div>);
@@ -178,6 +179,7 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
             <TransactionList
               noCreate
               appstate={appstate}
+              categories={appstate.categories}
               transactions={matching_transactions}
             />}
           </div>)

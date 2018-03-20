@@ -19,6 +19,7 @@
   "dependencies": {
     "bluebird": "3.5.0",
     "classnames": "2.2.5",
+    "color": "^3.0.0",
     "csv": "^2.0.0",
     "d3": "^4.10.0",
     "electron-is": "^2.4.0",
@@ -106,6 +107,7 @@
     "@types/bluebird": "^3.5.5",
     "@types/chai": "^4.0.0",
     "@types/cheerio": "^0.22.2",
+    "@types/color": "^3.0.0",
     "@types/d3": "^4.10.0",
     "@types/electron-builder": "2.8.0",
     "@types/fs-extra": "^4.0.0",

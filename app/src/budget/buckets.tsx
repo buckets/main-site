@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
+import * as Color from 'color'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { ts2utcdb, DateDisplay, parseUTCTime, localNow, makeLocalDate, PerMonth } from '../time'
@@ -9,7 +10,7 @@ import {Balances} from '../models/balances'
 import { Money, MoneyInput, cents2decimal } from '../money'
 import { onKeys, MonthSelector, ClickToEdit, SafetySwitch, DebouncedInput } from '../input'
 import { manager, AppState } from './appstate'
-import { ColorPicker } from '../color'
+import { ColorPicker, COLORS } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
@@ -1273,7 +1274,25 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
 export class BucketStyles extends React.Component<{buckets: Bucket[]}, {}> {
   render() {
     let guts = this.props.buckets.map(bucket => {
-      return `.tag.custom-bucket-style-${bucket.id} { background-color: ${bucket.color || 'var(--blue)'}; }`
+      const color = Color(bucket.color || COLORS.blue);
+      const background = color.rgb().string();
+      const textcolor = color.luminosity() > .5 ? 'black' : 'white';
+      return `
+.category-tag.bucket-style-${bucket.id},
+.category-input .tag.bucket-style-${bucket.id},
+.category-input .tag.bucket-style-${bucket.id} select {
+  color: ${textcolor};
+  text-decoration-color: ${textcolor};
+}
+.category-tag.bucket-style-${bucket.id} .name,
+.category-input .tag.bucket-style-${bucket.id} .name {
+  border-color: ${background};
+  background-color: ${background};
+}
+.category-tag.bucket-style-${bucket.id} .amount,
+.category-input .tag.bucket-style-${bucket.id} .amount {
+  background-color: ${color.rgb().fade(0.3).string()};
+}`
     })
     return <style>
       {guts.join('\n')}

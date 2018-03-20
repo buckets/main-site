@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 
 import { EventSource } from '../events'
 import {isObj, ObjectEvent, IStore} from '../store'
-import { Account, UnknownAccount, expectedBalance, Transaction as ATrans} from '../models/account'
+import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from '../models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { Connection } from '../models/simplefin'
 import { isBetween, parseLocalTime, localNow, makeLocalDate } from '../time'
@@ -69,6 +69,9 @@ export class AppState implements IComputedAppState {
   } = {};
   bank_macros: {
     [k: number]: BankMacro;
+  } = {};
+  categories: {
+    [trans_id: number]: Category[];
   } = {};
   csvs_needing_mapping: CSVNeedsMapping[] = [];
   csvs_needing_account: CSVNeedsAccountAssigned[] = [];
@@ -260,21 +263,21 @@ function computeTotals(appstate:AppState):IComputedAppState {
 }
 
 
-class DelayingCounter {
+class DelayingCounter<T> {
   readonly done = new EventSource<number>();
-  private _count = 0;
+  private _count = new Set<T>();
   private _timer;
   constructor(private delay:number=200) {}
-  add(num:number=1) {
-    this._count++;
+  add(val:T) {
+    this._count.add(val);
     if (this._timer) {
       // restart the timer
       clearTimeout(this._timer);
     }
     this._timer = setTimeout(() => {
-      let count = this._count;
+      let count = this._count.size;
       this.done.emit(count)
-      this._count = 0;
+      this._count = new Set<T>();
     }, this.delay);
   }
 }
@@ -407,7 +410,7 @@ export class StateManager {
       }
     } else if (isObj(ATrans, obj)) {
       if (ev.event === 'update') {
-        this.updated_trans_counter.add();
+        this.updated_trans_counter.add(obj.id);
       }
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
@@ -418,6 +421,11 @@ export class StateManager {
       } else if (ev.event === 'update') {
         this.appstate.transactions[obj.id] = obj;
       }
+      this.store.accounts.getCategories(obj.id)
+      .then(cats => {
+        this.appstate.categories[obj.id] = cats;
+        this.signalChange();
+      })
     } else if (isObj(BTrans, obj)) {
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
@@ -553,20 +561,22 @@ export class StateManager {
       this.appstate.actual_future_rain = rainfall;
     })
   }
-  fetchTransactions() {
+  async fetchTransactions() {
     let range = this.appstate.viewDateRange;
-    return this.store.accounts.listTransactions({
+    const transactions = await this.store.accounts.listTransactions({
       posted: {
         onOrAfter: range.onOrAfter,
         before: range.before,
       }
     })
-      .then(transactions => {
-        this.appstate.transactions = {};
-        transactions.forEach(trans => {
-          this.appstate.transactions[trans.id] = trans;
-        })
-      })
+    this.appstate.transactions = {};
+    let trans_ids = [];
+    transactions.forEach(trans => {
+      this.appstate.transactions[trans.id] = trans;
+      trans_ids.push(trans.id);
+    })
+    const categories = await this.store.accounts.getManyCategories(trans_ids);
+    this.appstate.categories = categories;
   }
   fetchBucketTransactions() {
     let range = this.appstate.viewDateRange;
