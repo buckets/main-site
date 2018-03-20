@@ -752,6 +752,9 @@ table.ledger .icon-button-wrap button.icon,
   border: none;
   outline: none;
 }
+.category-input select:focus {
+  outline: 2px solid var(--blue);
+}
 .category-input .tag,
 .category-tag {
   display: inline-grid;
@@ -800,12 +803,9 @@ table.ledger .icon-button-wrap button.icon,
   top: -1px;
 }
 .category-input .tag.general-tag {
-  background-color: transparent;
-  color: black;
 }
 .category-input .tag.general-tag select {
-  color: black;
-  font-size: 1rem;
+  
 }
 
 

@@ -3,6 +3,7 @@ import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
+import { IStore } from '../store'
 import { manager, AppState } from './appstate'
 import { Bucket } from '../models/bucket'
 import { Account, Category, Transaction, GeneralCatType } from '../models/account'
@@ -272,8 +273,8 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       memo: '',
       posted: props.appstate.defaultPostingDate,
       account_id: null,
-      general_cat: '',
-      cats: [],
+      general_cat: props.trans ? props.trans.general_cat : '',
+      cats: props.categories ? props.categories : [],
     }
     Object.assign(this.state, this.recomputeState(props));
   }
@@ -294,9 +295,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         memo: props.trans.memo,
         posted: parseLocalTime(props.trans.posted),
         account_id: props.trans.account_id,
-        general_cat: props.trans.general_cat,
-        cats: props.categories || [],
       };
+      if (this.props.trans && this.props.trans.general_cat !== props.trans.general_cat) {
+        state.general_cat = props.trans.general_cat;
+      }
+      if (!_.isEqual(this.props.categories, props.categories)) {
+        state.cats = props.categories;
+      }
       if (props.account) {
         state.account_id = props.account.id;
       }
@@ -318,17 +323,28 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       return ret;
     }
   }
+  async alsoCategorize(store:IStore, trans:Transaction) {
+    if (trans) {
+      const invalid_cats = this.state.cats.filter(x => x.bucket_id===null).length;
+      if (this.state.general_cat) {
+        await store.accounts.categorizeGeneral(trans.id, this.state.general_cat);
+      } else if (this.state.cats.length && !invalid_cats) {
+        await store.accounts.categorize(trans.id, this.state.cats);
+      }
+    }
+  }
   doTransaction = async () => {
     if (this.props.trans) {
       // update
-      await manager
+      const store = manager
       .checkpoint(sss('Update Transaction'))
-      .accounts.updateTransaction(this.props.trans.id, {
+      const trans = await store.accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
         memo: this.state.memo,
         posted: this.state.posted,
       })
+      await this.alsoCategorize(store, trans);
       this.setState({
         editing: false,
       })
@@ -336,21 +352,16 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // create
       if (this.state.amount) {
         try {
-          let store = manager
+          const store = manager
           .checkpoint(sss('Create Transaction'))
 
-          const new_trans = await store.accounts.transact({
+          const trans = await store.accounts.transact({
             account_id: this.state.account_id,
             amount: this.state.amount,
             memo: this.state.memo,
             posted: this.state.posted,
           })
-          const invalid_cats = this.state.cats.filter(x => x.bucket_id===null).length;
-          if (this.state.general_cat) {
-            await store.accounts.categorizeGeneral(new_trans.id, this.state.general_cat);
-          } else if (this.state.cats.length && !invalid_cats) {
-            await store.accounts.categorize(new_trans.id, this.state.cats);
-          }
+          await this.alsoCategorize(store, trans);
           this.setState({
             amount: 0,
             memo: '',
