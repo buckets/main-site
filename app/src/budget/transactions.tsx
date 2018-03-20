@@ -382,12 +382,6 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     }
     if (this.state.editing) {
       // editing
-      let deposit_withdrawl;
-      if (this.state.amount > 0) {
-        deposit_withdrawl = sss('Deposit');
-      } else if (this.state.amount < 0) {
-        deposit_withdrawl = sss('Withdraw');
-      }
       let account_cell;
       if (!hideAccount) {
         // show accounts
@@ -435,7 +429,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             })
           }}
         />
-      } else if (this.state.memo || this.state.amount || this.state.account_id) {
+      } else {
         // Creating a new transaction
         categoryInput = <CategoryInput
           buckets={appstate.unkicked_buckets}
@@ -482,7 +476,6 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             />
           </td>
           <td className="right">
-            {deposit_withdrawl}
             <MoneyInput
               value={this.state.amount}
               onKeyDown={postOnEnter}
@@ -667,16 +660,16 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
         className = cx('tag', 'general-tag');
         select_value = general_cat;
       } else {
-        className = cx('tag', !_.isNil(cat.bucket_id) ? `custom-bucket-style-${cat.bucket_id}` : '');
+        className = cx('tag', !_.isNil(cat.bucket_id) ? `bucket-style-${cat.bucket_id}` : '');
         select_value = _.isNil(cat.bucket_id) ? '' : cat.bucket_id;
       }
       let extra_options;
       if (idx === 0) {
         extra_options = [
-          <option key="transfer" value="transfer">⇄ {sss('Transfer')}</option>
+          <option key="transfer" value="transfer">{sss('Transfer')}</option>
         ];
         if (amount >= 0) {
-          extra_options.push(<option key="income" value="income">💰 {sss('Income')}</option>)
+          extra_options.push(<option key="income" value="income">{sss('Income')}</option>)
         }
       }
       return <div className="category" key={idx}>
@@ -883,7 +876,7 @@ class Categorizer extends React.Component<CategorizerProps, {
         return (appstate.buckets[cat.bucket_id] || {} as any).name || '???';
       }
       let categories = cats.map((cat, idx) => {
-        let className = cx('category-tag', `custom-bucket-style-${cat.bucket_id}`);
+        let className = cx('category-tag', `bucket-style-${cat.bucket_id}`);
         return <a key={idx} className={className} onClick={this.openCategorizer}>
           <div className="name">
             {bucketName(cat)}
