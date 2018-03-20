@@ -262,6 +262,7 @@ interface TransRowState {
   account_id: number;
   general_cat: GeneralCatType;
   cats: Category[];
+  transfer_account_id: number;
 }
 class TransRow extends React.Component<TransRowProps, TransRowState> {
   private memo_elem = null;
@@ -275,6 +276,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       account_id: null,
       general_cat: props.trans ? props.trans.general_cat : '',
       cats: props.categories ? props.categories : [],
+      transfer_account_id: null,
     }
     Object.assign(this.state, this.recomputeState(props));
   }
@@ -330,6 +332,8 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         await store.accounts.categorizeGeneral(trans.id, this.state.general_cat);
       } else if (this.state.cats.length && !invalid_cats) {
         await store.accounts.categorize(trans.id, this.state.cats);
+      } else if (this.state.cats.length && invalid_cats) {
+        makeToast(sss('Invalid categorization.  Categories not set.'), {className: 'warning'})
       }
     }
   }
@@ -362,11 +366,22 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             posted: this.state.posted,
           })
           await this.alsoCategorize(store, trans);
+          if (this.state.general_cat === 'transfer' && this.state.transfer_account_id) {
+            // Create a second, opposite transaction
+            const xfer_trans = await store.accounts.transact({
+              account_id: this.state.transfer_account_id,
+              amount: -this.state.amount,
+              memo: this.state.memo,
+              posted: this.state.posted,
+            })
+            await store.accounts.categorizeGeneral(xfer_trans.id, 'transfer');
+          }
           this.setState({
             amount: 0,
             memo: '',
             general_cat: '',
             cats: [],
+            transfer_account_id: null,
           }, () => {
             this.memo_elem.focus();
           })
@@ -423,6 +438,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         }
       }
       let categoryInput;
+      let relatedAccountSelect;
       if (trans) {
         // Editing an existing transaction
         categoryInput = <CategoryInput
@@ -457,6 +473,38 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             })
           }}
         />
+
+        if (this.state.general_cat === 'transfer') {
+          const dropdown = <select
+            value={this.state.transfer_account_id || ''}
+            onKeyDown={postOnEnter}
+            onChange={ev => {
+              let selection = Number(ev.target.value);
+              this.setState({
+                transfer_account_id: isNaN(selection) ? null : selection,
+              })
+            }}>
+            <option></option>
+            {appstate.open_accounts.map(account => {
+              if (account.id === this.state.account_id) {
+                // Can't transfer to/from the same account
+                return null;
+              }
+              return <option value={account.id} key={account.id}>{account.name}</option>
+            })}
+          </select>
+          if (this.state.amount >= 0) {
+            relatedAccountSelect = <div>
+              {sss('transfer-from-account', (dropdown:JSX.Element) => {
+                return <span>Transfer from {dropdown}</span>
+              })(dropdown)}</div>
+          } else {
+            relatedAccountSelect = <div>
+              {sss('transfer-to-account', (dropdown:JSX.Element) => {
+                return <span>Transfer to {dropdown}</span>
+              })(dropdown)}</div>
+          }
+        }
       }
       return (
         <tr className="action-row">
@@ -498,6 +546,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           { isNil(running_bal) ? null : <td></td> }
           <td name="categorize" className="center">
             {categoryInput}
+            {relatedAccountSelect}
           </td>
           <td name="edit" className="icon-wrap center">
             <button
@@ -728,8 +777,9 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
                   })
                 }
               }}>
-              {extra_options}
               <option></option>
+              {extra_options}
+              {extra_options ? <option></option> : null}
               {bucket_options}
             </select>
           </div>
@@ -824,17 +874,28 @@ class Categorizer extends React.Component<CategorizerProps, {
     this.setState({open: true})
   }
   closeCategorizer = () => {
-    this.setState({open: false})
+    this.setState({
+      open: false,
+      cats: this.props.cats || [],
+    })
   }
   saveChanges = async () => {
+    const invalid_cats = this.state.cats.filter(x => x.bucket_id===null).length;
     if (this.state.new_general_cat) {
       await manager
         .checkpoint(sss('Categorization'))
         .accounts.categorizeGeneral(this.props.transaction.id, this.state.new_general_cat)
     } else {
-      await manager
-        .checkpoint(sss('Categorization'))
-        .accounts.categorize(this.props.transaction.id, this.state.cats)
+      if (this.state.cats.length === 1 && invalid_cats) {
+        await manager
+          .checkpoint(sss('Remove Categorization'))
+          .accounts.removeCategorization(this.props.transaction.id, true);
+        this.setState({cats: [], new_general_cat: ''});
+      } else if (!invalid_cats) {
+        await manager
+          .checkpoint(sss('Categorization'))
+          .accounts.categorize(this.props.transaction.id, this.state.cats)
+      }
     }
     this.setState({open: false})
   }

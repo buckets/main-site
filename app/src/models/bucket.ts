@@ -236,7 +236,7 @@ export class BucketStore {
       this.store.publishObject('update', bucket);
     }));
     await Promise.all(Array.from(affected_atrans).map(async (atrans_id) => {
-      await this.store.accounts.removeCategorization(atrans_id);
+      await this.store.accounts.removeCategorization(atrans_id, false);
     }))
   }
   async updateTransaction(transid:number, data:Partial<Transaction>):Promise<Transaction> {
