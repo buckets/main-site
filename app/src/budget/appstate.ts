@@ -340,7 +340,7 @@ export class StateManager {
         result.errors.forEach(err => {
           log.warn('Error during sync:', err);
           makeToast(err.toString(), {className:'error'})
-        })  
+        })
       } else {
         makeToast(sss('Sync complete'));  
       }

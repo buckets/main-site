@@ -6,7 +6,7 @@ import {v4 as uuid} from 'uuid'
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
 import { Money, decimal2cents } from './money'
-import { DateDisplay, parseLocalTime } from './time'
+import { DateDisplay, parseLocalTime, dumpTS, loadTS } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
 import { Account, CSVImportMapping } from './models/account'
 import { IStore } from './store'
@@ -182,7 +182,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     return {
       amount,
       memo,
-      posted,
+      posted: dumpTS(posted),
       fi_id,
     }
   })
@@ -513,7 +513,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
         <tbody>
           {obj.transactions.map((trans, idx) => {
             return <tr key={idx}>
-              <td><DateDisplay value={trans.posted} /></td>
+              <td><DateDisplay value={loadTS(trans.posted)} /></td>
               <td>{trans.memo}</td>
               <td><Money value={trans.amount} /></td>
             </tr>

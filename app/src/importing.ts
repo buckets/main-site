@@ -9,8 +9,7 @@ import { isNil, hashStrings } from './util'
 import { IBudgetFile } from './mainprocess/files'
 import { displayError } from './errors'
 import { PrefixLogger } from './logging'
-import { ensureLocalMoment } from './time'
-import * as moment from 'moment-timezone'
+import { SerializedTimestamp, loadTS } from './time'
 
 const log = new PrefixLogger('(importing)');
 
@@ -26,7 +25,7 @@ export interface ImportableAccount {
 export interface ImportableTrans {
   amount: number;
   memo: string;
-  posted: moment.Moment;
+  posted: SerializedTimestamp;
   fi_id?: string;
 }
 export interface PendingImport {
@@ -98,7 +97,7 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
             account_id,
             amount: trans.amount,
             memo: trans.memo,
-            posted: ensureLocalMoment(trans.posted),
+            posted: loadTS(trans.posted),
             fi_id: trans.fi_id,
           }
         })
@@ -121,7 +120,7 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
                   account_id: mapping.account_id,
                   amount: trans.amount,
                   memo: trans.memo,
-                  posted: trans.posted,
+                  posted: loadTS(trans.posted),
                   fi_id: trans.fi_id,
                 }
               })
