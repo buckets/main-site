@@ -11,5 +11,8 @@ export interface ILangPack {
     decimal_regex: RegExp;
   };
   messages: IMessages;
-  contributors: string[];
+  contributors: Array<{
+    name: string;
+    href?: string;
+  }>;
 }
