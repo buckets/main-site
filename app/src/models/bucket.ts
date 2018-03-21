@@ -74,20 +74,16 @@ registerClass(Group);
 
 
 export interface BucketFlow {
-  total_in: number;
-  total_out: number;
-  in: number;
+  rain_in: number;
+  nonrain_in: number;
   out: number;
-  transfer_in: number;
-  transfer_out: number;
+  total_activity: number;
 }
 export const emptyFlow:BucketFlow = {
-  total_in: 0,
-  total_out: 0,
-  in: 0,
+  rain_in: 0,
+  nonrain_in: 0,
   out: 0,
-  transfer_in: 0,
-  transfer_out: 0,
+  total_activity: 0,
 }
 export interface BucketFlowMap {
   [bucket_id: number]: BucketFlow;
@@ -302,31 +298,23 @@ export class BucketStore {
           SUM(CASE
               WHEN
                   amount >= 0
-                  AND COALESCE(transfer, 0) = 0
+                  AND account_trans_id IS NULL
               THEN amount
               ELSE 0
-              END) as amount_in,
-          SUM(CASE
-              WHEN
-                  amount < 0
-                  AND COALESCE(transfer, 0) = 0
-              THEN amount
-              ELSE 0
-              END) as amount_out,
+              END) as rain_in,
           SUM(CASE
               WHEN
                   amount >= 0
-                  AND COALESCE(transfer, 0) = 1
+                  AND account_trans_id IS NOT NULL
               THEN amount
               ELSE 0
-              END) as transfer_in,
+              END) as nonrain_in,
           SUM(CASE
               WHEN
                   amount < 0
-                  AND COALESCE(transfer, 0) = 1
               THEN amount
               ELSE 0
-              END) as transfer_out,
+              END) as amount_out,
           bucket_id
       FROM
           bucket_transaction
@@ -342,12 +330,10 @@ export class BucketStore {
     let ret:BucketFlowMap = {};
     rows.forEach(row => {
       ret[row.bucket_id] = {
-        in: row.amount_in,
+        rain_in: row.rain_in,
         out: row.amount_out,
-        transfer_in: row.transfer_in,
-        transfer_out: row.transfer_out,
-        total_in: row.amount_in + row.transfer_in,
-        total_out: row.amount_out + row.transfer_out,
+        nonrain_in: row.nonrain_in,
+        total_activity: row.amount_out + row.nonrain_in
       }
     })
     return ret; 

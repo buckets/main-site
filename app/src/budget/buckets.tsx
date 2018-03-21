@@ -193,7 +193,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               return <Redirect to='/buckets' />;
             }
             let balance = appstate.bucket_balances[bucket.id];
-            let rainfall = appstate.getBucketFlow(bucket.id).in;
+            let rainfall = appstate.getBucketFlow(bucket.id).rain_in;
             return (<BucketView
               bucket={bucket}
               rainfall={rainfall}
@@ -267,7 +267,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
           today: appstate.defaultPostingDate,
           balance: appstate.bucket_balances[bucket.id],
         })
-        let rainfall = appstate.getBucketFlow(bucket.id).in;
+        let rainfall = appstate.getBucketFlow(bucket.id).rain_in;
         let ask = computed.deposit - rainfall;
         ask = ask < 0 ? 0 : ask;
         let amount = ask < left ? ask : left;
@@ -628,7 +628,7 @@ class BucketRow extends React.Component<BucketRowProps, {
 
     let rainfall_indicator;
     if (computed.deposit) {
-      let percent = flow.in/computed.deposit*100;
+      let percent = flow.rain_in/computed.deposit*100;
       rainfall_indicator = <Help
         icon={<ProgressBubble height="1rem" percent={percent} />}>
         {Math.floor(percent)}%
@@ -710,10 +710,10 @@ class BucketRow extends React.Component<BucketRowProps, {
         {rainfall_indicator}
       </td>
       <td name="in" className="right">
-        <Money value={flow.in} hidezero />
+        <Money value={flow.rain_in} hidezero />
       </td>
       <td name="activity" className="right">
-        <Money value={flow.out + flow.transfer_in + flow.transfer_out} nocolor hidezero />
+        <Money value={flow.total_activity} nocolor hidezero />
       </td>
       <td name="details"
           className="nopad bucket-details-wrap">
@@ -808,15 +808,14 @@ class GroupRow extends React.Component<{
     pending = pending || {};
 
     let total_in = 0;
-    let total_out = 0;
-    let total_transfer = 0;
+    let total_activity = 0;
     let total_balance = 0;
 
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
       let flow = bucket_flow[bucket.id] || Object.assign({}, emptyFlow)
-      total_in += flow.in;
-      total_out += flow.out;
+      total_in += flow.rain_in;
+      total_activity += flow.total_activity;
       total_balance += balances[bucket.id];
       return <BucketRow
         key={bucket.id}
@@ -893,7 +892,7 @@ class GroupRow extends React.Component<{
           <Money value={total_in} hidezero/>
         </td>
         <td name="activity" className="right">
-          <Money value={total_out + total_transfer} nocolor hidezero/>
+          <Money value={total_activity} nocolor hidezero/>
         </td>
         <td name="details">
         </td>
