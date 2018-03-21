@@ -13,6 +13,7 @@ import { AccountStore } from '../models/account'
 import { SimpleFINStore } from '../models/simplefin'
 import { ReportStore } from '../models/reports'
 import { BankMacroStore } from '../models/bankmacro'
+import { SettingsStore } from '../models/settings'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
@@ -242,12 +243,14 @@ export class DBStore implements IStore {
   readonly simplefin:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankmacro:BankMacroStore;
+  readonly settings:SettingsStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
     this.accounts = new AccountStore(this);
     this.buckets = new BucketStore(this);
     this.simplefin = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankmacro = new BankMacroStore(this);
+    this.settings = new SettingsStore(this);
     this.undo = new UndoTracker(this);
   }
   async open():Promise<DBStore> {

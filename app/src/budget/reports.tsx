@@ -514,13 +514,13 @@ interface BucketExpenseSummaryState {
   timeback_unit: 'month'|'year';
 }
 class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, BucketExpenseSummaryState> {
-  constructor(props) {
+  constructor(props:BucketExpenseSummaryProps) {
     super(props)
     this.state = {
       expensesByBucket: {},
       segments: {},
-      timeback_number: 18,
-      timeback_unit: 'month',
+      timeback_number: props.appstate.settings.reports_timeback_number || 18,
+      timeback_unit: props.appstate.settings.reports_timeback_unit || 'month',
     }
     this.recomputeState(props);
   }
@@ -616,6 +616,9 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
                     this.setState({
                       timeback_number: value,
                     }, () => {
+                      manager.nocheckpoint.settings.updateSettings({
+                        reports_timeback_number: this.state.timeback_number,
+                      });
                       this.triggerReload();
                     })
                   }}
@@ -634,6 +637,10 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
                       timeback_unit: ev.target.value as any,
                       timeback_number: timeback_number,
                     }, () => {
+                      manager.nocheckpoint.settings.updateSettings({
+                        reports_timeback_number: this.state.timeback_number,
+                        reports_timeback_unit: this.state.timeback_unit,
+                      })
                       this.triggerReload();
                     })
                   }}>

@@ -6,6 +6,7 @@ import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
 import { BankMacroStore } from './models/bankmacro'
+import { SettingsStore } from './models/settings'
 import { PrefixLogger } from './logging'
 
 const log = new PrefixLogger('(rpcstore)')
@@ -124,6 +125,7 @@ export class RPCRendererStore implements IStore {
   readonly simplefin:SimpleFINStore;
   readonly reports:ReportStore;
   readonly bankmacro:BankMacroStore;
+  readonly settings:SettingsStore;
   private caller:RPCCaller<IStore>;
   constructor(room:string, readonly bus:IBudgetBus) {
     this.accounts = new AccountStore(this);
@@ -131,6 +133,7 @@ export class RPCRendererStore implements IStore {
     this.simplefin = new SimpleFINStore(this);
     this.reports = new ReportStore(this);
     this.bankmacro = new BankMacroStore(this);
+    this.settings = new SettingsStore(this);
     this.caller = new RPCCaller(`rpc-store-${room}`);
   }
   async callRemote<T>(method, ...args):Promise<T> {

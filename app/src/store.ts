@@ -9,6 +9,7 @@ import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'
 import { ReportStore } from './models/reports'
 import { BankMacroStore } from './models/bankmacro'
+import { SettingsStore } from './models/settings'
 
 //----------------------------------------------------------------------
 // Database objects
@@ -60,6 +61,7 @@ export interface IStore {
   simplefin:SimpleFINStore;
   reports:ReportStore;
   bankmacro:BankMacroStore;
+  settings:SettingsStore;
 }
 
 //----------------------------------------------------------------

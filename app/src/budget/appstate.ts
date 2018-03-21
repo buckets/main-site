@@ -9,6 +9,7 @@ import { Connection } from '../models/simplefin'
 import { isBetween, parseLocalTime, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
 import { BankMacro } from '../models/bankmacro'
+import { ISettings, Setting, DEFAULTS as DefaultSettings } from '../models/settings'
 import { makeToast } from './toast'
 import { sss } from '../i18n'
 import { IBudgetFile } from '../mainprocess/files'
@@ -46,6 +47,7 @@ interface IComputedAppState {
 }
 
 export class AppState implements IComputedAppState {
+  settings: ISettings = DefaultSettings;
   accounts: {
     [k: number]: Account;
   } = {};
@@ -457,6 +459,8 @@ export class StateManager {
       } else if (ev.event === 'delete') {
         delete this.appstate.bank_macros[obj.id];
       }
+    } else if (isObj(Setting, obj)) {
+      this.appstate.settings[obj.key] = obj.value;
     }
     this.signalChange();
     return this.appstate;
@@ -486,6 +490,7 @@ export class StateManager {
   }
   async refresh():Promise<any> {
     await Promise.all([
+      this.fetchSettings(),
       this.fetchAllAccounts(),
       this.fetchAllBuckets(),
       this.fetchAllGroups(),
@@ -505,6 +510,9 @@ export class StateManager {
   recomputeTotals() {
     let totals = computeTotals(this.appstate);
     Object.assign(this.appstate, totals);
+  }
+  async fetchSettings() {
+    this.appstate.settings = await this.store.settings.getSettings();
   }
   fetchAllAccounts() {
     return this.store.accounts.list()
