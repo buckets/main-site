@@ -3,6 +3,10 @@ import * as moment from 'moment'
 
 import { ILangPack, IMessages } from './spec';
 
+// Put your name in here how you want it to appear in any credits
+const contributors:string[] = [
+];
+
 const messages:IMessages = {
   "Reopen Account": {
     val: "Reopen Account",
@@ -2481,4 +2485,5 @@ export const pack:ILangPack = {
     decimal_regex: /\./g,
   },
   messages,
+  contributors,
 }
