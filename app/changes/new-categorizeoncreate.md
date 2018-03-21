@@ -1,1 +1,0 @@
-You can now categorize transactions as you enter them, instead of having to categorize them after adding them.
