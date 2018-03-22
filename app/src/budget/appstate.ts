@@ -6,7 +6,7 @@ import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from '../models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { Connection } from '../models/simplefin'
-import { isBetween, parseLocalTime, localNow, makeLocalDate } from '../time'
+import { isBetween, loadTS, parseLocalTime, localNow, makeLocalDate } from '../time'
 import {Balances} from '../models/balances'
 import { BankMacro } from '../models/bankmacro'
 import { ISettings, Setting, DEFAULTS as DefaultSettings } from '../models/settings'
@@ -322,8 +322,8 @@ export class StateManager {
 
     // Syncing events
     file.room.events('sync_started').on(message => {
-      let onOrAfter = parseLocalTime(message.onOrAfter);
-      let before = parseLocalTime(message.before);
+      let onOrAfter = loadTS(message.onOrAfter);
+      let before = loadTS(message.before);
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
         return `Syncing transactions from ${start.format('ll')} to ${end.format('ll')}`;
       })(onOrAfter, before));
@@ -332,8 +332,8 @@ export class StateManager {
     })
     file.room.events('sync_done').on(message => {
       let { result } = message;
-      let onOrAfter = parseLocalTime(message.onOrAfter);
-      let before = parseLocalTime(message.before);
+      let onOrAfter = loadTS(message.onOrAfter);
+      let before = loadTS(message.before);
       log.info('Sync done', onOrAfter.format(), before.format(), 'errors:', result.errors.length, 'trans:', result.imported_count);
       this.appstate.syncing--;
       if (result.errors.length) {
