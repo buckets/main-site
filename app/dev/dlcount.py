@@ -40,10 +40,10 @@ for i,release in enumerate(releases):
     published = getReleaseDate(release)
     if published:
         if next_release:
-            next_published = getReleaseDate(next_release) or datetime.now()
+            next_published = getReleaseDate(next_release) or datetime.utcnow()
             seconds = (next_published - published).total_seconds()
         else:
-            seconds = (datetime.now() - published).total_seconds()
+            seconds = (datetime.utcnow() - published).total_seconds()
     if not seconds:
         seconds = 1
     seconds *= 1.0
