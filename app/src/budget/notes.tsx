@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { IObject, TABLE2CLASS } from '../store'
 import { manager } from './appstate'
-import { DebouncedInput } from '../input'
+import { debounceChange } from '../input'
 import { sss } from '../i18n'
 
 export interface INotable {
@@ -11,17 +11,31 @@ export interface INotable {
 interface NoteProps {
   obj: INotable & IObject;
 }
-export class NoteMaker extends React.Component<NoteProps, {
+export class NoteMaker extends React.PureComponent<NoteProps, {
   showing: boolean;
   focused: boolean;
+  notes: string;
 }> {
-  constructor(props) {
+  constructor(props:NoteProps) {
     super(props)
     this.state = {
       showing: false,
       focused: false,
+      notes: props.obj.notes || '',
     }
   }
+  componentWillReceiveProps(nextProps:NoteProps) {
+    if (!this.state.focused) {
+      this.setState({
+        notes: nextProps.obj.notes || '',
+      })
+    }
+  }
+  save = debounceChange((newval:string) => {
+    manager
+    .checkpoint(sss('Update Note'))
+    .updateObject(TABLE2CLASS[this.props.obj._type], this.props.obj.id, {notes:newval} as any)
+  })
   render() {
     let { obj } = this.props;
     let button = <button
@@ -39,9 +53,9 @@ export class NoteMaker extends React.Component<NoteProps, {
     if (this.state.showing) {
       guts = <div className="note-wrap">
         <div className="note-inner">
-          <DebouncedInput
+          <textarea
             autoFocus
-            value={obj.notes}
+            value={this.state.notes}
             onKeyDown={(ev) => {
               if (ev.key === 'Escape') {
                 this.setState({showing: false});
@@ -53,12 +67,14 @@ export class NoteMaker extends React.Component<NoteProps, {
             onBlur={() => {
               this.setState({focused: false});
             }}
-            onChange={(val) => {
-              manager
-              .checkpoint(sss('Update Note'))
-              .updateObject(TABLE2CLASS[obj._type], obj.id, {notes:val} as any)
+            onChange={(ev) => {
+              const val = ev.target.value;
+              this.setState({
+                notes: val,
+              }, () => {
+                this.save(val);
+              })
             }}
-            element="textarea"
           />
           <div className="note-help">{sss('press Escape to close')}</div>
         </div>
