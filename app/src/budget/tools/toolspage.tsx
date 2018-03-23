@@ -4,6 +4,7 @@ import { AppState } from '../appstate'
 import { Route, Switch, Link } from '../routing'
 
 import { AmazonPage } from './amazon'
+import { StartOverPage } from './startover'
 
 
 interface ToolsPageProps {
@@ -16,9 +17,13 @@ export class ToolsPage extends React.Component<ToolsPageProps, {}> {
       <Route path="/amazon">
         <AmazonPage appstate={appstate} />
       </Route>
+      <Route path="/startover">
+        <StartOverPage appstate={appstate} />
+      </Route>
       <Route path="" exact>
         <div className="padded">
           <ul>
+            <li><Link relative to="/startover">{sss('Start Over')}</Link></li>
             <li><Link relative to="/amazon">{sss('Amazon.com Reconciliation')}</Link></li>
           </ul>
         </div>

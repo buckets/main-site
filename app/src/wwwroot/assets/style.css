@@ -72,6 +72,10 @@ a:hover {
   text-decoration: underline;
 }
 
+ol.spaced li {
+  margin: 1rem 0;
+}
+
 .app {
   display: flex;
   height: 100vh;
@@ -291,6 +295,9 @@ hr.page {
   margin-left: -1rem;
   margin-right: -1rem;
   padding: 1rem;
+}
+.padded.full-width {
+  flex-grow: 1;
 }
 .flex-grow-2 {
   flex-grow: 2;

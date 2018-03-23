@@ -61,6 +61,11 @@ export interface IBudgetFile {
   room: Room<BudgetFileEvents>;
   
   /**
+   *  Get the filename for this budget.
+   */
+  getFilename():Promise<string>;
+
+  /**
    *  Cause the recording window to open for a particular recording
    */
   openRecordWindow(macro_id:number, autoplay?:{
@@ -192,6 +197,10 @@ export class BudgetFile implements IBudgetFile {
    */
   static fromWindowId(id:number):BudgetFile {
     return BudgetFile.WIN2FILE[id];
+  }
+
+  async getFilename() {
+    return this.filename;
   }
 
   /**
@@ -602,6 +611,10 @@ class RendererBudgetFile implements IBudgetFile {
     this.bus = new BudgetBusRenderer(id);
     this.store = new RPCRendererStore(id, this.bus);
     this.room = new Room<BudgetFileEvents>(this.id);
+  }
+
+  async getFilename() {
+    return this.callInMain('getFilename');
   }
 
   async openRecordWindow(macro_id:number, autoplay?:{

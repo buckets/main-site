@@ -5,7 +5,7 @@ import * as rp from 'request-promise'
 import * as moment from 'moment'
 import * as electron_log from 'electron-log'
 import * as _ from 'lodash'
-import { app, dialog, shell, BrowserWindow } from 'electron'
+import { app, remote, dialog, shell, BrowserWindow } from 'electron'
 import { sss, tx } from './i18n'
 import { APP_ROOT } from './mainprocess/globals'
 import { onlyRunInMain } from './rpc'
@@ -141,7 +141,7 @@ export const reportErrorToUser = onlyRunInMain((text?:string, args?:{
 });
 
 export function displayError(text?:string, title?:string) {
-  dialog.showMessageBox({
+  (remote ? remote.dialog : dialog).showMessageBox({
     title: title || sss('Error'),
     message: text,
     buttons: [
