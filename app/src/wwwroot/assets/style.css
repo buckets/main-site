@@ -755,6 +755,10 @@ table.ledger .icon-button-wrap button.icon,
 .category-input select:focus {
   outline: 2px solid var(--blue);
 }
+.category-input select option {
+  color: black;
+  background-color: white;
+}
 .category-input .tag,
 .category-tag {
   display: inline-grid;
@@ -783,8 +787,6 @@ table.ledger .icon-button-wrap button.icon,
 .category-input .tag .amount,
 .category-tag .amount {
   padding: .3rem .5rem;
-  sbackground-color: white;
-  scolor: black;
   white-space: nowrap;
   align-self: stretch;
 }
@@ -801,11 +803,6 @@ table.ledger .icon-button-wrap button.icon,
   padding: 0 .5rem;
   position: relative;
   top: -1px;
-}
-.category-input .tag.general-tag {
-}
-.category-input .tag.general-tag select {
-  
 }
 
 
