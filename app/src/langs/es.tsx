@@ -2577,12 +2577,7 @@ Would you like to purchase a license now?`,
 export const pack:ILangPack = {
   name: 'español',
   dir: 'ltr',
-  numbers: {
-    group: '.',
-    group_regex: /\./g,
-    decimal: ',',
-    decimal_regex: /,/g,
-  },
+  numbers: 'comma-period',
   messages,
   contributors,
 }

@@ -13,6 +13,7 @@ export interface PersistentState {
   recentFiles: string[];
   firstUseDate: string;
   locale: string;
+  number_format: ''|'comma-period'|'period-comma';
   skipVersion: string;
   animation: boolean;
   last_opened_windows: Array<{
@@ -25,6 +26,7 @@ export let PSTATE:PersistentState = {
   recentFiles: [],
   firstUseDate: null,
   locale: '',
+  number_format: '',
   skipVersion: null,
   animation: true,
   last_opened_windows: [],

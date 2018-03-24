@@ -24,6 +24,8 @@ import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
 import { PrefixLogger } from '../logging'
 import { utcNow, localNow } from '../time'
+import { PSTATE } from '../mainprocess/persistent'
+import { INumberFormat, NUMBER_FORMATS } from '../langs/spec'
 
 const log = new PrefixLogger('(budget.r)');
 
@@ -38,10 +40,19 @@ export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
   await localizeThisPage();
-  setSeparators(tx.langpack.numbers.group,
-      tx.langpack.numbers.group_regex,
-      tx.langpack.numbers.decimal,
-      tx.langpack.numbers.decimal_regex);
+  let numberformat:INumberFormat;
+  if (PSTATE.number_format) {
+    // override default language number format
+    log.info(`number format: ${PSTATE.number_format}`);
+    numberformat = NUMBER_FORMATS[PSTATE.number_format];
+  } else {
+    log.info(`number format: DEFAULT`);
+    numberformat = tx.getNumberFormat();
+  }
+  setSeparators(numberformat.group,
+      numberformat.group_regex,
+      numberformat.decimal,
+      numberformat.decimal_regex);
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())

@@ -4,7 +4,7 @@ import { EventSource } from './events'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
 
-import { IMessages, ILangPack } from './langs/spec'
+import { IMessages, ILangPack, INumberFormat, NUMBER_FORMATS } from './langs/spec'
 import {pack as en} from './langs/en';
 
 const log = new PrefixLogger('(i18n)')
@@ -49,6 +49,9 @@ class TranslationContext {
         log.error(err.stack);
       }  
     }
+  }
+  getNumberFormat():INumberFormat {
+    return NUMBER_FORMATS[this.langpack.numbers]
   }
   sss<T>(key:keyof IMessages, dft?:T):T {
     let entry = this._langpack.messages[key];

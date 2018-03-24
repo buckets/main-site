@@ -42,6 +42,22 @@ class PreferencesApp extends React.Component<{
         </select>
       </div>
       <div>
+        {sss('Number format:')} <select
+          value={pstate.number_format}
+          onChange={(ev) => {
+            let new_format = ev.target.value;
+            renderer.doUpdate(async () => {
+              CURRENT_PSTATE = await updateState({
+                number_format: new_format as any,
+              })
+            })
+          }}>
+          <option value="">{sss('Language default')}</option>
+          <option value="comma-period">1,500.22</option>
+          <option value="period-comma">1.500,22</option>
+        </select>
+      </div>
+      <div>
         {sss('Animation:')} <input
           type="checkbox"
           checked={pstate.animation}
