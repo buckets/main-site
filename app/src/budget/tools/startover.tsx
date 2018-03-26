@@ -7,6 +7,7 @@ import { sss } from '../../i18n'
 import { AppState, manager } from '../appstate'
 import { current_file } from '../../mainprocess/files'
 import { displayError } from '../../errors'
+import { makeToast } from '../../budget/toast'
 
 import { PrefixLogger } from '../../logging'
 const log = new PrefixLogger('startover');
@@ -52,15 +53,17 @@ async function backupAndStartOver(options:{
 
   // delete stuff
   const store = manager.nocheckpoint;
-  if (!options.keep_account_transactions) {
+  if (!options.keep_account_transactions || !options.keep_accounts) {
     log.info('Deleting account transactions')
     await store.query('DELETE FROM account_transaction', {});
+    log.info('Unlinking related bucket transactions')
+    await store.query('UPDATE bucket_transaction SET account_trans_id = NULL', {});
   }
   if (!options.keep_accounts) {
     log.info('Deleting accounts')
     await store.query('DELETE FROM account', {});
   }
-  if (!options.keep_bucket_transactions) {
+  if (!options.keep_bucket_transactions || !options.keep_buckets) {
     log.info('Deleting bucket transactions')
     await store.query('DELETE FROM bucket_transaction', {});
   }
@@ -69,6 +72,7 @@ async function backupAndStartOver(options:{
     await store.query('DELETE FROM buckets', {});
   }
   manager.refresh();
+  makeToast(sss('Done'))
 }
 
 interface StartOverPageProps {
@@ -90,15 +94,16 @@ export class StartOverPage extends React.Component<StartOverPageProps, StartOver
       keep_account_transactions: false,
     }
   }
-  checkBoxFor(prop:keyof StartOverPageState) {
+  checkBoxFor(prop:keyof StartOverPageState, opts:{disabled?:boolean, checked?:boolean}={}) {
+    const disabled = opts && opts.disabled;
+    const checked = (opts && opts.checked !== undefined) ? opts.checked : this.state[prop];
     return <input
-      checked={this.state[prop]}
+      disabled={disabled}
+      checked={checked}
       onChange={ev => {
-        if (ev.target.checked) {
-          this.setState({
-            [prop]: ev.target.checked,
-          } as any)
-        }
+        this.setState({
+          [prop]: ev.target.checked,
+        } as any)
       }}
       type="checkbox" />
   }
@@ -110,15 +115,11 @@ export class StartOverPage extends React.Component<StartOverPageProps, StartOver
       </p>
       <div>
         <label>{this.checkBoxFor('keep_buckets')} {sss('Keep buckets')}</label>
+        {this.state.keep_buckets ? <div><label>{this.checkBoxFor('keep_bucket_transactions')} {sss('Keep bucket transactions')}</label></div> : null}
       </div>
       <div>
         <label>{this.checkBoxFor('keep_accounts')} {sss('Keep accounts')}</label>
-      </div>
-      <div>
-        <label>{this.checkBoxFor('keep_bucket_transactions')} {sss('Keep bucket transactions')}</label>
-      </div>
-      <div>
-        <label>{this.checkBoxFor('keep_account_transactions')} {sss('Keep account transactions')}</label>
+        {this.state.keep_accounts ? <div><label>{this.checkBoxFor('keep_account_transactions')} {sss('Keep account transactions')}</label></div> : null}
       </div>
       <p>
         <button onClick={async () => {
