@@ -647,7 +647,7 @@ class BucketRow extends React.Component<BucketRowProps, {
         dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
       })}
     >
-      <td name="draghandle" className="nopad">
+      <td x-name="draghandle" className="nopad">
         <div
           className="drophandle"
           draggable
@@ -656,7 +656,7 @@ class BucketRow extends React.Component<BucketRowProps, {
             <span className="fa fa-bars"/>
         </div>
       </td>
-      <td name="color/note" className="nobr right">
+      <td x-name="color/note" className="nobr right">
         <ColorPicker
           className="small"
           value={bucket.color}
@@ -668,7 +668,7 @@ class BucketRow extends React.Component<BucketRowProps, {
           obj={bucket}
         />
       </td>
-      <td name="name" className="nobr">
+      <td x-name="name" className="nobr">
         <ClickToEdit
           value={bucket.name}
           placeholder="no name"
@@ -679,12 +679,12 @@ class BucketRow extends React.Component<BucketRowProps, {
           }}
         />
       </td>
-      <td name="balance" className="right clickable"
+      <td x-name="balance" className="right clickable"
         onClick={ev => {
           onPendingChanged({[bucket.id]: -balance})
         }}
       >{balance_el}</td>
-      <td name="in/out" className="left">
+      <td x-name="in/out" className="left">
         <MoneyInput
           value={pending || null}
           onChange={(val) => {
@@ -705,23 +705,23 @@ class BucketRow extends React.Component<BucketRowProps, {
           })}
         />
       </td>
-      <td name="want" className="right">
+      <td x-name="want" className="right">
         <Money value={computed.deposit} hidezero />
         {rainfall_indicator}
       </td>
-      <td name="in" className="right">
+      <td x-name="in" className="right">
         <Money value={flow.rain_in} hidezero />
       </td>
-      <td name="activity" className="right">
+      <td x-name="activity" className="right">
         <Money value={flow.total_activity} nocolor hidezero />
       </td>
-      <td name="details"
+      <td x-name="details"
           className="nopad bucket-details-wrap">
             <BucketKindDetails
             bucket={bucket}
             balance={balance}
             posting_date={posting_date} /></td>
-      <td name="more">
+      <td x-name="more">
         <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-ellipsis-h"></span></Link>
       </td>
     </tr>
@@ -834,19 +834,19 @@ class GroupRow extends React.Component<{
         onDragLeave={this.onDragLeave}
         >
       <tr className="section-divider">
-          <th name="draghandle"></th>
-          <th name="color/note"></th>
-          <th name="name"></th>
-          <th name="balance" className="right">{sss('Balance')}</th>
-          <th name="in/out" className="center"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
-          <th name="want" className="right nobr"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
-          <th name="in" className="center nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
-          <th name="activity" className="center nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
-          <th name="details">{sss('bucket.detailslabel', 'Details')}</th>
-          <th name="more"></th>
+          <th x-name="draghandle"></th>
+          <th x-name="color/note"></th>
+          <th x-name="name"></th>
+          <th x-name="balance" className="right">{sss('Balance')}</th>
+          <th x-name="in/out" className="center"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
+          <th x-name="want" className="right nobr"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
+          <th x-name="in" className="center nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
+          <th x-name="activity" className="center nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
+          <th x-name="details">{sss('bucket.detailslabel', 'Details')}</th>
+          <th x-name="more"></th>
         </tr>
       <tr className="group-row note-hover-trigger">
-        <td name="draghandle"
+        <td x-name="draghandle"
           className={cx(
           'nopad',
           'noborder', 
@@ -864,14 +864,14 @@ class GroupRow extends React.Component<{
               <span className="fa fa-bars"/>
           </div>}
         </td>
-        <td name="color/note" className="right">
+        <td x-name="color/note" className="right">
           <button
             className="icon"
             title={sss("New bucket")}
             onClick={this.createBucket}><span className="fa fa-plus" /></button>
           {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
         </td>
-        <td name="name" className="group-name">
+        <td x-name="name" className="group-name">
           {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <ClickToEdit
             value={group.name}
             placeholder="no name"
@@ -882,21 +882,21 @@ class GroupRow extends React.Component<{
             }}
           />}
         </td>
-        <td name="balance" className="right">
+        <td x-name="balance" className="right">
           <Money value={total_balance} hidezero />
         </td>
-        <td name="in/out"></td>
-        <td name="want" className="right">
+        <td x-name="in/out"></td>
+        <td x-name="want" className="right">
         </td>
-        <td name="in" className="right">
+        <td x-name="in" className="right">
           <Money value={total_in} hidezero/>
         </td>
-        <td name="activity" className="right">
+        <td x-name="activity" className="right">
           <Money value={total_activity} nocolor hidezero/>
         </td>
-        <td name="details">
+        <td x-name="details">
         </td>
-        <td name="more">
+        <td x-name="more">
           <SafetySwitch
             className="icon grey show-on-row-hover"
             onClick={ev => {

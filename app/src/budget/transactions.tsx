@@ -223,8 +223,8 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
           <th>{sss('Memo')}</th>
           <th>{sss('Amount')}</th>
           {isNil(ending_balance) ? null : <th>{sss('Balance')}</th>}
-          <th name="category">{sss('Category')}</th>
-          <th name="edit"></th>
+          <th x-name="category">{sss('Category')}</th>
+          <th x-name="edit"></th>
         </tr>
       </thead>
       <tbody>
@@ -544,11 +544,11 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             />
           </td>
           { isNil(running_bal) ? null : <td></td> }
-          <td name="categorize" className="center">
+          <td x-name="categorize" className="center">
             {categoryInput}
             {relatedAccountSelect}
           </td>
-          <td name="edit" className="icon-wrap center">
+          <td x-name="edit" className="icon-wrap center">
             <button
               className="icon"
               onClick={this.doTransaction}>
@@ -565,13 +565,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
         {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} /></td> }
-        <td name="categorize">
+        <td x-name="categorize">
           <Categorizer
             transaction={trans}
             cats={appstate.categories[trans.id]}
             appstate={appstate} />
         </td>
-        <td name="edit" className="icon-wrap center">
+        <td x-name="edit" className="icon-wrap center">
           <button className="icon show-on-row-hover"
             onClick={() => {
               this.startEditing();
