@@ -51,6 +51,7 @@ export function checkForUpdates() {
     }
     setUpdateWindowStatus({
       error: err,
+      state: 'idle',
     }, alert_user);
   })
   autoUpdater.on('download-progress', (progress) => {
