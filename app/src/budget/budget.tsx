@@ -1,31 +1,61 @@
+console.log('budget.tsx', performance.now());
 import { shell, ipcRenderer } from 'electron'
+console.log('loaded', performance.now(), "import { shell, ipcRenderer } from 'electron'");
 import * as React from 'react'
+console.log('loaded', performance.now(), "import * as React from 'react'");
 import * as moment from 'moment'
+console.log('loaded', performance.now(), "import * as moment from 'moment'");
 import * as _ from 'lodash'
+console.log('loaded', performance.now(), "import * as _ from 'lodash'");
 import * as cx from 'classnames'
+console.log('loaded', performance.now(), "import * as cx from 'classnames'");
 import { sss, tx, localizeThisPage } from '../i18n'
+console.log('loaded', performance.now(), "import { sss, tx, localizeThisPage } from '../i18n'");
 import {Renderer} from './render'
+console.log('loaded', performance.now(), "import {Renderer} from './render'");
 import { AccountsPage, ClosedAccountsPage } from './accounts'
+console.log('loaded', performance.now(), "import { AccountsPage, ClosedAccountsPage } from './accounts'");
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
+console.log('loaded', performance.now(), "import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'");
 import {TransactionPage} from './transactions'
+console.log('loaded', performance.now(), "import {TransactionPage} from './transactions'");
 import { ImportPage, SyncWidget } from './importpage'
+console.log('loaded', performance.now(), "import { ImportPage, SyncWidget } from './importpage'");
 import { ExportPage } from './exportpage'
+console.log('loaded', performance.now(), "import { ExportPage } from './exportpage'");
 import { SearchPage } from './searchpage'
+console.log('loaded', performance.now(), "import { SearchPage } from './searchpage'");
 import { ReportsPage } from './reports'
+console.log('loaded', performance.now(), "import { ReportsPage } from './reports'");
 import { Money, setAnimationEnabled, setSeparators } from '../money'
+console.log('loaded', performance.now(), "import { Money, setAnimationEnabled, setSeparators } from '../money'");
 import { MonthSelector } from '../input'
+console.log('loaded', performance.now(), "import { MonthSelector } from '../input'");
 import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
+console.log('loaded', performance.now(), "import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'");
 import { ToastDisplay } from './toast'
+console.log('loaded', performance.now(), "import { ToastDisplay } from './toast'");
 import { FinderDisplay } from './finding'
+console.log('loaded', performance.now(), "import { FinderDisplay } from './finding'");
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
+console.log('loaded', performance.now(), "import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'");
 import { current_file } from '../mainprocess/files'
+console.log('loaded', performance.now(), "import { current_file } from '../mainprocess/files'");
 import { Help } from '../tooltip'
+console.log('loaded', performance.now(), "import { Help } from '../tooltip'");
 import { reportErrorToUser } from '../errors';
+console.log('loaded', performance.now(), "import { reportErrorToUser } from '../errors';");
 import { ToolsPage } from './tools/toolspage'
+console.log('loaded', performance.now(), "import { ToolsPage } from './tools/toolspage'");
 import { PrefixLogger } from '../logging'
+console.log('loaded', performance.now(), "import { PrefixLogger } from '../logging'");
 import { utcNow, localNow } from '../time'
+console.log('loaded', performance.now(), "import { utcNow, localNow } from '../time'");
 import { PSTATE } from '../mainprocess/persistent'
+console.log('loaded', performance.now(), "import { PSTATE } from '../mainprocess/persistent'");
 import { INumberFormat, NUMBER_FORMATS } from '../langs/spec'
+console.log('loaded', performance.now(), "import { INumberFormat, NUMBER_FORMATS } from '../langs/spec'");
+console.log('budget.tsx everything loaded', performance.now());
 
 const log = new PrefixLogger('(budget.r)');
 
@@ -356,3 +386,4 @@ class Application extends React.Component<ApplicationProps, any> {
   }
 }
 
+console.log('end of budget.tsx', performance.now());

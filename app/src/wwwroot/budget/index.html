@@ -1,51 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" type="text/css" href="/assets/fonts.css" />
-  <link rel="stylesheet" type="text/css" href="/assets/style.css" />
-  <link rel="stylesheet" type="text/css" href="/assets/fontawesome/css/font-awesome.min.css" />
+  <script>console.log('first script', performance.now())</script>
   <style type="text/css">
     html {
       height: 100%;
     }
+    .loading-screen {
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(44, 62, 80,1.0) /* darker-darkblue */;
+      background-image: url(../assets/img/logo_med.png);
+      background-position: center 33%;
+      background-repeat: no-repeat;
+    }
   </style>
+  <link rel="stylesheet" type="text/css" href="/assets/fonts.css" />
+  <link rel="stylesheet" type="text/css" href="/assets/style.css" />
+  <link rel="stylesheet" type="text/css" href="/assets/fontawesome/css/font-awesome.min.css" />
 </head>
 <body>
-  <div id="root"><span class="fa fa-refresh fa-spin"></span></div>
-<script>
-const req = function() {
-  const {remote} = require('electron');
-  const Path = require('path');
-  const appPath = remote.app.getAppPath();
-  return (module) => {
-    if (module.startsWith('.') || module.startsWith('/')) {
-      return require(Path.resolve(appPath, module))
-    } else {
-      return require(module);
+  <div id="root"><div class="loading-screen"></div></div>
+  <script async>
+console.log('second script', performance.now())
+setTimeout(() => {
+  console.log('onload', performance.now());
+  const req = function() {
+    const {remote} = require('electron');
+    const Path = require('path');
+    const appPath = remote.app.getAppPath();
+    return (module) => {
+      if (module.startsWith('.') || module.startsWith('/')) {
+        return require(Path.resolve(appPath, module))
+      } else {
+        return require(module);
+      }
     }
+  }();
+  console.log('req defined', performance.now());
+
+  const hostname = window.location.hostname;
+  const querystring = require('querystring');
+  console.log('querystring loaded', performance.now());
+  const { start } = req('./src/wwwroot/budget/index.js');
+  console.log('budget loaded', performance.now());
+  const electron_is = req('electron-is');
+  console.log('electron-is loaded', performance.now());
+  
+
+  let body = document.body;
+  if (electron_is.windows()) {
+    document.body.classList.add('os-windows');
+  } else if (electron_is.macOS()) {
+    document.body.classList.add('os-macos');
+  } else if (electron_is.linux()) {
+    document.body.classList.add('os-linux');
   }
-}();
 
-const hostname = window.location.hostname;
-const querystring = require('querystring');
-const { start } = req('./src/wwwroot/budget/index.js');
-const electron_is = req('electron-is');
-let body = document.body;
-if (electron_is.windows()) {
-  document.body.classList.add('os-windows');
-} else if (electron_is.macOS()) {
-  document.body.classList.add('os-macos');
-} else if (electron_is.linux()) {
-  document.body.classList.add('os-linux');
-}
+  const qs = querystring.parse(window.location.search.substr(1));
+  const args = JSON.parse(qs.args);
+  console.log('args', args);
 
-const qs = querystring.parse(window.location.search.substr(1));
-const args = JSON.parse(qs.args);
-console.log('args', args);
-
-start(document.getElementById('root'), hostname, {
-  noanimation: args.noanimation,
-});  
+  console.log('about to start', performance.now());
+  start(document.getElementById('root'), hostname, {
+    noanimation: args.noanimation,
+  });
+}, 0)
 </script>
 </body>
 </html>
