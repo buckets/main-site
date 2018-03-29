@@ -212,7 +212,15 @@ export async function importYNAB4(store:IStore, path:string) {
     payees[payee.entityId] = payee;
   })
 
-  let ret = {
+  let ret:{
+    transactions_worth_looking_at: Array<{
+      transaction: Account.Transaction,
+      ynabSubTransactions: Array<{
+        amount: number;
+        category: string;
+      }>
+    }>
+  } = {
     transactions_worth_looking_at: [],
   }
 
@@ -327,6 +335,18 @@ export async function importYNAB4(store:IStore, path:string) {
     }  
   }
   
+  function addTransWorthLookingAt(trans:Account.Transaction, ynabTrans:YNAB.Transaction) {
+    ret.transactions_worth_looking_at.push({
+      transaction: trans,
+      ynabSubTransactions: ynabTrans.subTransactions.map(sub => {
+        return {
+          category: sub.categoryId && categories[sub.categoryId] ? categories[sub.categoryId].name : sub.categoryId || sss('Unknown category'),
+          amount: number2cents(sub.amount),
+        }
+      })
+    });
+  }
+
   // Transaction -> Transaction
   if (budget.transactions) {
     for (let ytrans of budget.transactions
@@ -362,7 +382,7 @@ export async function importYNAB4(store:IStore, path:string) {
           const nullCatCount = ytrans.subTransactions.filter(sub => !cat2bucket[sub.categoryId]).length;
           if (nullCatCount) {
             // It's not completely categorized or it's split between income and another category
-            ret.transactions_worth_looking_at.push(transaction);
+            addTransWorthLookingAt(transaction, ytrans);
           } else {
             let cats = ytrans.subTransactions.map(sub => {
               let bucket_id = cat2bucket[sub.categoryId].id;
@@ -372,7 +392,18 @@ export async function importYNAB4(store:IStore, path:string) {
                 amount,
               }
             })
-            await store.accounts.categorize(transaction.id, cats);
+            try {
+              await store.accounts.categorize(transaction.id, cats);  
+            } catch(err) {
+              if (err instanceof Account.SignMismatch) {
+                addTransWorthLookingAt(transaction, ytrans);
+              } else if (err instanceof Account.SumMismatch) {
+                addTransWorthLookingAt(transaction, ytrans);
+              } else {
+                throw err;
+              }
+            }
+            
           }
         } else {
           // Single category
@@ -410,7 +441,7 @@ export async function findYNAB4FileAndImport(store:IStore):Promise<any> {
       if (paths) {
         for (let path of paths) {
           try {
-            await importYNAB4(store, path);  
+            await importYNAB4(store, path);
           } catch(err) {
             log.error(err.stack);
             reportErrorToUser(sss('Error importing'), {err: err});
