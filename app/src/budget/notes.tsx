@@ -32,6 +32,9 @@ export class NoteMaker extends React.PureComponent<NoteProps, {
     }
   }
   save = debounceChange((newval:string) => {
+    if (!newval.trim()) {
+      newval = '';
+    }
     manager
     .checkpoint(sss('Update Note'))
     .updateObject(TABLE2CLASS[this.props.obj._type], this.props.obj.id, {notes:newval} as any)
