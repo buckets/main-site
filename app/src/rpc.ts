@@ -72,8 +72,8 @@ export class Room<T> {
     this.isrenderer = electron_is.renderer();
     if (this.isrenderer) {
       // renderer process
-      ipcRenderer.send(`${this.key}.join`);
       log.info(this.key, 'joining');
+      ipcRenderer.send(`${this.key}.join`);
       ipcRenderer.on(`${this.key}.message`, (ev, channel, message) => {
         let es = this.eventSources[channel];
         if (es) {
