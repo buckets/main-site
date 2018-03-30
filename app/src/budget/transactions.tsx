@@ -160,7 +160,6 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
     let hideAccount = this.props.hideAccount || false;
     sortFunc = sortFunc || [
       (item:Transaction) => -parseLocalTime(item.posted).unix(),
-      'account_id',
       (item:Transaction) => -item.id,
     ]
     let elems = _.sortBy(this.props.transactions, sortFunc)
