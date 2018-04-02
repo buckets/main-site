@@ -1,51 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" type="text/css" href="/assets/fonts.css" />
-  <link rel="stylesheet" type="text/css" href="/assets/style.css" />
-  <link rel="stylesheet" type="text/css" href="/assets/fontawesome/css/font-awesome.min.css" />
   <style type="text/css">
     html {
       height: 100%;
     }
+    .app-loading-spinner {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      color: var(--darker-darkblue);
+      background-color: rgba(255,255,255,1.0);
+      opacity: 0.6;
+      z-index: 3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity .5s;
+    }
+    .app-loading-spinner.on {
+      opacity: 1; 
+    }
+    .app-loading-spinner.off {
+      opacity: 0;
+    }
   </style>
+  <link rel="stylesheet" type="text/css" href="/assets/fonts.css" />
+  <link rel="stylesheet" type="text/css" href="/assets/style.css" />
+  <link rel="stylesheet" type="text/css" href="/assets/fontawesome/css/font-awesome.min.css" />
 </head>
 <body>
-  <div id="root"><span class="fa fa-refresh fa-spin"></span></div>
-<script>
-const req = function() {
-  const {remote} = require('electron');
-  const Path = require('path');
-  const appPath = remote.app.getAppPath();
-  return (module) => {
-    if (module.startsWith('.') || module.startsWith('/')) {
-      return require(Path.resolve(appPath, module))
-    } else {
-      return require(module);
+  <div id="loading" class="app-loading-spinner on">
+  </div>
+  <div id="root">
+    <div class="app">
+      <div class="nav"></div>
+      <div class="content">
+        <div class="header"><div style="height: 4rem;"></div></div>
+        <div class="page">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script async>
+const loading = document.getElementById('loading');
+loading.classList.remove('on');
+setTimeout(() => {
+  const req = function() {
+    const {remote} = require('electron');
+    const Path = require('path');
+    const appPath = remote.app.getAppPath();
+    return (module) => {
+      if (module.startsWith('.') || module.startsWith('/')) {
+        return require(Path.resolve(appPath, module))
+      } else {
+        return require(module);
+      }
     }
+  }();
+
+  const hostname = window.location.hostname;
+  const querystring = require('querystring');
+  const { start } = req('./src/wwwroot/budget/index.js');
+  const electron_is = req('electron-is');
+  
+
+  let body = document.body;
+  if (electron_is.windows()) {
+    document.body.classList.add('os-windows');
+  } else if (electron_is.macOS()) {
+    document.body.classList.add('os-macos');
+  } else if (electron_is.linux()) {
+    document.body.classList.add('os-linux');
   }
-}();
 
-const hostname = window.location.hostname;
-const querystring = require('querystring');
-const { start } = req('./src/wwwroot/budget/index.js');
-const electron_is = req('electron-is');
-let body = document.body;
-if (electron_is.windows()) {
-  document.body.classList.add('os-windows');
-} else if (electron_is.macOS()) {
-  document.body.classList.add('os-macos');
-} else if (electron_is.linux()) {
-  document.body.classList.add('os-linux');
-}
+  const qs = querystring.parse(window.location.search.substr(1));
+  const args = JSON.parse(qs.args);
 
-const qs = querystring.parse(window.location.search.substr(1));
-const args = JSON.parse(qs.args);
-console.log('args', args);
-
-start(document.getElementById('root'), hostname, {
-  noanimation: args.noanimation,
-});  
+  start(document.getElementById('root'), hostname, {
+    noanimation: args.noanimation,
+  })
+  .then(() => {
+    loading.classList.add('off');
+    setTimeout(() => {
+      loading.parentNode.removeChild(loading);
+    }, 510);
+  });
+}, 0)
 </script>
 </body>
 </html>

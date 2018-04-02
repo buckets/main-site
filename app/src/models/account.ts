@@ -1,12 +1,14 @@
 import * as moment from 'moment-timezone'
+import { createErrorSubclass } from '../errors'
 import { IObject, registerClass, IStore } from '../store';
 import { ts2localdb, parseLocalTime } from '../time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from '../budget/notes'
 
-export class Failure extends Error {
+export class Failure extends Error {}
 
-}
+export const SignMismatch = createErrorSubclass('SignMismatch')
+export const SumMismatch = createErrorSubclass('SumMismatch')
 
 export type GeneralCatType =
   ''
@@ -555,7 +557,7 @@ export class AccountStore {
     let sign = Math.sign(trans.amount);
     let sum = categories.reduce((sum, cat) => {
       if (Math.sign(cat.amount) !== sign) {
-        throw new Failure(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
+        throw new SignMismatch(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
       }
       if (cat.bucket_id === null) {
         throw new Failure(`You must choose a bucket.`);
@@ -564,7 +566,7 @@ export class AccountStore {
     }, 0)
 
     if (sum !== trans.amount) {
-      throw new Failure(`Categories must add up to ${trans.amount} not ${sum}`);
+      throw new SumMismatch(`Categories must add up to ${trans.amount} not ${sum}`);
     }
 
     // delete old

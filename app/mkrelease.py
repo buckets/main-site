@@ -199,6 +199,9 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
         subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
         subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
 
+    # push to origin
+    if yesno('Push to origin?', default=True):
+        subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
 
 
 if __name__ == '__main__':

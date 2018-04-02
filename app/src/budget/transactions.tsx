@@ -160,7 +160,6 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
     let hideAccount = this.props.hideAccount || false;
     sortFunc = sortFunc || [
       (item:Transaction) => -parseLocalTime(item.posted).unix(),
-      'account_id',
       (item:Transaction) => -item.id,
     ]
     let elems = _.sortBy(this.props.transactions, sortFunc)
@@ -332,7 +331,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         await store.accounts.categorizeGeneral(trans.id, this.state.general_cat);
       } else if (this.state.cats.length && !invalid_cats) {
         await store.accounts.categorize(trans.id, this.state.cats);
-      } else if (this.state.cats.length && invalid_cats) {
+      } else if (this.state.cats.length > 1 && invalid_cats) {
         makeToast(sss('Invalid categorization.  Categories not set.'), {className: 'warning'})
       }
     }
@@ -809,7 +808,7 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
           />}
         </div>
         <a
-          className="subtle delete-button"
+          className="subtle"
           onClick={() => {
             if (general_cat) {
               this.setState({
@@ -828,7 +827,7 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
                 this.emitChange();
               })
             }
-          }}>&times;</a>
+          }}><span className="fa fa-ban" /></a>
       </div>
     })
 
