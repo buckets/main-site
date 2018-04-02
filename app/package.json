@@ -24,7 +24,7 @@
     "d3": "^4.10.0",
     "electron-is": "^2.4.0",
     "electron-log": "^2.2.14",
-    "electron-updater": "2.1.2",
+    "electron-updater": "^2.21.4",
     "fs-extra": "^4.0.0",
     "fs-extra-promise": "^1.0.1",
     "jsonwebtoken": "7.4.1",
