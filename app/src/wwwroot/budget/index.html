@@ -5,23 +5,27 @@
     html {
       height: 100%;
     }
-    .app-loading-spinner {
-      width: 100vw;
-      height: 100vh;
+    .app.loading {
       position: fixed;
-      color: var(--darker-darkblue);
-      background-color: rgba(255,255,255,1.0);
-      opacity: 0.6;
-      z-index: 3;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+    .app.loading .nav,
+    .app.loading .header,
+    .app.loading .page {
+      opacity: 1;
       transition: opacity .5s;
     }
-    .app-loading-spinner.on {
-      opacity: 1; 
+    .app.loading.on .nav,
+    .app.loading.on .header,
+    .app.loading.on .page {
+      opacity: 1;
     }
-    .app-loading-spinner.off {
+    .app.loading.off .nav,
+    .app.loading.off .header,
+    .app.loading.off .page {
       opacity: 0;
     }
   </style>
@@ -30,15 +34,18 @@
   <link rel="stylesheet" type="text/css" href="/assets/fontawesome/css/font-awesome.min.css" />
 </head>
 <body>
-  <div id="loading" class="app-loading-spinner on">
-  </div>
   <div id="root">
-    <div class="app">
-      <div class="nav"></div>
-      <div class="content">
-        <div class="header"><div style="height: 4rem;"></div></div>
-        <div class="page">
-        </div>
+  </div>
+  <div id="loading" class="app loading">
+    <div class="nav"></div>
+    <div class="content">
+      <div class="header"><div style="height: 4rem;"></div></div>
+      <div class="page" style="text-align: center; display: flex; justify-content: center; align-items: center;">
+        <svg width="100" height="100" viewport="0 0 100 100">
+          <rect width="6" height="22" rx="3" x="38" y="50" fill="var(--darker-darkblue)" />
+          <rect width="6" height="22" rx="3" x="50" y="50" fill="var(--darker-darkblue)" />
+          <rect width="6" height="22" rx="3" x="62" y="50" fill="var(--darker-darkblue)" />
+        </svg>
       </div>
     </div>
   </div>
