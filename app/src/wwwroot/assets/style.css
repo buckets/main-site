@@ -785,7 +785,7 @@ table.ledger .icon-button-wrap button.icon,
 .category-tag .name {
   padding: 0 .5rem;
   white-space: nowrap;
-  align-self: center;
+  align-self: stretch;
 }
 .category-tag .name {
   padding: .1rem .3rem;

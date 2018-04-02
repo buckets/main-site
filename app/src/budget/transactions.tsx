@@ -808,7 +808,7 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
           />}
         </div>
         <a
-          className="subtle delete-button"
+          className="subtle"
           onClick={() => {
             if (general_cat) {
               this.setState({
@@ -827,7 +827,7 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
                 this.emitChange();
               })
             }
-          }}>&times;</a>
+          }}><span className="fa fa-ban" /></a>
       </div>
     })
 
