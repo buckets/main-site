@@ -293,7 +293,8 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     let { to_deposit, to_withdraw } = this.getPending();
     let transfer = (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0));
     const store = manager.checkpoint(sss('Transactions'));
-    _.map(this.state.pending, (amount, bucket_id) => {
+    Object.keys(this.state.pending).map(x=>Number(x)).forEach(bucket_id => {
+      const amount = this.state.pending[bucket_id];
       return store.buckets.transact({
         bucket_id: bucket_id,
         amount: amount,

@@ -70,7 +70,7 @@ export function debounceChange(func:(...args)=>any) {
  *    value => { console.log('value', value) }
  * )}
  */
-export function debounceOnChange(mapper:Function, actor:Function) {
+export function debounceOnChange(mapper:(...args)=>any, actor:(...args)=>any) {
   let debounced = _.debounce(actor, 250, {leading: false, trailing: true});
   return (...args) => {
     return debounced(mapper(...args));

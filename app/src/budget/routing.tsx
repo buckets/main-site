@@ -168,7 +168,6 @@ interface RouteState {
   match: IMatch|null;
 }
 export class Route extends _Routable<RouteProps, RouteState> {
-  private matcher:IMatcher;
   constructor(props, context:IRoutingContext) {
     super(props, context);
     this.state = {
@@ -204,9 +203,9 @@ export class Route extends _Routable<RouteProps, RouteState> {
     })
   }
   componentWillReceiveProps(nextProps, nextContext:IRoutingContext) {
-    this.matcher = nextContext.routing.master.makeMatcher(nextProps.path, {
-      exact: nextProps.exact || false,
-    });
+    // nextContext.routing.master.makeMatcher(nextProps.path, {
+    //   exact: nextProps.exact || false,
+    // });
     this.setState({
       match: matchPath(
         nextContext.routing.rest,

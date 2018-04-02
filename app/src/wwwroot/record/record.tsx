@@ -36,11 +36,10 @@ class Webview extends React.Component<WebviewProps, any> {
     let { preload, partition } = this.props;
     return <webview ref={elem => {
       if (elem) {
-        this.elem = elem;
+        this.elem = elem as Electron.WebviewTag;
       }
     }}
-      is
-      autosize="on"
+      autosize
       preload={preload}
       partition={partition} />
   }

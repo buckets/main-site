@@ -1,6 +1,7 @@
 'use strict';
 import * as React from 'react'
 import * as _ from 'lodash'
+import * as sortBy from 'lodash.sortby'
 import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
 import { IStore } from '../store'
@@ -162,8 +163,8 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
       (item:Transaction) => -parseLocalTime(item.posted).unix(),
       (item:Transaction) => -item.id,
     ]
-    let elems = _.sortBy(this.props.transactions, sortFunc)
-    .map(trans => {
+    let elems:Element = sortBy(this.props.transactions, sortFunc)
+    .map((trans:Transaction) => {
       let balance;
       if (!isNil(ending_balance)) {
         balance = ending_balance;
@@ -706,8 +707,8 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
   render() {
     const { buckets, amount, autoFocus } = this.props;
     const { general_cat, cats } = this.state;
-    const bucket_options = _.sortBy(buckets, [bucket=>bucket.name.toLowerCase()])
-      .map(bucket => {
+    const bucket_options = sortBy(buckets, [bucket=>bucket.name.toLowerCase()])
+      .map((bucket:Bucket) => {
         return <option key={bucket.id} value={bucket.id}>{bucket.name}</option>
       })
 

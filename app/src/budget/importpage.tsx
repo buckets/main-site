@@ -298,9 +298,8 @@ export class ImportPage extends React.Component<{
     current_file.openRecordWindow(macro.id);
   }
   connect = async () => {
-    let connection;
     try {
-      connection = await manager.nocheckpoint.simplefin.consumeToken(this.state.simplefin_token)
+      await manager.nocheckpoint.simplefin.consumeToken(this.state.simplefin_token)
     } catch(err) {
       this.setState({status_message: err.toString()});
       return;
