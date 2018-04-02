@@ -4,7 +4,7 @@
 import {app, session, protocol, BrowserWindow} from 'electron'
 import * as electron_log from 'electron-log'
 import * as electron_is from 'electron-is'
-import {autoUpdater} from 'electron-updater'
+import { autoUpdater } from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
 import * as moment from 'moment-timezone'
@@ -36,7 +36,7 @@ app.on('ready', () => {
   startLocalizing();
 });
 
-process.on('uncaughtException' as any, (err) => {
+process.on('uncaughtException', (err) => {
   log.error('uncaughtException', err.stack);
   reportErrorToUser(null, {
     err: err,
