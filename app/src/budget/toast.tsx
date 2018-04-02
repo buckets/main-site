@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 
 class Toast {
@@ -133,15 +133,15 @@ export class ToastDisplay extends React.Component<any, {toasts: Toast[]}> {
   render() {
     let items = this.state.toasts.map(toast => {
       let className = cx('toast', toast.className)
-      return <div className={className} key={toast.id}>{toast.message}</div>
+      return <CSSTransition
+          key={toast.id}
+          classNames="toast"
+          timeout={200}>
+        <div className={className}>{toast.message}</div>
+      </CSSTransition>
     })
     return <div className="toasts">
-      <ReactCSSTransitionGroup
-        transitionName="toast"
-        transitionEnterTimeout={200}
-        transitionLeaveTimeout={200}>
-          {items}
-      </ReactCSSTransitionGroup>
+      <TransitionGroup>{items}</TransitionGroup>
     </div>
   }
 }
