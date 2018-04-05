@@ -7,3 +7,4 @@ core/dist
 app/dist
 app/node_modules
 app/docs
+.yarnrc

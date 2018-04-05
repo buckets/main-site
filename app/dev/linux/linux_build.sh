@@ -1,7 +1,7 @@
 #!/bin/bash
 # This is run on the macOS host
 
-set -e
+set -xe
 
 CMD="$1"
 
@@ -13,7 +13,11 @@ fi
 
 docker-clean -i -c
 
-pushd ..
+# go to the root of the project
+while [ ! -d .git ]; do
+    cd ..
+done
+pwd
 
 TAG="buckets/linuxbuilder"
 echo "BUILDING..."
@@ -21,6 +25,5 @@ docker build --file app/dev/linux/linuxbuilder.Dockerfile -t $TAG .
 
 echo
 echo "RUNNING electron build..."
-docker run -i -v "${HOME}/.yarnmirror":/yarnmirror -v $(pwd):/code $ARGS $TAG
+docker run -i -v "${HOME}/.yarnmirror":/yarnmirror -v $(pwd)/app:/app $ARGS $TAG
 
-popd

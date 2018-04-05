@@ -2,14 +2,16 @@
 # This is run on the linux container
 
 # copy to build_dir
+set -xe
+
 ORIG_DIR="$(pwd)"
-BUILD_DIR="/tmp/build_dir"
+BUILD_DIR="/build_dir"
 
 mkdir -p "$BUILD_DIR"
 rsync -vrut \
     --exclude "dist/" \
     --exclude="node_modules/" \
-    "${ORIG_DIR}/app/" "$BUILD_DIR"
+    "${ORIG_DIR}/" "$BUILD_DIR/"
 
 pushd "$BUILD_DIR"
 export PATH="/cache/node_modules/.bin/:${PATH}"
@@ -21,4 +23,4 @@ fi
 
 build --linux $ARGS
 
-rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/app/dist"
+rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/"

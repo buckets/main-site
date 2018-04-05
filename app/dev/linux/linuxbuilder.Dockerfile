@@ -7,21 +7,31 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get update -q 
 RUN apt-get install -y yarn
 RUN yarn config set yarn-offline-mirror /yarnmirror
+COPY yarnmirror /yarnmirror
+RUN yarn cache clean
 
 RUN mkdir /cache
 
 # install core
 COPY core/ /core
 WORKDIR /core
-RUN yarn
+RUN du -ch /yarnmirror
+RUN yarn config list --verbose
+
+RUN yarn --offline || rm -rif node_modules yarn.lock && yarn
+#RUN yarn --offline
+
+RUN du -ch /yarnmirror
 RUN node_modules/.bin/tsc
 
 # install desktop packages
 COPY app/package.json /cache/
 COPY app/yarn.lock /cache/
 WORKDIR /cache
-RUN yarn
+RUN yarn config list --verbose
 
-WORKDIR /
+RUN yarn --offline
 
-CMD app/dev/linux/docker_linux_build.sh
+WORKDIR /app
+
+CMD dev/linux/docker_linux_build.sh
