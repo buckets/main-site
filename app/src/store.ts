@@ -4,12 +4,12 @@ import { webContents, ipcRenderer } from 'electron'
 import {} from 'bluebird'
 
 import { EventSource } from './events'
-import { BucketStore } from './core/models/bucket'
-import { AccountStore } from './core/models/account'
-import { SimpleFINStore } from './core/models/simplefin'
-import { ReportStore } from './core/models/reports'
-import { BankMacroStore } from './core/models/bankmacro'
-import { SettingsStore } from './core/models/settings'
+import { BucketStore } from './models/bucket'
+import { AccountStore } from './models/account'
+import { SimpleFINStore } from './models/simplefin'
+import { ReportStore } from './models/reports'
+import { BankMacroStore } from './models/bankmacro'
+import { SettingsStore } from './models/settings'
 
 //----------------------------------------------------------------------
 // Database objects

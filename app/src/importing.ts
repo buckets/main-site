@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra-promise'
 
 import { sss } from './i18n'
-import { Transaction, AccountMapping } from './core/models/account'
+import { Transaction, AccountMapping } from './models/account'
 import { ofx2importable } from './ofx'
 import { csv2importable } from './csvimport'
 import { IStore } from './store'

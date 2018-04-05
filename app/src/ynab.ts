@@ -5,8 +5,8 @@ import { dialog } from 'electron'
 
 import { sss } from './i18n'
 import { IStore } from './store'
-import * as Bucket from './core/models/bucket'
-import * as Account from './core/models/account'
+import * as Bucket from './models/bucket'
+import * as Account from './models/account'
 import { decimal2cents } from './money'
 import { parseLocalTime } from './time'
 
