@@ -1,4 +1,4 @@
-import { PrefixLogger } from '../logging'
+import { PrefixLogger } from './logging'
 const log = new PrefixLogger('(events)')
 
 /**
