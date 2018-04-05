@@ -9,7 +9,7 @@ mkdir -p "$BUILD_DIR"
 rsync -vrut \
     --exclude "dist/" \
     --exclude="node_modules/" \
-    "${ORIG_DIR}/" "$BUILD_DIR"
+    "${ORIG_DIR}/app/" "$BUILD_DIR"
 
 pushd "$BUILD_DIR"
 export PATH="/cache/node_modules/.bin/:${PATH}"
@@ -21,4 +21,4 @@ fi
 
 build --linux $ARGS
 
-rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/dist"
+rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/app/dist"

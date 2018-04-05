@@ -1,2 +1,9 @@
-.tox
-app
+.git
+iconwork
+bizdev
+docs
+core/node_modules
+core/dist
+app/dist
+app/node_modules
+app/docs

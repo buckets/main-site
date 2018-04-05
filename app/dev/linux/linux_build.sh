@@ -13,10 +13,14 @@ fi
 
 docker-clean -i -c
 
+pushd ..
+
 TAG="buckets/linuxbuilder"
 echo "BUILDING..."
-docker build --file dev/linux/linuxbuilder.Dockerfile -t $TAG .
+docker build --file app/dev/linux/linuxbuilder.Dockerfile -t $TAG .
 
 echo
 echo "RUNNING electron build..."
-docker run -i -v $(pwd):/code $ARGS $TAG
+docker run -i -v "${HOME}/.yarnmirror":/yarnmirror -v $(pwd):/code $ARGS $TAG
+
+popd
