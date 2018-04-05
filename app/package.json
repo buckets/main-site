@@ -4,6 +4,7 @@
   "homepage": "https://www.budgetwithbuckets.com",
   "main": "src/mainprocess/main.js",
   "description": "Buckets Family Budgeting",
+  "private": true,
   "author": {
     "name": "Buckets",
     "email": "hello@budgetwithbuckets.com"

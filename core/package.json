@@ -7,6 +7,9 @@
   "author": "Matt Haggard",
   "license": "Proprietary",
   "private": true,
+  "scripts": {
+    "test": "./test.sh"
+  },
   "dependencies": {
     "sqlite": "^2.9.1"
   },

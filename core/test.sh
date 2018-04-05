@@ -2,4 +2,4 @@
 
 extraargs="$*"
 export TAP_RCFILE=".taprc"
-find src -name "*.test.js" | xargs tap $* --
+find dist -name "*.test.js" | xargs tap $* --
