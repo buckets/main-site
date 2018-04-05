@@ -1,12 +1,12 @@
 import { v4 as uuid } from 'uuid';
 import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
 import { ipcMain, ipcRenderer } from 'electron'
-import { BucketStore } from './models/bucket'
-import { AccountStore } from './models/account'
-import { SimpleFINStore } from './models/simplefin'
-import { ReportStore } from './models/reports'
-import { BankMacroStore } from './models/bankmacro'
-import { SettingsStore } from './models/settings'
+import { BucketStore } from './core/models/bucket'
+import { AccountStore } from './core/models/account'
+import { SimpleFINStore } from './core/models/simplefin'
+import { ReportStore } from './core/models/reports'
+import { BankMacroStore } from './core/models/bankmacro'
+import { SettingsStore } from './core/models/settings'
 import { PrefixLogger } from './logging'
 
 const log = new PrefixLogger('(rpcstore)')

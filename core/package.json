@@ -1,0 +1,16 @@
+{
+  "name": "buckets-core",
+  "version": "0.1.0",
+  "description": "Buckets Core",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "author": "Matt Haggard",
+  "license": "Proprietary",
+  "private": true,
+  "dependencies": {
+    "sqlite": "^2.9.1"
+  },
+  "devDependencies": {
+    "typescript": "^2.8.1"
+  }
+}
