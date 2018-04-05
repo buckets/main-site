@@ -4,6 +4,10 @@
 # copy to build_dir
 set -xe
 
+yarn --version
+node --version
+npm --version
+
 ORIG_DIR="$(pwd)"
 BUILD_DIR="/build_dir"
 
@@ -23,4 +27,4 @@ fi
 
 build --linux $ARGS
 
-rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/"
+rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/dist/"
