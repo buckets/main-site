@@ -3,7 +3,7 @@ import * as URL from 'url'
 import { webContents, ipcRenderer } from 'electron'
 import {} from 'bluebird'
 
-import { EventSource } from './events'
+import { EventSource } from 'buckets-core'
 import { BucketStore } from './models/bucket'
 import { AccountStore } from './models/account'
 import { SimpleFINStore } from './models/simplefin'

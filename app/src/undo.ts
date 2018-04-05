@@ -1,6 +1,6 @@
 import { DBStore } from './mainprocess/dbstore'
 import { PrefixLogger } from './logging'
-import { EventSource } from './events'
+import { EventSource } from 'buckets-core'
 
 const log = new PrefixLogger('(undo)')
 

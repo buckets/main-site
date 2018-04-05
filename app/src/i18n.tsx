@@ -1,6 +1,6 @@
 import * as moment from 'moment'
 import { PrefixLogger} from './logging'
-import { EventSource } from './events'
+import { EventSource } from 'buckets-core'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
 
