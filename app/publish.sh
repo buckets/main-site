@@ -23,5 +23,5 @@ fi
 
 # windows
 if [ -z "$SKIP_WIN" ]; then
-    dev/win/winvm.sh publish "$(pwd)"
+    dev/win/winvm.sh publish "$(pwd)/.."
 fi

@@ -153,6 +153,14 @@ rununtiloutput() {
     rm "$FIFO"
 }
 
+project_root_dir() {
+    D="."
+    while [ ! -e "${D}/.git" ]; do
+        D="${D}/.."
+    done
+    echo "$(abspath "$D")"
+}
+
 do_start() {
     vboxmanage startvm "$VMNAME" --type headless
 }
@@ -169,22 +177,20 @@ do_restore() {
 }
 
 do_build() {
-    APPDIR=${1:-.}
-    APPDIR=$(abspath "$APPDIR")
-    echo "do_build $APPDIR"
+    PROJECT_DIR=$(project_root_dir)
+    echo "do_build $PROJECT_DIR"
     do_up
-    ensure_shared_folder project "$APPDIR" y
+    ensure_shared_folder project "$PROJECT_DIR" y
     ensure_mount project y
 
-    echo | cmd 'c:\builder\win_build.bat'
+    echo | cmd 'c:\builder\win_build_launcher.bat'
 }
 
 do_rebuild() {
     echo "do_rebuild"
-    APPDIR=${1:-.}
-    APPDIR=$(abspath "$APPDIR")
+    PROJECT_DIR=$(project_root_dir)
     do_up
-    echo | cmd 'c:\builder\win_build.bat'   
+    echo | cmd 'c:\builder\win_build_launcher.bat'
 }
 
 do_publish() {
@@ -193,21 +199,19 @@ do_publish() {
         echo "Set GH_TOKEN"
         exit 1
     fi
-    APPDIR=${1:-.}
-    APPDIR=$(abspath "$APPDIR")
-    do_build "$APPDIR"
+    PROJECT_DIR=$(project_root_dir)
+    do_build "$PROJECT_DIR"
     echo | vboxmanage guestcontrol "$VMNAME" run \
         --username "$WIN_USER" --password "$WIN_PASS" \
         --putenv GH_TOKEN="$GH_TOKEN" \
         --unquoted-args \
-        -- cmd.exe /c 'c:\builder\win_build.bat' publish
+        -- cmd.exe /c 'c:\builder\win_build_launcher.bat' publish
 }
 
 do_dev() {
-    APPDIR=${1:-.}
-    APPDIR=$(abspath "$APPDIR")
+    PROJECT_DIR=$(project_root_dir)
     do_up
-    echo | cmd 'c:\builder\win_build.bat dev'
+    echo | cmd 'c:\builder\win_build_launcher.bat dev'
 }
 
 guestcontrol() {
