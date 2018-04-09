@@ -13,6 +13,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
 set
+cmd /c npm config set msvs_version 2015 --global
 cmd /c npm install -g node-gyp
 if %errorlevel% neq 0 exit /b %errorlevel%
 
@@ -20,14 +21,14 @@ cmd /c yarn config set yarn-offline-mirror c:\proj\yarnmirror
 cmd /c yarn config set yarn-offline-mirror-pruning false
 
 cd \proj\core
-del /S node_modules
+rem del /S /Q node_modules
 cmd /c yarn --non-interactive --ignore-scripts
 if %errorlevel% neq 0 exit /b %errorlevel%
 cmd /c yarn compile
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cd \proj\app
-del /S node_modules
+rem del /S /Q node_modules
 cmd /c yarn --non-interactive --ignore-scripts
 if %errorlevel% neq 0 exit /b %errorlevel%
 cmd /c yarn compile
@@ -35,12 +36,17 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 IF "%1"=="publish" (
     cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32 -p always >c:\proj\app\dist\build.log
+    if %errorlevel% neq 0 exit /b %errorlevel%
 ) ELSE (
     IF "%1"=="dev" (
         cmd /c yarn start
+        if %errorlevel% neq 0 exit /b %errorlevel%
     ) ELSE (
-        cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32 >c:\proj\app\dist\build.log
+        cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32
+        if %errorlevel% neq 0 exit /b %errorlevel%
+        rem cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32 >c:\proj\app\dist\build.log
     )
 )
 
-xcopy c:\proj\app\dist\. y:\dist /d /F /I /s /Y 
+xcopy c:\proj\app\dist\. y:\app\dist /d /F /I /s /Y 
+xcopy c:\proj\yarnmirror\. y:\yarnmirror /d /F /I /s /Y
