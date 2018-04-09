@@ -6,6 +6,7 @@ test('cents2decimal', t => {
   t.equal(cents2decimal(null), null)
   t.equal(cents2decimal(null, {show_decimal: true}), null)
   t.equal(cents2decimal(undefined), null)
+  t.equal(cents2decimal(Infinity), '∞');
   t.equal(cents2decimal(''), null);
   t.equal(cents2decimal('foo'), '0');
 
@@ -21,6 +22,8 @@ test('cents2decimal', t => {
   t.equal(cents2decimal(150012, {
     show_sep: false,
   }), '1500.12');
+  t.equal(cents2decimal(2222, {round: true}), '22')
+  t.equal(cents2decimal(2222, {round: true, show_decimal: true}), '22.00')
   t.end();
 })
 test('decimal2cents', t => {

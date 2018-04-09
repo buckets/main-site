@@ -7,5 +7,4 @@ out
 *.sublime-project
 *.buckets
 *.bkts
-.nyc_output
 _CHANGELOG.md
