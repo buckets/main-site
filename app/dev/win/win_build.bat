@@ -42,11 +42,12 @@ IF "%1"=="publish" (
         cmd /c yarn start
         if %errorlevel% neq 0 exit /b %errorlevel%
     ) ELSE (
-        cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32
-        if %errorlevel% neq 0 exit /b %errorlevel%
-        rem cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32 >c:\proj\app\dist\build.log
+        rem cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32       
+        cmd /c c:\proj\app\node_modules\.bin\build --win --x64 --ia32 >c:\proj\app\dist\build.log
     )
 )
+type c:\proj\app\dist\build.log
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy c:\proj\app\dist\. y:\app\dist /d /F /I /s /Y 
 xcopy c:\proj\yarnmirror\. y:\yarnmirror /d /F /I /s /Y
