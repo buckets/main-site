@@ -92,7 +92,7 @@ export class AppState implements IComputedAppState {
   actual_future_rain: number = 0;
   // The amount of this month's rain used in future months.
   adjusted_future_rain: number = 0;
-  month: number = localNow().month();
+  month: number = localNow().month()+1;
   year: number = localNow().year();
 
   syncing: number = 0;

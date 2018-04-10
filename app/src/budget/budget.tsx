@@ -344,9 +344,12 @@ class Application extends React.Component<ApplicationProps, any> {
             </div>
           </Route>
           <WithRouting func={(routing) => {
+            log.info('today', today.format());
+            log.info('appstate.month', appstate.month);
+            log.info('appstate.year', appstate.year);
             let dft_path = routing.fullpath || '/accounts';
             let year = appstate.year || today.year();
-            let month = (appstate.month || today.month())+1;
+            let month = appstate.month ? appstate.month : (today.month()+1);
             const dst = `/y${year}m${month}${dft_path}`;
             log.info(`Redirect to ${dst}`)
             return (<Redirect to={dst} />)
