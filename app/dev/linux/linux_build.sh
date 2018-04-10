@@ -26,7 +26,6 @@ docker build --file app/dev/linux/linuxbuilder.Dockerfile -t $TAG .
 echo
 echo "RUNNING electron build..."
 docker run -i \
-    -v "$(pwd)/yarnmirror":/proj/yarnmirror \
     -v "$(pwd)/cache":/proj/cache \
     -v "$(pwd)/core":/proj/core \
     -v "$(pwd)/app":/proj/app \

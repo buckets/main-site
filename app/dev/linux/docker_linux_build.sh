@@ -9,14 +9,14 @@ node --version
 npm --version
 
 export ELECTRON_BUILDER_CACHE="/proj/cache/electron-cache"
+export ELECTRON_CACHE="/proj/cache/electron-cache"
 
-yarn config set yarn-offline-mirror /proj/yarnmirror
+yarn config set yarn-offline-mirror /proj/cache/yarnmirror
 
 rsync -vrut \
     --exclude "node_modules" \
     --exclude "app/dist" \
     --exclude ".nyc_output" \
-    --exclude "yarnmirror" \
     --exclude "cache" \
     /proj/* /build/
 export PATH="./node_modules/.bin/:${PATH}"

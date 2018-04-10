@@ -12,12 +12,14 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
+set ELECTRON_BUILDER_CACHE=Y:\cache\electron-cache
+set ELECTRON_CACHE=Y:\cache\electron-cache
 set
 cmd /c npm config set msvs_version 2015 --global
 cmd /c npm install -g node-gyp
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmd /c yarn config set yarn-offline-mirror c:\proj\yarnmirror
+cmd /c yarn config set yarn-offline-mirror y:\cache\yarnmirror
 cmd /c yarn config set yarn-offline-mirror-pruning false
 
 cd \proj\core
@@ -50,4 +52,3 @@ type c:\proj\app\dist\build.log
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 xcopy c:\proj\app\dist\. y:\app\dist /d /F /I /s /Y 
-xcopy c:\proj\yarnmirror\. y:\yarnmirror /d /F /I /s /Y

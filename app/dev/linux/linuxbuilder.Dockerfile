@@ -7,10 +7,10 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get update -q 
 RUN apt-get install -y yarn
 RUN npm i -g npm@^4
-RUN yarn config set yarn-offline-mirror /proj/yarnmirror
+RUN yarn config set yarn-offline-mirror /proj/cache/yarnmirror
 RUN yarn cache clean
 
-COPY yarnmirror /proj/yarnmirror
+COPY ./cache/yarnmirror /proj/cache/yarnmirror
 
 RUN mkdir -p /build/core
 COPY core/package.json /build/core/
