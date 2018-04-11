@@ -9,7 +9,7 @@ import { Route, Link, WithRouting, Redirect } from './routing'
 import { Money, MoneyInput } from '../money'
 import { makeToast } from './toast'
 import {TransactionList} from './transactions'
-import { ClickToEdit, DebouncedInput, SafetySwitch } from '../input';
+import { ClickToEdit, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'

@@ -1087,12 +1087,12 @@ button.delete.pulse {
   display: inline-block;
   overflow: hidden;
   vertical-align: middle;
-  perspective: 200px;
 }
 .safety-switch button {
   position: relative;
   margin: 0;
   display: inline-block;
+  min-height: 1.54rem;
 }
 .safety-switch .under {
   position: relative;
