@@ -229,7 +229,7 @@ class Application extends React.Component<ApplicationProps, any> {
                               <tr>
                                 <td>{sss('Accounts')}</td>
                                 <td></td>
-                                <td className="right"><Money value={appstate.account_total_balance} noFaintCents /></td>
+                                <td className="right"><Money value={appstate.open_accounts_balance} noFaintCents /></td>
                               </tr>
                               <tr>
                                 <td>{sss('Buckets')}</td>
@@ -290,7 +290,7 @@ class Application extends React.Component<ApplicationProps, any> {
                     </total>
                     <total className="section-start">
                       <name>{sss('in the bank')}</name>
-                      <amount><Money value={appstate.account_total_balance} /></amount>
+                      <amount><Money value={appstate.open_accounts_balance} /></amount>
                     </total>
                   </div>
                   <div>

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import * as cx from 'classnames'
 import { sss } from '../i18n'
 import { shell } from 'electron'
 import {Balances} from '../models/balances'
@@ -96,7 +97,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
           <td><Link relative to={`/${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link></td>
         </tr>);
     })
-    return (<table className="ledger">
+    return (<table className="ledger full-width">
       <thead>
         <tr>
           <th></th>
@@ -115,15 +116,33 @@ export class AccountList extends React.Component<AccountListProps,any> {
 interface AccountViewProps {
   account: Account;
   transactions: Transaction[];
-  balance: number;
+  current_balance: number;
   appstate: AppState;
 }
 export class AccountView extends React.Component<AccountViewProps, {
-  transaction_acount: number;
+  new_balance: number;
+  balance_edit_showing: boolean;
+  new_balance_with_transaction: boolean;
 }> {
+  constructor(props:AccountViewProps) {
+    super(props);
+    this.state = {
+      new_balance: props.current_balance || 0,
+      balance_edit_showing: false,
+      new_balance_with_transaction: true,
+    }
+  }
+  componentWillReceiveProps(nextProps:AccountViewProps) {
+    if (nextProps.current_balance !== this.props.current_balance) {
+      this.setState({
+        new_balance: nextProps.current_balance,
+        new_balance_with_transaction: true,
+      })
+    }
+  }
   render() {
-    let { account, balance, appstate } = this.props;
-    let import_balance = getImportBalance(account, balance);
+    let { account, current_balance, appstate } = this.props;
+    let import_balance = getImportBalance(account, current_balance);
     let import_balance_field;
     let close_button;
     let closed_ribbon;
@@ -163,22 +182,92 @@ export class AccountView extends React.Component<AccountViewProps, {
         }}>{sss('Close account')}</SafetySwitch>
     }
 
-    if (import_balance !== balance) {
-      import_balance_field = <div>
-        {sss('Synced balance')}: <Money value={import_balance} />
-        <p>
-          <div className="alert info">
-            <span className="fa fa-exclamation-circle" />
-          </div>
-          {sss('accounts.balance_mismatch_long_msg', () => {
-            return (<span>
-              The "Balance" above is this account's balance as of the latest entered transaction.
-              The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
-              Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
-              So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
-          </span>)})()}
-        </p>
-      </div>
+    if (import_balance !== current_balance) {
+      import_balance_field = <tr>
+        <th>{sss('Synced balance')}</th>
+        <td>
+          <Money value={import_balance} />
+          <p>
+            <div className="alert info">
+              <span className="fa fa-exclamation-circle" />
+            </div>
+            {sss('accounts.balance_mismatch_long_msg', () => {
+              return (<span>
+                The "Balance" above is this account's balance as of the latest entered transaction.
+                The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
+                Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
+                So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+            </span>)})()}
+          </p>
+        </td>
+      </tr>
+    }
+
+    let balance_edit_form;
+    let bal_time_diff = account.balance - current_balance;
+    let new_future_balance = this.state.new_balance + bal_time_diff;
+    let bal_adjustment_amount = new_future_balance - account.balance;
+    if (this.state.balance_edit_showing) {
+      balance_edit_form = <form
+        onSubmit={async ev => {
+          ev.preventDefault();
+          if (bal_adjustment_amount === 0) {
+            return;
+          }
+          let store = manager.checkpoint(sss('Update Account Balance'));
+          if (this.state.new_balance_with_transaction) {
+            // Update via transaction
+            await store.accounts.transact({
+              account_id: account.id,
+              memo: sss('Update account balance'),
+              amount: bal_adjustment_amount,
+              posted: appstate.defaultPostingDate,
+            })
+          } else {
+            // Direct update of balance
+            await store.accounts.update(account.id, {
+              balance: new_future_balance,
+            })
+          }
+          this.setState({
+            new_balance_with_transaction: true,
+          })
+        }}>
+        <div>
+          <MoneyInput
+            autoFocus
+            value={this.state.new_balance}
+            onChange={newval => {
+              this.setState({new_balance: newval});
+            }} />
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="record-as"
+              value="record-trans"
+              checked={this.state.new_balance_with_transaction}
+              onChange={ev => {
+                this.setState({new_balance_with_transaction: ev.target.checked})
+              }}/>
+            {sss('Record change as transaction')} (<Money value={bal_adjustment_amount} noFaintCents />)</label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="record-as"
+              value="no-trans"
+              checked={!this.state.new_balance_with_transaction}
+              onChange={ev => {
+                this.setState({new_balance_with_transaction: !ev.target.checked})
+              }}/> {sss('Update balance without a transaction')}</label>
+        </div>
+        <div>
+          <button>{sss('Update balance')}</button>
+        </div>
+      </form>
     }
     return (<div className="padded flex-grow-2" key={account.id}>
       {closed_ribbon}
@@ -193,35 +282,72 @@ export class AccountView extends React.Component<AccountViewProps, {
           }}
         />
       </h1>
-      <div className="fieldlist">
-        <div>
-          {sss('Balance')}: <DebouncedInput
-            element={MoneyInput}
-            value={balance}
-            changeArgIsValue
-            onChange={this_months_balance => {
-              
-              let diff = account.balance - balance;
-              let computed_balance = this_months_balance + diff;
-              manager
-              .checkpoint(sss('Update Account Balance'))
-              .accounts.update(account.id, {balance: computed_balance});
-            }}/> ({sss('balance-as-of', (date:JSX.Element) => {
-            return <span>as of {date}</span>
-          })(<DateDisplay value={appstate.defaultPostingDate} />)})
-        </div>
-        {import_balance_field}
-      </div>
+      <table className="fieldlist">
+        <tbody>
+          <tr>
+            <th>
+              {sss('Balance')}
+            </th>
+            <td>
+              <div>
+                {sss('money-balance-as-of', (amount:JSX.Element, date:JSX.Element) => {
+                  return <span>{amount} as of {date}</span>
+                })(
+                  <Money value={current_balance} noFaintCents />,
+                  <DateDisplay value={appstate.defaultPostingDate} />
+                )}
+                <button className="icon inline" onClick={ev => {
+                  this.setState({balance_edit_showing: !this.state.balance_edit_showing})
+                }}><span className={cx("fa", {
+                  "fa-pencil": !this.state.balance_edit_showing,
+                  "fa-check": this.state.balance_edit_showing,
+                })} /></button>
+              </div>
+              {balance_edit_form}
+            </td>
+          </tr>
+
+          {import_balance_field}
+
+          <tr>
+            <th>{sss('Off budget')}</th>
+            <td>
+              <input
+                type="checkbox"
+                checked={account.offbudget}
+                onChange={ev => {
+                  if (ev.target.checked) {
+                    manager
+                    .checkpoint(sss('Make Account Off Budget'))
+                    .accounts.update(account.id, {offbudget:true});
+                  } else {
+                    manager
+                    .checkpoint(sss('Make Account On Budget'))
+                    .accounts.update(account.id, {offbudget:false});
+                  }
+                }}
+              /> 
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('Actions')}</th>
+            <td>
+              {close_button}
+              {delete_all_transactions_button}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <hr/>
       <TransactionList
         transactions={this.props.transactions}
         categories={this.props.appstate.categories}
         appstate={this.props.appstate}
         account={account}
-        ending_balance={balance}
+        ending_balance={current_balance}
         hideAccount
       />
-
-      <div>{close_button} {delete_all_transactions_button}</div>
     </div>)
   }
 }
@@ -233,8 +359,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   render() {
     let { appstate } = this.props;
     let getting_started;
-    let accounts_list = appstate.open_accounts;
-    if (!accounts_list.length) {
+    if (!(appstate.open_accounts.length + appstate.offbudget_accounts.length)) {
       getting_started = <div className="notice">
         {sss('getting-started-link', (clickhandler) => {
           return <span>First time using Buckets?  Check out the <a href="#" onClick={clickhandler}>Getting Started Videos.</a></span>
@@ -255,24 +380,33 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
         <div className="layout-two-col">
           <div className="padded first">
             <AccountList
-              accounts={accounts_list}
+              accounts={appstate.open_accounts}
               balances={appstate.account_balances} />
+            {!appstate.offbudget_accounts.length ? null :
+              <div>
+                <h2 className="nobr">{sss('Off Budget Accounts')}</h2>
+                <AccountList
+                  accounts={appstate.offbudget_accounts}
+                  balances={appstate.account_balances} />
+              </div>}
           </div>
-          <Route path="/<int:id>">
-            <WithRouting func={(routing) => {
-              let account = appstate.accounts[routing.params.id];
-              if (!account) {
-                return <Redirect to='/accounts' />;
-              }
-              let balance = appstate.account_balances[account.id];
-              return (<div className="second"><AccountView
-                account={account}
-                balance={balance}
-                transactions={_.values(appstate.transactions)
-                  .filter(t => t.account_id == account.id)}
-                appstate={appstate} /></div>);
-            }} />
-          </Route>
+          <div className="second">
+            <Route path="/<int:id>">
+              <WithRouting func={(routing) => {
+                let account = appstate.accounts[routing.params.id];
+                if (!account) {
+                  return <Redirect to='/accounts' />;
+                }
+                let balance = appstate.account_balances[account.id];
+                return (<AccountView
+                  account={account}
+                  current_balance={balance}
+                  transactions={_.values(appstate.transactions)
+                    .filter(t => t.account_id == account.id)}
+                  appstate={appstate} />);
+              }} />
+            </Route>
+          </div>
         </div>
       </div>);
   }

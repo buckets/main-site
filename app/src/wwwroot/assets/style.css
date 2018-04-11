@@ -166,7 +166,20 @@ ol.spaced li {
 
 
 .fieldlist {
-  padding: 1rem 0;
+}
+.fieldlist th,
+.fieldlist td {
+  padding: .25rem;
+}
+.fieldlist th {
+  white-space: nowrap;
+  font-weight: bold;
+  color: var(--darkblue);
+  text-align: right;
+  vertical-align: top;
+}
+.fieldlist td {
+  vertical-align: top;
 }
 
 /* Alert */
@@ -1010,6 +1023,10 @@ button.icon {
   line-height: 1rem;
   padding: 0;
   text-align: center;
+}
+button.icon.inline {
+  height: auto;
+  line-height: initial;
 }
 button.icon.white {
   background-color: white;

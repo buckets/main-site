@@ -27,9 +27,11 @@ export class Account implements IObject, INotable {
   import_balance: number;
   currency: string;
   closed: boolean;
+  offbudget: boolean;
 
   static fromdb(obj:Account) {
-    obj.closed == !!obj.closed;
+    obj.closed = !!obj.closed;
+    obj.offbudget = !!obj.offbudget;
     return obj;
   }
 }
@@ -128,6 +130,7 @@ export class AccountStore {
       name?:string,
       balance?:number,
       import_balance?:number,
+      offbudget?:boolean,
   }):Promise<any> {
     return this.store.updateObject(Account, account_id, data);
   }

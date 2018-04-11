@@ -441,38 +441,46 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       let relatedAccountSelect;
       if (trans) {
         // Editing an existing transaction
-        categoryInput = <CategoryInput
-          buckets={appstate.unkicked_buckets}
-          amount={this.state.amount}
-          cats={this.state.cats.length ? this.state.cats : (appstate.categories[trans.id] || [])}
-          general_cat={this.state.general_cat}
-          onEnter={() => {
-            this.doTransaction()
-          }}
-          onChange={(general_cat:GeneralCatType, cats:Category[]) => {
-            this.setState({
-              general_cat,
-              cats,
-            })
-          }}
-        />
+        if (appstate.accounts[trans.account_id].offbudget) {
+          categoryInput = sss('Off budget');
+        } else {
+          categoryInput = <CategoryInput
+            buckets={appstate.unkicked_buckets}
+            amount={this.state.amount}
+            cats={this.state.cats.length ? this.state.cats : (appstate.categories[trans.id] || [])}
+            general_cat={this.state.general_cat}
+            onEnter={() => {
+              this.doTransaction()
+            }}
+            onChange={(general_cat:GeneralCatType, cats:Category[]) => {
+              this.setState({
+                general_cat,
+                cats,
+              })
+            }}
+          />
+        }
       } else {
         // Creating a new transaction
-        categoryInput = <CategoryInput
-          buckets={appstate.unkicked_buckets}
-          amount={this.state.amount}
-          cats={this.state.cats}
-          general_cat={this.state.general_cat}
-          onEnter={() => {
-            this.doTransaction()
-          }}
-          onChange={(general_cat:GeneralCatType, cats:Category[]) => {
-            this.setState({
-              general_cat,
-              cats,
-            })
-          }}
-        />
+        if (!isNil(this.state.account_id) && appstate.accounts[this.state.account_id].offbudget) {
+          categoryInput = sss('Off budget');
+        } else {
+          categoryInput = <CategoryInput
+            buckets={appstate.unkicked_buckets}
+            amount={this.state.amount}
+            cats={this.state.cats}
+            general_cat={this.state.general_cat}
+            onEnter={() => {
+              this.doTransaction()
+            }}
+            onChange={(general_cat:GeneralCatType, cats:Category[]) => {
+              this.setState({
+                general_cat,
+                cats,
+              })
+            }}
+          />
+        }
 
         if (this.state.general_cat === 'transfer') {
           const dropdown = <select
@@ -566,10 +574,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         <td className="right"><Money value={trans.amount} /></td>
         {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} /></td> }
         <td x-name="categorize">
-          <Categorizer
-            transaction={trans}
-            cats={appstate.categories[trans.id]}
-            appstate={appstate} />
+          {appstate.accounts[trans.account_id].offbudget
+           ? <div>{sss('Off budget')}</div>
+           : <Categorizer
+              transaction={trans}
+              cats={appstate.categories[trans.id]}
+              appstate={appstate} />
+          }
         </td>
         <td x-name="edit" className="icon-wrap center">
           <button className="icon show-on-row-hover"
