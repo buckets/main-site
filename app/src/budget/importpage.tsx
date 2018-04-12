@@ -294,12 +294,12 @@ export class ImportPage extends React.Component<{
   createMacro = async () => {
     let macro = await manager
     .checkpoint(sss('Create Macro'))
-    .bankmacro.add({name: ''});
+    .sub.bankmacro.add({name: ''});
     current_file.openRecordWindow(macro.id);
   }
   connect = async () => {
     try {
-      await manager.nocheckpoint.simplefin.consumeToken(this.state.simplefin_token)
+      await manager.nocheckpoint.sub.simplefin.consumeToken(this.state.simplefin_token)
     } catch(err) {
       this.setState({status_message: err.toString()});
       return;
@@ -343,7 +343,7 @@ class BankMacroList extends React.Component<{
             play_button = <button className="icon"
               onClick={() => {
                 let { onOrAfter, before } = manager.appstate.viewDateRange;
-                manager.nocheckpoint.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
+                manager.nocheckpoint.sub.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
               }}><span className="fa fa-play"></span></button>
           }
           return <tr key={idx}>
@@ -355,7 +355,7 @@ class BankMacroList extends React.Component<{
                   const enabled = (ev.target as any).checked;
                   manager
                   .checkpoint(enabled ? sss('Enable Macro') : sss('Disable Macro'))
-                  .bankmacro.update(macro.id, {enabled});
+                  .sub.bankmacro.update(macro.id, {enabled});
                 }}
               />
             </td>
@@ -366,7 +366,7 @@ class BankMacroList extends React.Component<{
                 onChange={(val) => {
                   manager
                   .checkpoint(sss('Update Macro Name'))
-                  .bankmacro.update(macro.id, {name: val});
+                  .sub.bankmacro.update(macro.id, {name: val});
                 }}
               />
             </td>
@@ -388,7 +388,7 @@ class BankMacroList extends React.Component<{
                 onClick={(ev) => {
                   manager
                   .checkpoint(sss('Delete Macro'))
-                  .bankmacro.delete(macro.id);
+                  .sub.bankmacro.delete(macro.id);
                 }}><span className="fa fa-trash"></span></SafetySwitch>
             </td>
           </tr>
@@ -505,12 +505,12 @@ class UnknownAccountRow extends React.Component<{
     let numeric_account_id:number;
     if (account_id === 'NEW') {
       // Make a new account
-      let new_account = await store.accounts.add(unknown.description);
+      let new_account = await store.sub.accounts.add(unknown.description);
       numeric_account_id = new_account.id;
     } else {
       // Link to an existing account
       numeric_account_id = parseInt(account_id);
     }
-    await store.accounts.linkAccountToHash(unknown.account_hash, numeric_account_id);
+    await store.sub.accounts.linkAccountToHash(unknown.account_hash, numeric_account_id);
   }
 }

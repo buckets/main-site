@@ -706,7 +706,7 @@ export async function start(args:{
   const renderer = new Renderer();
   
   let store = current_file.store;
-  let BANKMACRO = await store.bankmacro.get(args.macro_id);
+  let BANKMACRO = await store.sub.bankmacro.get(args.macro_id);
   let recording:Recording = null
   let sync_result:SyncResult = {
     errors: [],
@@ -717,7 +717,7 @@ export async function start(args:{
   let i = 0;
   while (true) {
     try {
-      let plaintext = await store.bankmacro.decryptRecording(BANKMACRO);
+      let plaintext = await store.sub.bankmacro.decryptRecording(BANKMACRO);
       recording = plaintext.recording;
       break;
     } catch(err) {
@@ -737,7 +737,7 @@ export async function start(args:{
   });
   director.events.newpage.on(message => {
     if (!BANKMACRO.name) {
-      store.bankmacro.update(BANKMACRO.id, {name: message.title});
+      store.sub.bankmacro.update(BANKMACRO.id, {name: message.title});
     }
   })
   director.events.file_downloaded.on(async ({localpath, filename, mimetype}) => {
@@ -824,7 +824,7 @@ export async function start(args:{
         }
       }}
       onRecordingChange={(new_recording) => {
-        store.bankmacro.update(args.macro_id, {
+        store.sub.bankmacro.update(args.macro_id, {
           recording: new_recording,
         })
       }}

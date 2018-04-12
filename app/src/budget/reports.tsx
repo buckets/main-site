@@ -106,7 +106,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
       return;
     }
     let { start, end } = props;
-    let transactions = await manager.nocheckpoint.accounts.listTransactions({
+    let transactions = await manager.nocheckpoint.sub.accounts.listTransactions({
       posted: {
         onOrAfter: start,
         before: end,
@@ -162,7 +162,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
   async recomputeState(props:CashFlowComparisonProps) {
     let { intervals } = props;
     let summaries = await Promise.all(intervals.map(interval => {
-      return manager.nocheckpoint.reports.incomeAndExpenses({
+      return manager.nocheckpoint.sub.reports.incomeAndExpenses({
         start: interval.start,
         end: interval.end,
       })  
@@ -537,7 +537,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
       .startOf(unit)
       .add(1, unit)
       .subtract(this.state.timeback_number + (unit === 'month' ? 1 : 0), unit);
-    let expensesByBucket = await manager.nocheckpoint.reports.bucketExpenseHistories({
+    let expensesByBucket = await manager.nocheckpoint.sub.reports.bucketExpenseHistories({
       interval: {
         start,
         end: end_date,
@@ -616,7 +616,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
                     this.setState({
                       timeback_number: value,
                     }, () => {
-                      manager.nocheckpoint.settings.updateSettings({
+                      manager.nocheckpoint.sub.settings.updateSettings({
                         reports_timeback_number: this.state.timeback_number,
                       });
                       this.triggerReload();
@@ -637,7 +637,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
                       timeback_unit: ev.target.value as any,
                       timeback_number: timeback_number,
                     }, () => {
-                      manager.nocheckpoint.settings.updateSettings({
+                      manager.nocheckpoint.sub.settings.updateSettings({
                         reports_timeback_number: this.state.timeback_number,
                         reports_timeback_unit: this.state.timeback_unit,
                       })

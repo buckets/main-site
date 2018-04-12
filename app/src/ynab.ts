@@ -155,6 +155,13 @@ namespace YNAB {
   }
 }
 
+
+export class YNABStore {
+  constructor(store:IStore) {
+
+  }
+}
+
 async function loadJSONFile<T>(path:string):Promise<T> {
   const guts = await fs.readFileAsync(path)
   return JSON.parse(guts.toString('utf8')) as T;
@@ -198,13 +205,13 @@ export async function importYNAB4(store:IStore, path:string) {
   let categories:{[k:string]: YNAB.SubCategory} = {};
   let masterCats:{[k:string]: YNAB.MasterCategory} = {};
 
-  let groups = await store.buckets.listGroups();
+  let groups = await store.sub.buckets.listGroups();
   const group_names = groups.map(x => x.name);
 
-  let buckets = await store.buckets.list();
+  let buckets = await store.sub.buckets.list();
   let cat2bucket:{[k:string]:Bucket.Bucket} = {};
 
-  let accounts = await store.accounts.list();
+  let accounts = await store.sub.accounts.list();
   const account_names = accounts.map(x => x.name);
   let acc2acc:{[k:string]:Account.Account} = {};
 
@@ -259,7 +266,7 @@ export async function importYNAB4(store:IStore, path:string) {
       // kicked bucket -- no group
     } else if (idx === -1) {
       // make a new group
-      let group = await store.buckets.addGroup({name: mcat.name});
+      let group = await store.sub.buckets.addGroup({name: mcat.name});
       group_id = group.id;
     } else {
       // use existing group
@@ -281,7 +288,7 @@ export async function importYNAB4(store:IStore, path:string) {
       let bucket:Bucket.Bucket;
       if (idx === -1) {
         // make a new bucket
-        bucket = await store.buckets.add({name: cat.name, group_id: group_id});
+        bucket = await store.sub.buckets.add({name: cat.name, group_id: group_id});
       } else {
         // use existing bucket
         bucket = buckets.filter(x => x.name === cat.name)[0];
@@ -292,7 +299,7 @@ export async function importYNAB4(store:IStore, path:string) {
       // Set up deposit amount
       let deposit_amount = deposit_amounts[cat.entityId]
       if (!bucket.deposit && bucket.kind === '' && deposit_amount) {
-        await store.buckets.update(bucket.id, {
+        await store.sub.buckets.update(bucket.id, {
           kind: 'deposit',
           deposit: deposit_amount,
         })
@@ -302,7 +309,7 @@ export async function importYNAB4(store:IStore, path:string) {
       let transactions = rain_transactions[cat.entityId];
       if (transactions) {
         for (let trans of transactions) {
-          await store.buckets.transact({
+          await store.sub.buckets.transact({
             bucket_id: bucket.id,
             amount: trans.rain,
             memo: 'Rain',
@@ -313,7 +320,7 @@ export async function importYNAB4(store:IStore, path:string) {
 
       if (mcat.entityId === "MasterCategory/__Hidden__") {
         // hidden
-        await store.buckets.kick(bucket.id);
+        await store.sub.buckets.kick(bucket.id);
       }
     }
   }
@@ -327,7 +334,7 @@ export async function importYNAB4(store:IStore, path:string) {
       let account;
       if (idx === -1) {
         // make a new account
-        account = await store.accounts.add(yaccount.accountName);
+        account = await store.sub.accounts.add(yaccount.accountName);
       } else {
         account = accounts.filter(x => x.name === yaccount.accountName)[0];
       }
@@ -364,7 +371,7 @@ export async function importYNAB4(store:IStore, path:string) {
         let payee = payees[ytrans.payeeId];
         memo = payee.name;
       }
-      let { transaction } = await store.accounts.importTransaction({
+      let { transaction } = await store.sub.accounts.importTransaction({
         account_id: buckets_account.id,
         amount: number2cents(ytrans.amount),
         memo,
@@ -376,7 +383,7 @@ export async function importYNAB4(store:IStore, path:string) {
       try {
         if (ytrans.categoryId === "Category/__ImmediateIncome__") {
           // Income
-          await store.accounts.categorizeGeneral(transaction.id, 'income');
+          await store.sub.accounts.categorizeGeneral(transaction.id, 'income');
         } else if (ytrans.categoryId === "Category/__Split__") {
           // Split category
           const nullCatCount = ytrans.subTransactions.filter(sub => !cat2bucket[sub.categoryId]).length;
@@ -393,7 +400,7 @@ export async function importYNAB4(store:IStore, path:string) {
               }
             })
             try {
-              await store.accounts.categorize(transaction.id, cats);  
+              await store.sub.accounts.categorize(transaction.id, cats);  
             } catch(err) {
               if (err instanceof Account.SignMismatch) {
                 addTransWorthLookingAt(transaction, ytrans);
@@ -409,7 +416,7 @@ export async function importYNAB4(store:IStore, path:string) {
           // Single category
           let bucket = cat2bucket[ytrans.categoryId];
           if (bucket) {
-            await store.accounts.categorize(transaction.id, [{
+            await store.sub.accounts.categorize(transaction.id, [{
               bucket_id: bucket.id,
               amount: transaction.amount,
             }])

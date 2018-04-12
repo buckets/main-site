@@ -183,7 +183,7 @@ function exportTransactionsToCSV(store:IStore, path:string, args:{
     })
     g.pipe(ws);
 
-    const data = await store.accounts.exportTransactions(args);
+    const data = await store.sub.accounts.exportTransactions(args);
     data.forEach(t => {
       g.write({
         id: t.t_id,

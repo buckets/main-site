@@ -30,7 +30,7 @@ export class ClosedAccountsPage extends React.Component<{appstate:AppState}, {}>
           <td><button onClick={() => {
             manager
             .checkpoint(sss('Reopen Account'))
-            .accounts.unclose(account.id)
+            .sub.accounts.unclose(account.id)
           }}>{sss('Reopen')}</button></td>
           <td>
             <Link relative to={`../${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link>
@@ -90,7 +90,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
             onChange={(val) => {
               manager
               .checkpoint(sss('Update Account Name'))
-              .accounts.update(account.id, {name: val});  
+              .sub.accounts.update(account.id, {name: val});  
             }}
           /></td>
           <td className="right nobr"><Money value={balances[account.id]} />{import_balance_note}</td>
@@ -151,14 +151,14 @@ export class AccountView extends React.Component<AccountViewProps, {
       close_button = <button onClick={() => {
         manager
         .checkpoint(sss('Reopen Account'))
-        .accounts.unclose(account.id);  
+        .sub.accounts.unclose(account.id);  
       }}>{sss('Reopen')}</button>
       closed_ribbon = <div className="kicked-ribbon">{sss('single-account Closed', 'Closed')}</div>
       delete_all_transactions_button = <SafetySwitch
         onClick={ev => {
           manager
           .checkpoint(sss('Delete Account'))
-          .accounts.deleteWholeAccount(account.id)
+          .sub.accounts.deleteWholeAccount(account.id)
           .then(() => {
             makeToast(sss('Account and transactions deleted'));
           });
@@ -170,7 +170,7 @@ export class AccountView extends React.Component<AccountViewProps, {
         onClick={ev => {
           manager
           .checkpoint(sss('Close Account'))
-          .accounts.close(account.id)
+          .sub.accounts.close(account.id)
           .then(new_account => {
             if (!new_account.closed) {
               // it was deleted
@@ -217,7 +217,7 @@ export class AccountView extends React.Component<AccountViewProps, {
           let store = manager.checkpoint(sss('Update Account Balance'));
           if (this.state.new_balance_with_transaction) {
             // Update via transaction
-            await store.accounts.transact({
+            await store.sub.accounts.transact({
               account_id: account.id,
               memo: sss('Update account balance'),
               amount: bal_adjustment_amount,
@@ -225,7 +225,7 @@ export class AccountView extends React.Component<AccountViewProps, {
             })
           } else {
             // Direct update of balance
-            await store.accounts.update(account.id, {
+            await store.sub.accounts.update(account.id, {
               balance: new_future_balance,
             })
           }
@@ -278,7 +278,7 @@ export class AccountView extends React.Component<AccountViewProps, {
           onChange={(val) => {
             manager
             .checkpoint(sss('Update Account Name'))
-            .accounts.update(account.id, {name: val});  
+            .sub.accounts.update(account.id, {name: val});  
           }}
         />
       </h1>
@@ -319,11 +319,11 @@ export class AccountView extends React.Component<AccountViewProps, {
                   if (ev.target.checked) {
                     manager
                     .checkpoint(sss('Make Account Off Budget'))
-                    .accounts.update(account.id, {offbudget:true});
+                    .sub.accounts.update(account.id, {offbudget:true});
                   } else {
                     manager
                     .checkpoint(sss('Make Account On Budget'))
-                    .accounts.update(account.id, {offbudget:false});
+                    .sub.accounts.update(account.id, {offbudget:false});
                   }
                 }}
               /> 
@@ -413,7 +413,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   addAccount = () => {
     manager
     .checkpoint(sss('Create Account'))
-    .accounts.add(sss('default account name', 'Savings'));  
+    .sub.accounts.add(sss('default account name', 'Savings'));  
   }
   createConnection = () => {
     setPath('/import')

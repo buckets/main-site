@@ -11,7 +11,7 @@ import { parseLocalTime } from '../time'
 
 test('add account', async (t) => {
   let { store, events } = await getStore();
-  let account = await store.accounts.add('Checking');
+  let account = await store.sub.accounts.add('Checking');
 
   // event
   t.equal(events.length, 1);
@@ -37,19 +37,19 @@ test('add account', async (t) => {
 
 test('list accounts', async (t) => {
   let { store } = await getStore();
-  let a1 = await store.accounts.add('Checking');
-  let a2 = await store.accounts.add('Savings');
-  let a3 = await store.accounts.add('Ally');
+  let a1 = await store.sub.accounts.add('Checking');
+  let a2 = await store.sub.accounts.add('Savings');
+  let a3 = await store.sub.accounts.add('Ally');
 
-  let accounts = await store.accounts.list();
+  let accounts = await store.sub.accounts.list();
   t.same(accounts, [a3, a1, a2]);
 })
 
 test('update account', async (t) => {
   let { store, events } = await getStore();
-  let account = await store.accounts.add('Checking');
+  let account = await store.sub.accounts.add('Checking');
   events.length = 0;
-  let new_account = await store.accounts.update(account.id, {name: 'Bono'});
+  let new_account = await store.sub.accounts.update(account.id, {name: 'Bono'});
 
   t.equal(account.id, new_account.id);
   t.equal(new_account.name, 'Bono');
@@ -59,9 +59,9 @@ test('update account', async (t) => {
 
 test('transact', async (t) => {
   let { store, events } = await getStore();
-  let account = await store.accounts.add('Savings');
+  let account = await store.sub.accounts.add('Savings');
   events.length = 0;
-  let orig = await store.accounts.transact({
+  let orig = await store.sub.accounts.transact({
     account_id: account.id,
     amount: 800,
     memo: 'something'});
@@ -96,7 +96,7 @@ test('transact, null account', async t => {
   let { store, events } = await getStore();
   events.length = 0;
   try {
-    await store.accounts.transact({
+    await store.sub.accounts.transact({
       account_id: null,
       amount: 500,
       memo: 'hello'});
@@ -108,16 +108,16 @@ test('transact, null account', async t => {
 
 test('balances', async (t) => {
   let { store } = await getStore();
-  let a1 = await store.accounts.add('Savings');
-  let a2 = await store.accounts.add('Checking');
+  let a1 = await store.sub.accounts.add('Savings');
+  let a2 = await store.sub.accounts.add('Checking');
 
-  await store.accounts.transact({
+  await store.sub.accounts.transact({
     account_id: a1.id,
     amount: 800,
     memo: 'something',
     posted: parseLocalTime('2000-01-01 00:00:00'),
   });
-  await store.accounts.transact({
+  await store.sub.accounts.transact({
     account_id: a2.id,
     amount: 750,
     memo: 'heyo',
@@ -125,28 +125,28 @@ test('balances', async (t) => {
   })
 
   // before any transactions
-  let bal = await store.accounts.balances(parseLocalTime('1999-01-01'));
+  let bal = await store.sub.accounts.balances(parseLocalTime('1999-01-01'));
   t.same(bal, {
     [a1.id]: 0,
     [a2.id]: 0,
   })
 
   // after the first transaction
-  bal = await store.accounts.balances(parseLocalTime('2000-06-06'))
+  bal = await store.sub.accounts.balances(parseLocalTime('2000-06-06'))
   t.same(bal, {
     [a1.id]: 800,
     [a2.id]: 0,
   })
 
   // after both transactions
-  bal = await store.accounts.balances(parseLocalTime('2001-06-06'))
+  bal = await store.sub.accounts.balances(parseLocalTime('2001-06-06'))
   t.same(bal, {
     [a1.id]: 800,
     [a2.id]: 750,
   })
 
   // now
-  bal = await store.accounts.balances()
+  bal = await store.sub.accounts.balances()
   t.same(bal, {
     [a1.id]: 800,
     [a2.id]: 750,
@@ -155,15 +155,15 @@ test('balances', async (t) => {
 
 test('deleteTransactions', async (t) => {
   let { store, events } = await getStore()
-  let a = await store.accounts.add('Checking');
-  let tr = await store.accounts.transact({
+  let a = await store.sub.accounts.add('Checking');
+  let tr = await store.sub.accounts.transact({
     account_id: a.id,
     amount: 750,
     memo: 'hey',
   })
   events.length = 0;
 
-  await store.accounts.deleteTransactions([tr.id])
+  await store.sub.accounts.deleteTransactions([tr.id])
 
   // transaction event
   t.equal(events.length, 2);
@@ -181,20 +181,20 @@ test('deleteTransactions', async (t) => {
 
 test('deleteTransactions linked bucket transactions', async t => {
   let { store, events } = await getStore()
-  let a = await store.accounts.add('Checking');
-  let b = await store.buckets.add({name: 'MyBucket'});
-  let tr = await store.accounts.transact({
+  let a = await store.sub.accounts.add('Checking');
+  let b = await store.sub.buckets.add({name: 'MyBucket'});
+  let tr = await store.sub.accounts.transact({
     account_id: a.id,
     amount: 750,
     memo: 'hey',
   })
-  await store.accounts.categorize(tr.id, [{
+  await store.sub.accounts.categorize(tr.id, [{
     bucket_id: b.id,
     amount: 750,
   }])
   events.length = 0;
 
-  await store.accounts.deleteTransactions([tr.id]);
+  await store.sub.accounts.deleteTransactions([tr.id]);
 
   t.equal(events.length, 4);
   let [tev, aev, btev, bev] = events;
@@ -221,21 +221,21 @@ test('deleteTransactions linked bucket transactions', async t => {
 
 test('listTransactions', async (t) => {
   let { store } = await getStore()
-  let acc1 = await store.accounts.add('Checking')
-  let acc2 = await store.accounts.add('Savings')
-  let t1 = await store.accounts.transact({
+  let acc1 = await store.sub.accounts.add('Checking')
+  let acc2 = await store.sub.accounts.add('Savings')
+  let t1 = await store.sub.accounts.transact({
     account_id: acc1.id,
     amount: 1,
     memo: 'first',
     posted: parseLocalTime('2000-01-01'),
   })
-  let t2 = await store.accounts.transact({
+  let t2 = await store.sub.accounts.transact({
     account_id: acc1.id,
     amount: 2,
     memo: 'second',
     posted: parseLocalTime('2000-02-01'),
   })
-  let t3 = await store.accounts.transact({
+  let t3 = await store.sub.accounts.transact({
     account_id: acc2.id,
     amount: 3,
     memo: 'other',
@@ -243,21 +243,21 @@ test('listTransactions', async (t) => {
   })
 
   await t.test('no args', async (tt) => {
-    let trans = await store.accounts.listTransactions()
+    let trans = await store.sub.accounts.listTransactions()
     tt.same(trans, [t2, t3, t1])
   })
   await t.test('onOrAfter', async (tt) => {
-    let trans = await store.accounts.listTransactions({posted: {onOrAfter: parseLocalTime('2000-02-01 00:00:00')}})
+    let trans = await store.sub.accounts.listTransactions({posted: {onOrAfter: parseLocalTime('2000-02-01 00:00:00')}})
     tt.same(trans, [t2, t3])
   })
   await t.test('before', async (tt) => {
-    let trans = await store.accounts.listTransactions({posted: {before: parseLocalTime('2000-02-01 00:00:00')}})
+    let trans = await store.sub.accounts.listTransactions({posted: {before: parseLocalTime('2000-02-01 00:00:00')}})
     tt.same(trans, [t1])
   })
   await t.test('account_id', async (tt) => {
-    let trans = await store.accounts.listTransactions({account_id: acc1.id})
+    let trans = await store.sub.accounts.listTransactions({account_id: acc1.id})
     tt.same(trans, [t2, t1])
-    trans = await store.accounts.listTransactions({account_id: acc2.id})
+    trans = await store.sub.accounts.listTransactions({account_id: acc2.id})
     tt.same(trans, [t3])
   })
 })

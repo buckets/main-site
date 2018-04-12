@@ -174,10 +174,10 @@ export async function createTemplateBucketSet() {
   ]
 
   for (const group_template of template) {
-    const group = await store.buckets.addGroup({name: group_template.name});
+    const group = await store.sub.buckets.addGroup({name: group_template.name});
 
     for (const btmpl of group_template.buckets) {
-      let bucket = await store.buckets.add({
+      let bucket = await store.sub.buckets.add({
         name: btmpl.name,
         group_id: group.id,
       })
@@ -185,7 +185,7 @@ export async function createTemplateBucketSet() {
       if (update.end_date) {
         update.end_date = ts2utcdb(parseLocalTime(update.end_date))
       }
-      await store.buckets.update(bucket.id, update)
+      await store.sub.buckets.update(bucket.id, update)
     }
   }
 }

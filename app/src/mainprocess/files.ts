@@ -437,7 +437,7 @@ export class BudgetFile implements IBudgetFile {
     before: MaybeMoment,
   }) {
     let win:Electron.BrowserWindow;
-    const bankmacro = await this.store.bankmacro.get(macro_id);
+    const bankmacro = await this.store.sub.bankmacro.get(macro_id);
 
     const partition = `persist:rec-${bankmacro.uuid}`;
     this.ensureSession(partition);

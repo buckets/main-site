@@ -1,6 +1,5 @@
 import { IObject, registerClass, IStore } from '../store';
 
-
 export interface ISettings {
   reports_timeback_number: number;
   reports_timeback_unit: 'month'|'year';

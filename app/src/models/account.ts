@@ -160,7 +160,7 @@ export class AccountStore {
     let btrans_ids = (await this.store.query(`SELECT id FROM bucket_transaction WHERE
       account_trans_id IN (SELECT id FROM account_transaction WHERE account_id=$id)`, {$id: account_id}))
       .map(x=>x.id);
-    await this.store.buckets.deleteTransactions(btrans_ids)
+    await this.store.sub.buckets.deleteTransactions(btrans_ids)
 
     // Delete account transactions
     let atrans_ids = (await this.store.query(`SELECT id FROM account_transaction WHERE account_id=$id;`, {$id: account_id}))
@@ -361,7 +361,7 @@ export class AccountStore {
       }
     } else {
       // Create new transaction
-      let transaction = await this.store.accounts.transact({
+      let transaction = await this.transact({
         account_id: args.account_id,
         amount: args.amount || 0,
         posted: args.posted,
@@ -384,7 +384,7 @@ export class AccountStore {
     await Promise.all(transaction_ids.map(async (transid) => {
       let trans = await this.store.getObject(Transaction, transid);
       affected_account_ids.add(trans.account_id)
-      let btrans_list = await this.store.buckets.listTransactions({
+      let btrans_list = await this.store.sub.buckets.listTransactions({
         account_trans_id: transid,
       })
       btrans_list.forEach(btrans => {
@@ -407,7 +407,7 @@ export class AccountStore {
 
     // publish changed buckets
     await Promise.all(Array.from(affected_bucket_ids).map(async bucket_id => {
-      let bucket = await this.store.buckets.get(bucket_id);
+      let bucket = await this.store.sub.buckets.get(bucket_id);
       this.store.publishObject('update', bucket);
     }))
   }
@@ -577,7 +577,7 @@ export class AccountStore {
 
     // create new bucket transactions
     await Promise.all(categories.map(cat => {
-      return this.store.buckets.transact({
+      return this.store.sub.buckets.transact({
         bucket_id: cat.bucket_id,
         amount: cat.amount,
         memo: trans.memo,
@@ -593,7 +593,7 @@ export class AccountStore {
     // delete old
     let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
       {$id: trans_id});
-    await this.store.buckets.deleteTransactions(old_ids.map(obj => obj.id))
+    await this.store.sub.buckets.deleteTransactions(old_ids.map(obj => obj.id))
     await this.store.query(`
       UPDATE account_transaction
       SET general_cat = ''

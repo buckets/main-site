@@ -452,7 +452,7 @@ export class StateManager {
       } else if (ev.event === 'update') {
         this.appstate.transactions[obj.id] = obj;
       }
-      this.store.accounts.getCategories(obj.id)
+      this.store.sub.accounts.getCategories(obj.id)
       .then(cats => {
         this.appstate.categories[obj.id] = cats;
         this.signalChange();
@@ -541,10 +541,10 @@ export class StateManager {
     Object.assign(this.appstate, totals);
   }
   async fetchSettings() {
-    this.appstate.settings = await this.store.settings.getSettings();
+    this.appstate.settings = await this.store.sub.settings.getSettings();
   }
   fetchAllAccounts() {
-    return this.store.accounts.list()
+    return this.store.sub.accounts.list()
       .then(accounts => {
         this.appstate.accounts = {};
         accounts.forEach(account => {
@@ -553,13 +553,13 @@ export class StateManager {
       })
   }
   fetchAccountBalances() {
-    return this.store.accounts.balances(this.appstate.viewDateRange.before)
+    return this.store.sub.accounts.balances(this.appstate.viewDateRange.before)
       .then(balances => {
         this.appstate.account_balances = balances;
       })
   }
   fetchAllBuckets() {
-    return this.store.buckets.list()
+    return this.store.sub.buckets.list()
       .then(buckets => {
         this.appstate.buckets = {};
         buckets.forEach(bucket => {
@@ -568,7 +568,7 @@ export class StateManager {
       })
   }
   fetchAllGroups() {
-    return this.store.buckets.listGroups()
+    return this.store.sub.buckets.listGroups()
       .then(groups => {
         this.appstate.groups = {}
         groups.forEach(group => {
@@ -577,13 +577,13 @@ export class StateManager {
       })
   }
   fetchBucketBalances() {
-    return this.store.buckets.balances(this.appstate.viewDateRange.before)
+    return this.store.sub.buckets.balances(this.appstate.viewDateRange.before)
       .then(balances => {
         this.appstate.bucket_balances = balances;
       })  
   }
   fetchBucketFlow() {
-    return this.store.buckets.getFlow(
+    return this.store.sub.buckets.getFlow(
       this.appstate.viewDateRange.onOrAfter,
       this.appstate.viewDateRange.before)
       .then(flow => {
@@ -591,7 +591,7 @@ export class StateManager {
       })
   }
   fetchFutureRainfall() {
-    return this.store.buckets.combinedRainfall({
+    return this.store.sub.buckets.combinedRainfall({
       onOrAfter: this.appstate.viewDateRange.before,
     })
     .then(rainfall => {
@@ -600,7 +600,7 @@ export class StateManager {
   }
   async fetchTransactions() {
     let range = this.appstate.viewDateRange;
-    const transactions = await this.store.accounts.listTransactions({
+    const transactions = await this.store.sub.accounts.listTransactions({
       posted: {
         onOrAfter: range.onOrAfter,
         before: range.before,
@@ -612,12 +612,12 @@ export class StateManager {
       this.appstate.transactions[trans.id] = trans;
       trans_ids.push(trans.id);
     })
-    const categories = await this.store.accounts.getManyCategories(trans_ids);
+    const categories = await this.store.sub.accounts.getManyCategories(trans_ids);
     this.appstate.categories = categories;
   }
   fetchBucketTransactions() {
     let range = this.appstate.viewDateRange;
-    return this.store.buckets.listTransactions({
+    return this.store.sub.buckets.listTransactions({
       posted: {
         onOrAfter: range.onOrAfter,
         before: range.before,
@@ -631,7 +631,7 @@ export class StateManager {
       })
   }
   fetchConnections() {
-    return this.store.simplefin.listConnections()
+    return this.store.sub.simplefin.listConnections()
     .then(connections => {
       this.appstate.sfinconnections = {};
       connections.forEach(obj => {

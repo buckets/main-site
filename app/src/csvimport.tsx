@@ -132,7 +132,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   const parsed = await parseCSVStringWithHeader(guts);
   const fingerprint = hashStrings(parsed.headers);
   log.info('fingerprint', fingerprint);
-  let csv_mapping = await store.accounts.getCSVMapping(fingerprint);
+  let csv_mapping = await store.sub.accounts.getCSVMapping(fingerprint);
   if (csv_mapping === null || args.force_mapping) {
     // no current mapping
     let need:CSVNeedsMapping = {
@@ -145,7 +145,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       bf.room.events('csv_mapping_response').onceSuccessfully(async message => {
         if (message.id === need.id) {
           // now there's a mapping
-          let new_mapping = await store.accounts.setCSVMapping(fingerprint, message.mapping);
+          let new_mapping = await store.sub.accounts.setCSVMapping(fingerprint, message.mapping);
           resolve(new_mapping);
           return true;
         }
@@ -491,7 +491,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
                 makeToast(sss('Provide a name for the new account.'), {className:'error'})
                 return;
               }
-              let new_account = await manager.checkpoint(sss('Create Account')).accounts.add(new_name);
+              let new_account = await manager.checkpoint(sss('Create Account')).sub.accounts.add(new_name);
               account_id = new_account.id;
             }
             current_file.room.broadcast('csv_account_response', {

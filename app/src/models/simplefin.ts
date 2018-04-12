@@ -98,7 +98,7 @@ class SimpleFINSync implements ASyncening {
         }
 
         try {
-          let result = await this.store.simplefin.sync(window_start, window_end)  
+          let result = await this.store.sub.simplefin.sync(window_start, window_end)  
           imported_count += result.transactions.length;
           result.errors.forEach(err => {
             log.info(`SimpleFin error: ${err}`);
@@ -170,13 +170,13 @@ export class SimpleFINStore {
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
-        let account_id = await this.store.accounts.hashToAccountId(hash)
+        let account_id = await this.store.sub.accounts.hashToAccountId(hash)
         if (account_id) {
-          let has_transactions = await this.store.accounts.hasTransactions(account_id);
+          let has_transactions = await this.store.sub.accounts.hasTransactions(account_id);
           account.transactions
           .map(trans => {
               got_data = true;
-              return this.store.accounts.importTransaction({
+              return this.store.sub.accounts.importTransaction({
                 account_id,
                 amount: parseStringAmount(trans.amount),
                 memo: trans.description,
@@ -191,12 +191,12 @@ export class SimpleFINStore {
           if (!has_transactions) {
             balance_update_data.balance = balance_update_data.import_balance;
           }
-          this.store.accounts.update(account_id, {
+          this.store.sub.accounts.update(account_id, {
             import_balance: parseStringAmount(account.balance),
           })
         } else {
           // no matching account
-          let unknown = await this.store.accounts.getOrCreateUnknownAccount({
+          let unknown = await this.store.sub.accounts.getOrCreateUnknownAccount({
             description: `${account.org.name || account.org.domain} ${account.name} (${account.id}) ${account.balance}`,
             account_hash: hash,
           })

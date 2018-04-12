@@ -6,7 +6,7 @@ import { parseLocalTime } from '../time'
 
 test('add bucket', async (t) => {
   let { store, events } = await getStore();
-  let bucket = await store.buckets.add({name: 'Food'});
+  let bucket = await store.sub.buckets.add({name: 'Food'});
 
   // event
   t.equal(events.length, 1)
@@ -29,20 +29,20 @@ test('add bucket', async (t) => {
 
 test('list buckets', async (t) => {
   let { store } = await getStore();
-  let b1 = await store.buckets.add({name: 'Food'})
-  let b2 = await store.buckets.add({name: 'Shelter'})
-  let b3 = await store.buckets.add({name: 'Apples'})
+  let b1 = await store.sub.buckets.add({name: 'Food'})
+  let b2 = await store.sub.buckets.add({name: 'Shelter'})
+  let b3 = await store.sub.buckets.add({name: 'Apples'})
 
-  let buckets = await store.buckets.list();
+  let buckets = await store.sub.buckets.list();
   t.same(buckets, [b3, b1, b2]);
 })
 
 test('update bucket', async (t) => {
   let { store, events } = await getStore();
-  let b1 = await store.buckets.add({name: 'Garbage'})
+  let b1 = await store.sub.buckets.add({name: 'Garbage'})
   events.length = 0;
 
-  let b2 = await store.buckets.update(b1.id, {
+  let b2 = await store.sub.buckets.update(b1.id, {
     name: 'Foobar',
     kind: 'goal-deposit',
     ranking: 'h',
@@ -63,10 +63,10 @@ test('update bucket', async (t) => {
 
 test('transact', async t => {
   let { store, events } = await getStore();
-  let bucket = await store.buckets.add({name: 'Food'})
+  let bucket = await store.sub.buckets.add({name: 'Food'})
   events.length = 0;
 
-  let trans = await store.buckets.transact({
+  let trans = await store.sub.buckets.transact({
     bucket_id: bucket.id,
     amount: 500,
     memo: 'Hello',
@@ -88,7 +88,7 @@ test('transact', async t => {
   // bucket event
   let ev1 = events[1];
   t.equal(ev1.event, 'update');
-  let newbucket = await store.buckets.get(bucket.id);
+  let newbucket = await store.sub.buckets.get(bucket.id);
   t.same(ev1.obj, newbucket);
   t.equal(newbucket.id, bucket.id)
   t.equal(newbucket.balance, 500)
@@ -96,16 +96,16 @@ test('transact', async t => {
 
 test('balances', async (t) => {
   let { store } = await getStore();
-  let b1 = await store.buckets.add({name: 'Food'});
-  let b2 = await store.buckets.add({name: 'Volleyball'});
+  let b1 = await store.sub.buckets.add({name: 'Food'});
+  let b2 = await store.sub.buckets.add({name: 'Volleyball'});
 
-  await store.buckets.transact({
+  await store.sub.buckets.transact({
     bucket_id: b1.id,
     amount: 800,
     memo: 'something',
     posted: parseLocalTime('2000-01-01 00:00:00'),
   });
-  await store.buckets.transact({
+  await store.sub.buckets.transact({
     bucket_id: b2.id,
     amount: 750,
     memo: 'heyo',
@@ -113,28 +113,28 @@ test('balances', async (t) => {
   })
 
   // before any transactions
-  let bal = await store.buckets.balances(parseLocalTime('1999-01-01'));
+  let bal = await store.sub.buckets.balances(parseLocalTime('1999-01-01'));
   t.same(bal, {
     [b1.id]: 0,
     [b2.id]: 0,
   })
 
   // after the first transaction
-  bal = await store.buckets.balances(parseLocalTime('2000-06-06'))
+  bal = await store.sub.buckets.balances(parseLocalTime('2000-06-06'))
   t.same(bal, {
     [b1.id]: 800,
     [b2.id]: 0,
   })
 
   // after both transactions
-  bal = await store.buckets.balances(parseLocalTime('2001-06-06'))
+  bal = await store.sub.buckets.balances(parseLocalTime('2001-06-06'))
   t.same(bal, {
     [b1.id]: 800,
     [b2.id]: 750,
   })
 
   // now
-  bal = await store.buckets.balances()
+  bal = await store.sub.buckets.balances()
   t.same(bal, {
     [b1.id]: 800,
     [b2.id]: 750,
@@ -143,36 +143,36 @@ test('balances', async (t) => {
 
 test('kick used bucket', async t => {
   let { store, events } = await getStore()
-  let bucket = await store.buckets.add({name: 'Grocery'});
-  await store.buckets.transact({
+  let bucket = await store.sub.buckets.add({name: 'Grocery'});
+  await store.sub.buckets.transact({
     bucket_id: bucket.id,
     amount: 750,
     memo: 'hey',
   })
   events.length = 0;
 
-  await store.buckets.kick(bucket.id);
+  await store.sub.buckets.kick(bucket.id);
   t.equal(events.length, 1);
   t.equal(events[0].event, 'update')
-  let new_bucket = await store.buckets.get(bucket.id);
+  let new_bucket = await store.sub.buckets.get(bucket.id);
   t.same(events[0].obj, new_bucket);
   t.equal(new_bucket.kicked, true);
 
   events.length = 0;
-  await store.buckets.unkick(bucket.id);
+  await store.sub.buckets.unkick(bucket.id);
   t.equal(events.length, 1);
   t.equal(events[0].event, 'update');
-  new_bucket = await store.buckets.get(bucket.id);
+  new_bucket = await store.sub.buckets.get(bucket.id);
   t.same(events[0].obj, new_bucket);
   t.equal(new_bucket.kicked, false);
 })
 
 test('kick new bucket', async t => {
   let { store, events } = await getStore()
-  let bucket = await store.buckets.add({name: 'Grocery'});
+  let bucket = await store.sub.buckets.add({name: 'Grocery'});
   events.length = 0;
 
-  await store.buckets.kick(bucket.id);
+  await store.sub.buckets.kick(bucket.id);
   t.equal(events.length, 1);
   t.equal(events[0].event, 'delete')
   t.same(events[0].obj, bucket);
@@ -180,15 +180,15 @@ test('kick new bucket', async t => {
 
 test('deleteTransactions', async (t) => {
   let { store, events } = await getStore()
-  let bucket = await store.buckets.add({name: 'Grocery'});
-  let tr = await store.buckets.transact({
+  let bucket = await store.sub.buckets.add({name: 'Grocery'});
+  let tr = await store.sub.buckets.transact({
     bucket_id: bucket.id,
     amount: 750,
     memo: 'hey',
   })
   events.length = 0;
 
-  await store.buckets.deleteTransactions([tr.id])
+  await store.sub.buckets.deleteTransactions([tr.id])
 
   // transaction event
   t.equal(events.length, 2);
@@ -207,19 +207,19 @@ test('deleteTransactions', async (t) => {
 test('create bucket in group', async t => {
   let { store, events } = await getStore()
 
-  let group = await store.buckets.addGroup({name: 'The Group'})
+  let group = await store.sub.buckets.addGroup({name: 'The Group'})
   t.equal(events.length, 1);
   
-  let b = await store.buckets.add({name: 'Bob', group_id: group.id});
+  let b = await store.sub.buckets.add({name: 'Bob', group_id: group.id});
   t.equal(b.group_id, group.id);
 })
 
 test('update group', async t => {
   let { store, events } = await getStore()
-  let group = await store.buckets.addGroup({name: 'The Group'})
+  let group = await store.sub.buckets.addGroup({name: 'The Group'})
   events.length = 0;
 
-  let new_group = await store.buckets.updateGroup(group.id, {name: 'Bob', ranking: 't'})
+  let new_group = await store.sub.buckets.updateGroup(group.id, {name: 'Bob', ranking: 't'})
   t.equal(new_group.name, 'Bob')
   t.equal(new_group.ranking, 't')
   t.same(events[0].obj, new_group);
@@ -227,49 +227,49 @@ test('update group', async t => {
 
 test('group different ranking', async t => {
   let { store } = await getStore()
-  let g1 = await store.buckets.addGroup({name: 'Group 1'})
-  let g2 = await store.buckets.addGroup({name: 'Group 2'})
+  let g1 = await store.sub.buckets.addGroup({name: 'Group 1'})
+  let g2 = await store.sub.buckets.addGroup({name: 'Group 2'})
 
   t.ok(g1.ranking < g2.ranking)
 })
 
 test('moveBucket 2', async t => {
   let { store, events } = await getStore()
-  let b1 = await store.buckets.add({name: 'Grocery'})
-  let b2 = await store.buckets.add({name: 'Vacation'})
+  let b1 = await store.sub.buckets.add({name: 'Grocery'})
+  let b2 = await store.sub.buckets.add({name: 'Vacation'})
   events.length = 0;
 
   t.ok(b1.ranking < b2.ranking, `b1 ${b1.ranking} should be < b2 ${b2.ranking}`)
 
-  await store.buckets.moveBucket(b2.id, 'before', b1.id);
+  await store.sub.buckets.moveBucket(b2.id, 'before', b1.id);
   t.equal(events.length, 1, "Should only notify about the changed bucket")
 
-  b1 = await store.buckets.get(b1.id);
-  b2 = await store.buckets.get(b2.id);
+  b1 = await store.sub.buckets.get(b1.id);
+  b2 = await store.sub.buckets.get(b2.id);
 
   t.same(b2, events[0].obj, "Should emit the bucket changed")
   t.ok(b1.ranking > b2.ranking, "b1 should be after b2 now")
 
-  await store.buckets.moveBucket(b2.id, 'after', b1.id);
+  await store.sub.buckets.moveBucket(b2.id, 'after', b1.id);
 
-  b1 = await store.buckets.get(b1.id);
-  b2 = await store.buckets.get(b2.id);
+  b1 = await store.sub.buckets.get(b1.id);
+  b2 = await store.sub.buckets.get(b2.id);
 
   t.ok(b1.ranking < b2.ranking, `b1 ${b1.ranking} should be < b2 ${b2.ranking}`)
 })
 test('moveBucket 3', async t => {
   let { store, events } = await getStore()
-  let b1 = await store.buckets.add({name: 'Grocery', group_id: 4})
-  let b2 = await store.buckets.add({name: 'Vacation', group_id: 4})
-  let b3 = await store.buckets.add({name: 'Johnson', group_id: 1})
+  let b1 = await store.sub.buckets.add({name: 'Grocery', group_id: 4})
+  let b2 = await store.sub.buckets.add({name: 'Vacation', group_id: 4})
+  let b3 = await store.sub.buckets.add({name: 'Johnson', group_id: 1})
   events.length = 0;
 
-  await store.buckets.moveBucket(b3.id, 'before', b2.id);
+  await store.sub.buckets.moveBucket(b3.id, 'before', b2.id);
   t.equal(events.length, 1, "Should only notify about the changed bucket")
 
-  b1 = await store.buckets.get(b1.id);
-  b2 = await store.buckets.get(b2.id);
-  b3 = await store.buckets.get(b3.id);
+  b1 = await store.sub.buckets.get(b1.id);
+  b2 = await store.sub.buckets.get(b2.id);
+  b3 = await store.sub.buckets.get(b3.id);
 
   t.same(b3, events[0].obj, "Should emit the bucket changed")
   t.ok(b1.ranking < b3.ranking)
@@ -278,26 +278,26 @@ test('moveBucket 3', async t => {
 })
 test('moveGroup', async t => {
   let { store } = await getStore()
-  let g1 = await store.buckets.addGroup({name: 'Group 1'})
-  let g2 = await store.buckets.addGroup({name: 'Group 2'})
-  let g3 = await store.buckets.addGroup({name: 'Group 3'})
+  let g1 = await store.sub.buckets.addGroup({name: 'Group 1'})
+  let g2 = await store.sub.buckets.addGroup({name: 'Group 2'})
+  let g3 = await store.sub.buckets.addGroup({name: 'Group 3'})
 
   t.ok(g1.ranking < g2.ranking)
   t.ok(g2.ranking < g3.ranking)
 
-  await store.buckets.moveGroup(g3.id, 'before', g1.id)
+  await store.sub.buckets.moveGroup(g3.id, 'before', g1.id)
 
-  g1 = await store.buckets.getGroup(g1.id);
-  g2 = await store.buckets.getGroup(g2.id);
-  g3 = await store.buckets.getGroup(g3.id);
+  g1 = await store.sub.buckets.getGroup(g1.id);
+  g2 = await store.sub.buckets.getGroup(g2.id);
+  g3 = await store.sub.buckets.getGroup(g3.id);
 
   t.ok(g3.ranking < g1.ranking)
   
-  await store.buckets.moveGroup(g3.id, 'after', g1.id)
+  await store.sub.buckets.moveGroup(g3.id, 'after', g1.id)
 
-  g1 = await store.buckets.getGroup(g1.id);
-  g2 = await store.buckets.getGroup(g2.id);
-  g3 = await store.buckets.getGroup(g3.id);
+  g1 = await store.sub.buckets.getGroup(g1.id);
+  g2 = await store.sub.buckets.getGroup(g2.id);
+  g3 = await store.sub.buckets.getGroup(g3.id);
 
   t.ok(g1.ranking < g3.ranking)
   t.ok(g3.ranking < g2.ranking)

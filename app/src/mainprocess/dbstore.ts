@@ -8,12 +8,7 @@ import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass 
 import {APP_ROOT} from './globals'
 import { Migration, migrations as jsmigrations } from './jsmigrations'
 
-import { BucketStore } from '../models/bucket'
-import { AccountStore } from '../models/account'
-import { SimpleFINStore } from '../models/simplefin'
-import { ReportStore } from '../models/reports'
-import { BankMacroStore } from '../models/bankmacro'
-import { SettingsStore } from '../models/settings'
+import { SubStore } from '../models/storebase'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
@@ -33,10 +28,10 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
     // Make sure there's a Buckets License bucket
     let license_bucket;
     try {
-      license_bucket = await store.buckets.get(-1);  
+      license_bucket = await store.sub.buckets.get(-1);  
     } catch(e) {
       if (e instanceof NotFound) {
-        license_bucket = await store.buckets.add({
+        license_bucket = await store.sub.buckets.add({
           name: sss('Buckets License'),
         })
         await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
@@ -46,7 +41,7 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
         throw e;
       }
     }
-    let groups = await store.buckets.listGroups();
+    let groups = await store.sub.buckets.listGroups();
     let group_id = null;
     if (groups.length) {
       group_id = groups[0].id;
@@ -66,7 +61,7 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
         ranking = rankBetween('a', first_bucket.ranking);
       }
     }
-    await store.buckets.update(-1, {
+    await store.sub.buckets.update(-1, {
       kind: 'goal-deposit',
       goal: license_bucket.goal <= 100 ? 2900 : license_bucket.goal,
       deposit: license_bucket.deposit <= 100 ? 500 : license_bucket.deposit,
@@ -237,20 +232,10 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
 export class DBStore implements IStore {
   private _db:sqlite.Database;
   readonly undo:UndoTracker;
+  readonly sub:SubStore;
 
-  readonly accounts:AccountStore;
-  readonly buckets:BucketStore;
-  readonly simplefin:SimpleFINStore;
-  readonly reports:ReportStore;
-  readonly bankmacro:BankMacroStore;
-  readonly settings:SettingsStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
-    this.accounts = new AccountStore(this);
-    this.buckets = new BucketStore(this);
-    this.simplefin = new SimpleFINStore(this);
-    this.reports = new ReportStore(this);
-    this.bankmacro = new BankMacroStore(this);
-    this.settings = new SettingsStore(this);
+    this.sub = new SubStore(this);
     this.undo = new UndoTracker(this);
   }
   async open():Promise<DBStore> {

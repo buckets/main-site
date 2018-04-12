@@ -206,7 +206,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
               onClick={ev => {
                 manager
                 .checkpoint(sss('Delete Transactions'))
-                .accounts.deleteTransactions(Array.from(this.state.selected));
+                .sub.accounts.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}
             >
@@ -329,9 +329,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     if (trans) {
       const invalid_cats = this.state.cats.filter(x => x.bucket_id===null).length;
       if (this.state.general_cat) {
-        await store.accounts.categorizeGeneral(trans.id, this.state.general_cat);
+        await store.sub.accounts.categorizeGeneral(trans.id, this.state.general_cat);
       } else if (this.state.cats.length && !invalid_cats) {
-        await store.accounts.categorize(trans.id, this.state.cats);
+        await store.sub.accounts.categorize(trans.id, this.state.cats);
       } else if (this.state.cats.length > 1 && invalid_cats) {
         makeToast(sss('Invalid categorization.  Categories not set.'), {className: 'warning'})
       }
@@ -342,7 +342,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // update
       const store = manager
       .checkpoint(sss('Update Transaction'))
-      const trans = await store.accounts.updateTransaction(this.props.trans.id, {
+      const trans = await store.sub.accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
         memo: this.state.memo,
@@ -359,7 +359,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           const store = manager
           .checkpoint(sss('Create Transaction'))
 
-          const trans = await store.accounts.transact({
+          const trans = await store.sub.accounts.transact({
             account_id: this.state.account_id,
             amount: this.state.amount,
             memo: this.state.memo,
@@ -368,13 +368,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           await this.alsoCategorize(store, trans);
           if (this.state.general_cat === 'transfer' && this.state.transfer_account_id) {
             // Create a second, opposite transaction
-            const xfer_trans = await store.accounts.transact({
+            const xfer_trans = await store.sub.accounts.transact({
               account_id: this.state.transfer_account_id,
               amount: -this.state.amount,
               memo: this.state.memo,
               posted: this.state.posted,
             })
-            await store.accounts.categorizeGeneral(xfer_trans.id, 'transfer');
+            await store.sub.accounts.categorizeGeneral(xfer_trans.id, 'transfer');
           }
           this.setState({
             amount: 0,
@@ -895,17 +895,17 @@ class Categorizer extends React.Component<CategorizerProps, {
     if (this.state.new_general_cat) {
       await manager
         .checkpoint(sss('Categorization'))
-        .accounts.categorizeGeneral(this.props.transaction.id, this.state.new_general_cat)
+        .sub.accounts.categorizeGeneral(this.props.transaction.id, this.state.new_general_cat)
     } else {
       if (this.state.cats.length === 1 && invalid_cats) {
         await manager
           .checkpoint(sss('Remove Categorization'))
-          .accounts.removeCategorization(this.props.transaction.id, true);
+          .sub.accounts.removeCategorization(this.props.transaction.id, true);
         this.setState({cats: [], new_general_cat: ''});
       } else if (!invalid_cats) {
         await manager
           .checkpoint(sss('Categorization'))
-          .accounts.categorize(this.props.transaction.id, this.state.cats)
+          .sub.accounts.categorize(this.props.transaction.id, this.state.cats)
       }
     }
     this.setState({open: false})
