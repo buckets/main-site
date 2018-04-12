@@ -155,10 +155,45 @@ namespace YNAB {
   }
 }
 
-
 export class YNABStore {
-  constructor(store:IStore) {
-
+  constructor(private store:IStore) {
+    this._loadSchema()
+  }
+  private async _loadSchema() {
+    log.info('Creating temporary schema')
+    return this.store.exec(`
+      CREATE TEMPORARY TABLE IF NOT EXISTS ynab_leftover_trans (
+        transaction_id INTEGER PRIMARY KEY,
+        ynab_trans_json TEXT
+      )`);
+  }
+  async addLeftoverTransaction(transaction_id:number, ynab_trans:YNAB.Transaction) {
+    await this.store.query(`
+      INSERT OR REPLACE INTO ynab_leftover_trans
+      (transaction_id, ynab_trans_json)
+      VALUES ($trans_id, $ynab_trans_json)`, {
+      $trans_id: transaction_id,
+      $ynab_trans_json: JSON.stringify(ynab_trans),
+    })
+  }
+  async listLeftoverTransactions() {
+    let ret:{
+      [trans_id:number]: {
+        trans: Account.Transaction;
+        ynab: YNAB.Transaction;
+      }
+    } = {};
+    const transactions = await this.store.listObjects(Account.Transaction, {
+      where: 'id IN (SELECT transaction_id FROM ynab_leftover_trans)',
+    });
+    transactions.forEach(trans => {
+      ret[trans.id] = {trans: trans, ynab: null};
+    })
+    const rows = await this.store.query('SELECT * FROM ynab_leftover_trans', {})
+    rows.forEach(({transaction_id, ynab_trans_json}) => {
+      ret[transaction_id].ynab = JSON.parse(ynab_trans_json);
+    })
+    return Object.values(ret);
   }
 }
 
@@ -342,7 +377,8 @@ export async function importYNAB4(store:IStore, path:string) {
     }  
   }
   
-  function addTransWorthLookingAt(trans:Account.Transaction, ynabTrans:YNAB.Transaction) {
+  async function addTransWorthLookingAt(trans:Account.Transaction, ynabTrans:YNAB.Transaction) {
+    await store.sub.ynab.addLeftoverTransaction(trans.id, ynabTrans);
     ret.transactions_worth_looking_at.push({
       transaction: trans,
       ynabSubTransactions: ynabTrans.subTransactions.map(sub => {
@@ -389,7 +425,7 @@ export async function importYNAB4(store:IStore, path:string) {
           const nullCatCount = ytrans.subTransactions.filter(sub => !cat2bucket[sub.categoryId]).length;
           if (nullCatCount) {
             // It's not completely categorized or it's split between income and another category
-            addTransWorthLookingAt(transaction, ytrans);
+            await addTransWorthLookingAt(transaction, ytrans);
           } else {
             let cats = ytrans.subTransactions.map(sub => {
               let bucket_id = cat2bucket[sub.categoryId].id;
@@ -403,9 +439,9 @@ export async function importYNAB4(store:IStore, path:string) {
               await store.sub.accounts.categorize(transaction.id, cats);  
             } catch(err) {
               if (err instanceof Account.SignMismatch) {
-                addTransWorthLookingAt(transaction, ytrans);
+                await addTransWorthLookingAt(transaction, ytrans);
               } else if (err instanceof Account.SumMismatch) {
-                addTransWorthLookingAt(transaction, ytrans);
+                await addTransWorthLookingAt(transaction, ytrans);
               } else {
                 throw err;
               }
@@ -429,7 +465,6 @@ export async function importYNAB4(store:IStore, path:string) {
       }
     }
   }
-
   return ret;
 }
 
