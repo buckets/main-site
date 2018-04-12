@@ -155,6 +155,11 @@ namespace YNAB {
   }
 }
 
+export interface LeftoverTrans {
+  trans: Account.Transaction;
+  ynab: YNAB.Transaction;
+}
+
 export class YNABStore {
   constructor(private store:IStore) {
     this._loadSchema()
@@ -178,10 +183,7 @@ export class YNABStore {
   }
   async listLeftoverTransactions() {
     let ret:{
-      [trans_id:number]: {
-        trans: Account.Transaction;
-        ynab: YNAB.Transaction;
-      }
+      [trans_id:number]: LeftoverTrans;
     } = {};
     const transactions = await this.store.listObjects(Account.Transaction, {
       where: 'id IN (SELECT transaction_id FROM ynab_leftover_trans)',
