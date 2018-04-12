@@ -19,6 +19,7 @@ import { onlyRunInMain, Room } from '../rpc'
 import { importFile, ImportResult } from '../importing'
 import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
+import { findYNAB4FileAndImport } from '../ynab'
 import { SimpleFINSyncer } from '../models/simplefin'
 import { MacroSyncer } from '../models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
@@ -33,7 +34,7 @@ export interface IOpenWindow {
   focused: boolean,
 }
 
-interface BudgetFileEvents {
+export interface BudgetFileEvents {
   sync_started: {
     onOrAfter: SerializedTimestamp;
     before: SerializedTimestamp;
@@ -78,6 +79,7 @@ export interface IBudgetFile {
    */
   importFile(path:string):Promise<ImportResult>;
   openImportFileDialog();
+  importYNAB4File();
 
   /**
    *  Start a sync
@@ -515,6 +517,10 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
+  importYNAB4File() {
+    findYNAB4FileAndImport(this, this.store);
+  }
+
   static async openFile(filename:string, args:{
     create?:boolean,
     windows?:Array<IOpenWindow>,
@@ -641,6 +647,9 @@ class RendererBudgetFile implements IBudgetFile {
   }
   openImportFileDialog() {
     return this.callInMain('openImportFileDialog');
+  }
+  importYNAB4File() {
+    return this.callInMain('importYNAB4File');
   }
 
   startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {

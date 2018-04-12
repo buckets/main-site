@@ -1261,10 +1261,13 @@ table.props th {
   right: .2rem;
 }
 .progress-bar.complete .bar .percent-label {
-  text-align: center;
+  text-align: end;
   width: 100%;
   position: relative;
-  right: 0;
+  right: .2rem;
+}
+.progress-bar-wrap {
+  display: inline-block;
 }
 .progress-bar-wrap .text-label {
   font-size: 8px;

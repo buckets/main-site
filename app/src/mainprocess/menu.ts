@@ -230,7 +230,7 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            findYNAB4FileAndImport(budgetfile.store);  
+            findYNAB4FileAndImport(budgetfile, budgetfile.store);  
           }
         }
       }
