@@ -445,88 +445,98 @@ export async function importYNAB4(current_file:IBudgetFile, store:IStore, path:s
       });
     }
 
+    let done_count = 0;
+    let total_transactions = 1;
+    function markTransactionDone() {
+      done_count++;
+      if (done_count % 100 === 0) {
+        log.info('completed importing', done_count);
+        current_file.room.broadcast('ynab_import_progress', {
+          id: import_id,
+          percent: done_count/total_transactions,
+        })
+      }
+    }
+
+    async function processTransaction(ytrans:YNAB.Transaction) {
+      let fi_id = ytrans.FITID || ytrans.YNABID || ytrans.entityId;
+      let buckets_account = acc2acc[ytrans.accountId];
+      let memo = ytrans.memo;
+      if (!memo && ytrans.payeeId) {
+        let payee = payees[ytrans.payeeId];
+        memo = payee.name;
+      }
+      let { transaction } = await store.sub.accounts.importTransaction({
+        account_id: buckets_account.id,
+        amount: number2cents(ytrans.amount),
+        memo,
+        posted: parseLocalTime(ytrans.date),
+        fi_id,
+      })
+
+      // Now categorize
+      try {
+        if (ytrans.categoryId === "Category/__ImmediateIncome__") {
+          // Income
+          await store.sub.accounts.categorizeGeneral(transaction.id, 'income');
+        } else if (ytrans.categoryId === "Category/__Split__") {
+          // Split category
+          const nullCatCount = ytrans.subTransactions.filter(sub => !cat2bucket[sub.categoryId]).length;
+          if (nullCatCount) {
+            // It's not completely categorized or it's split between income and another category
+            await addTransWorthLookingAt(transaction, ytrans);
+          } else {
+            let cats = ytrans.subTransactions.map(sub => {
+              let bucket_id = cat2bucket[sub.categoryId].id;
+              let amount = number2cents(sub.amount);
+              return {
+                bucket_id,
+                amount,
+              }
+            })
+            try {
+              await store.sub.accounts.categorize(transaction.id, cats);  
+            } catch(err) {
+              if (err instanceof Account.SignMismatch) {
+                await addTransWorthLookingAt(transaction, ytrans);
+              } else if (err instanceof Account.SumMismatch) {
+                await addTransWorthLookingAt(transaction, ytrans);
+              } else {
+                throw err;
+              }
+            }
+            
+          }
+        } else {
+          // Single category
+          let bucket = cat2bucket[ytrans.categoryId];
+          if (bucket) {
+            await store.sub.accounts.categorize(transaction.id, [{
+              bucket_id: bucket.id,
+              amount: transaction.amount,
+            }])
+          }
+        }
+      } catch(err) {
+        log.error(err);
+        log.info(`ytrans: ${JSON.stringify(ytrans)}`);
+        throw err;
+      } finally {
+        markTransactionDone();
+      }
+    }
     // Transaction -> Transaction
     if (budget.transactions) {
-      const total_transactions = budget.transactions.length;
-      let current_trans_num = 0;
+      total_transactions = budget.transactions.length;
       for (let ytrans of budget.transactions
           .sort((a, b) => {
             return compare(a.date, b.date);
           })) {
-        current_trans_num += 1;
-        if (current_trans_num % 100 === 0) {
-          current_file.room.broadcast('ynab_import_progress', {
-            id: import_id,
-            percent: current_trans_num/total_transactions,
-          })
-        }
         if (ytrans.isTombstone) {
+          markTransactionDone();
           continue;
         }
-        let fi_id = ytrans.FITID || ytrans.YNABID || ytrans.entityId;
-
-        let buckets_account = acc2acc[ytrans.accountId];
-        let memo = ytrans.memo;
-        if (!memo && ytrans.payeeId) {
-          let payee = payees[ytrans.payeeId];
-          memo = payee.name;
-        }
-        let { transaction } = await store.sub.accounts.importTransaction({
-          account_id: buckets_account.id,
-          amount: number2cents(ytrans.amount),
-          memo,
-          posted: parseLocalTime(ytrans.date),
-          fi_id,
-        })
-
-        // Now categorize
-        try {
-          if (ytrans.categoryId === "Category/__ImmediateIncome__") {
-            // Income
-            await store.sub.accounts.categorizeGeneral(transaction.id, 'income');
-          } else if (ytrans.categoryId === "Category/__Split__") {
-            // Split category
-            const nullCatCount = ytrans.subTransactions.filter(sub => !cat2bucket[sub.categoryId]).length;
-            if (nullCatCount) {
-              // It's not completely categorized or it's split between income and another category
-              await addTransWorthLookingAt(transaction, ytrans);
-            } else {
-              let cats = ytrans.subTransactions.map(sub => {
-                let bucket_id = cat2bucket[sub.categoryId].id;
-                let amount = number2cents(sub.amount);
-                return {
-                  bucket_id,
-                  amount,
-                }
-              })
-              try {
-                await store.sub.accounts.categorize(transaction.id, cats);  
-              } catch(err) {
-                if (err instanceof Account.SignMismatch) {
-                  await addTransWorthLookingAt(transaction, ytrans);
-                } else if (err instanceof Account.SumMismatch) {
-                  await addTransWorthLookingAt(transaction, ytrans);
-                } else {
-                  throw err;
-                }
-              }
-              
-            }
-          } else {
-            // Single category
-            let bucket = cat2bucket[ytrans.categoryId];
-            if (bucket) {
-              await store.sub.accounts.categorize(transaction.id, [{
-                bucket_id: bucket.id,
-                amount: transaction.amount,
-              }])
-            }
-          }
-        } catch(err) {
-          log.error(err);
-          log.info(`ytrans: ${JSON.stringify(ytrans)}`);
-          throw err;
-        }
+        await processTransaction(ytrans);
       }
     }
     log.info('done with import');

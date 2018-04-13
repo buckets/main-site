@@ -1648,3 +1648,22 @@ g.hover-labels:hover rect.highlight {
   padding: 0;
   background-color: transparent;
 }
+
+/* Tools list */
+.tools-list {
+  padding: 1rem;
+}
+.tools-list a {
+  border: 1px solid var(--lighter-grey);
+  background: var(--lightest-grey);
+  padding: 1rem;
+  display: block;
+  margin: 1rem;
+  border-radius: 3px;
+  color: var(--darker-darkblue);
+}
+.tools-list a:hover {
+  text-decoration: none;
+  border-color: var(--blue);
+  background-color: var(--faint-blue);
+}

@@ -7,7 +7,7 @@ import { ProgressBar } from '../../ui'
 
 import { TransactionList } from '../transactions'
 
-import { PrefixLogger } from '../../logging'
+// import { PrefixLogger } from '../../logging'
 // const log = new PrefixLogger('ynabimport');
 
 interface YNABImportPageProps {
@@ -26,7 +26,6 @@ export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImp
     }
   }
   refreshLeftovers() {
-    console.log('refreshing leftovers');
     manager.nocheckpoint.sub.ynab.listLeftoverTransactions()
     .then(leftovers => {
       this.setState({leftovers: leftovers});
@@ -64,7 +63,7 @@ export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImp
       </div>
     }
     return <div className="padded full-width">
-      <h1>{sss('YNAB4 Import')}</h1>
+      <h1><span className="fa fa-upload"/> {sss('Import from YNAB4')}</h1>
       <button onClick={() => {
         current_file.importYNAB4File();
       }}>

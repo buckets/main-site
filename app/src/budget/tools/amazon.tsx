@@ -224,7 +224,7 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
         </div>
         <div className="panes">
           <div className="padded">
-            <h2>{sss('Amazon Reconciliation')}</h2>
+            <h1>{sss('Amazon.com Reconciliation')}</h1>
 
             {orders_list}
 

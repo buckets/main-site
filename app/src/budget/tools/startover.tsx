@@ -109,9 +109,9 @@ export class StartOverPage extends React.Component<StartOverPageProps, StartOver
   }
   render() {
     return <div className="padded full-width">
-      <h2>{sss('Start Over')}</h2>
+      <h1><span className="fa fa-undo"/> {sss('Start Over')}</h1>
       <p>
-        {sss("This tool will delete data so that to make it easy to start over with your budget.")}
+        {sss("This tool will delete data to make it easy to start over with your budget.")}
       </p>
       <div>
         <label>{this.checkBoxFor('keep_buckets')} {sss('Keep buckets')}</label>
