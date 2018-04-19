@@ -596,11 +596,18 @@ class BucketRow extends React.Component<BucketRowProps, {
     })
 
     let rainfall_indicator;
-    if (computed.deposit) {
-      let percent = flow.rain_in/computed.deposit*100;
+    const monthly_want:number = computed.deposit || 0;
+    let remaining_want:number;
+    if (monthly_want) {
+      remaining_want = monthly_want - flow.rain_in;
+      // if (remaining_want < 0) {
+      //   remaining_want = 0;
+      // }
+      let percent = flow.rain_in/monthly_want*100;
       rainfall_indicator = <Help
         icon={<ProgressBubble height="1rem" percent={percent} />}>
-        {Math.floor(percent)}%
+        <Money value={flow.rain_in} noFaintCents />/<Money value={monthly_want} noFaintCents/>
+        ({Math.floor(percent)}%)
       </Help>
     }
 
@@ -674,8 +681,13 @@ class BucketRow extends React.Component<BucketRowProps, {
           })}
         />
       </td>
-      <td x-name="want" className="right">
-        <Money value={computed.deposit} hidezero />
+      <td x-name="want" className="right clickable"
+        onClick={ev => {
+          if (remaining_want) {
+            onPendingChanged({[bucket.id]: remaining_want})
+          }
+        }}>
+        <Money value={monthly_want} hidezero />
         {rainfall_indicator}
       </td>
       <td x-name="in" className="right">
