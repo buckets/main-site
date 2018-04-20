@@ -5,6 +5,7 @@ export type NumberFormat =
   | ''
   | 'comma-period'
   | 'period-comma'
+  | 'space-comma'
 
 export type NumberFormatDef = {
   [K in NumberFormat]?: INumberFormat
@@ -41,4 +42,10 @@ export const NUMBER_FORMATS:NumberFormatDef = {
     decimal: ',',
     decimal_regex: /,/g,
   },
+  'space-comma': {
+    group: ' ',
+    group_regex: /[ ]/g,
+    decimal: ',',
+    decimal_regex: /,/g,
+  }
 }
