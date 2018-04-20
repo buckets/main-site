@@ -742,7 +742,7 @@ export async function start(args:{
   })
   director.events.file_downloaded.on(async ({localpath, filename, mimetype}) => {
     log.info('File downloaded', filename, localpath, mimetype);
-    makeToast(sss('notify-downloaded-file', filename => `Downloaded file MATT: ${filename}`)(filename));
+    makeToast(sss('notify-downloaded-file', filename => `Downloaded file: ${filename}`)(filename));
 
     // process downloaded file
     let imported;

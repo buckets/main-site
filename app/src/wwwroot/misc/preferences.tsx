@@ -25,7 +25,7 @@ class PreferencesApp extends React.Component<{
     let { pstate } = this.props;
     return <div className="pane-body">
       <div>
-        {sss('Language:')} <select
+        {sss('Language:'/* Label for application language preference */)} <select
           value={pstate.locale}
           onChange={(ev) => {
             let new_locale = ev.target.value;
@@ -35,7 +35,7 @@ class PreferencesApp extends React.Component<{
               });
             })
           }}>
-          <option value="">{sss('System Default')}</option>
+          <option value="">{sss('System Default'/* Option for Buckets language preference */)}</option>
           <option value="en">English</option>
           <option value="es">español</option>
           <option value="fr">Français</option>
@@ -43,7 +43,7 @@ class PreferencesApp extends React.Component<{
         </select>
       </div>
       <div>
-        {sss('Number format:')} <select
+        {sss('Number format:'/* Label for application number formatting preference */)} <select
           value={pstate.number_format}
           onChange={(ev) => {
             let new_format = ev.target.value;
@@ -60,7 +60,7 @@ class PreferencesApp extends React.Component<{
         </select>
       </div>
       <div>
-        {sss('Animation:')} <input
+        {sss('Animation:'/* Label for application preference enabling/disabling animations */)} <input
           type="checkbox"
           checked={pstate.animation}
           onChange={ev => {

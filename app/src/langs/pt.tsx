@@ -133,6 +133,7 @@ const messages:IMessages = {
     h: "+LNAOPSLW2rpFCrT+U1suhdnoYyZa1k8ALddRlddDlI=",
   },
   "Animation:": {
+    /* Label for application preference enabling/disabling animations */
     val: "Animação:",
     translated: true,
     h: "11MkZLAqpQ4eVU9BzD6XMqSxlyIqQU+lodDdxwNkAag=",
@@ -338,7 +339,7 @@ const messages:IMessages = {
     h: "7HdV8X8++teDNW33urE2eccDw3VLdSpvII89zC/sfu4=",
   },
   "Closed": {
-    /*! Label for list of closed accounts */
+    /* ! Label for list of closed accounts */
     val: "Fechado",
     translated: true,
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
@@ -879,6 +880,7 @@ const messages:IMessages = {
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
   },
   "Language:": {
+    /* Label for application language preference */
     val: "Idioma:",
     translated: true,
     h: "Xcdts2Yh+LAPXO+KLTuFxMiNsv+xxIJPLlbCDbLrink=",
@@ -1084,6 +1086,7 @@ const messages:IMessages = {
     h: "NF10b/Nmjj8holFGK7KIiaJhSb8bsL9Zt/Fa8fFy4gk=",
   },
   "Number format:": {
+    /* Label for application number formatting preference */
     val: "Number format:",
     translated: false,
     h: "uTy4YNIFDQEyLVFU5kvDdjAthW+Y6WHSQx49x+suPQI=",
@@ -1254,7 +1257,7 @@ const messages:IMessages = {
     h: "S6dFwRYAFyRMUh4i6My2aNacGwMh8taa7neVTx9aiAM=",
   },
   "Recently used": {
-    /*! Label for list of recently used buckets files */
+    /* Label for list of recently used buckets files */
     val: "Utilizado Recentemente",
     translated: true,
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
@@ -1510,6 +1513,7 @@ const messages:IMessages = {
     h: "kuwg7vpvp082IqBtRakekOVu7bqB4PYxhnFVsoBDt/g=",
   },
   "System Default": {
+    /* Option for Buckets language preference */
     val: "Padrão do Sistema",
     translated: true,
     h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
@@ -1865,10 +1869,10 @@ const messages:IMessages = {
     h: "hRo1uzcSNStVll7ef2xHOB6PqFh+q7Sg/VHiGcK4M8M=",
   },
   "accounts.balance_mismatch_long_msg": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: () => {
               return (<span>
                 The "Balance" above is this account's balance as of the latest entered transaction.
@@ -2114,14 +2118,9 @@ Você gostaria de comprar uma licença agora?`,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
   },
   "notify-downloaded-file": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
-    newval: filename => `Downloaded file MATT: ${filename}`,
     val: filename => `Arquivo baixado: ${filename}`,
     translated: false,
-    h: "T+3yQ2k0eDrQ5AIWFqXvBJXE2JT1M7y1mkgz0PcN+0o=",
+    h: "HwxJ2TVx57Qef6bXYySekL/eoBzvIEFUqBxQdxgcyCs=",
   },
   "noun.transfer": {
     val: "Transferência",

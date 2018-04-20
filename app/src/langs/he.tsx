@@ -129,6 +129,7 @@ const messages:IMessages = {
     h: "+LNAOPSLW2rpFCrT+U1suhdnoYyZa1k8ALddRlddDlI=",
   },
   "Animation:": {
+    /* Label for application preference enabling/disabling animations */
     val: "Animation:",
     translated: false,
     h: "11MkZLAqpQ4eVU9BzD6XMqSxlyIqQU+lodDdxwNkAag=",
@@ -334,7 +335,7 @@ const messages:IMessages = {
     h: "7HdV8X8++teDNW33urE2eccDw3VLdSpvII89zC/sfu4=",
   },
   "Closed": {
-    /*! Label for list of closed accounts */
+    /* ! Label for list of closed accounts */
     val: "Closed",
     translated: false,
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
@@ -875,6 +876,7 @@ const messages:IMessages = {
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
   },
   "Language:": {
+    /* Label for application language preference */
     val: "Language:",
     translated: false,
     h: "Xcdts2Yh+LAPXO+KLTuFxMiNsv+xxIJPLlbCDbLrink=",
@@ -1080,6 +1082,7 @@ const messages:IMessages = {
     h: "NF10b/Nmjj8holFGK7KIiaJhSb8bsL9Zt/Fa8fFy4gk=",
   },
   "Number format:": {
+    /* Label for application number formatting preference */
     val: "Number format:",
     translated: false,
     h: "uTy4YNIFDQEyLVFU5kvDdjAthW+Y6WHSQx49x+suPQI=",
@@ -1250,7 +1253,7 @@ const messages:IMessages = {
     h: "S6dFwRYAFyRMUh4i6My2aNacGwMh8taa7neVTx9aiAM=",
   },
   "Recently used": {
-    /*! Label for list of recently used buckets files */
+    /* Label for list of recently used buckets files */
     val: "Recently used",
     translated: false,
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
@@ -1506,6 +1509,7 @@ const messages:IMessages = {
     h: "kuwg7vpvp082IqBtRakekOVu7bqB4PYxhnFVsoBDt/g=",
   },
   "System Default": {
+    /* Option for Buckets language preference */
     val: "System Default",
     translated: false,
     h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
@@ -1861,10 +1865,10 @@ const messages:IMessages = {
     h: "hRo1uzcSNStVll7ef2xHOB6PqFh+q7Sg/VHiGcK4M8M=",
   },
   "accounts.balance_mismatch_long_msg": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: () => {
               return (<span>
                 The "Balance" above is this account's balance as of the latest entered transaction.
@@ -1883,10 +1887,10 @@ const messages:IMessages = {
     h: "BdsYjG234PVfRR8ijm7NIKMEBjmebYIMCspF35KEHqA=",
   },
   "accounts.balance_mismatch_msg": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: "The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.",
     val: "The most recent synced balance does not match the balance computed from transactions.  Click more for more information.",
     translated: false,
@@ -2093,10 +2097,10 @@ const messages:IMessages = {
     h: "uiqCMjSdL1TgDZHPNYXLnfN/yZq59+kDR/wKZSAP0hU=",
   },
   "nag-message": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: () => `This is an unregistered trial version, and although the trial is untimed, a license must be purchased for continued use.
 
 Would you like to purchase a license now?`,
@@ -2125,14 +2129,14 @@ Would you like to purchase a license now?`,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
   },
   "notify-downloaded-file": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
-    newval: filename => `Downloaded file MATT: ${filename}`,
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
+    newval: filename => `Downloaded file: ${filename}`,
     val: filename => `Downloaded file: ${filename}`,
     translated: false,
-    h: "T+3yQ2k0eDrQ5AIWFqXvBJXE2JT1M7y1mkgz0PcN+0o=",
+    h: "HwxJ2TVx57Qef6bXYySekL/eoBzvIEFUqBxQdxgcyCs=",
   },
   "noun.transfer": {
     val: "Transfer",
@@ -2155,10 +2159,10 @@ Would you like to purchase a license now?`,
     h: "5jKKS3xwogwcB2YptY5sW2/MQ/ikfMbR99l8ViHxmAA=",
   },
   "rain.help.neg": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: (abs_amount:JSX.Element) => {
                                       return <span>
                                       You have put {abs_amount} too much money into buckets.  If all transactions have been categorized this month, remove {abs_amount} from buckets of your choosing.
@@ -2173,10 +2177,10 @@ Would you like to purchase a license now?`,
     h: "tqXmJxZXqyA0mN/8ugZkpCyspyO7XlPnGlEYGWgQ7jk=",
   },
   "rain.help.pos": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: (abs_amount:JSX.Element) => {
                                       return <span>
                                       You have {abs_amount} left to put into buckets.
@@ -2191,10 +2195,10 @@ Would you like to purchase a license now?`,
     h: "boezbSGkVm3dnfFvodJOAeCgAEMIQN9L+8TwEHLpU/o=",
   },
   "simplefin-connect-intro": {
-    /*! TRANSLATION CHANGED */
-    /*! 1. Translate "newval: ..." */
-    /*! 2. Delete the old "val: ..." */
-    /*! 3. Rename "newval" to "val" */
+    /* TRANSLATION CHANGED */
+    /* 1. Translate "newval: ..." */
+    /* 2. Delete the old "val: ..." */
+    /* 3. Rename "newval" to "val" */
     newval: "To connect, do the following:",
     val: "Connecting to your bank account will make it easy to pull transaction history from your bank into Buckets.  To connect, do the following:",
     translated: false,

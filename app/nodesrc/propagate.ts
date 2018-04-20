@@ -147,7 +147,7 @@ function mergeMessages(oldstuff:{[k:string]:IMessage}, newstuff:{[k:string]:IMes
       console.warn('ORIGINAL CHANGED', key);
     }
     log.info('item.comments', item.comments);
-    const comments = item.comments.length ? '\n    '+item.comments.map(c => `/*! ${c} */`).join('\n    ') : '';
+    const comments = item.comments.length ? '\n    '+item.comments.map(c => `/* ${c} */`).join('\n    ') : '';
     log.info('comment string', comments);
     lines.push(`  ${JSON.stringify(key)}: {${comments}${item.newval ? `\n    newval: ${item.newval},` : ''}
     val: ${item.val},

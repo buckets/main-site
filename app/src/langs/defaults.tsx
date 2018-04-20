@@ -29,7 +29,7 @@ export const DEFAULTS:IMessages = {
     val: "(Restart Buckets for the change to take effect.)",
     translated: false,
     h: "IYHFL+R57iN4UW8AS35balApUouS8GdkRIQ3uEa6wT8=",
-    // preferences.tsx:73
+    // preferences.tsx:75
   },
   "(optional)": {
     val: "(optional)",
@@ -159,10 +159,11 @@ export const DEFAULTS:IMessages = {
     // budget.tsx:171
   },
   "Animation:": {
+    /* Label for application preference enabling/disabling animations */
     val: "Animation:",
     translated: false,
     h: "11MkZLAqpQ4eVU9BzD6XMqSxlyIqQU+lodDdxwNkAag=",
-    // preferences.tsx:60
+    // preferences.tsx:62
   },
   "Any other monthly bills you have?": {
     val: "Any other monthly bills you have?",
@@ -419,7 +420,7 @@ export const DEFAULTS:IMessages = {
     // accounts.tsx:181
   },
   "Closed": {
-    /*! Label for list of closed accounts */
+    /* ! Label for list of closed accounts */
     val: "Closed",
     translated: false,
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
@@ -1079,9 +1080,10 @@ export const DEFAULTS:IMessages = {
     val: "Language default",
     translated: false,
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
-    // preferences.tsx:54
+    // preferences.tsx:55
   },
   "Language:": {
+    /* Label for application language preference */
     val: "Language:",
     translated: false,
     h: "Xcdts2Yh+LAPXO+KLTuFxMiNsv+xxIJPLlbCDbLrink=",
@@ -1344,10 +1346,11 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:196
   },
   "Number format:": {
+    /* Label for application number formatting preference */
     val: "Number format:",
     translated: false,
     h: "uTy4YNIFDQEyLVFU5kvDdjAthW+Y6WHSQx49x+suPQI=",
-    // preferences.tsx:44
+    // preferences.tsx:45
   },
   "OK": {
     val: "OK",
@@ -1558,7 +1561,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1130
   },
   "Recently used": {
-    /*! Label for list of recently used buckets files */
+    /* Label for list of recently used buckets files */
     val: "Recently used",
     translated: false,
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
@@ -1871,6 +1874,7 @@ export const DEFAULTS:IMessages = {
     // importpage.tsx:30
   },
   "System Default": {
+    /* Option for Buckets language preference */
     val: "System Default",
     translated: false,
     h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
@@ -2590,9 +2594,9 @@ Would you like to purchase a license now?`,
     // transactions.tsx:948
   },
   "notify-downloaded-file": {
-    val: filename => `Downloaded file MATT: ${filename}`,
+    val: filename => `Downloaded file: ${filename}`,
     translated: false,
-    h: "T+3yQ2k0eDrQ5AIWFqXvBJXE2JT1M7y1mkgz0PcN+0o=",
+    h: "HwxJ2TVx57Qef6bXYySekL/eoBzvIEFUqBxQdxgcyCs=",
     // record.tsx:744
   },
   "noun.transfer": {

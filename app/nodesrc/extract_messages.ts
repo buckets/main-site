@@ -81,14 +81,14 @@ function mergeMessages(pot:IMessageSpec, entry:IMessage) {
   }
 }
 
-const comment_pattern = /\/\*!.*?\*\//g
+const comment_pattern = /\/\*.*?\*\//g
 export function extractTranslatorComments(x:string):string[] {
   let m;
   let ret = [];
   do {
     m = comment_pattern.exec(x);
     if (m) {
-      const comment = m[0].slice('/*!'.length, -'*/'.length).trim()
+      const comment = m[0].slice('/*'.length, -'*/'.length).trim()
       if (comment) {
         ret.push(comment);  
       }
@@ -255,7 +255,7 @@ function displayDefaults(msgs:IMessageSpec) {
   keys.forEach(key => {
     const msg:IMessage = msgs[key];
     try {
-      const comments = msg.comments !== undefined ? '\n    ' + msg.comments.map(c => `/*! ${c} */`).join('\n    ') : '';
+      const comments = msg.comments !== undefined ? '\n    ' + msg.comments.map(c => `/* ${c} */`).join('\n    ') : '';
       lines.push(`  ${JSON.stringify(msg.key)}: {${comments}
     val: ${msg.defaultValue},
     translated: false,
