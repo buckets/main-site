@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, lstatSync } from 'fs'
 import { Console } from 'console'
 import * as Path from 'path'
 import * as ts from "typescript"
-import * as _ from 'lodash'
+import * as fs from 'fs'
 import * as cheerio from 'cheerio'
 import * as crypto from 'crypto'
 
@@ -10,10 +10,10 @@ let ERRORS = [];
 const log = new Console(process.stderr, process.stderr);
 log.info('starting');
 
-// XXX How do I auto-detect these?
-export const IMPORTS = `
+export const DEFAULTS_IMPORTS = `
 import * as React from 'react'
 import * as moment from 'moment'
+import { IMessages } from './base'
 `
 
 function hash(x:string):string {
@@ -60,7 +60,7 @@ interface IMessageSpec {
 }
 
 function formatSource(source:ISource):string {
-  return `${source.filename} line ${source.lineno}`
+  return `${Path.basename(source.filename)}:${source.lineno}`
 }
 
 function mergeMessages(pot:IMessageSpec, entry:IMessage) {
@@ -231,12 +231,14 @@ function displayInterface(msgs:IMessageSpec) {
   lines.push(`interface IMsg<T> {
   val: T;
   translated: boolean;
-  src: string[];
   h: string;
   newval?: T;
 }`);
   lines.push('export interface IMessages {');
-  _.each(msgs, (msg:IMessage) => {
+  const keys = Object.keys(msgs);
+  keys.sort()
+  keys.forEach(key => {
+    const msg:IMessage = msgs[key];
     lines.push(`  ${JSON.stringify(msg.key)}: IMsg<${msg.interfaceValue}>;`);
   })
   lines.push('}');
@@ -246,14 +248,17 @@ function displayInterface(msgs:IMessageSpec) {
 function displayDefaults(msgs:IMessageSpec) {
   let lines = [];
   lines.push('export const DEFAULTS:IMessages = {');
-  _.each(msgs, (msg:IMessage) => {
+  const keys = Object.keys(msgs);
+  keys.sort()
+  keys.forEach(key => {
+    const msg:IMessage = msgs[key];
     try {
       const comments = msg.comments !== undefined ? '\n    ' + msg.comments.map(c => `/*! ${c} */`).join('\n    ') : '';
       lines.push(`  ${JSON.stringify(msg.key)}: {${comments}
     val: ${msg.defaultValue},
     translated: false,
-    src: ${JSON.stringify(msg.sources.map(formatSource))},
     h: ${JSON.stringify(hash(msg.defaultValue))},
+${msg.sources.map(x => '    // '+formatSource(x)).join('\n')}
   },`);
     } catch(err) {
       console.error("Error processing msg", msg);
@@ -265,7 +270,7 @@ function displayDefaults(msgs:IMessageSpec) {
   return lines.join('\n');
 }
 
-export function extract(directory:string) {
+export function extract(directory:string, base_filename:string, defaults_filename:string) {
   let MSGS:IMessageSpec = {};
   walk(directory).forEach(filename => {
     if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
@@ -275,10 +280,17 @@ export function extract(directory:string) {
       extractMessagesFromHTML(MSGS, filename);
     }  
   })
-  console.log('// Auto-generated file');
-  console.log(IMPORTS);
-  console.log(displayInterface(MSGS));
-  console.log(displayDefaults(MSGS));
+  fs.writeFileSync(base_filename, [
+    '// Auto-generated file',
+    displayInterface(MSGS),
+    '',
+  ].join('\n\n'))
+  fs.writeFileSync(defaults_filename, [
+    '// Auto-generated file',
+    DEFAULTS_IMPORTS,
+    displayDefaults(MSGS),
+    '',
+  ].join('\n\n'))
 
   if (ERRORS.length) {
     ERRORS.forEach(err => {

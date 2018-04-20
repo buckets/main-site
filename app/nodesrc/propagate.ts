@@ -53,7 +53,6 @@ function getSrcValue(thing, src:ts.SourceFile):string {
 interface IMessage {
   val: any;
   translated: boolean;
-  src: string[];
   comments: string[];
   orig: any;
   h: string;
@@ -121,7 +120,6 @@ function mergeMessages(oldstuff:{[k:string]:IMessage}, newstuff:{[k:string]:IMes
     let item = {
       val: null,
       translated: false,
-      src: [],
       h: null,
       newval: null,
       comments: [],
@@ -129,26 +127,32 @@ function mergeMessages(oldstuff:{[k:string]:IMessage}, newstuff:{[k:string]:IMes
     if (olditem !== undefined) {
       // existing translation
       item = olditem as any;
+      item.comments = newitem.comments;
       if (olditem.h !== newitem.h) {
         // it changed
-        item['newval'] = newitem.val;
-        item['h'] = newitem.h;
-        console.warn('ORIGINAL CHANGED', key);
+        item.newval = newitem.val;
+        item.h = newitem.h;
       }
-      item['comments'] = newitem.comments;
     } else {
       // new key to be translated
       item = newitem as any;
       console.warn('NEW', key);
     }
+    if (item.newval) {
+      item.translated = false;
+      item.comments.push('TRANSLATION CHANGED')
+      item.comments.push('1. Translate "newval: ..."')
+      item.comments.push('2. Delete the old "val: ..."')
+      item.comments.push('3. Rename "newval" to "val"');
+      console.warn('ORIGINAL CHANGED', key);
+    }
     log.info('item.comments', item.comments);
     const comments = item.comments.length ? '\n    '+item.comments.map(c => `/*! ${c} */`).join('\n    ') : '';
     log.info('comment string', comments);
-    lines.push(`  ${JSON.stringify(key)}: {${comments}
+    lines.push(`  ${JSON.stringify(key)}: {${comments}${item.newval ? `\n    newval: ${item.newval},` : ''}
     val: ${item.val},
     translated: ${item.translated},
-    src: ${item.src},
-    h: ${item.h},${item.newval ? `\n    newval: ${item.newval},` : ''}
+    h: ${item.h},
   },`);
   })
   return lines.join('\n');

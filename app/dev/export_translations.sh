@@ -7,7 +7,7 @@ fi
 
 set -e
 
-rsync -vrut src/langs/*.tsx "${DST}/langs"
+rsync -vrut --exclude=defaults.tsx src/langs/*.tsx "${DST}/langs"
 
 pushd "${DST}"
 git commit -a -m "Update app strings"
