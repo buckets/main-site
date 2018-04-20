@@ -38,6 +38,7 @@ class PreferencesApp extends React.Component<{
           <option value="">{sss('System Default')}</option>
           <option value="en">English</option>
           <option value="es">español</option>
+          <option value="fr">Français</option>
           <option value="pt">Português</option>
         </select>
       </div>
@@ -55,6 +56,7 @@ class PreferencesApp extends React.Component<{
           <option value="">{sss('Language default')}</option>
           <option value="comma-period">1,500.22</option>
           <option value="period-comma">1.500,22</option>
+          <option value="space-comma">1 500,22</option>
         </select>
       </div>
       <div>
