@@ -198,6 +198,7 @@ function extractMessagesFromHTML(pot:IMessageSpec, filename:string) {
   tree('[data-translate]').each((i, elem) => {
     let e = cheerio(elem);
     let key = e.attr('data-translate');
+    let comment = e.attr('data-comment');
     let val = e.html();
     if (!key) {
       key = val;
@@ -207,6 +208,7 @@ function extractMessagesFromHTML(pot:IMessageSpec, filename:string) {
       defaultValue: JSON.stringify(val),
       interfaceValue: 'string',
       sources: [{filename, lineno:0}],
+      comments: comment ? [comment] : undefined,
     });
   })
 } 

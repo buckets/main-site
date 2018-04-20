@@ -1250,6 +1250,7 @@ const messages:IMessages = {
     h: "S6dFwRYAFyRMUh4i6My2aNacGwMh8taa7neVTx9aiAM=",
   },
   "Recently used": {
+    /*! Label for list of recently used buckets files */
     val: "Recently used",
     translated: false,
     h: "tJ5cBjszrV/JztG5V1FUrgo0bfVgXfK5KB495TvGsYs=",
