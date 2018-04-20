@@ -1,6 +1,10 @@
 import { readFileSync, writeFileSync } from 'fs'
+import { Console } from 'console'
+import { extractTranslatorComments } from './extract_messages'
 import * as ts from "typescript"
 import * as _ from 'lodash'
+
+const log = new Console(process.stderr, process.stderr);
 
 export async function copyEm(fromfile, tofile) {
   let fromdata = openFile(fromfile);
@@ -46,11 +50,23 @@ function getSrcValue(thing, src:ts.SourceFile):string {
   }
 }
 
+interface IMessage {
+  val: any;
+  translated: boolean;
+  src: string[];
+  comments: string[];
+  orig: any;
+  h: string;
+  newval?: any;
+}
+
 function readMessages(src:ts.SourceFile, varname:string) {
   let pre_string = null;
   let post_string = null;
   let full_text = src.getFullText();
-  let items = {};
+  let items:{
+    [k:string]: IMessage;
+  } = {};
   function processNode(node: ts.Node) {
     switch (node.kind) {
       case ts.SyntaxKind.VariableDeclaration: {
@@ -58,13 +74,21 @@ function readMessages(src:ts.SourceFile, varname:string) {
         if (n.name.escapedText === varname) {
           pre_string = full_text.substr(0, node.pos);
           post_string = full_text.substr(node.end);
+          
           n.initializer.properties.forEach(prop => {
+            const text = full_text.slice(prop.pos, prop.end);
+            const comments = extractTranslatorComments(text)
             let init = prop.initializer;
             let item = {
               val: null,
               translated: null,
               src: [],
               orig: null,
+              h: null,
+              comments: comments,
+            }
+            if (comments.length) {
+              log.info('comments', comments)
             }
             init.properties.forEach(subprop => {
               let key = subprop.name.escapedText;
@@ -87,9 +111,12 @@ function readMessages(src:ts.SourceFile, varname:string) {
   }
 }
 
-function mergeMessages(oldstuff:object, newstuff:object):string {
+function mergeMessages(oldstuff:{[k:string]:IMessage}, newstuff:{[k:string]:IMessage}):string {
   let lines = [];
   _.each(newstuff, (newitem, key) => {
+    if (newitem.comments.length) {
+      log.info('newitem.comments', newitem.comments);
+    }
     let olditem = oldstuff[key];
     let item = {
       val: null,
@@ -97,22 +124,27 @@ function mergeMessages(oldstuff:object, newstuff:object):string {
       src: [],
       h: null,
       newval: null,
+      comments: [],
     };
     if (olditem !== undefined) {
       // existing translation
-      item = olditem;
+      item = olditem as any;
       if (olditem.h !== newitem.h) {
         // it changed
         item['newval'] = newitem.val;
         item['h'] = newitem.h;
         console.warn('ORIGINAL CHANGED', key);
       }
+      item['comments'] = newitem.comments;
     } else {
       // new key to be translated
-      item = newitem;
+      item = newitem as any;
       console.warn('NEW', key);
     }
-    lines.push(`  ${JSON.stringify(key)}: {
+    log.info('item.comments', item.comments);
+    const comments = item.comments.length ? '\n    '+item.comments.map(c => `/*! ${c} */`).join('\n    ') : '';
+    log.info('comment string', comments);
+    lines.push(`  ${JSON.stringify(key)}: {${comments}
     val: ${item.val},
     translated: ${item.translated},
     src: ${item.src},

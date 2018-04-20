@@ -162,7 +162,7 @@ class Navbar extends React.Component<{
         <div>
           <Link relative to="/accounts" exactMatchClass="selected"><span>{sss('Accounts')}</span></Link>
           <Route path="/accounts">
-            <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed')}</Link>
+            <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed'/*! Label for list of closed accounts */)}</Link>
           </Route>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Transactions')}</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets')}</span>{buckets_badge}</Link>

@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync, lstatSync } from 'fs'
+import { Console } from 'console'
 import * as Path from 'path'
 import * as ts from "typescript"
 import * as _ from 'lodash'
@@ -6,6 +7,8 @@ import * as cheerio from 'cheerio'
 import * as crypto from 'crypto'
 
 let ERRORS = [];
+const log = new Console(process.stderr, process.stderr);
+log.info('starting');
 
 // XXX How do I auto-detect these?
 export const IMPORTS = `
@@ -35,6 +38,7 @@ function kindToTypeScriptIdentifier(x:ts.SyntaxKind):string {
 
 
 function openFile(relpath:string):ts.SourceFile {
+  log.info('Opening file', relpath);
   return ts.createSourceFile(relpath,
     readFileSync(relpath).toString(),
     ts.ScriptTarget.ES2016);
@@ -46,6 +50,7 @@ interface ISource {
 }
 interface IMessage {
   key: string;
+  comments?: string[];
   defaultValue: string;
   interfaceValue: string;
   sources: ISource[];
@@ -65,6 +70,9 @@ function mergeMessages(pot:IMessageSpec, entry:IMessage) {
     if (existing.defaultValue === entry.defaultValue
         && existing.interfaceValue === entry.interfaceValue) {
       existing.sources = existing.sources.concat(entry.sources);
+      if (existing.comments || entry.comments) {
+        existing.comments = [...existing.comments || [], ...entry.comments || []];
+      }
     } else {
       ERRORS.push(`Key '${entry.key}' used incompatibly in ${existing.sources.map(formatSource).join(', ')} and ${formatSource(entry.sources[0])}`);
     }
@@ -73,7 +81,24 @@ function mergeMessages(pot:IMessageSpec, entry:IMessage) {
   }
 }
 
+const comment_pattern = /\/\*!.*?\*\//g
+export function extractTranslatorComments(x:string):string[] {
+  let m;
+  let ret = [];
+  do {
+    m = comment_pattern.exec(x);
+    if (m) {
+      const comment = m[0].slice('/*!'.length, -'*/'.length).trim()
+      if (comment) {
+        ret.push(comment);  
+      }
+    }
+  } while (m);
+  return ret;
+}
+
 function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
+  const full_text = src.getFullText();
   function processNode(node: ts.Node) {
     let newitem:IMessage = null;
     switch (node.kind) {
@@ -83,7 +108,10 @@ function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
         let filename = src.fileName;
         if (n.expression && n.expression.escapedText === 'sss') {
           let args = n.arguments;
+          const text = full_text.slice(n.pos, n.end);
+          const comments = extractTranslatorComments(text);
           if (args.length == 1) {
+            // Simple translation where key is the string being translated
             let key = args[0].text;
             newitem = {
               key: key,
@@ -147,6 +175,9 @@ function extractMessagesFromTS(pot:IMessageSpec, src:ts.SourceFile) {
                 }
               }
             }
+          }
+          if (comments.length) {
+            newitem.comments = comments;
           }
         } 
       }
@@ -217,7 +248,8 @@ function displayDefaults(msgs:IMessageSpec) {
   lines.push('export const DEFAULTS:IMessages = {');
   _.each(msgs, (msg:IMessage) => {
     try {
-      lines.push(`  ${JSON.stringify(msg.key)}: {
+      const comments = msg.comments !== undefined ? '\n    ' + msg.comments.map(c => `/*! ${c} */`).join('\n    ') : '';
+      lines.push(`  ${JSON.stringify(msg.key)}: {${comments}
     val: ${msg.defaultValue},
     translated: false,
     src: ${JSON.stringify(msg.sources.map(formatSource))},

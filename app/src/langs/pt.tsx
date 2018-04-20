@@ -129,7 +129,14 @@ const messages:IMessages = {
           </span>)},
     translated: true,
     src: ["src/budget/accounts.tsx line 162"],
-    h: "wR5L88lhIXbxAVDXEZbN1lwbnZjYUBkAifA2KtAg8dM=",
+    h: "BdsYjG234PVfRR8ijm7NIKMEBjmebYIMCspF35KEHqA=",
+    newval: () => {
+              return (<span>
+                The "Balance" above is this account's balance as of the latest entered transaction.
+                The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
+                Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
+                So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
+            </span>)},
   },
   "Update Account Balance": {
     val: "Atualizar Saldo da Conta",
@@ -137,13 +144,61 @@ const messages:IMessages = {
     src: ["src/budget/accounts.tsx line 206"],
     h: "iwKjdHzqHPwoupXiUwrVL1tX4QfO//taXOPXFVtWRVE=",
   },
-  "balance-as-of": {
-    val: (date:JSX.Element) => {
-            return <span>assim como {date}</span>
-          },
-    translated: true,
-    src: ["src/budget/accounts.tsx line 192"],
-    h: "zfEhD0nTmeclrDPBvF4YQvThWfdELzmW0m1T1UJNEKw=",
+  "Update account balance": {
+    val: "Update account balance",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 221"],
+    h: "GQWvUamqQOyoaXm16AiGtHme6kW171erNK5pa4vgDIE=",
+  },
+  "Record change as transaction": {
+    val: "Record change as transaction",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 253"],
+    h: "yK0UuSf6pOl+44YBzW+tFNPHt6YYpqe88f+wQCuaHcQ=",
+  },
+  "Update balance without a transaction": {
+    val: "Update balance without a transaction",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 264"],
+    h: "thUs8btJm84m3sFUOg0QZBXmDfqGOrDhsYqwJ31BIAo=",
+  },
+  "Update balance": {
+    val: "Update balance",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 267"],
+    h: "XSg0Q5Q7j+G+HNjn3YJOakbNLSjTNcem3BFbw6fTDI8=",
+  },
+  "money-balance-as-of": {
+    val: (amount:JSX.Element, date:JSX.Element) => {
+                  return <span>{amount} as of {date}</span>
+                },
+    translated: false,
+    src: ["src/budget/accounts.tsx line 292"],
+    h: "99X4HuXB5SeCrTqn5LuD/S4a6GjUCB6gV1Z1gAZPfKM=",
+  },
+  "Off budget": {
+    val: "Off budget",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 312","src/budget/transactions.tsx line 444","src/budget/transactions.tsx line 465","src/budget/transactions.tsx line 577"],
+    h: "cw3ZD6kn6Mat0qZqOZP0Is9hg7xmOxrKqKCD8CIjmz4=",
+  },
+  "Make Account Off Budget": {
+    val: "Make Account Off Budget",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 320"],
+    h: "jw6HPdaDScqY+QIMmJ35WzXfjHVXwsPaWjv1EgCZC/M=",
+  },
+  "Make Account On Budget": {
+    val: "Make Account On Budget",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 324"],
+    h: "6gjcSYfUh5rPE2oFISLmP498V1RohOYnE0M2uhE47NM=",
+  },
+  "Actions": {
+    val: "Actions",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 333"],
+    h: "qm2CvbPMHZpeVCriZp/vJ2kAGatdeyDxfZ8TMaapQvo=",
   },
   "getting-started-link": {
     val: (clickhandler) => {
@@ -164,6 +219,12 @@ const messages:IMessages = {
     translated: true,
     src: ["src/budget/accounts.tsx line 233"],
     h: "0T7eA3oFvMxyPIOAkMZ2rDpJxQVORgxrLqrDx87L1ZY=",
+  },
+  "Off Budget Accounts": {
+    val: "Off Budget Accounts",
+    translated: false,
+    src: ["src/budget/accounts.tsx line 386"],
+    h: "EQ0I5sn/xpO55GIvIhUF8/XeTi0g5sxvvyE7TiynJDQ=",
   },
   "Create Account": {
     val: "Criar Conta",
@@ -690,6 +751,7 @@ const messages:IMessages = {
     h: "1oHDkv2zB1yiCABVTWBY5oX4Ccu36nJBCG7Q+JVg8TA=",
   },
   "Closed": {
+    /*! Label for list of closed accounts */
     val: "Fechado",
     translated: true,
     src: ["src/budget/budget.tsx line 150"],
@@ -1477,11 +1539,11 @@ const messages:IMessages = {
     src: ["src/budget/tools/amazon.tsx line 217"],
     h: "Mlif1y6Q52PbHr5bzc3mqcxGJBv1uosR7E+eLTi79kA=",
   },
-  "Amazon Reconciliation": {
-    val: "Reconciliação Amazon",
+  "Amazon.com Reconciliation": {
+    val: "Reconciliação Amazon.com",
     translated: true,
-    src: ["src/budget/tools/amazon.tsx line 224"],
-    h: "S+wC/RTatD+cq4mogt2XBek9Zw6sSUrQX2eNL62gzVE=",
+    src: ["src/budget/tools/toolspage.tsx line 21"],
+    h: "SS/vhEAqfP5cTcprv5/4dDYZCEsTIMySGfXEngOoMj0=",
   },
   "Create Backup": {
     val: "Create Backup",
@@ -1501,17 +1563,23 @@ const messages:IMessages = {
     src: ["src/budget/tools/startover.tsx line 41"],
     h: "LAt5pxdaPsRHDU6bS2Cu1aEDIQ2oZAMw46Pa7H6pc5o=",
   },
+  "Done": {
+    val: "Done",
+    translated: false,
+    src: ["src/budget/tools/startover.tsx line 74"],
+    h: "FlUsJYC76LgtNYLenrPiDvDgAVk3wLT14rwyk2hHYiY=",
+  },
   "Start Over": {
     val: "Start Over",
     translated: false,
     src: ["src/budget/tools/startover.tsx line 106","src/budget/tools/toolspage.tsx line 25"],
     h: "hlKNxy6ZDz4ny/qpQfkv6FwXDangtq2ECEo+ICgEbJs=",
   },
-  "This tool will delete data so that to make it easy to start over with your budget.": {
-    val: "This tool will delete data so that to make it easy to start over with your budget.",
+  "This tool will delete data to make it easy to start over with your budget.": {
+    val: "This tool will delete data to make it easy to start over with your budget.",
     translated: false,
-    src: ["src/budget/tools/startover.tsx line 108"],
-    h: "cGdr2kyPp8Y8D9aDDRX7C71PlUd9jhGYYu0t7fq46NI=",
+    src: ["src/budget/tools/startover.tsx line 113"],
+    h: "+40oxGj2jDLNe4ggunYHsgL/9aQz0pw5IeRM5VlYIIU=",
   },
   "Keep buckets": {
     val: "Keep buckets",
@@ -1519,17 +1587,17 @@ const messages:IMessages = {
     src: ["src/budget/tools/startover.tsx line 111"],
     h: "4lGk6/xvGOvn8z5vLVpqCLE6WQwpEoizH0LM95z1Tvo=",
   },
-  "Keep accounts": {
-    val: "Keep accounts",
-    translated: false,
-    src: ["src/budget/tools/startover.tsx line 114"],
-    h: "iQX3g3XL9mIf7uX5wDrQIhLNJ464eieqHwhtKtfSuoA=",
-  },
   "Keep bucket transactions": {
     val: "Keep bucket transactions",
     translated: false,
     src: ["src/budget/tools/startover.tsx line 117"],
     h: "0LwH6beBDlpdXvsVWW7nGj/5/tkz7gDk+Sm4Kltx3rQ=",
+  },
+  "Keep accounts": {
+    val: "Keep accounts",
+    translated: false,
+    src: ["src/budget/tools/startover.tsx line 114"],
+    h: "iQX3g3XL9mIf7uX5wDrQIhLNJ464eieqHwhtKtfSuoA=",
   },
   "Keep account transactions": {
     val: "Keep account transactions",
@@ -1543,11 +1611,23 @@ const messages:IMessages = {
     src: ["src/budget/tools/startover.tsx line 134"],
     h: "55tb3CtVKNADQpK4SdoMMPQvHu1ftBosd/dP8lFHV/o=",
   },
-  "Amazon.com Reconciliation": {
-    val: "Reconciliação Amazon.com",
+  "Import from YNAB4": {
+    val: "Import from YNAB4",
+    translated: false,
+    src: ["src/budget/tools/toolspage.tsx line 28","src/budget/tools/ynabimport.tsx line 65"],
+    h: "FJ55mGfxitbc5YeY1s6YEji8I54ILSi3sfzQALSx50I=",
+  },
+  "Transactions to review": {
+    val: "Transactions to review",
+    translated: false,
+    src: ["src/budget/tools/ynabimport.tsx line 55"],
+    h: "fcauVC7MkwNPXVHbfBl427k53jL2beDDx711UkVI5tg=",
+  },
+  "Import file": {
+    val: "Importar arquivo",
     translated: true,
-    src: ["src/budget/tools/toolspage.tsx line 21"],
-    h: "SS/vhEAqfP5cTcprv5/4dDYZCEsTIMySGfXEngOoMj0=",
+    src: ["src/budget/transactions.tsx line 115"],
+    h: "iaQvPnsbTKu/ItmjoC8ctwpVbyumVe15GLL8nCbe25Q=",
   },
   "Possible Duplicates": {
     val: "Possíveis Duplicadas",
@@ -1560,12 +1640,6 @@ const messages:IMessages = {
     translated: true,
     src: ["src/budget/transactions.tsx line 106"],
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
-  },
-  "Import file": {
-    val: "Importar arquivo",
-    translated: true,
-    src: ["src/budget/transactions.tsx line 115"],
-    h: "iaQvPnsbTKu/ItmjoC8ctwpVbyumVe15GLL8nCbe25Q=",
   },
   "Category": {
     val: "Categoria",
@@ -2343,6 +2417,18 @@ Você gostaria de comprar uma licença agora?`,
     src: ["src/wwwroot/misc/preferences.tsx line 37"],
     h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
   },
+  "Number format:": {
+    val: "Number format:",
+    translated: false,
+    src: ["src/wwwroot/misc/preferences.tsx line 44"],
+    h: "uTy4YNIFDQEyLVFU5kvDdjAthW+Y6WHSQx49x+suPQI=",
+  },
+  "Language default": {
+    val: "Language default",
+    translated: false,
+    src: ["src/wwwroot/misc/preferences.tsx line 54"],
+    h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
+  },
   "Animation:": {
     val: "Animação:",
     translated: true,
@@ -2546,6 +2632,12 @@ Você gostaria de comprar uma licença agora?`,
     translated: true,
     src: ["src/wwwroot/record/record.tsx line 772"],
     h: "eE9Fw8G4vQpND3fFWnfGNvtN5LxCcQQecWO6fQgBmpM=",
+  },
+  "Unknown category": {
+    val: "Unknown category",
+    translated: false,
+    src: ["src/ynab.ts line 440"],
+    h: "bK4teMnFOuofJ4sX76ozAla50yDaLbvb5pCj+New5f4=",
   },
   "Open YNAB4 File": {
     val: "Abrir arquivo YNAB4",
