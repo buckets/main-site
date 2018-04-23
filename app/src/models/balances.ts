@@ -4,7 +4,7 @@ import { ts2localdb, localNow } from '../time'
 import {sanitizeDbFieldName} from '../mainprocess/dbstore'
 
 export class Balances {
-  [k:number]:number;
+  [k:number]: number;
 }
 
 export async function computeBalances(

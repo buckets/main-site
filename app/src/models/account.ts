@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone'
 import { createErrorSubclass } from '../errors'
 import { IObject, registerClass, IStore } from '../store';
-import { ts2localdb, parseLocalTime } from '../time';
+import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from '../budget/notes'
 
@@ -476,6 +476,25 @@ export class AccountStore {
     let where = 'a.closed <> 1'
     let params = {};
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
+  }
+  async balanceDate(account_id:number, before:moment.Moment):Promise<SerializedTimestamp> {
+    const rows = await this.store.query(`SELECT max(posted) AS posted
+      FROM account_transaction
+      WHERE
+        account_id = $account_id
+        AND posted < $before`, {
+          $account_id: account_id,
+          $before: ts2localdb(before),
+        })
+    if (!rows.length) {
+      return null;
+    }
+    const posted = rows[0].posted;
+    if (!posted) {
+      return null
+    } else {
+      return dumpTS(parseLocalTime(posted))
+    }
   }
   async list():Promise<Account[]> {
     return this.store.listObjects(Account, {

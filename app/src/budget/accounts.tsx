@@ -1,6 +1,7 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import * as moment from 'moment-timezone'
 import { sss } from '../i18n'
 import { shell } from 'electron'
 import {Balances} from '../models/balances'
@@ -13,7 +14,7 @@ import { ClickToEdit, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
-import { DateDisplay } from '../time'
+import { DateDisplay, loadTS } from '../time'
 import { NoteMaker } from './notes'
 
 function getImportBalance(account:Account, balance:number):number {
@@ -119,18 +120,24 @@ interface AccountViewProps {
   current_balance: number;
   appstate: AppState;
 }
-export class AccountView extends React.Component<AccountViewProps, {
+interface AccountViewState {
   new_balance: number;
   balance_edit_showing: boolean;
   new_balance_with_transaction: boolean;
-}> {
+  balance_date: moment.Moment;
+}
+export class AccountView extends React.Component<AccountViewProps, AccountViewState> {
   constructor(props:AccountViewProps) {
     super(props);
     this.state = {
       new_balance: props.current_balance || 0,
       balance_edit_showing: false,
       new_balance_with_transaction: true,
+      balance_date: null,
     }
+  }
+  componentDidMount() {
+    this.refreshDetails(this.props);
   }
   componentWillReceiveProps(nextProps:AccountViewProps) {
     if (nextProps.current_balance !== this.props.current_balance) {
@@ -139,6 +146,23 @@ export class AccountView extends React.Component<AccountViewProps, {
         new_balance_with_transaction: true,
       })
     }
+    this.refreshDetails(nextProps);
+  }
+  refreshDetails(props:AccountViewProps) {
+    const store = manager.nocheckpoint.sub.accounts;
+    store.hasTransactions(props.account.id)
+    .then(has_transactions => {
+      this.setState({
+        new_balance_with_transaction: has_transactions,
+      });
+    })
+    store.balanceDate(props.account.id, props.appstate.viewDateRange.before)
+    .then(balance_date => {
+      console.log('got balance_date', balance_date);
+      this.setState({
+        balance_date: balance_date ? loadTS(balance_date) : null,
+      })
+    })
   }
   render() {
     let { account, current_balance, appstate } = this.props;
@@ -186,19 +210,17 @@ export class AccountView extends React.Component<AccountViewProps, {
       import_balance_field = <tr>
         <th>{sss('Synced balance')}</th>
         <td>
-          <Money value={import_balance} />
-          <p>
+          <Money value={import_balance} noFaintCents />
+          <div className="notice">
             <div className="alert info">
               <span className="fa fa-exclamation-circle" />
             </div>
-            {sss('accounts.balance_mismatch_long_msg', () => {
-              return (<span>
-                The "Balance" above is this account's balance as of the latest entered transaction.
-                The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
-                Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
-                So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
-            </span>)})()}
-          </p>
+            <span>{sss("account-bal-diff-1", "The running balance does not match the last synced balance for one of these reasons:")} </span>
+            <ul>
+              <li>{sss("account-bal-diff-fix-1", "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets.")}</li>
+              <li>{sss("account-bal-diff-fix-2", "Transactions are missing from Buckets.")}</li>
+            </ul>
+          </div>
         </td>
       </tr>
     }
@@ -294,7 +316,7 @@ export class AccountView extends React.Component<AccountViewProps, {
                   return <span>{amount} as of {date}</span>
                 })(
                   <Money value={current_balance} noFaintCents />,
-                  <DateDisplay value={appstate.defaultPostingDate} />
+                  <DateDisplay value={this.state.balance_date || appstate.defaultPostingDate} />
                 )}
                 <button className="icon inline" onClick={ev => {
                   this.setState({balance_edit_showing: !this.state.balance_edit_showing})
