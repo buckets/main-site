@@ -318,8 +318,10 @@ export async function updateMenu(args:{
   let preMenus = [];
 
   const about = {
-    role: 'about',
     label: sss('About Buckets'),
+    click() {
+      openUpdateWindow();
+    }
   }
   const check_for_updates = {
     label: sss('Check For Updates...'),
