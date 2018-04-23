@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-04-20 09:12-0400\n"
-"PO-Revision-Date: 2018-04-20 09:15-0400\n"
+"POT-Creation-Date: 2018-04-23 12:27-0600\n"
+"PO-Revision-Date: 2018-04-23 12:27-0600\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -387,34 +387,38 @@ msgstr "Buckets es <em>multilingüe</em>."
 msgid "Currently available languages:"
 msgstr "Idiomas disponibles actualmente:"
 
-#: buckets/web/templates/anon/index.html:198
+#: buckets/web/templates/anon/index.html:199
 msgid "Want to add your language?"
 msgstr "¿Quiere añadir su idioma?"
 
-#: buckets/web/templates/anon/index.html:204
+#: buckets/web/templates/anon/index.html:205
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul."
 msgstr ""
 "Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
 "aquí por mucho tiempo."
 
-#: buckets/web/templates/anon/index.html:208
+#: buckets/web/templates/anon/index.html:205
+msgid "Read more."
+msgstr "Lee mas."
+
+#: buckets/web/templates/anon/index.html:209
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
 
-#: buckets/web/templates/anon/index.html:249
+#: buckets/web/templates/anon/index.html:250
 msgid "Subscribe to the Monthly Newsletter"
 msgstr "Suscríbete al boletín de Buckets"
 
-#: buckets/web/templates/anon/index.html:251
+#: buckets/web/templates/anon/index.html:252
 msgid "Email Address"
 msgstr "Dirección de correo electrónico"
 
-#: buckets/web/templates/anon/index.html:255
+#: buckets/web/templates/anon/index.html:256
 msgid "First Name"
 msgstr "Nombre de pila"
 
-#: buckets/web/templates/anon/index.html:263
+#: buckets/web/templates/anon/index.html:264
 msgid "Subscribe"
 msgstr "Suscribir"
 
@@ -572,3 +576,6 @@ msgstr "Suscribir"
 #~ msgstr ""
 #~ "Buckets incluye algunos <em>extras</em> fabulosos como rápida reconciliación "
 #~ "de Amazon porqué-ellos-dividen-cada-compra-en-cien-transacciones."
+
+#~ msgid "Read more"
+#~ msgstr "Lee mas"

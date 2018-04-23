@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-04-20 09:12-0400\n"
+"POT-Creation-Date: 2018-04-23 12:27-0600\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -332,33 +332,37 @@ msgstr ""
 msgid "Currently available languages:"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:198
+#: buckets/web/templates/anon/index.html:199
 msgid "Want to add your language?"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:204
+#: buckets/web/templates/anon/index.html:205
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
 "haul."
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:208
+#: buckets/web/templates/anon/index.html:205
+msgid "Read more."
+msgstr ""
+
+#: buckets/web/templates/anon/index.html:209
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:249
+#: buckets/web/templates/anon/index.html:250
 msgid "Subscribe to the Monthly Newsletter"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:251
+#: buckets/web/templates/anon/index.html:252
 msgid "Email Address"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:255
+#: buckets/web/templates/anon/index.html:256
 msgid "First Name"
 msgstr ""
 
-#: buckets/web/templates/anon/index.html:263
+#: buckets/web/templates/anon/index.html:264
 msgid "Subscribe"
 msgstr ""
 
@@ -606,5 +610,8 @@ msgstr ""
 #~ " such as really fast Amazon why-"
 #~ "do-they-split-every-purchase-into-a"
 #~ "-hundred-transactions reonciliation."
+#~ msgstr ""
+
+#~ msgid "Read more"
 #~ msgstr ""
 
