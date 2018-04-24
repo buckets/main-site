@@ -14,7 +14,7 @@ interface YNABImportPageProps {
   appstate: AppState;
 }
 interface YNABImportPageState {
-  leftovers: Array<LeftoverTrans>;
+  leftovers: LeftoverTrans[];
   progress: number;
 }
 export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImportPageState> {

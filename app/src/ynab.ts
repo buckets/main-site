@@ -211,7 +211,7 @@ export class YNABStore {
       $ynab_trans_json: JSON.stringify(ynab_trans),
     })
   }
-  async listLeftoverTransactions() {
+  async listLeftoverTransactions():Promise<LeftoverTrans[]> {
     await this.ensureInit();
     let ret:{
       [trans_id:number]: LeftoverTrans;
