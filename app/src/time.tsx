@@ -2,8 +2,10 @@ import * as React from 'react';
 import * as moment from 'moment-timezone';
 import * as cx from 'classnames';
 import { sss } from './i18n'
+import { PrefixLogger } from './logging'
 
 const mytz = moment.tz.guess();
+const log = new PrefixLogger('(time)');
 
 
 /**
@@ -182,11 +184,12 @@ export class DateInput extends React.Component<DateInputProps, {value:moment.Mom
     });
   }
   render() {
-    let value = this.state.value.format('YYYY-MM-DD');
+    const value = this.state.value.format('YYYY-MM-DD');
     return <input type="date" value={value} onChange={this.onChange} />
   }
   onChange = (ev) => {
-    let newval = parseLocalTime(ev.target.value)
+    const newval = this.props.islocal ? parseLocalTime(ev.target.value) : parseUTCTime(ev.target.value);
+    log.info(`DateInput.onChange(${ev.target.value}) -> ${newval.format()}/${newval.format('YYYY-MM-DD')}`)
     this.setState({value: newval})
     this.props.onChange(newval)
   }
