@@ -61,7 +61,7 @@ for i,release in enumerate(releases):
             parts.append('%4d %4d/d %s' % (v, perday(v,seconds), k))
     print('\nv%s -- %s (%.2f days)' % (
             name,
-            published.isoformat(),
+            published.isoformat() if published else 'unpublished',
             seconds/SECONDS_PER_DAY))
     for part in parts:
         print('  {part}'.format(part=part))
