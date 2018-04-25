@@ -41,7 +41,7 @@ export const DEFAULTS:IMessages = {
     val: "/mo",
     translated: false,
     h: "ggq7na5vMB1wOjQQo0Wq0o7ctwbMUiiJr1tRRKphHss=",
-    // time.tsx:127
+    // time.tsx:129
   },
   "A sync is already in progress": {
     val: "A sync is already in progress",
@@ -64,7 +64,7 @@ export const DEFAULTS:IMessages = {
     // importpage.tsx:455
     // searchpage.tsx:119
     // searchpage.tsx:143
-    // transactions.tsx:221
+    // transactions.tsx:224
   },
   "Account Transactions": {
     val: "Account Transactions",
@@ -142,7 +142,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1240
     // searchpage.tsx:145
     // searchpage.tsx:174
-    // transactions.tsx:223
+    // transactions.tsx:226
     // csvimport.tsx:336
     // csvimport.tsx:509
   },
@@ -204,7 +204,7 @@ export const DEFAULTS:IMessages = {
     // accounts.tsx:310
     // buckets.tsx:820
     // buckets.tsx:1241
-    // transactions.tsx:224
+    // transactions.tsx:227
   },
   "Balance:": {
     val: "Balance:",
@@ -312,7 +312,7 @@ export const DEFAULTS:IMessages = {
     val: "Cancel",
     translated: false,
     h: "wHdMGFBg/BNmqwwBSIr4TrXk4fT1kilDHgZN5z4N5sU=",
-    // transactions.tsx:936
+    // transactions.tsx:939
   },
   "Cancel sync": {
     val: "Cancel sync",
@@ -342,20 +342,20 @@ export const DEFAULTS:IMessages = {
     val: "Categorization",
     translated: false,
     h: "DShuYOF3daz37AE7lGCN1TajYU1VyorRCvLwh4bM1r8=",
-    // transactions.tsx:896
-    // transactions.tsx:906
+    // transactions.tsx:899
+    // transactions.tsx:909
   },
   "Categorize": {
     val: "Categorize",
     translated: false,
     h: "mA6/TefxgXpo2M+OUx/ATLQ4QYHv4t1+8vy3MmV+EQg=",
-    // transactions.tsx:976
+    // transactions.tsx:979
   },
   "Category": {
     val: "Category",
     translated: false,
     h: "/frArhrZL+bxdiiBKi/1cYdR/tSD7rhbMHJLgHQQdNQ=",
-    // transactions.tsx:225
+    // transactions.tsx:228
   },
   "Charity": {
     val: "Charity",
@@ -503,7 +503,7 @@ export const DEFAULTS:IMessages = {
     val: "Create Transaction",
     translated: false,
     h: "G5NDAP857MBDE66GWUREcFAJc2pCogndYa6y+m6PRfE=",
-    // transactions.tsx:359
+    // transactions.tsx:362
   },
   "Create budget password:": {
     val: "Create budget password:",
@@ -577,7 +577,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "5rAWRNk97CWy9OfDP5IWSE/T2Ao461w7C3z/IDV154I=",
     // buckets.tsx:1225
-    // transactions.tsx:207
+    // transactions.tsx:210
   },
   "Delete all": {
     val: "Delete all",
@@ -948,7 +948,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "iaQvPnsbTKu/ItmjoC8ctwpVbyumVe15GLL8nCbe25Q=",
     // ynabimport.tsx:69
-    // transactions.tsx:119
+    // transactions.tsx:122
   },
   "Import from YNAB4": {
     val: "Import from YNAB4",
@@ -982,7 +982,7 @@ export const DEFAULTS:IMessages = {
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
     // budget.tsx:275
     // reports.tsx:208
-    // transactions.tsx:742
+    // transactions.tsx:745
   },
   "Install and Relaunch Buckets": {
     val: "Install and Relaunch Buckets",
@@ -1014,7 +1014,7 @@ export const DEFAULTS:IMessages = {
     val: "Invalid categorization.  Categories not set.",
     translated: false,
     h: "DykWhCxgeqeIt2i+Lc2sRdURMNIgRgohpjs83umwH9Y=",
-    // transactions.tsx:335
+    // transactions.tsx:338
   },
   "Invalid license": {
     val: "Invalid license",
@@ -1171,7 +1171,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1239
     // searchpage.tsx:144
     // searchpage.tsx:173
-    // transactions.tsx:222
+    // transactions.tsx:225
     // csvimport.tsx:337
     // csvimport.tsx:508
   },
@@ -1369,9 +1369,9 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "cw3ZD6kn6Mat0qZqOZP0Is9hg7xmOxrKqKCD8CIjmz4=",
     // accounts.tsx:334
-    // transactions.tsx:444
-    // transactions.tsx:465
-    // transactions.tsx:577
+    // transactions.tsx:447
+    // transactions.tsx:468
+    // transactions.tsx:580
   },
   "On": {
     val: "On",
@@ -1480,7 +1480,7 @@ export const DEFAULTS:IMessages = {
     val: "Possible Duplicates",
     translated: false,
     h: "ofGzHt7c7jfCo867EwNvCl3vCUJPLeLhFiC5Fmgrgp4=",
-    // transactions.tsx:87
+    // transactions.tsx:90
   },
   "Posted": {
     val: "Posted",
@@ -1489,7 +1489,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1238
     // searchpage.tsx:142
     // searchpage.tsx:171
-    // transactions.tsx:220
+    // transactions.tsx:223
     // csvimport.tsx:507
   },
   "Preferences": {
@@ -1602,7 +1602,7 @@ export const DEFAULTS:IMessages = {
     val: "Remove Categorization",
     translated: false,
     h: "b5sIQMfXAnBAqHD2NJfIgIAxclRGe5LJ7NzzF6sOruQ=",
-    // transactions.tsx:901
+    // transactions.tsx:904
   },
   "Rent/Mortgage": {
     val: "Rent/Mortgage",
@@ -1658,7 +1658,7 @@ export const DEFAULTS:IMessages = {
     val: "Save",
     translated: false,
     h: "wduD0WXtkIpIb6B4R8AA7ph724u3/Gtv27uaky6rEAU=",
-    // transactions.tsx:937
+    // transactions.tsx:940
     // record.tsx:487
   },
   "Screenshots:": {
@@ -1737,7 +1737,7 @@ export const DEFAULTS:IMessages = {
     val: "Show uncategorized",
     translated: false,
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
-    // transactions.tsx:110
+    // transactions.tsx:113
   },
   "SimpleFIN Connections": {
     val: "SimpleFIN Connections",
@@ -1983,7 +1983,7 @@ export const DEFAULTS:IMessages = {
     val: "Transfer",
     translated: false,
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
-    // transactions.tsx:739
+    // transactions.tsx:742
   },
   "Trial Version": {
     val: "Trial Version",
@@ -2150,7 +2150,7 @@ export const DEFAULTS:IMessages = {
     val: "Update Transaction",
     translated: false,
     h: "aMF18BJOMjuVOInpbGKf/3jyTE1qYzq4oHzb3sBVcWw=",
-    // transactions.tsx:343
+    // transactions.tsx:346
   },
   "Update account balance": {
     val: "Update account balance",
@@ -2597,7 +2597,7 @@ Would you like to purchase a license now?`,
     val: "Income",
     translated: false,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
-    // transactions.tsx:948
+    // transactions.tsx:951
   },
   "notify-downloaded-file": {
     val: filename => `Downloaded file: ${filename}`,
@@ -2610,7 +2610,7 @@ Would you like to purchase a license now?`,
     translated: false,
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
     // buckets.tsx:1242
-    // transactions.tsx:953
+    // transactions.tsx:956
   },
   "off": {
     val: "off",
@@ -2692,7 +2692,7 @@ Would you like to purchase a license now?`,
     val: "This symbol means the transaction came from an import/sync",
     translated: false,
     h: "S3tDRls+AJYj6f8jSNSCa1FVyNY+ngn6Db1EQJ3dpLE=",
-    // transactions.tsx:406
+    // transactions.tsx:409
   },
   "sync.toast.syncing": {
     val: (start:moment.Moment, end:moment.Moment) => {
@@ -2714,7 +2714,7 @@ Would you like to purchase a license now?`,
               },
     translated: false,
     h: "VJmIMDZGOdMKwBpoqDUYiVdCFhw1pJ4qCmKiszAECL4=",
-    // transactions.tsx:505
+    // transactions.tsx:508
   },
   "transfer-to-account": {
     val: (dropdown:JSX.Element) => {
@@ -2722,7 +2722,7 @@ Would you like to purchase a license now?`,
               },
     translated: false,
     h: "Bd1IGkjXo2ruWofGrT+WwLdiy8IwJ/PW+7SO4TaDcps=",
-    // transactions.tsx:510
+    // transactions.tsx:513
   },
   "version-available": {
     val: (newv:string) => `Version ${newv} available.`,
