@@ -1,1 +1,1 @@
-Fix date picker problem with macOS High Sierra (#bDbNumyY)
+Fix date picker problem with macOS High Sierra (#112)
