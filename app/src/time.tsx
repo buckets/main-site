@@ -2,10 +2,10 @@ import * as React from 'react';
 import * as moment from 'moment-timezone';
 import * as cx from 'classnames';
 import { sss } from './i18n'
-import { PrefixLogger } from './logging'
+// import { PrefixLogger } from './logging'
+// const log = new PrefixLogger('(time)');
 
 const mytz = moment.tz.guess();
-const log = new PrefixLogger('(time)');
 
 
 /**
@@ -220,7 +220,6 @@ export class DateInput extends React.Component<DateInputProps, {}> {
         day: Number(day),
       }
     }
-    log.info(`DateInput.onChange(${stringval}) -> ${JSON.stringify(newval)}`);
     this.props.onChange(newval);
   }
 }
