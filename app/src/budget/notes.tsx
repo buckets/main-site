@@ -42,7 +42,7 @@ export class NoteMaker extends React.PureComponent<NoteProps, {
   render() {
     let { obj } = this.props;
     let button = <button
-        className="icon note-icon"
+        className="icon hover note-icon"
         onClick={() => {
           this.setState({showing: !this.state.showing});
         }}>

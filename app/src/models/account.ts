@@ -49,6 +49,12 @@ export class Transaction implements IObject, INotable {
   memo: string;
   fi_id: string;
   general_cat: GeneralCatType;
+  cleared: boolean;
+
+  static fromdb(obj:Transaction) {
+    obj.cleared = !!obj.cleared;
+    return obj;
+  }
 }
 registerClass(Transaction);
 
@@ -210,6 +216,7 @@ export class AccountStore {
     memo?: string,
     posted?: moment.Moment,
     fi_id?: string,
+    cleared?: boolean,
   }):Promise<Transaction> {
     let affected_account_ids = new Set<number>();
     let existing = await this.store.getObject(Transaction, trans_id);
@@ -229,6 +236,7 @@ export class AccountStore {
       memo: args.memo,
       posted: args.posted ? ts2localdb(args.posted) : undefined,
       fi_id: args.fi_id,
+      cleared: args.cleared,
     });
 
     // publish affected accounts

@@ -1556,18 +1556,19 @@ g.hover-labels:hover rect.highlight {
   fill: var(--blue);
 }
 
+.icon-hover-trigger .hover.icon {
+  opacity: 0;
+}
+.icon-hover-trigger:hover .hover.icon {
+  opacity: 0.5;
+}
+
 .note-maker {
   display: inline;
 }
 .note-maker.inline {
   padding-left: .25rem;
   padding-right: .5rem;
-}
-.note-maker .note-icon {
-  opacity: 0;
-}
-.note-hover-trigger:hover .note-icon {
-  opacity: 0.5;
 }
 .note-maker.has-note .note-icon {
   opacity: 1;
@@ -1613,6 +1614,16 @@ g.hover-labels:hover rect.highlight {
   background-color: white;
   padding: 0 .25rem;
   transition: opacity .1s;
+  opacity: 0;
+}
+
+.icon.cleared-indicator,
+.icon.cleared-indicator.hover {
+  font-weight: bold;
+  opacity: 1;
+  color: var(--red);
+}
+.icon.cleared-indicator.cleared {
   opacity: 0;
 }
 
