@@ -6,7 +6,7 @@ import * as rp from 'request-promise'
 import * as moment from 'moment'
 import * as electron_log from 'electron-log'
 import * as _ from 'lodash'
-import { app, remote, dialog, shell, BrowserWindow } from 'electron'
+import { app, remote, dialog, BrowserWindow } from 'electron'
 import { sss, tx } from './i18n'
 import { APP_ROOT } from './mainprocess/globals'
 import { onlyRunInMain } from './rpc'
@@ -123,18 +123,12 @@ export const reportErrorToUser = onlyRunInMain((text?:string, args?:{
     message: text || sss(`There has been an error.`),
     detail: sss('error-detail', "If this error keeps happening or doesn't make sense, please report a bug or chat with us."),
     buttons: [
-      sss('action.ignore', 'Ignore'),
-      sss('action.chat', 'Chat'),
       sss('action.report bug', 'Report Bug'),
+      sss('action.ignore', 'Ignore'),
     ],
     defaultId: 0,
   }, (indexClicked) => {
     if (indexClicked === 0) {
-      // Ignore
-    } else if (indexClicked === 1) {
-      // Get Help
-      shell.openExternal('https://www.budgetwithbuckets.com/chat');
-    } else if (indexClicked === 2) {
       // Report Bug
       openBugReporter({err: args.err});
     }
