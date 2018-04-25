@@ -9,7 +9,7 @@ import { sss } from '../i18n'
 import { submitFeedback } from '../errors'
 import { makeToast } from './toast'
 import { cents2decimal } from '../money'
-import { localNow, DateInput } from '../time'
+import { localNow, DateInput, moment2LocalDay, localDay2moment } from '../time'
 
 interface ExportPageProps {
   appstate: AppState
@@ -103,9 +103,9 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
               <th>{sss('From')}</th>
               <td>
                 <DateInput
-                  value={this.state.from_date}
+                  value={moment2LocalDay(this.state.from_date)}
                   onChange={new_date => {
-                    this.setState({from_date: new_date});
+                    this.setState({from_date: localDay2moment(new_date)});
                   }}/>
               </td>
               <td rowSpan={100} className="top">
@@ -120,9 +120,9 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
               <th>{sss('To')}</th>
               <td>
                 <DateInput
-                  value={this.state.to_date}
+                  value={moment2LocalDay(this.state.to_date)}
                   onChange={new_date => {
-                    this.setState({to_date: new_date});
+                    this.setState({to_date: localDay2moment(new_date)});
                   }}
                 />
               </td>

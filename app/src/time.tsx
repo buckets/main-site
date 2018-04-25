@@ -166,32 +166,62 @@ export class DateTime extends React.Component<DateDisplayProps, any> {
   }
 }
 
-interface DateInputProps {
-  value: string|moment.Moment;
-  islocal?: boolean;
-  onChange: (val:moment.Moment)=>void;
+
+//-------------------------------------------------------------------------
+interface Day {
+  type: 'buckets-day';
+  year: number;
+  month0jan: number;
+  day: number;
 }
-export class DateInput extends React.Component<DateInputProps, {value:moment.Moment}> {
-  constructor(props:DateInputProps) {
-    super(props)
-    this.state = {
-      value: props.islocal ? parseLocalTime(props.value) : parseUTCTime(props.value),
-    }
+export function moment2LocalDay(m:moment.Moment):Day {
+  if (!m) {
+    return null;
   }
-  componentWillReceiveProps(nextProps:DateInputProps) {
-    this.setState({
-      value: nextProps.islocal ? parseLocalTime(nextProps.value) : parseUTCTime(nextProps.value),
-    });
+  m = ensureLocalMoment(m);
+  return {
+    type: 'buckets-day',
+    year: m.year(),
+    month0jan: m.month(),
+    day: m.date(),
   }
+}
+export function localDay2moment(d:Day):moment.Moment {
+  if (!d) {
+    return null;
+  }
+  return makeLocalDate(d.year, d.month0jan, d.day);
+}
+
+
+interface DateInputProps {
+  value: Day;
+  onChange: (val:Day)=>void;
+}
+export class DateInput extends React.Component<DateInputProps, {}> {
   render() {
-    const value = this.state.value.format('YYYY-MM-DD');
-    return <input type="date" value={value} onChange={this.onChange} />
+    const { value } = this.props;
+    const stringval = value ? localDay2moment(value).format('YYYY-MM-DD') : '';
+    return <input
+      type="date"
+      value={stringval}
+      onChange={this.onChange}
+    />
   }
   onChange = (ev) => {
-    const newval = this.props.islocal ? parseLocalTime(ev.target.value) : parseUTCTime(ev.target.value);
-    log.info(`DateInput.onChange(${ev.target.value}) -> ${newval.format()}/${newval.format('YYYY-MM-DD')}`)
-    this.setState({value: newval})
-    this.props.onChange(newval)
+    const stringval:string = ev.target.value;
+    let newval:Day = null;
+    if (stringval) {
+      const [year, month, day] = stringval.split('-');
+      newval = {
+        type: 'buckets-day',
+        year: Number(year),
+        month0jan: Number(month)-1,
+        day: Number(day),
+      }
+    }
+    log.info(`DateInput.onChange(${stringval}) -> ${JSON.stringify(newval)}`);
+    this.props.onChange(newval);
   }
 }
 

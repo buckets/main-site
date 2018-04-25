@@ -8,7 +8,7 @@ import { IStore } from '../store'
 import { manager, AppState } from './appstate'
 import { Bucket } from '../models/bucket'
 import { Account, Category, Transaction, GeneralCatType } from '../models/account'
-import { DateDisplay, DateInput, parseLocalTime } from '../time'
+import { DateDisplay, moment2LocalDay, localDay2moment, DateInput, parseLocalTime, ts2localdb } from '../time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
@@ -18,6 +18,9 @@ import { makeToast } from './toast'
 import { isNil } from '../util'
 import { findPotentialDupes } from './dupes'
 import { NoteMaker } from './notes'
+import { PrefixLogger } from '../logging'
+
+const log = new PrefixLogger('(transactions)')
 
 interface TransactionPageProps {
   appstate: AppState;
@@ -519,10 +522,11 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           <td></td>
           <td>
             <DateInput
-              value={this.state.posted}
-              islocal
+              value={moment2LocalDay(this.state.posted)}
               onChange={(new_posting_date) => {
-                this.setState({posted: new_posting_date});
+                let posted = localDay2moment(new_posting_date)
+                log.info('posted', posted.format(), ts2localdb(posted));
+                this.setState({posted});
               }} />
           </td>
           {account_cell}
