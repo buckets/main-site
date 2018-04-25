@@ -8,7 +8,7 @@ import { sss } from './i18n'
 import { Money, decimal2cents } from './money'
 import { DateDisplay, parseLocalTime, dumpTS, loadTS } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
-import { Account, CSVImportMapping } from './models/account'
+import { Account } from './models/account'
 import { IStore } from './store'
 import { IBudgetFile, current_file } from './mainprocess/files'
 import { hashStrings } from './util'
@@ -100,11 +100,15 @@ function invertMapping(mapping:CSVMapping):{
   return inverted_mapping;
 }
 
+/**
+ *  Format of mapping stored in database
+ */
 export interface CSVMapping {
   fields: {
     [field:string]: 'amount'|'memo'|'posted'|'fi_id';
   }
   posted_format?: string;
+  noheader?: boolean;
 }
 export interface CSVNeedsMapping {
   id: string;
@@ -125,6 +129,22 @@ export interface CSVAssignAccountResponse {
   redo_mapping?: boolean;
 }
 
+
+function getDataRows<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):T[] {
+  let ret = [];
+  if (mapping.noheader) {
+    let header_obj = {};
+    parsed.headers.forEach(column => {
+      header_obj[column] = column;
+    })
+    ret.push(header_obj);
+  }
+  parsed.rows.forEach(row => {
+    ret.push(row);
+  })
+  return ret;
+}
+
 export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, args:{
   force_mapping?:boolean,
 } = {}):Promise<ImportableAccountSet> {
@@ -133,6 +153,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   const fingerprint = hashStrings(parsed.headers);
   log.info('fingerprint', fingerprint);
   let csv_mapping = await store.sub.accounts.getCSVMapping(fingerprint);
+  let mapping:CSVMapping;
   if (csv_mapping === null || args.force_mapping) {
     // no current mapping
     let need:CSVNeedsMapping = {
@@ -141,11 +162,19 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       current_mapping: csv_mapping ? JSON.parse(csv_mapping.mapping_json) : undefined,
     };
     bf.room.broadcast('csv_needs_mapping', need);
-    csv_mapping = await new Promise<CSVImportMapping>((resolve, reject) => {
+    mapping = await new Promise<CSVMapping>((resolve, reject) => {
       bf.room.events('csv_mapping_response').onceSuccessfully(async message => {
         if (message.id === need.id) {
           // now there's a mapping
-          let new_mapping = await store.sub.accounts.setCSVMapping(fingerprint, message.mapping);
+          let new_mapping:CSVMapping;
+          if (!message.mapping.noheader) {
+            // There's a header; save the mapping with the fingerprint
+            const csv_mapping = await store.sub.accounts.setCSVMapping(fingerprint, message.mapping);
+            new_mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
+          } else {
+            // There's no header; we don't yet have a good way to fingerprint this
+            new_mapping = message.mapping;
+          }
           resolve(new_mapping);
           return true;
         }
@@ -153,14 +182,15 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
         return false;
       })
     });
+  } else {
+    mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   }
 
   // Use the mapping
-  const mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   log.info('mapping', mapping);
   let hashcount = {};
   let inverted_mapping = invertMapping(mapping);
-  const transactions = parsed.rows.map((row):ImportableTrans => {
+  const transactions = getDataRows(parsed, mapping).map((row):ImportableTrans => {
     const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
     const posted = parseLocalTime(row[inverted_mapping.posted[0]], mapping.posted_format);
@@ -249,6 +279,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
     let mapping = props.obj.current_mapping || {
       fields: {},
       posted_format: null,
+      noheader: false,
     }
     let guess = this.computeFormatOptionsAndBestGuess(mapping, props.obj);
     if (guess.posted_format !== undefined) {
@@ -302,6 +333,20 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
         <li>{sss('Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.')}</li>
         <li>{sss('Click the "Set mapping" to continue.')}</li>
       </ol>
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={!this.state.mapping.noheader}
+            onChange={ev => {
+              let new_mapping = Object.assign(mapping, {
+                noheader: !ev.target.checked,
+              })
+              this.setState({mapping: new_mapping})
+            }}/>
+          {sss('Header row'/* Label for checkbox indicating whether a CSV file has a header row or not */)}
+        </label>
+      </div>
       <table className="ledger">
         <thead>
           <tr>
@@ -369,18 +414,19 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
               </button>
             </th>
           </tr>
-          <tr>
-            {obj.parsed_data.headers.map(header => {
-              let value = mapping.fields[header] || '' 
-              return <th
-                key={header}
-                colSpan={value === 'posted'|| value === 'amount' ? 2 : 1}
-              >{header}</th>
-            })}
-          </tr>
         </thead>
         <tbody>
-          {obj.parsed_data.rows.map((row, idx) => {
+          { this.state.mapping.noheader
+            ? null
+            : <tr>
+              {obj.parsed_data.headers.map(header => {
+                let value = mapping.fields[header] || '';
+                const colspan = value === 'posted'|| value === 'amount' ? 2 : 1;
+                return <th key={header} colSpan={colspan}>{header}</th>
+              })}
+            </tr>
+          }
+          {getDataRows(obj.parsed_data, this.state.mapping).map((row, idx) => {
             return <tr key={idx}>
               {obj.parsed_data.headers.map(header => {
                 let value = mapping.fields[header] || '';
@@ -405,7 +451,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                 } else if (value === 'amount') {
                   let money;
                   try {
-                    money = <Money value={csvFieldToCents(row[header])} />
+                    money = <Money value={csvFieldToCents(row[header])} noanimate />
                   } catch(err) {
                     money = <span className="error">{sss('Invalid')}</span>
                   }
@@ -515,7 +561,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
             return <tr key={idx}>
               <td><DateDisplay value={loadTS(trans.posted)} /></td>
               <td>{trans.memo}</td>
-              <td><Money value={trans.amount} /></td>
+              <td><Money value={trans.amount} noanimate /></td>
             </tr>
           })}
         </tbody>
