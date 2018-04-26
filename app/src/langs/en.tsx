@@ -1534,14 +1534,9 @@ const messages:IMessages = {
     translated: false,
     h: "kuwg7vpvp082IqBtRakekOVu7bqB4PYxhnFVsoBDt/g=",
   },
-  "System Default": {
-    /* Option for timezone auto-detection */
-    val: "System Default",
-    translated: false,
-    h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
-  },
   "System default": {
     /* Option for Buckets language preference */
+    /* Option for timezone auto-detection */
     val: "System default",
     translated: false,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",

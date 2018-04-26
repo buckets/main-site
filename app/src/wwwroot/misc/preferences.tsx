@@ -90,7 +90,7 @@ class PreferencesApp extends React.Component<{
                     })
                   })
                 }}>
-                <option value="">{sss('System Default' /* Option for timezone auto-detection */)}</option>
+                <option value="">{sss('System default' /* Option for timezone auto-detection */)}</option>
                 {timezone_names.map(name => {
                   return <option key={name}>{name.replace(/_/g, ' ')}</option>
                 })}

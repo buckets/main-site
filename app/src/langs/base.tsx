@@ -310,7 +310,6 @@ export interface IMessages {
   "Sync has not yet been set up.": IMsg<string>;
   "Synced balance": IMsg<string>;
   "Syncing...": IMsg<string>;
-  "System Default": IMsg<string>;
   "System default": IMsg<string>;
   "Target date:": IMsg<string>;
   "Test Toast": IMsg<string>;

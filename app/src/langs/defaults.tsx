@@ -1904,19 +1904,14 @@ export const DEFAULTS:IMessages = {
     h: "kuwg7vpvp082IqBtRakekOVu7bqB4PYxhnFVsoBDt/g=",
     // importpage.tsx:30
   },
-  "System Default": {
-    /* Option for timezone auto-detection */
-    val: "System Default",
-    translated: false,
-    h: "UB0KL/QZH4CikHbpWgyv1qC4YgSqsZGmS6lmmgTTiFw=",
-    // preferences.tsx:92
-  },
   "System default": {
     /* Option for Buckets language preference */
+    /* Option for timezone auto-detection */
     val: "System default",
     translated: false,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",
     // preferences.tsx:49
+    // preferences.tsx:92
   },
   "Target date:": {
     val: "Target date:",
