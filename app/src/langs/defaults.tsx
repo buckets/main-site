@@ -35,7 +35,7 @@ export const DEFAULTS:IMessages = {
     val: "(optional)",
     translated: false,
     h: "njVpYkgCdiB755Pxnsk1D8GELOWqw1mBBYG+YQr7e98=",
-    // csvimport.tsx:339
+    // csvimport.tsx:384
   },
   "/mo": {
     val: "/mo",
@@ -100,7 +100,7 @@ export const DEFAULTS:IMessages = {
     val: "Account name",
     translated: false,
     h: "Wo+ZnjRTxGkow1m4BGCavACj82/UajUNs6oLDXB++sU=",
-    // csvimport.tsx:481
+    // csvimport.tsx:527
   },
   "Accounts": {
     val: "Accounts",
@@ -143,8 +143,8 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:145
     // searchpage.tsx:174
     // transactions.tsx:226
-    // csvimport.tsx:336
-    // csvimport.tsx:509
+    // csvimport.tsx:381
+    // csvimport.tsx:555
   },
   "Amount of money over-allocated in buckets.": {
     val: "Amount of money over-allocated in buckets.",
@@ -398,7 +398,7 @@ export const DEFAULTS:IMessages = {
     val: "Click the \"Set mapping\" to continue.",
     translated: false,
     h: "17QBrVZk8kjbKoqmqsbEBBHyjcoru22TcYanag65Jrw=",
-    // csvimport.tsx:302
+    // csvimport.tsx:333
   },
   "Close Account": {
     val: "Close Account",
@@ -473,7 +473,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "0N2I0sNdMLVk7zC9FqlNYoA1G6RDgQDvQErp/TjAnRA=",
     // accounts.tsx:436
-    // csvimport.tsx:493
+    // csvimport.tsx:539
   },
   "Create Backup": {
     val: "Create Backup",
@@ -522,7 +522,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "SmoVFbeAWSO4cW1YQJbuDJQz8kenVz5++WTJEkS6Vos=",
     // importpage.tsx:491
-    // csvimport.tsx:472
+    // csvimport.tsx:518
   },
   "Cut": {
     val: "Cut",
@@ -534,7 +534,7 @@ export const DEFAULTS:IMessages = {
     val: "Date Posted",
     translated: false,
     h: "3A+vhaBB21UASdnwmNYVGMV9qH/U43D3DCsVSXlWasY=",
-    // csvimport.tsx:338
+    // csvimport.tsx:383
   },
   "Debt": {
     val: "Debt",
@@ -693,7 +693,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "/ErBlknw7o83xx0uIDCjdDA4u5bAwnNZuhFd2GV1Zcw=",
     // errors.ts:121
-    // errors.ts:145
+    // errors.ts:139
   },
   "Error fetching data": {
     val: "Error fetching data",
@@ -785,13 +785,13 @@ export const DEFAULTS:IMessages = {
     val: "Finish import",
     translated: false,
     h: "4xsUuxEj2AOOfV6aSUBcosl89BFoAZ+srMPIeWzIjUI=",
-    // csvimport.tsx:501
+    // csvimport.tsx:547
   },
   "For Date Posted, you must also choose the date format.": {
     val: "For Date Posted, you must also choose the date format.",
     translated: false,
     h: "G2XPMMlP2JPnutFhPAo1RnCQMTzdukxPSc+FjoF2Vjs=",
-    // csvimport.tsx:299
+    // csvimport.tsx:330
   },
   "Force Reload": {
     val: "Force Reload",
@@ -846,6 +846,13 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "T6Kz6/FDxQkeIUJq8SVGn0T7OPdZ7B0YjPD3qHqW5p4=",
     // gettingstarted.ts:22
+  },
+  "Header row": {
+    /* Label for checkbox indicating whether a CSV file has a header row or not */
+    val: "Header row",
+    translated: false,
+    h: "uRtdJlb7w3q8Zl9lZhtY0JReqNVI7CfOdo5I9SW5lfw=",
+    // csvimport.tsx:346
   },
   "Health Insurance": {
     val: "Health Insurance",
@@ -905,7 +912,7 @@ export const DEFAULTS:IMessages = {
     val: "Identify the data each column contains using the drop downs below.",
     translated: false,
     h: "59JoGSJaPOdtgmCL+QLp8U/e6y+OGGM8fdEX4sClrpk=",
-    // csvimport.tsx:297
+    // csvimport.tsx:328
   },
   "If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.": {
     val: "If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.",
@@ -917,7 +924,7 @@ export const DEFAULTS:IMessages = {
     val: "If multiple columns are selected for Amount, the first non-zero value will be used.  This is helpful if the CSV contains separate Credit and Debit columns.",
     translated: false,
     h: "bxc4+JxhDrm2oYWek0ISeJDxq173KLfpcnOT4GEMWGQ=",
-    // csvimport.tsx:300
+    // csvimport.tsx:331
   },
   "Import": {
     val: "Import",
@@ -1000,9 +1007,9 @@ export const DEFAULTS:IMessages = {
     val: "Invalid",
     translated: false,
     h: "TTWlQj/xySwj3x3tLJd80Tl+VmJXWWdhFpMq90hNbfg=",
-    // csvimport.tsx:395
-    // csvimport.tsx:398
-    // csvimport.tsx:409
+    // csvimport.tsx:441
+    // csvimport.tsx:444
+    // csvimport.tsx:455
   },
   "Invalid SimpleFIN Token": {
     val: "Invalid SimpleFIN Token",
@@ -1172,8 +1179,8 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:144
     // searchpage.tsx:173
     // transactions.tsx:225
-    // csvimport.tsx:337
-    // csvimport.tsx:508
+    // csvimport.tsx:382
+    // csvimport.tsx:554
   },
   "Minimize": {
     val: "Minimize",
@@ -1356,7 +1363,7 @@ export const DEFAULTS:IMessages = {
     val: "OK",
     translated: false,
     h: "mMSSK7ZBxlx6MLe8r98jC5sAtmk2McVhRqslsnhu5KM=",
-    // errors.ts:147
+    // errors.ts:141
   },
   "Off Budget Accounts": {
     val: "Off Budget Accounts",
@@ -1383,7 +1390,7 @@ export const DEFAULTS:IMessages = {
     val: "Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.",
     translated: false,
     h: "MUc4sPlkaqyooNhJKZ15rbBQdclJSNbaarHERiW1hrs=",
-    // csvimport.tsx:301
+    // csvimport.tsx:332
   },
   "Open Buckets Budget": {
     val: "Open Buckets Budget",
@@ -1490,7 +1497,7 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:142
     // searchpage.tsx:171
     // transactions.tsx:223
-    // csvimport.tsx:507
+    // csvimport.tsx:553
   },
   "Preferences": {
     val: "Preferences",
@@ -1520,7 +1527,7 @@ export const DEFAULTS:IMessages = {
     val: "Provide a name for the new account.",
     translated: false,
     h: "WFHwJzRVIraGkeqDS03YjWe0vMsPsiRE1qM6V/Ef/xE=",
-    // csvimport.tsx:490
+    // csvimport.tsx:536
   },
   "Purchase": {
     val: "Purchase",
@@ -1695,7 +1702,7 @@ export const DEFAULTS:IMessages = {
     val: "Select the account these transactions belong to.",
     translated: false,
     h: "qkaCMMw9CYakrPrLxgfkBp3KsfadBdGLYgZB8urPaC4=",
-    // csvimport.tsx:450
+    // csvimport.tsx:496
   },
   "Self debt": {
     val: "Self debt",
@@ -1719,7 +1726,7 @@ export const DEFAULTS:IMessages = {
     val: "Set mapping",
     translated: false,
     h: "0GImzkG1VPzFzjFdepzZz8+Ysis4xn7QQRVGlxVrQIw=",
-    // csvimport.tsx:367
+    // csvimport.tsx:412
   },
   "Show All": {
     val: "Show All",
@@ -2040,7 +2047,7 @@ export const DEFAULTS:IMessages = {
     val: "Unique ID",
     translated: false,
     h: "UZsJmQ28mtEO349l3zdNHoAtb0JT1LT9e7EjedqptSE=",
-    // csvimport.tsx:339
+    // csvimport.tsx:384
   },
   "Unknown account: ": {
     val: "Unknown account: ",
@@ -2282,7 +2289,7 @@ export const DEFAULTS:IMessages = {
     val: "You must have at least one column each set to Amount, Memo and Date Posted.",
     translated: false,
     h: "k5NuGeKNgPfZs7xUbwp5PgfPr6dosV0ZTVxAnphHH6E=",
-    // csvimport.tsx:298
+    // csvimport.tsx:329
   },
   "Your email address:": {
     val: "Your email address:",
@@ -2351,17 +2358,11 @@ export const DEFAULTS:IMessages = {
     h: "054RU7JImk6Pavh27xHA9CgGIgjmP0dYIgXez2UWx34=",
     // buckets.tsx:215
   },
-  "action.chat": {
-    val: "Chat",
-    translated: false,
-    h: "Ct9w1d0AYWvEp42SCfVm7DFmet6f43eJOSWwg17o+7A=",
-    // errors.ts:125
-  },
   "action.ignore": {
     val: "Ignore",
     translated: false,
     h: "K8sAh2XND1/tJOuX9xTLmr1fQjUOB70cfc9GwI62fEs=",
-    // errors.ts:124
+    // errors.ts:125
   },
   "action.link-account": {
     val: "Link",
@@ -2373,7 +2374,7 @@ export const DEFAULTS:IMessages = {
     val: "Report Bug",
     translated: false,
     h: "RxuE9Dh0Dadda2PtjUPD0dQ7b8aQok84Ytvw31ABBRU=",
-    // errors.ts:126
+    // errors.ts:124
   },
   "bucket.detailslabel": {
     val: "Details",
@@ -2503,7 +2504,7 @@ export const DEFAULTS:IMessages = {
         },
     translated: false,
     h: "hFYUKKIqC+nYQ+RRKwNu3/PGxbtuHzNHoigSJwCK8d4=",
-    // csvimport.tsx:450
+    // csvimport.tsx:496
   },
   "enter-license-prompt": {
     val: "\n      Please enter your Buckets License below.  Don&apos;t have a license?  <a href=\"#\" id=\"clicktobuy\">Click here to purchase one.</a>\n    ",
