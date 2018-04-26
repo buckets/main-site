@@ -44,6 +44,9 @@ export async function parseCSVStringWithHeader<T>(guts:string):Promise<ParsedCSV
 }
 
 export function csvFieldToCents(x:string) {
+  if (!x) {
+    return 0;
+  }
   x = x.replace(/[^-\(\)0-9\.,]/g, '')
   if (x.startsWith('(') && x.endsWith(')')) {
     x = `-${x.substr(1, x.length-1)}`;

@@ -38,8 +38,8 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
         <table className="ledger">
           <thead>
             <tr>
-              <th className="right">Amount</th>
-              <th>Item</th>
+              <th className="right">{sss('Amount')}</th>
+              <th>{sss('Item'/* Amazon order item description label */)}</th>
             </tr>
           </thead>
           <tbody>
@@ -52,13 +52,13 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
           </tbody>
         </table>);
     } else {
-      return <div>Import an <a href="#" onClick={ev => {
+      return <div><a href="#" onClick={ev => {
             ev.preventDefault();
             openAmazonReportPage({
               range: appstateToInterval(appstate),
               type: 'ITEMS',
             })
-          }}>Amazon Items report</a> to see order details.
+          }}>{sss('Import an Amazon Items report to see order details.')}</a>
       </div>
     }
   }
@@ -187,86 +187,79 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
     }
     return (
       <div className="rows">
-        <div className="subheader">
-          <div className="group">
-            <button onClick={() => {
-              remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-                defaultPath: remote.app.getPath('downloads'),
-                properties: ['openFile', 'multiSelections'],
-                filters: [
-                  {name: 'CSV', extensions: ['csv']},
-                ],
-                title: 'Open Amazon.com Reports',
-              }, (filePaths:string[]) => {
-                if (filePaths) {
-                  processCSVFiles(filePaths)
-                  .then((result:ReportSet) => {
-                    if (result.items.length) {
-                      makeToast(sss('Successfully imported Amazon Items report'))
-                    }
-                    if (result.orders.length) {
-                      makeToast(sss('Successfully imported Amazon Orders report'))
-                    }
-                    if (result.refunds.length) {
-                      makeToast(sss('Successfully imported Amazon Refunds report'))  
-                    }
-                    let reportset = combineReportSets(this.state.reportset, result);
-                    this.setState({
-                      reportset,
-                    })
-                  });
-                }
-              })
-            }}><span className="fa fa-upload" /> {sss('Import Amazon Reports')}</button>
-          </div>
-          <div className="group">
-          </div>
-        </div>
         <div className="panes">
           <div className="padded">
             <h1>{sss('Amazon.com Reconciliation')}</h1>
 
-            {orders_list}
-
-            {refunds_list}
-
-            <p>
-              To begin reconciliation:
-            </p>
             <ol>
-              <li>Go to Amazon.com > Account &amp; Lists > Download order reports (or click the links below)</li>
               <li>
-                Request an <a href="#" onClick={ev => {
+                <a href="#" onClick={ev => {
                   ev.preventDefault();
                   openAmazonReportPage({
                     range: appstateToInterval(appstate),
                     type: 'ITEMS',
                   })
-                }}>Amazon Items report</a>
+                }}>{sss('Request an Amazon Items report')}</a>
                 {reportset.items.length ? <span className="fa fa-check fa-fw" /> : null}
               </li>
               <li>
-                Request an <a href="#" onClick={ev => {
+                <a href="#" onClick={ev => {
                   ev.preventDefault();
                   openAmazonReportPage({
                     range: appstateToInterval(appstate),
                     type: 'SHIPMENTS',
                   })
-                }}>Amazon Orders report</a>
+                }}>{sss('Request an Amazon Orders report')}</a>
                 {reportset.orders.length ? <span className="fa fa-check fa-fw" /> : null}
               </li>
               <li>
-                Optionally request a <a href="#" onClick={ev => {
+                <a href="#" onClick={ev => {
                   ev.preventDefault();
                   openAmazonReportPage({
                     range: appstateToInterval(appstate),
                     type: 'REFUNDS',
                   })
-                }}>Amazon Refunds report</a>
+                }}>{sss('Optionally request a Amazon Refunds report')}</a>
                 {reportset.refunds.length ? <span className="fa fa-check fa-fw" /> : null}
               </li>
-              <li>Import all the produced reports using the button above</li>
+              <li>
+                <a href="#" onClick={ev => {
+                  ev.preventDefault();
+                  remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+                    defaultPath: remote.app.getPath('downloads'),
+                    properties: ['openFile', 'multiSelections'],
+                    filters: [
+                      {name: 'CSV', extensions: ['csv']},
+                    ],
+                    title: 'Open Amazon.com Reports',
+                  }, (filePaths:string[]) => {
+                    if (filePaths) {
+                      processCSVFiles(filePaths)
+                      .then((result:ReportSet) => {
+                        if (result.items.length) {
+                          makeToast(sss('Successfully imported Amazon Items report'))
+                        }
+                        if (result.orders.length) {
+                          makeToast(sss('Successfully imported Amazon Orders report'))
+                        }
+                        if (result.refunds.length) {
+                          makeToast(sss('Successfully imported Amazon Refunds report'))  
+                        }
+                        let reportset = combineReportSets(this.state.reportset, result);
+                        this.setState({
+                          reportset,
+                        })
+                      });
+                    }
+                  })
+                }}>{sss('Import all Amazon Reports')}</a>
+              </li>
             </ol>
+
+            {orders_list}
+
+            {refunds_list}
+
           </div>
         </div>
       </div>
@@ -276,7 +269,7 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
 
 function appstateToInterval(appstate:AppState):Interval {
   return {
-    start: appstate.viewDateRange.onOrAfter,
+    start: appstate.viewDateRange.onOrAfter.subtract(7, 'days'),
     end: appstate.viewDateRange.before,
   }
 }
@@ -290,10 +283,10 @@ function openAmazonReportPage(args:{
     const { start, end } = args.range;
     Object.assign(qs, {
       monthstart: start.month()+1,
-      daystart: '1',
+      daystart: start.date(),
       yearstart: start.year(),
       monthend: end.month()+1,
-      dayend: '1',
+      dayend: end.date(),
       yearend: end.year(),
     });
   }
