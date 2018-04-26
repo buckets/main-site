@@ -410,6 +410,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>{sss('sync-symbol help', "This symbol means the transaction came from an import/sync")}</Help>
     } else if (trans) {
       source_icon = <button
+        title={trans.cleared
+          ? sss("Cleared")
+          : sss("Not yet cleared")}
         className={cx("icon hover cleared-indicator", {
           cleared: trans.cleared,
         })}
@@ -417,7 +420,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           let undo_note = trans.cleared ? sss('Mark Not Cleared') : sss('Mark Cleared');
           manager.checkpoint(undo_note)
           .sub.accounts.updateTransaction(trans.id, {cleared: !trans.cleared})
-        }}>C</button>
+        }}><span className="fa fa-check-circle"/></button>
     }
     if (this.state.editing) {
       // editing

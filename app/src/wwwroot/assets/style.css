@@ -1617,14 +1617,13 @@ g.hover-labels:hover rect.highlight {
   opacity: 0;
 }
 
-.icon.cleared-indicator,
-.icon.cleared-indicator.hover {
+.icon.cleared-indicator {
   font-weight: bold;
-  opacity: 1;
-  color: var(--red);
+  opacity: 0;
+  color: var(--darker-green);
 }
 .icon.cleared-indicator.cleared {
-  opacity: 0;
+  opacity: 1;
 }
 
 .record-list-item {
