@@ -2,11 +2,11 @@ import * as React from 'react';
 import * as moment from 'moment-timezone';
 import * as cx from 'classnames';
 import { sss } from './i18n'
+import { PSTATE } from './mainprocess/persistent'
 // import { PrefixLogger } from './logging'
 // const log = new PrefixLogger('(time)');
 
-const mytz = moment.tz.guess();
-
+const mytz = PSTATE.timezone || moment.tz.guess();
 
 /**
  *  Ensure that a moment returns isUTC() === true

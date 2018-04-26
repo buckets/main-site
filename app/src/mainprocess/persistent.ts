@@ -20,6 +20,7 @@ export interface PersistentState {
     filename: string;
     windows: Array<IOpenWindow>;
   }>;
+  timezone: string;
 }
 
 export let PSTATE:PersistentState = {
@@ -30,6 +31,7 @@ export let PSTATE:PersistentState = {
   skipVersion: null,
   animation: true,
   last_opened_windows: [],
+  timezone: '',
 };
 
 function loadState():PersistentState {

@@ -10,7 +10,7 @@ export function openPreferences() {
     return;
   }
   win = new BrowserWindow({
-    width: 400,
+    width: 500,
     height: 200,
     minWidth: 400,
     minHeight: 200,
