@@ -4,6 +4,7 @@ import sys
 import re
 import os
 import glob
+import time
 from github import GitHubClient
 
 GH_TOKEN = os.environ['GH_TOKEN']
@@ -25,4 +26,5 @@ for filename in filenames:
         for num in nums:
             github.labelIssue(num, ['included in next release'])
             sys.stdout.write(' #{0}'.format(num))
+            time.sleep(1.1)
     sys.stdout.write('\n')
