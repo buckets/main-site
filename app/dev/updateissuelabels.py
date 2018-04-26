@@ -26,5 +26,6 @@ for filename in filenames:
         for num in nums:
             github.labelIssue(num, ['included in next release'])
             sys.stdout.write(' #{0}'.format(num))
+            sys.stdout.flush()
             time.sleep(1.1)
     sys.stdout.write('\n')
