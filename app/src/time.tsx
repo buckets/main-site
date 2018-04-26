@@ -6,7 +6,7 @@ import { PSTATE } from './mainprocess/persistent'
 // import { PrefixLogger } from './logging'
 // const log = new PrefixLogger('(time)');
 
-const mytz = PSTATE.timezone || moment.tz.guess();
+export const mytz = PSTATE.timezone || moment.tz.guess();
 
 /**
  *  Ensure that a moment returns isUTC() === true
