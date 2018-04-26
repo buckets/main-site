@@ -616,7 +616,7 @@ class BucketRow extends React.Component<BucketRowProps, {
       onDragOver={this.onDragOver}
       onDrop={this.onDrop}
       onDragLeave={this.onDragLeave}
-      className={cx('note-hover-trigger', {
+      className={cx('icon-hover-trigger', {
         underDrag: this.state.underDrag,
         isDragging: this.state.isDragging,
         dropTopHalf: this.state.underDrag && this.state.dropHalf === 'top',
@@ -826,7 +826,7 @@ class GroupRow extends React.Component<{
           <th x-name="details">{sss('bucket.detailslabel', 'Details')}</th>
           <th x-name="more"></th>
         </tr>
-      <tr className="group-row note-hover-trigger">
+      <tr className="group-row icon-hover-trigger">
         <td x-name="draghandle"
           className={cx(
           'nopad',
@@ -1175,7 +1175,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
           account_name = appstate.accounts[account_id].name;
         }
       }
-      return <tr key={trans.id} className="note-hover-trigger">
+      return <tr key={trans.id} className="icon-hover-trigger">
         <td>
           <input
             type="checkbox"

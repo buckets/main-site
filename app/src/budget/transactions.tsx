@@ -408,6 +408,19 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     let source_icon;
     if (trans && trans.fi_id) {
       source_icon = <Help icon={<span className="fa fa-flash from-fi fa-fw" />}>{sss('sync-symbol help', "This symbol means the transaction came from an import/sync")}</Help>
+    } else if (trans) {
+      source_icon = <button
+        title={trans.cleared
+          ? sss("Cleared")
+          : sss("Not yet cleared")}
+        className={cx("icon hover cleared-indicator", {
+          cleared: trans.cleared,
+        })}
+        onClick={ev => {
+          let undo_note = trans.cleared ? sss('Mark Not Cleared') : sss('Mark Cleared');
+          manager.checkpoint(undo_note)
+          .sub.accounts.updateTransaction(trans.id, {cleared: !trans.cleared})
+        }}><span className="fa fa-check-circle"/></button>
     }
     if (this.state.editing) {
       // editing
@@ -569,9 +582,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         )
     } else {
       // viewing
-      return <tr className="note-hover-trigger">
+      return <tr className="icon-hover-trigger">
         <td>{checkbox}</td>
-        <td className="nobr"><NoteMaker obj={trans} />{source_icon}<DateDisplay value={trans.posted} islocal /></td>
+        <td className="nobr">
+          <NoteMaker obj={trans} />
+          {source_icon}
+          <span><DateDisplay value={trans.posted} islocal /></span>
+        </td>
         {hideAccount ? null : <td>{appstate.accounts[trans.account_id].name}</td>}
         <td>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>

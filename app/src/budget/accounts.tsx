@@ -83,7 +83,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
         </div>}>{sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.')}</Help>
 
       }
-      return (<tr key={account.id} className="note-hover-trigger">
+      return (<tr key={account.id} className="icon-hover-trigger">
           <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
           <td className="nobr"><ClickToEdit
             value={account.name}
