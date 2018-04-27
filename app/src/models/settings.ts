@@ -3,11 +3,13 @@ import { IObject, registerClass, IStore } from '../store';
 export interface ISettings {
   reports_timeback_number: number;
   reports_timeback_unit: 'month'|'year';
+  money_symbol: string,
 }
 
 export const DEFAULTS:ISettings = {
   reports_timeback_number: 18,
   reports_timeback_unit: 'month',
+  money_symbol: '',
 }
 
 export class Setting implements IObject {

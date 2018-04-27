@@ -11,6 +11,7 @@ import {TransactionPage} from './transactions'
 import { ImportPage, SyncWidget } from './importpage'
 import { ExportPage } from './exportpage'
 import { SearchPage } from './searchpage'
+import { SettingsPage } from './settingspage'
 import { ReportsPage } from './reports'
 import { Money, setAnimationEnabled, setSeparators } from '../money'
 import { MonthSelector } from '../input'
@@ -187,6 +188,7 @@ class Navbar extends React.Component<{
             shell.openExternal('https://www.budgetwithbuckets.com/chat');
             return false;
           }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt')}</span></a>
+          <Link relative to="/settings" exactMatchClass="selected" matchClass="selected"><span><span className="fa fa-fw fa-cog"></span> {sss('Settings')}</span></Link>
           {trial_version}
         </div>
       </div>)
@@ -337,6 +339,9 @@ class Application extends React.Component<ApplicationProps, any> {
                     </Route>
                     <Route path="/tools">
                       <ToolsPage appstate={appstate} />
+                    </Route>
+                    <Route path="/settings">
+                      <SettingsPage appstate={appstate} />
                     </Route>
                   </Switch>
                 </div>

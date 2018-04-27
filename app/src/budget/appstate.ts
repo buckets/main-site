@@ -15,6 +15,7 @@ import { sss } from '../i18n'
 import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
 import { CSVNeedsMapping, CSVNeedsAccountAssigned } from '../csvimport'
+import { setDefaultSymbol } from '../money'
 
 const log = new PrefixLogger('(appstate)')
 
@@ -490,6 +491,9 @@ export class StateManager {
       }
     } else if (isObj(Setting, obj)) {
       this.appstate.settings[obj.key] = obj.value;
+      if (obj.key === 'money_symbol') {
+        setDefaultSymbol(obj.value);
+      }
     }
     this.signalChange();
     return this.appstate;
@@ -542,6 +546,7 @@ export class StateManager {
   }
   async fetchSettings() {
     this.appstate.settings = await this.store.sub.settings.getSettings();
+    setDefaultSymbol(this.appstate.settings.money_symbol);
   }
   fetchAllAccounts() {
     return this.store.sub.accounts.list()
