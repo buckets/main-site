@@ -67,6 +67,14 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
     } catch(err) {
       log.info('Error reading file as CSV');
       log.info(err);
+      try {
+        set = await csv2importable(store, bf, data, {
+          delimiter: ';',
+        })
+      } catch(err) {
+        log.info('Error reading file as semicolon CSV');
+        log.info(err);  
+      }
     }
   }
 

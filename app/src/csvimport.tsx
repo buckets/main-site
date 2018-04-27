@@ -21,11 +21,16 @@ interface ParsedCSV<T> {
   headers: string[];
   rows: T[];
 }
-export async function parseCSVStringWithHeader<T>(guts:string):Promise<ParsedCSV<T>> {
+export async function parseCSVStringWithHeader<T>(guts:string, opts:{
+  delimiter: string,
+}={
+  delimiter: ','
+}):Promise<ParsedCSV<T>> {
   return new Promise<ParsedCSV<T>>((resolve, reject) => {
     let headers:string[] = [];
     csv.parse(guts, {
       relax_column_count: true,
+      delimiter: opts.delimiter,
       columns(header_row:string[]) {
         headers = header_row
         return header_row;
@@ -150,9 +155,17 @@ function getDataRows<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):T[] {
 
 export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, args:{
   force_mapping?:boolean,
+  delimiter?:string,
 } = {}):Promise<ImportableAccountSet> {
   log.info('csv2importable', guts.length);
-  const parsed = await parseCSVStringWithHeader(guts);
+  const delimiter = args.delimiter || ','
+  const parsed = await parseCSVStringWithHeader(guts, {
+    delimiter,
+  });
+  if (parsed.headers.length < 3) {
+    // Invalid CSV file
+    throw new Error('Not enough columns in CSV file')
+  }
   const fingerprint = hashStrings(parsed.headers);
   log.info('fingerprint', fingerprint);
   let csv_mapping = await store.sub.accounts.getCSVMapping(fingerprint);
