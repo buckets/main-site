@@ -5,7 +5,9 @@ import {v4 as uuid} from 'uuid'
 
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
+import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat } from './langs/spec'
 import { Money, decimal2cents } from './money'
+import { SEPS, ISeps } from 'buckets-core/dist/money'
 import { DateDisplay, parseLocalTime, dumpTS, loadTS } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
 import { Account } from './models/account'
@@ -48,7 +50,7 @@ export async function parseCSVStringWithHeader<T>(guts:string, opts:{
   })
 }
 
-export function csvFieldToCents(x:string) {
+export function csvFieldToCents(x:string, seps?:ISeps) {
   if (!x) {
     return 0;
   }
@@ -56,7 +58,9 @@ export function csvFieldToCents(x:string) {
   if (x.startsWith('(') && x.endsWith(')')) {
     x = `-${x.substr(1, x.length-1)}`;
   }
-  return decimal2cents(x);
+  return decimal2cents(x, {
+    seps: seps || undefined,
+  });
 }
 
 function guessDateFormat(formats:string[], dates:string[]):string[] {
@@ -117,6 +121,7 @@ export interface CSVMapping {
   }
   posted_format?: string;
   noheader?: boolean;
+  numberformat?: NumberFormat;
 }
 export interface CSVNeedsMapping {
   id: string;
@@ -207,7 +212,11 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   let hashcount = {};
   let inverted_mapping = invertMapping(mapping);
   const transactions = getDataRows(parsed, mapping).map((row):ImportableTrans => {
-    const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
+    const amount = csvFieldToCents(
+      inverted_mapping.amount
+        .map(key => row[key])
+        .filter(x=>x)[0],
+      mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
     const posted = parseLocalTime(row[inverted_mapping.posted[0]], mapping.posted_format);
     let fi_id:string;
@@ -296,6 +305,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
       fields: {},
       posted_format: null,
       noheader: false,
+      seps: undefined,
     }
     let guess = this.computeFormatOptionsAndBestGuess(mapping, props.obj);
     if (guess.posted_format !== undefined) {
@@ -414,6 +424,20 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                     })}
                   </select>
                 </div> : null}
+                {value === 'amount' ? <div>
+                  <select
+                    value={mapping.numberformat}
+                    onChange={ev => {
+                      this.setState({mapping: Object.assign(mapping, {
+                        numberformat: ev.target.value as NumberFormat,
+                      })})
+                    }}>
+                    <option value="">{sss('Language default')}</option>
+                    <option value="comma-period">{NUMBER_FORMAT_EXAMPLES['comma-period']}</option>
+                    <option value="period-comma">{NUMBER_FORMAT_EXAMPLES['period-comma']}</option>
+                    <option value="space-comma">{NUMBER_FORMAT_EXAMPLES['space-comma']}</option>
+                  </select>
+                </div> : null}
               </th>
             })}
             <th>
@@ -467,7 +491,11 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                 } else if (value === 'amount') {
                   let money;
                   try {
-                    money = <Money value={csvFieldToCents(row[header])} noanimate />
+                    money = <Money
+                      value={csvFieldToCents(row[header],
+                        mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS)}
+                      noanimate
+                    />
                   } catch(err) {
                     money = <span className="error">{sss('Invalid')}</span>
                   }

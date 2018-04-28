@@ -49,10 +49,7 @@ export async function start(base_element, room, args: {
     log.info(`number format: DEFAULT`);
     numberformat = tx.getNumberFormat();
   }
-  setSeparators(numberformat.group,
-      numberformat.group_regex,
-      numberformat.decimal,
-      numberformat.decimal_regex);
+  setSeparators(numberformat);
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())
