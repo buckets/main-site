@@ -28,7 +28,6 @@ To add a new language do:
 
 To add the language as an option in the preferences dropdown do:
 
-- Import it in `i18n.tsx`
 - Add it as an option in `preferences.tsx`
 
 Other use:

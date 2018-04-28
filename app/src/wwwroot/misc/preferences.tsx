@@ -52,6 +52,7 @@ class PreferencesApp extends React.Component<{
                 <option value="en">English</option>
                 <option value="es">español</option>
                 <option value="fr">Français</option>
+                <option value="nl">Nederlands</option>
                 <option value="pt">Português</option>
               </select>
             </td>

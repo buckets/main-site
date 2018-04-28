@@ -183,7 +183,7 @@ class Navbar extends React.Component<{
             ev.preventDefault();
             shell.openExternal('https://www.budgetwithbuckets.com/chat');
             return false;
-          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt')}</span></a>
+          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt'/* If "Chat with Matt" is to wide, you can translate this as just "Chat" */)}</span></a>
           {trial_version}
         </div>
       </div>)
