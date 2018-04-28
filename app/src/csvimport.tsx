@@ -419,7 +419,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   >
                     <option value=""></option>
                     <option value="amount">{sss('Amount')}</option>
-                    <option value="amount_sign">{sss('Sign'/* Referring to the sign of a number (positive or negative) */)} {sss('(optional)')}</option>
+                    <option value="amount_sign">{sss('Sign'/* Noun referring to the sign of a number (positive or negative) */)} {sss('(optional)')}</option>
                     <option value="memo">{sss('Memo')}</option>
                     <option value="posted">{sss('Date Posted')}</option>
                     <option value="fi_id">{sss('Unique ID')} {sss('(optional)')}</option>
