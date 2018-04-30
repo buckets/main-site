@@ -98,9 +98,9 @@ class TranslationContext {
 }
 
 async function getLocale():Promise<string> {
-  // LANG environment variable beats all
-  if (env.LANG) {
-    return env.LANG;
+  // BUCKETS_LANG environment variable beats all
+  if (env.BUCKETS_LANG) {
+    return env.BUCKETS_LANG;
   } else {
     // Application preference
     if (PSTATE.locale) {
