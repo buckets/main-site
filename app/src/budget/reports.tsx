@@ -605,7 +605,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
               <th className="right right-padded">{sss('Bucket')}</th>
               <th className="center">{sss('Budgeted')}</th>
               <th className="center">{sss('Average')}</th>
-              <th className="left left-padded">
+              <th className="left left-padded full-width">
                 <input
                   type="range"
                   min="2"
