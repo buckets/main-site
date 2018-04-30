@@ -69,7 +69,7 @@ async function backupAndStartOver(options:{
   }
   if (!options.keep_buckets) {
     log.info('Deleting buckets');
-    await store.query('DELETE FROM buckets', {});
+    await store.query('DELETE FROM bucket', {});
   }
   manager.refresh();
   makeToast(sss('Done'))
