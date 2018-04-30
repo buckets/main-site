@@ -1458,7 +1458,7 @@ const messages:IMessages = {
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
   },
   "Sign": {
-    /* Referring to the sign of a number (positive or negative) */
+    /* Noun referring to the sign of a number (positive or negative) */
     val: "Sign",
     translated: false,
     h: "uw6BT7o9vlsgV2TpwBFx/MfF1npvA+6ru4lXXcSzoCM=",
