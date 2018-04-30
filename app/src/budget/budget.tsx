@@ -56,6 +56,7 @@ export async function start(base_element, room, args: {
   log.info('   toLocaleString:', (new Date()).toLocaleString())
   log.info('getTimezoneOffset:', (new Date()).getTimezoneOffset())
   log.info(`moment: ${moment.version}`)
+  log.info(`moment.locale: ${moment.locale()}`);
 
   if (args) {
     if (args.noanimation) {
