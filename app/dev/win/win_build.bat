@@ -2,7 +2,8 @@ echo "win_build.bat start"
 c:
 cd \
 md proj
-md proj\dist
+md proj\app
+md proj\app\dist
 rem net use y: \\vboxsvr\project
 rmdir c:\proj\app\src /s /q
 rmdir c:\proj\app\migrations /s /q
