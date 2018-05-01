@@ -109,7 +109,12 @@ function invertMapping(mapping:CSVMapping):{
   };
   Object.keys(mapping.fields).sort().forEach(header => {
     const val = mapping.fields[header];
-    inverted_mapping[val].push(header);
+    try {
+      inverted_mapping[val].push(header);  
+    } catch(err) {
+      log.info('val:', val, 'header', header);
+      throw err;
+    }
   })
   return inverted_mapping;
 }
