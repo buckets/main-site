@@ -8,8 +8,8 @@ import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'elect
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
-import { Timestamp, serializeTimestamp, ensureLocalMoment } from '../time'
-import { IBudgetBus, BudgetBus, BudgetBusRenderer } from '../store'
+import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from '../time'
+import { IBudgetBus, BudgetBus, BudgetBusRenderer, TABLE2CLASS } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';
 import { addRecentFile, PSTATE } from './persistent'
@@ -19,9 +19,12 @@ import { onlyRunInMain, Room } from '../rpc'
 import { importFile, ImportResult } from '../importing'
 import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from '../sync'
+import { findYNAB4FileAndImport } from '../ynab'
 import { SimpleFINSyncer } from '../models/simplefin'
 import { MacroSyncer } from '../models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
+import { UndoRedoResult } from '../undo'
+import { updateMenu } from './menu'
 
 const log = new PrefixLogger('(files)')
 
@@ -31,14 +34,14 @@ export interface IOpenWindow {
   focused: boolean,
 }
 
-interface BudgetFileEvents {
+export interface BudgetFileEvents {
   sync_started: {
-    onOrAfter: string;
-    before: string;
+    onOrAfter: SerializedTimestamp;
+    before: SerializedTimestamp;
   };
   sync_done: {
-    onOrAfter: string;
-    before: string;
+    onOrAfter: SerializedTimestamp;
+    before: SerializedTimestamp;
     result: SyncResult;
   };
   macro_started: {
@@ -59,11 +62,16 @@ export interface IBudgetFile {
   room: Room<BudgetFileEvents>;
   
   /**
+   *  Get the filename for this budget.
+   */
+  getFilename():Promise<string>;
+
+  /**
    *  Cause the recording window to open for a particular recording
    */
   openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: Timestamp,
-    before: Timestamp,
+    onOrAfter: MaybeMoment;
+    before: MaybeMoment;
   }):Promise<SyncResult>;
   
   /**
@@ -71,16 +79,24 @@ export interface IBudgetFile {
    */
   importFile(path:string):Promise<ImportResult>;
   openImportFileDialog();
+  importYNAB4File();
 
   /**
    *  Start a sync
    */
-  startSync(onOrAfter:Timestamp, before:Timestamp);
+  startSync(onOrAfter:MaybeMoment, before:MaybeMoment);
 
   /**
    *  Cancel sync
    */
   cancelSync();
+
+  /**
+   *  Undo
+   */
+  doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T>;
+  doUndo();
+  doRedo();
 }
 
 interface IBudgetFileRPCMessage {
@@ -185,6 +201,10 @@ export class BudgetFile implements IBudgetFile {
     return BudgetFile.WIN2FILE[id];
   }
 
+  async getFilename() {
+    return this.filename;
+  }
+
   /**
 
    */
@@ -215,6 +235,10 @@ export class BudgetFile implements IBudgetFile {
     // listen for child store requests
     this.rpc_store = new RPCMainStore(this.store, this.id);
     await this.rpc_store.start();
+
+    this.store.undo.events.stackchange.on(() => {
+      updateMenu({budget: this});
+    })
 
     // mark it as having been opened
     addRecentFile(this.filename);
@@ -270,6 +294,7 @@ export class BudgetFile implements IBudgetFile {
       })
       this.openWindow(`/budget/index.html?${qs}`);
     }
+
   }
 
   /**
@@ -410,23 +435,26 @@ export class BudgetFile implements IBudgetFile {
    *
    */
   async openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: Timestamp,
-    before: Timestamp,
+    onOrAfter: MaybeMoment,
+    before: MaybeMoment,
   }) {
     let win:Electron.BrowserWindow;
-    const bankmacro = await this.store.bankmacro.get(macro_id);
+    const bankmacro = await this.store.sub.bankmacro.get(macro_id);
 
     const partition = `persist:rec-${bankmacro.uuid}`;
     this.ensureSession(partition);
 
     let response_id:string;
     let hide:boolean = false;
+    let serialized_autoplay;
     if (autoplay) {
-      autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter)
-      autoplay.before = serializeTimestamp(autoplay.before)
       response_id = uuid();
       hide = true;
       this.room.broadcast('macro_started', {id: macro_id});
+      serialized_autoplay = JSON.stringify({
+        onOrAfter: dumpTS(autoplay.onOrAfter),
+        before: dumpTS(autoplay.before),
+      })
     }
 
     // Load the url
@@ -434,7 +462,7 @@ export class BudgetFile implements IBudgetFile {
       macro_id,
       partition,
       response_id,
-      autoplay: JSON.stringify(autoplay),
+      autoplay: serialized_autoplay,
     })
     win = this.openWindow(`/record/record.html?${qs}`, {
       hide,
@@ -489,6 +517,10 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
+  importYNAB4File() {
+    findYNAB4FileAndImport(this, this.store);
+  }
+
   static async openFile(filename:string, args:{
     create?:boolean,
     windows?:Array<IOpenWindow>,
@@ -505,21 +537,21 @@ export class BudgetFile implements IBudgetFile {
   }
 
 
-  async startSync(onOrAfter:Timestamp, before:Timestamp) {
-    let m_onOrAfter = ensureLocalMoment(onOrAfter);
-    let m_before = ensureLocalMoment(before);
+  async startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
+    let m_onOrAfter = loadTS(onOrAfter);
+    let m_before = loadTS(before);
     let sync = this.syncer.syncTransactions(m_onOrAfter, m_before);
     this.running_syncs.push(sync);
     let p = sync.start();
     this.room.broadcast('sync_started', {
-      onOrAfter: serializeTimestamp(onOrAfter),
-      before: serializeTimestamp(m_before),
+      onOrAfter: dumpTS(onOrAfter),
+      before: dumpTS(before),
     })
     let result = await p;
     this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
     this.room.broadcast('sync_done', {
-      onOrAfter: serializeTimestamp(onOrAfter),
-      before: serializeTimestamp(m_before),
+      onOrAfter: dumpTS(onOrAfter),
+      before: dumpTS(before),
       result,
     })
   }
@@ -528,6 +560,44 @@ export class BudgetFile implements IBudgetFile {
     this.running_syncs.forEach(sync => {
       sync.cancel();
     })
+  }
+
+  /**
+   *  Run a function, recording it as undo-able
+   */
+  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
+    return this.store.undo.doAction(label, func);
+  }
+  async doUndo() {
+    let result = await this.store.undo.undoLastAction();
+    return this._handleUndoRedoResult(result)
+  }
+  async doRedo() {
+    let result = await this.store.undo.redoLastAction();
+    return this._handleUndoRedoResult(result);
+  }
+  private async _handleUndoRedoResult(result:UndoRedoResult) {
+    let promises = result.changes.map(async change => {
+      if (change.change === 'delete') {
+        return this.store.publishObject('delete', {
+          _type: change.table,
+          id: change.id,
+          created: null,
+        })
+      } else {
+        let obj = await this.store.getObject(TABLE2CLASS[change.table], change.id);
+        return this.store.publishObject('update', obj);
+      }
+    })
+    return Promise.all(promises);
+  }
+
+  // These are for use by RendererBudgetFile
+  async startAction(label:string) {
+    return this.store.undo.startAction(label);
+  }
+  async finishAction(id:number) {
+    return this.store.undo.finishAction(id);
   }
 }
 
@@ -549,16 +619,23 @@ class RendererBudgetFile implements IBudgetFile {
     this.room = new Room<BudgetFileEvents>(this.id);
   }
 
+  async getFilename() {
+    return this.callInMain('getFilename');
+  }
+
   async openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: Timestamp,
-    before: Timestamp,
+    onOrAfter: MaybeMoment,
+    before: MaybeMoment,
   }) {
     try {
+      let serialized_autoplay;
       if (autoplay) {
-        autoplay.before = serializeTimestamp(autoplay.before);
-        autoplay.onOrAfter = serializeTimestamp(autoplay.onOrAfter);
+        serialized_autoplay = {
+          onOrAfter: dumpTS(autoplay.onOrAfter),
+          before: dumpTS(autoplay.before),
+        }
       }
-      return await this.callInMain('openRecordWindow', macro_id, autoplay) 
+      return await this.callInMain('openRecordWindow', macro_id, serialized_autoplay)
     } catch(err) {
       log.error(err.stack)
       log.error(err);
@@ -571,18 +648,38 @@ class RendererBudgetFile implements IBudgetFile {
   openImportFileDialog() {
     return this.callInMain('openImportFileDialog');
   }
+  importYNAB4File() {
+    return this.callInMain('importYNAB4File');
+  }
 
-  startSync(onOrAfter:Timestamp, before:Timestamp) {
-    return this.callInMain('startSync', serializeTimestamp(onOrAfter), serializeTimestamp(before));
+  startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
+    return this.callInMain('startSync', dumpTS(onOrAfter), dumpTS(before));
   }
   cancelSync() {
     return this.callInMain('cancelSync');
   }
 
+  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
+    const action_id = await this.callInMain('startAction', label);
+    try {
+      return await func()
+    } catch(err) {
+      throw err;
+    } finally {
+      await this.callInMain('finishAction', action_id);
+    }
+  }
+  doUndo() {
+    return this.callInMain('doUndo');
+  }
+  doRedo() {
+    return this.callInMain('doRedo');
+  }
+
   /**
    *  Call a function on this budget's corresponding main process BudgetFile.
    */
-  private callInMain(method:keyof IBudgetFile, ...args):Promise<any> {
+  private callInMain(method:keyof BudgetFile, ...args):Promise<any> {
     return new Promise((resolve, reject) => {
       const message:IBudgetFileRPCMessage = {
         reply_ch: `budgetfile.reply.${uuid()}`,

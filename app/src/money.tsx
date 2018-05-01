@@ -1,18 +1,9 @@
 import * as React from 'react';
 import * as cx from 'classnames';
-import * as math from 'mathjs';
-
+import { cents2decimal, decimal2cents, fancyEval, SEPS } from 'buckets-core/dist/money'
+export { cents2decimal, decimal2cents, setSeparators } from 'buckets-core/dist/money'
 
 let ANIMATION_ENABLED = true;
-const _groupregex = new RegExp(',', "g");
-math.config({
-  number: 'BigNumber',
-  precision: 64,
-})
-function fancyEval(x:string) {
-  x = x.replace(_groupregex, '');
-  return math.eval(x).toString();
-}
 
 export function setAnimationEnabled(value:boolean) {
   ANIMATION_ENABLED = value;
@@ -55,7 +46,7 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
   onDisplayChanged(e) {
     var display = e.target.value;
     var value = this.display2Cents(display);
-    this.setState({display: display}, function() {
+    this.setState({display: display}, () => {
       if (this.props.onChange) {
         this.props.onChange(value);
       }
@@ -109,7 +100,9 @@ interface MoneyProps {
   value: number;
   className?: string;
   hidezero?: boolean;
-  alwaysShowDecimal?: boolean;
+  hideCents?: boolean;
+  hideZeroCents?: boolean;
+  noFaintCents?: boolean;
   noanimate?: boolean;
   nocolor?: boolean;
   symbol?: string|boolean;
@@ -197,7 +190,7 @@ export class Money extends React.Component<MoneyProps, {
     })
   }
   render() {
-    let { value, className, hidezero, noanimate, nocolor, symbol, round, alwaysShowDecimal, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, symbol, round, hideCents, hideZeroCents, noFaintCents, ...rest } = this.props;
     let going_up = true;
     if (ANIMATION_ENABLED && !noanimate) {
       // animating
@@ -206,7 +199,7 @@ export class Money extends React.Component<MoneyProps, {
     }
     let display = cents2decimal(value, {
       round: round,
-      show_decimal: alwaysShowDecimal || this.state.anim_show_decimal,
+      show_decimal: !hideCents || this.state.anim_show_decimal,
     }) || '0';
     if (symbol && display) {
       let symbol_display:string = symbol === true ? DEFAULT.symbol : symbol;
@@ -216,17 +209,22 @@ export class Money extends React.Component<MoneyProps, {
         display = symbol_display + display;
       }
     }
-    let parts = display.split(decimal_sep, 2);
+    let parts = display.split(SEPS.decimal, 2);
+    let zeroCents = true;
     let display_components = [];
     if (parts.length === 2) {
-      let zero_cls = parts[1] === '0'.repeat(parts[1].length);
+      zeroCents = parts[1] === '0'.repeat(parts[1].length);
       display_components.push(<span className="dollar" key="dollar">{parts[0]}</span>)
-      display_components.push(<span className={cx("decimal", {
-        "zero": zero_cls,
-      })} key="decimal">{decimal_sep}</span>);
-      display_components.push(<span className={cx("cents", {
-        "zero": zero_cls,
-      })} key="cents">{parts[1]}</span>)
+      if (zeroCents && hideZeroCents) {
+        // don't show cents
+      } else {
+        display_components.push(<span className={cx("decimal", {
+          "zero": zeroCents,
+        })} key="decimal">{SEPS.decimal}</span>);
+        display_components.push(<span className={cx("cents", {
+          "zero": zeroCents,
+        })} key="cents">{parts[1]}</span>)
+      }
     } else {
       display_components.push(<span className="dollar" key="dollar">{display}</span>)
     }
@@ -237,107 +235,11 @@ export class Money extends React.Component<MoneyProps, {
         negative: value < 0 && !nocolor,
         zero: value === 0,
         hidezero: hidezero,
+        'faint-cents': !noFaintCents,
         animating: this.state.animating,
         up: this.state.animating && going_up,
         down: this.state.animating && !going_up,
       })} {...rest}>{display_components}</span>);
   }
 
-}
-
-
-export let thousand_sep = ',';
-export let decimal_sep = '.';
-
-export function cents2decimal(cents:number|null|string, args:{
-    show_decimal?:boolean,
-    show_sep?:boolean,
-    round?:boolean,
-  } = {}):string {
-  if (cents === null || cents === undefined || cents === '') {
-    return null;
-  }
-  if (cents === Infinity) {
-    return '∞'
-  }
-  let { show_decimal, show_sep, round } = args;
-  if (show_decimal === undefined) {
-    show_decimal = false;
-  }
-  if (show_sep === undefined) {
-    show_sep = true;
-  }
-  if (typeof cents === 'string') {
-    cents = parseInt(cents);
-  }
-  if (round) {
-    cents = cents - cents % 100;
-  }
-  var x = Math.abs(Math.round(cents));
-  if (isNaN(x)) {
-    x = 0;
-    cents = 0;
-  }
-  var sign = cents < 0 ? '-' : '';
-
-  // Before decimal
-  var d = Math.trunc(x / 100).toString();
-  var stem = d;
-  if (show_sep) {
-    var parts = [];
-    while (d.length > 3) {
-      parts.push(d.substr(d.length-3, 3));
-      d = d.substr(0, d.length-3);
-    }
-    if (d.length) {
-      parts.push(d);
-    }
-    parts.reverse();
-    stem = parts.join(thousand_sep);
-  }
-
-  // After decimal
-  var r = (x % 100);
-  var suffix = '';
-  if (r || show_decimal) {
-    var suffix = r.toString();
-    if (suffix.length < 2) {
-      suffix = '0' + suffix;
-    }
-    suffix = decimal_sep + suffix;
-  }
-  return sign + stem + suffix;
-}
-
-export function decimal2cents(string:string):number {
-  string = string.trim();
-
-  var negative = false;
-  if (string.length && string[0] === '-') {
-    string = string.substr(1);
-    negative = true;
-  }
-
-  var re = new RegExp(thousand_sep, 'g');
-  string = string.replace(re, '');
-  var parts = string.split(decimal_sep);
-
-  // cents
-  var cents = 0;
-  if (parts.length == 2) {
-    cents = parseInt((parts[1] + '00').substr(0, 2), 10);
-  }
-
-  // dollars
-  if (parts[0] === '') {
-    parts[0] = '0';
-  }
-  var dollars = parseInt(parts[0], 10);
-
-  if (isNaN(cents) || isNaN(dollars)) {
-    return null;
-  }
-
-  var sign = negative ? -1 : 1;
-  return sign * (Math.abs(dollars) * 100 + cents);
 }

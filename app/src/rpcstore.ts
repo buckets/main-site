@@ -1,11 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
 import { ipcMain, ipcRenderer } from 'electron'
-import { BucketStore } from './models/bucket'
-import { AccountStore } from './models/account'
-import { SimpleFINStore } from './models/simplefin'
-import { ReportStore } from './models/reports'
-import { BankMacroStore } from './models/bankmacro'
+import { SubStore } from './models/storebase'
 import { PrefixLogger } from './logging'
 
 const log = new PrefixLogger('(rpcstore)')
@@ -119,18 +115,10 @@ export class RPCMainStore {
   }
 }
 export class RPCRendererStore implements IStore {
-  readonly accounts:AccountStore;
-  readonly buckets:BucketStore;
-  readonly simplefin:SimpleFINStore;
-  readonly reports:ReportStore;
-  readonly bankmacro:BankMacroStore;
+  readonly sub:SubStore;
   private caller:RPCCaller<IStore>;
   constructor(room:string, readonly bus:IBudgetBus) {
-    this.accounts = new AccountStore(this);
-    this.buckets = new BucketStore(this);
-    this.simplefin = new SimpleFINStore(this);
-    this.reports = new ReportStore(this);
-    this.bankmacro = new BankMacroStore(this);
+    this.sub = new SubStore(this);
     this.caller = new RPCCaller(`rpc-store-${room}`);
   }
   async callRemote<T>(method, ...args):Promise<T> {
@@ -155,6 +143,9 @@ export class RPCRendererStore implements IStore {
   }
   query(sql:string, params:{}):Promise<any> {
     return this.callRemote('query', sql, params);
+  }
+  exec(sql:string):Promise<any> {
+    return this.callRemote('exec', sql);
   }
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     return this.callRemote('deleteObject', serializeObjectClass(cls), id);

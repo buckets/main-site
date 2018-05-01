@@ -6,16 +6,14 @@ import { PrefixLogger } from '../logging'
 
 import {IStore, IBudgetBus, ObjectEventType, ObjectEvent, IObject, IObjectClass } from '../store'
 import {APP_ROOT} from './globals'
+import { Migration, migrations as jsmigrations } from './jsmigrations'
 
-import { BucketStore } from '../models/bucket'
-import { AccountStore } from '../models/account'
-import { SimpleFINStore } from '../models/simplefin'
-import { ReportStore } from '../models/reports'
-import { BankMacroStore } from '../models/bankmacro'
+import { SubStore } from '../models/storebase'
 
 import { isRegistered } from './drm'
 import { rankBetween } from '../ranking'
 import { sss } from '../i18n'
+import { UndoTracker } from '../undo'
 
 const log = new PrefixLogger('(dbstore)')
 
@@ -30,10 +28,10 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
     // Make sure there's a Buckets License bucket
     let license_bucket;
     try {
-      license_bucket = await store.buckets.get(-1);  
+      license_bucket = await store.sub.buckets.get(-1);  
     } catch(e) {
       if (e instanceof NotFound) {
-        license_bucket = await store.buckets.add({
+        license_bucket = await store.sub.buckets.add({
           name: sss('Buckets License'),
         })
         await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
@@ -43,7 +41,7 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
         throw e;
       }
     }
-    let groups = await store.buckets.listGroups();
+    let groups = await store.sub.buckets.listGroups();
     let group_id = null;
     if (groups.length) {
       group_id = groups[0].id;
@@ -63,7 +61,7 @@ async function ensureBucketsLicenseBucket(store:DBStore) {
         ranking = rankBetween('a', first_bucket.ranking);
       }
     }
-    await store.buckets.update(-1, {
+    await store.sub.buckets.update(-1, {
       kind: 'goal-deposit',
       goal: license_bucket.goal <= 100 ? 2900 : license_bucket.goal,
       deposit: license_bucket.deposit <= 100 ? 500 : license_bucket.deposit,
@@ -85,7 +83,7 @@ export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
 
-async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promise<any> {
+async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_migrations:Migration[]):Promise<any> {
 
   let logger = new PrefixLogger('(dbup)');
   await db.run(`CREATE TABLE IF NOT EXISTS _schema_version (
@@ -94,6 +92,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
   name TEXT UNIQUE
 )`)
 
+  //--------------------------------------------------------
   // old style of migrations
   let old_migrations = [];
   try {
@@ -101,7 +100,6 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
     logger.info('Old migrations present');
   } catch(err) {
   }
-
   if (old_migrations.length) {
     logger.info('Switching to new migrations method');
     // old style of migrations
@@ -113,11 +111,16 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
     logger.info('Dropping migrations');
     await db.run('DROP TABLE migrations')
   }
+  // end old style of migrations
+  //--------------------------------------------------------
 
   const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
-  logger.info('Applied migrations:', applied)
+  logger.info('Applied migrations:', Array.from(applied).join(', '))
 
-  // apply patches as needed
+  // collect all migrations (first js)
+  let all_migrations:Migration[] = [...js_migrations];
+
+  // collect file-based migrations
   const migrations = await new Promise<string[]>((resolve, reject) => {
     fs.readdir(migrations_path, (err, files) => {
       if (err) {
@@ -127,34 +130,69 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
       }
     })
   })
-  migrations.sort();
-  let encountered = new Set<string>();
   for (const path of migrations) {
-    const name = path.split('.')[0].toLowerCase();
-    if (encountered.has(name)) {
-      throw new Error('Duplicate schema patch name not allowed');
-    }
-    const plog = logger.child(`(patch ${name})`)
-    encountered.add(name);
-    if (applied.has(name)) {
-      plog.info('already applied');
-    } else {
-      plog.info('applying');
-      let fullpath = Path.resolve(migrations_path, path);
-      plog.info('fullpath', fullpath)
-      const fullsql = await new Promise<string>((resolve, reject) => {
-        fs.readFile(fullpath, 'utf-8', (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data.toString());
-          }
-        });
+    const fullname = path.split('.')[0].toLowerCase();
+    const order = Number(fullname.split('-')[0]);
+    const name = fullname.split('-').slice(1).join('-');
+
+    const fullpath = Path.resolve(migrations_path, path);
+    const fullsql = await new Promise<string>((resolve, reject) => {
+      fs.readFile(fullpath, 'utf-8', (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data.toString());
+        }
       });
+    });
+    all_migrations.push({
+      order,
+      name,
+      func: (db) => {
+        return db.exec(fullsql);
+      },
+    })
+  }
+
+  // Check for duplicate patch names/orders
+  let encountered_names = new Set<string>();
+  let encountered_orders = new Set<number>();
+  all_migrations.forEach(mig => {
+    if (encountered_names.has(mig.name)) {
+      throw new Error(`Duplicate schema patch name not allowed: ${mig.name} (${mig.order}) <${Array.from(encountered_names).join(',')}>`);
+    }
+    if (encountered_orders.has(mig.order)) {
+      throw new Error(`Duplicate schema order not allowed: ${mig.order} ${Array.from(encountered_orders)}`);
+    }
+    encountered_names.add(mig.name);
+    encountered_orders.add(mig.order);
+  })
+
+  // Sort by order
+  all_migrations.sort((a,b) => {
+    if (a.order < b.order) {
+      return -1
+    } else if (a.order > b.order) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+
+  // Apply patches
+  for (const migration of all_migrations) {
+    const name = migration.name;
+    const padded = `0000${migration.order}`.slice(-4);
+    const fullname = `${padded}-${migration.name}`
+    const plog = logger.child(`(patch ${fullname})`)
+    if (applied.has(fullname)) {
+      // already applied
+    } else {
+      plog.info('applying...');
       try {
         await db.run('BEGIN EXCLUSIVE TRANSACTION');
-        await db.exec(fullsql);
-        await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: name});
+        await migration.func(db);
+        await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: fullname});
         await db.run('COMMIT TRANSACTION');
         plog.info('commit');
       } catch(err) {
@@ -162,10 +200,8 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
         plog.warn(err);
         await db.run('ROLLBACK');
 
-        const patch_num = Number(name.split('-')[0]);
-
         // hold over from prior flakey migrations
-        if (patch_num <= 7 && (
+        if (migration.order <= 7 && (
             err.toString().indexOf('duplicate column name') !== -1
             || err.toString().indexOf('already exists') !== -1
           )) {
@@ -178,16 +214,16 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
           throw err;
         }
       }
-      plog.info('Applied');
+      plog.info('applied.');
     }
   }
   logger.info('schema is in sync');
 
-  logger.info('schema list:')
-  let sqlite_master = await db.all('SELECT * FROM sqlite_master');
-  sqlite_master.forEach(item => {
-    logger.info(`${item.type} ${item.name}`);
-  })
+  // logger.info('schema list:')
+  // let sqlite_master = await db.all('SELECT * FROM sqlite_master');
+  // sqlite_master.forEach(item => {
+  //   logger.info(`${item.type} ${item.name}`);
+  // })
 }
 
 /**
@@ -195,18 +231,12 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string):Promi
  */
 export class DBStore implements IStore {
   private _db:sqlite.Database;
+  readonly undo:UndoTracker;
+  readonly sub:SubStore;
 
-  readonly accounts:AccountStore;
-  readonly buckets:BucketStore;
-  readonly simplefin:SimpleFINStore;
-  readonly reports:ReportStore;
-  readonly bankmacro:BankMacroStore;
   constructor(private filename:string, readonly bus:IBudgetBus, private doTrialWork:boolean=false) {
-    this.accounts = new AccountStore(this);
-    this.buckets = new BucketStore(this);
-    this.simplefin = new SimpleFINStore(this);
-    this.reports = new ReportStore(this);
-    this.bankmacro = new BankMacroStore(this);
+    this.sub = new SubStore(this);
+    this.undo = new UndoTracker(this);
   }
   async open():Promise<DBStore> {
     this._db = await sqlite.open(this.filename, {promise:Promise})
@@ -214,9 +244,18 @@ export class DBStore implements IStore {
     // upgrade database
     try {
       log.info('Doing database migrations');
-      await upgradeDatabase(this._db, Path.join(APP_ROOT, 'migrations'));
+      await upgradeDatabase(this._db, Path.join(APP_ROOT, 'migrations'), jsmigrations);
     } catch(err) {
       log.error('Error during database migrations');
+      log.error(err.stack);
+      throw err;
+    }
+
+    // ensure triggers are enabled
+    try {
+      await this.query('DELETE FROM x_trigger_disabled', {})
+    } catch(err) {
+      log.error('Error enabling triggers');
       log.error(err.stack);
       throw err;
     }
@@ -230,6 +269,9 @@ export class DBStore implements IStore {
       }
     }
     
+    // track undos
+    await this.undo.start();
+
     return this;
   }
   get db():sqlite.Database {
@@ -320,10 +362,17 @@ export class DBStore implements IStore {
   async query(sql:string, params:{}):Promise<any> {
     return this.db.all(sql, params);
   }
+  async exec(sql:string):Promise<any> {
+    return this.db.exec(sql);
+  }
   async deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
     let obj = await this.getObject<T>(cls, id);
     let sql = `DELETE FROM ${cls.type} WHERE id=$id`;
     await this.db.run(sql, {$id: id});
     this.publishObject('delete', obj);
+  }
+
+  async doAction<T>(label:string, func:((...args)=>T|Promise<T>)):Promise<T> {
+    return this.undo.doAction(label, func);
   }
 }

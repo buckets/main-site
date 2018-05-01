@@ -2,17 +2,30 @@
 # This is run on the linux container
 
 # copy to build_dir
-ORIG_DIR="$(pwd)"
-BUILD_DIR="/tmp/build_dir"
+set -xe
 
-mkdir -p "$BUILD_DIR"
+yarn --version
+node --version
+npm --version
+
+export ELECTRON_BUILDER_CACHE="/proj/cache/electron-cache"
+export ELECTRON_CACHE="/proj/cache/electron-cache"
+
+yarn config set yarn-offline-mirror /proj/cache/yarnmirror
+
 rsync -vrut \
-    --exclude "dist/" \
-    --exclude="node_modules/" \
-    "${ORIG_DIR}/" "$BUILD_DIR"
-
-pushd "$BUILD_DIR"
-export PATH="/cache/node_modules/.bin/:${PATH}"
+    --exclude "node_modules" \
+    --exclude "app/dist" \
+    --exclude ".nyc_output" \
+    --exclude "cache" \
+    /proj/* /build/
+export PATH="./node_modules/.bin/:${PATH}"
+cd /build/core
+yarn --ignore-scripts
+tsc
+cd /build/app
+yarn --ignore-scripts
+tsc
 
 ARGS=""
 if [ ! -z "$GH_TOKEN" ]; then
@@ -21,4 +34,4 @@ fi
 
 build --linux $ARGS
 
-rsync -vrut "${BUILD_DIR}/dist/" "${ORIG_DIR}/dist"
+rsync -vrut "/build/app/dist/" "/proj/app/dist/"

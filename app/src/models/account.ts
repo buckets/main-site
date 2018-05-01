@@ -1,11 +1,14 @@
-import {IObject, registerClass, IStore} from '../store';
-import {Timestamp, ts2db} from '../time';
-import {Balances, computeBalances} from './balances';
+import * as moment from 'moment-timezone'
+import { createErrorSubclass } from '../errors'
+import { IObject, registerClass, IStore } from '../store';
+import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
+import { Balances, computeBalances } from './balances';
 import { INotable } from '../budget/notes'
 
-export class Failure extends Error {
+export class Failure extends Error {}
 
-}
+export const SignMismatch = createErrorSubclass('SignMismatch')
+export const SumMismatch = createErrorSubclass('SumMismatch')
 
 export type GeneralCatType =
   ''
@@ -24,9 +27,11 @@ export class Account implements IObject, INotable {
   import_balance: number;
   currency: string;
   closed: boolean;
+  offbudget: boolean;
 
   static fromdb(obj:Account) {
-    obj.closed == !!obj.closed;
+    obj.closed = !!obj.closed;
+    obj.offbudget = !!obj.offbudget;
     return obj;
   }
 }
@@ -44,6 +49,12 @@ export class Transaction implements IObject, INotable {
   memo: string;
   fi_id: string;
   general_cat: GeneralCatType;
+  cleared: boolean;
+
+  static fromdb(obj:Transaction) {
+    obj.cleared = !!obj.cleared;
+    return obj;
+  }
 }
 registerClass(Transaction);
 
@@ -99,7 +110,7 @@ interface ImportArgs {
   account_id: number,
   amount: number,
   memo: string,
-  posted: Timestamp,
+  posted: moment.Moment,
   fi_id: string,
 }
 
@@ -125,6 +136,7 @@ export class AccountStore {
       name?:string,
       balance?:number,
       import_balance?:number,
+      offbudget?:boolean,
   }):Promise<any> {
     return this.store.updateObject(Account, account_id, data);
   }
@@ -135,8 +147,10 @@ export class AccountStore {
     } else {
       // actually delete it
       let old_account = await this.get(account_id);
-      await this.store.deleteObject(Account, account_id);
-      return old_account;
+      return this.deleteWholeAccount(account_id)
+      .then(() => {
+        return old_account
+      });
     }
   }
   async unclose(account_id:number):Promise<Account> {
@@ -152,12 +166,11 @@ export class AccountStore {
     let btrans_ids = (await this.store.query(`SELECT id FROM bucket_transaction WHERE
       account_trans_id IN (SELECT id FROM account_transaction WHERE account_id=$id)`, {$id: account_id}))
       .map(x=>x.id);
-    await this.store.buckets.deleteTransactions(btrans_ids)
+    await this.store.sub.buckets.deleteTransactions(btrans_ids)
 
     // Delete account transactions
     let atrans_ids = (await this.store.query(`SELECT id FROM account_transaction WHERE account_id=$id;`, {$id: account_id}))
       .map(x=>x.id);
-    console.log('atrans_ids', atrans_ids);
     await this.deleteTransactions(atrans_ids)
 
     // Delete misc other stuff connected to accounts
@@ -170,21 +183,21 @@ export class AccountStore {
     // Delete the account itself
     await this.store.deleteObject(Account, account_id);
   }
-  // posted is a UTC time
+
   async transact(args:{
     account_id:number,
     amount:number,
     memo:string,
-    posted?:Timestamp,
+    posted?:moment.Moment,
     fi_id?:string,
   }):Promise<Transaction> {
     let data:any = {
       account_id: args.account_id,
-      amount: args.amount,
+      amount: args.amount || 0,
       memo: args.memo,
     };
     if (args.posted) {
-      data.posted = ts2db(args.posted)
+      data.posted = ts2localdb(args.posted)
     }
     if (args.account_id === null) {
       throw new Error('You must provide an account');
@@ -201,8 +214,9 @@ export class AccountStore {
     account_id?: number,
     amount?: number,
     memo?: string,
-    posted?: Timestamp,
+    posted?: moment.Moment,
     fi_id?: string,
+    cleared?: boolean,
   }):Promise<Transaction> {
     let affected_account_ids = new Set<number>();
     let existing = await this.store.getObject(Transaction, trans_id);
@@ -213,14 +227,16 @@ export class AccountStore {
     }
     if (args.amount !== undefined && existing.amount !== args.amount) {
       affected_account_ids.add(existing.account_id);
-      this.removeCategorization(trans_id);
+      this.removeCategorization(trans_id, false);
+      args.amount = args.amount || 0;
     }
     let trans = await this.store.updateObject(Transaction, trans_id, {
       account_id: args.account_id,
       amount: args.amount,
       memo: args.memo,
-      posted: args.posted ? ts2db(args.posted) : undefined,
+      posted: args.posted ? ts2localdb(args.posted) : undefined,
       fi_id: args.fi_id,
+      cleared: args.cleared,
     });
 
     // publish affected accounts
@@ -250,8 +266,8 @@ export class AccountStore {
     return rows[0][0];
   }
   async exportTransactions(args:{
-    onOrAfter?: Timestamp,
-    before?: Timestamp,
+    onOrAfter?: moment.Moment,
+    before?: moment.Moment,
   } = {}):Promise<Array<{
     t_id: number,
     t_amount: number,
@@ -267,11 +283,11 @@ export class AccountStore {
 
     if (args.onOrAfter) {
       where_parts.push('t.posted >= $onOrAfter');
-      params.$onOrAfter = ts2db(args.onOrAfter);
+      params.$onOrAfter = ts2localdb(args.onOrAfter);
     }
     if (args.before) {
       where_parts.push('t.posted < $before');
-      params.$before = ts2db(args.before);
+      params.$before = ts2localdb(args.before);
     }
 
     let where = '';
@@ -338,9 +354,9 @@ export class AccountStore {
       let existing_id:number = rows[0].id;
       let ret = await this.store.updateObject(Transaction, existing_id, {
         account_id: args.account_id,
-        amount: args.amount,
+        amount: args.amount || 0,
         memo: args.memo,
-        posted: ts2db(args.posted),
+        posted: ts2localdb(args.posted),
         fi_id: args.fi_id,
       })
       this.store.getObject(Account, args.account_id)
@@ -353,9 +369,9 @@ export class AccountStore {
       }
     } else {
       // Create new transaction
-      let transaction = await this.store.accounts.transact({
+      let transaction = await this.transact({
         account_id: args.account_id,
-        amount: args.amount,
+        amount: args.amount || 0,
         posted: args.posted,
         memo: args.memo,
         fi_id: args.fi_id,
@@ -376,7 +392,7 @@ export class AccountStore {
     await Promise.all(transaction_ids.map(async (transid) => {
       let trans = await this.store.getObject(Transaction, transid);
       affected_account_ids.add(trans.account_id)
-      let btrans_list = await this.store.buckets.listTransactions({
+      let btrans_list = await this.store.sub.buckets.listTransactions({
         account_trans_id: transid,
       })
       btrans_list.forEach(btrans => {
@@ -399,7 +415,7 @@ export class AccountStore {
 
     // publish changed buckets
     await Promise.all(Array.from(affected_bucket_ids).map(async bucket_id => {
-      let bucket = await this.store.buckets.get(bucket_id);
+      let bucket = await this.store.sub.buckets.get(bucket_id);
       this.store.publishObject('update', bucket);
     }))
   }
@@ -464,11 +480,29 @@ export class AccountStore {
     }
   }
 
-  // asof is a UTC time
-  async balances(asof?:Timestamp):Promise<Balances> {
+  async balances(asof?:moment.Moment):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
+  }
+  async balanceDate(account_id:number, before:moment.Moment):Promise<SerializedTimestamp> {
+    const rows = await this.store.query(`SELECT max(posted) AS posted
+      FROM account_transaction
+      WHERE
+        account_id = $account_id
+        AND posted < $before`, {
+          $account_id: account_id,
+          $before: ts2localdb(before),
+        })
+    if (!rows.length) {
+      return null;
+    }
+    const posted = rows[0].posted;
+    if (!posted) {
+      return null
+    } else {
+      return dumpTS(parseLocalTime(posted))
+    }
   }
   async list():Promise<Account[]> {
     return this.store.listObjects(Account, {
@@ -478,8 +512,8 @@ export class AccountStore {
   async listTransactions(args?:{
     account_id?:number,
     posted?:{
-      onOrAfter?:Timestamp,
-      before?:Timestamp,
+      onOrAfter?:moment.Moment,
+      before?:moment.Moment,
     },
     countedAsTransfer?: boolean,
   }):Promise<Transaction[]> {
@@ -497,11 +531,11 @@ export class AccountStore {
       if (args.posted) {
         if (args.posted.onOrAfter) {
           where_parts.push('posted >= $onOrAfter');
-          params['$onOrAfter'] = ts2db(args.posted.onOrAfter);
+          params['$onOrAfter'] = ts2localdb(args.posted.onOrAfter);
         }
         if (args.posted.before) {
           where_parts.push('posted < $before');
-          params['$before'] = ts2db(args.posted.before);
+          params['$before'] = ts2localdb(args.posted.before);
         }
       }
 
@@ -535,7 +569,7 @@ export class AccountStore {
 
     let where = where_parts.join(' AND ');
     return this.store.listObjects(Transaction, {where, params,
-      order: ['posted DESC', 'id']});
+      order: ['posted DESC', 'id DESC']});
   }
 
   //------------------------------------------------------------
@@ -553,7 +587,7 @@ export class AccountStore {
     let sign = Math.sign(trans.amount);
     let sum = categories.reduce((sum, cat) => {
       if (Math.sign(cat.amount) !== sign) {
-        throw new Failure(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
+        throw new SignMismatch(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
       }
       if (cat.bucket_id === null) {
         throw new Failure(`You must choose a bucket.`);
@@ -562,19 +596,19 @@ export class AccountStore {
     }, 0)
 
     if (sum !== trans.amount) {
-      throw new Failure(`Categories must add up to ${trans.amount} not ${sum}`);
+      throw new SumMismatch(`Categories must add up to ${trans.amount} not ${sum}`);
     }
 
     // delete old
-    await this.removeCategorization(trans_id)
+    await this.removeCategorization(trans_id, false)
 
     // create new bucket transactions
     await Promise.all(categories.map(cat => {
-      return this.store.buckets.transact({
+      return this.store.sub.buckets.transact({
         bucket_id: cat.bucket_id,
         amount: cat.amount,
         memo: trans.memo,
-        posted: trans.posted,
+        posted: parseLocalTime(trans.posted),
         account_trans_id: trans.id,
       })  
     }))
@@ -582,20 +616,44 @@ export class AccountStore {
     await this.store.publishObject('update', trans);
     return categories;
   }
-  async removeCategorization(trans_id:number):Promise<any> {
+  async removeCategorization(trans_id:number, publish:boolean):Promise<any> {
     // delete old
     let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
       {$id: trans_id});
-    await this.store.buckets.deleteTransactions(old_ids.map(obj => obj.id))
+    await this.store.sub.buckets.deleteTransactions(old_ids.map(obj => obj.id))
     await this.store.query(`
       UPDATE account_transaction
       SET general_cat = ''
       WHERE id = $id`, {$id: trans_id})
+    if (publish) {
+      const trans = await this.store.getObject(Transaction, trans_id);
+      this.store.publishObject('update', trans);
+    }
   }
   async categorizeGeneral(trans_id:number, category:GeneralCatType):Promise<Transaction> {
     // delete old
-    await this.removeCategorization(trans_id)
+    await this.removeCategorization(trans_id, false)
     return this.store.updateObject(Transaction, trans_id, {general_cat: category})
+  }
+  async getManyCategories(trans_ids:number[]):Promise<{[trans_id:number]:Category[]}> {
+    const row_promise = this.store.query(`
+      SELECT account_trans_id, bucket_id, amount
+      FROM bucket_transaction
+      WHERE account_trans_id in (${trans_ids.join(',')})
+      ORDER BY 1,2,3
+      `, {})
+    let ret = {};
+    trans_ids.forEach(id => {
+      ret[id] = [];
+    })
+    const rows = await row_promise;
+    rows.forEach(({account_trans_id, bucket_id, amount}) => {
+      ret[account_trans_id].push({
+        bucket_id,
+        amount,
+      })
+    })
+    return ret;
   }
   async getCategories(trans_id:number):Promise<Category[]> {
     return this.store.query(

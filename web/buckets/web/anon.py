@@ -146,6 +146,7 @@ def buy():
 
 @blue.route('/paypal-create-payment', methods=['POST'])
 def paypal_create_payment():
+    current_app.logger.info('Call to paypal-create-payment')
     paypal = current_app.paypal
     paymentID = paypal.createPayment(PRICE_STRING)
     return json.dumps({

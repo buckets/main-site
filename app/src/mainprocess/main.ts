@@ -4,10 +4,10 @@
 import {app, session, protocol, BrowserWindow} from 'electron'
 import * as electron_log from 'electron-log'
 import * as electron_is from 'electron-is'
-import {autoUpdater} from 'electron-updater'
+import { autoUpdater } from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { startLocalizing } from '../i18n'
 import { updateMenu } from './menu'
 import { BudgetFile } from './files'
@@ -17,6 +17,7 @@ import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 import { PrefixLogger } from '../logging'
 import { PSTATE, updateState } from './persistent'
+import { localNow } from '../time'
 
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
@@ -26,15 +27,16 @@ const log = new PrefixLogger('(main)')
 
 log.info(`\n\nSTARTING v${app.getVersion()}\n`);
 log.info(`Log level: ${electron_log.transports.file.level}`);
-log.info(`Local time: ${moment().format()}`);
+log.info(`Local time: ${localNow().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
+log.info(`Timezone: ${moment.tz.guess()}`);
 log.info(`NODE_ENV: ${process.env.NODE_ENV}`);
 
 app.on('ready', () => {
   startLocalizing();
 });
 
-process.on('uncaughtException' as any, (err) => {
+process.on('uncaughtException', (err) => {
   log.error('uncaughtException', err.stack);
   reportErrorToUser(null, {
     err: err,
@@ -190,7 +192,7 @@ app.on('browser-window-focus', (ev, win) => {
   const url = URL.parse(win.webContents.getURL());
   if (url.protocol === 'buckets:' && url.path.startsWith('/budget/index.html')) {
     // budget window
-    updateMenu({budget:true});
+    updateMenu({budget: BudgetFile.fromWindowId(win.id)});
   } else {
     // non-budget window
     updateMenu();

@@ -1,14 +1,16 @@
 import * as React from 'react'
 import * as csv from 'csv'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
+import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat } from './langs/spec'
 import { Money, decimal2cents } from './money'
-import { DateDisplay, serializeTimestamp } from './time'
+import { SEPS, ISeps } from 'buckets-core/dist/money'
+import { DateDisplay, parseLocalTime, dumpTS, loadTS } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
-import { Account, CSVImportMapping } from './models/account'
+import { Account } from './models/account'
 import { IStore } from './store'
 import { IBudgetFile, current_file } from './mainprocess/files'
 import { hashStrings } from './util'
@@ -21,13 +23,21 @@ interface ParsedCSV<T> {
   headers: string[];
   rows: T[];
 }
-export async function parseCSVStringWithHeader<T>(guts:string):Promise<ParsedCSV<T>> {
+export async function parseCSVStringWithHeader<T>(guts:string, opts:{
+  delimiter: string,
+}={
+  delimiter: ','
+}):Promise<ParsedCSV<T>> {
   return new Promise<ParsedCSV<T>>((resolve, reject) => {
     let headers:string[] = [];
-    csv.parse(guts, {columns: (header_row:string[]) => {
-      headers = header_row
-      return header_row;
-    }}, (err, data) => {
+    csv.parse(guts, {
+      relax_column_count: true,
+      delimiter: opts.delimiter,
+      columns(header_row:string[]) {
+        headers = header_row
+        return header_row;
+      }
+    }, (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -40,12 +50,17 @@ export async function parseCSVStringWithHeader<T>(guts:string):Promise<ParsedCSV
   })
 }
 
-export function csvFieldToCents(x:string) {
+export function csvFieldToCents(x:string, seps?:ISeps) {
+  if (!x) {
+    return 0;
+  }
   x = x.replace(/[^-\(\)0-9\.,]/g, '')
   if (x.startsWith('(') && x.endsWith(')')) {
     x = `-${x.substr(1, x.length-1)}`;
   }
-  return decimal2cents(x);
+  return decimal2cents(x, {
+    seps: seps || undefined,
+  });
 }
 
 function guessDateFormat(formats:string[], dates:string[]):string[] {
@@ -83,25 +98,38 @@ function invertMapping(mapping:CSVMapping):{
   memo?: string[],
   posted?: string[],
   fi_id?: string[],
+  amount_sign?: string[],
 } {
   let inverted_mapping = {
     amount: [],
     memo: [],
     posted: [],
     fi_id: [],
+    amount_sign: [],
   };
   Object.keys(mapping.fields).sort().forEach(header => {
     const val = mapping.fields[header];
-    inverted_mapping[val].push(header);
+    try {
+      inverted_mapping[val].push(header);  
+    } catch(err) {
+      log.info('val:', val, 'header', header);
+      throw err;
+    }
   })
   return inverted_mapping;
 }
 
+/**
+ *  Format of mapping stored in database
+ */
 export interface CSVMapping {
   fields: {
-    [field:string]: 'amount'|'memo'|'posted'|'fi_id';
+    [field:string]: 'amount'|'memo'|'posted'|'fi_id'|'amount_sign';
   }
   posted_format?: string;
+  noheader?: boolean;
+  numberformat?: NumberFormat;
+  negative_signifier?: string;
 }
 export interface CSVNeedsMapping {
   id: string;
@@ -122,14 +150,39 @@ export interface CSVAssignAccountResponse {
   redo_mapping?: boolean;
 }
 
+
+function getDataRows<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):T[] {
+  let ret = [];
+  if (mapping.noheader) {
+    let header_obj = {};
+    parsed.headers.forEach(column => {
+      header_obj[column] = column;
+    })
+    ret.push(header_obj);
+  }
+  parsed.rows.forEach(row => {
+    ret.push(row);
+  })
+  return ret;
+}
+
 export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, args:{
   force_mapping?:boolean,
+  delimiter?:string,
 } = {}):Promise<ImportableAccountSet> {
   log.info('csv2importable', guts.length);
-  const parsed = await parseCSVStringWithHeader(guts);
+  const delimiter = args.delimiter || ','
+  const parsed = await parseCSVStringWithHeader(guts, {
+    delimiter,
+  });
+  if (parsed.headers.length < 3) {
+    // Invalid CSV file
+    throw new Error('Not enough columns in CSV file')
+  }
   const fingerprint = hashStrings(parsed.headers);
   log.info('fingerprint', fingerprint);
-  let csv_mapping = await store.accounts.getCSVMapping(fingerprint);
+  let csv_mapping = await store.sub.accounts.getCSVMapping(fingerprint);
+  let mapping:CSVMapping;
   if (csv_mapping === null || args.force_mapping) {
     // no current mapping
     let need:CSVNeedsMapping = {
@@ -138,11 +191,19 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       current_mapping: csv_mapping ? JSON.parse(csv_mapping.mapping_json) : undefined,
     };
     bf.room.broadcast('csv_needs_mapping', need);
-    csv_mapping = await new Promise<CSVImportMapping>((resolve, reject) => {
+    mapping = await new Promise<CSVMapping>((resolve, reject) => {
       bf.room.events('csv_mapping_response').onceSuccessfully(async message => {
         if (message.id === need.id) {
           // now there's a mapping
-          let new_mapping = await store.accounts.setCSVMapping(fingerprint, message.mapping);
+          let new_mapping:CSVMapping;
+          if (!message.mapping.noheader) {
+            // There's a header; save the mapping with the fingerprint
+            const csv_mapping = await store.sub.accounts.setCSVMapping(fingerprint, message.mapping);
+            new_mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
+          } else {
+            // There's no header; we don't yet have a good way to fingerprint this
+            new_mapping = message.mapping;
+          }
           resolve(new_mapping);
           return true;
         }
@@ -150,23 +211,35 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
         return false;
       })
     });
+  } else {
+    mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   }
 
   // Use the mapping
-  const mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   log.info('mapping', mapping);
   let hashcount = {};
   let inverted_mapping = invertMapping(mapping);
-  const transactions = parsed.rows.map((row):ImportableTrans => {
-    const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
+  const transactions = getDataRows(parsed, mapping).map((row):ImportableTrans => {
+    let sign = 1;
+    if (inverted_mapping.amount_sign.length) {
+      let amount_sign_header = inverted_mapping.amount_sign.slice(-1)[0];
+      if (row[amount_sign_header] === mapping.negative_signifier) {
+        sign = -1;
+      }
+    }
+    const amount = sign * csvFieldToCents(
+      inverted_mapping.amount
+        .map(key => row[key])
+        .filter(x=>x)[0],
+      mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
-    const posted = serializeTimestamp(moment(row[inverted_mapping.posted[0]], mapping.posted_format));
+    const posted = parseLocalTime(row[inverted_mapping.posted[0]], mapping.posted_format);
     let fi_id:string;
     if (inverted_mapping.fi_id.length) {
       fi_id = inverted_mapping.fi_id.map(key=>row[key]).join(' ')
     } else {
       // Generate an id based on transaction details
-      let rowhash = hashStrings([amount.toString(), memo, posted])
+      let rowhash = hashStrings([amount.toString(), memo, posted.toISOString()])
       
       // If there are dupes within a CSV, they should have different fi_ids
       if (!hashcount[rowhash]) {
@@ -179,7 +252,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     return {
       amount,
       memo,
-      posted,
+      posted: dumpTS(posted),
       fi_id,
     }
   })
@@ -246,6 +319,9 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
     let mapping = props.obj.current_mapping || {
       fields: {},
       posted_format: null,
+      noheader: false,
+      seps: undefined,
+      negative_signifier: undefined,
     }
     let guess = this.computeFormatOptionsAndBestGuess(mapping, props.obj);
     if (guess.posted_format !== undefined) {
@@ -290,6 +366,8 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
       && mapping.posted_format
     );
 
+    const inverted = invertMapping(mapping);
+
     return <div>
       <ol className="instructions">
         <li>{sss('Identify the data each column contains using the drop downs below.')}</li>
@@ -299,6 +377,20 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
         <li>{sss('Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.')}</li>
         <li>{sss('Click the "Set mapping" to continue.')}</li>
       </ol>
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={!this.state.mapping.noheader}
+            onChange={ev => {
+              let new_mapping = Object.assign(mapping, {
+                noheader: !ev.target.checked,
+              })
+              this.setState({mapping: new_mapping})
+            }}/>
+          {sss('Header row'/* Label for checkbox indicating whether a CSV file has a header row or not */)}
+        </label>
+      </div>
       <table className="ledger">
         <thead>
           <tr>
@@ -332,6 +424,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   >
                     <option value=""></option>
                     <option value="amount">{sss('Amount')}</option>
+                    <option value="amount_sign">{sss('Sign'/* Noun referring to the sign of a number (positive or negative) */)} {sss('(optional)')}</option>
                     <option value="memo">{sss('Memo')}</option>
                     <option value="posted">{sss('Date Posted')}</option>
                     <option value="fi_id">{sss('Unique ID')} {sss('(optional)')}</option>
@@ -347,6 +440,43 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                       }}>
                     {format_options.map(option => {
                       return <option key={option}>{option}</option>
+                    })}
+                  </select>
+                </div> : null}
+                {value === 'amount' ? <div>
+                  <select
+                    value={mapping.numberformat}
+                    onChange={ev => {
+                      this.setState({mapping: Object.assign(mapping, {
+                        numberformat: ev.target.value as NumberFormat,
+                      })})
+                    }}>
+                    <option value="">{sss('Language default')}</option>
+                    <option value="comma-period">{NUMBER_FORMAT_EXAMPLES['comma-period']}</option>
+                    <option value="period-comma">{NUMBER_FORMAT_EXAMPLES['period-comma']}</option>
+                    <option value="space-comma">{NUMBER_FORMAT_EXAMPLES['space-comma']}</option>
+                  </select>
+                </div> : null}
+                {value === 'amount_sign' ? <div>
+                  {sss('Negative'/* Label for choosing the word/symbol that signifies a negative number */)} <select
+                    value={mapping.negative_signifier || ''}
+                    onChange={ev => {
+                      this.setState({mapping: Object.assign(mapping, {
+                        negative_signifier: ev.target.value,
+                      })})
+                    }}>
+                    <option value=""></option>
+                    {getDataRows(obj.parsed_data, mapping)
+                      .map(row => row[header])
+                      .reduce((prev:string[], current) => {
+                        if (prev.indexOf(current) === -1) {
+                          prev.push(current)
+                        }
+                        return prev;
+                      }, [])
+                      .map(option => {
+                        return <option key={option}>{option}</option>
+                      })
                     })}
                   </select>
                 </div> : null}
@@ -366,18 +496,19 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
               </button>
             </th>
           </tr>
-          <tr>
-            {obj.parsed_data.headers.map(header => {
-              let value = mapping.fields[header] || '' 
-              return <th
-                key={header}
-                colSpan={value === 'posted'|| value === 'amount' ? 2 : 1}
-              >{header}</th>
-            })}
-          </tr>
         </thead>
         <tbody>
-          {obj.parsed_data.rows.map((row, idx) => {
+          { this.state.mapping.noheader
+            ? null
+            : <tr>
+              {obj.parsed_data.headers.map(header => {
+                let value = mapping.fields[header] || '';
+                const colspan = value === 'posted'|| value === 'amount' ? 2 : 1;
+                return <th key={header} colSpan={colspan}>{header}</th>
+              })}
+            </tr>
+          }
+          {getDataRows(obj.parsed_data, this.state.mapping).map((row, idx) => {
             return <tr key={idx}>
               {obj.parsed_data.headers.map(header => {
                 let value = mapping.fields[header] || '';
@@ -401,8 +532,19 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   </td>
                 } else if (value === 'amount') {
                   let money;
+                  let sign = 1;
+                  if (inverted.amount_sign.length) {
+                    let amount_sign_header = inverted.amount_sign.slice(-1)[0];
+                    if (row[amount_sign_header] === mapping.negative_signifier) {
+                      sign = -1;
+                    }
+                  }
                   try {
-                    money = <Money value={csvFieldToCents(row[header])} />
+                    money = <Money
+                      value={sign * csvFieldToCents(row[header],
+                        mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS)}
+                      noanimate
+                    />
                   } catch(err) {
                     money = <span className="error">{sss('Invalid')}</span>
                   }
@@ -488,7 +630,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
                 makeToast(sss('Provide a name for the new account.'), {className:'error'})
                 return;
               }
-              let new_account = await manager.store.accounts.add(new_name);
+              let new_account = await manager.checkpoint(sss('Create Account')).sub.accounts.add(new_name);
               account_id = new_account.id;
             }
             current_file.room.broadcast('csv_account_response', {
@@ -510,9 +652,9 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
         <tbody>
           {obj.transactions.map((trans, idx) => {
             return <tr key={idx}>
-              <td><DateDisplay value={trans.posted} /></td>
+              <td><DateDisplay value={loadTS(trans.posted)} /></td>
               <td>{trans.memo}</td>
-              <td><Money value={trans.amount} /></td>
+              <td><Money value={trans.amount} noanimate /></td>
             </tr>
           })}
         </tbody>

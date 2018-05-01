@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { sss } from '../i18n'
+import { sss, tx, localizeThisPage } from '../i18n'
 import {Renderer} from './render'
 import { AccountsPage, ClosedAccountsPage } from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
@@ -12,7 +12,7 @@ import { ImportPage, SyncWidget } from './importpage'
 import { ExportPage } from './exportpage'
 import { SearchPage } from './searchpage'
 import { ReportsPage } from './reports'
-import { Money, setAnimationEnabled } from '../money'
+import { Money, setAnimationEnabled, setSeparators } from '../money'
 import { MonthSelector } from '../input'
 import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
@@ -24,6 +24,8 @@ import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
 import { PrefixLogger } from '../logging'
 import { utcNow, localNow } from '../time'
+import { PSTATE } from '../mainprocess/persistent'
+import { INumberFormat, NUMBER_FORMATS } from '../langs/spec'
 
 const log = new PrefixLogger('(budget.r)');
 
@@ -37,13 +39,24 @@ export function setPath(x:string) {
 export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
+  await localizeThisPage();
+  let numberformat:INumberFormat;
+  if (PSTATE.number_format) {
+    // override default language number format
+    log.info(`number format: ${PSTATE.number_format}`);
+    numberformat = NUMBER_FORMATS[PSTATE.number_format];
+  } else {
+    log.info(`number format: DEFAULT`);
+    numberformat = tx.getNumberFormat();
+  }
+  setSeparators(numberformat);
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())
   log.info('   toLocaleString:', (new Date()).toLocaleString())
   log.info('getTimezoneOffset:', (new Date()).getTimezoneOffset())
-  log.info(navigator.userAgent)
   log.info(`moment: ${moment.version}`)
+  log.info(`moment.locale: ${moment.locale()}`);
 
   if (args) {
     if (args.noanimation) {
@@ -91,7 +104,6 @@ export async function start(base_element, room, args: {
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
-    log.info('RENDERING');
     let path = window.location.hash.substr(1);
     return <Application
       path={path}
@@ -148,7 +160,7 @@ class Navbar extends React.Component<{
         <div>
           <Link relative to="/accounts" exactMatchClass="selected"><span>{sss('Accounts')}</span></Link>
           <Route path="/accounts">
-            <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed')}</Link>
+            <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed'/*! Label for list of closed accounts */)}</Link>
           </Route>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Transactions')}</span>{transactions_badge}</Link>
           <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets')}</span>{buckets_badge}</Link>
@@ -172,7 +184,7 @@ class Navbar extends React.Component<{
             ev.preventDefault();
             shell.openExternal('https://www.budgetwithbuckets.com/chat');
             return false;
-          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt')}</span></a>
+          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt'/* If "Chat with Matt" is too wide, you can translate this as just "Chat" */)}</span></a>
           {trial_version}
         </div>
       </div>)
@@ -215,17 +227,17 @@ class Application extends React.Component<ApplicationProps, any> {
                               <tr>
                                 <td>{sss('Accounts')}</td>
                                 <td></td>
-                                <td className="right"><Money value={appstate.account_total_balance} alwaysShowDecimal /></td>
+                                <td className="right"><Money value={appstate.open_accounts_balance} noFaintCents /></td>
                               </tr>
                               <tr>
                                 <td>{sss('Buckets')}</td>
                                 <td>-</td>
-                                <td className="right"><Money value={appstate.bucket_total_balance} alwaysShowDecimal /></td>
+                                <td className="right"><Money value={appstate.bucket_total_balance} noFaintCents /></td>
                               </tr>
                               <tr>
                                 <td>{sss('Used in future')}</td>
                                 <td>-</td>
-                                <td className="right"><Money value={appstate.adjusted_future_rain} alwaysShowDecimal /></td>
+                                <td className="right"><Money value={appstate.adjusted_future_rain} noFaintCents /></td>
                               </tr>
                               <tr>
                                 <td colSpan={3} className="total-line">
@@ -234,7 +246,7 @@ class Application extends React.Component<ApplicationProps, any> {
                               <tr>
                                 <td>{sss('Rain')}</td>
                                 <td></td>
-                                <td className="right"><Money value={appstate.rain} /></td>
+                                <td className="right"><Money value={appstate.rain} noFaintCents /></td>
                               </tr>
                               <tr>
                                 <td colSpan={3}>
@@ -248,7 +260,7 @@ class Application extends React.Component<ApplicationProps, any> {
                                       return <span>
                                       You have put {abs_amount} too much money into buckets.  If all transactions have been categorized this month, remove {abs_amount} from buckets of your choosing.
                                       </span>
-                                    })(<Money value={Math.abs(appstate.rain)} />)
+                                    })(<Money value={Math.abs(appstate.rain)} noFaintCents />)
                                   }
                                 </td>
                               </tr>
@@ -276,7 +288,7 @@ class Application extends React.Component<ApplicationProps, any> {
                     </total>
                     <total className="section-start">
                       <name>{sss('in the bank')}</name>
-                      <amount><Money value={appstate.account_total_balance} /></amount>
+                      <amount><Money value={appstate.open_accounts_balance} /></amount>
                     </total>
                   </div>
                   <div>
@@ -286,7 +298,6 @@ class Application extends React.Component<ApplicationProps, any> {
                         month={routing.params.month-1}
                         year={routing.params.year}
                         onChange={({month, year}) => {
-                          log.info('monthselector newdate', month, year);
                           routing.setPath(`/y${year}m${month+1}${routing.rest}`);
                         }}
                       />);
@@ -331,9 +342,12 @@ class Application extends React.Component<ApplicationProps, any> {
             </div>
           </Route>
           <WithRouting func={(routing) => {
+            log.info('today', today.format());
+            log.info('appstate.month', appstate.month);
+            log.info('appstate.year', appstate.year);
             let dft_path = routing.fullpath || '/accounts';
             let year = appstate.year || today.year();
-            let month = (appstate.month || today.month())+1;
+            let month = appstate.month ? appstate.month : (today.month()+1);
             const dst = `/y${year}m${month}${dft_path}`;
             log.info(`Redirect to ${dst}`)
             return (<Redirect to={dst} />)

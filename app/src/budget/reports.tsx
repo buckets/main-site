@@ -1,7 +1,6 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import * as React from 'react'
-import * as cx from 'classnames'
 import { manager, AppState } from './appstate'
 import { ObjectEvent, isObj } from '../store'
 import { Money, cents2decimal } from '../money'
@@ -10,6 +9,7 @@ import * as d3shape from 'd3-shape'
 import { COLORS, opacity } from '../color'
 import { chunkTime, Interval } from '../time'
 
+import { debounceChange } from '../input'
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
 import { Transaction as ATrans } from '../models/account'
@@ -17,7 +17,7 @@ import { Bucket, computeBucketData } from '../models/bucket'
 import { IncomeExpenseSum } from '../models/reports'
 import { TransactionList } from './transactions'
 
-import { SizeAwareDiv, UPARROW, DOWNARROW } from '../charts/util'
+import { SizeAwareDiv } from '../charts/util'
 import { sss } from '../i18n'
 
 export class ReportsPage extends React.Component<{
@@ -68,13 +68,7 @@ export class ReportsPage extends React.Component<{
             <h2 className="center">{sss('Month to Month')}</h2>
             <CashFlowComparison
               intervals={month_intervals}
-              columnFormatter={(x:Interval, idx:number) => {
-                if (idx === 0) {
-                  return x.start.format('MMM YYYY');
-                } else {
-                  return x.start.format('MMM');
-                }
-              }}
+              columnFormatter={(x:Interval) => x.start.format('MMM')}
             />
 
             <h2 className="center">{sss('Year to Year')}</h2>
@@ -112,7 +106,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
       return;
     }
     let { start, end } = props;
-    let transactions = await manager.store.accounts.listTransactions({
+    let transactions = await manager.nocheckpoint.sub.accounts.listTransactions({
       posted: {
         onOrAfter: start,
         before: end,
@@ -141,6 +135,7 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
     return <TransactionList
       transactions={this.state.transactions}
       appstate={this.props.appstate}
+      categories={this.props.appstate.categories}
       noCreate
     />
   }
@@ -167,7 +162,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
   async recomputeState(props:CashFlowComparisonProps) {
     let { intervals } = props;
     let summaries = await Promise.all(intervals.map(interval => {
-      return manager.store.reports.incomeAndExpenses({
+      return manager.nocheckpoint.sub.reports.incomeAndExpenses({
         start: interval.start,
         end: interval.end,
       })  
@@ -447,7 +442,7 @@ export class CashFlowComparison extends React.Component<CashFlowComparisonProps,
                 .domain([0, this.state.data.length])
                 .range([0, dims.width || 1]);
               let y = d3.scaleLinear()
-                .domain([Math.min(min_bal, 0), max_bal])
+                .domain([Math.min(min_bal), max_bal])
                 .range([dims.height-10, 10]);
 
               let balance_line = d3shape.line<IncomeExpenseSum>()
@@ -509,33 +504,23 @@ interface BucketExpenseSummaryProps {
   appstate: AppState;
 }
 interface BucketExpenseSummaryState {
-  data: {
-    [key:number]: {
-      interval: Interval;
-      unit: 'month'|'year';
-      avg_expenses: number;
-      min_expenses: number;
-      max_expenses: number;
-      deviation: number;
-      last_period_expenses: number;
-    },
+  expensesByBucket: {
+    [key:number]: number[];
   },
   segments: {
-    [frequency:string]: {
-      [magnitude:number]: {
-        min: number;
-        max: number;
-        buckets: Bucket[];
-      }  
-    }
+    [magnitude:number]: number[];
   },
+  timeback_number: number;
+  timeback_unit: 'month'|'year';
 }
 class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, BucketExpenseSummaryState> {
-  constructor(props) {
+  constructor(props:BucketExpenseSummaryProps) {
     super(props)
     this.state = {
-      data: {},
+      expensesByBucket: {},
       segments: {},
+      timeback_number: props.appstate.settings.reports_timeback_number || 18,
+      timeback_unit: props.appstate.settings.reports_timeback_unit || 'month',
     }
     this.recomputeState(props);
   }
@@ -546,128 +531,122 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
     .filter(bucket => {
       return bucket.kind === 'deposit';
     })
-
-    let data = {}
-    let segments = {};
-
-    await Promise.all(buckets.map(async bucket => {
-      let history = await manager.store.reports.bucketExpenseHistory({
+    
+    let unit = this.state.timeback_unit;
+    let start = end_date.clone()
+      .startOf(unit)
+      .add(1, unit)
+      .subtract(this.state.timeback_number + (unit === 'month' ? 1 : 0), unit);
+    let expensesByBucket = await manager.nocheckpoint.sub.reports.bucketExpenseHistories({
+      interval: {
+        start,
         end: end_date,
-        bucket_id: bucket.id,
-      });
-      if (!history) {
-        data[bucket.id] = null;
-        return;
-      }
+      },
+      unit: this.state.timeback_unit,
+      bucket_ids: buckets.map(x => x.id),
+    })
+
+    // Figure out where this bucket fits magnitude-wise
+    let segments = {};
+    buckets.forEach(bucket => {
       const balance = appstate.bucket_balances[bucket.id];
-      let computed = computeBucketData(bucket.kind, bucket, {
+      const computed = computeBucketData(bucket.kind, bucket, {
         today: end_date.clone().add(1, 'day'),
         balance: balance,
       })
-      let expenses = history.intervals
-        .map(i => {
-          if (i.expenses === null) {
-            return 0;
-          }
-          return -i.expenses;
-        });
-      let avg_expenses = d3.sum(expenses) / expenses.length;
-      let deviation = d3.deviation(expenses) || 0;
-      let min_expenses = d3.min(expenses);
-      let max_expenses = d3.max(expenses);
-
-      let last_period_expenses = -(history.intervals.slice(-1)[0].expenses || 0);
 
       let magnitude = Math.floor(logbase(computed.deposit, 10));
-      if (!segments[history.unit]) {
-        segments[history.unit] = {};
+      if (!segments[magnitude]) {
+        segments[magnitude] = [];
       }
-      let freq_segment = segments[history.unit];
-
-      if (!freq_segment[magnitude]) {
-        freq_segment[magnitude] = {
-          buckets: [],
-          min: avg_expenses,
-          max: avg_expenses,
-        }
-      }
-      let segment = freq_segment[magnitude];
-      segment.buckets.push(bucket);
-
-      segment.min = Math.min(avg_expenses, last_period_expenses, segment.min);
-      segment.max = Math.max(avg_expenses, last_period_expenses, segment.max);
-
-      data[bucket.id] = {
-        unit: history.unit,
-        avg_expenses,
-        deviation,
-        min_expenses,
-        max_expenses,
-        last_period_expenses,
-        interval: history.interval,
-      }
-    }))
+      segments[magnitude].push(bucket.id);
+    })
     this.setState({
       segments,
-      data,
+      expensesByBucket,
     })
   }
   componentWillReceiveProps(nextProps) {
     this.recomputeState(nextProps);
   }
+  triggerReload = debounceChange(() => {
+    this.recomputeState(this.props);
+  })
   render() {
     let { appstate } = this.props;
     let end_date = appstate.viewDateRange.onOrAfter;
+    let showing_years = this.state.timeback_unit === 'year';
 
-    let tables = ['year', 'month'].map(unit => {
-      let freq_segment = this.state.segments[unit];
-      if (!freq_segment) {
-        return;
-      }
-      let last_label = unit === 'year' ? end_date.format('YYYY') : end_date.clone().subtract(1, 'month').format('MMM');
-      let sections = (Object.keys(freq_segment)
+    let sections = (Object.keys(this.state.segments)
       .map(x=>Number(x))
       .sort((a,b) => a - b)
       .reverse()
       .map(magnitude => {
-        let segment = freq_segment[magnitude];
-        let rows = segment.buckets.map((bucket, idx) => {
+        let segment = this.state.segments[magnitude];
+        let rows = segment.map((bucket_id, idx) => {
           return <BucketExpenseSummaryRow
-            key={bucket.id}
-            bucket={bucket}
-            last_label={last_label}
+            key={bucket_id}
+            bucket={appstate.buckets[bucket_id]}
             end_date={end_date}
-            min={segment.min}
-            max={segment.max}
-            balance={appstate.bucket_balances[bucket.id]}
-            data={this.state.data[bucket.id]}
+            balance={appstate.bucket_balances[bucket_id]}
+            expenses={this.state.expensesByBucket[bucket_id]}
           />
         })
-        return <tbody key={`${unit}-${magnitude}`} className="line-below">
+        return <tbody key={`${magnitude}`} className="line-below">
           {rows}
         </tbody>
       }));
-      return <div key={unit}>
-        <h2 className="center">{unit === 'year' ? sss('Yearly expenses') : sss('Monthly expenses')}</h2>
+    if (sections.length) {
+      return <div>
+        <h2>{sss('Recurring Expenses')}</h2>
         <table className="summary full-width">
           <thead>
             <tr>
               <th className="right right-padded">{sss('Bucket')}</th>
               <th className="center">{sss('Budgeted')}</th>
-              <th colSpan={2} className="center">{last_label}</th>
-              <th colSpan={2} className="">{sss('Average')}</th>
-              <th className="right right-padded">{sss('Period')}</th>
-              <th>
-                {expenseNumberline({
-                  budgeted: 7500,
-                  avg_expenses: 2500,
-                  last_period_expenses: 5000,
-                  last_label,
-                  min: 0,
-                  max: 10000,
-                  yaxis: 25,
-                  alwaysShowLabels: true,
-                })}
+              <th className="center">{sss('Average')}</th>
+              <th className="left left-padded full-width">
+                <input
+                  type="range"
+                  min="2"
+                  max={showing_years ? 20 : 36}
+                  value={this.state.timeback_number}
+                  onChange={ev => {
+                    let value = Number(ev.target.value);
+                    this.setState({
+                      timeback_number: value,
+                    }, () => {
+                      manager.nocheckpoint.sub.settings.updateSettings({
+                        reports_timeback_number: this.state.timeback_number,
+                      });
+                      this.triggerReload();
+                    })
+                  }}
+                />
+                <span>{this.state.timeback_number}&nbsp;</span>
+
+                <select
+                  defaultValue={this.state.timeback_unit}
+                  onChange={ev => {
+                    let timeback_number = this.state.timeback_number;
+                    if (ev.target.value === 'year' && this.state.timeback_unit === 'month') {
+                      // switching from month -> year
+                      timeback_number = 5;
+                    }
+                    this.setState({
+                      timeback_unit: ev.target.value as any,
+                      timeback_number: timeback_number,
+                    }, () => {
+                      manager.nocheckpoint.sub.settings.updateSettings({
+                        reports_timeback_number: this.state.timeback_number,
+                        reports_timeback_unit: this.state.timeback_unit,
+                      })
+                      this.triggerReload();
+                    })
+                  }}>
+                  <option value="month">{sss('Months')}</option>
+                  <option value="year">{sss('Years')}</option>
+                </select>
               </th>
             </tr>
           </thead>
@@ -679,306 +658,178 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
           </tfoot>
         </table>
       </div>
-    }).filter(x => x);
-
-    if (tables.length) {
-      return <div>
-        {tables}
-      </div>  
     } else {
       return <div>{sss("You don't have any recurring expense buckets yet.")}</div>
     }
   }
 }
 
-function expenseNumberline(args:{
-    budgeted:number,
-    last_period_expenses:number,
-    last_label?:string,
-    avg_expenses:number,
-    min?:number,
-    max?:number,
-    yaxis?:number,
-    alwaysShowLabels?: boolean;
-  }) {
-  let { avg_expenses, budgeted, last_period_expenses, last_label, min, max, yaxis, alwaysShowLabels } = args;
-  last_label = last_label || sss('Last');
-  let avg_over = avg_expenses - budgeted;
-  let avg_overspend = avg_over > 0;
-  let last_over = last_period_expenses - budgeted;
-  let last_overspend = last_over > 0;
-  let blocks = [];
-  let points = [];
-  // blocks.push({
-  //   a: Math.min(computed.deposit, data.avg_expenses),
-  //   b: Math.max(computed.deposit, data.avg_expenses),
-  //   fill: 'var(--lighter-grey)',
-  //   opacity: 0.5,
-  //   h: 2,
-  // })
-  if (last_overspend) {
-    blocks.push({
-      a: budgeted,
-      b: last_period_expenses,
-      fill: 'var(--red)',
-      opacity: 0.5,
-    })
-  } else {
-    blocks.push({
-      a: last_period_expenses,
-      b: budgeted,
-      fill: 'var(--green)',
-      opacity: 0.5,
-    })
-  }
-  // blocks.push({
-  //   a: Math.min(data.avg_expenses, last_period_expenses),
-  //   b: Math.max(data.avg_expenses, last_period_expenses),
-  //   fill: last_period_expenses > data.avg_expenses ? 'var(--red)' : 'var(--green)',
-  //   opacity: 0.5,
-  // })
-  points.push({
-    value: budgeted,
-    fill: 'var(--darker-darkblue)',
-    label: `${sss('Budgeted:')} ${cents2decimal(budgeted, {round: true})}`,
-    label_options: {
-      textAnchor: 'middle',
-      dy: 12,
-      fontSize: 10,
-    }
-  });
-
-  points.push({
-    value: avg_expenses,
-    stroke: avg_overspend ? 'var(--red)' : 'var(--green)',
-    // fill: 'white',
-    strokeWidth: 2,
-    symbol: 'tick',
-    label: `${sss('Average:')} ${cents2decimal(avg_expenses, {round: true})}`,
-    label_options: {
-      textAnchor: 'middle',
-      dy: 12,
-      fontSize: 10,
-    }
-  })
-
-  points.push({
-    value: last_period_expenses,
-    fill: last_overspend ? 'var(--red)' : 'var(--green)',
-    label: `${last_label}: ${cents2decimal(last_period_expenses, {round: true})}`,
-    label_options: {
-      textAnchor: 'middle',
-      dy: 12,
-      fontSize: 10,
-    }
-  })
-  
-  return <div>
-    <NumberlineChart
-      className={cx({
-        'labels-on-hover': !alwaysShowLabels,
-      })}
-      width={400}
-      height={30}
-      yaxis={yaxis || 20}
-      min={min}
-      max={max}
-      points={points}
-      blocks={blocks}
-    />
-    
-  </div>
-}
 
 interface BucketExpenseSummaryRowProps {
   bucket: Bucket;
   end_date: moment.Moment;
-  last_label: string;
   balance: number;
-  min: number;
-  max: number;
-  data: {
-    unit: 'month'|'year';
-    avg_expenses: number;
-    min_expenses: number;
-    max_expenses: number;
-    deviation: number;
-    last_period_expenses: number;
-    interval: Interval;  
-  }
+  expenses: number[];
 }
 class BucketExpenseSummaryRow extends React.Component<BucketExpenseSummaryRowProps, {}> {
   render() {
-    let { bucket, end_date, last_label, balance, data, min, max } = this.props;
+    let { bucket, end_date, balance, expenses } = this.props;
     let computed = computeBucketData(bucket.kind, bucket, {
       today: end_date.clone().add(1, 'day'),
       balance: balance,
     })
-    let avg_over = data.avg_expenses - computed.deposit;
-    let avg_overspend = avg_over > 0;
-    let last_over = data.last_period_expenses - computed.deposit;
-    let last_overspend = last_over > 0;
-      
-    let period;
-    if (data.interval) {
-      period = sss('period-display', (n:number, unit:'year'|'month') => {
-        return `${n}${unit === 'year' ? 'yr' : 'mo'}`;
-    })(data.interval.end.diff(data.interval.start, data.unit), data.unit);  
-    }
+
+    let average = d3.sum(expenses) / expenses.length;
     
     return <tr className="hover">
       <th className="right-border">{bucket.name}</th>
       <td className="right-border"><Money value={computed.deposit} /></td>
-      <td className="right left-padded"><Money value={data.last_period_expenses} round /></td>
-      <td className={cx("nobr incdeclabel right-border left-padded", {
-        bad: last_overspend,
-      })}>{last_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(last_over)} round /></td>
-
-      <td className="right left-padded"><Money value={data.avg_expenses} round /></td>
-      <td className={cx("nobr incdeclabel right left-padded", {
-        bad: avg_overspend,
-      })}>{avg_overspend ? UPARROW : DOWNARROW}<Money value={Math.abs(avg_over)} round /></td>
-      <td className="right-border">{period}</td>
-      <td className="right-border center novpadding">{expenseNumberline({
-        avg_expenses: data.avg_expenses,
-        last_period_expenses: data.last_period_expenses,
-        last_label: last_label,
-        budgeted: computed.deposit,
-        min,
-        max,
-      })}</td>
+      <td className="right-border"><Money value={Math.abs(average)} hidezero /></td>
+      <td className="right-border center novpadding">
+        <ExpenseChart
+          minWidth={100}
+          expected={computed.deposit}
+          expenses={expenses.map(x => {
+            return {amount: x}
+          })}
+          barsToShow={expenses.length}
+        />
+      </td>
     </tr>
   }
 }
 
-
-interface NumberlineChartProps {
-  height?: number;
+interface ExpenseChartProps {
   width?: number;
-  center?: number;
-  yaxis?: number;
-  min?: number;
-  max?: number;
+  minWidth?: number;
+  height?: number;
   className?: string;
-  points?: Array<{
-    value: number;
-    symbol?: 'tick' | 'circle';
-    className?: string;
-    r?: number;
+  expected: number;
+  barsToShow?: number;
+  barWidth?: number;
+  barSpacing?: number;
+
+  // Expense data with most recent time period first
+  expenses: Array<{
     label?: string;
-    label_options?: {
-      [k:string]: any;
-    };
-    mouseEnter?:()=>void;
-    mouseLeave?:()=>void;
-    [k:string]: any;
-  }>;
-  blocks?: Array<{
-    a: number;
-    b: number;
-    className?: string;
-    h?: number;
-    [k:string]: any;
-  }>;
+    amount: number;
+  }>
 }
-class NumberlineChart extends React.Component<NumberlineChartProps, {}> {
+
+class ExpenseChart extends React.PureComponent<ExpenseChartProps, {}> {
   render() {
-    let { height, width, center, yaxis, points, blocks, className, min, max } = this.props;
-    const radius = 4;
-    const hpadding = 30;
-    height = height || 6;
-    yaxis = yaxis || height / 2;
-    width = width || 150;
-    points = points || [];
-    blocks = blocks || [];
+    let { width, minWidth, height, barsToShow, barWidth, barSpacing, expenses, expected, className } = this.props;
+    height = height || 30;
+    const padding = 3;
+    const vpadding = 1;
+    const label_height = 12;
+    const label_size = 10;
+    // barsToShow = barsToShow || 12;
 
-    min = min === undefined ? points[0].value : min;
-    max = max === undefined ? points[0].value : max;
-    points.forEach(point => {
-      min = Math.min(min, point.value);
-      max = Math.max(max, point.value);
-    })
-    blocks.forEach(block => {
-      min = Math.min(min, block.a, block.b);
-      max = Math.max(max, block.a, block.b);
-    })
+    barSpacing = barSpacing || 4;
+    barWidth = barWidth || 10;
+    width = width || (barsToShow * (barSpacing + barWidth) + barSpacing);
 
-    if (center) {
-      let r = Math.max(Math.abs(center - min), Math.abs(center - max));
-      min = center - r;
-      max = center + r;
-    }
-    const x = d3.scaleLinear()
-      .domain([min, max])
-      .range([hpadding, width-hpadding]);
+    //Math.floor(width / barsToShow - barSpacing);
+
+    const expenses_list = expenses.map(item => {
+      return Math.abs(item.amount);
+    }).reverse().slice(0, barsToShow)
+    const numBars = expenses_list.length;
+
+    let maxy = d3.max(expenses_list)
+    let miny = 0;
+    maxy = Math.max(Math.max(0, maxy), expected)
+
+    let x = d3.scaleLinear()
+      .domain([0, barsToShow])
+      .range([padding, width-padding]);
+    let y = d3.scaleLinear()
+      .domain([miny, maxy])
+      .range([height-vpadding, vpadding+label_height]);
+
+    const viewWidth = width < minWidth ? minWidth : width;
 
     return <div
-      className={cx("numberline", className)}
+      className={className}
       style={{
-        width: `${width}px`,
+        width: `${viewWidth}px`,
         height: `${height}px`,
       }}>
-      <svg viewBox={`0 0 ${width} ${height}`}>
-        {blocks.map((block, idx) => {
-          let { a, b, className, h, ...rest } = block;
-          if (b < a) {
-            let tmp = a;
-            a = b;
-            b = tmp;
+      <svg viewBox={`0 0 ${viewWidth} ${height}`}>
+
+        {expenses_list.map((expenses, i) => {
+          let rects = [];
+          let xval = x(numBars - i) - barWidth;
+          rects.push(<rect
+            key="hover-target"
+            x={xval}
+            width={barWidth}
+            y={y(maxy)}
+            height={height}
+            fill="transparent"
+          />)
+          if (expenses > expected) {
+            // overspend
+            rects.push(<rect
+              key="under"
+              className="highlight"
+              width={barWidth}
+              x={xval}
+              y={y(expected)}
+              height={y(0) - y(expected)}
+              fill={COLORS.lighter_grey}
+            />)
+            rects.push(<rect
+              key="over"
+              className="highlight"
+              width={barWidth}
+              x={xval}
+              y={y(expenses)}
+              height={y(expected) - y(expenses)}
+              fill={COLORS.red}
+            />)
+          } else if (expenses) {
+            // underspend
+            rects.push(<rect
+              className="highlight"
+              key="under"
+              width={barWidth}
+              x={xval}
+              y={y(expenses)}
+              height={y(0) - y(expenses)}
+              fill={COLORS.lighter_grey}
+            />)
           }
-          let w = x(b) - x(a);
-          h = h || 4;
-          return <rect
-            key={idx}
-            x={x(a)}
-            rx={2}
-            ry={2}
-            width={w}
-            y={yaxis-h/2}
-            height={h}
-            className={className}
-            {...rest}
+          const lefthalf = xval < viewWidth/2;
+          rects.push(<text
+            key="label"
+            x={
+              lefthalf ? xval : xval + barWidth
+            }
+            textAnchor={
+              lefthalf ? 'start' : 'end'
+            }
+            y={y(maxy)}
+            dy={-2}
+            fontSize={label_size}
+           className="label"
+          >{cents2decimal(expenses)}</text>)
+          return <g key={i} className="hover-labels">
+            {rects}
+          </g>
+        })}
+
+        <line
+          x1={padding}
+          x2={width-padding}
+          y1={y(0)}
+          y2={y(0)}
+          stroke={COLORS.lightest_grey} />
           />
-        })}
-        {points.map((point, idx) => {
-          let { symbol, value, className, r, label, label_options, ...rest } = point;
-          let elem;
-          if (symbol === 'tick') {
-            elem = <line
-              key={idx}
-              x1={x(value)}
-              x2={x(value)}
-              y1={yaxis-6}
-              y2={yaxis+6}
-              className={className}
-              {...rest}
-            />
-          } else {
-            elem = <circle
-              key={idx}
-              cx={x(value)}
-              cy={yaxis}
-              r={r === undefined ? radius : r}
-              className={className}
-              {...rest}
-            />
-          }
-          if (label) {
-            return <g key={idx}>
-              {elem}
-              <text
-                x={x(value)}
-                y={0}
-                dy={12}
-                fontSize={12}
-                {...label_options}
-              >{label}</text>
-            </g>
-          } else {
-            return elem;
-          }
-        })}
       </svg>
     </div>
+
   }
 }
+

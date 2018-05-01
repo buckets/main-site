@@ -5,3 +5,6 @@
 .coverage.*
 htmlcov
 node_modules/
+yarnmirror/
+.nyc_output/
+cache/

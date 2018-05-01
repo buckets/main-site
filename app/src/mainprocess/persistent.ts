@@ -2,7 +2,7 @@ import { app, remote } from 'electron'
 import * as electron_is from 'electron-is'
 import * as Path from 'path'
 import * as fs from 'fs'
-import { EventSource } from '../events'
+import { EventSource } from 'buckets-core'
 import { onlyRunInMain } from '../rpc'
 import { PrefixLogger } from '../logging'
 import { IOpenWindow } from './files'
@@ -13,21 +13,25 @@ export interface PersistentState {
   recentFiles: string[];
   firstUseDate: string;
   locale: string;
+  number_format: ''|'comma-period'|'period-comma';
   skipVersion: string;
   animation: boolean;
   last_opened_windows: Array<{
     filename: string;
     windows: Array<IOpenWindow>;
   }>;
+  timezone: string;
 }
 
 export let PSTATE:PersistentState = {
   recentFiles: [],
   firstUseDate: null,
   locale: '',
+  number_format: '',
   skipVersion: null,
   animation: true,
   last_opened_windows: [],
+  timezone: '',
 };
 
 function loadState():PersistentState {
@@ -70,8 +74,18 @@ export const PersistEvents = {
   added_recent_file: new EventSource<string>(),
 }
 
+/**
+ *  Return a list of recently opened files, but only those that *  are accessible.
+ */
 export function getRecentFiles():string[] {
-  return PSTATE.recentFiles;
+  return PSTATE.recentFiles.filter(x => {
+    try {
+      fs.accessSync(x);
+      return true;
+    } catch(err) {
+      return false;
+    }
+  });
 }
 export async function addRecentFile(path:string) {
   let recent_files = getRecentFiles();

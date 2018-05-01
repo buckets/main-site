@@ -7,17 +7,13 @@ tsc -p nodesrc
 
 echo
 echo "Extracting..."
-node nodesrc/dist/langutil.js extract src > src/langs/base.tsx
+node nodesrc/dist/langutil.js extract src src/langs/base.tsx src/langs/defaults.tsx
 
 for langfile in $(ls src/langs/??.tsx); do
-    if [ $(basename "$langfile") == "en.tsx" ]; then
-        echo "(skipping en.tsx)"
-        continue
-    fi
     echo
     echo "Updating ${langfile}..."
     set -x
-    node nodesrc/dist/langutil.js updatelang src/langs/base.tsx "$langfile"
+    node nodesrc/dist/langutil.js updatelang src/langs/defaults.tsx "$langfile"
     set +x
 done
 

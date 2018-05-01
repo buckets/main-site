@@ -68,7 +68,7 @@ export class SearchPage extends React.Component<{
   async doQuery(query:string) {
     let result:QueryResult;
     if (query.length >= this.min_query_len) {
-      result = await queryStore(manager.store, query);
+      result = await queryStore(manager.nocheckpoint, query);
     } else {
       result = {
         accounts: [],
@@ -150,10 +150,10 @@ export class SearchPage extends React.Component<{
             <tbody>
               {result.atrans.map(trans => {
                 return <tr key={trans.id}>
-                  <td className="nobr"><DateDisplay value={trans.posted} /></td>
+                  <td className="nobr"><DateDisplay value={trans.posted} islocal /></td>
                   <td className="nobr">{appstate.accounts[trans.account_id].name}</td>
                   <td>{trans.memo}</td>
-                  <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
+                  <td className="right"><Money value={trans.amount} /></td>
                   <td>{trans.notes}</td>
                 </tr>
               })}
@@ -179,10 +179,10 @@ export class SearchPage extends React.Component<{
             <tbody>
               {result.btrans.map(trans => {
                 return <tr key={trans.id}>
-                  <td className="nobr"><DateDisplay value={trans.posted} /></td>
+                  <td className="nobr"><DateDisplay value={trans.posted} islocal /></td>
                   <td className="nobr">{appstate.buckets[trans.bucket_id].name}</td>
                   <td>{trans.memo}</td>
-                  <td className="right"><Money value={trans.amount} alwaysShowDecimal className="faint-cents" /></td>
+                  <td className="right"><Money value={trans.amount} /></td>
                   <td>{trans.notes}</td>
                 </tr>
               })}

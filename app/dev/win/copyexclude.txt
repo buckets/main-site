@@ -1,4 +1,8 @@
 node_modules\
 .dmg
+.git\
 dist\
 docs\
+iconwork\
+bizdev\
+cache\

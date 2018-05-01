@@ -1,10 +1,10 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
-import { ensureUTCMoment } from '../time'
+import { parseLocalTime } from '../time'
 import { COLORS } from '../color'
 import { computeBucketData } from '../models/bucket'
 import { cents2decimal } from '../money'
@@ -32,7 +32,7 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
   }
   async recomputeState(props:BucketGoalChartProps) {
     let promises = props.bucket_ids.map(async bucket_id => {
-      let rows = await manager.store.query(`
+      let rows = await manager.nocheckpoint.query(`
         SELECT
           amount,
           posted
@@ -47,7 +47,7 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
       let balance = props.appstate.bucket_balances[bucket_id];
       let history = rows.map(row => {
         let ret = {
-          time: ensureUTCMoment(row.posted),
+          time: parseLocalTime(row.posted),
           balance: balance
         }
         balance -= row.amount;

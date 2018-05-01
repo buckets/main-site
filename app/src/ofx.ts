@@ -1,6 +1,7 @@
 import * as _ from 'lodash'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { parse as parseOFX } from 'ofx-js'
+import { dumpTS } from './time'
 import { decimal2cents } from './money'
 import { ImportableTrans, ImportableAccountSet } from './importing'
 import { PrefixLogger } from './logging'
@@ -14,7 +15,7 @@ let formats = [
   'YYYYMMDD',
 ]
 function parseOFXDate(x:string):moment.Moment {
-  let ret = moment.utc(x, formats);
+  let ret = moment.utc(x, formats).tz('UTC');
   return ret;
 }
 
@@ -86,7 +87,7 @@ export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
       return {
         amount: decimal2cents(trans.TRNAMT),
         memo: trans.MEMO || trans.NAME,
-        posted: parseOFXDate(trans.DTPOSTED),
+        posted: dumpTS(parseOFXDate(trans.DTPOSTED)),
         fi_id: trans.FITID,
       };
     })

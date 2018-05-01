@@ -1,14 +1,16 @@
 import * as React from 'react'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
+import * as moment from 'moment-timezone'
+import * as Color from 'color'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
-import { ts2db, Timestamp, DateDisplay, utcToLocal, localNow, makeLocalDate, PerMonth } from '../time'
+import { ts2utcdb, DateDisplay, parseUTCTime, localNow, makeLocalDate, PerMonth } from '../time'
 import {Balances} from '../models/balances'
 import { Money, MoneyInput, cents2decimal } from '../money'
-import { onKeys, MonthSelector, ClickToEdit, SafetySwitch } from '../input'
+import { onKeys, MonthSelector, ClickToEdit, SafetySwitch, DebouncedInput } from '../input'
 import { manager, AppState } from './appstate'
-import { ColorPicker } from '../color'
+import { ColorPicker, COLORS } from '../color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
@@ -16,7 +18,9 @@ import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
 import { isNil, isDifferent } from '../util'
 import { NoteMaker } from './notes'
-import { ensureUTCMoment } from '../time'
+import { parseLocalTime } from '../time'
+import { createTemplateBucketSet } from './gettingstarted'
+import { ProgressBar } from '../ui'
 
 const NOGROUP = -1;
 
@@ -43,7 +47,9 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
         return <tr key={bucket.id}>
           <td>{bucket.name}</td>
           <td><button onClick={() => {
-            manager.store.buckets.unkick(bucket.id);
+            manager
+            .checkpoint(sss('Un-kick Bucket'))
+            .sub.buckets.unkick(bucket.id);
           }}>{sss('Un-kick')}</button></td>
           <td>
             <Link relative to={`../${bucket.id}`} className="subtle">{sss('more')}</Link>
@@ -99,19 +105,19 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     if (to_deposit) {
       pendingInfo.push(<div key="deposit" className="labeled-number">
         <div className="label">{sss('In')}</div>
-        <div className="value"><Money value={to_deposit} symbol alwaysShowDecimal/></div>
+        <div className="value"><Money value={to_deposit} symbol/></div>
       </div>);
     }
     if (to_withdraw) {
       pendingInfo.push(<div key="withdraw" className="labeled-number">
         <div className="label">{sss('Out')}</div>
-        <div className="value"><Money value={to_withdraw} symbol alwaysShowDecimal /></div>
+        <div className="value"><Money value={to_withdraw} symbol /></div>
       </div>)
     }
     if (to_deposit && to_withdraw) {
       let amount;
       if (to_deposit + to_withdraw) {
-        amount = <Money value={to_deposit + to_withdraw} symbol alwaysShowDecimal />
+        amount = <Money value={to_deposit + to_withdraw} symbol />
       } else {
         amount = <span className="fa fa-fw fa-check" />
       }
@@ -125,7 +131,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
     if (appstate.rain > 0 && to_deposit) {
       rainleft = <div className="labeled-number">
         <div className="label">{sss('Rain left')}</div>
-        <div className="value"><Money value={appstate.rain - (to_deposit + to_withdraw)} symbol nocolor alwaysShowDecimal /></div>
+        <div className="value"><Money value={appstate.rain - (to_deposit + to_withdraw)} symbol nocolor /></div>
       </div>;
     }
 
@@ -161,15 +167,22 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       })
 
     let self_debt;
-    let show_effective_bal = false;
     if (self_debt_amount) {
       self_debt = <div className="labeled-number">
         <div className="label">
           {sss('Self debt')} <Help>{sss('Amount of money over-allocated in buckets.')}</Help>
         </div>
-        <div className="value"><Money value={self_debt_amount} className="faint-cents" alwaysShowDecimal /></div>
+        <div className="value"><Money value={self_debt_amount} /></div>
       </div>
-      show_effective_bal = true;
+    }
+
+    let getting_started;
+    if (appstate.unkicked_buckets.length < 3) {
+      getting_started = <div className="notice">
+        {sss('Need ideas for getting started?')} <button
+          onClick={createTemplateBucketSet}
+        >{sss('Start with a template')}</button>
+      </div>
     }
         
     return (
@@ -181,7 +194,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
               return <Redirect to='/buckets' />;
             }
             let balance = appstate.bucket_balances[bucket.id];
-            let rainfall = appstate.getBucketFlow(bucket.id).in;
+            let rainfall = appstate.getBucketFlow(bucket.id).rain_in;
             return (<BucketView
               bucket={bucket}
               rainfall={rainfall}
@@ -205,7 +218,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   <div className="label">
                     {sss('Rain')}<PerMonth/>&nbsp;<Help>{sss('Total amount your buckets expect each month.')}</Help>
                   </div>
-                  <div className="value"><Money value={total_rain_needed} className="faint-cents" alwaysShowDecimal /></div>
+                  <div className="value"><Money value={total_rain_needed} /></div>
                 </div>
                 {self_debt}
               </div>
@@ -216,14 +229,13 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                 {doPendingButton}
               </div>
             </div>
+            {getting_started}
             <div className="single-pane">
               
                 <GroupedBucketList
                   buckets={appstate.unkicked_buckets}
                   balances={appstate.bucket_balances}
                   bucket_flow={appstate.bucket_flow}
-                  effective_bals={appstate.nodebt_balances}
-                  show_effective_bal={show_effective_bal}
                   groups={_.values(appstate.groups)}
                   onPendingChanged={this.pendingChanged}
                   pending={pending}
@@ -235,10 +247,14 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       </Switch>);
   }
   addBucket = () => {
-    manager.store.buckets.add({name: sss('default new bucket name', 'New Bucket')})
+    manager
+    .checkpoint(sss('New Bucket'))
+    .sub.buckets.add({name: sss('default new bucket name', 'New Bucket')})
   }
   addGroup = () => {
-    manager.store.buckets.addGroup({name: sss('default new group name', 'New Group')})
+    manager
+    .checkpoint(sss('New Group'))
+    .sub.buckets.addGroup({name: sss('default new group name', 'New Group')})
   }
   makeItRain = () => {
     let { appstate } = this.props;
@@ -252,7 +268,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
           today: appstate.defaultPostingDate,
           balance: appstate.bucket_balances[bucket.id],
         })
-        let rainfall = appstate.getBucketFlow(bucket.id).in;
+        let rainfall = appstate.getBucketFlow(bucket.id).rain_in;
         let ask = computed.deposit - rainfall;
         ask = ask < 0 ? 0 : ask;
         let amount = ask < left ? ask : left;
@@ -277,8 +293,10 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
   doPending = async () => {
     let { to_deposit, to_withdraw } = this.getPending();
     let transfer = (to_deposit && to_withdraw && (to_deposit + to_withdraw === 0));
-    _.map(this.state.pending, (amount, bucket_id) => {
-      return manager.store.buckets.transact({
+    const store = manager.checkpoint(sss('Transactions'));
+    Object.keys(this.state.pending).map(x=>Number(x)).forEach(bucket_id => {
+      const amount = this.state.pending[bucket_id];
+      return store.sub.buckets.transact({
         bucket_id: bucket_id,
         amount: amount,
         transfer: transfer,
@@ -340,43 +358,10 @@ class ProgressBubble extends React.PureComponent<{
   }
 }
 
-class ProgressBar extends React.PureComponent<{
-  percent:number;
-  color?:string;
-  width?:string;
-  label?: string;
-},{}> {
-  render() {
-    let { percent, color, width, label } = this.props;
-    let outerStyle:any = {};
-    let innerStyle:any = {
-      width: `${percent}%`,
-    }
-    if (color) {
-      outerStyle.borderColor = color;
-      innerStyle.backgroundColor = color;
-    }
-    if (width) {
-      outerStyle.width = width;
-    }
-    return <div className="progress-bar-wrap">
-      <div className={cx("progress-bar", {
-          overhalf: percent >= 50,
-          complete: percent >= 100,
-        })} style={outerStyle}>
-        <div className="bar" style={innerStyle}>
-          <div className="percent-label">{percent}%</div>
-        </div>
-      </div>
-      <div className="text-label">{label}</div>
-    </div>
-  }
-}
-
 class BucketKindDetails extends React.Component<{
   bucket: Bucket;
   balance: number;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
 }, {
   open: boolean;
 }> {
@@ -391,17 +376,22 @@ class BucketKindDetails extends React.Component<{
     return <tr key="goal">
       <td>{sss('Goal:')}</td>
       <td>
-        <MoneyInput
+        <DebouncedInput
           value={bucket.goal}
-          onChange={_.debounce(val => {
-            manager.store.buckets.update(bucket.id, {goal: val});
-          }, 250)} />
+          element={MoneyInput}
+          changeArgIsValue
+          onChange={val => {
+            manager
+            .checkpoint(sss('Update Goal'))
+            .sub.buckets.update(bucket.id, {goal: val});
+          }}
+        />
       </td>
     </tr>
   }
   targetDateRow() {
     let { bucket } = this.props;
-    let dt = utcToLocal(bucket.end_date);
+    let dt = parseUTCTime(bucket.end_date);
     if (!dt || !dt.isValid()) {
       dt = localNow();
     }
@@ -413,7 +403,9 @@ class BucketKindDetails extends React.Component<{
           year={dt.year()}
           onChange={({month, year}) => {
             let new_date = makeLocalDate(year, month, 1);
-            manager.store.buckets.update(bucket.id, {end_date: ts2db(new_date)})
+            manager
+            .checkpoint(sss('Update Target Date'))
+            .sub.buckets.update(bucket.id, {end_date: ts2utcdb(new_date)})
           }} />
       </td>
     </tr>
@@ -423,11 +415,15 @@ class BucketKindDetails extends React.Component<{
     return <tr key="deposit">
       <td>{sss('Monthly deposit:')}</td>
       <td>
-        <MoneyInput
+        <DebouncedInput
+          changeArgIsValue
+          element={MoneyInput}
           value={bucket.deposit}
-          onChange={_.debounce(val => {
-            manager.store.buckets.update(bucket.id, {deposit: val});
-          }, 250)} /><PerMonth/>
+          onChange={val => {
+            manager
+            .checkpoint(sss('Update Monthly Deposit'))
+            .sub.buckets.update(bucket.id, {deposit: val})
+          }} /><PerMonth/>
       </td>
     </tr>
   }
@@ -446,7 +442,9 @@ class BucketKindDetails extends React.Component<{
           <select
             value={bucket.kind}
             onChange={(ev) => {
-              manager.store.buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
+              manager
+              .checkpoint(sss('Update Bucket Type'))
+              .sub.buckets.update(bucket.id, {kind: ev.target.value as BucketKind});
             }}>
             <option value="">{sss('buckettype.plain', 'Plain old bucket')}</option>
             <option value="deposit">{sss('buckettype.deposit', 'Recurring expense')}</option>
@@ -551,9 +549,7 @@ interface BucketRowProps {
   bucket: Bucket;
   balance: number;
   flow: BucketFlow;
-  effective_bal: number;
-  show_effective_bal?: boolean;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
 }
@@ -573,7 +569,9 @@ class BucketRow extends React.Component<BucketRowProps, {
   doPending = async () => {
     let { pending, bucket, posting_date, onPendingChanged } = this.props;
     if (pending) {
-      await manager.store.buckets.transact({
+      await manager
+      .checkpoint(sss('Transaction'))
+      .sub.buckets.transact({
         bucket_id: bucket.id,
         amount: pending,
         posted: posting_date,
@@ -585,28 +583,31 @@ class BucketRow extends React.Component<BucketRowProps, {
     return isDifferent(nextState, this.state) || isDifferent(nextProps, this.props);
   }
   render() {
-    let { posting_date, bucket, balance, flow, effective_bal, show_effective_bal, onPendingChanged, pending } = this.props;
-    let balance_el;
-    if (pending) {
-      balance_el = <span>
-        <Money value={balance} className="strikeout" />
-        <span className="fa fa-long-arrow-right change-arrow" />
-        <Money value={balance + pending} />
-      </span>
-    } else {
-      balance_el = <Money value={balance} className="faint-cents" alwaysShowDecimal />
-    }
+    let { posting_date, bucket, balance, flow, onPendingChanged, pending } = this.props;
+    let balance_el = <div className={cx("changing-value", {
+      changing: pending,
+    })}>
+      <div className="old-value"><Money value={balance} /></div>
+      {pending ? <div className="new-value"><Money value={balance + pending} /></div> : null}
+    </div>
     let computed = computeBucketData(bucket.kind, bucket, {
       today: posting_date,
       balance: balance,
     })
 
     let rainfall_indicator;
-    if (computed.deposit) {
-      let percent = flow.in/computed.deposit*100;
+    const monthly_want:number = computed.deposit || 0;
+    let remaining_want:number;
+    if (monthly_want) {
+      remaining_want = monthly_want - flow.rain_in;
+      // if (remaining_want < 0) {
+      //   remaining_want = 0;
+      // }
+      let percent = flow.rain_in/monthly_want*100;
       rainfall_indicator = <Help
         icon={<ProgressBubble height="1rem" percent={percent} />}>
-        {Math.floor(percent)}%
+        <Money value={flow.rain_in} noFaintCents />/<Money value={monthly_want} noFaintCents/>
+        ({Math.floor(percent)}%)
       </Help>
     }
 
@@ -615,14 +616,14 @@ class BucketRow extends React.Component<BucketRowProps, {
       onDragOver={this.onDragOver}
       onDrop={this.onDrop}
       onDragLeave={this.onDragLeave}
-      className={cx('note-hover-trigger', {
+      className={cx('icon-hover-trigger', {
         underDrag: this.state.underDrag,
         isDragging: this.state.isDragging,
         dropTopHalf: this.state.underDrag && this.state.dropHalf === 'top',
         dropBottomHalf: this.state.underDrag && this.state.dropHalf === 'bottom',
       })}
     >
-      <td name="draghandle" className="nopad noborder">
+      <td x-name="draghandle" className="nopad">
         <div
           className="drophandle"
           draggable
@@ -631,42 +632,35 @@ class BucketRow extends React.Component<BucketRowProps, {
             <span className="fa fa-bars"/>
         </div>
       </td>
-      <td name="color/note" className="nobr right">
+      <td x-name="color/note" className="nobr right">
         <ColorPicker
           className="small"
           value={bucket.color}
           onChange={(val) => {
-            manager.store.buckets.update(bucket.id, {color: val})
+            manager.checkpoint(sss('Update Color'))
+            .sub.buckets.update(bucket.id, {color: val})
           }} />
         <NoteMaker
           obj={bucket}
         />
       </td>
-      <td name="name" className="nobr">
+      <td x-name="name" className="nobr">
         <ClickToEdit
           value={bucket.name}
           placeholder="no name"
           onChange={(val) => {
-            manager.store.buckets.update(bucket.id, {name: val});
+            manager
+            .checkpoint(sss('Update Bucket Name'))
+            .sub.buckets.update(bucket.id, {name: val});
           }}
         />
       </td>
-      <td name="want" className="right div-right">
-        <Money value={computed.deposit} hidezero />{computed.deposit ? <PerMonth/> : ''}
-        {rainfall_indicator}
-      </td>
-      <td name="in" className="right">
-        <Money value={flow.in} alwaysShowDecimal className="faint-cents" hidezero />
-      </td>
-      <td name="out" className="right">
-        <Money value={flow.out} alwaysShowDecimal className="faint-cents" nocolor hidezero />
-      </td>
-      <td name="transfers" className="right">
-        <Money value={flow.transfer_in + flow.transfer_out} alwaysShowDecimal className="faint-cents" hidezero />
-      </td>
-      <td name="balance" className="right div-left">{balance_el}</td>
-      {show_effective_bal ? <td className="right"><Money value={effective_bal} noanimate alwaysShowDecimal className="faint-cents" /></td> : null }
-      <td name="in/out" className="left div-left">
+      <td x-name="balance" className="right clickable"
+        onClick={ev => {
+          onPendingChanged({[bucket.id]: -balance})
+        }}
+      >{balance_el}</td>
+      <td x-name="in/out" className="left">
         <MoneyInput
           value={pending || null}
           onChange={(val) => {
@@ -687,13 +681,28 @@ class BucketRow extends React.Component<BucketRowProps, {
           })}
         />
       </td>
-      <td name="details"
+      <td x-name="want" className="right clickable"
+        onClick={ev => {
+          if (remaining_want) {
+            onPendingChanged({[bucket.id]: remaining_want})
+          }
+        }}>
+        <Money value={monthly_want} hidezero />
+        {rainfall_indicator}
+      </td>
+      <td x-name="in" className="right">
+        <Money value={flow.rain_in} hidezero />
+      </td>
+      <td x-name="activity" className="right">
+        <Money value={flow.total_activity} nocolor hidezero />
+      </td>
+      <td x-name="details"
           className="nopad bucket-details-wrap">
             <BucketKindDetails
             bucket={bucket}
             balance={balance}
             posting_date={posting_date} /></td>
-      <td name="more">
+      <td x-name="more">
         <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-ellipsis-h"></span></Link>
       </td>
     </tr>
@@ -721,7 +730,9 @@ class BucketRow extends React.Component<BucketRowProps, {
         let bucket_id = ev.dataTransfer.getData(item.type);
         if (bucket_id !== this.props.bucket.id) {
           const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
-          manager.store.buckets.moveBucket(bucket_id, placement, this.props.bucket.id)
+          manager
+          .checkpoint(sss('Move Bucket'))
+          .sub.buckets.moveBucket(bucket_id, placement, this.props.bucket.id)
         }
       })
       this.setState({
@@ -757,9 +768,7 @@ class GroupRow extends React.Component<{
   buckets: Bucket[];
   balances: Balances;
   bucket_flow: BucketFlowMap;
-  effective_bals: Balances;
-  show_effective_bal: boolean;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
 }, {
@@ -776,29 +785,24 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, bucket_flow, balances, effective_bals, show_effective_bal, onPendingChanged, pending, posting_date } = this.props;
+    let { buckets, group, bucket_flow, balances, onPendingChanged, pending, posting_date } = this.props;
     pending = pending || {};
 
     let total_in = 0;
-    let total_out = 0;
-    let total_transfer = 0;
+    let total_activity = 0;
     let total_balance = 0;
-    let total_effective_bal = 0;
 
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
       let flow = bucket_flow[bucket.id] || Object.assign({}, emptyFlow)
-      total_in += flow.in;
-      total_out += flow.out;
+      total_in += flow.rain_in;
+      total_activity += flow.total_activity;
       total_balance += balances[bucket.id];
-      total_effective_bal += effective_bals[bucket.id];
       return <BucketRow
         key={bucket.id}
         bucket={bucket}
         balance={balances[bucket.id]}
         flow={flow}
-        effective_bal={effective_bals[bucket.id]}
-        show_effective_bal={show_effective_bal}
         onPendingChanged={onPendingChanged}
         pending={pending[bucket.id]}
         posting_date={posting_date} />
@@ -810,8 +814,20 @@ class GroupRow extends React.Component<{
         onDrop={this.onDrop}
         onDragLeave={this.onDragLeave}
         >
-      <tr className="group-row note-hover-trigger">
-        <td name="draghandle"
+      <tr className="section-divider">
+          <th x-name="draghandle"></th>
+          <th x-name="color/note"></th>
+          <th x-name="name"></th>
+          <th x-name="balance" className="right">{sss('Balance')}</th>
+          <th x-name="in/out" className="center"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
+          <th x-name="want" className="right nobr"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
+          <th x-name="in" className="center nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
+          <th x-name="activity" className="center nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
+          <th x-name="details">{sss('bucket.detailslabel', 'Details')}</th>
+          <th x-name="more"></th>
+        </tr>
+      <tr className="group-row icon-hover-trigger">
+        <td x-name="draghandle"
           className={cx(
           'nopad',
           'noborder', 
@@ -829,47 +845,45 @@ class GroupRow extends React.Component<{
               <span className="fa fa-bars"/>
           </div>}
         </td>
-        <td name="color/note" className="right">
+        <td x-name="color/note" className="right">
           <button
             className="icon"
             title={sss("New bucket")}
             onClick={this.createBucket}><span className="fa fa-plus" /></button>
           {group.id === NOGROUP ? null : <NoteMaker obj={group} />}
         </td>
-        <td name="name" className="group-name">
+        <td x-name="name" className="group-name">
           {group.id === NOGROUP ? <span>{group.name} <Help>{sss('This is a special group for all the buckets without a group.')}</Help></span> : <ClickToEdit
             value={group.name}
             placeholder="no name"
             onChange={(val) => {
-              manager.store.buckets.updateGroup(group.id, {name: val});
+              manager
+              .checkpoint(sss('Update Group Name'))
+              .sub.buckets.updateGroup(group.id, {name: val});
             }}
           />}
         </td>
-        <td name="want" className="right div-right">
+        <td x-name="balance" className="right">
+          <Money value={total_balance} hidezero />
         </td>
-        <td name="in" className="right">
-          <Money value={total_in} alwaysShowDecimal className="faint-cents" hidezero/>
+        <td x-name="in/out"></td>
+        <td x-name="want" className="right">
         </td>
-        <td name="out" className="right">
-          <Money value={total_out} alwaysShowDecimal className="faint-cents" nocolor hidezero/>
+        <td x-name="in" className="right">
+          <Money value={total_in} hidezero/>
         </td>
-        <td name="transfers" className="right">
-          <Money value={total_transfer} alwaysShowDecimal className="faint-cents" hidezero/>
+        <td x-name="activity" className="right">
+          <Money value={total_activity} nocolor hidezero/>
         </td>
-        <td name="balance" className="right div-left">
-          <Money value={total_balance} alwaysShowDecimal className="faint-cents" hidezero />
+        <td x-name="details">
         </td>
-        {show_effective_bal ? <td name="effective_bal" className="right">
-          <Money value={total_effective_bal} alwaysShowDecimal className="faint-cents" hidezero/>
-        </td> : null}
-        <td name="in/out" className="div-left"></td>
-        <td name="details">
-        </td>
-        <td name="more">
+        <td x-name="more">
           <SafetySwitch
             className="icon grey show-on-row-hover"
             onClick={ev => {
-              manager.store.buckets.deleteGroup(group.id);
+              manager
+              .checkpoint(sss('Delete Group'))
+              .sub.buckets.deleteGroup(group.id);
             }}
           >
             <span className="fa fa-trash" />
@@ -880,7 +894,9 @@ class GroupRow extends React.Component<{
     </tbody>);
   }
   createBucket = () => {
-    manager.store.buckets.add({name: sss('default new bucket name', 'New Bucket'), group_id: this.props.group.id})
+    manager
+    .checkpoint(sss('New Bucket'))
+    .sub.buckets.add({name: sss('default new bucket name', 'New Bucket'), group_id: this.props.group.id})
   }
   //----------------------------------
   // Draggable
@@ -905,11 +921,15 @@ class GroupRow extends React.Component<{
           let group_id = ev.dataTransfer.getData(item.type);
           if (group_id !== this.props.group.id) {
             const placement = this.state.dropHalf === 'top' ? 'before' : 'after';
-            manager.store.buckets.moveGroup(group_id, placement, this.props.group.id);
+            manager
+            .checkpoint(sss('Move Group'))
+            .sub.buckets.moveGroup(group_id, placement, this.props.group.id);
           }
         } else if (item.type === 'bucket') {
           let bucket_id = ev.dataTransfer.getData(item.type);
-          manager.store.buckets.update(bucket_id, {group_id: this.props.group.id})
+          manager
+          .checkpoint(sss('Move Bucket'))
+          .sub.buckets.update(bucket_id, {group_id: this.props.group.id})
         }
       })
       this.setState({
@@ -951,9 +971,7 @@ interface GroupedBucketListProps {
   buckets: Bucket[];
   balances: Balances;
   bucket_flow: BucketFlowMap;
-  effective_bals: Balances;
-  show_effective_bal: boolean;
-  posting_date: Timestamp;
+  posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
 }
@@ -967,7 +985,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { balances, bucket_flow, effective_bals, show_effective_bal, pending, posting_date } = this.props;
+    let { balances, bucket_flow, pending, posting_date } = this.props;
     pending = pending || {};
 
     let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
@@ -979,29 +997,11 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           buckets={buckets}
           balances={balances}
           bucket_flow={bucket_flow}
-          effective_bals={effective_bals}
-          show_effective_bal={show_effective_bal}
           onPendingChanged={this.pendingChanged}
           pending={pending}
           posting_date={posting_date} />
       })
     return <table className="ledger full-width">
-      <thead>
-        <tr>
-          <th name="draghandle"></th>
-          <th name="color/note"></th>
-          <th name="name"></th>
-          <th name="want" className="right nobr div-right"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
-          <th name="in" className="center">{sss("In")}</th>
-          <th name="out" className="center">{sss("Out")}</th>
-          <th name="transfers" className="center"><Help icon={<span className="fa fa-exchange" />}>{sss('Net transfers between buckets.')}</Help></th>
-          <th name="balance" className="center div-left">{sss('Balance')}</th>
-          {show_effective_bal ? <th className="right">{sss('Effective')} <Help><span>{sss('effective.help', 'This would be the balance if no buckets were in debt.')}</span></Help></th> : null}
-          <th name="in/out" className="left div-left">{sss('In/Out')}</th>
-          <th name="details">{sss('bucket.detailslabel', 'Details')}</th>
-          <th name="more"></th>
-        </tr>
-      </thead>
       {group_elems}
     </table>
   }
@@ -1057,13 +1057,17 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       kicked_ribbon = <div className="kicked-ribbon">{sss('single-bucket Kicked', 'Kicked')}</div>
       kick_button = <button
         onClick={() => {
-          manager.store.buckets.unkick(bucket.id);
+          manager
+          .checkpoint(sss('Un-kick Bucket'))
+          .sub.buckets.unkick(bucket.id);
         }}>{sss('Un-kick')}</button>
     } else {
       kick_button = <button
         className="delete"
         onClick={() => {
-          manager.store.buckets.kick(bucket.id)
+          manager
+          .checkpoint(sss('Kick Bucket'))
+          .sub.buckets.kick(bucket.id)
           .then(new_bucket => {
             if (!new_bucket.kicked) {
               // it was deleted
@@ -1109,13 +1113,17 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               <ColorPicker
               value={bucket.color}
               onChange={(val) => {
-                manager.store.buckets.update(bucket.id, {color: val})
+                manager
+                .checkpoint(sss('Update Color'))
+                .sub.buckets.update(bucket.id, {color: val})
               }} />
               <ClickToEdit
                 value={bucket.name}
                 placeholder="no name"
                 onChange={(val) => {
-                  manager.store.buckets.update(bucket.id, {name: val});
+                  manager
+                  .checkpoint(sss('Update Name'))
+                  .sub.buckets.update(bucket.id, {name: val});
                 }}
               />
             </h1>
@@ -1151,9 +1159,9 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
   render() {
     let { transactions, appstate, ending_balance } = this.props;
     const sortFunc = [
-      item => -ensureUTCMoment(item.posted).unix(),
+      (item:Transaction) => -parseLocalTime(item.posted).unix(),
       'bucket_id',
-      item => -item.id]
+      (item:Transaction) => -item.id]
     let rows = _.sortBy(transactions, sortFunc).map(trans => {
       let running_bal;
       if (!isNil(ending_balance)) {
@@ -1167,7 +1175,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
           account_name = appstate.accounts[account_id].name;
         }
       }
-      return <tr key={trans.id} className="note-hover-trigger">
+      return <tr key={trans.id} className="icon-hover-trigger">
         <td>
           <input
             type="checkbox"
@@ -1182,7 +1190,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
               this.setState({selected: newset})
             }}/>
         </td>
-        <td className="nobr"><NoteMaker obj={trans} /><DateDisplay value={trans.posted} /></td>
+        <td className="nobr"><NoteMaker obj={trans} /><DateDisplay value={trans.posted} islocal /></td>
         <td style={{width:'40%'}}>{trans.memo}</td>
         <td className="right"><Money value={trans.amount} /></td>
         {ending_balance === null ? null : <td className="right"><Money value={running_bal} /></td>}
@@ -1191,7 +1199,9 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
             type="checkbox"
             checked={trans.transfer}
             onChange={(ev) => {
-              manager.store.buckets.updateTransaction(trans.id, {
+              manager
+              .checkpoint(ev.target.checked ? sss('Make Transfer') : sss('Not Transfer'))
+              .sub.buckets.updateTransaction(trans.id, {
                 transfer: ev.target.checked,
               })
             }}/>
@@ -1212,7 +1222,9 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
             <SafetySwitch
               disabled={!this.state.selected.size}
               onClick={ev => {
-                manager.store.buckets.deleteTransactions(Array.from(this.state.selected));
+                manager
+                .checkpoint(sss('Delete Transactions'))
+                .sub.buckets.deleteTransactions(Array.from(this.state.selected));
                 this.setState({selected: new Set<number>()})
               }}
             >
@@ -1242,7 +1254,25 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
 export class BucketStyles extends React.Component<{buckets: Bucket[]}, {}> {
   render() {
     let guts = this.props.buckets.map(bucket => {
-      return `.tag.custom-bucket-style-${bucket.id} { background-color: ${bucket.color || 'var(--blue)'}; }`
+      const color = Color(bucket.color || COLORS.blue);
+      const background = color.rgb().string();
+      const textcolor = color.luminosity() > .5 ? 'black' : 'white';
+      return `
+.category-tag.bucket-style-${bucket.id},
+.category-input .tag.bucket-style-${bucket.id},
+.category-input .tag.bucket-style-${bucket.id} select {
+  color: ${textcolor};
+  text-decoration-color: ${textcolor};
+}
+.category-tag.bucket-style-${bucket.id} .name,
+.category-input .tag.bucket-style-${bucket.id} .name {
+  border-color: ${background};
+  background-color: ${background};
+}
+.category-tag.bucket-style-${bucket.id} .amount,
+.category-input .tag.bucket-style-${bucket.id} .amount {
+  background-color: ${color.rgb().fade(0.3).string()};
+}`
     })
     return <style>
       {guts.join('\n')}

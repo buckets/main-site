@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { Timestamp, ensureLocalMoment, localNow } from '../../time'
+import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from '../../time'
 import { remote, ipcRenderer } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankMacro } from '../../models/bankmacro'
@@ -36,11 +36,10 @@ class Webview extends React.Component<WebviewProps, any> {
     let { preload, partition } = this.props;
     return <webview ref={elem => {
       if (elem) {
-        this.elem = elem;
+        this.elem = elem as Electron.WebviewTag;
       }
     }}
-      is
-      autosize="on"
+      autosize
       preload={preload}
       partition={partition} />
   }
@@ -700,14 +699,14 @@ export async function start(args:{
     partition:string,
     response_id?:string,
     autoplay?: {
-      onOrAfter: Timestamp,
-      before: Timestamp,
+      onOrAfter: SerializedTimestamp,
+      before: SerializedTimestamp,
     }
   }) {
   const renderer = new Renderer();
   
   let store = current_file.store;
-  let BANKMACRO = await store.bankmacro.get(args.macro_id);
+  let BANKMACRO = await store.sub.bankmacro.get(args.macro_id);
   let recording:Recording = null
   let sync_result:SyncResult = {
     errors: [],
@@ -718,7 +717,7 @@ export async function start(args:{
   let i = 0;
   while (true) {
     try {
-      let plaintext = await store.bankmacro.decryptRecording(BANKMACRO);
+      let plaintext = await store.sub.bankmacro.decryptRecording(BANKMACRO);
       recording = plaintext.recording;
       break;
     } catch(err) {
@@ -738,7 +737,7 @@ export async function start(args:{
   });
   director.events.newpage.on(message => {
     if (!BANKMACRO.name) {
-      store.bankmacro.update(BANKMACRO.id, {name: message.title});
+      store.sub.bankmacro.update(BANKMACRO.id, {name: message.title});
     }
   })
   director.events.file_downloaded.on(async ({localpath, filename, mimetype}) => {
@@ -799,10 +798,10 @@ export async function start(args:{
           log.info('Starting autoplay');
           director.playFromBeginning((options:ValueOptions) => {
             if (options.key === 'start-date') {
-              let date = ensureLocalMoment(args.autoplay.onOrAfter);
+              let date = ensureLocalMoment(loadTS(args.autoplay.onOrAfter));
               return date.format(options.variation);
             } else if (options.key === 'end-date') {
-              let date = ensureLocalMoment(args.autoplay.before);
+              let date = ensureLocalMoment(loadTS(args.autoplay.before));
               return date.format(options.variation);
             }
           })
@@ -825,7 +824,7 @@ export async function start(args:{
         }
       }}
       onRecordingChange={(new_recording) => {
-        store.bankmacro.update(args.macro_id, {
+        store.sub.bankmacro.update(args.macro_id, {
           recording: new_recording,
         })
       }}

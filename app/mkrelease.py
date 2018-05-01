@@ -10,10 +10,11 @@ import io
 import requests
 import click
 import webbrowser
-from dev.changelog import trello as trellolib
+from dev.github import GitHubClient
 
 GH_TOKEN = os.environ['GH_TOKEN']
 GH_USER = os.environ.get('GH_USERNAME', 'iffy')
+github = GitHubClient(GH_USER, GH_TOKEN, 'buckets', 'application')
 
 
 def prompt(text, default=None, validate=lambda x:x, required=True):
@@ -74,14 +75,12 @@ def getLatestReleaseVersion():
         return release['name']
 
 #------------------------------------------------------------------------------
-# Trello stuff
+# GitHub stuff
 #------------------------------------------------------------------------------
-trello = trellolib.TrelloData()
 
-
-r_cardlink = re.compile(r'https://trello.com/c/([^\)]+)')
-def extractCardIds(changelog):
-    links = r_cardlink.findall(changelog)
+r_issuelink = re.compile(r'https://github.com/buckets/application/issues/([0-9]+)')
+def extractIssueNumbers(changelog):
+    links = r_issuelink.findall(changelog)
     return links
 
 
@@ -121,7 +120,7 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     # verify CHANGELOG
     print('=== CHANGELOG ===')
     new_changelog = subprocess.check_output(['dev/changelog/combine_changes.sh'])
-    card_ids = extractCardIds(new_changelog)
+    issue_numbers = extractIssueNumbers(new_changelog)
     print(new_changelog)
     if not yesno('Does this look correct?', default=True):
         abort()
@@ -184,10 +183,24 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     print('Updated version to {0}'.format(next_version))
 
     # close cards
-    if yesno('Move Trello cards to done ({0})?'.format(','.join(card_ids)), default=True):
-        for card_id in card_ids:
-            trello.commentOnCard(card_id, 'Included in v{0} release (AUTOMATED COMMENT)'.format(target_version))
-            trello.moveCardToList(card_id, 'Done')
+    if yesno('Close GitHub issues? ({0})?'.format(','.join(issue_numbers)), default=True):
+        for issue_number in issue_numbers:
+            github.commentOnIssue(issue_number, 'Included in v{0} release (AUTOMATED COMMENT)'.format(target_version))
+            github.closeIssue(issue_number)
+
+    # publish CHANGELOG
+    if yesno('Publish CHANGELOG.md to https://github.com/buckets/application?', default=True):
+        github_dir = os.path.abspath('../../buckets-application')
+        subprocess.check_call(['git', 'fetch', 'origin'], cwd=github_dir)
+        subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
+        subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
+        subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
+        subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
+        subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
+
+    # push to origin
+    if yesno('Push to origin?', default=True):
+        subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
 
 
 if __name__ == '__main__':

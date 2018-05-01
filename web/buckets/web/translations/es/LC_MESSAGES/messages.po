@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-01-31 11:59-0700\n"
-"PO-Revision-Date: 2018-01-31 12:01-0700\n"
+"POT-Creation-Date: 2018-04-23 12:27-0600\n"
+"PO-Revision-Date: 2018-04-23 12:27-0600\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -219,15 +219,15 @@ msgstr "¡Feliz presupuestar!"
 msgid "Buy Buckets"
 msgstr "Comprar Buckets"
 
-#: buckets/web/templates/anon/buy.html:17
+#: buckets/web/templates/anon/buy.html:25
 msgid "Purchase License"
 msgstr "Comprar licencia"
 
-#: buckets/web/templates/anon/buy.html:18
+#: buckets/web/templates/anon/buy.html:26
 msgid "Family budgeting app"
 msgstr "Aplicación de presupuesto familiar"
 
-#: buckets/web/templates/anon/buy.html:28
+#: buckets/web/templates/anon/buy.html:39
 msgid ""
 "For a <em>one-time $29 payment,</em> you will be emailed a Buckets License "
 "which may be used on any number of computers belonging to you and your "
@@ -237,7 +237,7 @@ msgstr ""
 "Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que "
 "le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
-#: buckets/web/templates/anon/buy.html:31
+#: buckets/web/templates/anon/buy.html:42
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr "Si perdió su licencia, envíeme a hello@budgetwithbuckets.com"
 
@@ -259,39 +259,39 @@ msgstr ""
 "Libérese de las deudas y logre metas financieras que no creía que estuvieran al "
 "alcance."
 
-#: buckets/web/templates/anon/index.html:110
+#: buckets/web/templates/anon/index.html:117
 msgid ""
 "Buckets makes budgeting <em>fast</em>, <em>simple</em> and <em>private.</em>"
 msgstr ""
 "Buckets hace que el presupuesto sea <em>rápido</em>, <em>simple</em> y "
 "<em>privado.</em>"
 
-#: buckets/web/templates/anon/index.html:115
+#: buckets/web/templates/anon/index.html:122
 #, python-format
 msgid "Download Buckets v%(latest_version)s for"
 msgstr "Descargar Buckets v%(latest_version)s para"
 
-#: buckets/web/templates/anon/index.html:119
+#: buckets/web/templates/anon/index.html:126
 msgid "macOS"
 msgstr "macOS"
 
-#: buckets/web/templates/anon/index.html:125
+#: buckets/web/templates/anon/index.html:132
 msgid "Windows"
 msgstr "Windows"
 
-#: buckets/web/templates/anon/index.html:131
+#: buckets/web/templates/anon/index.html:138
 msgid "Linux"
 msgstr "Linux"
 
-#: buckets/web/templates/anon/index.html:135
+#: buckets/web/templates/anon/index.html:142
 msgid "Other"
 msgstr "Otro"
 
-#: buckets/web/templates/anon/index.html:145
+#: buckets/web/templates/anon/index.html:152
 msgid "Buy $29"
 msgstr "Comprar $29"
 
-#: buckets/web/templates/anon/index.html:149
+#: buckets/web/templates/anon/index.html:156
 msgid ""
 "Buckets gives you an <em>untimed, free trial</em> for as long as you need to "
 "decide if it works for you.  Really."
@@ -299,24 +299,24 @@ msgstr ""
 "Buckets le ofrece <em>una prueba gratis, sin tiempo</em>, por el tiempo que "
 "necesite para decidir si le conviene.  En serio."
 
-#: buckets/web/templates/anon/index.html:153
+#: buckets/web/templates/anon/index.html:160
 msgid "Buckets is <em>private</em>."
 msgstr "Buckets es <em>privada</em>."
 
-#: buckets/web/templates/anon/index.html:153
+#: buckets/web/templates/anon/index.html:160
 msgid "Your finances stay on your computer.  You control your data again!"
 msgstr ""
 "Sus finanzas permanecen en su computadora.  Usted controla sus datos de nuevo!"
 
-#: buckets/web/templates/anon/index.html:157
+#: buckets/web/templates/anon/index.html:164
 msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
 msgstr "Buckets <em>no tiene tarifa mensual.</em>  Cuesta $29.  Una vez."
 
-#: buckets/web/templates/anon/index.html:157
+#: buckets/web/templates/anon/index.html:164
 msgid "You're saving money, not shackling yourself to another monthly service."
 msgstr "Estás ahorrando dinero, no te estás encarcelando a otro servicio mensual."
 
-#: buckets/web/templates/anon/index.html:157
+#: buckets/web/templates/anon/index.html:164
 msgid ""
 "A single license may be used on all your computers and all the computers of "
 "family members living in your home."
@@ -324,11 +324,11 @@ msgstr ""
 "Una sola licencia se puede usar en cualquier cantidad de computadoras que le "
 "pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
-#: buckets/web/templates/anon/index.html:161
+#: buckets/web/templates/anon/index.html:168
 msgid "Buckets has <em>amazing support.</em>"
 msgstr "Buckets tiene <em>apoyo increíble.</em>"
 
-#: buckets/web/templates/anon/index.html:161
+#: buckets/web/templates/anon/index.html:168
 msgid ""
 "I'll listen to your ideas, help you with the app and gladly answer questions, "
 "no matter how small."
@@ -336,7 +336,7 @@ msgstr ""
 "Escucharé tus ideas, te ayudaré con la aplicación y responderé preguntas, sin "
 "importar cuán pequeñas sean."
 
-#: buckets/web/templates/anon/index.html:161
+#: buckets/web/templates/anon/index.html:168
 msgid ""
 "I'm serious.  Click that chat bubble and tell me what you ate for dinner last "
 "night."
@@ -344,29 +344,29 @@ msgstr ""
 "Lo digo en serio. Haz clic en ese botón de chat y dime qué comiste para cenar "
 "anoche."
 
-#: buckets/web/templates/anon/index.html:165
+#: buckets/web/templates/anon/index.html:172
 msgid ""
 "Buckets includes some free and novel methods to <em>sync with your bank.</em>"
 msgstr ""
 "Buckets incluye algunos métodos gratuitos y novedosos para <em>sincronizar con "
 "su banco.</em>"
 
-#: buckets/web/templates/anon/index.html:165
+#: buckets/web/templates/anon/index.html:172
 msgid ""
 "Record completely private macros, import files or sign up with SimpleFIN Bridge."
 msgstr ""
 "Grabe macros completamente privadas, importe archivos o regístrese con "
 "SimpleFIN Bridge."
 
-#: buckets/web/templates/anon/index.html:169
+#: buckets/web/templates/anon/index.html:176
 msgid ""
 "Buckets includes some terrific <em>extras</em> such as really fast Amazon why-"
-"do-they-split-every-purchase-into-a-hundred-transactions reonciliation."
+"do-they-split-every-purchase-into-a-hundred-transactions reconciliation."
 msgstr ""
 "Buckets incluye algunos <em>extras</em> fabulosos como rápida reconciliación de "
 "Amazon porqué-ellos-dividen-cada-compra-en-cien-transacciones."
 
-#: buckets/web/templates/anon/index.html:175
+#: buckets/web/templates/anon/index.html:182
 #, python-format
 msgid ""
 "Buckets includes <em>helpful videos</em> to teach you how to budget like a "
@@ -375,38 +375,50 @@ msgstr ""
 "Buckets incluye <em>videos útiles</em> para enseñarle a presupuestar como un "
 "maestro.  <a href=\"%(href)s\">¡Échales un vistazo!</a>"
 
-#: buckets/web/templates/anon/index.html:181
+#: buckets/web/templates/anon/index.html:187
+msgid "Thanks"
+msgstr "Gracias"
+
+#: buckets/web/templates/anon/index.html:192
 msgid "Buckets is <em>multilingual</em>."
 msgstr "Buckets es <em>multilingüe</em>."
 
-#: buckets/web/templates/anon/index.html:181
-msgid "Currently English and Spanish are supported."
-msgstr "Actualmente, inglés y español están disponibles."
+#: buckets/web/templates/anon/index.html:192
+msgid "Currently available languages:"
+msgstr "Idiomas disponibles actualmente:"
 
-#: buckets/web/templates/anon/index.html:187
+#: buckets/web/templates/anon/index.html:199
+msgid "Want to add your language?"
+msgstr "¿Quiere añadir su idioma?"
+
+#: buckets/web/templates/anon/index.html:205
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul."
 msgstr ""
 "Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
 "aquí por mucho tiempo."
 
-#: buckets/web/templates/anon/index.html:191
+#: buckets/web/templates/anon/index.html:205
+msgid "Read more."
+msgstr "Lee mas."
+
+#: buckets/web/templates/anon/index.html:209
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
 
-#: buckets/web/templates/anon/index.html:232
+#: buckets/web/templates/anon/index.html:250
 msgid "Subscribe to the Monthly Newsletter"
 msgstr "Suscríbete al boletín de Buckets"
 
-#: buckets/web/templates/anon/index.html:234
+#: buckets/web/templates/anon/index.html:252
 msgid "Email Address"
 msgstr "Dirección de correo electrónico"
 
-#: buckets/web/templates/anon/index.html:238
+#: buckets/web/templates/anon/index.html:256
 msgid "First Name"
 msgstr "Nombre de pila"
 
-#: buckets/web/templates/anon/index.html:246
+#: buckets/web/templates/anon/index.html:264
 msgid "Subscribe"
 msgstr "Suscribir"
 
@@ -554,3 +566,16 @@ msgstr "Suscribir"
 #~ msgstr ""
 #~ "Buckets es <em>multilingüe</em>. Actualmente, inglés y español están "
 #~ "disponibles."
+
+#~ msgid "Currently English and Spanish are supported."
+#~ msgstr "Actualmente, inglés y español están disponibles."
+
+#~ msgid ""
+#~ "Buckets includes some terrific <em>extras</em> such as really fast Amazon "
+#~ "why-do-they-split-every-purchase-into-a-hundred-transactions reonciliation."
+#~ msgstr ""
+#~ "Buckets incluye algunos <em>extras</em> fabulosos como rápida reconciliación "
+#~ "de Amazon porqué-ellos-dividen-cada-compra-en-cien-transacciones."
+
+#~ msgid "Read more"
+#~ msgstr "Lee mas"

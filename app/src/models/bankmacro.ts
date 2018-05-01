@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
 import { IObject, IStore, registerClass } from '../store'
@@ -208,14 +208,14 @@ class MacroSync implements ASyncening {
   }
   async start():Promise<SyncResult> {
     log.info('MacroSync start', this.onOrAfter.format('l'), this.before.format('l'))
-    let macros = (await this.store.bankmacro.list()).filter(macro => macro.enabled);
+    let macros = (await this.store.sub.bankmacro.list()).filter(macro => macro.enabled);
     let { onOrAfter, before } = this;
     let errors = [];
     let imported_count = 0;
     for (let macro of macros) {
       log.info(`Syncing macro #${macro.id} ${macro.name}`);
       try {
-        let result:SyncResult = await this.store.bankmacro.runMacro(this.file, macro.id, onOrAfter, before);
+        let result:SyncResult = await this.store.sub.bankmacro.runMacro(this.file, macro.id, onOrAfter, before);
         errors = errors.concat(result.errors);
         imported_count += result.imported_count;
       } catch (err) {

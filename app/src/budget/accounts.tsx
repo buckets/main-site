@@ -1,5 +1,7 @@
 import * as React from 'react'
 import * as _ from 'lodash'
+import * as cx from 'classnames'
+import * as moment from 'moment-timezone'
 import { sss } from '../i18n'
 import { shell } from 'electron'
 import {Balances} from '../models/balances'
@@ -8,11 +10,11 @@ import { Route, Link, WithRouting, Redirect } from './routing'
 import { Money, MoneyInput } from '../money'
 import { makeToast } from './toast'
 import {TransactionList} from './transactions'
-import { ClickToEdit, debounceChange, SafetySwitch } from '../input';
+import { ClickToEdit, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
-import { DateDisplay } from '../time'
+import { DateDisplay, loadTS } from '../time'
 import { NoteMaker } from './notes'
 
 function getImportBalance(account:Account, balance:number):number {
@@ -27,7 +29,9 @@ export class ClosedAccountsPage extends React.Component<{appstate:AppState}, {}>
         return <tr key={account.id}>
           <td>{account.name}</td>
           <td><button onClick={() => {
-            manager.store.accounts.unclose(account.id);
+            manager
+            .checkpoint(sss('Reopen Account'))
+            .sub.accounts.unclose(account.id)
           }}>{sss('Reopen')}</button></td>
           <td>
             <Link relative to={`../${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link>
@@ -79,20 +83,22 @@ export class AccountList extends React.Component<AccountListProps,any> {
         </div>}>{sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.')}</Help>
 
       }
-      return (<tr key={account.id} className="note-hover-trigger">
+      return (<tr key={account.id} className="icon-hover-trigger">
           <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
-          <td><ClickToEdit
+          <td className="nobr"><ClickToEdit
             value={account.name}
             placeholder={sss('accounts.name_placeholder', 'no name')}
             onChange={(val) => {
-              manager.store.accounts.update(account.id, {name: val});
+              manager
+              .checkpoint(sss('Update Account Name'))
+              .sub.accounts.update(account.id, {name: val});  
             }}
           /></td>
-          <td className="right"><Money value={balances[account.id]} alwaysShowDecimal className="faint-cents" />{import_balance_note}</td>
+          <td className="right nobr"><Money value={balances[account.id]} />{import_balance_note}</td>
           <td><Link relative to={`/${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link></td>
         </tr>);
     })
-    return (<table className="ledger">
+    return (<table className="ledger full-width">
       <thead>
         <tr>
           <th></th>
@@ -111,27 +117,72 @@ export class AccountList extends React.Component<AccountListProps,any> {
 interface AccountViewProps {
   account: Account;
   transactions: Transaction[];
-  balance: number;
+  current_balance: number;
   appstate: AppState;
 }
-export class AccountView extends React.Component<AccountViewProps, {
-  transaction_acount: number;
-}> {
+interface AccountViewState {
+  new_balance: number;
+  balance_edit_showing: boolean;
+  new_balance_with_transaction: boolean;
+  balance_date: moment.Moment;
+}
+export class AccountView extends React.Component<AccountViewProps, AccountViewState> {
+  constructor(props:AccountViewProps) {
+    super(props);
+    this.state = {
+      new_balance: props.current_balance || 0,
+      balance_edit_showing: false,
+      new_balance_with_transaction: true,
+      balance_date: null,
+    }
+  }
+  componentDidMount() {
+    this.refreshDetails(this.props);
+  }
+  componentWillReceiveProps(nextProps:AccountViewProps) {
+    if (nextProps.current_balance !== this.props.current_balance) {
+      this.setState({
+        new_balance: nextProps.current_balance,
+        new_balance_with_transaction: true,
+      })
+    }
+    this.refreshDetails(nextProps);
+  }
+  refreshDetails(props:AccountViewProps) {
+    const store = manager.nocheckpoint.sub.accounts;
+    store.hasTransactions(props.account.id)
+    .then(has_transactions => {
+      this.setState({
+        new_balance_with_transaction: has_transactions,
+      });
+    })
+    store.balanceDate(props.account.id, props.appstate.viewDateRange.before)
+    .then(balance_date => {
+      console.log('got balance_date', balance_date);
+      this.setState({
+        balance_date: balance_date ? loadTS(balance_date) : null,
+      })
+    })
+  }
   render() {
-    let { account, balance, appstate } = this.props;
-    let import_balance = getImportBalance(account, balance);
+    let { account, current_balance, appstate } = this.props;
+    let import_balance = getImportBalance(account, current_balance);
     let import_balance_field;
     let close_button;
     let closed_ribbon;
     let delete_all_transactions_button;
     if (account.closed) {
       close_button = <button onClick={() => {
-        manager.store.accounts.unclose(account.id);
+        manager
+        .checkpoint(sss('Reopen Account'))
+        .sub.accounts.unclose(account.id);  
       }}>{sss('Reopen')}</button>
       closed_ribbon = <div className="kicked-ribbon">{sss('single-account Closed', 'Closed')}</div>
       delete_all_transactions_button = <SafetySwitch
         onClick={ev => {
-          manager.store.accounts.deleteWholeAccount(account.id)
+          manager
+          .checkpoint(sss('Delete Account'))
+          .sub.accounts.deleteWholeAccount(account.id)
           .then(() => {
             makeToast(sss('Account and transactions deleted'));
           });
@@ -141,7 +192,9 @@ export class AccountView extends React.Component<AccountViewProps, {
     } else {
       close_button = <SafetySwitch
         onClick={ev => {
-          manager.store.accounts.close(account.id)
+          manager
+          .checkpoint(sss('Close Account'))
+          .sub.accounts.close(account.id)
           .then(new_account => {
             if (!new_account.closed) {
               // it was deleted
@@ -153,22 +206,90 @@ export class AccountView extends React.Component<AccountViewProps, {
         }}>{sss('Close account')}</SafetySwitch>
     }
 
-    if (import_balance !== balance) {
-      import_balance_field = <div>
-        {sss('Synced balance')}: <Money value={import_balance} />
-        <p>
-          <div className="alert info">
-            <span className="fa fa-exclamation-circle" />
+    if (import_balance !== current_balance) {
+      import_balance_field = <tr>
+        <th>{sss('Synced balance')}</th>
+        <td>
+          <Money value={import_balance} noFaintCents />
+          <div className="notice">
+            <div className="alert info">
+              <span className="fa fa-exclamation-circle" />
+            </div>
+            <span>{sss("account-bal-diff-1", "The running balance does not match the last synced balance for one of these reasons:")} </span>
+            <ul>
+              <li>{sss("account-bal-diff-fix-1", "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets.")}</li>
+              <li>{sss("account-bal-diff-fix-2", "Transactions are missing from Buckets.")}</li>
+            </ul>
           </div>
-          {sss('accounts.balance_mismatch_long_msg', () => {
-            return (<span>
-              The "Balance" above is this account's balance as of the latest entered transaction.
-              The "Synced balance" is the this account's balance <i>as reported by the bank.</i>
-              Some banks always report <i>today's balance</i> as the "Synced balance" even though <i>today's transactions</i> haven't been sent to Buckets yet.
-              So this mismatch will usually resolve itself once all the transactions in your bank have been synced into Buckets.
-          </span>)})()}
-        </p>
-      </div>
+        </td>
+      </tr>
+    }
+
+    let balance_edit_form;
+    let bal_time_diff = account.balance - current_balance;
+    let new_future_balance = this.state.new_balance + bal_time_diff;
+    let bal_adjustment_amount = new_future_balance - account.balance;
+    if (this.state.balance_edit_showing) {
+      balance_edit_form = <form
+        onSubmit={async ev => {
+          ev.preventDefault();
+          if (bal_adjustment_amount === 0) {
+            return;
+          }
+          let store = manager.checkpoint(sss('Update Account Balance'));
+          if (this.state.new_balance_with_transaction) {
+            // Update via transaction
+            await store.sub.accounts.transact({
+              account_id: account.id,
+              memo: sss('Update account balance'),
+              amount: bal_adjustment_amount,
+              posted: appstate.defaultPostingDate,
+            })
+          } else {
+            // Direct update of balance
+            await store.sub.accounts.update(account.id, {
+              balance: new_future_balance,
+            })
+          }
+          this.setState({
+            new_balance_with_transaction: true,
+          })
+        }}>
+        <div>
+          <MoneyInput
+            autoFocus
+            value={this.state.new_balance}
+            onChange={newval => {
+              this.setState({new_balance: newval});
+            }} />
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="record-as"
+              value="record-trans"
+              checked={this.state.new_balance_with_transaction}
+              onChange={ev => {
+                this.setState({new_balance_with_transaction: ev.target.checked})
+              }}/>
+            {sss('Record change as transaction')} (<Money value={bal_adjustment_amount} noFaintCents />)</label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="record-as"
+              value="no-trans"
+              checked={!this.state.new_balance_with_transaction}
+              onChange={ev => {
+                this.setState({new_balance_with_transaction: !ev.target.checked})
+              }}/> {sss('Update balance without a transaction')}</label>
+        </div>
+        <div>
+          <button>{sss('Update balance')}</button>
+        </div>
+      </form>
     }
     return (<div className="padded flex-grow-2" key={account.id}>
       {closed_ribbon}
@@ -177,34 +298,78 @@ export class AccountView extends React.Component<AccountViewProps, {
           value={account.name}
           placeholder={sss('accounts.name_placeholder', 'no name')}
           onChange={(val) => {
-            manager.store.accounts.update(account.id, {name: val});
+            manager
+            .checkpoint(sss('Update Account Name'))
+            .sub.accounts.update(account.id, {name: val});  
           }}
         />
       </h1>
-      <div className="fieldlist">
-        <div>
-          {sss('Balance')}: <MoneyInput
-          value={balance}
-          onChange={debounceChange(this_months_balance => {
-            let diff = account.balance - balance;
+      <table className="fieldlist">
+        <tbody>
+          <tr>
+            <th>
+              {sss('Balance')}
+            </th>
+            <td>
+              <div>
+                {sss('money-balance-as-of', (amount:JSX.Element, date:JSX.Element) => {
+                  return <span>{amount} as of {date}</span>
+                })(
+                  <Money value={current_balance} noFaintCents />,
+                  <DateDisplay value={this.state.balance_date || appstate.defaultPostingDate} />
+                )}
+                <button className="icon inline" onClick={ev => {
+                  this.setState({balance_edit_showing: !this.state.balance_edit_showing})
+                }}><span className={cx("fa", {
+                  "fa-pencil": !this.state.balance_edit_showing,
+                  "fa-check": this.state.balance_edit_showing,
+                })} /></button>
+              </div>
+              {balance_edit_form}
+            </td>
+          </tr>
 
-            let computed_balance = this_months_balance + diff;
-            manager.store.accounts.update(account.id, {balance: computed_balance});
-          })}/> ({sss('balance-as-of', (date:JSX.Element) => {
-            return <span>as of {date}</span>
-          })(<DateDisplay value={appstate.defaultPostingDate} />)})
-        </div>
-        {import_balance_field}
-      </div>
+          {import_balance_field}
+
+          <tr>
+            <th>{sss('Off budget')}</th>
+            <td>
+              <input
+                type="checkbox"
+                checked={account.offbudget}
+                onChange={ev => {
+                  if (ev.target.checked) {
+                    manager
+                    .checkpoint(sss('Make Account Off Budget'))
+                    .sub.accounts.update(account.id, {offbudget:true});
+                  } else {
+                    manager
+                    .checkpoint(sss('Make Account On Budget'))
+                    .sub.accounts.update(account.id, {offbudget:false});
+                  }
+                }}
+              /> 
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('Actions')}</th>
+            <td>
+              {close_button}
+              {delete_all_transactions_button}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <hr/>
       <TransactionList
         transactions={this.props.transactions}
+        categories={this.props.appstate.categories}
         appstate={this.props.appstate}
         account={account}
-        ending_balance={balance}
+        ending_balance={current_balance}
         hideAccount
       />
-
-      <div>{close_button} {delete_all_transactions_button}</div>
     </div>)
   }
 }
@@ -216,8 +381,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   render() {
     let { appstate } = this.props;
     let getting_started;
-    let accounts_list = appstate.open_accounts;
-    if (!accounts_list.length) {
+    if (!(appstate.open_accounts.length + appstate.offbudget_accounts.length)) {
       getting_started = <div className="notice">
         {sss('getting-started-link', (clickhandler) => {
           return <span>First time using Buckets?  Check out the <a href="#" onClick={clickhandler}>Getting Started Videos.</a></span>
@@ -235,32 +399,43 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
           </div>
         </div>
         {getting_started}
-        <div className="panes">
-          <div className="padded">
+        <div className="layout-two-col">
+          <div className="padded first">
             <AccountList
-              accounts={accounts_list}
+              accounts={appstate.open_accounts}
               balances={appstate.account_balances} />
+            {!appstate.offbudget_accounts.length ? null :
+              <div>
+                <h2 className="nobr">{sss('Off Budget Accounts')}</h2>
+                <AccountList
+                  accounts={appstate.offbudget_accounts}
+                  balances={appstate.account_balances} />
+              </div>}
           </div>
-          <Route path="/<int:id>">
-            <WithRouting func={(routing) => {
-              let account = appstate.accounts[routing.params.id];
-              if (!account) {
-                return <Redirect to='/accounts' />;
-              }
-              let balance = appstate.account_balances[account.id];
-              return (<AccountView
-                account={account}
-                balance={balance}
-                transactions={_.values(appstate.transactions)
-                  .filter(t => t.account_id == account.id)}
-                appstate={appstate} />);
-            }} />
-          </Route>
+          <div className="second">
+            <Route path="/<int:id>">
+              <WithRouting func={(routing) => {
+                let account = appstate.accounts[routing.params.id];
+                if (!account) {
+                  return <Redirect to='/accounts' />;
+                }
+                let balance = appstate.account_balances[account.id];
+                return (<AccountView
+                  account={account}
+                  current_balance={balance}
+                  transactions={_.values(appstate.transactions)
+                    .filter(t => t.account_id == account.id)}
+                  appstate={appstate} />);
+              }} />
+            </Route>
+          </div>
         </div>
       </div>);
   }
   addAccount = () => {
-    manager.store.accounts.add(sss('default account name', 'Savings'));
+    manager
+    .checkpoint(sss('Create Account'))
+    .sub.accounts.add(sss('default account name', 'Savings'));  
   }
   createConnection = () => {
     setPath('/import')

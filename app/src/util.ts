@@ -24,3 +24,14 @@ export function hashStrings(strings:string[]):string {
 export function isDifferent(a:any, b:any) {
   return !_.isEqual(a, b);
 }
+
+/**
+ *  Sleep this thread for a number of milliseconds
+ *  This is just for debugging stuff.
+ */
+export function debugSleep(milli:number) {
+  const now = new Date().getTime();
+  while (new Date().getTime() < now + milli) {
+    // wait
+  }
+}

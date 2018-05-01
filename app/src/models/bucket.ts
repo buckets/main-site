@@ -1,6 +1,6 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { IObject, IStore, registerClass } from '../store'
-import { ensureLocalMoment, ts2db, Timestamp, Interval } from '../time'
+import { ensureLocalMoment, parseUTCTime, parseLocalTime, localNow, Interval, ts2localdb } from '../time'
 import { Balances, computeBalances } from './balances'
 import { rankBetween } from '../ranking'
 import { DEFAULT_COLORS } from '../color'
@@ -74,20 +74,16 @@ registerClass(Group);
 
 
 export interface BucketFlow {
-  total_in: number;
-  total_out: number;
-  in: number;
+  rain_in: number;
+  nonrain_in: number;
   out: number;
-  transfer_in: number;
-  transfer_out: number;
+  total_activity: number;
 }
 export const emptyFlow:BucketFlow = {
-  total_in: 0,
-  total_out: 0,
-  in: 0,
+  rain_in: 0,
+  nonrain_in: 0,
   out: 0,
-  transfer_in: 0,
-  transfer_out: 0,
+  total_activity: 0,
 }
 export interface BucketFlowMap {
   [bucket_id: number]: BucketFlow;
@@ -159,7 +155,7 @@ export class BucketStore {
           $bucket_id: bucket_id,
         });
     }
-    return moment.utc(rows[0].d);
+    return parseUTCTime(rows[0].d);
   }
   /**
    *
@@ -178,8 +174,8 @@ export class BucketStore {
         AND posted < $end
         ${where}`, {
           $bucket_id: bucket_id,
-          $start: ts2db(interval.start),
-          $end: ts2db(interval.end),
+          $start: ts2localdb(interval.start),
+          $end: ts2localdb(interval.end),
         });
     if (rows.length) {
       // No transactions within this 
@@ -188,43 +184,12 @@ export class BucketStore {
       return 0;
     }
   }
-  /**
-   *  Return the dates of the earliest and latest transactions with a range
-   */
-  async transactionSpan(bucket_id:number, interval:Interval, where?:string):Promise<Interval> {
-    if (where) {
-      where = `AND ${where}`;
-    }
-    let rows = await this.store.query(`
-      SELECT
-        min(posted) as start,
-        max(posted) as end
-      FROM bucket_transaction
-      WHERE
-        bucket_id = $bucket_id
-        AND posted >= $start
-        AND posted < $end
-        ${where}`, {
-          $bucket_id: bucket_id,
-          $start: ts2db(interval.start),
-          $end: ts2db(interval.end),
-        });
-    if (rows.length) {
-      // No transactions within this 
-      return {
-        start: moment.utc(rows[0].start),
-        end: moment.utc(rows[0].end),
-      }
-    } else {
-      return null;
-    }
-  }
 
   async transact(args:{
     bucket_id: number,
     amount: number,
     memo?: string,
-    posted?: Timestamp,
+    posted?: moment.Moment,
     account_trans_id?: number,
     transfer?: boolean,
   }):Promise<Transaction> {
@@ -233,13 +198,13 @@ export class BucketStore {
     }
     let data:any = {
       bucket_id: args.bucket_id,
-      amount: args.amount,
+      amount: args.amount || 0,
       memo: args.memo || '',
       account_trans_id: args.account_trans_id || null,
       transfer: args.transfer || false,
     };
     if (args.posted) {
-      data.posted = ts2db(args.posted)
+      data.posted = ts2localdb(args.posted)
     }
     if (args.bucket_id === null) {
       throw new Error('You must provide a bucket');
@@ -267,7 +232,7 @@ export class BucketStore {
       this.store.publishObject('update', bucket);
     }));
     await Promise.all(Array.from(affected_atrans).map(async (atrans_id) => {
-      await this.store.accounts.removeCategorization(atrans_id);
+      await this.store.sub.accounts.removeCategorization(atrans_id, false);
     }))
   }
   async updateTransaction(transid:number, data:Partial<Transaction>):Promise<Transaction> {
@@ -280,7 +245,7 @@ export class BucketStore {
     return new_trans;
   }
 
-  async balances(asof?:Timestamp, bucket_id?:number):Promise<Balances> {
+  async balances(asof?:moment.Moment, bucket_id?:number):Promise<Balances> {
     let where = 'a.kicked <> 1'
     let params = {};
     if (bucket_id !== undefined) {
@@ -293,8 +258,8 @@ export class BucketStore {
   }
 
   async combinedRainfall(args:{
-    onOrAfter?:Timestamp,
-    before?:Timestamp,
+    onOrAfter?:moment.Moment,
+    before?:moment.Moment,
   }={}):Promise<number> {
     let wheres = [
       'account_trans_id IS NULL',
@@ -303,11 +268,11 @@ export class BucketStore {
     let params:any = {};
     if (args.onOrAfter) {
       wheres.push('posted >= $onOrAfter')
-      params.$onOrAfter = ts2db(args.onOrAfter);
+      params.$onOrAfter = ts2localdb(args.onOrAfter);
     }
     if (args.before) {
       wheres.push('posted < $before')
-      params.$before = ts2db(args.before);
+      params.$before = ts2localdb(args.before);
     }
     const qry = `
       SELECT
@@ -327,37 +292,29 @@ export class BucketStore {
     }
   }
 
-  async getFlow(onOrAfter:Timestamp, before:Timestamp):Promise<BucketFlowMap> {
+  async getFlow(onOrAfter:moment.Moment, before:moment.Moment):Promise<BucketFlowMap> {
    let rows = await this.store.query(`
         SELECT
           SUM(CASE
               WHEN
                   amount >= 0
-                  AND COALESCE(transfer, 0) = 0
+                  AND account_trans_id IS NULL
               THEN amount
               ELSE 0
-              END) as amount_in,
-          SUM(CASE
-              WHEN
-                  amount < 0
-                  AND COALESCE(transfer, 0) = 0
-              THEN amount
-              ELSE 0
-              END) as amount_out,
+              END) as rain_in,
           SUM(CASE
               WHEN
                   amount >= 0
-                  AND COALESCE(transfer, 0) = 1
+                  AND account_trans_id IS NOT NULL
               THEN amount
               ELSE 0
-              END) as transfer_in,
+              END) as nonrain_in,
           SUM(CASE
               WHEN
                   amount < 0
-                  AND COALESCE(transfer, 0) = 1
               THEN amount
               ELSE 0
-              END) as transfer_out,
+              END) as amount_out,
           bucket_id
       FROM
           bucket_transaction
@@ -367,18 +324,16 @@ export class BucketStore {
       GROUP BY
         bucket_id
       `, {
-        $onOrAfter: ts2db(onOrAfter),
-        $before: ts2db(before),
+        $onOrAfter: ts2localdb(onOrAfter),
+        $before: ts2localdb(before),
       })
     let ret:BucketFlowMap = {};
     rows.forEach(row => {
       ret[row.bucket_id] = {
-        in: row.amount_in,
+        rain_in: row.rain_in,
         out: row.amount_out,
-        transfer_in: row.transfer_in,
-        transfer_out: row.transfer_out,
-        total_in: row.amount_in + row.transfer_in,
-        total_out: row.amount_out + row.transfer_out,
+        nonrain_in: row.nonrain_in,
+        total_activity: row.amount_out + row.nonrain_in
       }
     })
     return ret; 
@@ -388,8 +343,8 @@ export class BucketStore {
     bucket_id?: number,
     account_trans_id?: number,
     posted?:{
-      onOrAfter?:Timestamp,
-      before?:Timestamp,
+      onOrAfter?:moment.Moment,
+      before?:moment.Moment,
     },
     limit?: number;
     offset?: number;
@@ -415,11 +370,11 @@ export class BucketStore {
       if (args.posted) {
         if (args.posted.onOrAfter) {
           where_parts.push('posted >= $onOrAfter');
-          params['$onOrAfter'] = ts2db(args.posted.onOrAfter);
+          params['$onOrAfter'] = ts2localdb(args.posted.onOrAfter);
         }
         if (args.posted.before) {
           where_parts.push('posted < $before');
-          params['$before'] = ts2db(args.posted.before);
+          params['$before'] = ts2localdb(args.posted.before);
         }
       }
 
@@ -433,7 +388,7 @@ export class BucketStore {
     return this.store.listObjects(Transaction, {
       where,
       params,
-      order: ['posted DESC', 'id'],
+      order: ['posted DESC', 'id DESC'],
       limit: args.limit,
       offset: args.offset,
     });
@@ -568,7 +523,7 @@ export class BucketStore {
 // Deposits, goals, etc...
 //----------------------------------------------------------------
 interface ComputeArgs {
-  today: Timestamp;
+  today: moment.Moment;
   balance: number;
 }
 export interface IComputedData {
@@ -576,6 +531,10 @@ export interface IComputedData {
   goal: number;
   end_date: moment.Moment;
 }
+
+/**
+ *  Compute the amount a bucket wants (and other information)
+ **/
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs);
 export function computeBucketData(kind:'', b:Bucket);
 export function computeBucketData(kind:'deposit', b:Bucket);
@@ -588,7 +547,7 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
   };
   let today, balance;
   if (args) {
-    today = args.today !== null ? ensureLocalMoment(args.today) : moment.utc();
+    today = args.today !== null ? args.today : localNow();
     balance = args.balance !== null ? args.balance : b.balance;
   }
   switch (b.kind) {
@@ -597,9 +556,11 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
       break;
     }
     case 'goal-deposit': {
+      const deposit = balance + b.deposit > b.goal
+        ? b.goal - balance : b.deposit;
       Object.assign(ret, {
         goal: b.goal,
-        deposit: b.deposit,
+        deposit,
         end_date: computeGoalEndDate(balance, b.goal, b.deposit, today),
       })
       break;
@@ -607,16 +568,16 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
     case 'goal-date': {
       Object.assign(ret, {
         goal: b.goal,
-        deposit: computeGoalDeposit(balance, b.goal, b.end_date, today),
-        end_date: ensureLocalMoment(b.end_date),
+        deposit: computeGoalDeposit(balance, b.goal, parseLocalTime(b.end_date), today),
+        end_date: parseLocalTime(b.end_date),
       })
       break;
     }
     case 'deposit-date': {
       Object.assign(ret, {
-        goal: computeGoal(balance, b.deposit, b.end_date, today),
+        goal: computeGoal(balance, b.deposit, parseLocalTime(b.end_date), today),
         deposit: b.deposit,
-        end_date: ensureLocalMoment(b.end_date),
+        end_date: parseLocalTime(b.end_date),
       })
       break;
     }
@@ -631,7 +592,7 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
   return ret;
 }
 
-function computeGoalEndDate(balance:number, goal:number, deposit:number, today:Timestamp):Timestamp {
+function computeGoalEndDate(balance:number, goal:number, deposit:number, today:moment.Moment):moment.Moment {
   if (!deposit) {
     return null;
   }
@@ -639,7 +600,7 @@ function computeGoalEndDate(balance:number, goal:number, deposit:number, today:T
   let dt = ensureLocalMoment(today);
   return dt.add(units, 'month').startOf('month');
 }
-function computeGoalDeposit(balance:number, goal:number, end_date:Timestamp, today:Timestamp):number {
+function computeGoalDeposit(balance:number, goal:number, end_date:moment.Moment, today:moment.Moment):number {
   let s = ensureLocalMoment(today);
   let e = ensureLocalMoment(end_date);
   let diff = e.diff(s, 'month') + 1;
@@ -653,7 +614,7 @@ function computeGoalDeposit(balance:number, goal:number, end_date:Timestamp, tod
     return left;
   }
 }
-function computeGoal(balance:number, deposit:number, end_date:Timestamp, today:Timestamp):number {
+function computeGoal(balance:number, deposit:number, end_date:moment.Moment, today:moment.Moment):number {
   let s = ensureLocalMoment(today);
   let e = ensureLocalMoment(end_date);
   let diff = e.diff(s, 'month') + 1;

@@ -4,6 +4,8 @@ import { AppState } from '../appstate'
 import { Route, Switch, Link } from '../routing'
 
 import { AmazonPage } from './amazon'
+import { StartOverPage } from './startover'
+import { YNABImportPage } from './ynabimport'
 
 
 interface ToolsPageProps {
@@ -16,11 +18,17 @@ export class ToolsPage extends React.Component<ToolsPageProps, {}> {
       <Route path="/amazon">
         <AmazonPage appstate={appstate} />
       </Route>
+      <Route path="/startover">
+        <StartOverPage appstate={appstate} />
+      </Route>
+      <Route path="/ynabimport">
+        <YNABImportPage appstate={appstate} />
+      </Route>
       <Route path="" exact>
-        <div className="padded">
-          <ul>
-            <li><Link relative to="/amazon">{sss('Amazon.com Reconciliation')}</Link></li>
-          </ul>
+        <div className="tools-list">
+          <Link relative to="/ynabimport"><span className="fa fa-upload"/> {sss('Import from YNAB4')}</Link>
+          <Link relative to="/amazon">{sss('Amazon.com Reconciliation')}</Link>
+          <Link relative to="/startover"><span className="fa fa-undo"/> {sss('Start Over')}</Link>
         </div>
       </Route>
     </Switch>

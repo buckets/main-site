@@ -5,6 +5,9 @@
 {% block extrahead %}
 <script src="https://www.paypalobjects.com/api/checkout.js"></script>
 <style>
+.security-notice {
+  padding-top: .5rem;
+}
 .how-to-pay-label {
   text-align: center;
   padding-bottom: 1rem;
@@ -40,7 +43,7 @@
           src="https://checkout.stripe.com/checkout.js" class="stripe-button"
           data-image="{{ url_for('static', filename='img/main_logo.png') }}"
           data-key="{{ config.STRIPE_PUBLIC_KEY }}"
-          data-amount="{{ PRICE_CENTS }}"
+          data-amount="2900"
           data-name="Buckets"
           data-label="{% trans %}Credit Card{% endtrans %}"
           data-description="{% trans %}Family budgeting app{% endtrans %}"
@@ -51,7 +54,7 @@
         >
         </script>
       </form>
-      <div style="padding-top: .5rem;">
+      <div class="security-notice">
         <a href="https://stripe.com" target="_blank"><img src="{{ url_for('static', filename='img/powered_by_stripe.svg') }}" /></a>
       </div>
     </div>
@@ -85,6 +88,7 @@ paypal.Button.render({
   payment: function(data, actions) {
     return paypal.request.post('{{ url_for(".paypal_create_payment") }}')
     .then(data => {
+      console.log('data', data);
       return data.id;
     })
   },

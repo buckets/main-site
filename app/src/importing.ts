@@ -9,7 +9,7 @@ import { isNil, hashStrings } from './util'
 import { IBudgetFile } from './mainprocess/files'
 import { displayError } from './errors'
 import { PrefixLogger } from './logging'
-import { ensureLocalMoment, Timestamp } from './time'
+import { SerializedTimestamp, loadTS } from './time'
 
 const log = new PrefixLogger('(importing)');
 
@@ -25,7 +25,7 @@ export interface ImportableAccount {
 export interface ImportableTrans {
   amount: number;
   memo: string;
-  posted: Timestamp;
+  posted: SerializedTimestamp;
   fi_id?: string;
 }
 export interface PendingImport {
@@ -67,6 +67,14 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
     } catch(err) {
       log.info('Error reading file as CSV');
       log.info(err);
+      try {
+        set = await csv2importable(store, bf, data, {
+          delimiter: ';',
+        })
+      } catch(err) {
+        log.info('Error reading file as semicolon CSV');
+        log.info(err);  
+      }
     }
   }
 
@@ -85,19 +93,19 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
     let hash;
     if (isNil(account.account_id)) {
       hash = hashStrings([account.label]);
-      account_id = await store.accounts.hashToAccountId(hash);  
+      account_id = await store.sub.accounts.hashToAccountId(hash);  
     } else {
       account_id = account.account_id;
     }
     
     if (account_id) {
       // matching account
-      let results = await store.accounts.importTransactions(account.transactions.map(trans => {
+      let results = await store.sub.accounts.importTransactions(account.transactions.map(trans => {
           return {
             account_id,
             amount: trans.amount,
             memo: trans.memo,
-            posted: ensureLocalMoment(trans.posted),
+            posted: loadTS(trans.posted),
             fi_id: trans.fi_id,
           }
         })
@@ -105,7 +113,7 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
       imported = imported.concat(results.transactions);
     } else if (hash) {
       // no matching account
-      await store.accounts.getOrCreateUnknownAccount({
+      await store.sub.accounts.getOrCreateUnknownAccount({
         description: account.label,
         account_hash: hash,
       });
@@ -115,12 +123,12 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
         if (message.event === 'update' && message.obj._type === 'account_mapping') {
           let mapping = message.obj as AccountMapping;
           if (mapping.account_hash === hash) {
-            await store.accounts.importTransactions(account.transactions.map(trans => {
+            await store.sub.accounts.importTransactions(account.transactions.map(trans => {
                 return {
                   account_id: mapping.account_id,
                   amount: trans.amount,
                   memo: trans.memo,
-                  posted: trans.posted,
+                  posted: loadTS(trans.posted),
                   fi_id: trans.fi_id,
                 }
               })

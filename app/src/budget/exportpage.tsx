@@ -1,6 +1,7 @@
 import * as React from 'react'
 import * as csv from 'csv'
 import * as fs from 'fs-extra-promise'
+import * as moment from 'moment-timezone'
 import { remote } from 'electron'
 import { AppState, manager } from './appstate'
 import { IStore } from '../store'
@@ -8,15 +9,15 @@ import { sss } from '../i18n'
 import { submitFeedback } from '../errors'
 import { makeToast } from './toast'
 import { cents2decimal } from '../money'
-import { tsfromdb, localNow, Timestamp, DateInput } from '../time'
+import { localNow, DateInput, moment2LocalDay, localDay2moment } from '../time'
 
 interface ExportPageProps {
   appstate: AppState
 }
 interface ExportPageState {
   reason: string;
-  from_date: Timestamp;
-  to_date: Timestamp;
+  from_date: moment.Moment;
+  to_date: moment.Moment;
 }
 export class ExportPage extends React.Component<ExportPageProps, ExportPageState> {
   constructor(props) {
@@ -27,7 +28,7 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
       to_date: null,
     }
   }
-  quickDates = (start:Timestamp, end:Timestamp) => {
+  quickDates = (start:moment.Moment, end:moment.Moment) => {
     return (ev) => {
       ev.preventDefault();
       this.setState({
@@ -102,9 +103,9 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
               <th>{sss('From')}</th>
               <td>
                 <DateInput
-                  value={this.state.from_date}
+                  value={moment2LocalDay(this.state.from_date)}
                   onChange={new_date => {
-                    this.setState({from_date: new_date});
+                    this.setState({from_date: localDay2moment(new_date)});
                   }}/>
               </td>
               <td rowSpan={100} className="top">
@@ -119,9 +120,9 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
               <th>{sss('To')}</th>
               <td>
                 <DateInput
-                  value={this.state.to_date}
+                  value={moment2LocalDay(this.state.to_date)}
                   onChange={new_date => {
-                    this.setState({to_date: new_date});
+                    this.setState({to_date: localDay2moment(new_date)});
                   }}
                 />
               </td>
@@ -136,7 +137,7 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
                     buttonLabel: 'Export',
                   }, (path:string) => {
                     if (path) {
-                      exportTransactionsToCSV(manager.store, path, {
+                      exportTransactionsToCSV(manager.nocheckpoint, path, {
 
                       })
                       .then(() => {
@@ -158,8 +159,8 @@ export class ExportPage extends React.Component<ExportPageProps, ExportPageState
 
 
 function exportTransactionsToCSV(store:IStore, path:string, args:{
-  onOrAfter?: Timestamp,
-  before?: Timestamp,
+  onOrAfter?: moment.Moment,
+  before?: moment.Moment,
 } = {}) {
   return new Promise(async (resolve, reject) => {
     const columns = {
@@ -182,7 +183,7 @@ function exportTransactionsToCSV(store:IStore, path:string, args:{
     })
     g.pipe(ws);
 
-    const data = await store.accounts.exportTransactions(args);
+    const data = await store.sub.accounts.exportTransactions(args);
     data.forEach(t => {
       g.write({
         id: t.t_id,
@@ -190,7 +191,7 @@ function exportTransactionsToCSV(store:IStore, path:string, args:{
           show_sep: false,
           show_decimal: true,
         }),
-        posted: tsfromdb(t.t_posted).format(),
+        posted: t.t_posted,
         memo: t.t_memo,
         account: t.a_name,
         bt_id: t.bt_id,

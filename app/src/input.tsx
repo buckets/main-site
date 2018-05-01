@@ -3,9 +3,9 @@ import * as cx from 'classnames'
 import * as _ from 'lodash'
 import * as moment from 'moment'
 import { tx } from './i18n'
-import { PrefixLogger } from './logging'
 
-const log = new PrefixLogger('(input)');
+// import { PrefixLogger } from './logging'
+// const log = new PrefixLogger('(input)');
 
 export function onKeys(mapping:object):((ev)=>void) {
   let actual_mapping = {};
@@ -62,8 +62,15 @@ export function debounceChange(func:(...args)=>any) {
 
 /**
  * Run mapper every time, but only call actor debounced-like
+ *
+ * Use like this:
+ *
+ * onChange={debounceOnChange(
+ *    ev => ev.target.value,
+ *    value => { console.log('value', value) }
+ * )}
  */
-export function debounceOnChange(mapper:Function, actor:Function) {
+export function debounceOnChange(mapper:(...args)=>any, actor:(...args)=>any) {
   let debounced = _.debounce(actor, 250, {leading: false, trailing: true});
   return (...args) => {
     return debounced(mapper(...args));
@@ -73,7 +80,8 @@ export function debounceOnChange(mapper:Function, actor:Function) {
 
 interface DebouncedInputProps {
   value: any;
-  element?: string;
+  element?: string|any;
+  changeArgIsValue?: boolean;
   onChange: (newval:any)=>void;
   blendin?: boolean;
   [k:string]: any;
@@ -81,6 +89,9 @@ interface DebouncedInputProps {
 export class DebouncedInput extends React.Component<DebouncedInputProps, {
   value: any;
 }> {
+  private propChangesInFlight = 0;
+  private stateChangedSinceProps = false;
+
   constructor(props) {
     super(props)
     this.state = {
@@ -88,23 +99,32 @@ export class DebouncedInput extends React.Component<DebouncedInputProps, {
     }
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.state.value) {
+    this.propChangesInFlight -= 1;
+    if (nextProps.value !== this.state.value && this.propChangesInFlight <= 0 && !this.stateChangedSinceProps) {
       this.setState({value: nextProps.value});
+    }
+    this.stateChangedSinceProps = false;
+    if (this.propChangesInFlight < 0) {
+      this.propChangesInFlight = 0;
     }
   }
   onChange = (ev) => {
-    let val = ev.target.value;
+    let val = this.props.changeArgIsValue ? ev : ev.target.value;
     if (val !== this.state.value) {
+      if (this.propChangesInFlight) {
+        this.stateChangedSinceProps = true;
+      }
       this.setState({value: val}, () => {
         this.emitChange();
       })
     }
   }
   emitChange = debounceChange(() => {
+    this.propChangesInFlight += 1;
     this.props.onChange(this.state.value);
   })
   render() {
-    let { element, value, onChange, className, blendin, ...rest } = this.props;
+    let { element, value, onChange, className, blendin, changeArgIsValue, ...rest } = this.props;
     element = element || 'input'
     className = cx(className, {
       'ctx-matching-input': blendin,
@@ -270,7 +290,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
   }
   increment(amount:number) {
     return () => {
-      log.info('click increment', amount);
       let new_month = this.state.month + amount;
       let new_year = this.props.year;
       while (new_month < 0) {
@@ -281,7 +300,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
         new_year += 1;
         new_month -= 12;
       }
-      log.info('new', new_month, new_year);
       this.setDate({month: new_month, year:new_year});
     }
   }
@@ -293,7 +311,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     }
   }
   monthChanged = (ev) => {
-    log.info('monthChanged', ev.target.value);
     const new_month = parseInt(ev.target.value);
     this.setDate({
       month: new_month,
@@ -301,7 +318,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     });
   }
   yearChanged = (ev) => {
-    log.info('yearChanged', ev.target.value);
     const new_year = parseInt(ev.target.value);
     this.setState({year: ev.target.value});
     if (this.isValidYear(new_year)) {
@@ -312,7 +328,6 @@ export class MonthSelector extends React.Component<MonthSelectorProps, {
     }
   }
   setDate(args:{month:number, year:number}) {
-    log.info('setDate', args);
     this.props.onChange(args);
     this.setState({
       month: args.month,

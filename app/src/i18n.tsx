@@ -1,18 +1,18 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { PrefixLogger} from './logging'
-import { EventSource } from './events'
+import { EventSource } from 'buckets-core'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
 
-import { IMessages, ILangPack } from './langs/spec'
-
+import { IMessages, ILangPack, INumberFormat, NUMBER_FORMATS } from './langs/spec'
 import {pack as en} from './langs/en';
-import {pack as es} from './langs/es';
-import {pack as he} from './langs/he';
 
 const log = new PrefixLogger('(i18n)')
 
-const packs:{[x:string]:ILangPack} = {en, es, he};
+async function loadLangPack(locale:string) {
+  const mod = await import(`./langs/${locale}`);
+  return mod.pack as ILangPack;
+}
 
 class TranslationContext {
   private _langpack:ILangPack = en;
@@ -26,28 +26,33 @@ class TranslationContext {
   get langpack() {
     return this._langpack;
   }
-  setLocale(x:string) {
-    let was_set = true;
-    if (packs[x]) {
-      this._langpack = packs[x];
-      this._locale = x;
-      log.info(`locale set to: ${x}`);
-    } else if (packs[x.substr(0, 2)]) {
-      this._locale = x.substr(0, 2);
-      this._langpack = packs[this._locale];
-      log.info(`locale set to: ${this._locale}`);
-    } else {
-      log.warn(`Not setting locale to unknown: ${x}`);
-      was_set = false;
-    }
-    if (was_set) {
+  async setLocale(x:string) {
+    
+    // only 2-letter shortcodes are supported right now
+    let totry:string[] = [
+      x.substr(0, 2),
+    ]
+    for (const locale of totry) {
       try {
-        moment.locale(this._locale)
+        this._langpack = await loadLangPack(locale);
+        this._locale = locale;
+        log.info(`locale set to: ${locale}`);
+        try {
+          await import(`moment/locale/${locale}`);
+          moment.locale(this._locale)
+        } catch(err) {
+          log.error('Error setting date locale', err.stack);
+        }
+        this.localechanged.emit({locale: this._locale});
+        break;
       } catch(err) {
-        console.error('Error setting date locale', err.stack);
-      }
-      this.localechanged.emit({locale: this._locale});
+        log.error(`Error setting locale to ${locale}`)
+        log.error(err.stack);
+      }  
     }
+  }
+  getNumberFormat():INumberFormat {
+    return NUMBER_FORMATS[this.langpack.numbers]
   }
   sss<T>(key:keyof IMessages, dft?:T):T {
     let entry = this._langpack.messages[key];
@@ -61,6 +66,9 @@ class TranslationContext {
   toString() {
     return `TranslationContext locale=${this._locale}`;
   }
+  /**
+   *  Call this to start localization for renderer HTML/JS pages
+   */
   async localizeThisPage(args?:{
       skipwatch?:boolean,
     }):Promise<string> {
@@ -91,9 +99,9 @@ class TranslationContext {
 }
 
 async function getLocale():Promise<string> {
-  // LANG environment variable beats all
-  if (env.LANG) {
-    return env.LANG;
+  // BUCKETS_LANG environment variable beats all
+  if (env.BUCKETS_LANG) {
+    return env.BUCKETS_LANG;
   } else {
     // Application preference
     if (PSTATE.locale) {
@@ -121,7 +129,7 @@ export async function startLocalizing():Promise<string> {
   } else {
     STARTED_LOCALIZING = true;
     let locale = await getLocale();
-    tx.setLocale(locale);
+    await tx.setLocale(locale);
     return tx.locale;
   }
 }

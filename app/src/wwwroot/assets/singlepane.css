@@ -41,16 +41,14 @@ body.singlepane {
   font-weight: normal;
 }
 #singlepane-close {
+  position: fixed;
   top: 0;
-  right: 0;
+  right: 1rem;
   padding: .1rem .5rem;
   font-size: 2rem;
   color: black;
   opacity: .4;
   cursor: pointer;
-  flex-grow: 0;
-  flex-shrink: 0;
-  align-self: flex-start;
 }
 #singlepane-close:after {
   content: '\00d7';

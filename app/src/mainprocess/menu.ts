@@ -16,8 +16,9 @@ import { findYNAB4FileAndImport } from '../ynab'
 import { openDocs } from '../docs'
 
 export async function updateMenu(args:{
-    budget?:boolean,
+    budget?:BudgetFile,
   }={}) {
+  const { budget } = args;
   let recent_files = await getRecentFiles();
   let FileMenu:any = {
     label: sss('File'),
@@ -50,16 +51,56 @@ export async function updateMenu(args:{
       },
     ],
   };
+  let undo_label = sss('Undo');
+  let undo_enabled = true;
+  let redo_label = sss('Redo');
+  let redo_enabled = true;
+  if (budget) {
+    const nextUndoLabel = budget.store.undo.nextUndoLabel;
+    const nextRedoLabel = budget.store.undo.nextRedoLabel;
+    if (nextUndoLabel) {
+      undo_label = [undo_label, nextUndoLabel].join(' ');
+    } else {
+      undo_enabled = false;
+    }
+    if (nextRedoLabel) {
+      redo_label = [redo_label, nextRedoLabel].join(' ');
+    } else {
+      redo_enabled = false;
+    }
+  }
   let EditMenu = {
     label: sss('Edit'),
     submenu: [
       {
-        role: 'undo',
-        label: sss('Undo'),
+        label: undo_label,
+        enabled: undo_enabled,
+        accelerator: 'CmdOrCtrl+Z',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          let budgetfile = BudgetFile.fromWindowId(win.id);
+          if (budgetfile) {
+            budgetfile.doUndo();
+          } else {
+            // do the default action
+            win.webContents.undo();
+          }
+        }
       },
       {
-        role: 'redo',
-        label: sss('Redo'),
+        label: redo_label,
+        enabled: redo_enabled,
+        accelerator: 'CmdOrCtrl+Y',
+        click() {
+          let win = BrowserWindow.getFocusedWindow();
+          let budgetfile = BudgetFile.fromWindowId(win.id);
+          if (budgetfile) {
+            budgetfile.doRedo();
+          } else {
+            // do the default action
+            win.webContents.redo();
+          }
+        }
       },
       {type: 'separator'},
       {
@@ -189,7 +230,8 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            findYNAB4FileAndImport(budgetfile.store);  
+            findYNAB4FileAndImport(budgetfile, budgetfile.store);
+            win.webContents.send('buckets:goto', '/tools/ynabimport');
           }
         }
       }
@@ -276,8 +318,10 @@ export async function updateMenu(args:{
   let preMenus = [];
 
   const about = {
-    role: 'about',
     label: sss('About Buckets'),
+    click() {
+      openUpdateWindow();
+    }
   }
   const check_for_updates = {
     label: sss('Check For Updates...'),
@@ -379,7 +423,7 @@ export async function updateMenu(args:{
     ViewMenu,
     WindowMenu,
   ]
-  if (args.budget) {
+  if (budget) {
     template.push(BudgetMenu);
   }
   if (!isRegistered()) {

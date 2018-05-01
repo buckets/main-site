@@ -16,9 +16,7 @@ import { CSVMapper, CSVAssigner } from '../csvimport'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
-  let onOrAfter = range.onOrAfter.clone();
-  let before = range.before.clone();
-  return current_file.startSync(onOrAfter, before)
+  return current_file.startSync(range.onOrAfter, range.before)
 }
 
 
@@ -294,13 +292,14 @@ export class ImportPage extends React.Component<{
     })
   }
   createMacro = async () => {
-    let macro = await manager.store.bankmacro.add({name: ''});
+    let macro = await manager
+    .checkpoint(sss('Create Macro'))
+    .sub.bankmacro.add({name: ''});
     current_file.openRecordWindow(macro.id);
   }
   connect = async () => {
-    let connection;
     try {
-      connection = await manager.store.simplefin.consumeToken(this.state.simplefin_token)
+      await manager.nocheckpoint.sub.simplefin.consumeToken(this.state.simplefin_token)
     } catch(err) {
       this.setState({status_message: err.toString()});
       return;
@@ -344,7 +343,7 @@ class BankMacroList extends React.Component<{
             play_button = <button className="icon"
               onClick={() => {
                 let { onOrAfter, before } = manager.appstate.viewDateRange;
-                manager.store.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
+                manager.nocheckpoint.sub.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
               }}><span className="fa fa-play"></span></button>
           }
           return <tr key={idx}>
@@ -353,7 +352,10 @@ class BankMacroList extends React.Component<{
                 type="checkbox"
                 checked={macro.enabled}
                 onChange={(ev) => {
-                  manager.store.bankmacro.update(macro.id, {enabled: (ev.target as any).checked});
+                  const enabled = (ev.target as any).checked;
+                  manager
+                  .checkpoint(enabled ? sss('Enable Macro') : sss('Disable Macro'))
+                  .sub.bankmacro.update(macro.id, {enabled});
                 }}
               />
             </td>
@@ -362,7 +364,9 @@ class BankMacroList extends React.Component<{
                 value={macro.name}
                 placeholder="no name"
                 onChange={(val) => {
-                  manager.store.bankmacro.update(macro.id, {name: val});
+                  manager
+                  .checkpoint(sss('Update Macro Name'))
+                  .sub.bankmacro.update(macro.id, {name: val});
                 }}
               />
             </td>
@@ -382,7 +386,9 @@ class BankMacroList extends React.Component<{
                 className="icon"
                 coverClassName="white"
                 onClick={(ev) => {
-                  manager.store.bankmacro.delete(macro.id);
+                  manager
+                  .checkpoint(sss('Delete Macro'))
+                  .sub.bankmacro.delete(macro.id);
                 }}><span className="fa fa-trash"></span></SafetySwitch>
             </td>
           </tr>
@@ -406,7 +412,9 @@ class ConnectionList extends React.Component<{
             className="icon"
             coverClassName="white"
             onClick={(ev) => {
-              manager.store.deleteObject(Connection, conn.id);
+              manager
+              .checkpoint(sss('Delete Connection'))
+              .deleteObject(Connection, conn.id);
             }}
           >
             <span className="fa fa-trash"></span>
@@ -491,17 +499,18 @@ class UnknownAccountRow extends React.Component<{
     </tr>
   }
   link = async () => {
+    let store = manager.checkpoint(sss('Link Account'))
     let { unknown } = this.props;
     let account_id = this.state.chosen_account_id;
     let numeric_account_id:number;
     if (account_id === 'NEW') {
       // Make a new account
-      let new_account = await manager.store.accounts.add(unknown.description);
+      let new_account = await store.sub.accounts.add(unknown.description);
       numeric_account_id = new_account.id;
     } else {
       // Link to an existing account
       numeric_account_id = parseInt(account_id);
     }
-    await manager.store.accounts.linkAccountToHash(unknown.account_hash, numeric_account_id);
+    await store.sub.accounts.linkAccountToHash(unknown.account_hash, numeric_account_id);
   }
 }

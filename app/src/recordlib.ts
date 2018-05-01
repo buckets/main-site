@@ -2,7 +2,7 @@ import * as _ from 'lodash'
 import * as electron_is from 'electron-is'
 import { PrefixLogger } from './logging'
 import { ipcRenderer } from 'electron'
-import { EventSource } from './events'
+import { EventSource } from 'buckets-core'
 import { getBounds, IBounds } from './position'
 
 export class DoublePlayError extends Error {}

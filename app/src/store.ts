@@ -3,12 +3,7 @@ import * as URL from 'url'
 import { webContents, ipcRenderer } from 'electron'
 import {} from 'bluebird'
 
-import { EventSource } from './events'
-import { BucketStore } from './models/bucket'
-import { AccountStore } from './models/account'
-import { SimpleFINStore } from './models/simplefin'
-import { ReportStore } from './models/reports'
-import { BankMacroStore } from './models/bankmacro'
+import { EventSource } from 'buckets-core'
 
 //----------------------------------------------------------------------
 // Database objects
@@ -35,10 +30,8 @@ export function registerClass(cls:IObjectClass<any>) {
 /**
   Store interface used in both main and renderer processes
 
-  XXX I have plans to split this into an interface that contains
-  most of the methods, and another class with the `accounts`, `buckets`,
-  `connections`, etc... on it so that each implementation of
-  the store doesn't have to add those members themselves.
+  This is augmented in other modules, so not everything you see here
+  is everything that's part of IStore.
 */
 export interface IStore {
   bus:IBudgetBus;
@@ -52,13 +45,7 @@ export interface IStore {
   listObjects<T extends IObject>(cls: IObjectClass<T>, args?:{where?:string, params?:{}, order?:string[], limit?:number, offset?:number}):Promise<T[]>;
   deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any>;
   query(sql:string, params:{}):Promise<any>;
-
-  // model-specific stuff
-  accounts:AccountStore;
-  buckets:BucketStore;
-  simplefin:SimpleFINStore;
-  reports:ReportStore;
-  bankmacro:BankMacroStore;
+  exec(sql:string):Promise<any>;
 }
 
 //----------------------------------------------------------------

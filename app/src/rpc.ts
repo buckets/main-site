@@ -2,7 +2,7 @@ import * as electron_is from 'electron-is'
 import {v4 as uuid} from 'uuid'
 import { ipcMain, ipcRenderer, webContents } from 'electron'
 import * as crypto from 'crypto'
-import { EventSource } from './events'
+import { EventSource } from 'buckets-core'
 import { PrefixLogger } from './logging'
 
 const log = new PrefixLogger(electron_is.renderer() ? '(rpc.r)' : '(rpc)')
@@ -72,8 +72,8 @@ export class Room<T> {
     this.isrenderer = electron_is.renderer();
     if (this.isrenderer) {
       // renderer process
-      ipcRenderer.send(`${this.key}.join`);
       log.info(this.key, 'joining');
+      ipcRenderer.send(`${this.key}.join`);
       ipcRenderer.on(`${this.key}.message`, (ev, channel, message) => {
         let es = this.eventSources[channel];
         if (es) {
