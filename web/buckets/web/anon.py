@@ -1,8 +1,8 @@
 import structlog
 import time
 import stripe
+import paypalrestsdk
 import requests
-import json
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, flash
@@ -112,7 +112,7 @@ def buy():
 
         # generate the license
         try:
-            generateLicense(email)
+            license = generateLicense(email)
         except Exception:
             flash(gettext('Error generating license.  Your card was not charged.'), 'error')
             raise
@@ -147,28 +147,70 @@ def buy():
 @blue.route('/paypal-create-payment', methods=['POST'])
 def paypal_create_payment():
     current_app.logger.info('Call to paypal-create-payment')
-    paypal = current_app.paypal
-    paymentID = paypal.createPayment(PRICE_STRING)
-    return json.dumps({
-        'paymentID': paymentID,
+    payment = paypalrestsdk.Payment({
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal",
+        },
+        "redirect_urls": {
+            "return_url": url_for('.paypal_execute_payment', _external=True),
+            "cancel_url": url_for('.buy', _external=True),
+        },
+        "transactions": [{
+            "amount": {
+                "total": PRICE_STRING,
+                "currency": "USD",
+            },
+            "description": "Buckets v1 License",
+        }],
+        "note_to_payer": "I don't know why PayPal asks for a shipping address, and I don't know how to disable it.  Put in whatever you want :)"
     })
-    # tx = request.args.get('tx', '')
-    # if not tx:
-    #     flash(gettext("There was an error processing your transaction."), 'error')
-    #     raise Exception('Error processing transaction')
+    created = payment.create()
+    if created:
+        for link in payment.links:
+            if link.rel == 'approval_url':
+                return redirect(link.href)
 
-    # try:
-    #     generateLicense(email)
-    # except Exception:
-    #     flash(gettext('Error generating license BUT YOU WERE CHARGED.  Please contact me at hello@budgetwithbuckets.com'), 'error')
-    #     raise
-    # emailLicense(email, license)
-    # return render_template('anon/bought.html', license=license)
+    flash('Error getting to paypal', 'error')
+    return redirect(url_for('.buy'))
 
-@blue.route('/paypal-execute-payment', methods=['POST'])
+@blue.route('/paypal-execute-payment', methods=['GET'])
 def paypal_execute_payment():
-    pass
+    paymentId = request.args['paymentId']
+    # token = request.args['token']
+    payerid = request.args['PayerID']
+    payment = paypalrestsdk.Payment.find(paymentId)
+    print('payment', payment)
+    import sys; sys.stdout.flush()
 
+    try:
+        email = payment.payer.payer_info.email
+        if not email:
+            flash(gettext('No email address provided.  Each license must be associated with an email address.  You were not charged.', 'error'))
+            raise Exception('No email address provided')
+    except:
+        raise
+    
+    # generate the license
+    try:
+        license = generateLicense(email)
+    except Exception:
+        flash(gettext('Error generating license.  Your card was not charged.'), 'error')
+        raise
+
+    # charge them
+    if payment.execute({"payer_id": payerid}):
+        # successful payment
+        flash(gettext('Payment received.'))
+        emailLicense(email, license)
+        return render_template('anon/bought.html', license=license)
+    else:
+        flash(gettext("Error finalizing payment.  I don't think you were charged, but please email to see.", 'error'))
+        raise Exception(payment.error)
+
+@blue.route('/paypal-return', methods=['GET'])
+def paypal_return():
+    raise Exception("You shouldn't ever get here")
 
 
 

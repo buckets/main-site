@@ -1,5 +1,6 @@
 import structlog
 import stripe
+import paypalrestsdk
 import logging
 logger = structlog.get_logger()
 
@@ -16,7 +17,6 @@ from raven.contrib.flask import Sentry
 from buckets.mailing import PostmarkMailer, NoMailer
 from buckets.web.util import structlog_context, sentry_context
 from buckets.web.util import send_warnings_to_sentry
-from buckets.paypal import PayPal
 
 
 f = Flask(__name__)
@@ -70,7 +70,8 @@ def configureApp(flask_secret_key,
         postmark_key,
         stripe_api_key,
         stripe_public_key,
-        paypal_access_token,
+        paypal_client_id,
+        paypal_client_secret,
         sentry_dsn,
         buckets_license_key,
         debug=False):
@@ -115,12 +116,14 @@ def configureApp(flask_secret_key,
     stripe.api_version = '2016-07-06'
 
     # paypal
-    if not paypal_access_token:
+    if not any([paypal_client_id, paypal_client_secret]):
         logger.info('PayPal NOT CONFIGURED')
     else:
-        f.paypal = PayPal(
-            access_token=paypal_access_token,
-            sandbox=debug)
+        paypalrestsdk.configure({
+            'mode': 'sandbox' if debug else 'live',
+            'client_id': paypal_client_id,
+            'client_secret': paypal_client_secret,
+        })
         logger.info('PayPal: configured')
 
 

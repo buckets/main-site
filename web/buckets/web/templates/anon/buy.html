@@ -3,7 +3,6 @@
 {% block title %}{% trans %}Buy Buckets{% endtrans %}{% endblock %}
 
 {% block extrahead %}
-<script src="https://www.paypalobjects.com/api/checkout.js"></script>
 <style>
 .security-notice {
   padding-top: .5rem;
@@ -59,7 +58,9 @@
       </div>
     </div>
     <div class="option">
-      <div id="paypal-button"></div>
+      <form method="post" action="{{ url_for('.paypal_create_payment') }}">
+        <input type="image" src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/buy-logo-large.png" border="0" alt="Buy now with PayPal" />
+      </form>
     </div>
   </div>
   <div class="callout para">
@@ -72,38 +73,4 @@
     - Matt
   </div>
 </div>
-
-<script>
-paypal.Button.render({
-  env: 'sandbox', // Or 'production',
-  commit: true,
-
-  style: {
-    color: 'gold',
-    size: 'small',
-    tagline: false,
-    label: 'paypal',
-  },
-
-  payment: function(data, actions) {
-    return paypal.request.post('{{ url_for(".paypal_create_payment") }}')
-    .then(data => {
-      console.log('data', data);
-      return data.id;
-    })
-  },
-
-  onAuthorize: function(data, actions) {
-    console.log('data', data);
-    return paypal.request.post('{{ url_for(".paypal_execute_payment") }}', {
-      paymentID: data.paymentID,
-      payerID: data.payerID,
-    })
-  },
-
-  onError: function(err) {
-    console.log('error', err);
-  }
-}, '#paypal-button');
-</script>
 {% endblock content %}
