@@ -82,22 +82,22 @@ def emailLicense(email, license):
             subject=gettext('Buckets v1 License'),
             body=gettext('''Thank you for purchasing Buckets!
 
-    Below is your Buckets v1 License.  To use it:
+Below is your Buckets v1 License.  To use it:
 
-    1. Open the Buckets application (download at www.budgetwithbuckets.com)
-    2. Click the "Trial Version" menu
-    3. Click "Enter License..."
-    4. Copy and paste the following license into the box
-    5. Click the button
+1. Open the Buckets application (download at www.budgetwithbuckets.com)
+2. Click the "Trial Version" menu
+3. Click "Enter License..."
+4. Copy and paste the following license into the box
+5. Click the button
 
-    {license}
+{license}
 
-    This license may be used on any number of computers belonging to you
-    and your immediate family members living in your home.
+This license may be used on any number of computers belonging to you
+and your immediate family members living in your home.
 
-    Happy budgeting!
+Happy budgeting!
 
-    - Matt
+- Matt
     ''').format(license=license))
     except Exception:
         flash(gettext("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error'))

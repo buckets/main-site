@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-04-23 12:27-0600\n"
-"PO-Revision-Date: 2018-04-23 12:27-0600\n"
+"POT-Creation-Date: 2018-05-01 21:09-0600\n"
+"PO-Revision-Date: 2018-05-01 21:13-0600\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -19,27 +19,11 @@ msgstr ""
 "Generated-By: Babel 2.5.1\n"
 "X-Generator: Poedit 2.0.5\n"
 
-#: buckets/web/anon.py:88
-msgid "Error generating license.  Your card was not charged."
-msgstr "Error al generar la licencia.  Su tarjeta no fue cargada."
-
-#: buckets/web/anon.py:97
-msgid "Buckets Budgeting App"
-msgstr "Buckets Presupuestos"
-
-#: buckets/web/anon.py:101
-msgid "We got your bitcoins."
-msgstr "Recibimos sus bitcoins."
-
-#: buckets/web/anon.py:103
-msgid "Your card was charged."
-msgstr "Su tarjeta fue cargada."
-
-#: buckets/web/anon.py:114
+#: buckets/web/anon.py:82
 msgid "Buckets v1 License"
 msgstr "Licencia v1 para Buckets"
 
-#: buckets/web/anon.py:115
+#: buckets/web/anon.py:83
 msgid ""
 "Thank you for purchasing Buckets!\n"
 "\n"
@@ -59,6 +43,7 @@ msgid ""
 "Happy budgeting!\n"
 "\n"
 "- Matt\n"
+"    "
 msgstr ""
 "¡Gracias por comprar Buckets!\n"
 "\n"
@@ -78,14 +63,51 @@ msgstr ""
 "¡Feliz presupuestar!\n"
 "\n"
 "- Matt\n"
+"    "
 
-#: buckets/web/anon.py:135
+#: buckets/web/anon.py:103
 msgid ""
 "Error emailing license.  If you don't receive an email soon, please reach out "
 "to us."
 msgstr ""
 "Error al enviar la licencia por correo electrónico.  Si no recibe un correo "
 "electrónico pronto, póngase en contacto con nosotros."
+
+#: buckets/web/anon.py:117 buckets/web/anon.py:198
+msgid "Error generating license.  Your card was not charged."
+msgstr "Error al generar la licencia.  Su tarjeta no fue cargada."
+
+#: buckets/web/anon.py:126
+msgid "Buckets Budgeting App"
+msgstr "Buckets Presupuestos"
+
+#: buckets/web/anon.py:130
+msgid "We got your bitcoins."
+msgstr "Recibimos sus bitcoins."
+
+#: buckets/web/anon.py:132
+msgid "Your card was charged."
+msgstr "Su tarjeta fue cargada."
+
+#: buckets/web/anon.py:189
+msgid ""
+"No email address provided.  Each license must be associated with an email "
+"address.  You were not charged."
+msgstr ""
+"No se proporcionó una dirección de correo electrónico. Cada licencia debe estar "
+"asociada a una dirección de correo electrónico. No se te cobró dinero."
+
+#: buckets/web/anon.py:204
+msgid "Payment received."
+msgstr "Pago recibido."
+
+#: buckets/web/anon.py:208
+msgid ""
+"Error finalizing payment.  I don't think you were charged, but please email to "
+"see."
+msgstr ""
+"Error al finalizar el pago. No creo que le hayan cobrado dinero, pero envíe un "
+"correo electrónico para ver."
 
 #: buckets/web/templates/base.html:4
 msgid "Private Family Budgeting App"
@@ -219,15 +241,27 @@ msgstr "¡Feliz presupuestar!"
 msgid "Buy Buckets"
 msgstr "Comprar Buckets"
 
-#: buckets/web/templates/anon/buy.html:25
+#: buckets/web/templates/anon/buy.html:43
+msgid "How do you want to pay?"
+msgstr "¿Cómo quieres pagar?"
+
+#: buckets/web/templates/anon/buy.html:47
+msgid "Credit Card"
+msgstr "Tarjeta de crédito"
+
+#: buckets/web/templates/anon/buy.html:56
 msgid "Purchase License"
 msgstr "Comprar licencia"
 
-#: buckets/web/templates/anon/buy.html:26
+#: buckets/web/templates/anon/buy.html:57
 msgid "Family budgeting app"
 msgstr "Aplicación de presupuesto familiar"
 
-#: buckets/web/templates/anon/buy.html:39
+#: buckets/web/templates/anon/buy.html:69
+msgid "PayPal"
+msgstr "PayPal"
+
+#: buckets/web/templates/anon/buy.html:78
 msgid ""
 "For a <em>one-time $29 payment,</em> you will be emailed a Buckets License "
 "which may be used on any number of computers belonging to you and your "
@@ -237,7 +271,7 @@ msgstr ""
 "Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que "
 "le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
-#: buckets/web/templates/anon/buy.html:42
+#: buckets/web/templates/anon/buy.html:81
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr "Si perdió su licencia, envíeme a hello@budgetwithbuckets.com"
 
@@ -387,38 +421,38 @@ msgstr "Buckets es <em>multilingüe</em>."
 msgid "Currently available languages:"
 msgstr "Idiomas disponibles actualmente:"
 
-#: buckets/web/templates/anon/index.html:199
+#: buckets/web/templates/anon/index.html:200
 msgid "Want to add your language?"
 msgstr "¿Quiere añadir su idioma?"
 
-#: buckets/web/templates/anon/index.html:205
+#: buckets/web/templates/anon/index.html:206
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul."
 msgstr ""
 "Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
 "aquí por mucho tiempo."
 
-#: buckets/web/templates/anon/index.html:205
+#: buckets/web/templates/anon/index.html:206
 msgid "Read more."
 msgstr "Lee mas."
 
-#: buckets/web/templates/anon/index.html:209
+#: buckets/web/templates/anon/index.html:210
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
 
-#: buckets/web/templates/anon/index.html:250
+#: buckets/web/templates/anon/index.html:251
 msgid "Subscribe to the Monthly Newsletter"
 msgstr "Suscríbete al boletín de Buckets"
 
-#: buckets/web/templates/anon/index.html:252
+#: buckets/web/templates/anon/index.html:253
 msgid "Email Address"
 msgstr "Dirección de correo electrónico"
 
-#: buckets/web/templates/anon/index.html:256
+#: buckets/web/templates/anon/index.html:257
 msgid "First Name"
 msgstr "Nombre de pila"
 
-#: buckets/web/templates/anon/index.html:264
+#: buckets/web/templates/anon/index.html:265
 msgid "Subscribe"
 msgstr "Suscribir"
 
@@ -579,3 +613,42 @@ msgstr "Suscribir"
 
 #~ msgid "Read more"
 #~ msgstr "Lee mas"
+
+#~ msgid ""
+#~ "Thank you for purchasing Buckets!\n"
+#~ "\n"
+#~ "Below is your Buckets v1 License.  To use it:\n"
+#~ "\n"
+#~ "1. Open the Buckets application (download at www.budgetwithbuckets.com)\n"
+#~ "2. Click the \"Trial Version\" menu\n"
+#~ "3. Click \"Enter License...\"\n"
+#~ "4. Copy and paste the following license into the box\n"
+#~ "5. Click the button\n"
+#~ "\n"
+#~ "{license}\n"
+#~ "\n"
+#~ "This license may be used on any number of computers belonging to you\n"
+#~ "and your immediate family members living in your home.\n"
+#~ "\n"
+#~ "Happy budgeting!\n"
+#~ "\n"
+#~ "- Matt\n"
+#~ msgstr ""
+#~ "¡Gracias por comprar Buckets!\n"
+#~ "\n"
+#~ "Debajo está su licencia de Buckets v1.  Para usarla:\n"
+#~ "\n"
+#~ "1. Abra la aplicación Buckets (descargar en www.budgetwithbuckets.com)\n"
+#~ "2. Clic en el menú \"Versión de prueba\"\n"
+#~ "3. Clic en \"Entrar licencia...\"\n"
+#~ "4. Copie y pegue la siguiente licencia en la caja\n"
+#~ "5. Clic en el botón\n"
+#~ "\n"
+#~ "{license}\n"
+#~ "\n"
+#~ "Esta licencia se puede usar en cualquier cantidad de computadoras que le "
+#~ "pertenezcan a usted y a los familiares inmediatos que vivan en su hogar.\n"
+#~ "\n"
+#~ "¡Feliz presupuestar!\n"
+#~ "\n"
+#~ "- Matt\n"
