@@ -9,7 +9,8 @@ STRIPE_API_KEY = os.getenv('STRIPE_API_KEY', '')
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', '')
 SENTRY_DSN = os.getenv('SENTRY_DSN', '')
 BUCKETS_LICENSE_KEY = os.getenv('BUCKETS_LICENSE_KEY', '')
-PAYPAL_ACCESS_TOKEN = os.getenv('PAYPAL_ACCESS_TOKEN', '')
+PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID', '')
+PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET', '')
 
 
 application = configureApp(
@@ -20,4 +21,5 @@ application = configureApp(
     stripe_public_key=STRIPE_PUBLIC_KEY,
     sentry_dsn=SENTRY_DSN,
     buckets_license_key=BUCKETS_LICENSE_KEY,
-    paypal_access_token=PAYPAL_ACCESS_TOKEN)
+    paypal_client_id=PAYPAL_CLIENT_ID,
+    paypal_client_secret=PAYPAL_CLIENT_SECRET)
