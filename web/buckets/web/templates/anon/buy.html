@@ -12,7 +12,7 @@
   padding-bottom: 1rem;
 }
 table.payment-options {
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
   border-radius: 3px;
   border: 1px solid lightgrey;
@@ -24,7 +24,7 @@ table.payment-options td {
 }
 table.payment-options td:first-child {
   text-align: right;
-  width: 40%;
+  width: 45%;
 }
 table.payment-options td:last-child {
   text-align: left;
@@ -53,7 +53,7 @@ table.payment-options tr:first-child td {
               data-key="{{ config.STRIPE_PUBLIC_KEY }}"
               data-amount="2900"
               data-name="Buckets"
-              data-label="{% trans %}Purchase License{% endtrans %}"
+              data-label="{% trans %}Buy Now{% endtrans %}"
               data-description="{% trans %}Family budgeting app{% endtrans %}"
               data-zip-code="true"
               data-billing-address="false"
