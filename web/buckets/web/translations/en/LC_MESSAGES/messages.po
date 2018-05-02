@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-05-01 21:09-0600\n"
+"POT-Creation-Date: 2018-05-01 21:25-0600\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -213,7 +213,7 @@ msgid "Credit Card"
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:56
-msgid "Purchase License"
+msgid "Buy Now"
 msgstr ""
 
 #: buckets/web/templates/anon/buy.html:57
@@ -689,5 +689,8 @@ msgstr ""
 #~ "\n"
 #~ "    - Matt\n"
 #~ "    "
+#~ msgstr ""
+
+#~ msgid "Purchase License"
 #~ msgstr ""
 

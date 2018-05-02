@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-05-01 21:09-0600\n"
-"PO-Revision-Date: 2018-05-01 21:13-0600\n"
+"POT-Creation-Date: 2018-05-01 21:25-0600\n"
+"PO-Revision-Date: 2018-05-01 21:25-0600\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -250,8 +250,8 @@ msgid "Credit Card"
 msgstr "Tarjeta de crédito"
 
 #: buckets/web/templates/anon/buy.html:56
-msgid "Purchase License"
-msgstr "Comprar licencia"
+msgid "Buy Now"
+msgstr "Comprar ahora"
 
 #: buckets/web/templates/anon/buy.html:57
 msgid "Family budgeting app"
@@ -652,3 +652,6 @@ msgstr "Suscribir"
 #~ "¡Feliz presupuestar!\n"
 #~ "\n"
 #~ "- Matt\n"
+
+#~ msgid "Purchase License"
+#~ msgstr "Comprar licencia"
