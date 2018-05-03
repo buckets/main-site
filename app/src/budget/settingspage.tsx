@@ -26,7 +26,7 @@ export class SettingsPage extends React.Component<SettingsPageProps, {}> {
                 onChange={ev => {
                   manager.nocheckpoint.sub
                   .settings.updateSettings({
-                    money_symbol: ev.target.value
+                    money_symbol: ev.target.value.substr(0, 4)
                   })
                 }}
               />
@@ -37,3 +37,84 @@ export class SettingsPage extends React.Component<SettingsPageProps, {}> {
     </div>
   }
 }
+
+
+// <details>
+//   <summary>{sss('Common symbols'/* Referring to currency symbols */)}</summary>
+//   {CURRENCY_SYMBOLS.map((symbol, i) => {
+//     return <a
+//       key={i}
+//       href="#"
+//       style={{
+//         padding: '0 .45rem',
+//         display: 'inline-block',
+//         fontSize: '1.2rem',
+//       }}
+//       onClick={(ev) => {
+//         ev.preventDefault();
+//         manager.nocheckpoint.sub
+//         .settings.updateSettings({
+//           money_symbol: symbol,
+//         })
+//       }}
+//     >{symbol}</a>
+//   })}
+// </details>
+// const CURRENCY_SYMBOLS = [
+//   '0024',
+//   '00A2',
+//   '00A3',
+//   '00A4',
+//   '00A5',
+//   '058F',
+//   '060B',
+//   '09F2',
+//   '09F3',
+//   '09FB',
+//   '0AF1',
+//   '0BF9',
+//   '0E3F',
+//   '17DB',
+//   '20A0',
+//   '20A1',
+//   '20A2',
+//   '20A3',
+//   '20A4',
+//   '20A5',
+//   '20A6',
+//   '20A7',
+//   '20A8',
+//   '20A9',
+//   '20AA',
+//   '20AB',
+//   '20AC',
+//   '20AD',
+//   '20AE',
+//   '20AF',
+//   '20B0',
+//   '20B1',
+//   '20B2',
+//   '20B3',
+//   '20B4',
+//   '20B5',
+//   '20B6',
+//   '20B7',
+//   '20B8',
+//   '20B9',
+//   '20BA',
+//   '20BB',
+//   '20BC',
+//   '20BD',
+//   '20BE',
+//   '3350',
+//   '5143',
+//   '5186',
+//   '5706',
+//   '570E',
+//   '5713',
+//   '571C',
+//   'A838',
+//   'C6D0',
+//   'FDFC',
+// ].map(x => String.fromCodePoint(parseInt(x, 16)))
+

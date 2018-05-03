@@ -270,27 +270,27 @@ class Application extends React.Component<ApplicationProps, any> {
                           </table>
                         </Help>
                       </name>
-                      <amount><Money value={appstate.rain} /></amount>
+                      <amount><Money value={appstate.rain} symbol /></amount>
                     </total>
                     <total className="section-start">
                       <name>{sss('Income')}</name>
-                      <amount><Money value={appstate.income} /></amount>
+                      <amount><Money value={appstate.income} symbol /></amount>
                     </total>
                     <inter-total>-</inter-total>
                     <total>
                       <name>{sss('Expenses')}</name>
-                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} /></amount>
+                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} symbol /></amount>
                     </total>
                     <inter-total>=</inter-total>
                     <total>
                       <name>{sss('months gain/loss label', (gain) => {
                         return gain >= 0 ? "Month's gain" : "Month's loss";
                       })(appstate.gain)}</name>
-                      <amount><Money value={appstate.gain} /></amount>
+                      <amount><Money value={appstate.gain} symbol /></amount>
                     </total>
                     <total className="section-start">
                       <name>{sss('in the bank')}</name>
-                      <amount><Money value={appstate.open_accounts_balance} /></amount>
+                      <amount><Money value={appstate.open_accounts_balance} symbol /></amount>
                     </total>
                   </div>
                   <div>
