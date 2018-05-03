@@ -2,47 +2,86 @@
 
 {% block title %}{% trans %}Buy Buckets{% endtrans %}{% endblock %}
 
-{% block navlinks %}{% endblock %}
-
 {% block extrahead %}
-<style type="text/css">
+<style>
 .security-notice {
   padding-top: .5rem;
+}
+.how-to-pay-label {
+  text-align: center;
+  padding-bottom: 1rem;
+}
+table.payment-options {
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 3px;
+  border: 1px solid lightgrey;
+}
+table.payment-options td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-top: 1px solid lightgrey;
+}
+table.payment-options td:first-child {
+  text-align: right;
+  width: 45%;
+}
+table.payment-options td:last-child {
+  text-align: left;
+}
+table.payment-options tr:first-child td {
+  border-top: 0;
 }
 </style>
 {% endblock %}
 
+{% block navlinks %}{% endblock %}
+
 {% block content %}
 <div class="wrap spaced">
-    <div style="text-align: center;">
-        <form action="{{ url_for('.buy') }}" method="POST">
-          <script
-            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-            data-image="{{ url_for('static', filename='img/main_logo.png') }}"
-            data-key="{{ config.STRIPE_PUBLIC_KEY }}"
-            data-amount="2900"
-            data-name="Buckets"
-            data-label="{% trans %}Purchase License{% endtrans %}"
-            data-description="{% trans %}Family budgeting app{% endtrans %}"
-            data-zip-code="true"
-            data-billing-address="false"
-            data-locale="auto"
-            data-allow-remember-me="false"
-          >
-          </script>
-        </form>
-        <div class="security-notice">
-          <a href="https://stripe.com" target="_blank"><img src="{{ url_for('static', filename='img/powered_by_stripe.svg') }}" /></a>
-        </div>
-    </div>
-    <div class="callout para">
-        {% trans %}For a <em>one-time $29 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.{% endtrans %}
-    </div>
-    <div class="callout para">
-        {% trans %}If you've lost your license, email me at hello@budgetwithbuckets.com{% endtrans %}
-    </div>
-    <div class="callout para">
-        - Matt
-    </div>
+  <p class="callout" style="text-align: center;">
+    {% trans %}How do you want to pay?{% endtrans %}
+  </p>
+  <table class="payment-options">
+    <tr>
+        <td>{% trans %}Credit Card{% endtrans %}</td>
+        <td>
+          <form action="{{ url_for('.buy') }}" method="POST">
+            <script
+              src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+              data-image="{{ url_for('static', filename='img/main_logo.png') }}"
+              data-key="{{ config.STRIPE_PUBLIC_KEY }}"
+              data-amount="2900"
+              data-name="Buckets"
+              data-label="{% trans %}Buy Now{% endtrans %}"
+              data-description="{% trans %}Family budgeting app{% endtrans %}"
+              data-zip-code="true"
+              data-billing-address="false"
+              data-locale="auto"
+              data-allow-remember-me="false"
+            >
+            </script>
+          </form>
+        </td>
+    </tr>
+
+    <tr>
+        <td>{% trans %}PayPal{% endtrans %}</td>
+        <td>
+          <form method="post" action="{{ url_for('.paypal_create_payment') }}">
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" alt="Buy now with PayPal" />
+          </form>
+        </td>
+    </tr>
+  </table>
+  <div class="callout para">
+    {% trans %}For a <em>one-time $29 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.{% endtrans %}
+  </div>
+  <div class="callout para">
+    {% trans %}If you've lost your license, email me at hello@budgetwithbuckets.com{% endtrans %}
+  </div>
+  <div class="callout para">
+    - Matt
+  </div>
 </div>
 {% endblock content %}

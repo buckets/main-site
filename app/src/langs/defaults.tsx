@@ -29,7 +29,8 @@ export const DEFAULTS:IMessages = {
     val: "(optional)",
     translated: false,
     h: "njVpYkgCdiB755Pxnsk1D8GELOWqw1mBBYG+YQr7e98=",
-    // csvimport.tsx:384
+    // csvimport.tsx:426
+    // csvimport.tsx:429
   },
   "/mo": {
     val: "/mo",
@@ -94,14 +95,14 @@ export const DEFAULTS:IMessages = {
     val: "Account name",
     translated: false,
     h: "Wo+ZnjRTxGkow1m4BGCavACj82/UajUNs6oLDXB++sU=",
-    // csvimport.tsx:527
+    // csvimport.tsx:620
   },
   "Accounts": {
     val: "Accounts",
     translated: false,
     h: "1oHDkv2zB1yiCABVTWBY5oX4Ccu36nJBCG7Q+JVg8TA=",
-    // budget.tsx:162
-    // budget.tsx:229
+    // budget.tsx:160
+    // budget.tsx:227
     // searchpage.tsx:115
   },
   "Actions": {
@@ -126,7 +127,7 @@ export const DEFAULTS:IMessages = {
     val: "Amazon.com Reconciliation",
     translated: false,
     h: "SS/vhEAqfP5cTcprv5/4dDYZCEsTIMySGfXEngOoMj0=",
-    // amazon.tsx:226
+    // amazon.tsx:191
     // toolspage.tsx:29
   },
   "Amount": {
@@ -136,9 +137,10 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1240
     // searchpage.tsx:145
     // searchpage.tsx:174
+    // amazon.tsx:40
     // transactions.tsx:226
-    // csvimport.tsx:381
-    // csvimport.tsx:555
+    // csvimport.tsx:425
+    // csvimport.tsx:648
   },
   "Amount of money over-allocated in buckets.": {
     val: "Amount of money over-allocated in buckets.",
@@ -150,14 +152,14 @@ export const DEFAULTS:IMessages = {
     val: "Analysis",
     translated: false,
     h: "+LNAOPSLW2rpFCrT+U1suhdnoYyZa1k8ALddRlddDlI=",
-    // budget.tsx:171
+    // budget.tsx:169
   },
   "Animation": {
     /* Label for application preference enabling/disabling animations */
     val: "Animation",
     translated: false,
     h: "Vk4XaMgXNIEY4+Gcal1n+qdnamgr4Q5af/+wzFRoIHU=",
-    // preferences.tsx:104
+    // preferences.tsx:106
   },
   "Any other monthly bills you have?": {
     val: "Any other monthly bills you have?",
@@ -249,8 +251,8 @@ export const DEFAULTS:IMessages = {
     val: "Buckets",
     translated: false,
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
-    // budget.tsx:167
-    // budget.tsx:234
+    // budget.tsx:165
+    // budget.tsx:232
     // searchpage.tsx:92
   },
   "Buckets Budget Filename": {
@@ -358,10 +360,11 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:14
   },
   "Chat with Matt": {
+    /* If "Chat with Matt" is too wide, you can translate this as just "Chat" */
     val: "Chat with Matt",
     translated: false,
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
-    // budget.tsx:188
+    // budget.tsx:186
   },
   "Chat...": {
     val: "Chat...",
@@ -398,7 +401,7 @@ export const DEFAULTS:IMessages = {
     val: "Click the \"Set mapping\" to continue.",
     translated: false,
     h: "17QBrVZk8kjbKoqmqsbEBBHyjcoru22TcYanag65Jrw=",
-    // csvimport.tsx:333
+    // csvimport.tsx:377
   },
   "Close Account": {
     val: "Close Account",
@@ -424,7 +427,7 @@ export const DEFAULTS:IMessages = {
     val: "Closed",
     translated: false,
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
-    // budget.tsx:164
+    // budget.tsx:162
   },
   "Clothing": {
     val: "Clothing",
@@ -473,7 +476,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "0N2I0sNdMLVk7zC9FqlNYoA1G6RDgQDvQErp/TjAnRA=",
     // accounts.tsx:436
-    // csvimport.tsx:539
+    // csvimport.tsx:632
   },
   "Create Backup": {
     val: "Create Backup",
@@ -522,7 +525,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "SmoVFbeAWSO4cW1YQJbuDJQz8kenVz5++WTJEkS6Vos=",
     // importpage.tsx:491
-    // csvimport.tsx:518
+    // csvimport.tsx:611
   },
   "Cut": {
     val: "Cut",
@@ -534,7 +537,7 @@ export const DEFAULTS:IMessages = {
     val: "Date Posted",
     translated: false,
     h: "3A+vhaBB21UASdnwmNYVGMV9qH/U43D3DCsVSXlWasY=",
-    // csvimport.tsx:383
+    // csvimport.tsx:428
   },
   "Debt": {
     val: "Debt",
@@ -729,14 +732,14 @@ export const DEFAULTS:IMessages = {
     val: "Expenses",
     translated: false,
     h: "d6aKytFAPwPUzFOv41R0itfcMu11VdE29vkM05dnpBU=",
-    // budget.tsx:280
+    // budget.tsx:278
     // reports.tsx:219
   },
   "Export": {
     val: "Export",
     translated: false,
     h: "mZJs0iE089tMZ5BWqTUBp+2aJ90wKL4act4hUPt7zkA=",
-    // budget.tsx:182
+    // budget.tsx:180
     // exportpage.tsx:98
   },
   "File": {
@@ -761,7 +764,7 @@ export const DEFAULTS:IMessages = {
     val: "Import Failed",
     translated: false,
     h: "Z6QnadHff9fEji/vnFxKuxbfAKGNb263Hm13z3txfSM=",
-    // importing.ts:74
+    // importing.ts:82
   },
   "Find Next": {
     val: "Find Next",
@@ -785,13 +788,13 @@ export const DEFAULTS:IMessages = {
     val: "Finish import",
     translated: false,
     h: "4xsUuxEj2AOOfV6aSUBcosl89BFoAZ+srMPIeWzIjUI=",
-    // csvimport.tsx:547
+    // csvimport.tsx:640
   },
   "For Date Posted, you must also choose the date format.": {
     val: "For Date Posted, you must also choose the date format.",
     translated: false,
     h: "G2XPMMlP2JPnutFhPAo1RnCQMTzdukxPSc+FjoF2Vjs=",
-    // csvimport.tsx:330
+    // csvimport.tsx:374
   },
   "Force Reload": {
     val: "Force Reload",
@@ -852,7 +855,7 @@ export const DEFAULTS:IMessages = {
     val: "Header row",
     translated: false,
     h: "uRtdJlb7w3q8Zl9lZhtY0JReqNVI7CfOdo5I9SW5lfw=",
-    // csvimport.tsx:346
+    // csvimport.tsx:390
   },
   "Health Insurance": {
     val: "Health Insurance",
@@ -912,7 +915,7 @@ export const DEFAULTS:IMessages = {
     val: "Identify the data each column contains using the drop downs below.",
     translated: false,
     h: "59JoGSJaPOdtgmCL+QLp8U/e6y+OGGM8fdEX4sClrpk=",
-    // csvimport.tsx:328
+    // csvimport.tsx:372
   },
   "If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.": {
     val: "If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.",
@@ -924,19 +927,13 @@ export const DEFAULTS:IMessages = {
     val: "If multiple columns are selected for Amount, the first non-zero value will be used.  This is helpful if the CSV contains separate Credit and Debit columns.",
     translated: false,
     h: "bxc4+JxhDrm2oYWek0ISeJDxq173KLfpcnOT4GEMWGQ=",
-    // csvimport.tsx:331
+    // csvimport.tsx:375
   },
   "Import": {
     val: "Import",
     translated: false,
     h: "F3sijvfYz3oB4iz2rVHjUvNDLQs43MbXDVIr5VFA2/c=",
-    // budget.tsx:177
-  },
-  "Import Amazon Reports": {
-    val: "Import Amazon Reports",
-    translated: false,
-    h: "Mlif1y6Q52PbHr5bzc3mqcxGJBv1uosR7E+eLTi79kA=",
-    // amazon.tsx:219
+    // budget.tsx:175
   },
   "Import From YNAB4...": {
     val: "Import From YNAB4...",
@@ -949,6 +946,18 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
     // menu.ts:215
+  },
+  "Import all Amazon Reports": {
+    val: "Import all Amazon Reports",
+    translated: false,
+    h: "EwzV2gCi/cxxLtdXGeSBJLDZhAhXqomL1rdi7QPOQxA=",
+    // amazon.tsx:254
+  },
+  "Import an Amazon Items report to see order details.": {
+    val: "Import an Amazon Items report to see order details.",
+    translated: false,
+    h: "wYXwxlFC+5KEx6+/6kqpqcHLs1Xfkt7mHrY683QmQPk=",
+    // amazon.tsx:60
   },
   "Import file": {
     val: "Import file",
@@ -987,7 +996,7 @@ export const DEFAULTS:IMessages = {
     val: "Income",
     translated: false,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
-    // budget.tsx:275
+    // budget.tsx:273
     // reports.tsx:208
     // transactions.tsx:762
   },
@@ -1007,9 +1016,9 @@ export const DEFAULTS:IMessages = {
     val: "Invalid",
     translated: false,
     h: "TTWlQj/xySwj3x3tLJd80Tl+VmJXWWdhFpMq90hNbfg=",
-    // csvimport.tsx:441
-    // csvimport.tsx:444
-    // csvimport.tsx:455
+    // csvimport.tsx:523
+    // csvimport.tsx:526
+    // csvimport.tsx:548
   },
   "Invalid SimpleFIN Token": {
     val: "Invalid SimpleFIN Token",
@@ -1040,6 +1049,13 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "RjwjZtmUgFzGUxR0zMmyXh0cHzpzsbj4nk6R7tGe+i4=",
     // menu.ts:284
+  },
+  "Item": {
+    /* Amazon order item description label */
+    val: "Item",
+    translated: false,
+    h: "J0Og6dJ0OAeNyx49ggQ07tKx/Pu/fyej6BKciFOMU0s=",
+    // amazon.tsx:41
   },
   "Keep account transactions": {
     val: "Keep account transactions",
@@ -1081,20 +1097,21 @@ export const DEFAULTS:IMessages = {
     val: "Kicked",
     translated: false,
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
-    // budget.tsx:169
+    // budget.tsx:167
   },
   "Language": {
     /* Label for application language preference */
     val: "Language",
     translated: false,
     h: "H6JLSQVzeo1QvqYd6ewWITP1MyGheSF5eFCeaP6nQwk=",
-    // preferences.tsx:37
+    // preferences.tsx:38
   },
   "Language default": {
     val: "Language default",
     translated: false,
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
-    // preferences.tsx:71
+    // csvimport.tsx:453
+    // preferences.tsx:73
   },
   "Last used": {
     val: "Last used",
@@ -1191,8 +1208,8 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:144
     // searchpage.tsx:173
     // transactions.tsx:225
-    // csvimport.tsx:382
-    // csvimport.tsx:554
+    // csvimport.tsx:427
+    // csvimport.tsx:647
   },
   "Minimize": {
     val: "Minimize",
@@ -1261,6 +1278,13 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "RbGrwaVYaT8OdEbNo5YBRWxoGZNYzZKjiDz7JrZVuuc=",
     // gettingstarted.ts:11
+  },
+  "Negative": {
+    /* Label for choosing the word/symbol that signifies a negative number */
+    val: "Negative",
+    translated: false,
+    h: "uu+tZJYytTWkRjWGnhq7P28TYmWJ58RmQcbAv4QEakg=",
+    // csvimport.tsx:460
   },
   "Net": {
     val: "Net",
@@ -1375,7 +1399,7 @@ export const DEFAULTS:IMessages = {
     val: "Number format",
     translated: false,
     h: "RxooctpubAJr5NcKn57a5kjGBEdlPT5b2h6PUFLqxxE=",
-    // preferences.tsx:59
+    // preferences.tsx:61
   },
   "OK": {
     val: "OK",
@@ -1408,7 +1432,7 @@ export const DEFAULTS:IMessages = {
     val: "Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.",
     translated: false,
     h: "MUc4sPlkaqyooNhJKZ15rbBQdclJSNbaarHERiW1hrs=",
-    // csvimport.tsx:332
+    // csvimport.tsx:376
   },
   "Open Buckets Budget": {
     val: "Open Buckets Budget",
@@ -1446,6 +1470,12 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "zVM8610w5Mn1yRIYOsmOY5ZxBd2KLIudsimw610auYU=",
     // reportbug.html:0
+  },
+  "Optionally request a Amazon Refunds report": {
+    val: "Optionally request a Amazon Refunds report",
+    translated: false,
+    h: "0Gpd84fiRS78S1bJAzdSplsljFZorKyMIlg+IP0Yjys=",
+    // amazon.tsx:221
   },
   "Out": {
     val: "Out",
@@ -1515,7 +1545,7 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:142
     // searchpage.tsx:171
     // transactions.tsx:223
-    // csvimport.tsx:553
+    // csvimport.tsx:646
   },
   "Preferences": {
     val: "Preferences",
@@ -1545,7 +1575,7 @@ export const DEFAULTS:IMessages = {
     val: "Provide a name for the new account.",
     translated: false,
     h: "WFHwJzRVIraGkeqDS03YjWe0vMsPsiRE1qM6V/Ef/xE=",
-    // csvimport.tsx:536
+    // csvimport.tsx:629
   },
   "Purchase": {
     val: "Purchase",
@@ -1570,8 +1600,8 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "fqeHyOaOYnCtGAcJlJbhAR37DG6YMrsasUNtiL6z8hc=",
     // buckets.tsx:218
-    // budget.tsx:225
-    // budget.tsx:248
+    // budget.tsx:223
+    // budget.tsx:246
   },
   "Rain left": {
     val: "Rain left",
@@ -1608,7 +1638,7 @@ export const DEFAULTS:IMessages = {
     val: "Recurring Expenses",
     translated: false,
     h: "yDp5Agru+QzDSy583s3kjOdZbbe6X1WDfMeSNXsYlaY=",
-    // budget.tsx:174
+    // budget.tsx:172
     // reports.tsx:600
   },
   "Redo": {
@@ -1667,6 +1697,18 @@ export const DEFAULTS:IMessages = {
     h: "/jSK7LcBLJ1FsOYb9ntsVYAxwAyGLLUZXlTL/zrC020=",
     // menu.ts:281
   },
+  "Request an Amazon Items report": {
+    val: "Request an Amazon Items report",
+    translated: false,
+    h: "P4rrDh5nDkcbT6+2mP6w2/DdQS+Hlhu7u/AEo7usOGc=",
+    // amazon.tsx:201
+  },
+  "Request an Amazon Orders report": {
+    val: "Request an Amazon Orders report",
+    translated: false,
+    h: "c+Qi3RJelGSlC9MybLul6oqMPosN10WOFW6k+roCtxk=",
+    // amazon.tsx:211
+  },
   "Required deposit:": {
     val: "Required deposit:",
     translated: false,
@@ -1683,7 +1725,7 @@ export const DEFAULTS:IMessages = {
     val: "Restart Buckets for changes to take effect.",
     translated: false,
     h: "WDqnfUftItQB8zteFdZrFOknNYODkXCwU89Lk/Hs/SQ=",
-    // preferences.tsx:32
+    // preferences.tsx:33
   },
   "Save": {
     val: "Save",
@@ -1702,7 +1744,7 @@ export const DEFAULTS:IMessages = {
     val: "Search",
     translated: false,
     h: "vembE+Cp1aKCKR2j2LCJD29QyiQxfGPUcGI1I8l5/5Y=",
-    // budget.tsx:181
+    // budget.tsx:179
   },
   "Search:": {
     val: "Search:",
@@ -1726,7 +1768,7 @@ export const DEFAULTS:IMessages = {
     val: "Select the account these transactions belong to.",
     translated: false,
     h: "qkaCMMw9CYakrPrLxgfkBp3KsfadBdGLYgZB8urPaC4=",
-    // csvimport.tsx:496
+    // csvimport.tsx:589
   },
   "Self debt": {
     val: "Self debt",
@@ -1750,7 +1792,7 @@ export const DEFAULTS:IMessages = {
     val: "Set mapping",
     translated: false,
     h: "0GImzkG1VPzFzjFdepzZz8+Ysis4xn7QQRVGlxVrQIw=",
-    // csvimport.tsx:412
+    // csvimport.tsx:494
   },
   "Show All": {
     val: "Show All",
@@ -1769,6 +1811,13 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
     // transactions.tsx:113
+  },
+  "Sign": {
+    /* Noun referring to the sign of a number (positive or negative) */
+    val: "Sign",
+    translated: false,
+    h: "uw6BT7o9vlsgV2TpwBFx/MfF1npvA+6ru4lXXcSzoCM=",
+    // csvimport.tsx:426
   },
   "SimpleFIN Connections": {
     val: "SimpleFIN Connections",
@@ -1853,19 +1902,19 @@ export const DEFAULTS:IMessages = {
     val: "Successfully imported Amazon Items report",
     translated: false,
     h: "zcIlaWv/ZpEjOL5xQHbD/Q8+nNhqDbq4oJsVr0hLKcI=",
-    // amazon.tsx:204
+    // amazon.tsx:239
   },
   "Successfully imported Amazon Orders report": {
     val: "Successfully imported Amazon Orders report",
     translated: false,
     h: "jD2nczKNctIdPeGX20WLyUGOlIl/MbKqKpP5hCxbtt8=",
-    // amazon.tsx:207
+    // amazon.tsx:242
   },
   "Successfully imported Amazon Refunds report": {
     val: "Successfully imported Amazon Refunds report",
     translated: false,
     h: "cL1VAhdyv9ML3nJT0QY3lg6QrxkJ/UQf0gbcokIDJGU=",
-    // amazon.tsx:210
+    // amazon.tsx:245
   },
   "Sync": {
     val: "Sync",
@@ -1910,8 +1959,8 @@ export const DEFAULTS:IMessages = {
     val: "System default",
     translated: false,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",
-    // preferences.tsx:49
-    // preferences.tsx:92
+    // preferences.tsx:50
+    // preferences.tsx:94
   },
   "Target date:": {
     val: "Target date:",
@@ -1960,7 +2009,7 @@ export const DEFAULTS:IMessages = {
     val: "Timezone",
     translated: false,
     h: "y2odAzUKexep7CmO6P8BCj1p4PWG6VZ/RbIg8oOWASI=",
-    // preferences.tsx:80
+    // preferences.tsx:82
   },
   "To": {
     val: "To",
@@ -1984,7 +2033,7 @@ export const DEFAULTS:IMessages = {
     val: "Tools",
     translated: false,
     h: "mPsch0seV0ZNaU+41My/wS+DkAGfYqzWpPlJpfT1sBs=",
-    // budget.tsx:178
+    // budget.tsx:176
   },
   "Tot:": {
     val: "Tot:",
@@ -2010,7 +2059,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "4+yGUer/b71cfxTdeUa5QbonqN9ezC8Eii7KO22Ety0=",
     // buckets.tsx:295
-    // budget.tsx:166
+    // budget.tsx:164
     // exportpage.tsx:148
   },
   "Transactions to review": {
@@ -2029,7 +2078,7 @@ export const DEFAULTS:IMessages = {
     val: "Trial Version",
     translated: false,
     h: "GtZIXrHILA84HlpKlxi3BErHwR7WIYkQ/e5BE0Fiaxg=",
-    // budget.tsx:134
+    // budget.tsx:132
     // menu.ts:292
   },
   "Tuition": {
@@ -2080,7 +2129,7 @@ export const DEFAULTS:IMessages = {
     val: "Unique ID",
     translated: false,
     h: "UZsJmQ28mtEO349l3zdNHoAtb0JT1LT9e7EjedqptSE=",
-    // csvimport.tsx:384
+    // csvimport.tsx:429
   },
   "Unknown account: ": {
     val: "Unknown account: ",
@@ -2220,7 +2269,7 @@ export const DEFAULTS:IMessages = {
     val: "Used in future",
     translated: false,
     h: "O0zGsqv23d44/pWJqCSt+qkDtG/nBrBI2W0aRA9XoDw=",
-    // budget.tsx:239
+    // budget.tsx:237
   },
   "Vacation ": {
     val: "Vacation ",
@@ -2322,7 +2371,7 @@ export const DEFAULTS:IMessages = {
     val: "You must have at least one column each set to Amount, Memo and Date Posted.",
     translated: false,
     h: "k5NuGeKNgPfZs7xUbwp5PgfPr6dosV0ZTVxAnphHH6E=",
-    // csvimport.tsx:329
+    // csvimport.tsx:373
   },
   "Your email address:": {
     val: "Your email address:",
@@ -2537,7 +2586,7 @@ export const DEFAULTS:IMessages = {
         },
     translated: false,
     h: "hFYUKKIqC+nYQ+RRKwNu3/PGxbtuHzNHoigSJwCK8d4=",
-    // csvimport.tsx:496
+    // csvimport.tsx:589
   },
   "enter-license-prompt": {
     val: "\n      Please enter your Buckets License below.  Don&apos;t have a license?  <a href=\"#\" id=\"clicktobuy\">Click here to purchase one.</a>\n    ",
@@ -2569,7 +2618,7 @@ export const DEFAULTS:IMessages = {
     val: "in the bank",
     translated: false,
     h: "7gl7ZdgJ3HfhOcQMiU7hVkFpXIR3KFxXtlMhKyE/Irw=",
-    // budget.tsx:291
+    // budget.tsx:289
   },
   "match-count": {
     val: (current_match:number, total_matches:number) => {
@@ -2599,7 +2648,7 @@ export const DEFAULTS:IMessages = {
                       },
     translated: false,
     h: "lGcEnJfZJau2h5ohbKNxY1FjL0vJoW3oJOJQwSCt+Kg=",
-    // budget.tsx:285
+    // budget.tsx:283
   },
   "more": {
     val: "more",
@@ -2672,7 +2721,7 @@ Would you like to purchase a license now?`,
                                     },
     translated: false,
     h: "tqXmJxZXqyA0mN/8ugZkpCyspyO7XlPnGlEYGWgQ7jk=",
-    // budget.tsx:260
+    // budget.tsx:258
   },
   "rain.help.pos": {
     val: (abs_amount:JSX.Element) => {
@@ -2682,7 +2731,7 @@ Would you like to purchase a license now?`,
                                     },
     translated: false,
     h: "boezbSGkVm3dnfFvodJOAeCgAEMIQN9L+8TwEHLpU/o=",
-    // budget.tsx:255
+    // budget.tsx:253
   },
   "simplefin-connect-intro": {
     val: "To connect, do the following:",

@@ -819,10 +819,10 @@ class GroupRow extends React.Component<{
           <th x-name="color/note"></th>
           <th x-name="name"></th>
           <th x-name="balance" className="right">{sss('Balance')}</th>
-          <th x-name="in/out" className="center"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
+          <th x-name="in/out" className="left"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
           <th x-name="want" className="right nobr"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
-          <th x-name="in" className="center nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
-          <th x-name="activity" className="center nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
+          <th x-name="in" className="right nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
+          <th x-name="activity" className="right nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
           <th x-name="details">{sss('bucket.detailslabel', 'Details')}</th>
           <th x-name="more"></th>
         </tr>

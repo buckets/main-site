@@ -176,13 +176,18 @@ do_restore() {
     restore_to "${1:-buildtools}"
 }
 
-do_build() {
+do_prepare_build() {
     PROJECT_DIR=$(project_root_dir)
-    echo "do_build $PROJECT_DIR"
+    echo "do_prepare_build $PROJECT_DIR"
     do_up
     ensure_shared_folder project "$PROJECT_DIR" y
     ensure_mount project y
+}
 
+do_build() {
+    PROJECT_DIR=$(project_root_dir)
+    echo "do_build $PROJECT_DIR"
+    do_prepare_build "$PROJECT_DIR"
     echo | cmd 'c:\builder\win_build_launcher.bat'
 }
 
@@ -200,7 +205,7 @@ do_publish() {
         exit 1
     fi
     PROJECT_DIR=$(project_root_dir)
-    do_build "$PROJECT_DIR"
+    do_prepare_build "$PROJECT_DIR"
     echo | vboxmanage guestcontrol "$VMNAME" run \
         --username "$WIN_USER" --password "$WIN_PASS" \
         --putenv GH_TOKEN="$GH_TOKEN" \

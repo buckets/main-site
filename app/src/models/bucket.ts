@@ -531,6 +531,10 @@ export interface IComputedData {
   goal: number;
   end_date: moment.Moment;
 }
+
+/**
+ *  Compute the amount a bucket wants (and other information)
+ **/
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs);
 export function computeBucketData(kind:'', b:Bucket);
 export function computeBucketData(kind:'deposit', b:Bucket);
@@ -552,9 +556,11 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
       break;
     }
     case 'goal-deposit': {
+      const deposit = balance + b.deposit > b.goal
+        ? b.goal - balance : b.deposit;
       Object.assign(ret, {
         goal: b.goal,
-        deposit: b.deposit,
+        deposit,
         end_date: computeGoalEndDate(balance, b.goal, b.deposit, today),
       })
       break;

@@ -1,5 +1,6 @@
 import structlog
 import stripe
+import paypalrestsdk
 import logging
 logger = structlog.get_logger()
 
@@ -69,6 +70,8 @@ def configureApp(flask_secret_key,
         postmark_key,
         stripe_api_key,
         stripe_public_key,
+        paypal_client_id,
+        paypal_client_secret,
         sentry_dsn,
         buckets_license_key,
         debug=False):
@@ -111,6 +114,18 @@ def configureApp(flask_secret_key,
         logger.info('Stripe: PRODUCTION')
     stripe.api_key = stripe_api_key
     stripe.api_version = '2016-07-06'
+
+    # paypal
+    if not any([paypal_client_id, paypal_client_secret]):
+        logger.info('PayPal NOT CONFIGURED')
+    else:
+        paypalrestsdk.configure({
+            'mode': 'sandbox' if debug else 'live',
+            'client_id': paypal_client_id,
+            'client_secret': paypal_client_secret,
+        })
+        logger.info('PayPal: configured')
+
 
     structlog.configure(
         processors=[

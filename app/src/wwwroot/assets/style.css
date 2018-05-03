@@ -705,6 +705,9 @@ table.summary td.novpadding {
   padding-top: 0;
   padding-bottom: 0;
 }
+table.summary th.full-width {
+  width: 100%;
+}
 
 
 table.ledger .icon-button-wrap,

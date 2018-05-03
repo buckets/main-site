@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { PrefixLogger} from './logging'
 import { EventSource } from 'buckets-core'
 import { remote, app } from 'electron'
@@ -38,6 +38,7 @@ class TranslationContext {
         this._locale = locale;
         log.info(`locale set to: ${locale}`);
         try {
+          await import(`moment/locale/${locale}`);
           moment.locale(this._locale)
         } catch(err) {
           log.error('Error setting date locale', err.stack);
@@ -98,9 +99,9 @@ class TranslationContext {
 }
 
 async function getLocale():Promise<string> {
-  // LANG environment variable beats all
-  if (env.LANG) {
-    return env.LANG;
+  // BUCKETS_LANG environment variable beats all
+  if (env.BUCKETS_LANG) {
+    return env.BUCKETS_LANG;
   } else {
     // Application preference
     if (PSTATE.locale) {

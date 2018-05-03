@@ -5,7 +5,9 @@ import {v4 as uuid} from 'uuid'
 
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
+import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat } from './langs/spec'
 import { Money, decimal2cents } from './money'
+import { SEPS, ISeps } from 'buckets-core/dist/money'
 import { DateDisplay, parseLocalTime, dumpTS, loadTS } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
 import { Account } from './models/account'
@@ -48,7 +50,7 @@ export async function parseCSVStringWithHeader<T>(guts:string, opts:{
   })
 }
 
-export function csvFieldToCents(x:string) {
+export function csvFieldToCents(x:string, seps?:ISeps) {
   if (!x) {
     return 0;
   }
@@ -56,7 +58,9 @@ export function csvFieldToCents(x:string) {
   if (x.startsWith('(') && x.endsWith(')')) {
     x = `-${x.substr(1, x.length-1)}`;
   }
-  return decimal2cents(x);
+  return decimal2cents(x, {
+    seps: seps || undefined,
+  });
 }
 
 function guessDateFormat(formats:string[], dates:string[]):string[] {
@@ -94,16 +98,23 @@ function invertMapping(mapping:CSVMapping):{
   memo?: string[],
   posted?: string[],
   fi_id?: string[],
+  amount_sign?: string[],
 } {
   let inverted_mapping = {
     amount: [],
     memo: [],
     posted: [],
     fi_id: [],
+    amount_sign: [],
   };
   Object.keys(mapping.fields).sort().forEach(header => {
     const val = mapping.fields[header];
-    inverted_mapping[val].push(header);
+    try {
+      inverted_mapping[val].push(header);  
+    } catch(err) {
+      log.info('val:', val, 'header', header);
+      throw err;
+    }
   })
   return inverted_mapping;
 }
@@ -113,10 +124,12 @@ function invertMapping(mapping:CSVMapping):{
  */
 export interface CSVMapping {
   fields: {
-    [field:string]: 'amount'|'memo'|'posted'|'fi_id';
+    [field:string]: 'amount'|'memo'|'posted'|'fi_id'|'amount_sign';
   }
   posted_format?: string;
   noheader?: boolean;
+  numberformat?: NumberFormat;
+  negative_signifier?: string;
 }
 export interface CSVNeedsMapping {
   id: string;
@@ -207,7 +220,18 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   let hashcount = {};
   let inverted_mapping = invertMapping(mapping);
   const transactions = getDataRows(parsed, mapping).map((row):ImportableTrans => {
-    const amount = csvFieldToCents(inverted_mapping.amount.map(key => row[key]).filter(x=>x)[0]);
+    let sign = 1;
+    if (inverted_mapping.amount_sign.length) {
+      let amount_sign_header = inverted_mapping.amount_sign.slice(-1)[0];
+      if (row[amount_sign_header] === mapping.negative_signifier) {
+        sign = -1;
+      }
+    }
+    const amount = sign * csvFieldToCents(
+      inverted_mapping.amount
+        .map(key => row[key])
+        .filter(x=>x)[0],
+      mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
     const posted = parseLocalTime(row[inverted_mapping.posted[0]], mapping.posted_format);
     let fi_id:string;
@@ -296,6 +320,8 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
       fields: {},
       posted_format: null,
       noheader: false,
+      seps: undefined,
+      negative_signifier: undefined,
     }
     let guess = this.computeFormatOptionsAndBestGuess(mapping, props.obj);
     if (guess.posted_format !== undefined) {
@@ -339,6 +365,8 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
       && mapped_fields.filter(x=>x==='posted').length === 1
       && mapping.posted_format
     );
+
+    const inverted = invertMapping(mapping);
 
     return <div>
       <ol className="instructions">
@@ -396,6 +424,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   >
                     <option value=""></option>
                     <option value="amount">{sss('Amount')}</option>
+                    <option value="amount_sign">{sss('Sign'/* Noun referring to the sign of a number (positive or negative) */)} {sss('(optional)')}</option>
                     <option value="memo">{sss('Memo')}</option>
                     <option value="posted">{sss('Date Posted')}</option>
                     <option value="fi_id">{sss('Unique ID')} {sss('(optional)')}</option>
@@ -411,6 +440,43 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                       }}>
                     {format_options.map(option => {
                       return <option key={option}>{option}</option>
+                    })}
+                  </select>
+                </div> : null}
+                {value === 'amount' ? <div>
+                  <select
+                    value={mapping.numberformat}
+                    onChange={ev => {
+                      this.setState({mapping: Object.assign(mapping, {
+                        numberformat: ev.target.value as NumberFormat,
+                      })})
+                    }}>
+                    <option value="">{sss('Language default')}</option>
+                    <option value="comma-period">{NUMBER_FORMAT_EXAMPLES['comma-period']}</option>
+                    <option value="period-comma">{NUMBER_FORMAT_EXAMPLES['period-comma']}</option>
+                    <option value="space-comma">{NUMBER_FORMAT_EXAMPLES['space-comma']}</option>
+                  </select>
+                </div> : null}
+                {value === 'amount_sign' ? <div>
+                  {sss('Negative'/* Label for choosing the word/symbol that signifies a negative number */)} <select
+                    value={mapping.negative_signifier || ''}
+                    onChange={ev => {
+                      this.setState({mapping: Object.assign(mapping, {
+                        negative_signifier: ev.target.value,
+                      })})
+                    }}>
+                    <option value=""></option>
+                    {getDataRows(obj.parsed_data, mapping)
+                      .map(row => row[header])
+                      .reduce((prev:string[], current) => {
+                        if (prev.indexOf(current) === -1) {
+                          prev.push(current)
+                        }
+                        return prev;
+                      }, [])
+                      .map(option => {
+                        return <option key={option}>{option}</option>
+                      })
                     })}
                   </select>
                 </div> : null}
@@ -466,8 +532,19 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   </td>
                 } else if (value === 'amount') {
                   let money;
+                  let sign = 1;
+                  if (inverted.amount_sign.length) {
+                    let amount_sign_header = inverted.amount_sign.slice(-1)[0];
+                    if (row[amount_sign_header] === mapping.negative_signifier) {
+                      sign = -1;
+                    }
+                  }
                   try {
-                    money = <Money value={csvFieldToCents(row[header])} noanimate />
+                    money = <Money
+                      value={sign * csvFieldToCents(row[header],
+                        mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS)}
+                      noanimate
+                    />
                   } catch(err) {
                     money = <span className="error">{sss('Invalid')}</span>
                   }

@@ -11,7 +11,8 @@ echo '<!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->' > _CHANGELOG.
 # Version header
 #---------------------------------------------------------------
 version=$(cat "${thisdir}/../../package.json" | grep version | cut -d'"' -f4)
-VERSION_HEADER="## v${version}"
+VERSION_DATE=$(date +"%-d %b %Y")
+VERSION_HEADER="## v${version} - ${VERSION_DATE}"
 echo "$VERSION_HEADER" | tee -a _CHANGELOG.md
 echo | tee -a _CHANGELOG.md
 

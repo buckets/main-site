@@ -3,6 +3,7 @@ import * as moment from 'moment-timezone'
 import { sss, localizeThisPage } from '../../i18n'
 import { PSTATE, updateState, PersistentState } from '../../mainprocess/persistent'
 import { Renderer } from '../../budget/render'
+import { NUMBER_FORMAT_EXAMPLES } from '../../langs/spec'
 
 let CURRENT_PSTATE = PSTATE;
 let renderer:Renderer = new Renderer();
@@ -51,6 +52,7 @@ class PreferencesApp extends React.Component<{
                 <option value="en">English</option>
                 <option value="es">español</option>
                 <option value="fr">Français</option>
+                <option value="nl">Nederlands</option>
                 <option value="pt">Português</option>
               </select>
             </td>
@@ -70,9 +72,9 @@ class PreferencesApp extends React.Component<{
                   })
                 }}>
                 <option value="">{sss('Language default')}</option>
-                <option value="comma-period">1,500.22</option>
-                <option value="period-comma">1.500,22</option>
-                <option value="space-comma">1 500,22</option>
+                <option value="comma-period">{NUMBER_FORMAT_EXAMPLES['comma-period']}</option>
+                <option value="period-comma">{NUMBER_FORMAT_EXAMPLES['period-comma']}</option>
+                <option value="space-comma">{NUMBER_FORMAT_EXAMPLES['space-comma']}</option>
               </select>
             </td>
           </tr>

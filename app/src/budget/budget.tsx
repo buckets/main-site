@@ -50,16 +50,14 @@ export async function start(base_element, room, args: {
     log.info(`number format: DEFAULT`);
     numberformat = tx.getNumberFormat();
   }
-  setSeparators(numberformat.group,
-      numberformat.group_regex,
-      numberformat.decimal,
-      numberformat.decimal_regex);
+  setSeparators(numberformat);
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())
   log.info('   toLocaleString:', (new Date()).toLocaleString())
   log.info('getTimezoneOffset:', (new Date()).getTimezoneOffset())
   log.info(`moment: ${moment.version}`)
+  log.info(`moment.locale: ${moment.locale()}`);
 
   if (args) {
     if (args.noanimation) {
@@ -187,7 +185,7 @@ class Navbar extends React.Component<{
             ev.preventDefault();
             shell.openExternal('https://www.budgetwithbuckets.com/chat');
             return false;
-          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt')}</span></a>
+          }}><span><span className="fa fa-fw fa-comment"></span> {sss('Chat with Matt'/* If "Chat with Matt" is too wide, you can translate this as just "Chat" */)}</span></a>
           <Link relative to="/settings" exactMatchClass="selected" matchClass="selected"><span><span className="fa fa-fw fa-cog"></span> {sss('Settings')}</span></Link>
           {trial_version}
         </div>

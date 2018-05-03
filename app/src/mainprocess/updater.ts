@@ -45,7 +45,7 @@ export function checkForUpdates() {
   autoUpdater.on('error', (err) => {
     log.error(err);
     let alert_user = true;
-    if (err.toString.indexOf('net::ERR_INTERNET_DISCONNECTED') !== -1) {
+    if (err.toString().indexOf('net::ERR_INTERNET_DISCONNECTED') !== -1) {
       // They have no internet connection
       alert_user = false;
     }
