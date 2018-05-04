@@ -107,15 +107,16 @@ function invertMapping(mapping:CSVMapping):{
     fi_id: [],
     amount_sign: [],
   };
-  Object.keys(mapping.fields).sort().forEach(header => {
-    const val = mapping.fields[header];
-    try {
+  try {
+    Object.keys(mapping.fields).sort().forEach(header => {
+      const val = mapping.fields[header];
       inverted_mapping[val].push(header);  
-    } catch(err) {
-      log.info('val:', val, 'header', header);
-      throw err;
-    }
-  })
+    })
+  } catch(err) {
+    log.info('mapping', mapping);
+    log.info('inverted_mapping so far', inverted_mapping);
+    throw err;
+  }
   return inverted_mapping;
 }
 
