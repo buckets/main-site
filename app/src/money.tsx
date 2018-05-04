@@ -197,24 +197,24 @@ export class Money extends React.Component<MoneyProps, {
       going_up = value > this.state.current_value;
       value = this.state.current_value;
     }
-    let display = cents2decimal(value, {
+    let display = cents2decimal(Math.abs(value), {
       round: round,
       show_decimal: !hideCents || this.state.anim_show_decimal,
     }) || '0';
+    let symbolDisplay = '';
     if (symbol && display) {
-      let symbol_display:string = symbol === true ? DEFAULT.symbol : symbol;
-      if (value < 0) {
-        display = `-${symbol_display}${display.substr(1)}`
-      } else {
-        display = symbol_display + display;
-      }
+      symbolDisplay = symbol === true ? DEFAULT.symbol : symbol;
+    }
+    let signDisplay = '';
+    if (value < 0) {
+      signDisplay = '-';
     }
     let parts = display.split(SEPS.decimal, 2);
     let zeroCents = true;
     let display_components = [];
     if (parts.length === 2) {
       zeroCents = parts[1] === '0'.repeat(parts[1].length);
-      display_components.push(<span className="dollar" key="dollar">{parts[0]}</span>)
+      display_components.push(<span className="dollar" key="dollar">{signDisplay}{symbolDisplay}{parts[0]}</span>)
       if (zeroCents && hideZeroCents) {
         // don't show cents
       } else {
@@ -226,7 +226,7 @@ export class Money extends React.Component<MoneyProps, {
         })} key="cents">{parts[1]}</span>)
       }
     } else {
-      display_components.push(<span className="dollar" key="dollar">{display}</span>)
+      display_components.push(<span className="dollar" key="dollar">{signDisplay}{symbolDisplay}{display}</span>)
     }
     return (<span className={cx(
       'money',
