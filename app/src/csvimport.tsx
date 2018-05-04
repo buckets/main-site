@@ -94,11 +94,12 @@ function guessDateFormat(formats:string[], dates:string[]):string[] {
 }
 
 function invertMapping(mapping:CSVMapping):{
-  amount?: string[],
-  memo?: string[],
-  posted?: string[],
-  fi_id?: string[],
-  amount_sign?: string[],
+  amount: string[],
+  memo: string[],
+  posted: string[],
+  fi_id: string[],
+  amount_sign: string[],
+  '': string[],
 } {
   let inverted_mapping = {
     amount: [],
@@ -106,6 +107,7 @@ function invertMapping(mapping:CSVMapping):{
     posted: [],
     fi_id: [],
     amount_sign: [],
+    '': [],
   };
   try {
     Object.keys(mapping.fields).sort().forEach(header => {
@@ -336,8 +338,10 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
   computeFormatOptionsAndBestGuess(mapping:CSVMapping, obj:CSVNeedsMapping) {
     let ret:{
       posted_format?: string,
-      format_options?: string[],
-    } = {};
+      format_options: string[],
+    } = {
+      format_options: [],
+    };
     let format_options = DATE_FORMATS;
     let inverted_mapping = invertMapping(mapping);
     if (inverted_mapping.posted.length) {
@@ -404,8 +408,9 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                   <select
                     value={value}
                     onChange={ev => {
+                      const newvalue = ev.target.value;
                       let new_fields = Object.assign(mapping.fields, {
-                        [header]: ev.target.value,
+                        [header]: newvalue,
                       })
                       let new_mapping = Object.assign(mapping, {
                         fields: new_fields,
@@ -413,7 +418,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
 
                       let newstate:any = {mapping: new_mapping}
 
-                      if (ev.target.value === 'posted') {
+                      if (newvalue === 'posted') {
                         let guess = this.computeFormatOptionsAndBestGuess(new_mapping, obj)
                         if (!new_mapping.posted_format && guess.posted_format) {
                           new_mapping.posted_format = guess.posted_format
