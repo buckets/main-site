@@ -179,6 +179,20 @@ do_restore() {
 do_prepare_build() {
     PROJECT_DIR=$(project_root_dir)
     echo "do_prepare_build $PROJECT_DIR"
+
+    # code signing stuff
+    if [ ! -z "$CSC_LINK" ] && [ ! -z "$CSC_KEY_PASSWORD" ]; then
+        echo "Preparing code signing certificate..."
+        echo "$CSC_LINK" | base64 --decode --input - --output "${PROJECT_DIR}/csc_link.p12"
+        echo -n "$CSC_KEY_PASSWORD" > "${PROJECT_DIR}/csc_key_password.txt"
+        function finish {
+            echo "Removing code signing certificate..."
+            rm "${PROJECT_DIR}/csc_link.p12"
+            rm "${PROJECT_DIR}/csc_key_password.txt"
+        }
+        trap finish EXIT
+    fi
+
     do_up
     ensure_shared_folder project "$PROJECT_DIR" y
     ensure_mount project y

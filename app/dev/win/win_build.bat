@@ -15,6 +15,8 @@ set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
 set ELECTRON_BUILDER_CACHE=Y:\cache\electron-cache
 set ELECTRON_CACHE=Y:\cache\electron-cache
+set CSC_LINK=Y:\csc_link.p12
+set /P CSC_KEY_PASSWORD=< Y:\csc_key_password.txt
 set
 cmd /c npm config set msvs_version 2015 --global
 cmd /c npm install -g node-gyp

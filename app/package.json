@@ -61,8 +61,8 @@
     "dmg": {
       "icon": "build/dmg.icns"
     },
-    "nsis": {
-      "perMachine": true
+    "win": {
+      "publisherName": "ONE PART RAIN, LLC"
     },
     "linux": {
       "category": "Finance",
