@@ -1,5 +1,6 @@
 import * as math from 'mathjs';
-
+// import { PrefixLogger } from './logging'
+// const log = new PrefixLogger('(money)');
 
 export interface ISeps {
   group: string;

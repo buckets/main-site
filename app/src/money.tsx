@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as cx from 'classnames';
 import { cents2decimal, decimal2cents, fancyEval, SEPS } from 'buckets-core/dist/money'
-export { cents2decimal, decimal2cents, setSeparators } from 'buckets-core/dist/money'
+export { cents2decimal, decimal2cents } from 'buckets-core/dist/money'
 
 let ANIMATION_ENABLED = true;
 
