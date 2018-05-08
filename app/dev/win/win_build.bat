@@ -11,6 +11,16 @@ type C:\builder\copyexclude.txt
 xcopy y:\ c:\proj /d /F /I /s /Y /EXCLUDE:C:\builder\copyexclude.txt
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+cmd /c yarn config set yarn-offline-mirror y:\cache\yarnmirror
+cmd /c yarn config set yarn-offline-mirror-pruning false
+
+cd \proj\app\
+cmd /c yarn --non-interactive --ignore-scripts
+cmd /c node_modules\.bin\tsc -p dev\win\
+cmd /c node dev\win\winbuild.js "%1"
+exit /b 1
+
+
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
 set ELECTRON_BUILDER_CACHE=Y:\cache\electron-cache
