@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
-import { sss, tx, localizeThisPage } from '../i18n'
+import { sss, localizeThisPage } from '../i18n'
 import {Renderer} from './render'
 import { AccountsPage, ClosedAccountsPage } from './accounts'
 import { BucketsPage, BucketStyles, KickedBucketsPage } from './buckets'
@@ -13,7 +13,7 @@ import { ExportPage } from './exportpage'
 import { SearchPage } from './searchpage'
 import { SettingsPage } from './settingspage'
 import { ReportsPage } from './reports'
-import { Money, setAnimationEnabled, setSeparators } from '../money'
+import { Money, setAnimationEnabled } from '../money'
 import { MonthSelector } from '../input'
 import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
@@ -25,8 +25,6 @@ import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
 import { PrefixLogger } from '../logging'
 import { utcNow, localNow } from '../time'
-import { PSTATE } from '../mainprocess/persistent'
-import { INumberFormat, NUMBER_FORMATS } from '../langs/spec'
 
 const log = new PrefixLogger('(budget.r)');
 
@@ -41,16 +39,6 @@ export async function start(base_element, room, args: {
   noanimation?:boolean,
 } = {}) {
   await localizeThisPage();
-  let numberformat:INumberFormat;
-  if (PSTATE.number_format) {
-    // override default language number format
-    log.info(`number format: ${PSTATE.number_format}`);
-    numberformat = NUMBER_FORMATS[PSTATE.number_format];
-  } else {
-    log.info(`number format: DEFAULT`);
-    numberformat = tx.getNumberFormat();
-  }
-  setSeparators(numberformat);
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
   log.info('         toString:', (new Date()).toString())

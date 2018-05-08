@@ -3,6 +3,7 @@ import { PrefixLogger} from './logging'
 import { EventSource } from 'buckets-core'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
+import { setSeparators, SEPS } from 'buckets-core/dist/money'
 
 import { IMessages, ILangPack, INumberFormat, NUMBER_FORMATS } from './langs/spec'
 import {pack as en} from './langs/en';
@@ -34,15 +35,30 @@ class TranslationContext {
     ]
     for (const locale of totry) {
       try {
+        // language
         this._langpack = await loadLangPack(locale);
         this._locale = locale;
         log.info(`locale set to: ${locale}`);
+
+        // date
         try {
           await import(`moment/locale/${locale}`);
           moment.locale(this._locale)
+          log.info('date format set');
         } catch(err) {
-          log.error('Error setting date locale', err.stack);
+          if (locale !== 'en') {
+            log.error('Error setting date locale', err.stack);  
+          }
         }
+
+        // numbers
+        try {
+          setSeparators(this.getNumberFormat());
+          log.info('number format set:', JSON.stringify(SEPS));
+        } catch(err) {
+          log.error('Error setting number format', err.stack);
+        }
+
         this.localechanged.emit({locale: this._locale});
         break;
       } catch(err) {

@@ -222,6 +222,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   log.info('mapping', mapping);
   let hashcount = {};
   let inverted_mapping = invertMapping(mapping);
+  const numberformatdef = mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS;
   const transactions = getDataRows(parsed, mapping).map((row):ImportableTrans => {
     let sign = 1;
     if (inverted_mapping.amount_sign.length) {
@@ -234,7 +235,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       inverted_mapping.amount
         .map(key => row[key])
         .filter(x=>x)[0],
-      mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS);
+      numberformatdef);
     const memo = inverted_mapping.memo.map(key=>row[key]).join(' ');
     const posted = parseLocalTime(row[inverted_mapping.posted[0]], mapping.posted_format);
     let fi_id:string;
@@ -283,7 +284,10 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     // It's probably better to not do this recursively, but how many
     // times are people going to recurse?  Famous last words? :)
     log.info('redoing mapping');
-    return await csv2importable(store, bf, guts, {force_mapping: true});
+    return await csv2importable(store, bf, guts, {
+      force_mapping: true,
+      delimiter,
+    });
   }
 
   if (account_id === null) {
