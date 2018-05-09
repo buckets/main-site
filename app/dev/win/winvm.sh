@@ -193,6 +193,10 @@ do_prepare_build() {
         trap finish EXIT
     fi
 
+    # build winbuild.ts
+    echo "Building winbuild.ts ..."
+    tsc -p "${PROJECT_DIR}/app/dev/win/tsconfig.json"
+
     do_up
     ensure_shared_folder project "$PROJECT_DIR" y
     ensure_mount project y
@@ -510,16 +514,22 @@ snapshot_node() {
 snapshot_buildtools() {
     echo
     echo "Installing build tools..."
+
+    # build winbuild.ts
+    echo "Building winbuild.ts ..."
+    tsc -p "${THISDIR}/tsconfig.json"
+
     ensure_shared_folder buildshare "$THISDIR"
 
     ensure_mount buildshare x
     set -x
     cmd 'c:\builder\bootstrap.bat'
-    admincmd 'c:\builder\win_installbuildtools.bat'
-    cmd 'npm config set msvs_version 2015'
-    cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
-    cmd 'npm install -g node-gyp'
-    cmd 'set'
+    admincmd 'node c:\builder\winbuild.js installbuildtools'
+    cmd 'node c:\builder\winbuild.js installnodegyp'
+    # cmd 'npm config set msvs_version 2015'
+    # cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
+    # cmd 'npm install -g node-gyp'
+    # cmd 'set'
     set +x
     echo
     echo "Build tools installed"
