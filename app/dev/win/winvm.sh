@@ -179,6 +179,25 @@ do_restore() {
 do_prepare_build() {
     PROJECT_DIR=$(project_root_dir)
     echo "do_prepare_build $PROJECT_DIR"
+
+    # code signing stuff
+    if [ ! -z "$CSC_LINK" ] && [ ! -z "$CSC_KEY_PASSWORD" ]; then
+        echo "Preparing code signing certificate..."
+        echo "$CSC_LINK" | base64 --decode --input - --output "${PROJECT_DIR}/csc_link.p12"
+        echo -n "$CSC_KEY_PASSWORD" > "${PROJECT_DIR}/csc_key_password.txt"
+        function finish {
+            echo "Removing code signing certificate..."
+            rm "${PROJECT_DIR}/csc_link.p12"
+            rm "${PROJECT_DIR}/csc_key_password.txt"
+        }
+        trap finish EXIT
+    fi
+
+    # build winbuild.ts
+    echo "Building winbuild.ts ..."
+    tsc -p "${PROJECT_DIR}/app/dev/win/tsconfig.json"
+    echo "Built winbuild.ts"
+
     do_up
     ensure_shared_folder project "$PROJECT_DIR" y
     ensure_mount project y
@@ -188,14 +207,14 @@ do_build() {
     PROJECT_DIR=$(project_root_dir)
     echo "do_build $PROJECT_DIR"
     do_prepare_build "$PROJECT_DIR"
-    echo | cmd 'c:\builder\win_build_launcher.bat'
+    echo | cmd 'c:\builder\win_build_launcher.bat build'
 }
 
 do_rebuild() {
     echo "do_rebuild"
     PROJECT_DIR=$(project_root_dir)
     do_up
-    echo | cmd 'c:\builder\win_build_launcher.bat'
+    echo | cmd 'c:\builder\win_build_launcher.bat build'
 }
 
 do_publish() {
@@ -333,9 +352,21 @@ snapshot_admin() {
     echo "starting admin snapshot"
     ensure_on
     echo
-    echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
+    echo "Please enable auto-login"
     echo "1. Sign in w/"
-    echo "   User: $WIN_USER"
+    echo "   User: ${WIN_USER}"
+    echo "   Pass: ${WIN_PASS}"
+    echo "2. Click Start"
+    echo "3. Type: netplwiz (then run it)"
+    echo "4. Select IEUser"
+    echo "5. Uncheck 'Users must enter a user name and password to use this computer.'"
+    echo "6. Click 'Apply'"
+    echo "7. Enter password: ${WIN_PASS} and click 'OK'"
+    echo "8. Click 'OK'"
+    echo
+    echo "Please set the Administrator's password to '${ADMIN_PASS}' using the GUI"
+    echo "1. Sign in w/ (if you haven't yet)"
+    echo "   User: ${WIN_USER}"
     echo "   Pass: ${WIN_PASS}"
     echo "2. Right click Windows Icon (bottom left)"
     echo "3. Click 'Computer Management'"
@@ -344,7 +375,7 @@ snapshot_admin() {
     echo "6. Right click 'Administrator'"
     echo "7. Click 'Set Password...'"
     echo
-    echo "    set the password to 'admin'"
+    echo "    set the password to '${ADMIN_PASS}'"
     echo
     echo "Also enable the user:"
     echo "1. Right click 'Administrator'"
@@ -496,16 +527,23 @@ snapshot_node() {
 snapshot_buildtools() {
     echo
     echo "Installing build tools..."
+
+    # build winbuild.ts
+    echo "Building winbuild.ts ..."
+    tsc -p "${THISDIR}/tsconfig.json"
+    echo "built winbuild.ts"
+
     ensure_shared_folder buildshare "$THISDIR"
 
     ensure_mount buildshare x
     set -x
     cmd 'c:\builder\bootstrap.bat'
-    admincmd 'c:\builder\win_installbuildtools.bat'
-    cmd 'npm config set msvs_version 2015'
-    cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
-    cmd 'npm install -g node-gyp'
-    cmd 'set'
+    admincmd 'node c:\builder\winbuild.js installbuildtools'
+    cmd 'node c:\builder\winbuild.js installnodegyp'
+    # cmd 'npm config set msvs_version 2015'
+    # cmd 'npm config set python C:\Users\IEUser\.windows-build-tools\python27\python.exe'
+    # cmd 'npm install -g node-gyp'
+    # cmd 'set'
     set +x
     echo
     echo "Build tools installed"

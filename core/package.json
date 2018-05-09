@@ -12,8 +12,7 @@
     "compile": "cross-env NODE_ENV=production tsc"
   },
   "dependencies": {
-    "mathjs": "^4.0.1",
-    "sqlite": "^2.9.1"
+    "mathjs": "^4.0.1"
   },
   "devDependencies": {
     "@types/mathjs": "^0.0.39",
