@@ -352,9 +352,21 @@ snapshot_admin() {
     echo "starting admin snapshot"
     ensure_on
     echo
-    echo "Please set the Administrator's password to '$ADMIN_PASS' using the GUI"
+    echo "Please enable auto-login"
     echo "1. Sign in w/"
-    echo "   User: $WIN_USER"
+    echo "   User: ${WIN_USER}"
+    echo "   Pass: ${WIN_PASS}"
+    echo "2. Click Start"
+    echo "3. Type: netplwiz (then run it)"
+    echo "4. Select IEUser"
+    echo "5. Uncheck 'Users must enter a user name and password to use this computer.'"
+    echo "6. Click 'Apply'"
+    echo "7. Enter password: ${WIN_PASS} and click 'OK'"
+    echo "8. Click 'OK'"
+    echo
+    echo "Please set the Administrator's password to '${ADMIN_PASS}' using the GUI"
+    echo "1. Sign in w/ (if you haven't yet)"
+    echo "   User: ${WIN_USER}"
     echo "   Pass: ${WIN_PASS}"
     echo "2. Right click Windows Icon (bottom left)"
     echo "3. Click 'Computer Management'"
@@ -363,7 +375,7 @@ snapshot_admin() {
     echo "6. Right click 'Administrator'"
     echo "7. Click 'Set Password...'"
     echo
-    echo "    set the password to 'admin'"
+    echo "    set the password to '${ADMIN_PASS}'"
     echo
     echo "Also enable the user:"
     echo "1. Right click 'Administrator'"

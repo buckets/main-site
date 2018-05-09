@@ -1,0 +1,1 @@
+Buckets is now signed for Windows!  This means you shouldn't get as many warnings when trying to install it.
