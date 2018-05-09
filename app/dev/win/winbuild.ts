@@ -49,6 +49,7 @@ async function run(args:string[], opts:{
     rc = await new Promise((resolve, reject) => {
       const cwd = opts.cwd || CWD;
       console.log(`\n(${PNUM}) SPAWN ${args.join(' ')} @ ${cwd}`)
+      const start = Date.now();
       const p = spawn('cmd.exe', ['/c', ...args], {
         env: opts.env || ENV,
         stdio: 'pipe',
@@ -70,10 +71,9 @@ async function run(args:string[], opts:{
         process.stderr.write(data.toString());
       })
       p.on('exit', (code, signal) => {
-        console.log(`(${PNUM}) EXIT ${code} ${signal ? signal : ''}`);
-        if (code !== 0 && !opts.failok) {
-          console.error(output.toString());
-        }
+        const end = Date.now();
+        const seconds = (end - start)/1000;
+        console.log(`(${PNUM}) EXIT ${code} ${Math.floor(seconds)}s ${signal ? signal : ''}`);
         resolve(code);
       })
       p.on('error', (err) => {
@@ -196,6 +196,7 @@ async function doBuild(result:'publish'|'dev'|'build') {
 }
 
 async function main() {
+  const main_start = Date.now();
   console.log('winbuild.ts starting');
   const command = process.argv[2];
   console.log('command', command);
@@ -230,6 +231,8 @@ async function main() {
     console.error(err)
     process.exit(1)
   }
+  const tdiff = (Date.now() - main_start)/1000;
+  console.log(`(${tdiff}s elapsed)`)
 }
 
 if (require.main === module) {
