@@ -1,6 +1,6 @@
 import * as Path from 'path'
 import { BrowserWindow, ipcMain } from 'electron'
-import * as keytar from 'keytar'
+// import * as keytar from 'keytar'
 import {v4 as uuid} from 'uuid'
 import * as querystring from 'querystring'
 import * as triplesec from 'triplesec'
@@ -115,9 +115,9 @@ export const getPassword = onlyRunInMain(async function getPassword(service:stri
 /**
     Save a password in the OS keychain.
  */
-export async function savePassword(service:string, account:string, password:string):Promise<void> {
-  await keytar.setPassword(service, account, password)
-}
+// export async function savePassword(service:string, account:string, password:string):Promise<void> {
+//   await keytar.setPassword(service, account, password)
+// }
 
 export function encrypt(plaintext:string, password:string):Promise<string> {
   return new Promise((resolve, reject) => {

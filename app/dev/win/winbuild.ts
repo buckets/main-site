@@ -3,7 +3,7 @@ import * as fs from 'fs'
 
 let ENV = Object.assign({}, process.env, {
   PYTHON: 'C:\\Users\\IEUser\\.windows-build-tools\\python27\\python.exe',
-  PATH: `.\\node_modules\\.bin\\;${process.env.PATH};C:\\Users\\IEUser\\.windows-build-tools\\python27`,
+  PATH: `.\\node_modules\\.bin\\;${process.env.PATH};${process.env.APPDATA}\\npm\\node_modules\\.bin\\;C:\\Users\\IEUser\\.windows-build-tools\\python27`,
   ELECTRON_BUILDER_CACHE: 'Y:\\cache\\electron-cache',
   ELECTRON_CACHE: 'Y:\\cache\\electron-cache',
 })
@@ -16,12 +16,13 @@ let CWD:string;
 function mkdir(path:string) {
   try {
     fs.mkdirSync(path)
-    console.log('mkdir', path);
+    PNUM++;
+    console.log(`(${++PNUM}) mkdir ${path}`);
   } catch(err) {
   }
 }
 function cat(path:string) {
-  console.log(`${path}:`);
+  console.log(`(${++PNUM}) cat ${path}`);
   console.log(fs.readFileSync(path).toString())
 }
 
@@ -54,7 +55,7 @@ async function run(args:string[], opts:{
         cwd,
       });
       still_alive_timer = setInterval(() => {
-        console.log(`(${PNUM}) still alive... pid=${p.pid}`)
+        console.log(`(${PNUM}) ${(new Date()).toISOString()} still alive... pid=${p.pid}`)
       }, 30 * 1000)
 
       let output = new Buffer('');
@@ -121,6 +122,7 @@ async function doBuild(result:'publish'|'dev'|'build') {
   })
 
   // Get files and env vars into place
+  console.log('')
   console.log('---------------------------------------------')
   console.log('files and vars')
   console.log('---------------------------------------------')
@@ -131,13 +133,14 @@ async function doBuild(result:'publish'|'dev'|'build') {
   await run(['rmdir', 'c:\\proj\\app\\src', '/s', '/q'], {failok: true})
   await run(['rmdir', 'c:\\proj\\app\\migrations', '/s', '/q'], {failok: true})
   cat('C:\\builder\\copyexclude.txt')
-  await run(['xcopy', 'y:\\', 'c:\\proj', '/d', '/F', '/I', '/s', '/Y', '/EXCLUDE:C:\\builder\\copyexclude.txt'])
+  await run(['xcopy', 'y:\\', 'c:\\proj', '/f', '/I', '/s', '/Y', '/EXCLUDE:C:\\builder\\copyexclude.txt'])
   await run(['set'])
 
   
   await run(['npm', 'config', 'set', 'msvs_version', '2015', '--global'])
   await run(['npm', 'install', '-g', 'node-gyp'])
 
+  console.log('')
   console.log('---------------------------------------------')
   console.log('configure yarn mirror')
   console.log('---------------------------------------------')
@@ -145,24 +148,30 @@ async function doBuild(result:'publish'|'dev'|'build') {
   await run(['yarn', 'config', 'set', 'yarn-offline-mirror-pruning', 'false'])
   await run(['yarn', 'config', 'list'])
 
+  console.log('')
   console.log('---------------------------------------------')
   console.log('compile core')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\core'
-  await run(['yarn', '--non-interactive', '--ignore-scripts'])
+  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['yarn', '--non-interactive'])
   await run(['yarn', 'compile'])
 
+  console.log('')
   console.log('---------------------------------------------')
   console.log('compile app code')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\app'
-  await run(['yarn', '--non-interactive', '--ignore-scripts'])
+  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['yarn', '--non-interactive'])
   await run(['yarn', 'compile'])
 
+  console.log('')
   console.log('---------------------------------------------')
   console.log('build app')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\app'
+  await run(['electron-builder', '--version'])
   switch (result) {
     case 'publish': {
       await run(['c:\\proj\\app\\node_modules\\.bin\\build', '--win', '--x64', '--ia32', '-p', 'always'])
@@ -177,12 +186,13 @@ async function doBuild(result:'publish'|'dev'|'build') {
     }
   }
 
+  console.log('')
   console.log('---------------------------------------------')
   console.log('copy things back')
   console.log('---------------------------------------------')
-  await run(['xcopy', 'c:\\proj\\app\\dist\\.', 'y:\\app\\dist', '/d', '/F', '/I', '/s', '/Y'])
+  await run(['xcopy', 'c:\\proj\\app\\dist\\.', 'y:\\app\\dist', '/f', '/I', '/s', '/Y'])
 
-  console.log('ok')
+  console.log('\nok\n')
 }
 
 async function main() {
