@@ -110,10 +110,10 @@ export function openUpdateWindow() {
   }
   win = new BrowserWindow({
     frame: false,
-    width: 350,
-    height: 120,
+    width: 400,
+    height: 200,
     minWidth: 350,
-    minHeight: 120,
+    minHeight: 200,
     show: false,
   });
   win.once('ready-to-show', () => {

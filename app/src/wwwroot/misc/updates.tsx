@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ipcRenderer, remote } from 'electron'
+import { ipcRenderer, remote, shell } from 'electron'
 import { documentDimensions } from '../../position'
 
 import { sss, localizeThisPage } from '../../i18n'
@@ -28,9 +28,9 @@ export async function start(base_element) {
 function fitToContent(width?:number) {
   setTimeout(() => {
     let dims = documentDimensions();
-    const height = dims.h > 350 ? 350 : dims.h;
+    const height = dims.h > 400 ? 400 : dims.h;
     if (!width) {
-      width = dims.w > 600 ? 600 : dims.w;
+      width = dims.w > 700 ? 700 : dims.w;
     }
     current_window.setContentSize(width, height);
   }, 0);
@@ -40,7 +40,10 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
   render() {
     let { current_version, error, new_version, state, percent, releaseNotes } = this.props.status;
     let guts;
-    let error_el = error ? <div className="error">{sss('There was an error.  Maybe try again?')}</div> : null;
+    let error_el = error ? <div className="error">{sss('There was an error.  Maybe try again?')}  <a href="#" onClick={ev => {
+      ev.preventDefault();
+      shell.openExternal('https://www.budgetwithbuckets.com');
+    }}>{sss('Or click to download the new version manually.')}</a></div> : null;
     
     if (state === 'idle' || !state) {
       guts = <div className="buttons">
