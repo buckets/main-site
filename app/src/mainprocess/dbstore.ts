@@ -1,6 +1,7 @@
 import * as Path from 'path'
-import * as sqlite from 'sqlite'
+import * as sqlite3 from 'sqlite3-offline'
 import * as fs from 'fs-extra-promise'
+import { AsyncDatabase } from '../async-sqlite'
 
 import { PrefixLogger } from '../logging'
 
@@ -83,7 +84,7 @@ export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
 
-async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_migrations:Migration[]):Promise<any> {
+async function upgradeDatabase(db:AsyncDatabase, migrations_path:string, js_migrations:Migration[]):Promise<any> {
 
   let logger = new PrefixLogger('(dbup)');
   await db.run(`CREATE TABLE IF NOT EXISTS _schema_version (
@@ -114,7 +115,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
   // end old style of migrations
   //--------------------------------------------------------
 
-  const applied = new Set<string>((await db.all('SELECT name FROM _schema_version')).map(x => x.name));
+  const applied = new Set<string>((await db.all<any>('SELECT name FROM _schema_version')).map(x => x.name));
   logger.info('Applied migrations:', Array.from(applied).join(', '))
 
   // collect all migrations (first js)
@@ -230,7 +231,7 @@ async function upgradeDatabase(db:sqlite.Database, migrations_path:string, js_mi
  * The IStore for the main process
  */
 export class DBStore implements IStore {
-  private _db:sqlite.Database;
+  private _db:AsyncDatabase;
   readonly undo:UndoTracker;
   readonly sub:SubStore;
 
@@ -239,7 +240,7 @@ export class DBStore implements IStore {
     this.undo = new UndoTracker(this);
   }
   async open():Promise<DBStore> {
-    this._db = await sqlite.open(this.filename, {promise:Promise})
+    this._db = new AsyncDatabase(new sqlite3.Database(this.filename))
 
     // upgrade database
     try {
@@ -274,7 +275,7 @@ export class DBStore implements IStore {
 
     return this;
   }
-  get db():sqlite.Database {
+  get db():AsyncDatabase {
     return this._db;
   }
   publishObject(event:ObjectEventType, obj:IObject) {
@@ -313,7 +314,7 @@ export class DBStore implements IStore {
   async getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
     let sql = `SELECT *,'${cls.type}' as _type FROM ${cls.type}
     WHERE id=$id`;
-    let ret = await this.db.get(sql, {$id: id});
+    let ret = await this.db.get<T>(sql, {$id: id});
     if (ret === undefined) {
       throw new NotFound(`${cls.type} ${id}`);
     }
@@ -351,7 +352,7 @@ export class DBStore implements IStore {
       offset_clause = `OFFSET ${offset}`
     }
     let sql = `${select} ${where} ${order_clause} ${limit_clause} ${offset_clause}`;
-    let ret = this.db.all(sql, params);
+    let ret = this.db.all<T>(sql, params);
     if (cls.fromdb) {
       ret.then(objects => {
         return objects.map(cls.fromdb);
