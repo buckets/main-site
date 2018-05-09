@@ -196,6 +196,7 @@ do_prepare_build() {
     # build winbuild.ts
     echo "Building winbuild.ts ..."
     tsc -p "${PROJECT_DIR}/app/dev/win/tsconfig.json"
+    echo "Built winbuild.ts"
 
     do_up
     ensure_shared_folder project "$PROJECT_DIR" y
@@ -206,14 +207,14 @@ do_build() {
     PROJECT_DIR=$(project_root_dir)
     echo "do_build $PROJECT_DIR"
     do_prepare_build "$PROJECT_DIR"
-    echo | cmd 'c:\builder\win_build_launcher.bat'
+    echo | cmd 'c:\builder\win_build_launcher.bat build'
 }
 
 do_rebuild() {
     echo "do_rebuild"
     PROJECT_DIR=$(project_root_dir)
     do_up
-    echo | cmd 'c:\builder\win_build_launcher.bat'
+    echo | cmd 'c:\builder\win_build_launcher.bat build'
 }
 
 do_publish() {
@@ -518,6 +519,7 @@ snapshot_buildtools() {
     # build winbuild.ts
     echo "Building winbuild.ts ..."
     tsc -p "${THISDIR}/tsconfig.json"
+    echo "built winbuild.ts"
 
     ensure_shared_folder buildshare "$THISDIR"
 
