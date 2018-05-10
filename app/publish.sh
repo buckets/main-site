@@ -17,7 +17,7 @@ ORIG_CSC_KEY_PASSWORD="$CSC_KEY_PASSWORD"
 if [ -z "$SKIP_MAC" ]; then
     unset CSC_LINK
     unset CSC_KEY_PASSWORD
-    CSC_NAME="Mac Developer" node_modules/.bin/build --mac -p always
+    node_modules/.bin/build --mac -p always
 fi
 
 export CSC_LINK="$ORIG_CSC_LINK"
