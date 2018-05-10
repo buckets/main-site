@@ -1,1 +1,0 @@
-Buckets is now signed for macOS and Windows!  This means you shouldn't get as many warnings when trying to install it.  (#150)
