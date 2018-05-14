@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra-promise'
-
+import * as iconv from 'iconv-lite'
+import * as chardet from 'chardet'
 import { sss } from './i18n'
 import { Transaction, AccountMapping } from './models/account'
 import { ofx2importable } from './ofx'
@@ -50,8 +51,21 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
   log.info('importFile', path);
   let set:ImportableAccountSet;
   
-  let data = await fs.readFileAsync(path, {encoding:'utf8'});
-  log.info('read data', data.length);
+  let encoding = await new Promise<string>((resolve, reject) => {
+    chardet.detectFile(path, (err, result) => {
+      if (err) {
+        log.info('error guessing encoding', err.toString())
+        resolve('utf8');
+      } else {
+        console.log('result', result);
+        resolve(result.toString());
+      }
+    })
+  })
+  log.info('opening with encoding', encoding);
+  const bindata = await fs.readFileAsync(path);
+  const data = iconv.decode(bindata, encoding);
+  log.info('data length:', data.length);
   try {
     log.info('Trying OFX/QFX parser');
     set = await ofx2importable(data);
