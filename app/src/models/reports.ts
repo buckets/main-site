@@ -34,13 +34,16 @@ export class ReportStore {
     // income
     let rows = await this.store.query(`
       SELECT
-        SUM(amount) as income
-      FROM account_transaction
+        SUM(t.amount) AS income
+      FROM account_transaction AS t
+        LEFT JOIN account AS a
+          ON a.id = t.account_id
       WHERE
-        coalesce(general_cat, '') <> 'transfer'
-        AND posted >= $start
-        AND posted < $end
-        AND amount > 0`, {
+        coalesce(t.general_cat, '') <> 'transfer'
+        AND t.posted >= $start
+        AND t.posted < $end
+        AND t.amount > 0
+        AND a.offbudget = 0`, {
       $start: ts2localdb(start),
       $end: ts2localdb(end),
     })
@@ -49,13 +52,16 @@ export class ReportStore {
     // expense
     rows = await this.store.query(`
       SELECT
-        SUM(amount) as expenses
-      FROM account_transaction
+        SUM(t.amount) AS expenses
+      FROM account_transaction AS t
+        LEFT JOIN account AS a
+          ON a.id = t.account_id
       WHERE
-        coalesce(general_cat, '') <> 'transfer'
-        AND posted >= $start
-        AND posted < $end
-        AND amount <= 0`, {
+        coalesce(t.general_cat, '') <> 'transfer'
+        AND t.posted >= $start
+        AND t.posted < $end
+        AND t.amount <= 0
+        AND a.offbudget = 0`, {
       $start: ts2localdb(start),
       $end: ts2localdb(end),
     })
@@ -64,11 +70,14 @@ export class ReportStore {
     // transfers
     rows = await this.store.query(`
       SELECT
-        SUM(amount) as total
-      FROM account_transaction
+        SUM(t.amount) AS total
+      FROM account_transaction AS t
+        LEFT JOIN account AS a
+          ON a.id = t.account_id
       WHERE
-        posted >= $start
-        AND posted < $end`, {
+        t.posted >= $start
+        AND t.posted < $end
+        AND a.offbudget = 0`, {
       $start: ts2localdb(start),
       $end: ts2localdb(end),
     })
