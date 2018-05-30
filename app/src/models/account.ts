@@ -457,6 +457,30 @@ export class AccountStore {
     })
     await Promise.all(promises);
   }
+  /**
+   *  Return true if an account has at least one AccountMapping
+   */
+  async hasAccountMappings(account_id:number) {
+    let rows = await this.store.query(`SELECT id FROM account_mapping
+      WHERE
+        account_id = $account_id
+      LIMIT 1`, {
+          $account_id: account_id,
+        })
+    return rows.length !== 0;
+  }
+  /**
+   *  Delete all of an account's import mappings
+   */
+  async deleteAccountMappings(account_id:number) {
+    let mappings = await this.store.listObjects(AccountMapping, {
+      where: 'account_id = $account_id',
+      params: { $account_id: account_id },
+    })
+    await Promise.all(mappings.map(mapping => {
+      this.store.deleteObject(AccountMapping, mapping.id);
+    }))
+  }
   async getCSVMapping(fingerprint:string) {
     let rows = await this.store.query(`SELECT id FROM csv_import_mapping WHERE fingerprint_hash=$fingerprint`, {$fingerprint: fingerprint});
     if (rows.length) {

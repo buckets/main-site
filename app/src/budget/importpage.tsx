@@ -435,7 +435,6 @@ class ConnectionList extends React.Component<{
   }
 }
 
-
 class UnknownAccountList extends React.Component<{
   appstate: AppState,
 }, {}> {

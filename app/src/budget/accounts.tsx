@@ -125,6 +125,7 @@ interface AccountViewState {
   balance_edit_showing: boolean;
   new_balance_with_transaction: boolean;
   balance_date: moment.Moment;
+  hasMappings: boolean;
 }
 export class AccountView extends React.Component<AccountViewProps, AccountViewState> {
   constructor(props:AccountViewProps) {
@@ -134,6 +135,7 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
       balance_edit_showing: false,
       new_balance_with_transaction: true,
       balance_date: null,
+      hasMappings: false,
     }
   }
   componentDidMount() {
@@ -162,6 +164,10 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
       this.setState({
         balance_date: balance_date ? loadTS(balance_date) : null,
       })
+    })
+    store.hasAccountMappings(props.account.id)
+    .then(hasMappings => {
+      this.setState({hasMappings});
     })
   }
   render() {
@@ -223,6 +229,21 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           </div>
         </td>
       </tr>
+    }
+
+    let break_mappings;
+    if (this.state.hasMappings) {
+      break_mappings = <SafetySwitch
+        onClick={ev => {
+          manager
+          .checkpoint(sss('Break Import Links'))
+          .sub.accounts.deleteAccountMappings(account.id)
+          .then(() => {
+            makeToast(sss('Import links broken' /* Notification indicating that the links between imported transaction files and a particular account have been broken. */))
+          });
+        }}>
+        {sss('Break Import Links')}
+      </SafetySwitch>
     }
 
     let balance_edit_form;
@@ -355,6 +376,7 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           <tr>
             <th>{sss('Actions')}</th>
             <td>
+              {break_mappings}
               {close_button}
               {delete_all_transactions_button}
             </td>
