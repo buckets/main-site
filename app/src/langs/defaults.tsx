@@ -56,7 +56,7 @@ export const DEFAULTS:IMessages = {
     h: "ihCgI4A9UaFZ63kuiKXqFHoGsze2dYwzpgSVU0clMfQ=",
     // accounts.tsx:49
     // accounts.tsx:104
-    // importpage.tsx:455
+    // importpage.tsx:454
     // searchpage.tsx:119
     // searchpage.tsx:143
     // transactions.tsx:224
@@ -71,13 +71,13 @@ export const DEFAULTS:IMessages = {
     val: "Account and transactions deleted",
     translated: false,
     h: "iwS2+dAqfDOEtU5SUm1d1oPFTe0+JT5NCm4nH2SrglE=",
-    // accounts.tsx:186
+    // accounts.tsx:191
   },
   "Account closed": {
     val: "Account closed",
     translated: false,
     h: "l9xs5wLKF3KIgunL1SJh9r9XDYpWkC7LYrL4KUUFm3M=",
-    // accounts.tsx:202
+    // accounts.tsx:207
   },
   "Account created: ": {
     val: "Account created: ",
@@ -89,7 +89,7 @@ export const DEFAULTS:IMessages = {
     val: "Account deleted completely",
     translated: false,
     h: "LswJ+SxzkHRVy6+Et4Wga6r/Io1P6MBlTiwdjUAUj48=",
-    // accounts.tsx:200
+    // accounts.tsx:205
   },
   "Account name": {
     val: "Account name",
@@ -109,7 +109,7 @@ export const DEFAULTS:IMessages = {
     val: "Actions",
     translated: false,
     h: "qm2CvbPMHZpeVCriZp/vJ2kAGatdeyDxfZ8TMaapQvo=",
-    // accounts.tsx:355
+    // accounts.tsx:375
   },
   "Activity": {
     val: "Activity",
@@ -197,7 +197,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "azvDWgVPY349dq4q8mbtpDhehRsFKYKNzMk/TcuOvEQ=",
     // accounts.tsx:105
-    // accounts.tsx:310
+    // accounts.tsx:330
     // buckets.tsx:820
     // buckets.tsx:1241
     // transactions.tsx:227
@@ -213,6 +213,13 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "rzI9rIMV5VD86pAzRZf+uFAA8rWYhz1rIH5N9fDesSk=",
     // gettingstarted.ts:145
+  },
+  "Break Import Links": {
+    val: "Break Import Links",
+    translated: false,
+    h: "XQYKw3qJ7xKoR/DX6K6NdZxbJLHVJhxy9mFVV8r1ZU4=",
+    // accounts.tsx:237
+    // accounts.tsx:243
   },
   "Bring All to Front": {
     val: "Bring All to Front",
@@ -315,7 +322,7 @@ export const DEFAULTS:IMessages = {
     val: "Cancel",
     translated: false,
     h: "wHdMGFBg/BNmqwwBSIr4TrXk4fT1kilDHgZN5z4N5sU=",
-    // transactions.tsx:956
+    // transactions.tsx:958
   },
   "Cancel sync": {
     val: "Cancel sync",
@@ -345,14 +352,14 @@ export const DEFAULTS:IMessages = {
     val: "Categorization",
     translated: false,
     h: "DShuYOF3daz37AE7lGCN1TajYU1VyorRCvLwh4bM1r8=",
-    // transactions.tsx:916
-    // transactions.tsx:926
+    // transactions.tsx:918
+    // transactions.tsx:928
   },
   "Categorize": {
     val: "Categorize",
     translated: false,
     h: "mA6/TefxgXpo2M+OUx/ATLQ4QYHv4t1+8vy3MmV+EQg=",
-    // transactions.tsx:996
+    // transactions.tsx:998
   },
   "Category": {
     val: "Category",
@@ -402,7 +409,7 @@ export const DEFAULTS:IMessages = {
     val: "Cleared",
     translated: false,
     h: "j1SmbPuDDBP04XfOH9NNFCDzXmB9xAzSoVG7RcHcdBg=",
-    // transactions.tsx:413
+    // transactions.tsx:415
   },
   "Click the \"Set mapping\" to continue.": {
     val: "Click the \"Set mapping\" to continue.",
@@ -414,7 +421,7 @@ export const DEFAULTS:IMessages = {
     val: "Close Account",
     translated: false,
     h: "qTJEf8mdhLx1bU9LZPYaTtrT8pMLqxemoL/YqbhjESI=",
-    // accounts.tsx:195
+    // accounts.tsx:200
   },
   "Close Window": {
     val: "Close Window",
@@ -427,7 +434,7 @@ export const DEFAULTS:IMessages = {
     val: "Close account",
     translated: false,
     h: "7HdV8X8++teDNW33urE2eccDw3VLdSpvII89zC/sfu4=",
-    // accounts.tsx:205
+    // accounts.tsx:210
   },
   "Closed": {
     /* ! Label for list of closed accounts */
@@ -458,7 +465,7 @@ export const DEFAULTS:IMessages = {
     val: "Connect to bank",
     translated: false,
     h: "0T7eA3oFvMxyPIOAkMZ2rDpJxQVORgxrLqrDx87L1ZY=",
-    // accounts.tsx:397
+    // accounts.tsx:418
   },
   "Connecting...": {
     val: "Connecting...",
@@ -482,7 +489,7 @@ export const DEFAULTS:IMessages = {
     val: "Create Account",
     translated: false,
     h: "0N2I0sNdMLVk7zC9FqlNYoA1G6RDgQDvQErp/TjAnRA=",
-    // accounts.tsx:436
+    // accounts.tsx:457
     // csvimport.tsx:642
   },
   "Create Backup": {
@@ -513,7 +520,7 @@ export const DEFAULTS:IMessages = {
     val: "Create Transaction",
     translated: false,
     h: "G5NDAP857MBDE66GWUREcFAJc2pCogndYa6y+m6PRfE=",
-    // transactions.tsx:362
+    // transactions.tsx:363
   },
   "Create budget password:": {
     val: "Create budget password:",
@@ -531,7 +538,7 @@ export const DEFAULTS:IMessages = {
     val: "Create new account",
     translated: false,
     h: "SmoVFbeAWSO4cW1YQJbuDJQz8kenVz5++WTJEkS6Vos=",
-    // importpage.tsx:491
+    // importpage.tsx:490
     // csvimport.tsx:621
   },
   "Currency symbol": {
@@ -569,7 +576,7 @@ export const DEFAULTS:IMessages = {
     val: "Delete Account",
     translated: false,
     h: "zTJTocYLEbNVwJ0ojyPCB6M0JpGx6fe6AZHWtuVJv0M=",
-    // accounts.tsx:183
+    // accounts.tsx:188
   },
   "Delete Connection": {
     val: "Delete Connection",
@@ -606,7 +613,7 @@ export const DEFAULTS:IMessages = {
     val: "Description",
     translated: false,
     h: "bg0ZDIR+z+PEkinc/ZyqkERMsVZcFFm3NhQoIqZH+WM=",
-    // importpage.tsx:454
+    // importpage.tsx:453
   },
   "Diapers": {
     val: "Diapers",
@@ -987,6 +994,13 @@ export const DEFAULTS:IMessages = {
     // toolspage.tsx:28
     // ynabimport.tsx:65
   },
+  "Import links broken": {
+    /* Notification indicating that the links between imported transaction files and a particular account have been broken. */
+    val: "Import links broken",
+    translated: false,
+    h: "rLgGF32tMx7KSWu+vRLEbr+IbkedxhS8ELcYZhNCqTs=",
+    // accounts.tsx:240
+  },
   "In": {
     val: "In",
     translated: false,
@@ -1012,7 +1026,7 @@ export const DEFAULTS:IMessages = {
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
     // budget.tsx:263
     // reports.tsx:208
-    // transactions.tsx:762
+    // transactions.tsx:764
   },
   "Install and Relaunch Buckets": {
     val: "Install and Relaunch Buckets",
@@ -1156,7 +1170,7 @@ export const DEFAULTS:IMessages = {
     val: "Link Account",
     translated: false,
     h: "Kq3pmMt0lHo1Or0xDzOxrUYLyhXtTVmVmcm/qGByIuk=",
-    // importpage.tsx:501
+    // importpage.tsx:500
   },
   "Macros": {
     val: "Macros",
@@ -1168,13 +1182,13 @@ export const DEFAULTS:IMessages = {
     val: "Make Account Off Budget",
     translated: false,
     h: "jw6HPdaDScqY+QIMmJ35WzXfjHVXwsPaWjv1EgCZC/M=",
-    // accounts.tsx:342
+    // accounts.tsx:362
   },
   "Make Account On Budget": {
     val: "Make Account On Budget",
     translated: false,
     h: "6gjcSYfUh5rPE2oFISLmP498V1RohOYnE0M2uhE47NM=",
-    // accounts.tsx:346
+    // accounts.tsx:366
   },
   "Make Transfer": {
     val: "Make Transfer",
@@ -1200,13 +1214,13 @@ export const DEFAULTS:IMessages = {
     val: "Mark Cleared",
     translated: false,
     h: "Z+NICH1z9EYN3Ub7Z9idiTw/t+QaDF9n3h9br9WhjgE=",
-    // transactions.tsx:419
+    // transactions.tsx:421
   },
   "Mark Not Cleared": {
     val: "Mark Not Cleared",
     translated: false,
     h: "4VoXUMr4nLIoyueiB8YlIR9HFGPYBhYxJq/cqqwDLs0=",
-    // transactions.tsx:419
+    // transactions.tsx:421
   },
   "Medical": {
     val: "Medical",
@@ -1336,7 +1350,7 @@ export const DEFAULTS:IMessages = {
     val: "New account",
     translated: false,
     h: "MtAiANg7ugdeUiGmiGklfBPG4T1igh1iChKeC0Mdxnc=",
-    // accounts.tsx:396
+    // accounts.tsx:417
   },
   "New bucket": {
     val: "New bucket",
@@ -1391,7 +1405,7 @@ export const DEFAULTS:IMessages = {
     val: "Not yet cleared",
     translated: false,
     h: "Hf/KSsxHfxvXx0udkqgCw/QkkE8Vi5ex9pdYnX6qzEU=",
-    // transactions.tsx:414
+    // transactions.tsx:416
   },
   "Note": {
     val: "Note",
@@ -1425,16 +1439,16 @@ export const DEFAULTS:IMessages = {
     val: "Off Budget Accounts",
     translated: false,
     h: "EQ0I5sn/xpO55GIvIhUF8/XeTi0g5sxvvyE7TiynJDQ=",
-    // accounts.tsx:408
+    // accounts.tsx:429
   },
   "Off budget": {
     val: "Off budget",
     translated: false,
     h: "cw3ZD6kn6Mat0qZqOZP0Is9hg7xmOxrKqKCD8CIjmz4=",
-    // accounts.tsx:334
-    // transactions.tsx:460
-    // transactions.tsx:481
-    // transactions.tsx:597
+    // accounts.tsx:354
+    // transactions.tsx:462
+    // transactions.tsx:483
+    // transactions.tsx:599
   },
   "On": {
     val: "On",
@@ -1531,7 +1545,7 @@ export const DEFAULTS:IMessages = {
     val: "Permanently delete account",
     translated: false,
     h: "fcpAc/TcJr/ayfOjnYZmGo2BIga/mx8UyuwCbh2BRFg=",
-    // accounts.tsx:189
+    // accounts.tsx:194
   },
   "Personal Loan Payment": {
     val: "Personal Loan Payment",
@@ -1646,7 +1660,7 @@ export const DEFAULTS:IMessages = {
     val: "Record change as transaction",
     translated: false,
     h: "yK0UuSf6pOl+44YBzW+tFNPHt6YYpqe88f+wQCuaHcQ=",
-    // accounts.tsx:275
+    // accounts.tsx:295
   },
   "Recording": {
     val: "Recording",
@@ -1677,7 +1691,7 @@ export const DEFAULTS:IMessages = {
     val: "Remove Categorization",
     translated: false,
     h: "b5sIQMfXAnBAqHD2NJfIgIAxclRGe5LJ7NzzF6sOruQ=",
-    // transactions.tsx:921
+    // transactions.tsx:923
   },
   "Rent/Mortgage": {
     val: "Rent/Mortgage",
@@ -1690,14 +1704,14 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "5497b4yxPFO2M524tL0qmmNk47Qv/aca/7n0zMEeX/o=",
     // accounts.tsx:34
-    // accounts.tsx:178
+    // accounts.tsx:183
   },
   "Reopen Account": {
     val: "Reopen Account",
     translated: false,
     h: "KBv9ohpTpLSanhr/AFbKdJCA0VZ1iJ0THB53Hut00v4=",
     // accounts.tsx:32
-    // accounts.tsx:176
+    // accounts.tsx:181
   },
   "Report Bug": {
     val: "Report Bug",
@@ -1751,7 +1765,7 @@ export const DEFAULTS:IMessages = {
     val: "Save",
     translated: false,
     h: "wduD0WXtkIpIb6B4R8AA7ph724u3/Gtv27uaky6rEAU=",
-    // transactions.tsx:957
+    // transactions.tsx:959
     // record.tsx:487
   },
   "Screenshots:": {
@@ -1971,7 +1985,7 @@ export const DEFAULTS:IMessages = {
     val: "Synced balance",
     translated: false,
     h: "yyCVeQRle/vbcZ1/QyVYtL+ZmyQ5WanHCYKZpJqFd6o=",
-    // accounts.tsx:210
+    // accounts.tsx:215
   },
   "Syncing...": {
     val: "Syncing...",
@@ -2098,7 +2112,7 @@ export const DEFAULTS:IMessages = {
     val: "Transfer",
     translated: false,
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
-    // transactions.tsx:759
+    // transactions.tsx:761
   },
   "Trial Version": {
     val: "Trial Version",
@@ -2185,14 +2199,14 @@ export const DEFAULTS:IMessages = {
     val: "Update Account Balance",
     translated: false,
     h: "iwKjdHzqHPwoupXiUwrVL1tX4QfO//taXOPXFVtWRVE=",
-    // accounts.tsx:238
+    // accounts.tsx:258
   },
   "Update Account Name": {
     val: "Update Account Name",
     translated: false,
     h: "xcyLhnHNOTDgJsYGhaelbAmXYam4HWMfD5mQiTiZJ50=",
     // accounts.tsx:92
-    // accounts.tsx:301
+    // accounts.tsx:321
   },
   "Update Available": {
     val: "Update Available",
@@ -2271,19 +2285,19 @@ export const DEFAULTS:IMessages = {
     val: "Update account balance",
     translated: false,
     h: "GQWvUamqQOyoaXm16AiGtHme6kW171erNK5pa4vgDIE=",
-    // accounts.tsx:243
+    // accounts.tsx:263
   },
   "Update balance": {
     val: "Update balance",
     translated: false,
     h: "XSg0Q5Q7j+G+HNjn3YJOakbNLSjTNcem3BFbw6fTDI8=",
-    // accounts.tsx:289
+    // accounts.tsx:309
   },
   "Update balance without a transaction": {
     val: "Update balance without a transaction",
     translated: false,
     h: "thUs8btJm84m3sFUOg0QZBXmDfqGOrDhsYqwJ31BIAo=",
-    // accounts.tsx:286
+    // accounts.tsx:306
   },
   "Update downloaded.": {
     val: "Update downloaded.",
@@ -2427,19 +2441,19 @@ export const DEFAULTS:IMessages = {
     val: "The running balance does not match the last synced balance for one of these reasons:",
     translated: false,
     h: "9KaivrLeSKn8ROgvad6S9iE9NAz0BZRwQh3/ufRahVA=",
-    // accounts.tsx:217
+    // accounts.tsx:222
   },
   "account-bal-diff-fix-1": {
     val: "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets.",
     translated: false,
     h: "CRYYgg8YHspvP5KI3HGvyzlrOhxZf4rrjjUQbmL6Z7Q=",
-    // accounts.tsx:219
+    // accounts.tsx:224
   },
   "account-bal-diff-fix-2": {
     val: "Transactions are missing from Buckets.",
     translated: false,
     h: "CeKVWaErT3a5EvPpQb/Av2kHD7RtudYjlQntfcMMtS8=",
-    // accounts.tsx:220
+    // accounts.tsx:225
   },
   "accounts.balance_mismatch_msg": {
     val: "The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.",
@@ -2452,7 +2466,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "UwMHboI9q49SZQkwMN8ps9zBi6YOSdtwakjLJwudtyA=",
     // accounts.tsx:89
-    // accounts.tsx:298
+    // accounts.tsx:318
   },
   "action.New bucket": {
     val: "New bucket",
@@ -2476,7 +2490,7 @@ export const DEFAULTS:IMessages = {
     val: "Link",
     translated: false,
     h: "unfAYQpjuyuTjjRCodr+S+jNjRmz3nahjZ91u/j5HfE=",
-    // importpage.tsx:496
+    // importpage.tsx:495
   },
   "action.report bug": {
     val: "Report Bug",
@@ -2591,7 +2605,7 @@ export const DEFAULTS:IMessages = {
     val: "Savings",
     translated: false,
     h: "zCYN8vtLT3Hhb9CbDDSL2xOOjqhzmmhMa5yWDTR7bCE=",
-    // accounts.tsx:437
+    // accounts.tsx:458
   },
   "default new bucket name": {
     val: "New Bucket",
@@ -2638,7 +2652,7 @@ export const DEFAULTS:IMessages = {
         },
     translated: false,
     h: "9NGQRvIxlAaOF9i+zWPXMFQubcY+5jtA7Td/lii16aM=",
-    // accounts.tsx:385
+    // accounts.tsx:406
   },
   "in the bank": {
     val: "in the bank",
@@ -2666,7 +2680,7 @@ export const DEFAULTS:IMessages = {
                 },
     translated: false,
     h: "99X4HuXB5SeCrTqn5LuD/S4a6GjUCB6gV1Z1gAZPfKM=",
-    // accounts.tsx:314
+    // accounts.tsx:334
   },
   "months gain/loss label": {
     val: (gain) => {
@@ -2706,7 +2720,7 @@ Would you like to purchase a license now?`,
     val: "Income",
     translated: false,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
-    // transactions.tsx:968
+    // transactions.tsx:970
   },
   "notify-downloaded-file": {
     val: filename => `Downloaded file: ${filename}`,
@@ -2719,7 +2733,7 @@ Would you like to purchase a license now?`,
     translated: false,
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
     // buckets.tsx:1242
-    // transactions.tsx:973
+    // transactions.tsx:975
   },
   "off": {
     val: "off",
@@ -2783,7 +2797,7 @@ Would you like to purchase a license now?`,
     val: "Closed",
     translated: false,
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
-    // accounts.tsx:179
+    // accounts.tsx:184
   },
   "single-bucket Kicked": {
     val: "Kicked",
@@ -2801,7 +2815,7 @@ Would you like to purchase a license now?`,
     val: "This symbol means the transaction came from an import/sync",
     translated: false,
     h: "S3tDRls+AJYj6f8jSNSCa1FVyNY+ngn6Db1EQJ3dpLE=",
-    // transactions.tsx:409
+    // transactions.tsx:411
   },
   "sync.toast.syncing": {
     val: (start:moment.Moment, end:moment.Moment) => {
@@ -2823,7 +2837,7 @@ Would you like to purchase a license now?`,
               },
     translated: false,
     h: "VJmIMDZGOdMKwBpoqDUYiVdCFhw1pJ4qCmKiszAECL4=",
-    // transactions.tsx:521
+    // transactions.tsx:523
   },
   "transfer-to-account": {
     val: (dropdown:JSX.Element) => {
@@ -2831,7 +2845,7 @@ Would you like to purchase a license now?`,
               },
     translated: false,
     h: "Bd1IGkjXo2ruWofGrT+WwLdiy8IwJ/PW+7SO4TaDcps=",
-    // transactions.tsx:526
+    // transactions.tsx:528
   },
   "version-available": {
     val: (newv:string) => `Version ${newv} available.`,
