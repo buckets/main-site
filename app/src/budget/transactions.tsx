@@ -328,14 +328,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       return ret;
     }
   }
-  async alsoCategorize(store:IStore, trans:Transaction) {
+  async alsoCategorize(store:IStore, trans:Transaction, cats:Category[]) {
     if (trans) {
-      const invalid_cats = this.state.cats.filter(x => x.bucket_id===null).length;
+      const invalid_cats = cats.filter(x => x.bucket_id===null).length;
       if (this.state.general_cat) {
         await store.sub.accounts.categorizeGeneral(trans.id, this.state.general_cat);
-      } else if (this.state.cats.length && !invalid_cats) {
-        await store.sub.accounts.categorize(trans.id, this.state.cats);
-      } else if (this.state.cats.length > 1 && invalid_cats) {
+      } else if (cats.length && !invalid_cats) {
+        await store.sub.accounts.categorize(trans.id, cats);
+      } else if (cats.length > 1 && invalid_cats) {
         makeToast(sss('Invalid categorization.  Categories not set.'), {className: 'warning'})
       }
     }
@@ -345,13 +345,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // update
       const store = manager
       .checkpoint(sss('Update Transaction'))
+      const cats = this.state.cats;
       const trans = await store.sub.accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
         memo: this.state.memo,
         posted: this.state.posted,
       })
-      await this.alsoCategorize(store, trans);
+      await this.alsoCategorize(store, trans, cats);
       this.setState({
         editing: false,
       })
@@ -362,13 +363,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           const store = manager
           .checkpoint(sss('Create Transaction'))
 
+          const cats = this.state.cats;
           const trans = await store.sub.accounts.transact({
             account_id: this.state.account_id,
             amount: this.state.amount,
             memo: this.state.memo,
             posted: this.state.posted,
           })
-          await this.alsoCategorize(store, trans);
+          await this.alsoCategorize(store, trans, cats);
           if (this.state.general_cat === 'transfer' && this.state.transfer_account_id) {
             // Create a second, opposite transaction
             const xfer_trans = await store.sub.accounts.transact({

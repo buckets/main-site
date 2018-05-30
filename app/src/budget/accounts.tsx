@@ -160,7 +160,6 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
     })
     store.balanceDate(props.account.id, props.appstate.viewDateRange.before)
     .then(balance_date => {
-      console.log('got balance_date', balance_date);
       this.setState({
         balance_date: balance_date ? loadTS(balance_date) : null,
       })
