@@ -456,7 +456,10 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   addAccount = () => {
     manager
     .checkpoint(sss('Create Account'))
-    .sub.accounts.add(sss('default account name', 'Savings'));  
+    .sub.accounts.add(sss('default account name', 'Savings'))
+    .then(account => {
+      setPath(`/accounts/${account.id}`);
+    })
   }
   createConnection = () => {
     setPath('/import')
