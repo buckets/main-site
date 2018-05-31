@@ -2,7 +2,7 @@ import {isObj} from '../store';
 import { getStore } from './testutil';
 import { test } from 'tap'
 import { Bucket } from './bucket';
-import { parseLocalTime } from '../time'
+import { parseLocalTime } from 'buckets-core/dist/time'
 
 test('add bucket', async (t) => {
   let { store, events } = await getStore();

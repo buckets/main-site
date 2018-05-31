@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone'
 import { createErrorSubclass } from '../errors'
 import { IObject, registerClass, IStore } from '../store';
-import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
+import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from 'buckets-core/dist/time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from '../budget/notes'
 
@@ -504,9 +504,14 @@ export class AccountStore {
     }
   }
 
-  async balances(asof?:moment.Moment):Promise<Balances> {
+  async balances(asof?:moment.Moment, opts:{
+    onbudget_only?:boolean,
+  }={}):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
+    if (opts.onbudget_only) {
+      where += ' AND a.offbudget = 0'
+    }
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }
   async balanceDate(account_id:number, before:moment.Moment):Promise<SerializedTimestamp> {

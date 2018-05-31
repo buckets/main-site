@@ -10,7 +10,7 @@ import { IStore } from './store'
 import * as Bucket from './models/bucket'
 import * as Account from './models/account'
 import { decimal2cents } from './money'
-import { parseLocalTime } from './time'
+import { parseLocalTime } from 'buckets-core/dist/time'
 import { IBudgetFile } from './mainprocess/files'
 
 import { reportErrorToUser } from './errors'

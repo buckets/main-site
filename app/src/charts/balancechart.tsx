@@ -9,7 +9,7 @@ import { AppState, manager } from '../budget/appstate'
 import { COLORS, opacity } from '../color'
 import { cents2decimal } from '../money'
 import { Transaction, computeBucketData } from '../models/bucket'
-import { parseLocalTime } from '../time'
+import { parseLocalTime } from 'buckets-core/dist/time'
 
 interface SparklineProps {
   height?: number;

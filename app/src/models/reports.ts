@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone'
 import { IStore } from '../store'
-import { ts2localdb, Interval, chunkTime } from '../time'
+import { ts2localdb, Interval, chunkTime } from 'buckets-core/dist/time'
 
 export interface IncomeExpenseSum {
   interval: Interval;
@@ -84,7 +84,9 @@ export class ReportStore {
     item.net_transfer = rows[0].total - item.income - item.expenses;
 
     // balance
-    let end_balances = await this.store.sub.accounts.balances(end);
+    let end_balances = await this.store.sub.accounts.balances(end, {
+      onbudget_only: true,
+    });
     _.each(end_balances, (balance) => {
       item.end_balance += balance;
     })

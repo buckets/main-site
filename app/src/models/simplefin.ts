@@ -2,7 +2,7 @@ import * as req from 'request-promise'
 import * as moment from 'moment-timezone'
 
 import { IObject, IStore, registerClass } from '../store'
-import { ts2utcdb, localNow, ensureUTCMoment } from '../time'
+import { ts2utcdb, localNow, ensureUTCMoment } from 'buckets-core/dist/time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { sss } from '../i18n'

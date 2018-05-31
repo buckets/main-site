@@ -9,7 +9,7 @@ import { sss } from '../i18n'
 import { ISyncChannel, ASyncening, SyncResult } from '../sync'
 import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
-import { localNow } from '../time'
+import { localNow } from 'buckets-core/dist/time'
 
 const log = new PrefixLogger('(bankmacro)');
 

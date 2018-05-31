@@ -1,6 +1,6 @@
 import { shell, ipcRenderer } from 'electron'
 import * as React from 'react'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import * as cx from 'classnames'
 import { sss, localizeThisPage } from '../i18n'
@@ -24,9 +24,11 @@ import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
 import { PrefixLogger } from '../logging'
-import { utcNow, localNow } from '../time'
+import { PSTATE } from '../mainprocess/persistent'
+import { utcNow, localNow, setTimezone } from 'buckets-core/dist/time'
 
 const log = new PrefixLogger('(budget.r)');
+setTimezone(PSTATE.timezone || moment.tz.guess())
 
 import { manager, AppState } from './appstate'
 

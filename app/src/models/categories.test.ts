@@ -4,7 +4,7 @@ import { getStore } from './testutil';
 import {Failure} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
 import {Transaction as ATrans} from './account';
-import { parseLocalTime } from '../time'
+import { parseLocalTime } from 'buckets-core/dist/time'
 
 async function setup(amount=1000) {
   let { store, events } = await getStore();

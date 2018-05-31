@@ -16,7 +16,7 @@ To run:
     tsc && yarn start
 
 
-# Refreshing buckets-core
+# Refresh buckets-core
 
     yarn add file:../core
 

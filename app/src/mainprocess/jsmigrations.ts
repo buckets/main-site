@@ -1,5 +1,5 @@
 import * as moment from 'moment-timezone'
-import { ts2localdb, utcToLocal } from '../time'
+import { ts2localdb, utcToLocal } from 'buckets-core/dist/time'
 import { PrefixLogger } from '../logging'
 import { AsyncDatabase } from '../async-sqlite'
 

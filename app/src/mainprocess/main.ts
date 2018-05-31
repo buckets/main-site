@@ -17,7 +17,7 @@ import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 import { PrefixLogger } from '../logging'
 import { PSTATE, updateState } from './persistent'
-import { localNow } from '../time'
+import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
 
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
@@ -25,12 +25,14 @@ electron_log.transports.file.maxSize = 5 * 1024 * 1024;
 
 const log = new PrefixLogger('(main)')
 
+setTimezone(PSTATE.timezone || moment.tz.guess())
+
 log.info(`\n\nSTARTING v${app.getVersion()}\n`);
-log.info(`Log level: ${electron_log.transports.file.level}`);
+log.info(` Log level: ${electron_log.transports.file.level}`);
 log.info(`Local time: ${localNow().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);
-log.info(`Timezone: ${moment.tz.guess()}`);
-log.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+log.info(`  Timezone: ${getTimezone()}`);
+log.info(`  NODE_ENV: ${process.env.NODE_ENV}`);
 
 app.on('ready', () => {
   startLocalizing();
