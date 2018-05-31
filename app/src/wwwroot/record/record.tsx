@@ -123,7 +123,7 @@ class Browser extends React.Component<BrowserProps, {
       throw new Error('Trying to set URL before webview exists');
     }
     if (!url.startsWith('http')) {
-      url = `https://${url}`
+      url = `http://${url}`
     }
     if (wv.getWebContents) {
       let wc = wv.getWebContents();
