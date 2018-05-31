@@ -2,7 +2,7 @@ import * as moment from 'moment-timezone'
 import { IObject, IStore, registerClass } from '../store'
 import { ensureLocalMoment, parseUTCTime, parseLocalTime, localNow, Interval, ts2localdb } from '../time'
 import { Balances, computeBalances } from './balances'
-import { rankBetween } from '../ranking'
+import { rankBetween } from 'buckets-core/dist/ranking'
 import { DEFAULT_COLORS } from '../color'
 import { INotable } from '../budget/notes'
 

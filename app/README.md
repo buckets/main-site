@@ -16,9 +16,9 @@ To run:
     tsc && yarn start
 
 
-# Get issues
+# Refresh buckets-core
 
-    dev/getissues.py && dev/formatissues.py
+    yarn add file:../core
 
 # Internationalization
 

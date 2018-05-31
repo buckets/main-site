@@ -12,7 +12,7 @@ import { Migration, migrations as jsmigrations } from './jsmigrations'
 import { SubStore } from '../models/storebase'
 
 import { isRegistered } from './drm'
-import { rankBetween } from '../ranking'
+import { rankBetween } from 'buckets-core/dist/ranking'
 import { sss } from '../i18n'
 import { UndoTracker } from '../undo'
 
