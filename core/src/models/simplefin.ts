@@ -1,8 +1,8 @@
 import * as req from 'request-promise'
 import * as moment from 'moment-timezone'
 
-import { IObject, IStore, registerClass } from '../store'
-import { ts2utcdb, localNow, ensureUTCMoment } from 'buckets-core/dist/time'
+import { IObject, IStore } from '../store'
+import { ts2utcdb, localNow, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
 import { sss } from '../i18n'
@@ -14,16 +14,23 @@ const log = new PrefixLogger('(simplefin)')
 
 import { ISyncChannel, ASyncening, SyncResult } from '../sync'
 
-export class Connection implements IObject {
-  static type: string = 'simplefin_connection'
-  id: number;
-  created: string;
-  readonly _type: string = Connection.type;
-  
+//-------------------------------------------------------
+// Database objects
+//-------------------------------------------------------
+declare module '../store' {
+  interface IObjectTypes {
+    simplefin_connection: Connection;
+  }
+  interface ISubStore {
+    simplefin: SimpleFINStore;
+  }
+}
+export interface Connection extends IObject {
+  _type: 'simplefin_connection';
   access_token: string;
   last_used: string;
 }
-registerClass(Connection);
+//-------------------------------------------------------
 
 export declare namespace SFIN {
   export interface AccountSet {
@@ -70,7 +77,7 @@ export function sleep(milliseconds:number):Promise<any> {
   })
 }
 
-class SimpleFINSync implements ASyncening {
+export class SimpleFINSync implements ASyncening {
   public result:SyncResult;
 
   private time_range:number = 7;
@@ -147,12 +154,12 @@ export class SimpleFINStore {
   }
   async consumeToken(token:string):Promise<Connection> {
     let access_url = await this.client.consumeToken(token);
-    return this.store.createObject(Connection, {
+    return this.store.createObject('simplefin_connection', {
       access_token: access_url,
     })
   }
   async listConnections():Promise<Connection[]> {
-    return this.store.listObjects(Connection);
+    return this.store.listObjects('simplefin_connection');
   }
   async sync(since:moment.Moment, enddate:moment.Moment):Promise<{
     transactions: Transaction[],
@@ -204,7 +211,7 @@ export class SimpleFINStore {
         }
       }))
       if (got_data) {
-        return this.store.updateObject(Connection, conn.id, {
+        return this.store.updateObject('simplefin_connection', conn.id, {
           last_used: ts2utcdb(localNow())
         })
       }

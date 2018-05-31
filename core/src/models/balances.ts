@@ -1,7 +1,6 @@
 import * as moment from 'moment-timezone'
 import {IStore} from '../store'
-import { ts2localdb, localNow } from 'buckets-core/dist/time'
-import {sanitizeDbFieldName} from '../mainprocess/dbstore'
+import { ts2localdb, localNow } from '../time'
 
 export class Balances {
   [k:number]: number;
@@ -29,9 +28,9 @@ export async function computeBalances(
     SELECT
       a.id, a.balance - sum(coalesce(t.amount,0)) as balance, sum(t.amount)
     FROM
-      ${sanitizeDbFieldName(account_table)} as a
-      left join ${sanitizeDbFieldName(transaction_table)} as t
-        on a.id = t.${sanitizeDbFieldName(join_column)}
+      ${account_table} as a
+      left join ${transaction_table} as t
+        on a.id = t.${join_column}
            AND t.posted >= $asof
     ${where}
     GROUP BY 1

@@ -17,7 +17,7 @@ test('add account', async (t) => {
   t.equal(events.length, 1);
   let ev = events[0];
   t.equal(ev.event, 'update');
-  if (!isObj(Account, ev.obj)) {
+  if (!isObj('account', ev.obj)) {
     t.fail('should be an Account');
   }
   let obj = ev.obj as Account;
@@ -28,10 +28,10 @@ test('add account', async (t) => {
   t.equal(obj.balance, 0);
   t.equal(obj.currency, 'USD');  
   
-  t.same(account, obj);
+  t.same('account', obj);
 
   // stored in the database
-  let stored = await store.getObject(Account, ev.obj.id);
+  let stored = await store.getObject('account', ev.obj.id);
   t.same(stored, account);
 })
 
@@ -42,16 +42,16 @@ test('list accounts', async (t) => {
   let a3 = await store.sub.accounts.add('Ally');
 
   let accounts = await store.sub.accounts.list();
-  t.same(accounts, [a3, a1, a2]);
+  t.same('account', [a3, a1, a2]);
 })
 
 test('update account', async (t) => {
   let { store, events } = await getStore();
   let account = await store.sub.accounts.add('Checking');
   events.length = 0;
-  let new_account = await store.sub.accounts.update(account.id, {name: 'Bono'});
+  let new_account = await store.sub.accounts.update('account'.id, {name: 'Bono'});
 
-  t.equal(account.id, new_account.id);
+  t.equal('account'.id, new_account.id);
   t.equal(new_account.name, 'Bono');
   t.equal(events[0].event, 'update');
   t.same(events[0].obj, new_account);
@@ -72,7 +72,7 @@ test('transact', async (t) => {
   // transaction event
   let ev0 = events[0];
   t.equal(ev0.event, 'update');
-  if (!isObj(Transaction, ev0.obj)) {
+  if (!isObj('account_transaction', ev0.obj)) {
     t.fail('should be a Transaction');
   }
   let trans = ev0.obj as Transaction;
@@ -85,7 +85,7 @@ test('transact', async (t) => {
   // account event
   let ev1 = events[1];
   t.equal(ev1.event, 'update');
-  if (!isObj(Account, ev1.obj)) {
+  if (!isObj('account', ev1.obj)) {
     t.fail('should be an Account');
   }
   let new_account = ev1.obj as Account
@@ -174,7 +174,7 @@ test('deleteTransactions', async (t) => {
   // account event
   let aev = events[1]
   t.equal(aev.event, 'update')
-  t.ok(isObj(Account, aev.obj))
+  t.ok(isObj('account', aev.obj))
   let new_a = aev.obj as Account;
   t.equal(new_a.balance, 0, "Should return the balance to 0")
 })
@@ -205,7 +205,7 @@ test('deleteTransactions linked bucket transactions', async t => {
 
   // account event
   t.equal(aev.event, 'update');
-  t.ok(isObj(Account, aev.obj));
+  t.ok(isObj('account', aev.obj));
   t.equal((aev.obj as Account).balance, 0);
 
   // bucket transaction event

@@ -2,22 +2,25 @@ import * as moment from 'moment-timezone'
 import { IObject } from '../store';
 import { INotable } from './notes';
 
+//-------------------------------------------------------
+// Database objects
+//-------------------------------------------------------
 declare module '../store' {
   interface IObjectTypes {
     bucket: Bucket;
     bucket_group: Group;
     bucket_transaction: Transaction;
   }
+  interface ISubStore {
+    buckets: BucketStore;
+  }
 }
-
-
 export type BucketKind =
   ''
   | 'deposit'
   | 'goal-deposit'
   | 'goal-date'
   | 'deposit-date';
-
 export interface Bucket extends IObject,INotable {
   _type:'bucket';
   name: string;
@@ -35,8 +38,6 @@ export interface Bucket extends IObject,INotable {
 }
 export interface Transaction extends IObject,INotable {
   _type: 'bucket_transaction';
-  id: number;
-  created: string;
   bucket_id: number;
   
   amount: number;
@@ -48,12 +49,11 @@ export interface Transaction extends IObject,INotable {
 }
 export interface Group extends IObject,INotable {
   _type: 'bucket_group';
-  id: number;
-  created: string;
   name: string;
   ranking: string;
   notes: string;
 }
+//-------------------------------------------------------
 
 
 export interface BucketFlow {

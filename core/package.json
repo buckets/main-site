@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/mathjs": "^0.0.39",
+    "@types/node": "^10.3.0",
     "cross-env": "^5.1.4",
     "nsp": "^3.2.1",
     "tap": "^11.1.3",

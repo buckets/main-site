@@ -1,9 +1,23 @@
 import * as moment from 'moment-timezone'
 import { createErrorSubclass } from '../errors'
-import { IObject, registerClass, IStore } from '../store';
-import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from 'buckets-core/dist/time';
+import { IObject, IStore } from '../store';
+import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
 import { Balances, computeBalances } from './balances';
-import { INotable } from '../budget/notes'
+import { INotable } from './notes'
+
+
+declare module '../store' {
+  interface IObjectTypes {
+    account: Account;
+    account_transaction: Transaction;
+    unknown_account: UnknownAccount;
+    account_mapping: AccountMapping;
+    csv_import_mapping: CSVImportMapping;
+  }
+  interface ISubStore {
+    accounts: AccountStore;
+  }
+}
 
 export class Failure extends Error {}
 
@@ -16,11 +30,10 @@ export type GeneralCatType =
   | 'transfer';
 
 
-export class Account implements IObject, INotable {
-  static type: string = 'account';
+export interface Account extends IObject, INotable {
+  _type: 'account';
   id: number;
   created: string;
-  readonly _type: string = Account.type;
   name: string;
   balance: number;
   notes: string;
@@ -29,21 +42,20 @@ export class Account implements IObject, INotable {
   closed: boolean;
   offbudget: boolean;
 
-  static fromdb(obj:Account) {
-    obj.closed = !!obj.closed;
-    obj.offbudget = !!obj.offbudget;
-    return obj;
-  }
+  // XXX TODO
+  // static fromdb(obj:Account) {
+  //   obj.closed = !!obj.closed;
+  //   obj.offbudget = !!obj.offbudget;
+  //   return obj;
+  // }
 }
-registerClass(Account);
 
-export class Transaction implements IObject, INotable {
-  static type: string = 'account_transaction';
+export interface Transaction extends IObject, INotable {
+  _type: 'account_transaction';
   id: number;
   created: string;
   notes: string;
   posted: string;
-  readonly _type: string = Transaction.type;
   account_id: number;
   amount: number;
   memo: string;
@@ -51,45 +63,41 @@ export class Transaction implements IObject, INotable {
   general_cat: GeneralCatType;
   cleared: boolean;
 
-  static fromdb(obj:Transaction) {
-    obj.cleared = !!obj.cleared;
-    return obj;
-  }
+  // XXX TODO
+  // static fromdb(obj:Transaction) {
+  //   obj.cleared = !!obj.cleared;
+  //   return obj;
+  // }
 }
-registerClass(Transaction);
 
-export class UnknownAccount implements IObject {
-  static type: string = 'unknown_account'
+export interface UnknownAccount extends IObject {
+  _type: 'unknown_account'
   id: number;
   created: string;
-  readonly _type: string = UnknownAccount.type;
 
   description: string;
   account_hash: string;
 }
-registerClass(UnknownAccount);
 
-export class AccountMapping implements IObject {
-  static type: string = 'account_mapping'
+export interface AccountMapping extends IObject {
+  _type: 'account_mapping'
   id: number;
   created: string;
-  readonly _type: string = AccountMapping.type;
 
   account_id: number;
   account_hash: string;
 }
-registerClass(AccountMapping);
 
-export class CSVImportMapping implements IObject {
-  static type: string = 'csv_import_mapping'
+export interface CSVImportMapping extends IObject {
+  _type: 'csv_import_mapping'
   id: number;
   created: string;
-  readonly _type: string = CSVImportMapping.type;
 
   fingerprint_hash: string;
   mapping_json: string;
 }
-registerClass(CSVImportMapping);
+
+
 
 
 export interface Category {
@@ -123,14 +131,14 @@ export class AccountStore {
     this.store = store;
   }
   async add(name:string):Promise<Account> {
-    return this.store.createObject(Account, {
+    return this.store.createObject('account', {
       name: name,
       balance: 0,
       currency: 'USD',
     });
   }
   async get(account_id: number):Promise<Account> {
-    return this.store.getObject(Account, account_id);
+    return this.store.getObject('account', account_id);
   }
   async update(account_id:number, data:{
       name?:string,
@@ -138,12 +146,12 @@ export class AccountStore {
       import_balance?:number,
       offbudget?:boolean,
   }):Promise<any> {
-    return this.store.updateObject(Account, account_id, data);
+    return this.store.updateObject('account', account_id, data);
   }
   async close(account_id:number):Promise<Account> {
     if (await this.hasTransactions(account_id)) {
       // mark as close
-      return this.store.updateObject(Account, account_id, {closed: true});
+      return this.store.updateObject('account', account_id, {closed: true});
     } else {
       // actually delete it
       let old_account = await this.get(account_id);
@@ -154,7 +162,7 @@ export class AccountStore {
     }
   }
   async unclose(account_id:number):Promise<Account> {
-    return this.store.updateObject(Account, account_id, {closed: false});
+    return this.store.updateObject('account', account_id, {closed: false});
   }
   /**
    *  Delete an account and all its transactions
@@ -181,7 +189,7 @@ export class AccountStore {
     }
 
     // Delete the account itself
-    await this.store.deleteObject(Account, account_id);
+    await this.store.deleteObject('account', account_id);
   }
 
   async transact(args:{
@@ -206,7 +214,7 @@ export class AccountStore {
       data.fi_id = args.fi_id;
     }
     let trans = await this.store.createObject(Transaction, data);
-    let account = await this.store.getObject(Account, args.account_id);
+    let account = await this.store.getObject('account', args.account_id);
     this.store.publishObject('update', account);
     return trans;
   }
@@ -241,7 +249,7 @@ export class AccountStore {
 
     // publish affected accounts
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
-      let account = await this.store.getObject(Account, account_id);
+      let account = await this.store.getObject('account', account_id);
       this.store.publishObject('update', account);
     }));
     return trans;
@@ -359,7 +367,7 @@ export class AccountStore {
         posted: ts2localdb(args.posted),
         fi_id: args.fi_id,
       })
-      this.store.getObject(Account, args.account_id)
+      this.store.getObject('account', args.account_id)
       .then(account => {
         this.store.publishObject('update', account);  
       })
@@ -404,7 +412,7 @@ export class AccountStore {
 
     // publish changed accounts
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
-      let account = await this.store.getObject(Account, account_id);
+      let account = await this.store.getObject('account', account_id);
       this.store.publishObject('update', account);
     }));
 
@@ -534,7 +542,7 @@ export class AccountStore {
     }
   }
   async list():Promise<Account[]> {
-    return this.store.listObjects(Account, {
+    return this.store.listObjects('account', {
       order: ['name ASC', 'id'],
     });
   }

@@ -43,9 +43,13 @@ export interface IStore {
   // Events
   events:EventSource<IObjectEvent>;
 
+  sub:ISubStore;
+
+  publishObject(event:ObjectEventType, obj:IObject):void;
+
   createObject<T extends keyof IObjectTypes>(cls:T, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]>;
   
-  getObject<T extends keyof IObjectTypes>(cls:T, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]>;
+  getObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<IObjectTypes[T]>;
 
   updateObject<T extends keyof IObjectTypes>(cls:T, id:number, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]>;
 
@@ -60,8 +64,13 @@ export interface IStore {
 
   deleteObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<any>;
 
-  query<T>(sql:string, params:{}):Promise<T>;
+  query<T>(sql:string, params:{}):Promise<Array<T>>;
 
-  exec<T>(sql:string):Promise<null>;
+  exec(sql:string):Promise<null>;
 }
 
+/**
+ *  Application-specific store operations.
+ *  To be expanded as like IObjectTypes is.
+ */
+export interface ISubStore {}
