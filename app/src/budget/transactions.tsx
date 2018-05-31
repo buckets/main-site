@@ -511,7 +511,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               })
             }}>
             <option></option>
-            {appstate.open_accounts.map(account => {
+            {Object.values(appstate.accounts).map(account => {
               if (account.id === this.state.account_id) {
                 // Can't transfer to/from the same account
                 return null;
