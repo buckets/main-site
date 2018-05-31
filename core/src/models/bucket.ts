@@ -1,5 +1,5 @@
 import * as moment from 'moment-timezone'
-import { IObject, IStore } from '../store';
+import { IObject } from '../store';
 import { INotable } from './notes';
 
 declare module '../store' {
