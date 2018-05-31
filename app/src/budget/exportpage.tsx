@@ -9,7 +9,8 @@ import { sss } from '../i18n'
 import { submitFeedback } from '../errors'
 import { makeToast } from './toast'
 import { cents2decimal } from '../money'
-import { localNow, DateInput, moment2LocalDay, localDay2moment } from '../time'
+import { localNow, moment2LocalDay, localDay2moment } from 'buckets-core/dist/time'
+import { DateInput } from '../time'
 
 interface ExportPageProps {
   appstate: AppState

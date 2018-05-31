@@ -1,6 +1,6 @@
 import * as moment from 'moment-timezone'
 import {IStore} from '../store'
-import { ts2localdb, localNow } from '../time'
+import { ts2localdb, localNow } from 'buckets-core/dist/time'
 import {sanitizeDbFieldName} from '../mainprocess/dbstore'
 
 export class Balances {

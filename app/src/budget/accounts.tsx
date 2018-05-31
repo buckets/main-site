@@ -14,7 +14,8 @@ import { ClickToEdit, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
-import { DateDisplay, loadTS } from '../time'
+import { DateDisplay } from '../time'
+import { loadTS } from 'buckets-core/dist/time'
 import { NoteMaker } from './notes'
 
 function getImportBalance(account:Account, balance:number):number {

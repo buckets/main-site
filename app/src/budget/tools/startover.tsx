@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Path from 'path'
 import * as fs from 'fs-extra-promise'
-import { localNow } from '../../time'
+import { localNow } from 'buckets-core/dist/time'
 import { remote } from 'electron'
 import { sss } from '../../i18n'
 import { AppState, manager } from '../appstate'

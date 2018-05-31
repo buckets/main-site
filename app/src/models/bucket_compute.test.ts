@@ -1,7 +1,7 @@
 import * as moment from 'moment'
 import {test} from 'tap'
 import { Bucket, computeBucketData } from './bucket'
-import { parseLocalTime } from '../time'
+import { parseLocalTime } from 'buckets-core/dist/time'
 
 function mkBucket(data?:Partial<Bucket>) {
   let b = new Bucket();

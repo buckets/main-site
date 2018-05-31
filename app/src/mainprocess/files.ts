@@ -8,7 +8,7 @@ import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'elect
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
-import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from '../time'
+import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from 'buckets-core/dist/time'
 import { IBudgetBus, BudgetBus, BudgetBusRenderer, TABLE2CLASS } from '../store'
 import { DBStore } from './dbstore';
 import { RPCMainStore, RPCRendererStore } from '../rpcstore';

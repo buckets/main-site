@@ -3,7 +3,7 @@ import {Account, Transaction} from './account';
 import {Bucket, Transaction as BTrans} from './bucket';
 import {test} from 'tap';
 import { getStore } from './testutil';
-import { parseLocalTime } from '../time'
+import { parseLocalTime } from 'buckets-core/dist/time'
 
 //-----------------------------
 // Tests

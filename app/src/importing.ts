@@ -10,7 +10,7 @@ import { isNil, hashStrings } from './util'
 import { IBudgetFile } from './mainprocess/files'
 import { displayError } from './errors'
 import { PrefixLogger } from './logging'
-import { SerializedTimestamp, loadTS } from './time'
+import { SerializedTimestamp, loadTS } from 'buckets-core/dist/time'
 
 const log = new PrefixLogger('(importing)');
 

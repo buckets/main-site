@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from '../../time'
+import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from 'buckets-core/dist/time'
 import { remote, ipcRenderer } from 'electron'
 import { isObj, IStore } from '../../store'
 import { BankMacro } from '../../models/bankmacro'

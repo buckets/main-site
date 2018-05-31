@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone'
 import { createErrorSubclass } from '../errors'
 import { IObject, registerClass, IStore } from '../store';
-import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
+import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from 'buckets-core/dist/time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from '../budget/notes'
 
