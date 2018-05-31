@@ -504,9 +504,14 @@ export class AccountStore {
     }
   }
 
-  async balances(asof?:moment.Moment):Promise<Balances> {
+  async balances(asof?:moment.Moment, opts:{
+    onbudget_only?:boolean,
+  }={}):Promise<Balances> {
     let where = 'a.closed <> 1'
     let params = {};
+    if (opts.onbudget_only) {
+      where += ' AND a.offbudget = 0'
+    }
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }
   async balanceDate(account_id:number, before:moment.Moment):Promise<SerializedTimestamp> {

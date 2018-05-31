@@ -84,7 +84,9 @@ export class ReportStore {
     item.net_transfer = rows[0].total - item.income - item.expenses;
 
     // balance
-    let end_balances = await this.store.sub.accounts.balances(end);
+    let end_balances = await this.store.sub.accounts.balances(end, {
+      onbudget_only: true,
+    });
     _.each(end_balances, (balance) => {
       item.end_balance += balance;
     })
