@@ -2,7 +2,7 @@ import * as electron_is from 'electron-is'
 import {v4 as uuid} from 'uuid'
 import { ipcMain, ipcRenderer, webContents } from 'electron'
 import * as crypto from 'crypto'
-import { EventSource } from 'buckets-core'
+import { EventSource } from 'eventsts'
 import { PrefixLogger } from './logging'
 
 const log = new PrefixLogger(electron_is.renderer() ? '(rpc.r)' : '(rpc)')

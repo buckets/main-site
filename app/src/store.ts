@@ -3,7 +3,7 @@ import * as URL from 'url'
 import { webContents, ipcRenderer } from 'electron'
 import {} from 'bluebird'
 
-import { EventSource } from 'buckets-core'
+import { EventSource } from 'eventsts'
 
 //----------------------------------------------------------------------
 // Database objects

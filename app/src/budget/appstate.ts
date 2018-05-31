@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 
-import { EventSource } from 'buckets-core'
+import { EventSource } from 'eventsts'
 import {isObj, ObjectEvent, IStore} from '../store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from '../models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'

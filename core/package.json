@@ -12,10 +12,12 @@
     "compile": "cross-env NODE_ENV=production tsc"
   },
   "dependencies": {
-    "mathjs": "^4.0.1"
+    "mathjs": "^4.0.1",
+    "moment-timezone": "^0.5.17"
   },
   "devDependencies": {
     "@types/mathjs": "^0.0.39",
+    "@types/moment-timezone": "^0.5.5",
     "cross-env": "^5.1.4",
     "nsp": "^3.2.1",
     "tap": "^11.1.3",

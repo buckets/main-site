@@ -133,7 +133,7 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
       });
 
       // wait for the account to be linked or ignored and then import it
-      store.bus.obj.onceSuccessfully(async message => {
+      store.bus.obj.untilTrue(async message => {
         if (message.event === 'update' && message.obj._type === 'account_mapping') {
           let mapping = message.obj as AccountMapping;
           if (mapping.account_hash === hash) {
