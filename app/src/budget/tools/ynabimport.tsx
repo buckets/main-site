@@ -33,7 +33,7 @@ export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImp
   }
   componentDidMount() {
     this.refreshLeftovers();
-    current_file.room.events('ynab_import_progress').onceSuccessfully(message => {
+    current_file.room.events('ynab_import_progress').untilTrue(message => {
       if (message.error) {
         this.refreshLeftovers();
         return true;
