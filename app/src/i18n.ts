@@ -1,9 +1,11 @@
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
-import { TranslationContext } from 'buckets-core/dist/i18n'
+import { TranslationContext } from '@iffycan/i18n'
+import { IMessages } from './langs/spec'
 
 async function getLocale():Promise<string> {
   // BUCKETS_LANG environment variable beats all
+  const env = remote ? remote.process.env : process.env;
   if (env.BUCKETS_LANG) {
     return env.BUCKETS_LANG;
   } else {
@@ -26,19 +28,18 @@ async function getLocale():Promise<string> {
   }  
 }
 
-var STARTED_LOCALIZING = null;
-export async function startLocalizing():Promise<string> {
-  if (STARTED_LOCALIZING) {
-    return tx.locale;
-  } else {
-    STARTED_LOCALIZING = true;
-    let locale = await getLocale();
-    await tx.setLocale(locale);
-    return tx.locale;
-  }
+export const tx = new TranslationContext<IMessages>('./langs');
+export const sss = tx.sss.bind(tx);
+
+export async function setLocale():Promise<string> {
+  let locale = await getLocale();
+  await tx.setLocale(locale);
+  return tx.locale;
 }
 
-const env = remote ? remote.process.env : process.env;
-export const tx = new TranslationContext();
-export const localizeThisPage = tx.localizeThisPage.bind(tx);
-export const sss = tx.sss.bind(tx);
+export async function localizeThisHTMLPage() {
+  let locale = await getLocale();
+  await tx.localizeThisHTMLPage(locale);
+}
+
+

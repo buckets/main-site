@@ -2,7 +2,7 @@
   This module contains stuff that is NOT specific to Buckets.
   Keep buckets-specific stuff out.
  */
-import { EventSource } from './events'
+import { EventSource } from '@iffycan/events'
 
 export interface IObject {
   id: number;

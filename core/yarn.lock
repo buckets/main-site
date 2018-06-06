@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@iffycan/events@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@iffycan/events/-/events-1.0.1.tgz#b78b4610effad956cfdd7ed46da6b78dc2c2a8b3"
+
 "@types/mathjs@^0.0.39":
   version "0.0.39"
   resolved "https://registry.yarnpkg.com/@types/mathjs/-/mathjs-0.0.39.tgz#d0cb3ec66fc5726119d76a42a83dd9e4d5b2bc54"

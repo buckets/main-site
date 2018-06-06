@@ -6,7 +6,10 @@ interface IMsg<T> {
   h: string;
   newval?: T;
 }
-export interface IMessages {
+interface IMessageSet {
+  [k:string]: IMsg<any>;
+}
+export interface IMessages extends IMessageSet {
   "\n        Though filling out this form is preferrable, you can also email bugs@budgetwithbuckets.com\n      ": IMsg<string>;
   "(Drop files or click)": IMsg<string>;
   "(If you want a response)": IMsg<string>;

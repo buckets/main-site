@@ -1,60 +1,34 @@
 export { IMessages } from './base';
-import { IMessages } from './base';
 
-export type NumberFormat =
-  | ''
-  | 'comma-period'
-  | 'period-comma'
-  | 'space-comma'
+//----------------------------------------------------------------
+// Copied for now from core/i18n.ts
+//----------------------------------------------------------------
 
-export type NumberFormatDef = {
-  [K in NumberFormat]?: INumberFormat
+/**
+ *  An individual message in a IMessageSet
+ */
+export interface IMsg<T> {
+  val: T;
+  translated: boolean;
+  h: string;
+  newval?: T;
 }
-export type NumberFormatExample = {
-  [K in NumberFormat]: string;
+/**
+ *  An applications set of messages
+ */
+export interface IMessageSet {
+  [k:string]: IMsg<any>;
 }
-
-export interface ILangPack {
+/**
+ *  A locale for the application
+ */
+export interface ILangPack<T extends IMessageSet> {
   name: string;
   dir: 'ltr'|'rtl';
   numbers: NumberFormat;
-  messages: IMessages;
+  messages: T;
   contributors: Array<{
     name: string;
     href?: string;
   }>;
-}
-
-export interface INumberFormat {
-  group: string;
-  group_regex: RegExp;
-  decimal: string;
-  decimal_regex: RegExp;
-}
-
-export const NUMBER_FORMAT_EXAMPLES:NumberFormatExample = {
-  '': '',
-  'comma-period': '1,400.82',
-  'period-comma': '1.400,82',
-  'space-comma': '1 400,82',
-}
-export const NUMBER_FORMATS:NumberFormatDef = {
-  'comma-period': {
-    group: ',',
-    group_regex: /,/g,
-    decimal: '.',
-    decimal_regex: /\./g,
-  },
-  'period-comma': {
-    group: '.',
-    group_regex: /\./g,
-    decimal: ',',
-    decimal_regex: /,/g,
-  },
-  'space-comma': {
-    group: ' ',
-    group_regex: /[ ]/g,
-    decimal: ',',
-    decimal_regex: /,/g,
-  }
 }

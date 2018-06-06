@@ -236,6 +236,9 @@ function displayInterface(msgs:IMessageSpec) {
   h: string;
   newval?: T;
 }`);
+  lines.push(`interface IMessageSet {
+  [k:string]: IMsg<any>;
+}`);
   lines.push('export interface IMessages {');
   const keys = Object.keys(msgs);
   keys.sort()

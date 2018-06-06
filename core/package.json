@@ -12,6 +12,7 @@
     "compile": "cross-env NODE_ENV=production tsc"
   },
   "dependencies": {
+    "@iffycan/events": "^1.0.1",
     "@types/moment-timezone": "^0.5.5",
     "mathjs": "^4.0.1",
     "moment": "^2.22.1",
