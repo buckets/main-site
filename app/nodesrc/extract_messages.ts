@@ -10,7 +10,7 @@ let ERRORS = [];
 const log = new Console(process.stderr, process.stderr);
 log.info('starting');
 
-export const DEFAULTS_IMPORTS = `
+export const DEFAULT_IMPORTS = `
 import * as React from 'react'
 import * as moment from 'moment'
 import { IMessages } from './base'
@@ -230,15 +230,7 @@ function walk(f:string):string[] {
 
 function displayInterface(msgs:IMessageSpec) {
   let lines = [];
-  lines.push(`interface IMsg<T> {
-  val: T;
-  translated: boolean;
-  h: string;
-  newval?: T;
-}`);
-  lines.push(`interface IMessageSet {
-  [k:string]: IMsg<any>;
-}`);
+  lines.push(`import { IMsg, IMessageSet } from '@iffycan/i18n'`);
   lines.push('export interface IMessages {');
   const keys = Object.keys(msgs);
   keys.sort()
@@ -292,7 +284,7 @@ export function extract(directory:string, base_filename:string, defaults_filenam
   ].join('\n\n'))
   fs.writeFileSync(defaults_filename, [
     '// Auto-generated file',
-    DEFAULTS_IMPORTS,
+    DEFAULT_IMPORTS,
     displayDefaults(MSGS),
     '',
   ].join('\n\n'))
