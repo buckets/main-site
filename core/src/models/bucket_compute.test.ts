@@ -1,10 +1,25 @@
 import * as moment from 'moment'
 import {test} from 'tap'
 import { Bucket, computeBucketData } from './bucket'
-import { parseLocalTime } from 'buckets-core/dist/time'
+import { parseLocalTime } from '../time'
 
-function mkBucket(data?:Partial<Bucket>) {
-  let b = new Bucket();
+function mkBucket(data?:Partial<Bucket>):Bucket {
+  let b:Bucket = {
+    _type: 'bucket',
+    id: 1,
+    created: '2018-01-01 00:00:00',
+    name: 'Bucket',
+    balance: 0,
+    kicked: false,
+    group_id: null,
+    ranking: 'm',
+    color: 'blue',
+    kind: '',
+    goal: null,
+    end_date: null,
+    deposit: null,
+    notes: '',
+  };
   Object.assign(b, data || {});
   return b;
 }

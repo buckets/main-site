@@ -1,3 +1,7 @@
+/**
+  This module contains stuff that is NOT specific to Buckets.
+  Keep buckets-specific stuff out.
+ */
 import { EventSource } from './events'
 
 export interface IObject {
@@ -5,6 +9,17 @@ export interface IObject {
   created: string;
   _type: string;
 }
+/**
+ *  For type guards: returns true if the passed in object is of the given type.
+ *
+ *  Usage:
+ *    isObj('bucket', somebucketobj)
+ */
+export function isObj<T extends keyof IObjectTypes>(cls:T, obj: IObject): obj is IObjectTypes[T] {
+  return obj._type === cls;
+}
+
+
 /**
  *  The global list of database tables/object types
  *  You can add to this FROM other modules by doing something
@@ -41,8 +56,9 @@ export function makeEvent<T extends keyof IObjectTypes>(event:ObjectEventType, o
 export interface IStore {
 
   // Events
-  events:EventSource<IObjectEvent>;
+  events:EventCollection<IStoreEvents>;
 
+  // Application-specific stuff
   sub:ISubStore;
 
   publishObject(event:ObjectEventType, obj:IObject):void;
@@ -69,8 +85,21 @@ export interface IStore {
   exec(sql:string):Promise<null>;
 }
 
+export interface EventCollection<T> {
+  broadcast<K extends keyof T>(channel:K, message:T[K]);
+  get<K extends keyof T>(channel:K):EventSource<T[K]>;
+}
+
+/**
+ *  Application-specific events for the store.
+ *  To be expanded like IObjectTypes is.
+ */
+export interface IStoreEvents {
+  obj: IObjectEvent;
+}
+
 /**
  *  Application-specific store operations.
- *  To be expanded as like IObjectTypes is.
+ *  To be expanded like IObjectTypes is.
  */
 export interface ISubStore {}

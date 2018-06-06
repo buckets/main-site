@@ -1,34 +1,42 @@
 import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
-import { IObject, IStore, registerClass } from '../store'
+import { IObject, IStore } from '../store'
 import { encrypt, decrypt, getPassword, cachePassword } from '../crypto'
 import * as reclib from '../recordlib'
 import { IncorrectPassword } from '../error'
 import { sss } from '../i18n'
-import { ISyncChannel, ASyncening, SyncResult } from '../sync'
+import { ISyncChannel, ASyncening, SyncResult } from './sync'
 import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
-import { localNow } from 'buckets-core/dist/time'
+import { localNow } from '../time'
 
 const log = new PrefixLogger('(bankmacro)');
 
-export class BankMacro implements IObject {
-  static type: string = 'bank_macro';
-  id: number;
-  created: string;
-  readonly _type: string = BankMacro.type;
+//-------------------------------------------------------
+// Database objects
+//-------------------------------------------------------
+declare module '../store' {
+  interface IObjectTypes {
+    bank_macro: BankMacro
+  }
+  interface ISubStore {
+    bankmacro: BankMacroStore
+  }
+}
+
+export interface BankMacro extends IObject {
+  _type: 'bank_macro';
   uuid: string;
   name: string;
   enc_recording: string;
   enabled: boolean;
-
-  static fromdb(obj:BankMacro) {
-    obj.enabled = !!obj.enabled;
-    return obj;
-  }
+  // XXX
+  // static fromdb(obj:BankMacro) {
+  //   obj.enabled = !!obj.enabled;
+  //   return obj;
+  // }
 }
-registerClass(BankMacro);
 
 
 async function createPassword(service:string, account:string, prompt:string):Promise<string> {
@@ -53,7 +61,7 @@ async function createPassword(service:string, account:string, prompt:string):Pro
 }
 
 
-interface IUpdateArgs {
+export interface IUpdateArgs {
   name?: string;
   recording?: reclib.Recording;
   enabled?: boolean;
@@ -101,7 +109,7 @@ export class BankMacroStore {
     }
   }
   private async isPasswordCorrect(password:string):Promise<boolean> {
-    let rows = await this.store.query(
+    let rows = await this.store.query<{enc_recording:string}>(
       `SELECT enc_recording
       FROM bank_macro
       WHERE coalesce(enc_recording, '') <> ''
@@ -143,22 +151,22 @@ export class BankMacroStore {
     if (!data.uuid) {
       data.uuid = uuid();
     }
-    return this.store.createObject(BankMacro, data);
+    return this.store.createObject('bank_macro', data);
   }
   async list():Promise<BankMacro[]> {
-    return this.store.listObjects(BankMacro, {
+    return this.store.listObjects('bank_macro', {
       order: ['name ASC', 'id'],
     })
   }
   async get(macro_id:number):Promise<BankMacro> {
-    return this.store.getObject(BankMacro, macro_id);
+    return this.store.getObject('bank_macro', macro_id);
   }
   async update(macro_id:number, args:IUpdateArgs):Promise<BankMacro> {
     const data = await this._prepareForDB(args);
-    return this.store.updateObject(BankMacro, macro_id, data);
+    return this.store.updateObject('bank_macro', macro_id, data);
   }
   async delete(macro_id:number):Promise<any> {
-    return this.store.deleteObject(BankMacro, macro_id);
+    return this.store.deleteObject('bank_macro', macro_id);
   }
   async runMacro(file:IBudgetFile, macro_id:number, onOrAfter:moment.Moment, before:moment.Moment):Promise<SyncResult> {
     let today = localNow();
@@ -200,7 +208,7 @@ export class MacroSyncer implements ISyncChannel {
   }
 }
 
-class MacroSync implements ASyncening {
+export class MacroSync implements ASyncening {
   public result:SyncResult;
 
   constructor(private store:IStore, private file:IBudgetFile, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {

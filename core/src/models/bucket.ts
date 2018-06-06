@@ -1,6 +1,10 @@
 import * as moment from 'moment-timezone'
-import { IObject } from '../store';
+import { IObject, IStore } from '../store';
 import { INotable } from './notes';
+import { ensureLocalMoment, parseLocalTime, localNow, ts2localdb, Interval, parseUTCTime } from '../time'
+import { rankBetween } from '../ranking'
+import { computeBalances, Balances } from './balances'
+import { DEFAULT_COLORS } from '../color'
 
 //-------------------------------------------------------
 // Database objects
@@ -83,7 +87,7 @@ export class BucketStore {
   async add(args?:{name:string, group_id?:number}):Promise<Bucket> {
     let data:Partial<Bucket> = args || {};
     let group_id = args.group_id || null;
-    let rows = await this.store.query(`
+    let rows = await this.store.query<{highrank:string}>(`
         SELECT max(ranking) as highrank
         FROM bucket
         WHERE coalesce(group_id, -1) = coalesce($group_id, -1)`, {
@@ -91,18 +95,18 @@ export class BucketStore {
         })
     data.ranking = rankBetween(rows[0].highrank, 'z')
     data.color = DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)];
-    return this.store.createObject(Bucket, data);
+    return this.store.createObject('bucket', data);
   }
   async list():Promise<Bucket[]> {
-    return this.store.listObjects(Bucket, {
+    return this.store.listObjects('bucket', {
       order: ['name ASC', 'id'],
     })
   }
   async get(bucket_id:number):Promise<Bucket> {
-    return this.store.getObject(Bucket, bucket_id);
+    return this.store.getObject('bucket', bucket_id);
   }
   async update(bucket_id:number, data:Partial<Bucket>):Promise<Bucket> {
-    return this.store.updateObject(Bucket, bucket_id, data);
+    return this.store.updateObject('bucket', bucket_id, data);
   }
   async kick(bucket_id:number):Promise<Bucket> {
     let transactions = await this.store.query(
@@ -118,7 +122,7 @@ export class BucketStore {
     } else {
       // bucket is unused
       let old_bucket = await this.get(bucket_id);
-      await this.store.deleteObject(Bucket, bucket_id);
+      await this.store.deleteObject('bucket', bucket_id);
       return old_bucket;
     }
   }
@@ -126,13 +130,13 @@ export class BucketStore {
     return this.update(bucket_id, {kicked: false});
   }
   async earliestTransaction(bucket_id:number):Promise<moment.Moment> {
-    let rows = await this.store.query(`
+    let rows = await this.store.query<{d:string}>(`
       SELECT min(posted) as d FROM bucket_transaction
       WHERE bucket_id=$bucket_id`, {
         $bucket_id: bucket_id,
       });
     if (!rows.length) {
-      rows = await this.store.query(`
+      rows = await this.store.query<{d:string}>(`
         SELECT created as d FROM bucket
         WHERE id=$bucket_id`, {
           $bucket_id: bucket_id,
@@ -192,8 +196,8 @@ export class BucketStore {
     if (args.bucket_id === null) {
       throw new Error('You must provide a bucket');
     }
-    let trans = await this.store.createObject(Transaction, data);
-    let bucket = await this.store.getObject(Bucket, args.bucket_id);
+    let trans = await this.store.createObject('bucket_transaction', data);
+    let bucket = await this.store.getObject('bucket', args.bucket_id);
     this.store.publishObject('update', bucket);
     return trans;
   }
@@ -203,15 +207,15 @@ export class BucketStore {
 
     // This could be optimized later
     await Promise.all(trans_ids.map(async (transid) => {
-      let trans = await this.store.getObject(Transaction, transid);
+      let trans = await this.store.getObject('bucket_transaction', transid);
       affected_buckets.add(trans.bucket_id)
       if (trans.account_trans_id) {
         affected_atrans.add(trans.account_trans_id)
       }
-      await this.store.deleteObject(Transaction, transid);
+      await this.store.deleteObject('bucket_transaction', transid);
     }));
     await Promise.all(Array.from(affected_buckets).map(async (bucket_id) => {
-      let bucket = await this.store.getObject(Bucket, bucket_id);
+      let bucket = await this.store.getObject('bucket', bucket_id);
       this.store.publishObject('update', bucket);
     }));
     await Promise.all(Array.from(affected_atrans).map(async (atrans_id) => {
@@ -219,10 +223,10 @@ export class BucketStore {
     }))
   }
   async updateTransaction(transid:number, data:Partial<Transaction>):Promise<Transaction> {
-    let trans = await this.store.getObject(Transaction, transid);
+    let trans = await this.store.getObject('bucket_transaction', transid);
     let affected_bucket_id = trans.bucket_id;
-    let new_trans = await this.store.updateObject(Transaction, transid, data);
-    let new_bucket = await this.store.getObject(Bucket, affected_bucket_id);
+    let new_trans = await this.store.updateObject('bucket_transaction', transid, data);
+    let new_bucket = await this.store.getObject('bucket', affected_bucket_id);
     this.store.publishObject('update', new_trans);
     this.store.publishObject('update', new_bucket);
     return new_trans;
@@ -267,7 +271,7 @@ export class BucketStore {
       WHERE
         ${wheres.join(' AND ')}
     `;
-    let rows = await this.store.query(qry, params)
+    let rows = await this.store.query<{rainfall:number}>(qry, params)
     if (rows.length) {
       return rows[0].rainfall || 0
     } else {
@@ -276,7 +280,7 @@ export class BucketStore {
   }
 
   async getFlow(onOrAfter:moment.Moment, before:moment.Moment):Promise<BucketFlowMap> {
-   let rows = await this.store.query(`
+   let rows = await this.store.query<{rain_in:number,nonrain_in:number,amount_out:number,bucket_id:number}>(`
         SELECT
           SUM(CASE
               WHEN
@@ -368,7 +372,7 @@ export class BucketStore {
     }
 
     let where = where_parts.join(' AND ');
-    return this.store.listObjects(Transaction, {
+    return this.store.listObjects('bucket_transaction', {
       where,
       params,
       order: ['posted DESC', 'id DESC'],
@@ -388,7 +392,7 @@ export class BucketStore {
       where = 'ranking >= (SELECT ranking FROM bucket WHERE id=$reference_id)'
       order = 'ranking ASC'
     }
-    let rows = await this.store.query(`
+    let rows = await this.store.query<{id:number,ranking:string,group_id:number}>(`
         SELECT id, ranking, group_id
         FROM bucket
         WHERE
@@ -424,32 +428,32 @@ export class BucketStore {
   //-------------------------------------------------------------
   async addGroup(args:{name: string}):Promise<Group> {
     let data:Partial<Group> = args || {};
-    let rows = await this.store.query(`
+    let rows = await this.store.query<{highrank:string}>(`
       SELECT max(ranking) as highrank
       FROM bucket_group`, {})
     data.ranking = rankBetween(rows[0].highrank, 'z')
-    return this.store.createObject(Group, data);
+    return this.store.createObject('bucket_group', data);
   }
   async listGroups():Promise<Group[]> {
-    return this.store.listObjects(Group, {
+    return this.store.listObjects('bucket_group', {
       order: ['ranking', 'name', 'id'],
     })
   }
   async getGroup(id:number):Promise<Group> {
-    return this.store.getObject(Group, id);
+    return this.store.getObject('bucket_group', id);
   }
   async updateGroup(id:number, data:{name?:string, ranking?:string}):Promise<Group> {
-    return this.store.updateObject(Group, id, data);
+    return this.store.updateObject('bucket_group', id, data);
   }
   async deleteGroup(id:number):Promise<any> {
-    let rows = await this.store.query(`
+    const maxrank_rows = await this.store.query<{maxrank:string}>(`
       SELECT
         max(ranking) as maxrank
       FROM bucket
       WHERE coalesce(group_id, -1) = -1`, {})
-    let max_rank = rows[0].maxrank;
+    let max_rank = maxrank_rows[0].maxrank;
 
-    rows = await this.store.query(`
+    const ranking_rows = await this.store.query<{id:number,ranking:string}>(`
         SELECT
           id,
           ranking
@@ -458,11 +462,11 @@ export class BucketStore {
         ORDER BY ranking`, {
           $group_id: id,
         })
-    for (const row of rows) {
+    for (const row of ranking_rows) {
       let new_rank = max_rank = rankBetween(max_rank, 'z');
       await this.update(row.id, {ranking: new_rank, group_id: null})
     }
-    return this.store.deleteObject(Group, id);
+    return this.store.deleteObject('bucket_group', id);
   }
   async moveGroup(moving_id:number, placement:'before'|'after', reference_id:number) {
     let where;
@@ -476,7 +480,7 @@ export class BucketStore {
       where = 'ranking >= (SELECT ranking FROM bucket_group WHERE id=$reference_id)'
       order = 'ranking ASC'
     }
-    let rows = await this.store.query(`
+    let rows = await this.store.query<{id:number,ranking:string}>(`
         SELECT id, ranking
         FROM bucket_group
         WHERE ${where}
@@ -505,7 +509,7 @@ export class BucketStore {
 //----------------------------------------------------------------
 // Deposits, goals, etc...
 //----------------------------------------------------------------
-interface ComputeArgs {
+export interface ComputeArgs {
   today: moment.Moment;
   balance: number;
 }

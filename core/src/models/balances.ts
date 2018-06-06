@@ -36,7 +36,7 @@ export async function computeBalances(
     GROUP BY 1
   `;
   prm.$asof = ts2localdb(asof);
-  let rows = await store.query(sql, prm);
+  let rows = await store.query<{id:number, balance:number}>(sql, prm);
   let ret:Balances = {};
   rows.forEach(row => {
     ret[row.id] = row.balance;

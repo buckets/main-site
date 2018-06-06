@@ -15,11 +15,12 @@
     "@types/moment-timezone": "^0.5.5",
     "mathjs": "^4.0.1",
     "moment": "^2.22.1",
-    "moment-timezone": "^0.5.17"
+    "moment-timezone": "^0.5.17",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "@types/mathjs": "^0.0.39",
-    "@types/node": "^10.3.0",
+    "@types/node": "^10.3.1",
     "cross-env": "^5.1.4",
     "nsp": "^3.2.1",
     "tap": "^11.1.3",

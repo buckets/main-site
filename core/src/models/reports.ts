@@ -1,7 +1,16 @@
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone'
 import { IStore } from '../store'
-import { ts2localdb, Interval, chunkTime } from 'buckets-core/dist/time'
+import { ts2localdb, Interval, chunkTime } from '../time'
+
+//-------------------------------------------------------
+// Database objects
+//-------------------------------------------------------
+declare module '../store' {
+  interface ISubStore {
+    reports: ReportStore;
+  }
+}
 
 export interface IncomeExpenseSum {
   interval: Interval;
@@ -32,7 +41,7 @@ export class ReportStore {
     }
     
     // income
-    let rows = await this.store.query(`
+    const income_rows = await this.store.query<{income:number}>(`
       SELECT
         SUM(t.amount) AS income
       FROM account_transaction AS t
@@ -47,10 +56,10 @@ export class ReportStore {
       $start: ts2localdb(start),
       $end: ts2localdb(end),
     })
-    item.income = rows[0].income;
+    item.income = income_rows[0].income;
 
     // expense
-    rows = await this.store.query(`
+    const expense_rows = await this.store.query<{expenses:number}>(`
       SELECT
         SUM(t.amount) AS expenses
       FROM account_transaction AS t
@@ -65,10 +74,10 @@ export class ReportStore {
       $start: ts2localdb(start),
       $end: ts2localdb(end),
     })
-    item.expenses = rows[0].expenses
+    item.expenses = expense_rows[0].expenses
 
     // transfers
-    rows = await this.store.query(`
+    const transfer_rows = await this.store.query<{total:number}>(`
       SELECT
         SUM(t.amount) AS total
       FROM account_transaction AS t
@@ -81,7 +90,7 @@ export class ReportStore {
       $start: ts2localdb(start),
       $end: ts2localdb(end),
     })
-    item.net_transfer = rows[0].total - item.income - item.expenses;
+    item.net_transfer = transfer_rows[0].total - item.income - item.expenses;
 
     // balance
     let end_balances = await this.store.sub.accounts.balances(end, {
@@ -133,7 +142,7 @@ export class ReportStore {
     args.bucket_ids.forEach(bucket_id => {
       incomplete[bucket_id] = {};
     });
-    let rows = await this.store.query(queries.join(' UNION ALL '),
+    let rows = await this.store.query<{ago:number, bucket_id:number, expenses:number}>(queries.join(' UNION ALL '),
       params);
     for (let row of rows) {
       incomplete[row.bucket_id][row.ago] = row.expenses;

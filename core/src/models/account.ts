@@ -114,12 +114,23 @@ export function expectedBalance(a:Account):number {
 }
 
 
-interface ImportArgs {
-  account_id: number,
-  amount: number,
-  memo: string,
-  posted: moment.Moment,
-  fi_id: string,
+export interface ImportArgs {
+  account_id: number;
+  amount: number;
+  memo: string;
+  posted: moment.Moment;
+  fi_id: string;
+}
+
+export interface TransactionExportRow {
+  t_id: number;
+  t_amount: number;
+  t_memo: string;
+  t_posted: string;
+  a_name: string;
+  bt_id: number;
+  bt_amount: number;
+  b_name: string;
 }
 
 /**
@@ -171,21 +182,21 @@ export class AccountStore {
     // This is not very efficient, but is done this way so that everything is properly notified about the deletions
 
     // Delete bucket transactions first before we lose the ids
-    let btrans_ids = (await this.store.query(`SELECT id FROM bucket_transaction WHERE
+    let btrans_ids = (await this.store.query<{id:number}>(`SELECT id FROM bucket_transaction WHERE
       account_trans_id IN (SELECT id FROM account_transaction WHERE account_id=$id)`, {$id: account_id}))
       .map(x=>x.id);
     await this.store.sub.buckets.deleteTransactions(btrans_ids)
 
     // Delete account transactions
-    let atrans_ids = (await this.store.query(`SELECT id FROM account_transaction WHERE account_id=$id;`, {$id: account_id}))
+    let atrans_ids = (await this.store.query<{id:number}>(`SELECT id FROM account_transaction WHERE account_id=$id;`, {$id: account_id}))
       .map(x=>x.id);
     await this.deleteTransactions(atrans_ids)
 
     // Delete misc other stuff connected to accounts
-    let mapping_ids = (await this.store.query(`SELECT id FROM account_mapping WHERE account_id=$id;`, {$id: account_id}))
+    let mapping_ids = (await this.store.query<{id:number}>(`SELECT id FROM account_mapping WHERE account_id=$id;`, {$id: account_id}))
       .map(x=>x.id);
     for (let mapping_id of mapping_ids) {
-      await this.store.deleteObject(AccountMapping, mapping_id);
+      await this.store.deleteObject('account_mapping', mapping_id);
     }
 
     // Delete the account itself
@@ -213,7 +224,7 @@ export class AccountStore {
     if (args.fi_id) {
       data.fi_id = args.fi_id;
     }
-    let trans = await this.store.createObject(Transaction, data);
+    let trans = await this.store.createObject('account_transaction', data);
     let account = await this.store.getObject('account', args.account_id);
     this.store.publishObject('update', account);
     return trans;
@@ -227,7 +238,7 @@ export class AccountStore {
     cleared?: boolean,
   }):Promise<Transaction> {
     let affected_account_ids = new Set<number>();
-    let existing = await this.store.getObject(Transaction, trans_id);
+    let existing = await this.store.getObject('account_transaction', trans_id);
 
     if (args.account_id !== undefined && existing.account_id !== args.account_id) {
       affected_account_ids.add(existing.account_id);
@@ -238,7 +249,7 @@ export class AccountStore {
       this.removeCategorization(trans_id, false);
       args.amount = args.amount || 0;
     }
-    let trans = await this.store.updateObject(Transaction, trans_id, {
+    let trans = await this.store.updateObject('account_transaction', trans_id, {
       account_id: args.account_id,
       amount: args.amount,
       memo: args.memo,
@@ -276,16 +287,7 @@ export class AccountStore {
   async exportTransactions(args:{
     onOrAfter?: moment.Moment,
     before?: moment.Moment,
-  } = {}):Promise<Array<{
-    t_id: number,
-    t_amount: number,
-    t_memo: string,
-    t_posted: string,
-    a_name: string,
-    bt_id: number,
-    bt_amount: number,
-    b_name: string,
-  }>> {
+  } = {}):Promise<Array<TransactionExportRow>> {
     let params:any = {};
     let where_parts = [];
 
@@ -302,7 +304,7 @@ export class AccountStore {
     if (where_parts.length) {
       where = `WHERE ${where_parts.join(' AND ')}`;
     }
-    return await this.store.query(`SELECT
+    return await this.store.query<TransactionExportRow>(`SELECT
       t.id as t_id,
       t.amount as t_amount,
       t.memo as t_memo,
@@ -349,7 +351,7 @@ export class AccountStore {
     isupdate: boolean,
     transaction: Transaction,
   }> {
-    let rows = await this.store.query(`SELECT id
+    let rows = await this.store.query<{id:number}>(`SELECT id
       FROM account_transaction
       WHERE
         account_id = $account_id
@@ -360,7 +362,7 @@ export class AccountStore {
     if (rows.length) {
       // Update existing
       let existing_id:number = rows[0].id;
-      let ret = await this.store.updateObject(Transaction, existing_id, {
+      let ret = await this.store.updateObject('account_transaction', existing_id, {
         account_id: args.account_id,
         amount: args.amount || 0,
         memo: args.memo,
@@ -398,7 +400,7 @@ export class AccountStore {
 
     // This could be optimized later
     await Promise.all(transaction_ids.map(async (transid) => {
-      let trans = await this.store.getObject(Transaction, transid);
+      let trans = await this.store.getObject('account_transaction', transid);
       affected_account_ids.add(trans.account_id)
       let btrans_list = await this.store.sub.buckets.listTransactions({
         account_trans_id: transid,
@@ -407,7 +409,7 @@ export class AccountStore {
         deleted_btrans.push(btrans);
         affected_bucket_ids.add(btrans.bucket_id);  
       })
-      await this.store.deleteObject(Transaction, transid);
+      await this.store.deleteObject('account_transaction', transid);
     }));
 
     // publish changed accounts
@@ -432,7 +434,7 @@ export class AccountStore {
   // account mapping
   //------------------------------------------------------------
   async hashToAccountId(hash:string):Promise<number|null> {
-    let rows = await this.store.query(`SELECT account_id FROM account_mapping
+    let rows = await this.store.query<{account_id:number}>(`SELECT account_id FROM account_mapping
         WHERE account_hash=$hash`, {$hash: hash})
     if (rows.length) {
       return rows[0].account_id;
@@ -441,27 +443,27 @@ export class AccountStore {
     }
   }
   async getOrCreateUnknownAccount(args:{description:string, account_hash:string}):Promise<UnknownAccount> {
-    let rows = await this.store.query(`SELECT id FROM unknown_account WHERE account_hash=$hash`, {$hash: args.account_hash});
+    let rows = await this.store.query<{id:number}>(`SELECT id FROM unknown_account WHERE account_hash=$hash`, {$hash: args.account_hash});
     if (rows.length === 1) {
-      return this.store.getObject(UnknownAccount, rows[0].id);
+      return this.store.getObject('unknown_account', rows[0].id);
     } else {
-      await this.store.createObject(UnknownAccount, {
+      await this.store.createObject('unknown_account', {
         description: args.description,
         account_hash: args.account_hash,
       })
     }
   }
   async linkAccountToHash(hash:string, account_id:number) {
-    await this.store.createObject(AccountMapping, {
+    await this.store.createObject('account_mapping', {
       account_id: account_id,
       account_hash: hash,
     })
-    let unknowns = await this.store.listObjects(UnknownAccount, {
+    let unknowns = await this.store.listObjects('unknown_account', {
       where: 'account_hash = $account_hash',
       params: { $account_hash: hash },
     })
     let promises = unknowns.map(unknown => {
-      return this.store.deleteObject(UnknownAccount, unknown.id)
+      return this.store.deleteObject('unknown_account', unknown.id)
     })
     await Promise.all(promises);
   }
@@ -481,18 +483,18 @@ export class AccountStore {
    *  Delete all of an account's import mappings
    */
   async deleteAccountMappings(account_id:number) {
-    let mappings = await this.store.listObjects(AccountMapping, {
+    let mappings = await this.store.listObjects('account_mapping', {
       where: 'account_id = $account_id',
       params: { $account_id: account_id },
     })
     await Promise.all(mappings.map(mapping => {
-      this.store.deleteObject(AccountMapping, mapping.id);
+      this.store.deleteObject('account_mapping', mapping.id);
     }))
   }
   async getCSVMapping(fingerprint:string) {
-    let rows = await this.store.query(`SELECT id FROM csv_import_mapping WHERE fingerprint_hash=$fingerprint`, {$fingerprint: fingerprint});
+    let rows = await this.store.query<{id:number}>(`SELECT id FROM csv_import_mapping WHERE fingerprint_hash=$fingerprint`, {$fingerprint: fingerprint});
     if (rows.length) {
-      return this.store.getObject(CSVImportMapping, rows[0].id);
+      return this.store.getObject('csv_import_mapping', rows[0].id);
     } else {
       return null;
     }
@@ -501,12 +503,12 @@ export class AccountStore {
     let obj = await this.getCSVMapping(fingerprint);
     if (obj === null) {
       // does not exist
-      return await this.store.createObject(CSVImportMapping, {
+      return await this.store.createObject('csv_import_mapping', {
         fingerprint_hash: fingerprint,
         mapping_json: JSON.stringify(mapping),
       })
     } else {
-      return await this.store.updateObject(CSVImportMapping, obj.id, {
+      return await this.store.updateObject('csv_import_mapping', obj.id, {
         mapping_json: JSON.stringify(mapping),
       })
     }
@@ -523,7 +525,7 @@ export class AccountStore {
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }
   async balanceDate(account_id:number, before:moment.Moment):Promise<SerializedTimestamp> {
-    const rows = await this.store.query(`SELECT max(posted) AS posted
+    const rows = await this.store.query<{posted:string}>(`SELECT max(posted) AS posted
       FROM account_transaction
       WHERE
         account_id = $account_id
@@ -605,7 +607,7 @@ export class AccountStore {
     }
 
     let where = where_parts.join(' AND ');
-    return this.store.listObjects(Transaction, {where, params,
+    return this.store.listObjects('account_transaction', {where, params,
       order: ['posted DESC', 'id DESC']});
   }
 
@@ -613,7 +615,7 @@ export class AccountStore {
   // categorizing
   //------------------------------------------------------------
   async categorize(trans_id:number, categories:Category[]):Promise<Category[]> {
-    let trans = await this.store.getObject(Transaction, trans_id);
+    let trans = await this.store.getObject('account_transaction', trans_id);
 
     // ignore 0s and null bucket ids
     categories = categories.filter(cat => {
@@ -649,13 +651,13 @@ export class AccountStore {
         account_trans_id: trans.id,
       })  
     }))
-    trans = await this.store.getObject(Transaction, trans_id);
+    trans = await this.store.getObject('account_transaction', trans_id);
     await this.store.publishObject('update', trans);
     return categories;
   }
   async removeCategorization(trans_id:number, publish:boolean):Promise<any> {
     // delete old
-    let old_ids = await this.store.query('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
+    let old_ids = await this.store.query<{id:number}>('SELECT id FROM bucket_transaction WHERE account_trans_id = $id',
       {$id: trans_id});
     await this.store.sub.buckets.deleteTransactions(old_ids.map(obj => obj.id))
     await this.store.query(`
@@ -663,14 +665,14 @@ export class AccountStore {
       SET general_cat = ''
       WHERE id = $id`, {$id: trans_id})
     if (publish) {
-      const trans = await this.store.getObject(Transaction, trans_id);
+      const trans = await this.store.getObject('account_transaction', trans_id);
       this.store.publishObject('update', trans);
     }
   }
   async categorizeGeneral(trans_id:number, category:GeneralCatType):Promise<Transaction> {
     // delete old
     await this.removeCategorization(trans_id, false)
-    return this.store.updateObject(Transaction, trans_id, {general_cat: category})
+    return this.store.updateObject('account_transaction', trans_id, {general_cat: category})
   }
   async getManyCategories(trans_ids:number[]):Promise<{[trans_id:number]:Category[]}> {
     const row_promise = this.store.query(`
@@ -693,7 +695,7 @@ export class AccountStore {
     return ret;
   }
   async getCategories(trans_id:number):Promise<Category[]> {
-    return this.store.query(
+    return this.store.query<{bucket_id:number, amount:number}>(
       `SELECT bucket_id, amount
       FROM bucket_transaction
       WHERE account_trans_id = $trans_id

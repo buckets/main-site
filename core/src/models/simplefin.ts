@@ -12,7 +12,7 @@ import { PrefixLogger } from '../logging'
 
 const log = new PrefixLogger('(simplefin)')
 
-import { ISyncChannel, ASyncening, SyncResult } from '../sync'
+import { ISyncChannel, ASyncening, SyncResult } from './sync'
 
 //-------------------------------------------------------
 // Database objects

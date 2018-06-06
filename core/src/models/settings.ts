@@ -1,4 +1,16 @@
-import { IObject, registerClass, IStore } from '../store';
+import { IObject, IStore } from '../store';
+
+//-------------------------------------------------------
+// Database objects
+//-------------------------------------------------------
+declare module '../store' {
+  interface IObjectTypes {
+    settings: ISettingsObject;
+  }
+  interface ISubStore {
+    settings: SettingsStore;
+  }
+}
 
 export interface ISettings {
   reports_timeback_number: number;
@@ -12,24 +24,21 @@ export const DEFAULTS:ISettings = {
   money_symbol: '',
 }
 
-export class Setting implements IObject {
-  static type: string = 'settings';
-  id: number;
-  created: string;
-  readonly _type: string = Setting.type;
+export interface ISettingsObject extends IObject {
+  _type: 'settings';
   key: keyof ISettings;
   value: any;
 
-  static fromdb(obj:Setting) {
-    try {
-      obj.value = JSON.parse(obj.value as string);  
-    } catch(err) {
-      obj.value = DEFAULTS[obj.key];
-    }
-    return obj;
-  }
+  // XXX
+  // static fromdb(obj:Setting) {
+  //   try {
+  //     obj.value = JSON.parse(obj.value as string);  
+  //   } catch(err) {
+  //     obj.value = DEFAULTS[obj.key];
+  //   }
+  //   return obj;
+  // }
 }
-registerClass(Setting);
 
 
 /**
@@ -41,7 +50,7 @@ export class SettingsStore {
     this.store = store;
   }
   async getSettings():Promise<ISettings> {
-    const rows = await this.store.query('SELECT key, value FROM settings', {})
+    const rows = await this.store.query<{key:keyof ISettings,value:any}>('SELECT key, value FROM settings', {})
     let ret:Partial<ISettings> = {};
     rows.forEach(row => {
       let value;
@@ -56,7 +65,7 @@ export class SettingsStore {
   }
   async updateSettings(data:Partial<ISettings>) {
     for (const key of Object.keys(data)) {
-      await this.store.createObject(Setting, {
+      await this.store.createObject('settings', {
         key: key as keyof ISettings,
         value: JSON.stringify(data[key]),
       });
