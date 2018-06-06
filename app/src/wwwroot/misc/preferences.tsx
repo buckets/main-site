@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as moment from 'moment-timezone'
-import { sss, localizeThisHTMLPage } from '../../i18n'
+import { sss, localizeThisPage } from '../../i18n'
 import { PSTATE, updateState, PersistentState } from '../../mainprocess/persistent'
 import { Renderer } from '../../budget/render'
 import { NUMBER_FORMAT_EXAMPLES } from '@iffycan/i18n'
@@ -9,7 +9,7 @@ let CURRENT_PSTATE = PSTATE;
 let renderer:Renderer = new Renderer();
 
 export async function start(base_element) {
-  localizeThisHTMLPage();
+  localizeThisPage();
 
   renderer.registerRendering(() => {
     return <PreferencesApp

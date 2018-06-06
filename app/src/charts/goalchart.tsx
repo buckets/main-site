@@ -5,7 +5,7 @@ import * as d3shape from 'd3-shape'
 import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
 import { parseLocalTime } from 'buckets-core/dist/time'
-import { COLORS } from '../color'
+import { COLORS } from 'buckets-core/dist/color'
 import { computeBucketData } from '../models/bucket'
 import { cents2decimal } from '../money'
 

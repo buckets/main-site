@@ -1,4 +1,4 @@
-import { COLORS, DEFAULT_COLORS, opacity } from 'buckets-core/dist/color'
+import { DEFAULT_COLORS } from 'buckets-core/dist/color'
 import * as React from 'react'
 import * as cx from 'classnames'
 

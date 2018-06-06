@@ -31,13 +31,13 @@ async function getLocale():Promise<string> {
 export const tx = new TranslationContext<IMessages>('./langs');
 export const sss = tx.sss.bind(tx);
 
-export async function setLocale():Promise<string> {
+export async function startLocalizing():Promise<string> {
   let locale = await getLocale();
   await tx.setLocale(locale);
   return tx.locale;
 }
 
-export async function localizeThisHTMLPage() {
+export async function localizeThisPage() {
   let locale = await getLocale();
   await tx.localizeThisHTMLPage(locale);
 }

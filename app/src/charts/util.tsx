@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import { COLORS } from '../color'
+import { COLORS } from 'buckets-core/dist/color'
 
 
 export const UPARROW = <span>&#x25B2;</span>

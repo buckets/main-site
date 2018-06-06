@@ -6,7 +6,7 @@ import { ObjectEvent, isObj } from '../store'
 import { Money, cents2decimal } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
-import { COLORS, opacity } from '../color'
+import { COLORS, opacity } from 'buckets-core/dist/color'
 import { chunkTime, Interval } from 'buckets-core/dist/time'
 
 import { debounceChange } from '../input'
