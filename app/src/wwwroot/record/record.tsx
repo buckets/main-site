@@ -2,19 +2,19 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from 'buckets-core/dist/time'
 import { remote, ipcRenderer } from 'electron'
-import { isObj, IStore } from '../../store'
-import { BankMacro } from '../../models/bankmacro'
+import { isObj, IStore } from 'buckets-core/dist/store'
+import { BankMacro } from 'buckets-core/dist/models/bankmacro'
 import { current_file } from '../../mainprocess/files'
 import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
 import { sss } from '../../i18n'
 import { SafetySwitch } from '../../input'
-import { IncorrectPassword } from '../../error'
+import { IncorrectPassword } from '../../errors'
 import { makeToast, ToastDisplay } from '../../budget/toast'
 import { PrefixLogger } from '../../logging'
 import { Help } from '../../tooltip'
-import { SyncResult } from '../../sync'
+import { SyncResult } from 'buckets-core/dist/models/sync'
 
 const log = new PrefixLogger('(record)')
 
@@ -849,7 +849,7 @@ export async function start(args:{
 
   store.bus.obj.on(async (ev) => {
     let obj = ev.obj;
-    if (isObj(BankMacro, obj) && obj.id === args.macro_id) {
+    if (isObj('bank_macro', obj) && obj.id === args.macro_id) {
       BANKMACRO = Object.assign(BANKMACRO, obj);
       renderer.doUpdate();
     }

@@ -1,20 +1,17 @@
 import * as sqlite3 from 'sqlite3-offline'
+import { AsyncRunResult, IAsyncSqlite } from 'buckets-core/dist/dbstore'
 
-interface RunResult {
-  lastID: number;
-}
-
-export class AsyncDatabase {
+export class AsyncDatabase implements IAsyncSqlite {
   constructor(readonly db:sqlite3.Database) {
 
   }
-  async run(query:string, params={}):Promise<RunResult> {
-    return new Promise<RunResult>((resolve, reject) => {
+  async run(query:string, params={}):Promise<AsyncRunResult> {
+    return new Promise<AsyncRunResult>((resolve, reject) => {
       this.db.run(query, params, function callback(err) {
         if (err) {
           reject(err);
         } else {
-          const result:RunResult = {
+          const result:AsyncRunResult = {
             lastID: this.lastID,
           }
           resolve(result);

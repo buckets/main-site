@@ -12,8 +12,12 @@ import { APP_ROOT } from './mainprocess/globals'
 import { onlyRunInMain } from './rpc'
 import { isRegistered } from './mainprocess/drm'
 import { PrefixLogger } from './logging'
+import { createErrorSubclass } from 'buckets-core/dist/errors'
 
 const log = new PrefixLogger('(errors)');
+
+export const IncorrectPassword = createErrorSubclass('IncorrectPassword');
+
 
 const SUBMIT_URL = process.env.BUCKETS_BUGREPORT_URL || 'https://www.budgetwithbuckets.com/_api/bugreport';
 
@@ -146,17 +150,4 @@ export function displayError(text?:string, title?:string) {
   }, () => {
     
   })
-}
-
-export function createErrorSubclass<T>(name:string) {
-  const SubError = function(message?:string, otherprops?:T):void {
-    Error.captureStackTrace(this, this.constructor);
-    this.name = name;
-    this.message = message;
-    if (otherprops !== undefined) {
-      Object.assign(this, otherprops);  
-    }
-  }
-  util.inherits(SubError, Error);
-  return SubError;
 }

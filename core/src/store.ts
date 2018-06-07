@@ -43,20 +43,11 @@ export interface IObjectEvent {
   event: ObjectEventType;
   obj: IObject;
 }
-/**
- *  Utility function for making IObjectEvents
- */
-export function makeEvent<T extends keyof IObjectTypes>(event:ObjectEventType, obj:IObjectTypes[T]):IObjectEvent {
-  return {
-    event,
-    obj,
-  }
-}
 
 export interface IStore {
 
   // Events
-  events:EventCollection<IStoreEvents>;
+  events:IEventCollection<IStoreEvents>;
 
   // Application-specific stuff
   sub:ISubStore;
@@ -85,7 +76,7 @@ export interface IStore {
   exec(sql:string):Promise<null>;
 }
 
-export interface EventCollection<T> {
+export interface IEventCollection<T> {
   broadcast<K extends keyof T>(channel:K, message:T[K]);
   get<K extends keyof T>(channel:K):EventSource<T[K]>;
 }
