@@ -231,7 +231,7 @@ function walk(f:string):string[] {
 function displayInterface(msgs:IMessageSpec) {
   let lines = [];
   lines.push(`import { IMsg, IMessageSet } from '@iffycan/i18n'`);
-  lines.push('export interface IMessages {');
+  lines.push('export interface IMessages extends IMessageSet {');
   const keys = Object.keys(msgs);
   keys.sort()
   keys.forEach(key => {

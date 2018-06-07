@@ -1,8 +1,8 @@
 import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 
-import { EventSource } from 'buckets-core'
-import {isObj, ObjectEvent, IStore} from '../store'
+import { EventSource } from '@iffycan/events'
+import {isObj, IStore, IObjectEvent} from 'buckets-core/dist/store'
 import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from '../models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
 import { Connection } from '../models/simplefin'
@@ -320,13 +320,13 @@ export class StateManager {
   private file:IBudgetFile;
 
   public appstate:AppState;
-  private queue: ObjectEvent<any>[] = [];
+  private queue: IObjectEvent[] = [];
   private posttick: Set<keyof StateManager> = new Set();
 
   private updated_trans_counter = new DelayingCounter();
 
   public events = {
-    obj: new EventSource<ObjectEvent<any>>(),
+    obj: new EventSource<IObjectEvent>(),
     change: new EventSource<AppState>(),
   }
 
@@ -404,7 +404,7 @@ export class StateManager {
       this.signalChange();
     })
   }
-  async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
+  async processEvent(ev:IObjectEvent):Promise<AppState> {
     this.queue.push(ev);
     this.events.obj.emit(ev);
     return this.tick();

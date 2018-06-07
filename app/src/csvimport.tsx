@@ -196,7 +196,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     };
     bf.room.broadcast('csv_needs_mapping', need);
     mapping = await new Promise<CSVMapping>((resolve, reject) => {
-      bf.room.events('csv_mapping_response').onceSuccessfully(async message => {
+      bf.room.events('csv_mapping_response').untilTrue(async message => {
         if (message.id === need.id) {
           // now there's a mapping
           let new_mapping:CSVMapping;
@@ -271,7 +271,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
   bf.room.broadcast('csv_needs_account_assigned', need);
   log.info('csv_needs_account_assigned', need.id);
   const {account_id, redo_mapping} = await new Promise<CSVAssignAccountResponse>((resolve, reject) => {
-    bf.room.events('csv_account_response').onceSuccessfully(msg => {
+    bf.room.events('csv_account_response').untilTrue(msg => {
       if (msg.id === need.id) {
         resolve(msg);
         return true;
@@ -636,17 +636,20 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
         <button
           disabled={!account_id}
           onClick={async () => {
+            let num_account_id:number;
             if (account_id === 'NEW') {
               if (!new_name) {
                 makeToast(sss('Provide a name for the new account.'), {className:'error'})
                 return;
               }
               let new_account = await manager.checkpoint(sss('Create Account')).sub.accounts.add(new_name);
-              account_id = new_account.id;
+              num_account_id = new_account.id;
+            } else {
+              num_account_id = account_id;
             }
             current_file.room.broadcast('csv_account_response', {
               id: obj.id,
-              account_id,
+              account_id: num_account_id,
             })
           }}>
           {sss('Finish import')}

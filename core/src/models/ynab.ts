@@ -2,26 +2,37 @@ import * as fs from 'fs-extra-promise'
 import * as Path from 'path'
 import {v4 as uuid} from 'uuid'
 
-import { dialog } from 'electron'
+// import { dialog } from 'electron'
 
 import * as sortby from 'lodash.sortby'
-import { sss } from './i18n'
-import { IStore } from './store'
-import * as Bucket from './models/bucket'
-import * as Account from './models/account'
-import { decimal2cents } from './money'
-import { parseLocalTime } from 'buckets-core/dist/time'
-import { IBudgetFile } from './mainprocess/files'
+import { sss } from '@iffycan/i18n'
+import { IStore } from '../store'
+import * as Bucket from './bucket'
+import * as Account from './account'
+import { decimal2cents } from '../money'
+import { parseLocalTime } from '../time'
+// import { IBudgetFile } from './mainprocess/files'
 
-import { reportErrorToUser } from './errors'
+// import { reportErrorToUser } from './errors'
 
-import { PrefixLogger } from './logging'
+import { PrefixLogger } from '../logging'
 
 const log = new PrefixLogger('(ynab)')
 
 
-declare module './mainprocess/files' {
-  interface BudgetFileEvents {
+//-------------------------------------------------------
+// Database objects
+//-------------------------------------------------------
+declare module '../store' {
+  interface IObjectTypes {
+    // bucket: Bucket;
+    // bucket_group: Group;
+    // bucket_transaction: Transaction;
+  }
+  interface ISubStore {
+    ynab: YNABStore;
+  }
+  interface IStoreEvents {
     ynab_import_progress: {
       id: string;
       percent: number;
@@ -34,7 +45,7 @@ function number2cents(n:number):number {
   return decimal2cents(n.toString());
 }
 
-namespace YNAB {
+export namespace YNAB {
   export interface Meta {
     formatVersion: string;
     relativeDataFolderName: string;
@@ -58,7 +69,7 @@ namespace YNAB {
     masterCategories: MasterCategory[];
     payees: Payee[];
   }
-  interface CommonTransaction {
+  export interface CommonTransaction {
     date: string;
     entityId: string;
     entityType: string;
@@ -216,7 +227,7 @@ export class YNABStore {
     let ret:{
       [trans_id:number]: LeftoverTrans;
     } = {};
-    const transactions = await this.store.listObjects(Account.Transaction, {
+    const transactions = await this.store.listObjects('account_transaction', {
       where: 'id IN (SELECT transaction_id FROM ynab_leftover_trans)',
     });
     transactions.forEach(trans => {
@@ -247,9 +258,9 @@ function sortByIndex(a, b) {
   return compare(a.sortableIndex, b.sortableIndex);
 }
 
-export async function importYNAB4(current_file:IBudgetFile, store:IStore, path:string) {
+export async function importYNAB4(store:IStore, path:string) {
   const import_id = uuid();
-  current_file.room.broadcast('ynab_import_progress', {
+  store.events.broadcast('ynab_import_progress', {
     id: import_id,
     percent: 0,
   })
@@ -451,7 +462,7 @@ export async function importYNAB4(current_file:IBudgetFile, store:IStore, path:s
       done_count++;
       if (done_count % 100 === 0) {
         log.info('completed importing', done_count);
-        current_file.room.broadcast('ynab_import_progress', {
+        store.events.broadcast('ynab_import_progress', {
           id: import_id,
           percent: done_count/total_transactions,
         })
@@ -540,13 +551,13 @@ export async function importYNAB4(current_file:IBudgetFile, store:IStore, path:s
       }
     }
     log.info('done with import');
-    current_file.room.broadcast('ynab_import_progress', {
+    store.events.broadcast('ynab_import_progress', {
       id: import_id,
       percent: 1,
     })
     return ret;
   } catch(err) {
-    current_file.room.broadcast('ynab_import_progress', {
+    store.events.broadcast('ynab_import_progress', {
       id: import_id,
       percent: 0,
       error: true,
@@ -555,31 +566,32 @@ export async function importYNAB4(current_file:IBudgetFile, store:IStore, path:s
   }
 }
 
-export async function findYNAB4FileAndImport(current_file:IBudgetFile, store:IStore):Promise<any> {
-  return new Promise((resolve, reject) => {
-    dialog.showOpenDialog({
-      title: sss('Open YNAB4 File'),
-      properties: ['openFile', 'openDirectory'],
-      filters: [
-        {
-          name: 'YNAB',
-          extensions: ['ynab4'],
-        }
-      ],
-    }, async (paths) => {
-      if (paths) {
-        for (let path of paths) {
-          try {
-            await importYNAB4(current_file, store, path);
-          } catch(err) {
-            log.error(err.stack);
-            reportErrorToUser(sss('Error importing'), {err: err});
-          }
-        }
-        resolve(null)
-      } else {
-        reject(null)
-      }
-    })
-  });
-}
+// XXX TODO
+// export async function findYNAB4FileAndImport(current_file:IBudgetFile, store:IStore):Promise<any> {
+//   return new Promise((resolve, reject) => {
+//     dialog.showOpenDialog({
+//       title: sss('Open YNAB4 File'),
+//       properties: ['openFile', 'openDirectory'],
+//       filters: [
+//         {
+//           name: 'YNAB',
+//           extensions: ['ynab4'],
+//         }
+//       ],
+//     }, async (paths) => {
+//       if (paths) {
+//         for (let path of paths) {
+//           try {
+//             await importYNAB4(current_file, store, path);
+//           } catch(err) {
+//             log.error(err.stack);
+//             reportErrorToUser(sss('Error importing'), {err: err});
+//           }
+//         }
+//         resolve(null)
+//       } else {
+//         reject(null)
+//       }
+//     })
+//   });
+// }

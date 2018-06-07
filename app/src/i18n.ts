@@ -1,7 +1,7 @@
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
-import { TranslationContext } from '@iffycan/i18n'
-import { IMessages } from './langs/spec'
+import { CONTEXT } from '@iffycan/i18n'
+export { sss } from '@iffycan/i18n'
 
 async function getLocale():Promise<string> {
   // BUCKETS_LANG environment variable beats all
@@ -28,8 +28,11 @@ async function getLocale():Promise<string> {
   }  
 }
 
-export const tx = new TranslationContext<IMessages>('./langs');
-export const sss = tx.sss.bind(tx);
+CONTEXT.config({
+  langpack_basepath: './langs',
+})
+
+export const tx = CONTEXT;
 
 export async function startLocalizing():Promise<string> {
   let locale = await getLocale();

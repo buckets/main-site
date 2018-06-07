@@ -2,7 +2,7 @@ import * as _ from 'lodash'
 import * as electron_is from 'electron-is'
 import { PrefixLogger } from './logging'
 import { ipcRenderer } from 'electron'
-import { EventSource } from 'buckets-core'
+import { EventSource } from '@iffycan/events'
 import { getBounds, IBounds } from './position'
 
 export class DoublePlayError extends Error {}
@@ -1290,7 +1290,7 @@ export class RecordingDirector<T> {
       }, this.STEP_TIMEOUT);
 
       let { webview } = this.tabs[step.tab_id];
-      this.events.child_ready_for_control.onceSuccessfully(tab_id => {
+      this.events.child_ready_for_control.untilTrue(tab_id => {
         log.info('got child_ready_for_control', tab_id, step.tab_id);
         if (tab_id === step.tab_id) {
           if (timer) {

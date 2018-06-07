@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 
 import { ILangPack } from '@iffycan/i18n'
-import { IMessages } from './spec'
+import { IMessages } from './base'
 
 // Contributors, include your name and optionally a link to
 // a website as you want it to appear in any credits.
@@ -2357,7 +2357,7 @@ Would you like to purchase a license now?`,
     h: "YCoofx1v0tRUHkHfhFnm6bV2xXfnsNT6QAyXqgkUa9c=",
   },
 }
-export const pack:ILangPack<IMessages> = {
+export const pack:ILangPack = {
   name: 'español',
   dir: 'ltr',
   numbers: 'comma-period',
