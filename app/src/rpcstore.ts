@@ -1,28 +1,14 @@
 import { v4 as uuid } from 'uuid';
-import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
+// import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
+import { IStore, IStoreEvents, IEventCollection, ObjectEventType, IObject, IObjectTypes } from 'buckets-core/dist/store'
+import { SubStore } from 'buckets-core/dist/models/substore'
 import { ipcMain, ipcRenderer } from 'electron'
-import { SubStore } from './models/storebase'
+// import { SubStore } from './models/storebase'
 import { PrefixLogger } from './logging'
+import { MainEventCollection, RendererEventCollection } from './rpc'
 
 const log = new PrefixLogger('(rpcstore)')
 
-//--------------------------------------------------------------------------------
-// serializing
-//--------------------------------------------------------------------------------
-interface SerializedObjectClass {
-  _buckets_serialized_object_class: string;
-}
-function isSerializedObjectClass(obj): obj is SerializedObjectClass {
-  return obj !== null && (<any>obj)._buckets_serialized_object_class !== undefined;
-}
-function serializeObjectClass<T extends IObject>(cls:IObjectClass<T>):SerializedObjectClass {
-  return {
-    _buckets_serialized_object_class: cls.type,
-  }
-}
-function deserializeObjectClass<T extends IObject>(obj:SerializedObjectClass):IObjectClass<T> {
-  return TABLE2CLASS[obj._buckets_serialized_object_class]
-}
 
 //---------------------------------------------------------------------------
 // Generic RPC classes
@@ -51,10 +37,7 @@ export class RPCReceiver<T> {
   gotMessage = async (event, message:RPCMessage<T>) => {
     // log.debug('MAIN RPC', message);
     try {
-      // convert args to classes
-      let args = message.params.map(arg => {
-        return isSerializedObjectClass(arg) ? deserializeObjectClass(arg) : arg;
-      })
+      let args = message.params;
       let value = this.obj[message.method];
       if (value instanceof Function) {
         let result = await value.bind(this.obj)(...args);
@@ -100,12 +83,17 @@ export class RPCCaller<T> {
 // RPC Store pairs for bridging main and renderer
 //---------------------------------------------------------------------------
 /**
-  
+ *  Main process Store wrapper.  This doesn't implement IStore; it just provides
+ *  the things needed by the RPCRendererStore
  */
-export class RPCMainStore {
+export class RPCMainStoreHookup {
   private receiver:RPCReceiver<IStore>;
+  // private events:IEventCollection<IStoreEvents>;
+
   constructor(store:IStore, room:string) {
     this.receiver = new RPCReceiver(`rpc-store-${room}`, store);
+    new MainEventCollection(store.events, room);
+    // XXX Maybe should have a way to turn this on/off
   }
   start() {
     this.receiver.start();
@@ -114,41 +102,55 @@ export class RPCMainStore {
     this.receiver.stop();
   }
 }
+
+/**
+ *  Renderer process IStore which sends all requests to the main process to
+ *  actually be run.
+ */
 export class RPCRendererStore implements IStore {
+  
   readonly sub:SubStore;
+  readonly events:IEventCollection<IStoreEvents>;
+
   private caller:RPCCaller<IStore>;
-  constructor(room:string, readonly bus:IBudgetBus) {
+  
+  constructor(room:string) {
     this.sub = new SubStore(this);
     this.caller = new RPCCaller(`rpc-store-${room}`);
+    this.events = new RendererEventCollection<IStoreEvents>(room);
   }
-  async callRemote<T>(method, ...args):Promise<T> {
+  async callRemote<T>(method:keyof IStore, ...args):Promise<T> {
     return this.caller.callRemote<T>(method, ...args);
   }
 
   // IStore methods
   publishObject(event:ObjectEventType, obj:IObject) {
+    this.events.broadcast('obj', {
+      event,
+      obj,
+    });
     return this.callRemote('publishObject', event, obj);
   }
-  createObject<T extends IObject>(cls: IObjectClass<T>, data:Partial<T>):Promise<T> {
-    return this.callRemote('createObject', serializeObjectClass(cls), data);
+  createObject<T extends keyof IObjectTypes>(cls:T, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]> {
+    return this.callRemote('createObject', cls, data);
   }
-  updateObject<T extends IObject>(cls: IObjectClass<T>, id:number, data:Partial<T>):Promise<T> {
-    return this.callRemote('updateObject', serializeObjectClass(cls), id, data);
+  updateObject<T extends keyof IObjectTypes>(cls:T, id:number, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]> {
+    return this.callRemote('updateObject', cls, id, data);
   }
-  getObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<T> {
-    return this.callRemote('getObject', serializeObjectClass(cls), id);
+  getObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<IObjectTypes[T]> {
+    return this.callRemote('getObject', cls, id);
   }
-  listObjects<T extends IObject>(cls: IObjectClass<T>, ...args):Promise<T[]> {
-    return this.callRemote('listObjects', serializeObjectClass(cls), ...args);
+  listObjects<T extends keyof IObjectTypes>(cls:T, ...args):Promise<IObjectTypes[T][]> {
+    return this.callRemote('listObjects', cls, ...args);
   }
-  query(sql:string, params:{}):Promise<any> {
+  query<T>(sql:string, params:{}):Promise<Array<T>> {
     return this.callRemote('query', sql, params);
   }
-  exec(sql:string):Promise<any> {
+  exec(sql:string):Promise<null> {
     return this.callRemote('exec', sql);
   }
-  deleteObject<T extends IObject>(cls: IObjectClass<T>, id:number):Promise<any> {
-    return this.callRemote('deleteObject', serializeObjectClass(cls), id);
+  deleteObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<any> {
+    return this.callRemote('deleteObject', cls, id);
   }
 }
 

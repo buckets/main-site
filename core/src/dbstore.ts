@@ -1,5 +1,5 @@
-import { EventSource } from '@iffycan/events'
-import { IStore, ISubStore, IStoreEvents, IEventCollection, IObjectTypes, ObjectEventType, IObject } from './store'
+// import { EventSource } from '@iffycan/events'
+import { IStore, ISubStore, IStoreEvents, EventCollection, IObjectTypes, ObjectEventType, IObject } from './store'
 import { createErrorSubclass } from './errors'
 import { SubStore } from './models/substore'
 
@@ -21,7 +21,7 @@ export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
 
-export class SqliteStore implements IStore {
+export class SQLiteStore implements IStore {
   readonly events = new EventCollection<IStoreEvents>();
   readonly sub: ISubStore;
 
@@ -138,24 +138,3 @@ export class SqliteStore implements IStore {
   }
 }
 
-/**
- *  A collection of events
- */
-export class EventCollection<T> implements IEventCollection<T> {
-  private eventSources:{
-    [k:string]: EventSource<any>;
-  } = {};
-  broadcast<K extends keyof T>(channel:K, message:T[K]) {
-    const es = this.eventSources[channel as string];
-    if (es) {
-      es.emit(message);
-    }
-  }
-  get<K extends keyof T>(channel:K):EventSource<T[K]> {
-    let key = channel as string;
-    if (!this.eventSources[key]) {
-      this.eventSources[key] = new EventSource<T[K]>();
-    }
-    return this.eventSources[key];
-  }
-}

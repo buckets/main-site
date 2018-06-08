@@ -76,10 +76,6 @@ export interface IStore {
   exec(sql:string):Promise<null>;
 }
 
-export interface IEventCollection<T> {
-  broadcast<K extends keyof T>(channel:K, message:T[K]);
-  get<K extends keyof T>(channel:K):EventSource<T[K]>;
-}
 
 /**
  *  Application-specific events for the store.
@@ -94,3 +90,54 @@ export interface IStoreEvents {
  *  To be expanded like IObjectTypes is.
  */
 export interface ISubStore {}
+
+
+
+export interface IEventCollectionBroadcast<T, K extends keyof T> {
+  channel: K;
+  message: T[K];
+}
+export interface IEventCollection<T> {
+  /**
+   *  An EventSource that emits all events
+   */
+  all:EventSource<IEventCollectionBroadcast<T, keyof T>>;
+  
+  /**
+   *  Broadcast a message of a particular type to all listeners
+   */
+  broadcast<K extends keyof T>(channel:K, message:T[K]);
+
+  /**
+   *  Get a single channel's EventSource
+   */
+  get<K extends keyof T>(channel:K):EventSource<T[K]>;
+}
+/**
+ *  Basic in-process eventcollection thing
+ */
+export class EventCollection<T> implements IEventCollection<T> {
+  private eventSources:{
+    [k:string]: EventSource<any>;
+  } = {};
+
+  readonly all = new EventSource<IEventCollectionBroadcast<T, keyof T>>();
+
+  broadcast<K extends keyof T>(channel:K, message:T[K]) {
+    const es = this.eventSources[channel as string];
+    if (es) {
+      es.emit(message);
+    }
+    this.all.emit({
+      channel: channel,
+      message: message,
+    })
+  }
+  get<K extends keyof T>(channel:K):EventSource<T[K]> {
+    let key = channel as string;
+    if (!this.eventSources[key]) {
+      this.eventSources[key] = new EventSource<T[K]>();
+    }
+    return this.eventSources[key];
+  }
+}
