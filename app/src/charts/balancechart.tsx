@@ -8,7 +8,7 @@ import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
 import { COLORS, opacity } from 'buckets-core/dist/color'
 import { cents2decimal } from '../money'
-import { Transaction, computeBucketData } from '../models/bucket'
+import { Transaction, computeBucketData } from 'buckets-core/dist/models/bucket'
 import { parseLocalTime } from 'buckets-core/dist/time'
 
 interface SparklineProps {

@@ -8,7 +8,7 @@ import { AppState } from '../appstate'
 import { Interval } from 'buckets-core/dist/time'
 import { Money } from '../../money'
 import { TransactionList } from '../transactions'
-import { Transaction } from '../../models/account'
+import { Transaction } from 'buckets-core/dist/models/account'
 import { makeToast } from '../toast'
 import { parseCSVStringWithHeader, csvFieldToCents } from '../../csvimport'
 

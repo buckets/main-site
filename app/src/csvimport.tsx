@@ -5,16 +5,15 @@ import {v4 as uuid} from 'uuid'
 
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
-import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat } from './langs/spec'
+import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat } from '@iffycan/i18n'
 import { Money, decimal2cents } from './money'
 import { SEPS, ISeps } from 'buckets-core/dist/money'
 import { parseLocalTime, dumpTS, loadTS } from 'buckets-core/dist/time'
 import { DateDisplay } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
-import { Account } from './models/account'
-import { IStore } from './store'
-import { IBudgetFile, current_file } from './mainprocess/files'
-import { hashStrings } from './util'
+import { Account } from 'buckets-core/dist/models/account'
+import { IStore } from 'buckets-core/dist/store'
+import { hashStrings } from 'buckets-core/dist/util'
 import { PrefixLogger } from './logging'
 import { makeToast } from './budget/toast'
 
@@ -170,7 +169,7 @@ function getDataRows<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):T[] {
   return ret;
 }
 
-export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, args:{
+export async function csv2importable(store:IStore, guts:string, args:{
   force_mapping?:boolean,
   delimiter?:string,
 } = {}):Promise<ImportableAccountSet> {
@@ -194,9 +193,9 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
       parsed_data: parsed,
       current_mapping: csv_mapping ? JSON.parse(csv_mapping.mapping_json) : undefined,
     };
-    bf.room.broadcast('csv_needs_mapping', need);
+    store.events.broadcast('csv_needs_mapping', need);
     mapping = await new Promise<CSVMapping>((resolve, reject) => {
-      bf.room.events('csv_mapping_response').untilTrue(async message => {
+      store.events.get('csv_mapping_response').untilTrue(async message => {
         if (message.id === need.id) {
           // now there's a mapping
           let new_mapping:CSVMapping;
@@ -268,10 +267,10 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     id: uuid(),
     transactions,
   }
-  bf.room.broadcast('csv_needs_account_assigned', need);
+  store.events.broadcast('csv_needs_account_assigned', need);
   log.info('csv_needs_account_assigned', need.id);
   const {account_id, redo_mapping} = await new Promise<CSVAssignAccountResponse>((resolve, reject) => {
-    bf.room.events('csv_account_response').untilTrue(msg => {
+    store.events.get('csv_account_response').untilTrue(msg => {
       if (msg.id === need.id) {
         resolve(msg);
         return true;
@@ -285,7 +284,7 @@ export async function csv2importable(store:IStore, bf:IBudgetFile, guts:string, 
     // It's probably better to not do this recursively, but how many
     // times are people going to recurse?  Famous last words? :)
     log.info('redoing mapping');
-    return await csv2importable(store, bf, guts, {
+    return await csv2importable(store, guts, {
       force_mapping: true,
       delimiter,
     });
@@ -498,7 +497,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                 className="primary"
                 disabled={!mapping_acceptable}
                 onClick={() => {
-                  current_file.room.broadcast('csv_mapping_response', {
+                  manager.nocheckpoint.events.broadcast('csv_mapping_response', {
                     id: obj.id,
                     mapping: this.state.mapping,
                   })
@@ -602,7 +601,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
           return <span>Or <a href="#" onClick={onClick}>edit the mapping.</a></span>
         })((ev) => {
           ev.preventDefault();
-          current_file.room.broadcast('csv_account_response', {
+          manager.nocheckpoint.events.broadcast('csv_account_response', {
             id: obj.id,
             account_id: null,
             redo_mapping: true,
@@ -647,7 +646,7 @@ export class CSVAssigner extends React.Component<CSVAssignerProps, CSVAssignerSt
             } else {
               num_account_id = account_id;
             }
-            current_file.room.broadcast('csv_account_response', {
+            manager.nocheckpoint.events.broadcast('csv_account_response', {
               id: obj.id,
               account_id: num_account_id,
             })

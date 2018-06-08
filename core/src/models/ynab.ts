@@ -24,11 +24,6 @@ const log = new PrefixLogger('(ynab)')
 // Database objects
 //-------------------------------------------------------
 declare module '../store' {
-  interface IObjectTypes {
-    // bucket: Bucket;
-    // bucket_group: Group;
-    // bucket_transaction: Transaction;
-  }
   interface ISubStore {
     ynab: YNABStore;
   }

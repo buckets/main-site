@@ -73,7 +73,7 @@ export async function start(base_element, room, args: {
   await manager.refresh();
 
   // watch for changes
-  store.bus.obj.on(async (data) => {
+  store.events.get('obj').on(async (data) => {
     await manager.processEvent(data);
   })
   manager.events.change.on(() => {

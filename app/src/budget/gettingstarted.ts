@@ -1,7 +1,7 @@
 import { manager } from './appstate'
 import { sss } from '../i18n'
 import { localNow, parseLocalTime, ts2utcdb } from 'buckets-core/dist/time'
-import { Bucket } from '../models/bucket'
+import { Bucket } from 'buckets-core/dist/models/bucket'
 
 export async function createTemplateBucketSet() {
   const store = manager

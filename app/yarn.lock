@@ -325,12 +325,6 @@
   dependencies:
     moment ">=2.14.0"
 
-"@types/moment-timezone@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@types/moment-timezone/-/moment-timezone-0.5.5.tgz#b25d526182df9a58f1e8e28fba9761fb793f4cb5"
-  dependencies:
-    moment ">=2.14.0"
-
 "@types/node@*", "@types/node@^9.6.1":
   version "9.6.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.2.tgz#e49ac1adb458835e95ca6487bc20f916b37aff23"
@@ -806,7 +800,6 @@ browser-stdout@1.3.0:
   dependencies:
     "@iffycan/events" "^1.0.1"
     "@iffycan/i18n" "^0.2.0"
-    "@types/moment-timezone" "^0.5.5"
     fs-extra-promise "^1.0.1"
     lodash.sortby "^4.7.0"
     mathjs "^4.0.1"

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { sss } from '../../i18n'
 import { AppState, manager } from '../appstate'
-import { LeftoverTrans } from '../../ynab'
+import { LeftoverTrans } from 'buckets-core/dist/models/ynab'
 import { current_file } from '../../mainprocess/files'
 import { ProgressBar } from '../../ui'
 
@@ -33,7 +33,7 @@ export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImp
   }
   componentDidMount() {
     this.refreshLeftovers();
-    current_file.room.events('ynab_import_progress').untilTrue(message => {
+    manager.nocheckpoint.events.get('ynab_import_progress').untilTrue(message => {
       if (message.error) {
         this.refreshLeftovers();
         return true;

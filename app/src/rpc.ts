@@ -67,34 +67,44 @@ export class MainEventCollection<T> extends EventCollection<T> {
 
   constructor(private wrapped:IEventCollection<T>, private key:string) {
     super();
-
+  }
+  start() {
     // Watch for renderers to join
-    ipcMain.on(`${this.key}.join`, (ev:Electron.IpcMessageEvent) => {
-      const wc_id = ev.sender.id;
-      if (this.webContents.has(wc_id)) {
-        // already joined
-        return;
-      }
-
-      const wc = webContents.fromId(wc_id);
-      log.info(this.key, 'renderer joined:', wc_id)
-      this.webContents.set(wc_id, wc);
-      wc.on('destroyed', () => {
-        this.webContents.delete(wc_id);
-      })
-    });
+    ipcMain.on(`${this.key}.join`, this._handle_join);
 
     // Watch for renderers to broadcast
-    ipcMain.on(`${this.key}.pleasesend`, <K extends keyof T>(ev, channel:K, message:T[K]) => {
-      // Send up to parent
-      this.broadcast(channel, message);
-    })
+    ipcMain.on(`${this.key}.pleasesend`, this._handle_pleasesend);
 
     // Watch the wrapped one for events
-    wrapped.all.on(({channel, message}) => {
-      this._broadcastToChildren(channel, message);
-    });
+    this.wrapped.all.on(this._handle_parent);
   }
+  private _handle_join = (ev:Electron.IpcMessageEvent) => {
+    const wc_id = ev.sender.id;
+    if (this.webContents.has(wc_id)) {
+      // already joined
+      return;
+    }
+
+    const wc = webContents.fromId(wc_id);
+    log.info(this.key, 'renderer joined:', wc_id)
+    this.webContents.set(wc_id, wc);
+    wc.on('destroyed', () => {
+      this.webContents.delete(wc_id);
+    })
+  }
+  private _handle_pleasesend = <K extends keyof T>(ev, channel:K, message:T[K]) => {
+    // Send up to parent
+    this.broadcast(channel, message);
+  }
+  private _handle_parent = ({channel, message}) => {
+    this._broadcastToChildren(channel, message);
+  }
+  stop() {
+    ipcMain.removeListener(`${this.key}.join`, this._handle_join);
+    ipcMain.removeListener(`${this.key}.pleasesend`, this._handle_pleasesend);
+    this.wrapped.all.removeListener(this._handle_parent);
+  }
+
   broadcast<K extends keyof T>(channel:K, message:T[K]) {
     // Send to parent (who will then send back to this)
     this.wrapped.broadcast(channel, message);

@@ -1,4 +1,4 @@
-import { Transaction } from '../models/account'
+import { Transaction } from 'buckets-core/dist/models/account'
 
 
 export function findPotentialDupes(transactions:Transaction[]):Transaction[] {

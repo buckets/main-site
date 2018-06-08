@@ -1,9 +1,7 @@
 import { v4 as uuid } from 'uuid';
-// import { IStore, IBudgetBus, TABLE2CLASS, IObject, IObjectClass, ObjectEventType} from './store'
 import { IStore, IStoreEvents, IEventCollection, ObjectEventType, IObject, IObjectTypes } from 'buckets-core/dist/store'
 import { SubStore } from 'buckets-core/dist/models/substore'
 import { ipcMain, ipcRenderer } from 'electron'
-// import { SubStore } from './models/storebase'
 import { PrefixLogger } from './logging'
 import { MainEventCollection, RendererEventCollection } from './rpc'
 
@@ -84,22 +82,23 @@ export class RPCCaller<T> {
 //---------------------------------------------------------------------------
 /**
  *  Main process Store wrapper.  This doesn't implement IStore; it just provides
- *  the things needed by the RPCRendererStore
+ *  the things needed by the RPCRendererStore to interact with the wrapped IStore
  */
 export class RPCMainStoreHookup {
   private receiver:RPCReceiver<IStore>;
-  // private events:IEventCollection<IStoreEvents>;
+  private events:MainEventCollection<IStoreEvents>;
 
   constructor(store:IStore, room:string) {
     this.receiver = new RPCReceiver(`rpc-store-${room}`, store);
-    new MainEventCollection(store.events, room);
-    // XXX Maybe should have a way to turn this on/off
+    this.events = new MainEventCollection(store.events, room);
   }
   start() {
     this.receiver.start();
+    this.events.start();
   }
   stop() {
     this.receiver.stop();
+    this.events.stop();
   }
 }
 

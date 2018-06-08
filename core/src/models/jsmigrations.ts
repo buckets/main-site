@@ -1,7 +1,7 @@
 import * as moment from 'moment-timezone'
-import { ts2localdb, utcToLocal } from 'buckets-core/dist/time'
+import { ts2localdb, utcToLocal } from '../time'
 import { PrefixLogger } from '../logging'
-import { AsyncDatabase } from '../async-sqlite'
+import { IAsyncSqlite } from '../dbstore'
 
 const log = new PrefixLogger('(jsmig)');
 
@@ -10,13 +10,13 @@ const log = new PrefixLogger('(jsmig)');
 export interface Migration {
   order: number;
   name: string;
-  func: (db:AsyncDatabase)=>Promise<any>;
+  func: (db:IAsyncSqlite)=>Promise<any>;
 }
 export const migrations:Migration[] = [
   {
     order: 10,
     name: 'postedtolocal',
-    async func(db:AsyncDatabase) {
+    async func(db:IAsyncSqlite) {
       let updates = [];
 
       /**

@@ -2,9 +2,9 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { shell } from 'electron'
 import { makeToast } from './toast'
-import { Account, UnknownAccount } from '../models/account'
-import { Connection } from '../models/simplefin'
-import { BankMacro } from '../models/bankmacro'
+import { Account, UnknownAccount } from 'buckets-core/dist/models/account'
+import { Connection } from 'buckets-core/dist/models/simplefin'
+import { BankMacro } from 'buckets-core/dist/models/bankmacro'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
@@ -414,7 +414,7 @@ class ConnectionList extends React.Component<{
             onClick={(ev) => {
               manager
               .checkpoint(sss('Delete Connection'))
-              .deleteObject(Connection, conn.id);
+              .deleteObject('simplefin_connection', conn.id);
             }}
           >
             <span className="fa fa-trash"></span>

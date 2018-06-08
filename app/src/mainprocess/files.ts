@@ -9,21 +9,21 @@ import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
 import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from 'buckets-core/dist/time'
-import { IBudgetBus, BudgetBus, BudgetBusRenderer, TABLE2CLASS } from '../store'
-import { DBStore } from './dbstore';
-import { RPCMainStore, RPCRendererStore } from '../rpcstore';
+import { SQLiteStore } from 'buckets-core/dist/dbstore';
+import { openSqlite } from '../async-sqlite'
+import { RPCMainStoreHookup, RPCRendererStore } from '../rpcstore';
 import { addRecentFile, PSTATE } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
-import { onlyRunInMain, Room } from '../rpc'
+import { onlyRunInMain } from '../rpc'
 import { importFile, ImportResult } from '../importing'
 import { PrefixLogger } from '../logging'
-import { SyncResult, MultiSyncer, ASyncening } from '../sync'
-import { findYNAB4FileAndImport } from '../ynab'
-import { SimpleFINSyncer } from '../models/simplefin'
-import { MacroSyncer } from '../models/bankmacro'
+import { SyncResult, MultiSyncer, ASyncening } from 'buckets-core/dist/models/sync'
+import { findYNAB4FileAndImport } from 'buckets-core/dist/models/ynab'
+import { SimpleFINSyncer } from 'buckets-core/dist/models/simplefin'
+import { MacroSyncer } from 'buckets-core/dist/models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
-import { UndoRedoResult } from '../undo'
+import { UndoRedoResult } from 'buckets-core/dist/undo'
 import { updateMenu } from './menu'
 
 const log = new PrefixLogger('(files)')
@@ -34,33 +34,31 @@ export interface IOpenWindow {
   focused: boolean,
 }
 
-export interface BudgetFileEvents {
-  sync_started: {
-    onOrAfter: SerializedTimestamp;
-    before: SerializedTimestamp;
-  };
-  sync_done: {
-    onOrAfter: SerializedTimestamp;
-    before: SerializedTimestamp;
-    result: SyncResult;
-  };
-  macro_started: {
-    id: number;
-  };
-  macro_stopped: {
-    id: number;
-  };
-  csv_needs_mapping: CSVNeedsMapping;
-  csv_mapping_response: CSVMappingResponse;
-  csv_needs_account_assigned: CSVNeedsAccountAssigned;
-  csv_account_response: CSVAssignAccountResponse;
+declare module 'buckets-core/dist/store' {
+  interface IStoreEvents {
+    sync_started: {
+      onOrAfter: SerializedTimestamp;
+      before: SerializedTimestamp;
+    };
+    sync_done: {
+      onOrAfter: SerializedTimestamp;
+      before: SerializedTimestamp;
+      result: SyncResult;
+    };
+    macro_started: {
+      id: number;
+    };
+    macro_stopped: {
+      id: number;
+    };
+    csv_needs_mapping: CSVNeedsMapping;
+    csv_mapping_response: CSVMappingResponse;
+    csv_needs_account_assigned: CSVNeedsAccountAssigned;
+    csv_account_response: CSVAssignAccountResponse;
+  }
 }
 
 export interface IBudgetFile {
-  bus:IBudgetBus;
-
-  room: Room<BudgetFileEvents>;
-  
   /**
    *  Get the filename for this budget.
    */
@@ -129,11 +127,8 @@ export class BudgetFile implements IBudgetFile {
     [win_id:number]: BudgetFile;
   } = {};
 
-  public store:DBStore;
-  private rpc_store:RPCMainStore = null;
-  
-  readonly bus:BudgetBus;
-  readonly room:Room<BudgetFileEvents>;
+  public store:SQLiteStore;
+  private rpc_main_hookup:RPCMainStoreHookup = null;
 
   public running_syncs:ASyncening[] = [];
   private syncer:MultiSyncer;
@@ -142,15 +137,8 @@ export class BudgetFile implements IBudgetFile {
   readonly filename:string;
   constructor(filename?:string) {
     log.info('opening', filename);
-    this.id = uuid();
-    this.room = new Room<BudgetFileEvents>(this.id);
     this.filename = filename || '';
-    this.bus = new BudgetBus(this.id);
-    this.store = new DBStore(filename, this.bus, true);
-    this.syncer = new MultiSyncer([
-      new MacroSyncer(this.store, this),
-      new SimpleFINSyncer(this.store),
-    ]);
+    this.id = uuid();
     BudgetFile.REGISTRY[this.id] = this;
   }
 
@@ -211,7 +199,9 @@ export class BudgetFile implements IBudgetFile {
   async start(windows:Array<IOpenWindow>=[]) {
     // connect to database
     try {
-      await this.store.open();  
+      const db = openSqlite(this.filename);
+      this.store = new SQLiteStore(db);
+      await this.store.doSetup();
     } catch(err) {
       log.error(`Error opening file: ${this.filename}`);
       log.error(err.stack);
@@ -232,9 +222,14 @@ export class BudgetFile implements IBudgetFile {
       ev.sender.send(message.reply_ch, response);
     })
 
+    this.syncer = new MultiSyncer([
+      new MacroSyncer(this.store, this),
+      new SimpleFINSyncer(this.store),
+    ]);
+
     // listen for child store requests
-    this.rpc_store = new RPCMainStore(this.store, this.id);
-    await this.rpc_store.start();
+    this.rpc_main_hookup = new RPCMainStoreHookup(this.store, this.id);
+    await this.rpc_main_hookup.start();
 
     this.store.undo.events.stackchange.on(() => {
       updateMenu({budget: this});
@@ -253,7 +248,7 @@ export class BudgetFile implements IBudgetFile {
    */
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
-    this.rpc_store.stop();
+    this.rpc_main_hookup.stop();
     ipcMain.removeAllListeners(`budgetfile.rpc.${this.id}`)
   }
 
@@ -450,7 +445,7 @@ export class BudgetFile implements IBudgetFile {
     if (autoplay) {
       response_id = uuid();
       hide = true;
-      this.room.broadcast('macro_started', {id: macro_id});
+      this.store.events.broadcast('macro_started', {id: macro_id});
       serialized_autoplay = JSON.stringify({
         onOrAfter: dumpTS(autoplay.onOrAfter),
         before: dumpTS(autoplay.before),
@@ -479,7 +474,7 @@ export class BudgetFile implements IBudgetFile {
             log.info('closing macro window', win.id);
             win.close();  
           }
-          this.room.broadcast('macro_stopped', {id: macro_id});
+          this.store.events.broadcast('macro_stopped', {id: macro_id});
           resolve(message);
         })
       })
@@ -543,13 +538,13 @@ export class BudgetFile implements IBudgetFile {
     let sync = this.syncer.syncTransactions(m_onOrAfter, m_before);
     this.running_syncs.push(sync);
     let p = sync.start();
-    this.room.broadcast('sync_started', {
+    this.store.events.broadcast('sync_started', {
       onOrAfter: dumpTS(onOrAfter),
       before: dumpTS(before),
     })
     let result = await p;
     this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
-    this.room.broadcast('sync_done', {
+    this.store.events.broadcast('sync_done', {
       onOrAfter: dumpTS(onOrAfter),
       before: dumpTS(before),
       result,
@@ -585,7 +580,7 @@ export class BudgetFile implements IBudgetFile {
           created: null,
         })
       } else {
-        let obj = await this.store.getObject(TABLE2CLASS[change.table], change.id);
+        let obj = await this.store.getObject(change.table, change.id);
         return this.store.publishObject('update', obj);
       }
     })
@@ -610,13 +605,10 @@ export class BudgetFile implements IBudgetFile {
  *  In-renderer interface to a main process `BudgetFile`
  */
 class RendererBudgetFile implements IBudgetFile {
-  readonly bus:BudgetBusRenderer;
-  readonly room:Room<BudgetFileEvents>;
   readonly store:RPCRendererStore;
+
   constructor(readonly id:string) {
-    this.bus = new BudgetBusRenderer(id);
-    this.store = new RPCRendererStore(id, this.bus);
-    this.room = new Room<BudgetFileEvents>(this.id);
+    this.store = new RPCRendererStore(id);
   }
 
   async getFilename() {

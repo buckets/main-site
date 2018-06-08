@@ -2,11 +2,11 @@ import * as fs from 'fs-extra-promise'
 import * as iconv from 'iconv-lite'
 import * as chardet from 'chardet'
 import { sss } from './i18n'
-import { Transaction, AccountMapping } from './models/account'
+import { Transaction, AccountMapping } from 'buckets-core/dist/models/account'
 import { ofx2importable } from './ofx'
 import { csv2importable } from './csvimport'
-import { IStore } from './store'
-import { isNil, hashStrings } from './util'
+import { IStore } from 'buckets-core/dist/store'
+import { isNil, hashStrings } from 'buckets-core/dist/util'
 import { IBudgetFile } from './mainprocess/files'
 import { displayError } from './errors'
 import { PrefixLogger } from './logging'
@@ -77,12 +77,12 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
   if (!set && path.toLowerCase().endsWith('.csv')) {
     log.info('Trying CSV parser');
     try {
-      set = await csv2importable(store, bf, data);
+      set = await csv2importable(store, data);
     } catch(err) {
       log.info('Error reading file as CSV');
       log.info(err);
       try {
-        set = await csv2importable(store, bf, data, {
+        set = await csv2importable(store, data, {
           delimiter: ';',
         })
       } catch(err) {
@@ -133,7 +133,7 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
       });
 
       // wait for the account to be linked or ignored and then import it
-      store.bus.obj.untilTrue(async message => {
+      store.events.get('obj').untilTrue(async message => {
         if (message.event === 'update' && message.obj._type === 'account_mapping') {
           let mapping = message.obj as AccountMapping;
           if (mapping.account_hash === hash) {

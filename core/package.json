@@ -11,10 +11,12 @@
     "test": "./test.sh && nsp check",
     "compile": "cross-env NODE_ENV=production tsc"
   },
+  "files": [
+    "migrations"
+  ],
   "dependencies": {
     "@iffycan/events": "^1.0.1",
     "@iffycan/i18n": "^0.2.0",
-    "@types/moment-timezone": "^0.5.5",
     "fs-extra-promise": "^1.0.1",
     "lodash.sortby": "^4.7.0",
     "mathjs": "^4.0.1",

@@ -1,6 +1,10 @@
 import * as sqlite3 from 'sqlite3-offline'
 import { AsyncRunResult, IAsyncSqlite } from 'buckets-core/dist/dbstore'
 
+export function openSqlite(filename:string) {
+  return new AsyncDatabase(new sqlite3.Database(filename))
+}
+
 export class AsyncDatabase implements IAsyncSqlite {
   constructor(readonly db:sqlite3.Database) {
 

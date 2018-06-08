@@ -2,6 +2,8 @@
 import { IStore, ISubStore, IStoreEvents, EventCollection, IObjectTypes, ObjectEventType, IObject } from './store'
 import { createErrorSubclass } from './errors'
 import { SubStore } from './models/substore'
+import { setupDatabase } from './dbsetup'
+import { UndoTracker } from './undo'
 
 export const NotFound = createErrorSubclass('NotFound');
 
@@ -9,6 +11,10 @@ export interface AsyncRunResult {
   lastID: number;
 }
 
+/**
+ *  This is the interface that needs to be implemented
+ *  by an SQLite library in order to be used with SQLiteStore.
+ */
 export interface IAsyncSqlite {
   run(query:string, params?:object):Promise<AsyncRunResult>;
   exec(query:string):Promise<null>;
@@ -21,12 +27,22 @@ export function sanitizeDbFieldName(x) {
   return x.replace(ALLOWED_RE, '')
 }
 
+/**
+ *  Implementation of IStore for SQLite databases implementing
+ *  the IAsyncSqlite interface.
+ */
 export class SQLiteStore implements IStore {
   readonly events = new EventCollection<IStoreEvents>();
   readonly sub: ISubStore;
+  readonly undo: UndoTracker;
 
-  constructor(private db:IAsyncSqlite) {
+  constructor(readonly db:IAsyncSqlite) {
     this.sub = new SubStore(this);
+    this.undo = new UndoTracker(this);
+  }
+
+  async doSetup() {
+    setupDatabase(this);
   }
 
   publishObject(event:ObjectEventType, obj:IObject) {
@@ -135,6 +151,13 @@ export class SQLiteStore implements IStore {
 
   async exec(sql:string):Promise<null> {
     return this.db.exec(sql);
+  }
+
+  /**
+   *  Perform a function that can later be undone.
+   */
+  async doUndoableAction<T>(label:string, func:((...args)=>T|Promise<T>)):Promise<T> {
+    return this.undo.doAction(label, func);
   }
 }
 

@@ -1,11 +1,12 @@
-import { DBStore } from './mainprocess/dbstore'
+import { IObjectTypes } from './store'
+import { SQLiteStore } from './dbstore'
 import { PrefixLogger } from './logging'
 import { EventSource } from '@iffycan/events'
 
 const log = new PrefixLogger('(undo)')
 
 
-interface SqliteTableInfoRow {
+export interface SQLiteTableInfoRow {
   cid: number;
   name: string;
   type: 'INTEGER'|'TIMESTAMP'|'TEXT'|'TINYINT';
@@ -14,23 +15,27 @@ interface SqliteTableInfoRow {
   dflt_value?: string;
 }
 
-interface ICheckpoint {
+export type DirectionType =
+  | 'undo'
+  | 'redo'
+
+export interface ICheckpoint {
   id: number;
   created: string;
   undo_log_id: number;
-  direction: 'undo'|'redo';
+  direction: DirectionType;
   label: string;
 }
-interface ILogEntry {
+export interface ILogEntry {
   id: number;
   table_name: string;
   object_id: number;
-  direction: 'undo'|'redo';
+  direction: DirectionType;
   sql: string;
 }
 
-interface IChange {
-  table: string;
+export interface IChange {
+  table: keyof IObjectTypes;
   id: number;
   change: 'update'|'delete';
 }
@@ -38,20 +43,23 @@ export interface UndoRedoResult {
   changes: IChange[];
 }
 
+/**
+ *  Utility class to add undo functionality to an SQLiteStore.
+ */
 export class UndoTracker {
 
   // milliseconds window that groups actions together
   private checkpoint_id:number = null;
-  private direction:'undo'|'redo' = 'undo';
+  private direction:DirectionType = 'undo';
 
   private _nextUndoLabel:string = null;
   private _nextRedoLabel:string = null;
 
   readonly events = {
-    stackchange: new EventSource<'undo'|'redo'>(),
+    stackchange: new EventSource<DirectionType>(),
   }
 
-  constructor(private store:DBStore) {
+  constructor(private store:SQLiteStore) {
 
   }
   async start() {
@@ -96,13 +104,13 @@ export class UndoTracker {
       throw err;
     }
 
-    // Decide which tables get undo tracking
+    // Decide which tables DON'T get undo tracking
     const exclude_tables = new Set([
       '_schema_version',
       '_dear_hacker',
       'x_trigger_disabled',
     ])
-    const all_tables = await this.store.query(`SELECT name FROM sqlite_master WHERE type='table';`, {});
+    const all_tables = await this.store.query<{name:string}>(`SELECT name FROM sqlite_master WHERE type='table';`, {});
     const sqls = await Promise.all(all_tables
     .map(x => x.name)
     .filter(table_name => !exclude_tables.has(table_name))
@@ -127,8 +135,8 @@ export class UndoTracker {
   }
 
   async logState() {
-    let undo_log:ILogEntry[] = await this.store.query('SELECT * FROM undo_log', {});
-    let checkpoints:ICheckpoint[] = await this.store.query('SELECT * FROM undo_checkpoint', {});
+    let undo_log:ILogEntry[] = await this.store.query<ILogEntry>('SELECT * FROM undo_log', {});
+    let checkpoints:ICheckpoint[] = await this.store.query<ICheckpoint>('SELECT * FROM undo_checkpoint', {});
     log.info('undo_log\n' + undo_log.map(item => {
       return `${item.id} ${item.direction}: ${item.sql}`;
     }).join('\n'));
@@ -138,7 +146,7 @@ export class UndoTracker {
     }).join('\n'))
   }
   async enableTableSQL(table_name:string) {
-    const columns = Array.from(await this.store.query(`pragma table_info(${table_name})`, {})) as SqliteTableInfoRow[];
+    const columns = Array.from(await this.store.query<SQLiteTableInfoRow>(`pragma table_info(${table_name})`, {}));
 
     return `
       -- INSERT
@@ -248,9 +256,9 @@ export class UndoTracker {
     return this.popStack('redo');
   }
 
-  async popStack(direction:'undo'|'redo'):Promise<UndoRedoResult> {
-    let rows = await this.store.query(`SELECT * FROM undo_checkpoint WHERE direction=$direction ORDER BY id DESC LIMIT 1`, {$direction: direction});
-    const checkpoint:ICheckpoint = rows[0];
+  async popStack(direction:DirectionType):Promise<UndoRedoResult> {
+    let rows = await this.store.query<ICheckpoint>(`SELECT * FROM undo_checkpoint WHERE direction=$direction ORDER BY id DESC LIMIT 1`, {$direction: direction});
+    const checkpoint = rows[0];
     if (!checkpoint) {
       // stack is empty
       return {
@@ -258,7 +266,7 @@ export class UndoTracker {
       };
     }
 
-    const logitems:ILogEntry[] = await this.store.query(`
+    const logitems = await this.store.query<ILogEntry>(`
       SELECT id, table_name, object_id, sql
       FROM undo_log
       WHERE
@@ -283,11 +291,7 @@ export class UndoTracker {
       });
     
     let object_map:{
-      [key:string]: {
-        table: string;
-        id: number;
-        change: 'update'|'delete';
-      }
+      [key:string]: IChange
     } = {};
     let ret:UndoRedoResult = {
       changes: [],
@@ -315,7 +319,7 @@ export class UndoTracker {
           ret.changes.splice(ret.changes.indexOf(existing_change), 1)
         }
         const change:IChange = {
-          table: item.table_name,
+          table: item.table_name as keyof IObjectTypes,
           id: item.object_id,
           change: (item.sql.startsWith('DELETE') ? 'delete' : 'update'),
         }
@@ -343,7 +347,7 @@ export class UndoTracker {
     this.direction = 'undo'
 
     // notify about stack change
-    const label_rows = await this.store.query(`
+    const label_rows = await this.store.query<{direction:DirectionType,label:string}>(`
       SELECT direction, label
       FROM (
         SELECT id, direction, label

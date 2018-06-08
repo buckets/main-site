@@ -847,7 +847,7 @@ export async function start(args:{
   //   renderer.doUpdate();
   // })
 
-  store.bus.obj.on(async (ev) => {
+  store.events.get('obj').on(async (ev) => {
     let obj = ev.obj;
     if (isObj('bank_macro', obj) && obj.id === args.macro_id) {
       BANKMACRO = Object.assign(BANKMACRO, obj);
