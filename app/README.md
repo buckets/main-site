@@ -18,7 +18,13 @@ To run:
 
 # Refresh buckets-core
 
+One time:
+
     yarn add file:../core
+
+Or during development (sort of doesn't work):
+
+    pushd ../core && yarn link && popd && yarn link buckets-core
 
 
 # Internationalization

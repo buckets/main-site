@@ -1,9 +1,9 @@
 // import { EventSource } from '@iffycan/events'
-import { IStore, ISubStore, IStoreEvents, EventCollection, IObjectTypes, ObjectEventType, IObject } from './store'
+import { IStore, ISubStore, IStoreEvents, EventCollection, IObjectTypes, ObjectEventType, IObject, IUserInterfaceFunctions } from './store'
 import { createErrorSubclass } from './errors'
 import { SubStore } from './models/substore'
 import { setupDatabase } from './dbsetup'
-import { UndoTracker } from './undo'
+import { UndoTracker, UndoRedoResult } from './undo'
 
 export const NotFound = createErrorSubclass('NotFound');
 
@@ -36,9 +36,10 @@ export class SQLiteStore implements IStore {
   readonly sub: ISubStore;
   readonly undo: UndoTracker;
 
-  constructor(readonly db:IAsyncSqlite) {
+  constructor(readonly db:IAsyncSqlite, readonly ui:IUserInterfaceFunctions) {
     this.sub = new SubStore(this);
     this.undo = new UndoTracker(this);
+    ui.attachStore(this);
   }
 
   async doSetup() {
@@ -153,11 +154,38 @@ export class SQLiteStore implements IStore {
     return this.db.exec(sql);
   }
 
-  /**
-   *  Perform a function that can later be undone.
-   */
-  async doUndoableAction<T>(label:string, func:((...args)=>T|Promise<T>)):Promise<T> {
+  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
     return this.undo.doAction(label, func);
+  }
+  async doUndo() {
+    let result = await this.undo.undoLastAction();
+    await this._handleUndoRedoResult(result)
+  }
+  async doRedo() {
+    let result = await this.undo.redoLastAction();
+    await this._handleUndoRedoResult(result);
+  }
+  private async _handleUndoRedoResult(result:UndoRedoResult) {
+    let promises = result.changes.map(async change => {
+      if (change.change === 'delete') {
+        return this.publishObject('delete', {
+          _type: change.table,
+          id: change.id,
+          created: null,
+        })
+      } else {
+        let obj = await this.getObject(change.table, change.id);
+        return this.publishObject('update', obj);
+      }
+    })
+    return Promise.all(promises);
+  }
+
+  async startAction(label:string) {
+    return this.undo.startAction(label);
+  }
+  async finishAction(id:number) {
+    return this.undo.finishAction(id);
   }
 }
 

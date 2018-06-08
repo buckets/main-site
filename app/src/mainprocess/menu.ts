@@ -12,7 +12,6 @@ import { openBugReporter } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
 import { IS_DEBUG } from './globals'
-import { findYNAB4FileAndImport } from '../ynab'
 import { openDocs } from '../docs'
 
 export async function updateMenu(args:{
@@ -80,9 +79,9 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            budgetfile.doUndo();
+            budgetfile.store.doUndo();
           } else {
-            // do the default action
+            // do the default electron action
             win.webContents.undo();
           }
         }
@@ -95,9 +94,9 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            budgetfile.doRedo();
+            budgetfile.store.doRedo();
           } else {
-            // do the default action
+            // do the default electron action
             win.webContents.redo();
           }
         }
@@ -230,7 +229,7 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            findYNAB4FileAndImport(budgetfile, budgetfile.store);
+            budgetfile.store.ui.promptToStartYNABImport();
             win.webContents.send('buckets:goto', '/tools/ynabimport');
           }
         }

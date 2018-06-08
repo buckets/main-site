@@ -52,14 +52,32 @@ export interface IStore {
   // Application-specific stuff
   sub:ISubStore;
 
+  // UI-specific stuff
+  ui:IUserInterfaceFunctions;
+
+  /**
+   *  Emit a change/delete notification about an object.
+   */
   publishObject(event:ObjectEventType, obj:IObject):void;
 
+  /**
+   *  Create an instance of a database object.
+   */
   createObject<T extends keyof IObjectTypes>(cls:T, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]>;
   
+  /**
+   *  Get a single instance of a database object.
+   */
   getObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<IObjectTypes[T]>;
 
+  /**
+   *  Update a database object.
+   */
   updateObject<T extends keyof IObjectTypes>(cls:T, id:number, data:Partial<IObjectTypes[T]>):Promise<IObjectTypes[T]>;
 
+  /**
+   *  List objects of a certain type.
+   */
   listObjects<T extends keyof IObjectTypes>(cls:T,
     args?: {
       where?:string,
@@ -69,11 +87,51 @@ export interface IStore {
       offset?:number
     }):Promise<IObjectTypes[T][]>;
 
+  /**
+   *  Delete a database object and emit a deletion event.
+   */
   deleteObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<any>;
 
+  /**
+   *  Run a single, result-returning SQL statement.
+   */
   query<T>(sql:string, params:{}):Promise<Array<T>>;
 
+  /**
+   *  Execute a blob of SQL.  Can include multiple statements.
+   *  No result is returned.
+   */
   exec(sql:string):Promise<null>;
+
+  /**
+   *  Run a function, recording its effects so that it can be undone
+   */
+  doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T>;
+
+  /**
+   *  Make a checkpoint as the start of an action to be undone.
+   *  Everything performed until finishAction will be part of the
+   *  action.
+   *
+   *  Normally, just use doAction, which does startAction
+   *  and finishAction for you.
+   */
+  startAction(label:string):Promise<number>;
+
+  /**
+   *  Finish an action started by startAction.
+   */
+  finishAction(id:number):Promise<void>;
+
+  /**
+   *  Undo the last action recorded by doAction.
+   */
+  doUndo():Promise<void>;
+  
+  /**
+   *  Redo the last action undone by doUndo.
+   */
+  doRedo():Promise<void>;
 }
 
 
@@ -91,6 +149,15 @@ export interface IStoreEvents {
  */
 export interface ISubStore {}
 
+/**
+ *  User Interface specific functions/handlers.
+ *  For instance, the desktop app will have one implementation
+ *  and mobile apps will have another.
+ *  To be expanded like IObjectTypes is.
+ */
+export interface IUserInterfaceFunctions {
+  attachStore(store:IStore)
+}
 
 
 export interface IEventCollectionBroadcast<T, K extends keyof T> {

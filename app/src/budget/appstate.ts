@@ -12,7 +12,6 @@ import { BankMacro } from 'buckets-core/dist/models/bankmacro'
 import { ISettings, DEFAULTS as DefaultSettings } from 'buckets-core/dist/models/settings'
 import { makeToast } from './toast'
 import { sss } from '../i18n'
-import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
 import { CSVNeedsMapping, CSVNeedsAccountAssigned } from '../csvimport'
 import { setDefaultSymbol } from '../money'
@@ -317,7 +316,6 @@ class DelayingCounter<T> {
 
 export class StateManager {
   private store:IStore;
-  private file:IBudgetFile;
 
   public appstate:AppState;
   private queue: IObjectEvent[] = [];
@@ -340,15 +338,14 @@ export class StateManager {
     })
   }
   checkpoint(label:string) {
-    this.file.doAction(label, () => {});
+    this.store.doAction(label, () => {});
     return this.store;
   }
   get nocheckpoint() {
     return this.store;
   }
-  attach(store: IStore, file:IBudgetFile) {
+  attach(store: IStore) {
     this.store = store;
-    this.file = file;
 
     // Syncing events
     store.events.get('sync_started').on(message => {

@@ -27,6 +27,9 @@ declare module '../store' {
   interface ISubStore {
     ynab: YNABStore;
   }
+  interface IUserInterfaceFunctions {
+    promptToStartYNABImport();
+  }
   interface IStoreEvents {
     ynab_import_progress: {
       id: string;
@@ -560,33 +563,3 @@ export async function importYNAB4(store:IStore, path:string) {
     throw err;
   }
 }
-
-// XXX TODO
-// export async function findYNAB4FileAndImport(current_file:IBudgetFile, store:IStore):Promise<any> {
-//   return new Promise((resolve, reject) => {
-//     dialog.showOpenDialog({
-//       title: sss('Open YNAB4 File'),
-//       properties: ['openFile', 'openDirectory'],
-//       filters: [
-//         {
-//           name: 'YNAB',
-//           extensions: ['ynab4'],
-//         }
-//       ],
-//     }, async (paths) => {
-//       if (paths) {
-//         for (let path of paths) {
-//           try {
-//             await importYNAB4(current_file, store, path);
-//           } catch(err) {
-//             log.error(err.stack);
-//             reportErrorToUser(sss('Error importing'), {err: err});
-//           }
-//         }
-//         resolve(null)
-//       } else {
-//         reject(null)
-//       }
-//     })
-//   });
-// }

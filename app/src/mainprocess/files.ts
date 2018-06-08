@@ -8,6 +8,7 @@ import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'elect
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
+import { DesktopFunctions } from '../desktop'
 import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from 'buckets-core/dist/time'
 import { SQLiteStore } from 'buckets-core/dist/dbstore';
 import { openSqlite } from '../async-sqlite'
@@ -19,11 +20,9 @@ import { onlyRunInMain } from '../rpc'
 import { importFile, ImportResult } from '../importing'
 import { PrefixLogger } from '../logging'
 import { SyncResult, MultiSyncer, ASyncening } from 'buckets-core/dist/models/sync'
-import { findYNAB4FileAndImport } from 'buckets-core/dist/models/ynab'
 import { SimpleFINSyncer } from 'buckets-core/dist/models/simplefin'
 import { MacroSyncer } from 'buckets-core/dist/models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
-import { UndoRedoResult } from 'buckets-core/dist/undo'
 import { updateMenu } from './menu'
 
 const log = new PrefixLogger('(files)')
@@ -77,7 +76,6 @@ export interface IBudgetFile {
    */
   importFile(path:string):Promise<ImportResult>;
   openImportFileDialog();
-  importYNAB4File();
 
   /**
    *  Start a sync
@@ -88,13 +86,6 @@ export interface IBudgetFile {
    *  Cancel sync
    */
   cancelSync();
-
-  /**
-   *  Undo
-   */
-  doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T>;
-  doUndo();
-  doRedo();
 }
 
 interface IBudgetFileRPCMessage {
@@ -135,11 +126,30 @@ export class BudgetFile implements IBudgetFile {
 
   readonly id:string;
   readonly filename:string;
+
   constructor(filename?:string) {
     log.info('opening', filename);
     this.filename = filename || '';
     this.id = uuid();
     BudgetFile.REGISTRY[this.id] = this;
+  }
+
+  /**
+   *  Open or create a budget file.
+   */
+  static async openFile(filename:string, args:{
+    create?:boolean,
+    windows?:Array<IOpenWindow>,
+  } = {}):Promise<BudgetFile> {
+    if (!args.create) {
+      // open the file or fail if it doesn't exist
+      if (! await fs.existsAsync(filename)) {
+        displayError(sss('File does not exist:') + ` ${filename}`)
+        return;
+      }
+    }
+    let bf = new BudgetFile(filename);
+    return bf.start(args.windows);
   }
 
   /**
@@ -194,13 +204,14 @@ export class BudgetFile implements IBudgetFile {
   }
 
   /**
-
+   *  Open the file, hook up all communication channels and event
+   *  processors and create windows.
    */
   async start(windows:Array<IOpenWindow>=[]) {
     // connect to database
     try {
       const db = openSqlite(this.filename);
-      this.store = new SQLiteStore(db);
+      this.store = new SQLiteStore(db, new DesktopFunctions());
       await this.store.doSetup();
     } catch(err) {
       log.error(`Error opening file: ${this.filename}`);
@@ -254,9 +265,6 @@ export class BudgetFile implements IBudgetFile {
 
   /**
    *  Open the "default" set of windows for a newly opened budget.
-   *
-   *  Currently, this just opens the accounts page, but in the future
-   *  It might open the set of last-opened windows.
    */
   async openDefaultWindows(windows:Array<IOpenWindow>=[]) {
     if (windows.length) {
@@ -293,7 +301,7 @@ export class BudgetFile implements IBudgetFile {
   }
 
   /**
-   *  Open a new budget-specific window.
+   *  Open a new budget-specific window in an already-open budget.
    *
    *  @param path  Relative path to open
    *  @param hide  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.
@@ -512,26 +520,6 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
-  importYNAB4File() {
-    findYNAB4FileAndImport(this, this.store);
-  }
-
-  static async openFile(filename:string, args:{
-    create?:boolean,
-    windows?:Array<IOpenWindow>,
-  } = {}):Promise<BudgetFile> {
-    if (!args.create) {
-      // open the file or fail if it doesn't exist
-      if (! await fs.existsAsync(filename)) {
-        displayError(sss('File does not exist:') + ` ${filename}`)
-        return;
-      }
-    }
-    let bf = new BudgetFile(filename);
-    return bf.start(args.windows);
-  }
-
-
   async startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
     let m_onOrAfter = loadTS(onOrAfter);
     let m_before = loadTS(before);
@@ -555,44 +543,6 @@ export class BudgetFile implements IBudgetFile {
     this.running_syncs.forEach(sync => {
       sync.cancel();
     })
-  }
-
-  /**
-   *  Run a function, recording it as undo-able
-   */
-  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
-    return this.store.undo.doAction(label, func);
-  }
-  async doUndo() {
-    let result = await this.store.undo.undoLastAction();
-    return this._handleUndoRedoResult(result)
-  }
-  async doRedo() {
-    let result = await this.store.undo.redoLastAction();
-    return this._handleUndoRedoResult(result);
-  }
-  private async _handleUndoRedoResult(result:UndoRedoResult) {
-    let promises = result.changes.map(async change => {
-      if (change.change === 'delete') {
-        return this.store.publishObject('delete', {
-          _type: change.table,
-          id: change.id,
-          created: null,
-        })
-      } else {
-        let obj = await this.store.getObject(change.table, change.id);
-        return this.store.publishObject('update', obj);
-      }
-    })
-    return Promise.all(promises);
-  }
-
-  // These are for use by RendererBudgetFile
-  async startAction(label:string) {
-    return this.store.undo.startAction(label);
-  }
-  async finishAction(id:number) {
-    return this.store.undo.finishAction(id);
   }
 }
 
@@ -640,32 +590,12 @@ class RendererBudgetFile implements IBudgetFile {
   openImportFileDialog() {
     return this.callInMain('openImportFileDialog');
   }
-  importYNAB4File() {
-    return this.callInMain('importYNAB4File');
-  }
 
   startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
     return this.callInMain('startSync', dumpTS(onOrAfter), dumpTS(before));
   }
   cancelSync() {
     return this.callInMain('cancelSync');
-  }
-
-  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
-    const action_id = await this.callInMain('startAction', label);
-    try {
-      return await func()
-    } catch(err) {
-      throw err;
-    } finally {
-      await this.callInMain('finishAction', action_id);
-    }
-  }
-  doUndo() {
-    return this.callInMain('doUndo');
-  }
-  doRedo() {
-    return this.callInMain('doRedo');
   }
 
   /**

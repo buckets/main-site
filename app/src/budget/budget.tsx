@@ -69,7 +69,7 @@ export async function start(base_element, room, args: {
   let store = current_file.store;
 
   // initial state
-  manager.attach(store, current_file);
+  manager.attach(store);
   await manager.refresh();
 
   // watch for changes
