@@ -1,5 +1,7 @@
+import * as Path from 'path'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
+import { APP_ROOT } from './mainprocess/globals'
 import { CONTEXT } from '@iffycan/i18n'
 export { sss } from '@iffycan/i18n'
 
@@ -29,7 +31,7 @@ async function getLocale():Promise<string> {
 }
 
 CONTEXT.config({
-  langpack_basepath: './langs',
+  langpack_basepath: Path.join(APP_ROOT, 'src/langs'),
 })
 
 export const tx = CONTEXT;
