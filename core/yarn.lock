@@ -1005,6 +1005,20 @@ https-proxy-agent@^2.1.0:
     agent-base "^4.1.0"
     debug "^3.1.0"
 
+iced-error@>=0.0.9:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/iced-error/-/iced-error-0.0.12.tgz#e0a861462817cf0ce974b13fca612d3a0d5d10be"
+
+iced-lock@^1.0.1:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/iced-lock/-/iced-lock-1.1.0.tgz#6116ef1cab3acd6e6b10893bb27ba622fd3fde72"
+  dependencies:
+    iced-runtime "^1.0.0"
+
+iced-runtime@>=0.0.1, iced-runtime@^1.0.0, iced-runtime@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/iced-runtime/-/iced-runtime-1.0.3.tgz#2d4f4fb999ab7aa5430b193c77a7fce4118319ce"
+
 iconv-lite@^0.4.17:
   version "0.4.21"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.21.tgz#c47f8733d02171189ebc4a400f3218d348094798"
@@ -1570,6 +1584,12 @@ moment-timezone@^0.5.17:
   version "2.22.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.1.tgz#529a2e9bf973f259c9643d237fda84de3a26e8ad"
 
+more-entropy@>=0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/more-entropy/-/more-entropy-0.0.7.tgz#67bfc6f7a86f26fbc37aac83fd46d88c61d109b5"
+  dependencies:
+    iced-runtime ">=0.0.1"
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
@@ -1864,6 +1884,10 @@ preserve@^0.2.0:
 process-nextick-args@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.0.tgz#a37d732f4271b4ab1ad070d35508e8290788ffaa"
+
+progress@~1.1.2:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
 
 pseudomap@^1.0.2:
   version "1.0.2"
@@ -2466,6 +2490,16 @@ tough-cookie@~2.3.3:
 trim-right@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
+
+triplesec@^3.0.26:
+  version "3.0.26"
+  resolved "https://registry.yarnpkg.com/triplesec/-/triplesec-3.0.26.tgz#dff2bb4758a423372e739a397d8991f0597d0ac1"
+  dependencies:
+    iced-error ">=0.0.9"
+    iced-lock "^1.0.1"
+    iced-runtime "^1.0.2"
+    more-entropy ">=0.0.7"
+    progress "~1.1.2"
 
 trivial-deferred@^1.0.1:
   version "1.0.1"

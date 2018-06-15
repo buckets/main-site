@@ -2,16 +2,18 @@ import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
 import { IObject, IStore } from '../store'
-import { encrypt, decrypt, getPassword, cachePassword } from '../crypto'
+import { encrypt, decrypt } from '../crypto'
 import * as reclib from '../recordlib'
-import { IncorrectPassword } from '../error'
+MATT, this is what you need to figure out next.  How to split up the recording lib into Electron and non-electron parts.
+import { createErrorSubclass } from '../errors'
 import { sss } from '@iffycan/i18n'
 import { ISyncChannel, ASyncening, SyncResult } from './sync'
-import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
-import { localNow } from '../time'
+import { localNow, MaybeMoment } from '../time'
 
 const log = new PrefixLogger('(bankmacro)');
+
+export const IncorrectPassword = createErrorSubclass('IncorrectPassword');
 
 //-------------------------------------------------------
 // Database objects
@@ -22,6 +24,15 @@ declare module '../store' {
   }
   interface ISubStore {
     bankmacro: BankMacroStore
+  }
+  interface IUserInterfaceFunctions {
+    /**
+     *  Open a bankmacro window/browser
+     */
+    openBankMacroBrowser(macro_id:number, autoplay?:{
+      onOrAfter: MaybeMoment;
+      before: MaybeMoment;
+    }):Promise<SyncResult>    
   }
 }
 
@@ -39,17 +50,19 @@ export interface BankMacro extends IObject {
 }
 
 
-async function createPassword(service:string, account:string, prompt:string):Promise<string> {
+async function createPassword(store:IStore, pwkey:string, prompt:string):Promise<string> {
   let error;
   for (var i = 0; i < 3; i++) {
-    let p1 = await getPassword(service, account, {
+    let p1 = await store.sub.passwords.getPassword({
+      pwkey: pwkey,
       prompt: prompt,
-      no_cache: true,
-      error: error,
+      nocache: true,
+      error_message: error,
     });
-    let p2 = await getPassword(service, account, {
+    let p2 = await store.sub.passwords.getPassword({
+      pwkey: pwkey,
       prompt: sss('Confirm password:'),
-      no_cache: true,
+      nocache: true,
     })
     if (p1 === p2) {
       return p1;
@@ -57,7 +70,7 @@ async function createPassword(service:string, account:string, prompt:string):Pro
       error = sss('Passwords did not match');
     }
   }
-  throw new Error("Passwords didn't match");
+  throw new Error(sss("Passwords did not match"));
 }
 
 
@@ -85,23 +98,23 @@ export class BankMacroStore {
     }
   }
   async getPassword():Promise<string> {
-    const service = 'buckets.encryption';
-    const account = 'encryption';
+    const pwkey = 'buckets.encryption';
     // XXX when you decide to store in the OS keychain, change
-    // these service and account values to something unique
-    // to the budget file
+    // this to something unique to the budget file
     if (! await this.hasPassword() ) {
       // No password set yet
-      let password = await createPassword(service, account, sss('Create budget password:'));
-      await cachePassword(service, account, password);
+      let password = await createPassword(this.store, pwkey, sss('Create budget password:'));
+      await this.store.sub.passwords.cachePassword(pwkey, password);
       return password;
     } else {
       // Already have a set password
-      let password = await getPassword(service, account, {
-        prompt: 'Budget password:',
+      let password = await this.store.sub.passwords.getPassword({
+        pwkey,
+        prompt: sss('Budget password:'/* Label for bank macro password prompt */),
       });
+
       if (await this.isPasswordCorrect(password)) {
-        await cachePassword(service, account, password);
+        await this.store.sub.passwords.cachePassword(pwkey, password);
       } else {
         throw new IncorrectPassword('Incorrect password');
       }
@@ -168,7 +181,7 @@ export class BankMacroStore {
   async delete(macro_id:number):Promise<any> {
     return this.store.deleteObject('bank_macro', macro_id);
   }
-  async runMacro(file:IBudgetFile, macro_id:number, onOrAfter:moment.Moment, before:moment.Moment):Promise<SyncResult> {
+  async runMacro(macro_id:number, onOrAfter:moment.Moment, before:moment.Moment):Promise<SyncResult> {
     let today = localNow();
     if (today.isBefore(onOrAfter)) {
       // We're in the future
@@ -183,7 +196,7 @@ export class BankMacroStore {
     let imported_count = 0;
     log.info(`Running macro #${macro_id}`);
     try {
-      let result:SyncResult = await file.openRecordWindow(macro_id, {
+      let result:SyncResult = await this.store.ui.openBankMacroBrowser(macro_id, {
         onOrAfter,
         before,
       })
@@ -201,17 +214,17 @@ export class BankMacroStore {
 
 
 export class MacroSyncer implements ISyncChannel {
-  constructor(private store:IStore, private file:IBudgetFile) {
+  constructor(private store:IStore) {
   }
   syncTransactions(onOrAfter:moment.Moment, before:moment.Moment) {
-    return new MacroSync(this.store, this.file, onOrAfter, before);
+    return new MacroSync(this.store, onOrAfter, before);
   }
 }
 
 export class MacroSync implements ASyncening {
   public result:SyncResult;
 
-  constructor(private store:IStore, private file:IBudgetFile, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
+  constructor(private store:IStore, readonly onOrAfter:moment.Moment, readonly before:moment.Moment) {
 
   }
   async start():Promise<SyncResult> {
@@ -223,7 +236,7 @@ export class MacroSync implements ASyncening {
     for (let macro of macros) {
       log.info(`Syncing macro #${macro.id} ${macro.name}`);
       try {
-        let result:SyncResult = await this.store.sub.bankmacro.runMacro(this.file, macro.id, onOrAfter, before);
+        let result:SyncResult = await this.store.sub.bankmacro.runMacro(macro.id, onOrAfter, before);
         errors = errors.concat(result.errors);
         imported_count += result.imported_count;
       } catch (err) {

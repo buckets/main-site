@@ -7,6 +7,7 @@ import { ReportStore } from './reports'
 import { BankMacroStore } from './bankmacro'
 import { SettingsStore } from './settings'
 import { YNABStore } from './ynab'
+import { PasswordFetcher } from './passwords'
 
 export class SubStore implements ISubStore {
   constructor(private store:IStore) {
@@ -50,6 +51,14 @@ export class SubStore implements ISubStore {
       this._bankmacro = new BankMacroStore(this.store);
     }
     return this._bankmacro;
+  }
+
+  private _pwfetcher:PasswordFetcher;
+  get passwords() {
+    if (!this._pwfetcher) {
+      this._pwfetcher = new PasswordFetcher(this.store);
+    }
+    return this._pwfetcher;
   }
   
   private _settings:SettingsStore;

@@ -22,7 +22,8 @@
     "mathjs": "^4.0.1",
     "moment": "^2.22.1",
     "moment-timezone": "^0.5.17",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "triplesec": "^3.0.26"
   },
   "devDependencies": {
     "@types/mathjs": "^0.0.39",
