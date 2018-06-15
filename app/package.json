@@ -48,7 +48,6 @@
     "request-promise": "4.2.1",
     "sqlite3-offline": "^3.2.0",
     "tmp": "0.0.31",
-    "triplesec": "^3.0.26",
     "uuid": "^3.0.1"
   },
   "build": {

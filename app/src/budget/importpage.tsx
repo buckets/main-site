@@ -295,7 +295,7 @@ export class ImportPage extends React.Component<{
     let macro = await manager
     .checkpoint(sss('Create Macro'))
     .sub.bankmacro.add({name: ''});
-    current_file.openRecordWindow(macro.id);
+    manager.nocheckpoint.ui.openBankMacroBrowser(macro.id);
   }
   connect = async () => {
     try {
@@ -343,7 +343,7 @@ class BankMacroList extends React.Component<{
             play_button = <button className="icon"
               onClick={() => {
                 let { onOrAfter, before } = manager.appstate.viewDateRange;
-                manager.nocheckpoint.sub.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
+                manager.nocheckpoint.sub.bankmacro.runMacro(macro.id, onOrAfter, before);
               }}><span className="fa fa-play"></span></button>
           }
           return <tr key={idx}>
@@ -373,7 +373,8 @@ class BankMacroList extends React.Component<{
             <td className="icon-button-wrap">
               <button className="icon"
                 onClick={() => {
-                  current_file.openRecordWindow(macro.id);
+                  manager
+                  .nocheckpoint.ui.openBankMacroBrowser(macro.id);
                 }}>
                 <span className="fa fa-gear"></span>
               </button>

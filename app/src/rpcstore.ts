@@ -1,6 +1,8 @@
 import { v4 as uuid } from 'uuid';
 import { IStore, IStoreEvents, IEventCollection, ObjectEventType, IObject, IObjectTypes, IUserInterfaceFunctions } from 'buckets-core/dist/store'
 import { SubStore } from 'buckets-core/dist/models/substore'
+import { SyncResult } from 'buckets-core/dist/models/sync'
+import { MaybeMoment } from 'buckets-core/dist/time'
 import { ipcMain, ipcRenderer } from 'electron'
 import { PrefixLogger } from './logging'
 import { MainEventCollection, RendererEventCollection } from './rpc'
@@ -201,7 +203,22 @@ class RendererUserInterfaceFunctions implements IUserInterfaceFunctions {
   }
 
   // Actual implementation
+  
   promptToStartYNABImport() {
     return this.callRemote('promptToStartYNABImport');
+  }
+
+  async openBankMacroBrowser(macro_id:number, autoplay?:{
+    onOrAfter: MaybeMoment;
+    before: MaybeMoment;
+  }):Promise<SyncResult> {
+    return this.callRemote<SyncResult>('openBankMacroBrowser', macro_id, autoplay);
+  }
+  getPassword(opts: {
+    pwkey: string;
+    prompt: string;
+    error_message?:string;
+  }):Promise<string> {
+    return this.callRemote('getPassword', opts);
   }
 }

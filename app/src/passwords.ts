@@ -3,7 +3,6 @@ import { BrowserWindow, ipcMain } from 'electron'
 // import * as keytar from 'keytar'
 import {v4 as uuid} from 'uuid'
 import * as querystring from 'querystring'
-import * as triplesec from 'triplesec'
 import { onlyRunInMain } from './rpc'
 
 import { APP_ROOT } from './mainprocess/globals'
@@ -56,44 +55,15 @@ export const promptForPassword = onlyRunInMain((prompt:string, args?:{
   })
 })
 
-let PW_CACHE = {};
-let PW_CACHE_TIMEOUTS = {};
-const CACHE_TIME = 15 * 60 * 1000;
-export const cachePassword = onlyRunInMain(function(service:string, account:string, value:string) {
-  const cache_key = `${service}:${account}`;
-  // cache it
-  PW_CACHE[cache_key] = value;
-
-  // plan to clear it
-  let existing_timer = PW_CACHE_TIMEOUTS[cache_key];
-  if (existing_timer) {
-    clearTimeout(existing_timer);
-  }
-  PW_CACHE_TIMEOUTS[cache_key] = setTimeout(() => {
-    delete PW_CACHE[cache_key];
-  }, CACHE_TIME);
-});
 
 /**
-  Get a password from a cache, the OS keychain or optionally by prompting the user.
+  Get a password from the OS keychain or optionally by prompting the user.
 */
-export const getPassword = onlyRunInMain(async function getPassword(service:string, account:string, args?:{
+export const getPassword = onlyRunInMain(async function getPassword(pwkey:string, args:{
   prompt?:string,
-  no_cache?:boolean,
   error?:string,
-}):Promise<string> {
-  args = args || {};
-  const cache_key = `${service}:${account}`;
-  let pw = null;
-
-  // try the cache
-  if (!args.no_cache) {
-    if (PW_CACHE[cache_key]) {
-      pw = PW_CACHE[cache_key];
-      return pw
-    }
-  }
-  
+}={}):Promise<string> {
+  let pw:string;
   // try the OS keychain
   // pw = await keytar.getPassword(service, account)
   // if (pw !== null) {
@@ -118,34 +88,4 @@ export const getPassword = onlyRunInMain(async function getPassword(service:stri
 // export async function savePassword(service:string, account:string, password:string):Promise<void> {
 //   await keytar.setPassword(service, account, password)
 // }
-
-export function encrypt(plaintext:string, password:string):Promise<string> {
-  return new Promise((resolve, reject) => {
-    let key = new Buffer(password, 'utf8')
-    let ptbuffer = new Buffer(plaintext, 'utf8')
-    triplesec.encrypt({key, data:ptbuffer}, (err, ciphertext) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(ciphertext.toString('base64'))  
-      }
-    })
-  })
-  // let cipher = crypto.createCipher('aes256', password)
-  // cipher.update(plaintext, 'utf8')
-  // return cipher.final('base64')
-}
-export function decrypt(ciphertext:string, password:string):Promise<string> {
-  return new Promise((resolve, reject) => {
-    let key = new Buffer(password, 'utf8')
-    let ctbuffer = new Buffer(ciphertext, 'base64')
-    triplesec.decrypt({key, data:ctbuffer}, (err, plaintext) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(plaintext.toString('utf8'))  
-      }
-    })
-  })
-}
 

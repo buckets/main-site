@@ -3,6 +3,16 @@ declare module '../store' {
   interface ISubStore {
     passwords: PasswordFetcher;
   }
+  interface IUserInterfaceFunctions {
+    /**
+     *  Get a password either from the user or a password vault
+     */
+    getPassword(opts: {
+      pwkey: string;
+      prompt: string;
+      error_message?:string;
+    }):Promise<string>
+  }
 }
 
 class EventualValue<T> {

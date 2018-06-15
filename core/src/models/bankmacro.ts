@@ -3,8 +3,6 @@ import {v4 as uuid} from 'uuid'
 
 import { IObject, IStore } from '../store'
 import { encrypt, decrypt } from '../crypto'
-import * as reclib from '../recordlib'
-MATT, this is what you need to figure out next.  How to split up the recording lib into Electron and non-electron parts.
 import { createErrorSubclass } from '../errors'
 import { sss } from '@iffycan/i18n'
 import { ISyncChannel, ASyncening, SyncResult } from './sync'
@@ -49,7 +47,6 @@ export interface BankMacro extends IObject {
   // }
 }
 
-
 async function createPassword(store:IStore, pwkey:string, prompt:string):Promise<string> {
   let error;
   for (var i = 0; i < 3; i++) {
@@ -76,8 +73,14 @@ async function createPassword(store:IStore, pwkey:string, prompt:string):Promise
 
 export interface IUpdateArgs {
   name?: string;
-  recording?: reclib.Recording;
+  recording_str?: string;
   enabled?: boolean;
+}
+export interface BankMacroGuts {
+  name?: string;
+  enc_recording?: string;
+  enabled?: boolean;
+  uuid?: string;
 }
 
 export class BankMacroStore {
@@ -139,31 +142,31 @@ export class BankMacroStore {
       return true;
     }
   }
-  async _prepareForDB(args:IUpdateArgs):Promise<Partial<BankMacro>> {
-    let data:any = args || {};
-    if (data.recording) {
+  async _prepareForDB(args:IUpdateArgs={}):Promise<BankMacroGuts> {
+    let bank_macro:BankMacroGuts = {
+      name: args.name,
+      enc_recording: undefined,
+      enabled: args.enabled,
+    };
+    if (args.recording_str) {
       const password = await this.getPassword();  
-      data.enc_recording = await encrypt(JSON.stringify(data.recording), password)
-      delete data.recording;
+      bank_macro.enc_recording = await encrypt(args.recording_str, password)
     }
-    const partial:Partial<BankMacro> = data;
-    return partial;
+    return bank_macro;
   }
   async decryptRecording(bank_macro:BankMacro):Promise<{
-    recording: reclib.Recording,
+    recording_str: string,
   }> {
-    let recording = null;
+    let recording_str:string;
     if (bank_macro.enc_recording) {
       const password = await this.getPassword();
-      recording = reclib.Recording.parse(await decrypt(bank_macro.enc_recording, password));
+      recording_str = await decrypt(bank_macro.enc_recording, password);
     }
-    return { recording }
+    return { recording_str }
   }
   async add(args:IUpdateArgs):Promise<BankMacro> {
-    const data = await this._prepareForDB(args);
-    if (!data.uuid) {
-      data.uuid = uuid();
-    }
+    let data = await this._prepareForDB(args);
+    data.uuid = uuid();
     return this.store.createObject('bank_macro', data);
   }
   async list():Promise<BankMacro[]> {

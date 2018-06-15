@@ -717,8 +717,8 @@ export async function start(args:{
   let i = 0;
   while (true) {
     try {
-      let plaintext = await store.sub.bankmacro.decryptRecording(BANKMACRO);
-      recording = plaintext.recording;
+      let { recording_str } = await store.sub.bankmacro.decryptRecording(BANKMACRO);
+      recording = Recording.parse(recording_str);
       break;
     } catch(err) {
       if (err instanceof IncorrectPassword) {
@@ -823,9 +823,9 @@ export async function start(args:{
           });
         }
       }}
-      onRecordingChange={(new_recording) => {
+      onRecordingChange={(new_recording:Recording) => {
         store.sub.bankmacro.update(args.macro_id, {
-          recording: new_recording,
+          recording_str: new_recording.stringify(),
         })
       }}
     />

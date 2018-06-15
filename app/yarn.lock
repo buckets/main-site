@@ -806,6 +806,7 @@ browser-stdout@1.3.0:
     moment "^2.22.1"
     moment-timezone "^0.5.17"
     request-promise "^4.2.2"
+    triplesec "^3.0.26"
 
 buffer-equal-constant-time@1.0.1:
   version "1.0.1"
