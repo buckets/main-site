@@ -180,7 +180,7 @@ function getDataRows<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):T[] {
 }
 
 // Convert a ParsedCSV into a list of importable values
-interface NormalizedRow<T> {
+interface NormalizedRow {
   norm: {
     amount: number;
     memo: string;
@@ -195,13 +195,13 @@ interface NormalizedRow<T> {
     }
   }
 }
-function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<NormalizedRow<T>> {
+function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<NormalizedRow> {
   const inverted = invertMapping(mapping);
   const funcs = Object.keys(mapping.fields).map(csvheader => {
     const dst_field = mapping.fields[csvheader];
     switch (dst_field) {
       case 'amount': {
-        return (row:NormalizedRow<T>) => {
+        return (row:NormalizedRow) => {
           const orig = row.fields[csvheader].orig;
           let num = null;
           try {
@@ -229,14 +229,14 @@ function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<N
         }
       }
       case 'memo': {
-        return (row:NormalizedRow<T>) => {
+        return (row:NormalizedRow) => {
           const orig = row.fields[csvheader].orig;
           row.fields[csvheader].normkey = 'memo';
           row.norm.memo = row.fields[csvheader].newval = orig;
         }
       }
       case 'posted': {
-        return (row:NormalizedRow<T>) => {
+        return (row:NormalizedRow) => {
           const orig = row.fields[csvheader].orig;
           let val = null;
           if (mapping.posted_format) {
@@ -252,7 +252,7 @@ function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<N
         }
       }
       case 'fi_id': {
-        return (row:NormalizedRow<T>) => {
+        return (row:NormalizedRow) => {
           const orig = row.fields[csvheader].orig;
           row.fields[csvheader].normkey = 'fi_id';
           row.fields[csvheader].newval = orig;
@@ -272,7 +272,7 @@ function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<N
         orig: orig[csvheader],
       }
     })
-    let row:NormalizedRow<T> = {
+    let row:NormalizedRow = {
       norm: {
         amount: null,
         memo: '',
