@@ -16,6 +16,7 @@ export interface PersistentState {
   number_format: ''|'comma-period'|'period-comma';
   skipVersion: string;
   animation: boolean;
+  download_beta_versions: boolean;
   last_opened_windows: Array<{
     filename: string;
     windows: Array<IOpenWindow>;
@@ -30,6 +31,7 @@ export let PSTATE:PersistentState = {
   number_format: '',
   skipVersion: null,
   animation: true,
+  download_beta_versions: false,
   last_opened_windows: [],
   timezone: '',
 };

@@ -119,6 +119,24 @@ class PreferencesApp extends React.Component<{
                 }} />
             </td>
           </tr>
+
+          <tr>
+            <th>{sss('Beta Updates'/* Label for checkbox indicating if users want to receive Beta version of Buckets before wide release */)}</th>
+            <td>
+              <input
+                type="checkbox"
+                checked={pstate.download_beta_versions}
+                onChange={ev => {
+                  let newval = ev.target.checked;
+                  renderer.doUpdate(async () => {
+                    CURRENT_PSTATE = await updateState({
+                      download_beta_versions: newval,
+                    })
+                  })
+                }} />
+              <div className="helptext">{sss('Enable to get new versions of Buckets before everyone else.  There might be more bugs :)')}</div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
