@@ -49,6 +49,7 @@ class PreferencesApp extends React.Component<{
                   })
                 }}>
                 <option value="">{sss('System default'/* Option for Buckets language preference */)}</option>
+                <option value="de">Deutsch</option>
                 <option value="en">English</option>
                 <option value="es">español</option>
                 <option value="fr">Français</option>
