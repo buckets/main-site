@@ -39,7 +39,7 @@ app.on('ready', () => {
 });
 
 process.on('uncaughtException', (err) => {
-  log.error('uncaughtException', err.stack);
+  log.error('uncaughtException', err && err.stack ? err.stack : err);
   reportErrorToUser(null, {
     err: err,
   })

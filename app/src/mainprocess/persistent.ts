@@ -1,3 +1,4 @@
+import * as os from 'os'
 import { app, remote } from 'electron'
 import * as electron_is from 'electron-is'
 import * as Path from 'path'
@@ -62,8 +63,18 @@ function stateFilename() {
 export const updateState = onlyRunInMain(async (update:Partial<PersistentState>):Promise<PersistentState> => {
     let new_state = Object.assign({}, PSTATE, update);
     PSTATE = await new Promise<PersistentState>((resolve, reject) => {
-      fs.writeFile(stateFilename(), JSON.stringify(new_state, null, 2), 'utf8' as any, err => {
-        if (err) {
+      const filename = stateFilename();
+      fs.writeFile(filename, JSON.stringify(new_state, null, 2), 'utf8' as any, err => {
+        if (true || err) {
+          log.error(`Error writing ${filename}`);
+          log.info(`user=${JSON.stringify(os.userInfo())}`);
+          log.info(`platform=${process.platform}`);
+          log.info(`release=${os.release()}`);
+          log.info(`arch=${process.arch}`);
+          const real_app = remote ? remote.app : app;
+          logStat(filename)
+          logStat(real_app.getPath('userData'))
+          logStat(real_app.getPath('appData'))
           throw err;
         }
         resolve(new_state);
@@ -74,6 +85,45 @@ export const updateState = onlyRunInMain(async (update:Partial<PersistentState>)
 
 export const PersistEvents = {
   added_recent_file: new EventSource<string>(),
+}
+
+function logStat(path:string) {
+  try {
+    const stat = JSON.stringify(fs.statSync(path));
+    const nicestat = JSON.stringify(getNiceStat(path));
+    log.info(`stat of ${path}`);
+    log.info(nicestat);
+    log.info(stat);  
+  } catch(err2) {
+    log.info(`Error doing stat of ${path}`);
+  }
+}
+
+function getNiceStat(path:string) {
+  let ret = {
+    readable: null,
+    writeable: null,
+    exists: null,
+  }
+  try {
+    fs.accessSync(path, fs.constants.F_OK)
+    ret.exists = true;
+  } catch(err) {
+    ret.exists = false;
+  }
+  try {
+    fs.accessSync(path, fs.constants.R_OK)
+    ret.readable = true;
+  } catch(err) {
+    ret.readable = false;
+  }
+  try {
+    fs.accessSync(path, fs.constants.W_OK)
+    ret.writeable = true;
+  } catch(err) {
+    ret.writeable = false;
+  }
+  return ret;
 }
 
 /**
