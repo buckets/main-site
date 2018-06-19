@@ -65,7 +65,7 @@ export const updateState = onlyRunInMain(async (update:Partial<PersistentState>)
     PSTATE = await new Promise<PersistentState>((resolve, reject) => {
       const filename = stateFilename();
       fs.writeFile(filename, JSON.stringify(new_state, null, 2), 'utf8' as any, err => {
-        if (true || err) {
+        if (err) {
           log.error(`Error writing ${filename}`);
           log.info(`user=${JSON.stringify(os.userInfo())}`);
           log.info(`platform=${process.platform}`);
