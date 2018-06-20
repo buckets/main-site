@@ -159,7 +159,7 @@ export const DEFAULTS:IMessages = {
     val: "Animation",
     translated: false,
     h: "Vk4XaMgXNIEY4+Gcal1n+qdnamgr4Q5af/+wzFRoIHU=",
-    // preferences.tsx:106
+    // preferences.tsx:107
   },
   "Any other monthly bills you have?": {
     val: "Any other monthly bills you have?",
@@ -213,7 +213,7 @@ export const DEFAULTS:IMessages = {
     val: "Beta Updates",
     translated: false,
     h: "xyGKwUoes8hYiGBWy9KIoxkU/BREGx8pGiKIUb6hsEc=",
-    // preferences.tsx:123
+    // preferences.tsx:124
   },
   "Birthdays": {
     val: "Birthdays",
@@ -699,7 +699,7 @@ export const DEFAULTS:IMessages = {
     val: "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)",
     translated: false,
     h: "sC2MA2Tqphkt5iblpZFWToDQhdF9U2nk8FpwTxH3Ta8=",
-    // preferences.tsx:136
+    // preferences.tsx:137
   },
   "Ending Balance": {
     val: "Ending Balance",
@@ -731,6 +731,7 @@ export const DEFAULTS:IMessages = {
     h: "/ErBlknw7o83xx0uIDCjdDA4u5bAwnNZuhFd2GV1Zcw=",
     // errors.ts:121
     // errors.ts:139
+    // main.ts:51
   },
   "Error fetching data": {
     val: "Error fetching data",
@@ -1151,7 +1152,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
     // csvimport.tsx:569
-    // preferences.tsx:73
+    // preferences.tsx:74
   },
   "Last used": {
     val: "Last used",
@@ -1446,13 +1447,14 @@ export const DEFAULTS:IMessages = {
     val: "Number format",
     translated: false,
     h: "RxooctpubAJr5NcKn57a5kjGBEdlPT5b2h6PUFLqxxE=",
-    // preferences.tsx:61
+    // preferences.tsx:62
   },
   "OK": {
     val: "OK",
     translated: false,
     h: "mMSSK7ZBxlx6MLe8r98jC5sAtmk2McVhRqslsnhu5KM=",
     // errors.ts:141
+    // main.ts:54
   },
   "Off Budget Accounts": {
     val: "Off Budget Accounts",
@@ -2019,7 +2021,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",
     // preferences.tsx:50
-    // preferences.tsx:94
+    // preferences.tsx:95
   },
   "Target date:": {
     val: "Target date:",
@@ -2068,7 +2070,7 @@ export const DEFAULTS:IMessages = {
     val: "Timezone",
     translated: false,
     h: "y2odAzUKexep7CmO6P8BCj1p4PWG6VZ/RbIg8oOWASI=",
-    // preferences.tsx:82
+    // preferences.tsx:83
   },
   "To": {
     val: "To",
@@ -2664,6 +2666,19 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "mv9GxRVjWShYHYo8kb/wvNU8eEYBGE2QtfUTxTsdP0I=",
     // exportpage.tsx:72
+  },
+  "file-perm-error": {
+    /* Error title for file permission problem */
+    val: "Permission error",
+    translated: false,
+    h: "nQIADEN41YoaLIfsI4ftbFHRtc4bChKL9/O1Y4DBd8I=",
+    // main.ts:52
+  },
+  "file-perm-error-detail": {
+    val: (path:string) => `Buckets is unable to create a directory inside "${path}".  Buckets uses the directory to save preferences.\n\nPlease adjust permissions and restart Buckets.`,
+    translated: false,
+    h: "SEPpn14I33mY1MVIeTNP+mAkD5up85QMwn5GSW0dAfY=",
+    // main.ts:53
   },
   "getting-started-link": {
     val: (clickhandler) => {
