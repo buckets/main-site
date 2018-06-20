@@ -414,13 +414,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     } else if (trans) {
       source_icon = <button
         title={trans.cleared
-          ? sss("Cleared")
-          : sss("Not yet cleared")}
+          ? sss("Cleared"/* Tooltip text indicating that a transaction has cleared. */)
+          : sss("Not yet cleared"/* Tooltip text indicating that a transaction has not yet cleared. */)}
         className={cx("icon hover cleared-indicator", {
           cleared: trans.cleared,
         })}
         onClick={ev => {
-          let undo_note = trans.cleared ? sss('Mark Not Cleared') : sss('Mark Cleared');
+          let undo_note = trans.cleared ? sss('Mark Not Cleared'/* Name of action for marking a transaction as not having cleared the bank */) : sss('Mark Cleared'/* Name of action for marking a transaction as having cleared the bank */);
           manager.checkpoint(undo_note)
           .sub.accounts.updateTransaction(trans.id, {cleared: !trans.cleared})
         }}><span className="fa fa-check-circle"/></button>
@@ -512,7 +512,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               })
             }}>
             <option></option>
-            {Object.values(appstate.accounts).map(account => {
+            {Object.values<Account>(appstate.accounts).map(account => {
               if (account.id === this.state.account_id) {
                 // Can't transfer to/from the same account
                 return null;

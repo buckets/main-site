@@ -59,6 +59,9 @@ button {
 .center {
   text-align: center !important;
 }
+.full-width {
+  min-width: 100%;
+}
 
 .error {
   color: var(--red);

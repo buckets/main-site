@@ -33,7 +33,7 @@ export class ClosedAccountsPage extends React.Component<{appstate:AppState}, {}>
             manager
             .checkpoint(sss('Reopen Account'))
             .sub.accounts.unclose(account.id)
-          }}>{sss('Reopen')}</button></td>
+          }}>{sss('Reopen'/* Label for button to reopen a close account */)}</button></td>
           <td>
             <Link relative to={`../${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link>
           </td>

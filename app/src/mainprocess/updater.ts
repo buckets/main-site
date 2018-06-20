@@ -14,6 +14,7 @@ let win:Electron.BrowserWindow;
 
 export function checkForUpdates() {
   autoUpdater.autoDownload = false;
+  autoUpdater.allowPrerelease = PSTATE.download_beta_versions;
   autoUpdater.on('checking-for-update', () => {
     log.info('checking for updates...');
     setUpdateWindowStatus({

@@ -92,8 +92,8 @@ export function nag() {
 
 Would you like to purchase a license now?`)(),
       buttons: [
-        sss('Later'),
-        sss('Purchase'),
+        sss('Later'/* Button label for purchasing a license later */),
+        sss('Purchase'/* Button label for purchasing a license */),
       ],
       defaultId: 1,
     }, (indexClicked) => {

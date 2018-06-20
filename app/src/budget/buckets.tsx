@@ -49,9 +49,9 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
           <td>{bucket.name}</td>
           <td><button onClick={() => {
             manager
-            .checkpoint(sss('Un-kick Bucket'))
+            .checkpoint(sss('Un-kick Bucket'/* Name of action for undo/redo labels (i.e. Control-Z will "Undo Un-kick Bucket") Consider this the opposite of "Archive Bucket" */))
             .sub.buckets.unkick(bucket.id);
-          }}>{sss('Un-kick')}</button></td>
+          }}>{sss('Un-kick'/* Button label for unarchiving a bucket */)}</button></td>
           <td>
             <Link relative to={`../${bucket.id}`} className="subtle">{sss('more')}</Link>
           </td>
@@ -143,7 +143,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       if (total > 0 && total > appstate.rain) {
         doPendingButton = <SafetySwitch
           onClick={this.doPending}
-        >{sss('Make it so')}</SafetySwitch>
+        >{sss('Make it so'/* Button label for causing the set of pending deposits/withdrawls to happen.  Synonyms could be: "Do it" or "Run" or "Go" */)}</SafetySwitch>
         warning = <Help className="right" icon={<span className="error fa fa-exclamation-triangle" />}>{sss("Warning: Doing this will use rain you don't have and could steal rain from future months (if available).")}</Help>
       } else {
         doPendingButton = <button className="primary" onClick={this.doPending}>{sss('Make it so')}</button>;  
@@ -1059,7 +1059,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       kick_button = <button
         onClick={() => {
           manager
-          .checkpoint(sss('Un-kick Bucket'))
+          .checkpoint(sss('Un-kick Bucket'/* Name of action.  Consider this "Unarchive Bucket" */))
           .sub.buckets.unkick(bucket.id);
         }}>{sss('Un-kick')}</button>
     } else {
@@ -1067,7 +1067,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
         className="delete"
         onClick={() => {
           manager
-          .checkpoint(sss('Kick Bucket'))
+          .checkpoint(sss('Kick Bucket'/* Name of action.  Consider this "Archive Bucket" */))
           .sub.buckets.kick(bucket.id)
           .then(new_bucket => {
             if (!new_bucket.kicked) {
@@ -1075,7 +1075,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               makeToast(sss('Bucket deleted completely'));
             }
           })
-        }}>{sss('Kick the bucket')}</button>
+        }}>{sss('Kick the bucket'/* Button label for archiving a bucket */)}</button>
     }
 
     let chart;

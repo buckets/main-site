@@ -11,7 +11,7 @@ export function openPreferences() {
   }
   win = new BrowserWindow({
     width: 500,
-    height: 250,
+    height: 300,
     minWidth: 400,
     minHeight: 200,
     show: false,

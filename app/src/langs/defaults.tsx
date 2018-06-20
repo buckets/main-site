@@ -29,8 +29,8 @@ export const DEFAULTS:IMessages = {
     val: "(optional)",
     translated: false,
     h: "njVpYkgCdiB755Pxnsk1D8GELOWqw1mBBYG+YQr7e98=",
-    // csvimport.tsx:437
-    // csvimport.tsx:440
+    // csvimport.tsx:540
+    // csvimport.tsx:543
   },
   "/mo": {
     val: "/mo",
@@ -95,7 +95,7 @@ export const DEFAULTS:IMessages = {
     val: "Account name",
     translated: false,
     h: "Wo+ZnjRTxGkow1m4BGCavACj82/UajUNs6oLDXB++sU=",
-    // csvimport.tsx:631
+    // csvimport.tsx:733
   },
   "Accounts": {
     val: "Accounts",
@@ -139,8 +139,8 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:174
     // amazon.tsx:40
     // transactions.tsx:227
-    // csvimport.tsx:436
-    // csvimport.tsx:659
+    // csvimport.tsx:539
+    // csvimport.tsx:761
   },
   "Amount of money over-allocated in buckets.": {
     val: "Amount of money over-allocated in buckets.",
@@ -159,7 +159,7 @@ export const DEFAULTS:IMessages = {
     val: "Animation",
     translated: false,
     h: "Vk4XaMgXNIEY4+Gcal1n+qdnamgr4Q5af/+wzFRoIHU=",
-    // preferences.tsx:106
+    // preferences.tsx:107
   },
   "Any other monthly bills you have?": {
     val: "Any other monthly bills you have?",
@@ -207,6 +207,13 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "hHHAAGXs0oscbD5jkMQSQUQ5sLsgo/sPaBumUBAq+CA=",
     // buckets.tsx:1129
+  },
+  "Beta Updates": {
+    /* Label for checkbox indicating if users want to receive Beta version of Buckets before wide release */
+    val: "Beta Updates",
+    translated: false,
+    h: "xyGKwUoes8hYiGBWy9KIoxkU/BREGx8pGiKIUb6hsEc=",
+    // preferences.tsx:124
   },
   "Birthdays": {
     val: "Birthdays",
@@ -406,6 +413,7 @@ export const DEFAULTS:IMessages = {
     // updates.tsx:55
   },
   "Cleared": {
+    /* Tooltip text indicating that a transaction has cleared. */
     val: "Cleared",
     translated: false,
     h: "j1SmbPuDDBP04XfOH9NNFCDzXmB9xAzSoVG7RcHcdBg=",
@@ -415,7 +423,7 @@ export const DEFAULTS:IMessages = {
     val: "Click the \"Set mapping\" to continue.",
     translated: false,
     h: "17QBrVZk8kjbKoqmqsbEBBHyjcoru22TcYanag65Jrw=",
-    // csvimport.tsx:387
+    // csvimport.tsx:491
   },
   "Close Account": {
     val: "Close Account",
@@ -490,7 +498,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "0N2I0sNdMLVk7zC9FqlNYoA1G6RDgQDvQErp/TjAnRA=",
     // accounts.tsx:458
-    // csvimport.tsx:643
+    // csvimport.tsx:745
   },
   "Create Backup": {
     val: "Create Backup",
@@ -539,7 +547,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "SmoVFbeAWSO4cW1YQJbuDJQz8kenVz5++WTJEkS6Vos=",
     // importpage.tsx:490
-    // csvimport.tsx:622
+    // csvimport.tsx:724
   },
   "Currency symbol": {
     /* Label for currency symbol setting */
@@ -558,9 +566,10 @@ export const DEFAULTS:IMessages = {
     val: "Date Posted",
     translated: false,
     h: "3A+vhaBB21UASdnwmNYVGMV9qH/U43D3DCsVSXlWasY=",
-    // csvimport.tsx:439
+    // csvimport.tsx:542
   },
   "Debt": {
+    /* Name of bucket group for debts */
     val: "Debt",
     translated: false,
     h: "y9kslXhW17gMMFZ9Dq8g/tabfINzlmzT+39QNbWiWGA=",
@@ -637,7 +646,7 @@ export const DEFAULTS:IMessages = {
     val: "Download",
     translated: false,
     h: "QVM3NKWnuJ19cWUaN3y9fVCbkiQTygWbOYuFMklAwNc=",
-    // updater.ts:196
+    // updater.ts:197
   },
   "Download Update": {
     val: "Download Update",
@@ -687,6 +696,12 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "9SWFr96CNVD21JQ30lw4cj1JCAZ44RNlKkDzQJ/RyuE=",
     // importpage.tsx:356
+  },
+  "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)": {
+    val: "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)",
+    translated: false,
+    h: "sC2MA2Tqphkt5iblpZFWToDQhdF9U2nk8FpwTxH3Ta8=",
+    // preferences.tsx:137
   },
   "Ending Balance": {
     val: "Ending Balance",
@@ -788,12 +803,14 @@ export const DEFAULTS:IMessages = {
     // importing.ts:96
   },
   "Find Next": {
+    /* Edit menu label for finding the next match.  Perhaps use what your browser or other applications use. */
     val: "Find Next",
     translated: false,
     h: "LALfI5V4TsQo0DcGJwmNmrm3xNPtY5PmQuxB1voZo34=",
     // menu.ts:138
   },
   "Find Previous": {
+    /* Edit menu label for finding the previous match.  Perhaps use what your browser or other applications use. */
     val: "Find Previous",
     translated: false,
     h: "0n6Dq5KDTxxsTAKrJE+RDdgi9ln6FyfUEPNBJ6ejZ5o=",
@@ -809,13 +826,13 @@ export const DEFAULTS:IMessages = {
     val: "Finish import",
     translated: false,
     h: "4xsUuxEj2AOOfV6aSUBcosl89BFoAZ+srMPIeWzIjUI=",
-    // csvimport.tsx:651
+    // csvimport.tsx:753
   },
   "For Date Posted, you must also choose the date format.": {
     val: "For Date Posted, you must also choose the date format.",
     translated: false,
     h: "G2XPMMlP2JPnutFhPAo1RnCQMTzdukxPSc+FjoF2Vjs=",
-    // csvimport.tsx:384
+    // csvimport.tsx:488
   },
   "Force Reload": {
     val: "Force Reload",
@@ -876,7 +893,7 @@ export const DEFAULTS:IMessages = {
     val: "Header row",
     translated: false,
     h: "uRtdJlb7w3q8Zl9lZhtY0JReqNVI7CfOdo5I9SW5lfw=",
-    // csvimport.tsx:400
+    // csvimport.tsx:504
   },
   "Health Insurance": {
     val: "Health Insurance",
@@ -936,7 +953,7 @@ export const DEFAULTS:IMessages = {
     val: "Identify the data each column contains using the drop downs below.",
     translated: false,
     h: "59JoGSJaPOdtgmCL+QLp8U/e6y+OGGM8fdEX4sClrpk=",
-    // csvimport.tsx:382
+    // csvimport.tsx:486
   },
   "If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.": {
     val: "If Net is 0, the bucket transactions will be marked as transfers rather than as income or expenses.",
@@ -948,7 +965,7 @@ export const DEFAULTS:IMessages = {
     val: "If multiple columns are selected for Amount, the first non-zero value will be used.  This is helpful if the CSV contains separate Credit and Debit columns.",
     translated: false,
     h: "bxc4+JxhDrm2oYWek0ISeJDxq173KLfpcnOT4GEMWGQ=",
-    // csvimport.tsx:385
+    // csvimport.tsx:489
   },
   "Import": {
     val: "Import",
@@ -1044,9 +1061,8 @@ export const DEFAULTS:IMessages = {
     val: "Invalid",
     translated: false,
     h: "TTWlQj/xySwj3x3tLJd80Tl+VmJXWWdhFpMq90hNbfg=",
-    // csvimport.tsx:534
-    // csvimport.tsx:537
-    // csvimport.tsx:559
+    // csvimport.tsx:656
+    // csvimport.tsx:661
   },
   "Invalid SimpleFIN Token": {
     val: "Invalid SimpleFIN Token",
@@ -1110,18 +1126,21 @@ export const DEFAULTS:IMessages = {
     // startover.tsx:116
   },
   "Kick Bucket": {
+    /* Name of action.  Consider this "Archive Bucket" */
     val: "Kick Bucket",
     translated: false,
     h: "3hmOuv1hNsjpQJ5cSDTlSqN4jGOGFnSPw9r0bK68RWY=",
     // buckets.tsx:1068
   },
   "Kick the bucket": {
+    /* Button label for archiving a bucket */
     val: "Kick the bucket",
     translated: false,
     h: "IvzeGJ9G+Rns8Rbnal26flTFzd+yBNSEBQSptdNy8t8=",
     // buckets.tsx:1076
   },
   "Kicked": {
+    /* Label for list of archived buckets */
     val: "Kicked",
     translated: false,
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
@@ -1138,8 +1157,8 @@ export const DEFAULTS:IMessages = {
     val: "Language default",
     translated: false,
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
-    // csvimport.tsx:464
-    // preferences.tsx:73
+    // csvimport.tsx:569
+    // preferences.tsx:74
   },
   "Last used": {
     val: "Last used",
@@ -1148,11 +1167,12 @@ export const DEFAULTS:IMessages = {
     // importpage.tsx:428
   },
   "Later": {
+    /* Button label for purchasing a license later */
     val: "Later",
     translated: false,
     h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
     // drm.ts:93
-    // updater.ts:195
+    // updater.ts:196
   },
   "Learn More": {
     val: "Learn More",
@@ -1203,6 +1223,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:213
   },
   "Make it so": {
+    /* Button label for causing the set of pending deposits/withdrawls to happen.  Synonyms could be: "Do it" or "Run" or "Go" */
     val: "Make it so",
     translated: false,
     h: "XRTIWjylWKAy5BW8/0C0rOSW5S1QC+CxmgmFfhi81pk=",
@@ -1211,12 +1232,14 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:150
   },
   "Mark Cleared": {
+    /* Name of action for marking a transaction as having cleared the bank */
     val: "Mark Cleared",
     translated: false,
     h: "Z+NICH1z9EYN3Ub7Z9idiTw/t+QaDF9n3h9br9WhjgE=",
     // transactions.tsx:422
   },
   "Mark Not Cleared": {
+    /* Name of action for marking a transaction as not having cleared the bank */
     val: "Mark Not Cleared",
     translated: false,
     h: "4VoXUMr4nLIoyueiB8YlIR9HFGPYBhYxJq/cqqwDLs0=",
@@ -1236,8 +1259,8 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:144
     // searchpage.tsx:173
     // transactions.tsx:226
-    // csvimport.tsx:438
-    // csvimport.tsx:658
+    // csvimport.tsx:541
+    // csvimport.tsx:760
   },
   "Minimize": {
     val: "Minimize",
@@ -1307,12 +1330,19 @@ export const DEFAULTS:IMessages = {
     h: "RbGrwaVYaT8OdEbNo5YBRWxoGZNYzZKjiDz7JrZVuuc=",
     // gettingstarted.ts:11
   },
+  "Negate": {
+    /* Verb meaning to make a number have the opposite sign */
+    val: "Negate",
+    translated: false,
+    h: "dZDdZz59qbx8gpMDeqIXTcDabOUtC1qWeUHncjptLo0=",
+    // csvimport.tsx:590
+  },
   "Negative": {
     /* Label for choosing the word/symbol that signifies a negative number */
     val: "Negative",
     translated: false,
     h: "uu+tZJYytTWkRjWGnhq7P28TYmWJ58RmQcbAv4QEakg=",
-    // csvimport.tsx:471
+    // csvimport.tsx:593
   },
   "Net": {
     val: "Net",
@@ -1402,6 +1432,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1202
   },
   "Not yet cleared": {
+    /* Tooltip text indicating that a transaction has not yet cleared. */
     val: "Not yet cleared",
     translated: false,
     h: "Hf/KSsxHfxvXx0udkqgCw/QkkE8Vi5ex9pdYnX6qzEU=",
@@ -1427,7 +1458,7 @@ export const DEFAULTS:IMessages = {
     val: "Number format",
     translated: false,
     h: "RxooctpubAJr5NcKn57a5kjGBEdlPT5b2h6PUFLqxxE=",
-    // preferences.tsx:61
+    // preferences.tsx:62
   },
   "OK": {
     val: "OK",
@@ -1460,7 +1491,7 @@ export const DEFAULTS:IMessages = {
     val: "Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.",
     translated: false,
     h: "MUc4sPlkaqyooNhJKZ15rbBQdclJSNbaarHERiW1hrs=",
-    // csvimport.tsx:386
+    // csvimport.tsx:490
   },
   "Open Buckets Budget": {
     val: "Open Buckets Budget",
@@ -1579,7 +1610,7 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:142
     // searchpage.tsx:171
     // transactions.tsx:224
-    // csvimport.tsx:657
+    // csvimport.tsx:759
   },
   "Preferences": {
     val: "Preferences",
@@ -1600,6 +1631,7 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:99
   },
   "Prompt": {
+    /* Title for prompt window */
     val: "Prompt",
     translated: false,
     h: "56HrS6R0zfyg5ruiVb/J04UP3T8O2V99V+mXHvVfEZ0=",
@@ -1609,9 +1641,10 @@ export const DEFAULTS:IMessages = {
     val: "Provide a name for the new account.",
     translated: false,
     h: "WFHwJzRVIraGkeqDS03YjWe0vMsPsiRE1qM6V/Ef/xE=",
-    // csvimport.tsx:640
+    // csvimport.tsx:742
   },
   "Purchase": {
+    /* Button label for purchasing a license */
     val: "Purchase",
     translated: false,
     h: "SfwhUMXO5ckJhwUkBjdC9n17k8zH4+hoAlFoUdOwE/g=",
@@ -1700,6 +1733,7 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:18
   },
   "Reopen": {
+    /* Label for button to reopen a close account */
     val: "Reopen",
     translated: false,
     h: "5497b4yxPFO2M524tL0qmmNk47Qv/aca/7n0zMEeX/o=",
@@ -1802,7 +1836,7 @@ export const DEFAULTS:IMessages = {
     val: "Select the account these transactions belong to.",
     translated: false,
     h: "qkaCMMw9CYakrPrLxgfkBp3KsfadBdGLYgZB8urPaC4=",
-    // csvimport.tsx:600
+    // csvimport.tsx:702
   },
   "Self debt": {
     val: "Self debt",
@@ -1826,7 +1860,7 @@ export const DEFAULTS:IMessages = {
     val: "Set mapping",
     translated: false,
     h: "0GImzkG1VPzFzjFdepzZz8+Ysis4xn7QQRVGlxVrQIw=",
-    // csvimport.tsx:505
+    // csvimport.tsx:628
   },
   "Settings": {
     val: "Settings",
@@ -1857,7 +1891,7 @@ export const DEFAULTS:IMessages = {
     val: "Sign",
     translated: false,
     h: "uw6BT7o9vlsgV2TpwBFx/MfF1npvA+6ru4lXXcSzoCM=",
-    // csvimport.tsx:437
+    // csvimport.tsx:540
   },
   "SimpleFIN Connections": {
     val: "SimpleFIN Connections",
@@ -2000,7 +2034,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",
     // preferences.tsx:50
-    // preferences.tsx:94
+    // preferences.tsx:95
   },
   "Target date:": {
     val: "Target date:",
@@ -2049,7 +2083,7 @@ export const DEFAULTS:IMessages = {
     val: "Timezone",
     translated: false,
     h: "y2odAzUKexep7CmO6P8BCj1p4PWG6VZ/RbIg8oOWASI=",
-    // preferences.tsx:82
+    // preferences.tsx:83
   },
   "To": {
     val: "To",
@@ -2128,6 +2162,7 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:70
   },
   "Un-kick": {
+    /* Button label for unarchiving a bucket */
     val: "Un-kick",
     translated: false,
     h: "P5Z1ij4jmS06jNOQiHymi+/D+uYJktoalTdw+AHGukM=",
@@ -2135,6 +2170,8 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1062
   },
   "Un-kick Bucket": {
+    /* Name of action for undo/redo labels (i.e. Control-Z will "Undo Un-kick Bucket") Consider this the opposite of "Archive Bucket" */
+    /* Name of action.  Consider this "Unarchive Bucket" */
     val: "Un-kick Bucket",
     translated: false,
     h: "7WOQPepkeOH+dwwSbEjomy0amoqY5JtvtlyCSG02c1Q=",
@@ -2169,7 +2206,7 @@ export const DEFAULTS:IMessages = {
     val: "Unique ID",
     translated: false,
     h: "UZsJmQ28mtEO349l3zdNHoAtb0JT1LT9e7EjedqptSE=",
-    // csvimport.tsx:440
+    // csvimport.tsx:543
   },
   "Unknown account: ": {
     val: "Unknown account: ",
@@ -2212,7 +2249,7 @@ export const DEFAULTS:IMessages = {
     val: "Update Available",
     translated: false,
     h: "FKOD6i3t69T8rvTwVJ5VSnLfkQPBcceuuk2X4ZsNKMY=",
-    // updater.ts:193
+    // updater.ts:194
   },
   "Update Bucket Name": {
     val: "Update Bucket Name",
@@ -2411,7 +2448,7 @@ export const DEFAULTS:IMessages = {
     val: "You must have at least one column each set to Amount, Memo and Date Posted.",
     translated: false,
     h: "k5NuGeKNgPfZs7xUbwp5PgfPr6dosV0ZTVxAnphHH6E=",
-    // csvimport.tsx:383
+    // csvimport.tsx:487
   },
   "Your email address:": {
     val: "Your email address:",
@@ -2626,7 +2663,7 @@ export const DEFAULTS:IMessages = {
         },
     translated: false,
     h: "hFYUKKIqC+nYQ+RRKwNu3/PGxbtuHzNHoigSJwCK8d4=",
-    // csvimport.tsx:600
+    // csvimport.tsx:702
   },
   "enter-license-prompt": {
     val: "\n      Please enter your Buckets License below.  Don&apos;t have a license?  <a href=\"#\" id=\"clicktobuy\">Click here to purchase one.</a>\n    ",
@@ -2851,7 +2888,7 @@ Would you like to purchase a license now?`,
     val: (newv:string) => `Version ${newv} available.`,
     translated: false,
     h: "YCoofx1v0tRUHkHfhFnm6bV2xXfnsNT6QAyXqgkUa9c=",
-    // updater.ts:194
+    // updater.ts:195
     // updates.tsx:59
   },
 }

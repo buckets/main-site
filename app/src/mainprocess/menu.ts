@@ -135,14 +135,14 @@ export async function updateMenu(args:{
         }
       },
       {
-        label: sss('Find Next'),
+        label: sss('Find Next'/* Edit menu label for finding the next match.  Perhaps use what your browser or other applications use. */),
         accelerator: 'CmdOrCtrl+G',
         click() {
           findNext();
         }
       },
       {
-        label: sss('Find Previous'),
+        label: sss('Find Previous'/* Edit menu label for finding the previous match.  Perhaps use what your browser or other applications use. */),
         accelerator: 'CmdOrCtrl+Shift+G',
         click() {
           findPrev();

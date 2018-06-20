@@ -80,7 +80,7 @@ export async function createTemplateBucketSet() {
       ]
     },
     {
-      name: sss('Debt'),
+      name: sss('Debt'/* Name of bucket group for debts */),
       buckets: [
         {
           name: sss("Car Payment"),

@@ -15,6 +15,10 @@ To run:
 
     tsc && yarn start
 
+# To generate a license
+
+    python ../web/buckets/drm.py
+
 
 # Refresh buckets-core
 

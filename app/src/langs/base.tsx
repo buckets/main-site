@@ -40,6 +40,7 @@ export interface IMessages extends IMessageSet {
   "Babysitting": IMsg<string>;
   "Balance": IMsg<string>;
   "Balance:": IMsg<string>;
+  "Beta Updates": IMsg<string>;
   "Birthdays": IMsg<string>;
   "Break Import Links": IMsg<string>;
   "Bring All to Front": IMsg<string>;
@@ -117,6 +118,7 @@ export interface IMessages extends IMessageSet {
   "Edit": IMsg<string>;
   "Electricity": IMsg<string>;
   "Enable Macro": IMsg<string>;
+  "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)": IMsg<string>;
   "Ending Balance": IMsg<string>;
   "Ending amount:": IMsg<string>;
   "Enter Buckets License": IMsg<string>;
@@ -216,6 +218,7 @@ export interface IMessages extends IMessageSet {
   "Natural gas/propane/oil": IMsg<string>;
   "Need ideas for getting started?": IMsg<string>;
   "Needs": IMsg<string>;
+  "Negate": IMsg<string>;
   "Negative": IMsg<string>;
   "Net": IMsg<string>;
   "Net Transfers": IMsg<string>;
