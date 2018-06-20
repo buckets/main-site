@@ -7,6 +7,7 @@ import { EventSource } from 'eventsts'
 import { onlyRunInMain } from '../rpc'
 import { PrefixLogger } from '../logging'
 import { IOpenWindow } from './files'
+import { getNiceStat } from '../util'
 
 const log = new PrefixLogger(electron_is.renderer() ? '(persistent.r)' : '(persistent)');
 
@@ -87,6 +88,9 @@ export const PersistEvents = {
   added_recent_file: new EventSource<string>(),
 }
 
+/**
+ *  Log the stat output for a path
+ */
 function logStat(path:string) {
   try {
     const stat = JSON.stringify(fs.statSync(path));
@@ -97,33 +101,6 @@ function logStat(path:string) {
   } catch(err2) {
     log.info(`Error doing stat of ${path}`);
   }
-}
-
-function getNiceStat(path:string) {
-  let ret = {
-    readable: null,
-    writeable: null,
-    exists: null,
-  }
-  try {
-    fs.accessSync(path, fs.constants.F_OK)
-    ret.exists = true;
-  } catch(err) {
-    ret.exists = false;
-  }
-  try {
-    fs.accessSync(path, fs.constants.R_OK)
-    ret.readable = true;
-  } catch(err) {
-    ret.readable = false;
-  }
-  try {
-    fs.accessSync(path, fs.constants.W_OK)
-    ret.writeable = true;
-  } catch(err) {
-    ret.writeable = false;
-  }
-  return ret;
 }
 
 /**

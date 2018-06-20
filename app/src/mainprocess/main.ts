@@ -1,14 +1,14 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, session, protocol, BrowserWindow} from 'electron'
+import {app, session, protocol, BrowserWindow, dialog} from 'electron'
 import * as electron_log from 'electron-log'
 import * as electron_is from 'electron-is'
 import { autoUpdater } from 'electron-updater'
 import * as URL from 'url'
 import * as Path from 'path'
 import * as moment from 'moment-timezone'
-import { startLocalizing } from '../i18n'
+import { startLocalizing, sss } from '../i18n'
 import { updateMenu } from './menu'
 import { BudgetFile } from './files'
 import { APP_ROOT } from './globals'
@@ -17,6 +17,7 @@ import { checkForUpdates } from './updater'
 import { reportErrorToUser } from '../errors'
 import { PrefixLogger } from '../logging'
 import { PSTATE, updateState } from './persistent'
+import { doesPathExist, isPathExecutable, getNiceStat } from '../util'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
 
 autoUpdater.logger = electron_log;
@@ -34,7 +35,37 @@ log.info(`  UTC time: ${moment.utc().format()}`);
 log.info(`  Timezone: ${getTimezone()}`);
 log.info(`  NODE_ENV: ${process.env.NODE_ENV}`);
 
+/**
+ *  Run permission checks
+ */
+function checkForFilesystemPermissionProblems() {
+  const plog = new PrefixLogger('(permcheck)', log);
+  plog.info('start');
+  const userDataPath = app.getPath('userData')
+  if (!doesPathExist(userDataPath)) {
+    plog.error(`userData path (${userDataPath}) does not exist`);
+    const appDataPath = app.getPath('appData');
+    if (!isPathExecutable(appDataPath)) {
+      plog.error(`appData path (${appDataPath}) is not executable`);
+      plog.info(`stat of ${appDataPath}: ${JSON.stringify(getNiceStat(appDataPath))}`);
+      dialog.showMessageBox({
+        title: sss('Error'),
+        message: sss('file-perm-error', 'Permission error' /* Error title for file permission problem */),
+        detail: sss('file-perm-error-detail', (path:string) => `Buckets is unable to create a directory inside "${path}".  Buckets uses the directory to save preferences.\n\nPlease adjust permissions and restart Buckets.`)(appDataPath),
+        buttons: [
+          sss('OK'),
+        ],
+        defaultId: 0,
+      }, () => {
+
+      })
+    }
+  }
+  plog.info('done');
+}
+
 app.on('ready', () => {
+  checkForFilesystemPermissionProblems();
   startLocalizing();
 });
 
