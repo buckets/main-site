@@ -1,7 +1,7 @@
 // Copyright (c) Buckets
 // See LICENSE for details.
 
-import {app, session, protocol, BrowserWindow, dialog} from 'electron'
+import { app, session, protocol, BrowserWindow } from 'electron'
 import * as electron_log from 'electron-log'
 import * as electron_is from 'electron-is'
 import { autoUpdater } from 'electron-updater'

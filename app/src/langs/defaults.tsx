@@ -413,6 +413,7 @@ export const DEFAULTS:IMessages = {
     // updates.tsx:55
   },
   "Cleared": {
+    /* Tooltip text indicating that a transaction has cleared. */
     val: "Cleared",
     translated: false,
     h: "j1SmbPuDDBP04XfOH9NNFCDzXmB9xAzSoVG7RcHcdBg=",
@@ -568,6 +569,7 @@ export const DEFAULTS:IMessages = {
     // csvimport.tsx:542
   },
   "Debt": {
+    /* Name of bucket group for debts */
     val: "Debt",
     translated: false,
     h: "y9kslXhW17gMMFZ9Dq8g/tabfINzlmzT+39QNbWiWGA=",
@@ -731,7 +733,6 @@ export const DEFAULTS:IMessages = {
     h: "/ErBlknw7o83xx0uIDCjdDA4u5bAwnNZuhFd2GV1Zcw=",
     // errors.ts:121
     // errors.ts:139
-    // main.ts:51
   },
   "Error fetching data": {
     val: "Error fetching data",
@@ -802,12 +803,14 @@ export const DEFAULTS:IMessages = {
     // importing.ts:96
   },
   "Find Next": {
+    /* Edit menu label for finding the next match.  Perhaps use what your browser or other applications use. */
     val: "Find Next",
     translated: false,
     h: "LALfI5V4TsQo0DcGJwmNmrm3xNPtY5PmQuxB1voZo34=",
     // menu.ts:138
   },
   "Find Previous": {
+    /* Edit menu label for finding the previous match.  Perhaps use what your browser or other applications use. */
     val: "Find Previous",
     translated: false,
     h: "0n6Dq5KDTxxsTAKrJE+RDdgi9ln6FyfUEPNBJ6ejZ5o=",
@@ -1123,18 +1126,21 @@ export const DEFAULTS:IMessages = {
     // startover.tsx:116
   },
   "Kick Bucket": {
+    /* Name of action.  Consider this "Archive Bucket" */
     val: "Kick Bucket",
     translated: false,
     h: "3hmOuv1hNsjpQJ5cSDTlSqN4jGOGFnSPw9r0bK68RWY=",
     // buckets.tsx:1068
   },
   "Kick the bucket": {
+    /* Button label for archiving a bucket */
     val: "Kick the bucket",
     translated: false,
     h: "IvzeGJ9G+Rns8Rbnal26flTFzd+yBNSEBQSptdNy8t8=",
     // buckets.tsx:1076
   },
   "Kicked": {
+    /* Label for list of archived buckets */
     val: "Kicked",
     translated: false,
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
@@ -1161,6 +1167,7 @@ export const DEFAULTS:IMessages = {
     // importpage.tsx:428
   },
   "Later": {
+    /* Button label for purchasing a license later */
     val: "Later",
     translated: false,
     h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
@@ -1216,6 +1223,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:213
   },
   "Make it so": {
+    /* Button label for causing the set of pending deposits/withdrawls to happen.  Synonyms could be: "Do it" or "Run" or "Go" */
     val: "Make it so",
     translated: false,
     h: "XRTIWjylWKAy5BW8/0C0rOSW5S1QC+CxmgmFfhi81pk=",
@@ -1224,12 +1232,14 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:150
   },
   "Mark Cleared": {
+    /* Name of action for marking a transaction as having cleared the bank */
     val: "Mark Cleared",
     translated: false,
     h: "Z+NICH1z9EYN3Ub7Z9idiTw/t+QaDF9n3h9br9WhjgE=",
     // transactions.tsx:422
   },
   "Mark Not Cleared": {
+    /* Name of action for marking a transaction as not having cleared the bank */
     val: "Mark Not Cleared",
     translated: false,
     h: "4VoXUMr4nLIoyueiB8YlIR9HFGPYBhYxJq/cqqwDLs0=",
@@ -1422,6 +1432,7 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1202
   },
   "Not yet cleared": {
+    /* Tooltip text indicating that a transaction has not yet cleared. */
     val: "Not yet cleared",
     translated: false,
     h: "Hf/KSsxHfxvXx0udkqgCw/QkkE8Vi5ex9pdYnX6qzEU=",
@@ -1454,7 +1465,6 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "mMSSK7ZBxlx6MLe8r98jC5sAtmk2McVhRqslsnhu5KM=",
     // errors.ts:141
-    // main.ts:54
   },
   "Off Budget Accounts": {
     val: "Off Budget Accounts",
@@ -1621,6 +1631,7 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:99
   },
   "Prompt": {
+    /* Title for prompt window */
     val: "Prompt",
     translated: false,
     h: "56HrS6R0zfyg5ruiVb/J04UP3T8O2V99V+mXHvVfEZ0=",
@@ -1633,6 +1644,7 @@ export const DEFAULTS:IMessages = {
     // csvimport.tsx:742
   },
   "Purchase": {
+    /* Button label for purchasing a license */
     val: "Purchase",
     translated: false,
     h: "SfwhUMXO5ckJhwUkBjdC9n17k8zH4+hoAlFoUdOwE/g=",
@@ -1721,6 +1733,7 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:18
   },
   "Reopen": {
+    /* Label for button to reopen a close account */
     val: "Reopen",
     translated: false,
     h: "5497b4yxPFO2M524tL0qmmNk47Qv/aca/7n0zMEeX/o=",
@@ -2149,6 +2162,7 @@ export const DEFAULTS:IMessages = {
     // gettingstarted.ts:70
   },
   "Un-kick": {
+    /* Button label for unarchiving a bucket */
     val: "Un-kick",
     translated: false,
     h: "P5Z1ij4jmS06jNOQiHymi+/D+uYJktoalTdw+AHGukM=",
@@ -2156,6 +2170,8 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:1062
   },
   "Un-kick Bucket": {
+    /* Name of action for undo/redo labels (i.e. Control-Z will "Undo Un-kick Bucket") Consider this the opposite of "Archive Bucket" */
+    /* Name of action.  Consider this "Unarchive Bucket" */
     val: "Un-kick Bucket",
     translated: false,
     h: "7WOQPepkeOH+dwwSbEjomy0amoqY5JtvtlyCSG02c1Q=",
@@ -2666,19 +2682,6 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "mv9GxRVjWShYHYo8kb/wvNU8eEYBGE2QtfUTxTsdP0I=",
     // exportpage.tsx:72
-  },
-  "file-perm-error": {
-    /* Error title for file permission problem */
-    val: "Permission error",
-    translated: false,
-    h: "nQIADEN41YoaLIfsI4ftbFHRtc4bChKL9/O1Y4DBd8I=",
-    // main.ts:52
-  },
-  "file-perm-error-detail": {
-    val: (path:string) => `Buckets is unable to create a directory inside "${path}".  Buckets uses the directory to save preferences.\n\nPlease adjust permissions and restart Buckets.`,
-    translated: false,
-    h: "SEPpn14I33mY1MVIeTNP+mAkD5up85QMwn5GSW0dAfY=",
-    // main.ts:53
   },
   "getting-started-link": {
     val: (clickhandler) => {
