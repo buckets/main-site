@@ -1,7 +1,8 @@
 import * as React from 'react'
 import * as moment from 'moment'
 
-import { ILangPack, IMessages } from './spec';
+import { ILangPack } from '@iffycan/i18n'
+import { IMessages } from './base'
 
 // Contributors, include your name and optionally a link to
 // a website as you want it to appear in any credits.

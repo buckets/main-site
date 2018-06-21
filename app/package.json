@@ -12,6 +12,7 @@
   "scripts": {
     "docs": "typedoc --tsconfig tsconfig.json --theme minimal --exclude '**/*.{test,spec}.*' --out devdocs/ src/",
     "start": "electron .",
+    "clean": "find src -name '*.js' -exec rm {} \\;",
     "compile": "cross-env NODE_ENV=production tsc",
     "test": "./test.sh && nsp check",
     "postinstall": "electron-builder install-app-deps",
