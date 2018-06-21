@@ -4,10 +4,10 @@ import {v4 as uuid} from 'uuid'
 import { IObject, IStore } from '../store'
 import { encrypt, decrypt } from '../crypto'
 import { createErrorSubclass } from '../errors'
-import { sss } from '@iffycan/i18n'
+import { sss, CONTEXT } from '@iffycan/i18n'
 import { ISyncChannel, ASyncening, SyncResult } from './sync'
 import { PrefixLogger } from '../logging'
-import { localNow, MaybeMoment } from '../time'
+import { localNow, SerializedTimestamp, dumpTS } from '../time'
 
 const log = new PrefixLogger('(bankmacro)');
 
@@ -28,8 +28,8 @@ declare module '../store' {
      *  Open a bankmacro window/browser
      */
     openBankMacroBrowser(macro_id:number, autoplay?:{
-      onOrAfter: MaybeMoment;
-      before: MaybeMoment;
+      onOrAfter: SerializedTimestamp;
+      before: SerializedTimestamp;
     }):Promise<SyncResult>    
   }
 }
@@ -101,6 +101,7 @@ export class BankMacroStore {
     // this to something unique to the budget file
     if (! await this.hasPassword() ) {
       // No password set yet
+      log.info(`MATT going to use sss, current locale is ${CONTEXT.locale}`);
       let password = await createPassword(this.store, pwkey, sss('Create budget password:'));
       await this.store.sub.passwords.cachePassword(pwkey, password);
       return password;
@@ -193,10 +194,12 @@ export class BankMacroStore {
     let errors = [];
     let imported_count = 0;
     log.info(`Running macro #${macro_id}`);
+    const ts_onOrAfter = dumpTS(onOrAfter);
+    const ts_before = dumpTS(before);
     try {
       let result:SyncResult = await this.store.ui.openBankMacroBrowser(macro_id, {
-        onOrAfter,
-        before,
+        onOrAfter: ts_onOrAfter,
+        before: ts_before,
       })
       errors = errors.concat(result.errors);
       imported_count += result.imported_count;

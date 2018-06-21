@@ -4,11 +4,12 @@ import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from 'bucket
 import { remote, ipcRenderer } from 'electron'
 import { isObj, IStore } from 'buckets-core/dist/store'
 import { BankMacro } from 'buckets-core/dist/models/bankmacro'
-import { current_file } from '../../mainprocess/files'
+import { getCurrentFile } from '../../mainprocess/files'
 import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
 import { sss, localizeThisPage } from '../../i18n'
+import { CONTEXT } from '@iffycan/i18n'
 import { SafetySwitch } from '../../input'
 import { IncorrectPassword } from '../../errors'
 import { makeToast, ToastDisplay } from '../../budget/toast'
@@ -706,6 +707,7 @@ export async function start(args:{
   await localizeThisPage();
   const renderer = new Renderer();
   
+  const current_file = getCurrentFile();
   let store = current_file.store;
   let BANKMACRO = await store.sub.bankmacro.get(args.macro_id);
   let recording:Recording = null

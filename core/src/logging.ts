@@ -1,8 +1,10 @@
+import { config } from '@iffycan/i18n'
 
 let BASE_LOGGER:ILogger = console;
 
 export function setBaseLogger(logger:ILogger) {
   BASE_LOGGER = logger;
+  config.logger = logger as any;
 }
 
 export interface ILogger {

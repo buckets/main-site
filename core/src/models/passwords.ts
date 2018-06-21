@@ -58,6 +58,11 @@ export class PasswordFetcher {
    */
   async cachePassword(pwkey:string, password:string) {
     const store = await this.store.get()
+    MATT, work on this
+    [17:31:09.283] [error] (rpcstore) RPC error Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: _password_cache.pwkey
+
+[17:31:09.284] [error] null
+
     await store.query(`INSERT INTO _password_cache (pwkey, password) VALUES ($pwkey, $password)`, {
       $pwkey: pwkey,
       $password: password,

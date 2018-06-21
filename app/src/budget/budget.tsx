@@ -19,7 +19,7 @@ import { Router, Route, Link, Switch, Redirect, WithRouting} from './routing'
 import { ToastDisplay } from './toast'
 import { FinderDisplay } from './finding'
 import { isRegistered, openBuyPage, promptForLicense } from '../mainprocess/drm'
-import { current_file } from '../mainprocess/files'
+import { getCurrentFile } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { reportErrorToUser } from '../errors';
 import { ToolsPage } from './tools/toolspage'
@@ -66,7 +66,7 @@ export async function start(base_element, room, args: {
     })
   }, false);
 
-  let store = current_file.store;
+  let store = getCurrentFile().store;
 
   // initial state
   manager.attach(store);

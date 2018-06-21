@@ -478,10 +478,16 @@ class RendererBudgetFile implements IBudgetFile {
  *
  *  In the main process this is `undefined`
  */
-export let current_file:RendererBudgetFile;
-if (electron_is.renderer()) {
-  let hostname = window.location.hostname;
-  current_file = new RendererBudgetFile(hostname);
+let _current_file:RendererBudgetFile;
+export function getCurrentFile() {
+  if (!electron_is.renderer()) {
+    throw new Error('getCurrentFile may only be called from the renderer processes');
+  }
+  if (_current_file === undefined) {
+    let hostname = window.location.hostname;
+    _current_file = new RendererBudgetFile(hostname);
+  }
+  return _current_file;
 }
 
 //------------------------------------------------------------------------------

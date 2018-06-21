@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid';
 import { IStore, IUserInterfaceFunctions } from 'buckets-core/dist/store'
 import { importYNAB4 } from 'buckets-core/dist/models/ynab'
 import { SyncResult } from 'buckets-core/dist/models/sync'
-import { dumpTS, MaybeMoment } from 'buckets-core/dist/time'
+import { dumpTS, SerializedTimestamp } from 'buckets-core/dist/time'
 
 import { IBudgetFile } from './mainprocess/files'
 import { sss } from './i18n'
@@ -153,8 +153,8 @@ export class DesktopFunctions implements IUserInterfaceFunctions {
     return this._sessions[partition];
   }
   async openBankMacroBrowser(macro_id:number, autoplay?:{
-    onOrAfter: MaybeMoment;
-    before: MaybeMoment;
+    onOrAfter: SerializedTimestamp;
+    before: SerializedTimestamp;
   }):Promise<SyncResult> {
     let win:Electron.BrowserWindow;
     const bankmacro = await this.store.sub.bankmacro.get(macro_id);

@@ -5,7 +5,7 @@ import { localNow } from 'buckets-core/dist/time'
 import { remote } from 'electron'
 import { sss } from '../../i18n'
 import { AppState, manager } from '../appstate'
-import { current_file } from '../../mainprocess/files'
+import { getCurrentFile } from '../../mainprocess/files'
 import { displayError } from '../../errors'
 import { makeToast } from '../../budget/toast'
 
@@ -19,7 +19,7 @@ async function backupAndStartOver(options:{
   keep_account_transactions: boolean;
 }) {
   log.info('Starting over', options);
-  const this_filename = await current_file.getFilename();
+  const this_filename = await getCurrentFile().getFilename();
   const dirname = Path.dirname(this_filename);
   const basename = Path.basename(this_filename);
   const ext = Path.extname(this_filename);

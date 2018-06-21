@@ -14,7 +14,7 @@ import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
 import { sss } from '../i18n'
-import { current_file } from '../mainprocess/files'
+import { getCurrentFile } from '../mainprocess/files'
 import { makeToast } from './toast'
 import { isNil } from 'buckets-core/dist/util'
 import { findPotentialDupes } from './dupes'
@@ -118,8 +118,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
         <div className="group">
           <button
             onClick={ev => {
-              current_file.openImportFileDialog();
-
+              getCurrentFile().openImportFileDialog();
             }}>
             <span className="fa fa-upload"></span> {sss('Import file')}
           </button>

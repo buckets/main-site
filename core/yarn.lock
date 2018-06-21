@@ -6,9 +6,9 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@iffycan/events/-/events-1.0.1.tgz#b78b4610effad956cfdd7ed46da6b78dc2c2a8b3"
 
-"@iffycan/i18n@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@iffycan/i18n/-/i18n-0.2.0.tgz#17fc856f8b024d7ff00df2627a2d1eca2eb61ec9"
+"@iffycan/i18n@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@iffycan/i18n/-/i18n-0.3.0.tgz#73023194e47637a0ea01ed95f65f43e542486615"
   dependencies:
     "@iffycan/events" "^1.0.1"
     moment-timezone "^0.5.17"

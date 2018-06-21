@@ -30,7 +30,7 @@ async function getLocale():Promise<string> {
   }  
 }
 
-CONTEXT.config({
+CONTEXT.configure({
   langpack_basepath: Path.join(APP_ROOT, 'src/langs'),
 })
 

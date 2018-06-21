@@ -9,14 +9,14 @@ import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
 import { ClickToEdit, SafetySwitch } from '../input'
-import { current_file } from '../mainprocess/files'
+import { getCurrentFile } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { setPath } from './budget'
 import { CSVMapper, CSVAssigner } from '../csvimport'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
-  return current_file.startSync(range.onOrAfter, range.before)
+  return getCurrentFile().startSync(range.onOrAfter, range.before)
 }
 
 
@@ -172,7 +172,7 @@ export class ImportPage extends React.Component<{
             <button
               onClick={() => {
                 if (appstate.syncing) {
-                  current_file.cancelSync();
+                  getCurrentFile().cancelSync();
                 } else {
                   syncCurrentMonth(appstate);
                 }
@@ -181,7 +181,7 @@ export class ImportPage extends React.Component<{
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
             <button onClick={() => {
-                current_file.openImportFileDialog();
+                getCurrentFile().openImportFileDialog();
               }}>
                 <span className="fa fa-upload"></span> Import file
               </button>
@@ -259,7 +259,7 @@ export class ImportPage extends React.Component<{
               <h3>File import</h3>
 
               <button className="primary" onClick={() => {
-                current_file.openImportFileDialog();
+                getCurrentFile().openImportFileDialog();
               }}>
                 <span className="fa fa-upload"></span> Import file
               </button>
