@@ -10,6 +10,9 @@ declare module '../store' {
   interface ISubStore {
     settings: SettingsStore;
   }
+  interface IFromDBFunctions {
+    settings: (obj:ISettingsObject)=>ISettingsObject;
+  }
 }
 
 export interface ISettings {
@@ -28,16 +31,15 @@ export interface ISettingsObject extends IObject {
   _type: 'settings';
   key: keyof ISettings;
   value: any;
+}
 
-  // XXX
-  // static fromdb(obj:Setting) {
-  //   try {
-  //     obj.value = JSON.parse(obj.value as string);  
-  //   } catch(err) {
-  //     obj.value = DEFAULTS[obj.key];
-  //   }
-  //   return obj;
-  // }
+export function ISettingsObjectFromDB(obj:ISettingsObject) {
+  try {
+    obj.value = JSON.parse(obj.value as string);  
+  } catch(err) {
+    obj.value = DEFAULTS[obj.key];
+  }
+  return obj;
 }
 
 
@@ -53,6 +55,7 @@ export class SettingsStore {
     const rows = await this.store.query<{key:keyof ISettings,value:any}>('SELECT key, value FROM settings', {})
     let ret:Partial<ISettings> = {};
     rows.forEach(row => {
+      console.log("row", row);
       let value;
       try {
         value = JSON.parse(row.value);

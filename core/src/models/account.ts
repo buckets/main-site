@@ -41,13 +41,6 @@ export interface Account extends IObject, INotable {
   currency: string;
   closed: boolean;
   offbudget: boolean;
-
-  // XXX TODO
-  // static fromdb(obj:Account) {
-  //   obj.closed = !!obj.closed;
-  //   obj.offbudget = !!obj.offbudget;
-  //   return obj;
-  // }
 }
 
 export interface Transaction extends IObject, INotable {
@@ -62,12 +55,6 @@ export interface Transaction extends IObject, INotable {
   fi_id: string;
   general_cat: GeneralCatType;
   cleared: boolean;
-
-  // XXX TODO
-  // static fromdb(obj:Transaction) {
-  //   obj.cleared = !!obj.cleared;
-  //   return obj;
-  // }
 }
 
 export interface UnknownAccount extends IObject {

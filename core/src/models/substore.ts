@@ -5,12 +5,16 @@ import { AccountStore } from './account'
 import { SimpleFINStore } from './simplefin'
 import { ReportStore } from './reports'
 import { BankMacroStore } from './bankmacro'
-import { SettingsStore } from './settings'
+import * as Settings from './settings'
 import { YNABStore } from './ynab'
 import { PasswordFetcher } from './passwords'
 
 export class SubStore implements ISubStore {
   constructor(private store:IStore) {
+  }
+
+  readonly fromDB = {
+    settings: Settings.ISettingsObjectFromDB,
   }
   
   private _accounts:AccountStore;
@@ -61,10 +65,10 @@ export class SubStore implements ISubStore {
     return this._pwfetcher;
   }
   
-  private _settings:SettingsStore;
+  private _settings:Settings.SettingsStore;
   get settings() {
     if (!this._settings) {
-      this._settings = new SettingsStore(this.store);
+      this._settings = new Settings.SettingsStore(this.store);
     }
     return this._settings;
   }

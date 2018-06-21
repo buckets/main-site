@@ -40,11 +40,6 @@ export interface BankMacro extends IObject {
   name: string;
   enc_recording: string;
   enabled: boolean;
-  // XXX
-  // static fromdb(obj:BankMacro) {
-  //   obj.enabled = !!obj.enabled;
-  //   return obj;
-  // }
 }
 
 async function createPassword(store:IStore, pwkey:string, prompt:string):Promise<string> {

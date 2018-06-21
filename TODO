@@ -1,7 +1,7 @@
- ☐ Add fromdb functions back
+ ✔ Add fromdb functions back @done (18-06-21 11:59)
  ☐ Uncomment all tests
  ☐ simplefin
  ☐ Bank macros
- ☐ i18n
- ☐ restore findYNAB4FileAndImport
- ☐ db upgrade database (including moving migrations over to core)
+ ✔ i18n @done (18-06-21 11:59)
+ ✔ restore findYNAB4FileAndImport @done (18-06-21 11:59)
+ ✔ db upgrade database (including moving migrations over to core) @done (18-06-21 11:59)

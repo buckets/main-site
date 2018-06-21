@@ -147,7 +147,17 @@ export interface IStoreEvents {
  *  Application-specific store operations.
  *  To be expanded like IObjectTypes is.
  */
-export interface ISubStore {}
+export interface ISubStore {
+  fromDB: IFromDBFunctions
+}
+
+/**
+ *  Application-specific db->object functions.
+ *  These functions operate on each object as it comes
+ *  out of the database
+ */
+export interface IFromDBFunctions {}
+
 
 /**
  *  User Interface specific functions/handlers.

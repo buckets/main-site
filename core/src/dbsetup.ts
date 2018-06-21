@@ -20,7 +20,7 @@ const log = new PrefixLogger('(dbsetup)')
  *  - Starts undo/redo tracking
  */
 export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=false) {
-  const migrations_dir = Path.join(require.resolve('buckets-core'), '../../migrations');
+  const migrations_dir = Path.join(__dirname, '../migrations');
 
   // upgrade database
   try {

@@ -43,7 +43,7 @@ export class SQLiteStore implements IStore {
   }
 
   async doSetup() {
-    setupDatabase(this);
+    await setupDatabase(this);
   }
 
   publishObject(event:ObjectEventType, obj:IObject) {
@@ -77,10 +77,10 @@ export class SQLiteStore implements IStore {
     if (ret === undefined) {
       throw new NotFound(`${cls} ${id}`);
     }
-    // XXX TODO
-    // if (cls.fromdb !== undefined) {
-    //   ret = cls.fromdb(ret);
-    // }
+    const fromdb = this.sub.fromDB[cls as string];
+    if (fromdb) {
+      ret = fromdb(ret);
+    }
     return ret;
   }
 
@@ -130,12 +130,12 @@ export class SQLiteStore implements IStore {
     let sql = `${select} ${where} ${order_clause} ${limit_clause} ${offset_clause}`;
     let ret = this.db.all<IObjectTypes[T]>(sql, params);
     
-    // XXX TODO
-    // if (cls.fromdb) {
-    //   ret.then(objects => {
-    //     return objects.map(cls.fromdb);
-    //   })
-    // }
+    const fromdb = this.sub.fromDB[cls as string];
+    if (fromdb) {
+      ret.then(objects => {
+        return objects.map(fromdb);
+      })
+    }
     return ret;
   }
 
