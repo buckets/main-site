@@ -152,7 +152,7 @@ export class BankMacroStore {
   async decryptRecording(bank_macro:BankMacro):Promise<{
     recording_str: string,
   }> {
-    let recording_str:string;
+    let recording_str:string = null;
     if (bank_macro.enc_recording) {
       const password = await this.getPassword();
       recording_str = await decrypt(bank_macro.enc_recording, password);

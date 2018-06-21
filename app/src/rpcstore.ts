@@ -35,7 +35,7 @@ export class RPCReceiver<T> {
     ipcMain.removeListener(this.channel, this.gotMessage);
   }
   gotMessage = async (event, message:RPCMessage<T>) => {
-    // log.debug('MAIN RPC', message);
+    // log.info('MAIN RPC', message);
     try {
       let args = message.params;
       let value = this.obj[message.method];
@@ -58,7 +58,9 @@ export class RPCReceiver<T> {
  */ 
 export class RPCCaller<T> {
   private next_msg_id = 1;
+  
   constructor(private channel:string) {}
+
   async callRemote<K>(method:keyof T, ...args):Promise<K> {
     let msg:RPCMessage<T> = {
       reply_ch: `rpc-reply-${this.next_msg_id++}-${uuid()}`,
@@ -106,8 +108,6 @@ export class RPCMainStoreHookup {
     this.ui_receiver.stop();
     this.events.stop();
   }
-
-  startAction
 }
 
 /**
@@ -191,7 +191,7 @@ class RendererUserInterfaceFunctions implements IUserInterfaceFunctions {
   private caller:RPCCaller<IUserInterfaceFunctions>;
 
   constructor(room:string) {
-    this.caller = new RPCCaller<IUserInterfaceFunctions>(room)
+    this.caller = new RPCCaller<IUserInterfaceFunctions>(`rpc-ui-${room}`)
   }
 
   attachStore(store:RPCRendererStore) {

@@ -8,7 +8,7 @@ import { current_file } from '../../mainprocess/files'
 import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
-import { sss } from '../../i18n'
+import { sss, localizeThisPage } from '../../i18n'
 import { SafetySwitch } from '../../input'
 import { IncorrectPassword } from '../../errors'
 import { makeToast, ToastDisplay } from '../../budget/toast'
@@ -703,6 +703,7 @@ export async function start(args:{
       before: SerializedTimestamp,
     }
   }) {
+  await localizeThisPage();
   const renderer = new Renderer();
   
   let store = current_file.store;

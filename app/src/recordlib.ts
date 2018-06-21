@@ -499,7 +499,12 @@ export class Recording {
     })
   }
   loadFromString(x:string):Recording {
-    const data = JSON.parse(x);
+    let data;
+    if (x === null) {
+      data = {steps: []}
+    } else {
+      data = JSON.parse(x);
+    }
     this.steps = data.steps;
     this.events.change.emit(true);
     return this;
