@@ -105,7 +105,7 @@ export class SimpleFINSync implements ASyncening {
         }
 
         try {
-          let result = await this.store.sub.simplefin.sync(window_start, window_end)  
+          let result = await this.store.sub.simplefin.sync(window_start, window_end)
           imported_count += result.transactions.length;
           result.errors.forEach(err => {
             log.info(`SimpleFin error: ${err}`);
@@ -173,7 +173,7 @@ export class SimpleFINStore {
     let promises = connections.map(async conn => {
       let got_data = false;
       let accountset = await this.client.fetchAccounts(conn.access_token, since, enddate);
-      errors = errors.concat(accountset.errors);
+      errors = errors.concat(accountset.errors || []);
       await Promise.all(accountset.accounts.map(async account => {
         // find the matching account_id
         let hash = this.computeHash(account.org, account.id);
