@@ -102,6 +102,11 @@ def abort():
 @click.option('--skip-win', is_flag=True)
 @click.option('--no-publish', is_flag=True)
 def doit(no_publish, skip_mac, skip_linux, skip_win):
+    # run tests?
+    if yesno('Run tests?', default=True):
+        subprocess.check_call(['yarn', 'test'], cwd='.')
+        subprocess.check_call(['yarn', 'test'], cwd='../core')
+
     # choose version
     package_version = getPackageVersion()
     guess_target_version = package_version
@@ -189,18 +194,18 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
             github.closeIssue(issue_number)
 
     # publish CHANGELOG
-    if yesno('Publish CHANGELOG.md to https://github.com/buckets/application?', default=True):
-        github_dir = os.path.abspath('../../buckets-application')
-        subprocess.check_call(['git', 'fetch', 'origin'], cwd=github_dir)
-        subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
-        subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
-        subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
-        subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
-        subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
+    print('Publishing CHANGELOG.md')
+    github_dir = os.path.abspath('../../buckets-application')
+    subprocess.check_call(['git', 'fetch', 'origin'], cwd=github_dir)
+    subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
+    subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
+    subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
+    subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
+    subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
 
     # push to origin
-    if yesno('Push to origin?', default=True):
-        subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
+    print('Pushing to origin')
+    subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
 
 
 if __name__ == '__main__':
