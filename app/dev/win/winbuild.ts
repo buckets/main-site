@@ -156,8 +156,8 @@ async function doBuild(result:'publish'|'dev'|'build') {
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\core'
   await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
-  await run(['tsc', '--version'])
   await run(['yarn', '--non-interactive'])
+  await run(['tsc', '--version'])
   await run(['yarn', 'compile'])
 
   console.log('')
@@ -166,8 +166,8 @@ async function doBuild(result:'publish'|'dev'|'build') {
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\app'
   await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
-  await run(['tsc', '--version'])
   await run(['yarn', '--non-interactive'])
+  await run(['tsc', '--version'])
   await run(['yarn', 'compile'])
 
   console.log('')
