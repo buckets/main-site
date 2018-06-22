@@ -5,5 +5,4 @@
  ✔ i18n @done (18-06-21 11:59)
  ✔ restore findYNAB4FileAndImport @done (18-06-21 11:59)
  ✔ db upgrade database (including moving migrations over to core) @done (18-06-21 11:59)
- ☐ (node:73487) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 1): Error: Attmpting to use sss() before setting the locale: File
-   (node:73487) DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+ ✔ (node:73487) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 1): Error: Attmpting to use sss() before setting the locale: File @done (18-06-22 15:15)
