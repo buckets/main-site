@@ -46,11 +46,17 @@ export class PasswordFetcher {
     this._loadSchema()
   }
   private async _loadSchema() {
-    await this._store.query(`
+    await this._store.exec(`
       CREATE TEMPORARY TABLE IF NOT EXISTS _password_cache (
         pwkey TEXT PRIMARY KEY NOT NULL,
         password TEXT
-      )`, {})
+      );
+      CREATE TEMPORARY TRIGGER IF NOT EXISTS there_can_be_only_one_pw_key
+      BEFORE INSERT ON _password_cache
+      BEGIN
+        DELETE FROM _password_cache WHERE pwkey=NEW.pwkey;
+      END;
+      `)
     this.store.resolve(this._store);
   }
   /**
@@ -58,11 +64,6 @@ export class PasswordFetcher {
    */
   async cachePassword(pwkey:string, password:string) {
     const store = await this.store.get()
-    MATT, work on this
-    [17:31:09.283] [error] (rpcstore) RPC error Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: _password_cache.pwkey
-
-[17:31:09.284] [error] null
-
     await store.query(`INSERT INTO _password_cache (pwkey, password) VALUES ($pwkey, $password)`, {
       $pwkey: pwkey,
       $password: password,
