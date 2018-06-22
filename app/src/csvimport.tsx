@@ -635,9 +635,7 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
             ? null
             : <tr>
               {obj.parsed_data.headers.map(header => {
-                let value = mapping.fields[header] || '';
-                const colspan = value === 'posted'|| value === 'amount' ? 2 : 1;
-                return <th key={header} colSpan={colspan}>{header}</th>
+                return <th key={header}>{header}</th>
               })}
             </tr>
           }
