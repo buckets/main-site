@@ -130,8 +130,10 @@ async function doBuild(result:'publish'|'dev'|'build') {
   mkdir('C:\\proj')
   mkdir('C:\\proj\\app')
   mkdir('C:\\proj\\app\\dist')
+  await run(['rmdir', 'c:\\proj\\core\\src', '/s', '/q'], {failok: true})
+  await run(['rmdir', 'c:\\proj\\core\\migrations', '/s', '/q'], {
+    failok: true})
   await run(['rmdir', 'c:\\proj\\app\\src', '/s', '/q'], {failok: true})
-  await run(['rmdir', 'c:\\proj\\app\\migrations', '/s', '/q'], {failok: true})
   cat('C:\\builder\\copyexclude.txt')
   await run(['xcopy', 'y:\\', 'c:\\proj', '/f', '/I', '/s', '/Y', '/EXCLUDE:C:\\builder\\copyexclude.txt'])
   await run(['set'])
@@ -153,7 +155,7 @@ async function doBuild(result:'publish'|'dev'|'build') {
   console.log('compile core')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\core'
-  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
   await run(['tsc', '--version'])
   await run(['yarn', '--non-interactive'])
   await run(['yarn', 'compile'])
@@ -163,7 +165,7 @@ async function doBuild(result:'publish'|'dev'|'build') {
   console.log('compile app code')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\app'
-  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
   await run(['tsc', '--version'])
   await run(['yarn', '--non-interactive'])
   await run(['yarn', 'compile'])
