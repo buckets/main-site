@@ -267,22 +267,28 @@ ${msg.sources.map(x => '    // '+formatSource(x)).join('\n')}
   return lines.join('\n');
 }
 
-export function extract(directory:string, base_filename:string, defaults_filename:string) {
+export function extract(opts: {
+  base_filename: string,
+  defaults_filename: string,
+  directories: string[],
+}) {
   let MSGS:IMessageSpec = {};
-  walk(directory).forEach(filename => {
-    if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
-      let fh = openFile(filename);
-      extractMessagesFromTS(MSGS, fh);
-    } else if (filename.endsWith('.html')) {
-      extractMessagesFromHTML(MSGS, filename);
-    }  
+  opts.directories.forEach(directory => {
+    walk(directory).forEach(filename => {
+      if (filename.endsWith('.ts') || filename.endsWith('.tsx')) {
+        let fh = openFile(filename);
+        extractMessagesFromTS(MSGS, fh);
+      } else if (filename.endsWith('.html')) {
+        extractMessagesFromHTML(MSGS, filename);
+      }  
+    })
   })
-  fs.writeFileSync(base_filename, [
+  fs.writeFileSync(opts.base_filename, [
     '// Auto-generated file',
     displayInterface(MSGS),
     '',
   ].join('\n\n'))
-  fs.writeFileSync(defaults_filename, [
+  fs.writeFileSync(opts.defaults_filename, [
     '// Auto-generated file',
     DEFAULT_IMPORTS,
     displayDefaults(MSGS),

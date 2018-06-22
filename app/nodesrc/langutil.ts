@@ -7,7 +7,11 @@ const rest = process.argv.slice(3);
 if (command === 'updatelang') {
   copyEm(rest[0], rest[1]);
 } else if (command === 'extract') {
-  extract(rest[0], rest[1], rest[2]);
+  extract({
+    base_filename: rest[0],
+    defaults_filename: rest[1],
+    directories: rest.slice(2),
+  });
 } else {
   throw new Error(`Unknown subcommand: ${command}`)
 }

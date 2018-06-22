@@ -240,6 +240,12 @@ const messages:IMessages = {
     translated: false,
     h: "zuw0HcpRRRdvF6TOHxlpW20VLJgfbPvUcTImp1laiKA=",
   },
+  "Budget password:": {
+    /* Label for bank macro password prompt */
+    val: "Budget password:",
+    translated: false,
+    h: "yB5u4awiXu76+/Pw81ZYhBtgYQktcAVe6KU4WreiReU=",
+  },
   "Budgeted": {
     val: "Budgeted",
     translated: false,

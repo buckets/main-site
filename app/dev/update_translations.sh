@@ -7,7 +7,7 @@ tsc -p nodesrc
 
 echo
 echo "Extracting..."
-node nodesrc/dist/langutil.js extract src src/langs/base.tsx src/langs/defaults.tsx
+node nodesrc/dist/langutil.js extract src/langs/base.tsx src/langs/defaults.tsx src ../core/src
 
 for langfile in $(ls src/langs/??.tsx); do
     echo
