@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as cx from 'classnames';
-import { cents2decimal, decimal2cents, fancyEval, SEPS } from 'buckets-core/dist/money'
+import { cents2decimal, decimal2cents, fancyEval } from 'buckets-core/dist/money'
 export { cents2decimal, decimal2cents } from 'buckets-core/dist/money'
+import { CONTEXT as tx } from '@iffycan/i18n'
 
 let ANIMATION_ENABLED = true;
 
@@ -209,7 +210,7 @@ export class Money extends React.Component<MoneyProps, {
     if (value < 0) {
       signDisplay = '-';
     }
-    let parts = display.split(SEPS.decimal, 2);
+    let parts = display.split(tx.number_seps.decimal, 2);
     let zeroCents = true;
     let display_components = [];
     if (parts.length === 2) {
@@ -220,7 +221,7 @@ export class Money extends React.Component<MoneyProps, {
       } else {
         display_components.push(<span className={cx("decimal", {
           "zero": zeroCents,
-        })} key="decimal">{SEPS.decimal}</span>);
+        })} key="decimal">{tx.number_seps.decimal}</span>);
         display_components.push(<span className={cx("cents", {
           "zero": zeroCents,
         })} key="cents">{parts[1]}</span>)

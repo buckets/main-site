@@ -5,9 +5,8 @@ import {v4 as uuid} from 'uuid'
 
 import { manager } from './budget/appstate'
 import { sss } from './i18n'
-import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat } from '@iffycan/i18n'
+import { NUMBER_FORMATS, NUMBER_FORMAT_EXAMPLES, NumberFormat, ISeps, CONTEXT as tx } from '@iffycan/i18n'
 import { Money, decimal2cents } from './money'
-import { SEPS, ISeps } from 'buckets-core/dist/money'
 import { parseLocalTime, dumpTS, loadTS } from 'buckets-core/dist/time'
 import { DateDisplay } from './time'
 import { ImportableAccountSet, ImportableTrans } from './importing'
@@ -206,7 +205,7 @@ function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<N
           try {
             num = csvFieldToCents(
               orig,
-              mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : SEPS)
+              mapping.numberformat ? NUMBER_FORMATS[mapping.numberformat] : tx.number_seps)
             let sign = 1;
             if (inverted.amount_sign.length) {
               let amount_sign_header = inverted.amount_sign.slice(-1)[0];

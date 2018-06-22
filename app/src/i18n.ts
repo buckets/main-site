@@ -1,9 +1,13 @@
 import * as Path from 'path'
+import * as moment from 'moment-timezone'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
 import { APP_ROOT } from './mainprocess/globals'
 import { CONTEXT } from '@iffycan/i18n'
 export { sss } from '@iffycan/i18n'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(i18n)');
 
 async function getLocale():Promise<string> {
   // BUCKETS_LANG environment variable beats all
@@ -32,6 +36,20 @@ async function getLocale():Promise<string> {
 
 CONTEXT.configure({
   langpack_basepath: Path.join(APP_ROOT, 'src/langs'),
+})
+CONTEXT.localechanged.on(async ({locale}) => {
+  // date
+  try {
+    await import(`moment/locale/${locale}`);
+    moment.locale(locale)
+    log.info('date format set');
+  } catch(err) {
+    if (locale !== 'en') {
+      log.error('Error setting date locale', err.stack);  
+    }
+  }
+
+  // numbers
 })
 
 export const tx = CONTEXT;

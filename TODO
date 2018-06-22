@@ -8,5 +8,5 @@
  ✔ (node:73487) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 1): Error: Attmpting to use sss() before setting the locale: File @done (18-06-22 15:15)
 
  ✔ CSV Import, why is there an extra column? @done (18-06-22 15:35)
- ☐ Month selector not localized
+ ✔ Month selector not localized @done (18-06-22 15:48)
  
