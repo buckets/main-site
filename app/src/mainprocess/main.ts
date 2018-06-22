@@ -64,11 +64,6 @@ log.info(`  NODE_ENV: ${process.env.NODE_ENV}`);
 //   plog.info('done');
 // }
 
-app.on('ready', () => {
-  // checkForFilesystemPermissionProblems();
-  startLocalizing();
-});
-
 process.on('uncaughtException', (err) => {
   log.error('uncaughtException', err && err.stack ? err.stack : err);
   reportErrorToUser(null, {
@@ -76,9 +71,13 @@ process.on('uncaughtException', (err) => {
   })
 })
 
-// Make accessing '/' access the expected place
 protocol.registerStandardSchemes(['buckets'])
-app.on('ready', () => {
+
+app.on('ready', async () => {
+  // checkForFilesystemPermissionProblems();
+  await startLocalizing();
+  
+  // Make accessing '/' access the expected place
   session.defaultSession.protocol.registerFileProtocol('buckets', (request, callback) => {
     const parsed = URL.parse(request.url);
     let bf = BudgetFile.fromId(parsed.hostname);
@@ -101,30 +100,7 @@ app.on('ready', () => {
       throw new Error('failed to register buckets: protocol');
     }
   })
-})
 
-// A file was double-clicked
-let openfirst:string[] = [];
-app.on('will-finish-launching', () => {
-  app.on('open-file', function(event, path) {
-    if (app.isReady()) {
-      BudgetFile.openFile(path);
-    } else {
-      openfirst.push(path);
-    }
-    event.preventDefault();
-  })
-})
-if (electron_is.windows()) {
-  process.argv.forEach(arg => {
-    if (arg.endsWith('.buckets')) {
-      openfirst.push(arg);
-    }
-  })
-}
-
-app.on('ready', async () => {
-  
   // Create the Menu
   updateMenu();
 
@@ -164,7 +140,28 @@ app.on('ready', async () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     openWizard();
   }
-});
+})
+
+// A file was double-clicked
+let openfirst:string[] = [];
+app.on('will-finish-launching', () => {
+  app.on('open-file', function(event, path) {
+    if (app.isReady()) {
+      BudgetFile.openFile(path);
+    } else {
+      openfirst.push(path);
+    }
+    event.preventDefault();
+  })
+})
+if (electron_is.windows()) {
+  process.argv.forEach(arg => {
+    if (arg.endsWith('.buckets')) {
+      openfirst.push(arg);
+    }
+  })
+}
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
