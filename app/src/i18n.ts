@@ -3,7 +3,7 @@ import * as moment from 'moment-timezone'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
 import { APP_ROOT } from './mainprocess/globals'
-import { CONTEXT } from '@iffycan/i18n'
+import { CONTEXT, NUMBER_FORMATS } from '@iffycan/i18n'
 export { sss } from '@iffycan/i18n'
 import { PrefixLogger } from './logging'
 
@@ -49,7 +49,11 @@ CONTEXT.localechanged.on(async ({locale}) => {
     }
   }
 
-  // numbers
+  // numbers are already taken care of in @iffycan/i18n
+  // but can be overwritten by preference
+  if (PSTATE.number_format) {
+    CONTEXT.number_seps = NUMBER_FORMATS[PSTATE.number_format];
+  }
 })
 
 export const tx = CONTEXT;
