@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as cx from 'classnames'
 import * as _ from 'lodash'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { tx } from './i18n'
 
 // import { PrefixLogger } from './logging'
