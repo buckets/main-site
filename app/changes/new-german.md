@@ -1,1 +1,0 @@
-Now available in Deutsch!
