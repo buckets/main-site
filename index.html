@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Buckets - Private Family Budgeting App</title>
+  
+  <link rel="alternate" hreflang="en" href="en" />
+  <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+  <link rel="stylesheet" type="text/css" href="/static/buckets.css">
+  <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+  <meta name="description" content="Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer." />
+  
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Product",
+  "name": "Buckets",
+  "image": "https://www.budgetwithbuckets.com/static/img/logo.svg",
+  "description": "Buckets provides you with private, beautiful budgeting that you'll stick with.  Pull yourself out of debt and achieve financial goals you didn't think were in reach.",
+  "offers": {
+    "@type": "Offer",
+    "price": "29",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2018-02-01"
+  },
+  "brand": {
+    "@type": "Thing",
+    "name": "Buckets, LLC"
+  }
+}
+</script>
+<style>
+.buttonish.download {
+  margin: .5rem 0 0;
+  white-space: nowrap;
+  display: block;
+}
+.buttonish.buy {
+  text-align: center;
+  font-size: 1.75rem;
+  padding: 1rem 3rem;
+  border: 0;
+  background-color: rgba(241, 196, 15,1.0);
+  background: linear-gradient(15deg, rgba(230, 126, 34,1.0), rgba(241, 196, 15,1.0));
+  
+  transition: transform 0.2s;
+  /*border: 3px solid rgba(230, 126, 34,1.0);
+  background-color: rgba(230, 126, 34,0.1);
+  color: rgba(230, 126, 34,1.0);*/
+}
+.buttonish.buy:hover {
+  background: rgba(26, 188, 156,1.0);
+}
+.download-section {
+  padding: 1rem;
+  border-radius: 3px;
+  text-align: center;
+  display: block;
+  width: 20rem;
+}
+.side-by-side {
+  display: flex;
+  max-width: 100%;
+}
+.main-shot-wrap {
+  flex-basis: 75%;
+  flex-grow: 6;
+}
+img.main-shot {
+  max-width: 100%;
+  top: -20%;
+  position: relative;
+}
+.intro-para {
+  flex-basis: 25%;
+  flex-grow: 4;
+}
+.price-section {
+  text-align: center;
+}
+.price {
+  font-size: 3rem;
+}
+.strikeout {
+  text-decoration: line-through;
+}
+.rightimg {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-right: -5rem;
+}
+.leftimg {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-left: -5rem;
+}
+.credit {
+  display: inline;
+  position: relative;
+  font-size: .5rem;
+  margin-left: .5rem;
+  line-height: .15rem;
+  color: grey;
+}
+</style>
+
+  <style>
+  .hero {
+    background-color: #2eaef1;
+    text-align: center;
+    padding: 2rem 0 5rem;
+  }
+  .hero img {
+    width: 15rem;
+  }
+  .hero.mini {
+    padding: 2rem;
+  }
+  .hero.mini img {
+    width: 10rem;
+  }
+  a.buttonish {
+    font-size: 1.25rem;
+    text-decoration: none;
+    border: 1px solid #2eaef1;
+    background-color: #2eaef1;
+    color: white;
+    border-radius: 4px;
+    display: inline-block;
+    padding: .5rem 1rem;
+    text-align: center;
+  }
+  a.buttonish:hover {
+    background-color: rgba(241, 196, 15,1.0);
+    color: white;
+    border-color: rgba(241, 196, 15,1.0);
+  }
+  .wrap {
+    width: 30rem;
+    margin: 0 auto;
+  }
+  .wrap.spaced {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .wrap.large {
+    width: 60rem;
+    margin: 0 auto;
+  }
+  .flashes {
+    width: 30rem;
+    margin: 0 auto;
+  }
+  .flashes .message {
+    border: 2px solid #2eaef1;
+    color: #2eaef1;
+    border-radius: 3px;
+    padding: .5rem;
+    margin: .5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: top;
+  }
+  .flashes .message.error {
+    color: red;
+    border-color: red;
+  }
+  .callout {
+    font-size: 1.25rem;
+    line-height: 2rem;
+  }
+  .callout em {
+    color: rgba(26, 188, 156,1.0);
+    font-size: 1.75rem;
+    font-style: normal;
+    font-weight: bold;
+  }
+  .callout.para {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  footer {
+    display: flex;
+    border: 1px solid lightgrey;
+    border-width: 1px 0 0;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    margin-bottom: 5rem;
+  }
+  footer > div {
+    flex-basis: 50%;
+    padding: 1rem 0;
+    text-align: left;
+    line-height: 1.5rem;
+  }
+  </style>
+</head>
+<body>
+  <div class="buckets-nav">
+  <div class="buckets-nav-inner">
+    <div class="buckets-nav-left">
+      <a class="logo" href="/index.html">
+        <img src="/static/favicon.png" />
+      </a>
+      <a href="https://docs.budgetwithbuckets.com">Guide</a>
+      <a href="https://blog.budgetwithbuckets.com">Blog</a>
+    </div>
+    <div class="buckets-nav-right">
+      
+    </div>
+  </div>
+</div>
+  
+<div class="hero">
+  <img src="/static/img/logo.svg" />
+</div>
+
+
+  
+<div class="large wrap spaced" style="margin-bottom: -5rem;">
+  <div class="side-by-side">
+    <div class="main-shot-wrap">
+      <img src="/static/img/shots/transactions.png" class="main-shot" />
+    </div>
+    <div class="intro-para">
+      <span class="callout">
+        Buckets makes budgeting <em>fast</em>, <em>simple</em> and <em>private.</em>
+      </span>
+    
+      <div class="download-section">
+        <a name="download"></a>
+        <span class="fa fa-download"></span> Download Buckets vv0.55 for
+        <div>
+          <a class="buttonish download" href="https://github.com/buckets/application/releases/download/vv0.55/Buckets-v0.55.dmg">
+            <span class="fa fa-apple"></span>
+            macOS
+          </a>
+        </div>
+        <div>
+          <a class="buttonish download" href="https://github.com/buckets/application/releases/download/vv0.55/Buckets-Setup-v0.55.exe">
+            <span class="fa fa-windows"></span>
+            Windows
+          </a>
+        </div>
+        <div>
+          <a class="buttonish download" href="https://github.com/buckets/application/releases/download/vv0.55/Buckets-v0.55-x86_64.AppImage">
+            <span class="fa fa-linux"></span>
+            Linux
+          </a>
+        </div>
+        <div>
+          <a class="download" style="line-height: 2rem; text-decoration: none;" href="https://github.com/buckets/application/releases/latest">Other</a>
+        </div>
+      </div>  
+
+    </div>
+  </div>
+</div>
+<div class="wrap">
+
+  <div style="text-align: center;">
+    <a class="buttonish buy" href="/buy.html">Buy $29</a>
+  </div>
+
+  <div class="callout para">
+    Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Really.
+  </div>
+
+  <div class="callout para">
+    Buckets is <em>private</em>.  Your finances stay on your computer.  You control your data again!
+  </div>
+
+  <div class="callout para">
+    Buckets has <em>no monthly fee.</em>  It costs $29.  Once.  You're saving money, not shackling yourself to another monthly service.  A single license may be used on all your computers and all the computers of family members living in your home.
+  </div>
+
+  <div class="callout para">
+    Buckets has <em>amazing support.</em>  I'll listen to your ideas, help you with the app and gladly answer questions, no matter how small.  I'm serious.  Click that chat bubble and tell me what you ate for dinner last night.
+  </div>
+
+  <div class="callout para">
+    Buckets includes some free and novel methods to <em>sync with your bank.</em>  Record completely private macros, import files or sign up with SimpleFIN Bridge.
+  </div>
+
+  <div class="callout para">
+    Buckets includes some terrific <em>extras</em> such as really fast Amazon why-do-they-split-every-purchase-into-a-hundred-transactions reconciliation.
+  </div>
+
+  <div class="leftimg">
+    <a href="/gettingstarted.html"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
+    <div class="callout para">
+      Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="/gettingstarted.html">Check them out!</a>
+    </div>
+  </div>
+
+  
+
+  <div class="rightimg">
+    <div class="callout para">
+      Buckets is <em>multilingual</em>.  Currently available languages:
+      <ul>
+        <li>Deutsch</li>
+        <li>English</li>
+        <li>español</li>
+        <li>Français 
+  <div class="credit">Thanks Raoul de Limézy!</div>
+  </li>
+        <li>Nederlands</li>
+        <li>Português 
+  <div class="credit">Thanks Carlos!</div>
+  </li>
+      </ul>
+      <a href="https://github.com/buckets/translations" target="_blank">Want to add your language?</a>
+    </div>
+    <img src="/static/img/shots/spanish.png" style="width: 300px;">
+  </div>  
+
+  <div class="callout para">
+    Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.  <a href="https://blog.budgetwithbuckets.com/2018/04/23/history-and-future.html">Read more.</a>
+  </div>
+
+  <div class="callout para">
+    <a href="#download">Download it now</a> for free!
+  </div>
+
+  <div class="callout para">
+    &mdash; Matt
+  </div>
+
+</div>
+
+<div class="wrap">
+<!-- Begin MailChimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+  #mc_embed_signup{
+    background: #fff;
+    clear: left;
+    width: 100%;
+    padding: 0rem 2rem;
+    margin: 1rem auto;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.5);
+
+    background-color: #eee;
+    background-image: url(/static/img/mail.png);
+    background-repeat: no-repeat;
+    background-size: 30%;
+    background-position: bottom 2rem right 3rem;
+  }
+  #mc_embed_signup form {
+    padding: 1rem 0;
+  }
+  #mc_embed_signup .mc-field-group {
+    width: 50%;
+  }
+  #mc_embed_signup #mc-embedded-subscribe {
+  }
+</style>
+<div id="mc_embed_signup">
+<form action="//bucketsisbetter.us8.list-manage.com/subscribe/post?u=bc109895c8df246ae54ad4d71&amp;id=0960a6d05e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+    <div id="mc_embed_signup_scroll">
+  <h2>Subscribe to the Monthly Newsletter</h2>
+<div class="mc-field-group">
+  <label for="mce-EMAIL">Email Address</label>
+  <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
+</div>
+<div class="mc-field-group">
+  <label for="mce-FNAME">First Name</label>
+  <input type="text" value="" name="FNAME" class="required" id="mce-FNAME">
+</div>
+  <div id="mce-responses" class="clear">
+    <div class="response" id="mce-error-response" style="display:none"></div>
+    <div class="response" id="mce-success-response" style="display:none"></div>
+  </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_bc109895c8df246ae54ad4d71_0960a6d05e" tabindex="-1" value=""></div>
+    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    </div>
+</form>
+</div>
+<!--End mc_embed_signup-->
+</div>
+
+
+
+  <div class="wrap">
+    <footer>
+      <div>
+        <div>Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
+        </div>
+        <div><a href="mailto:hello@budgetwithbuckets.com">hello@budgetwithbuckets.com</a>
+        </div>
+        <div><a href="https://www.paypal.me/onepartrain/5" target="_blank">Donate</a></div>
+        <div>&copy; One Part Rain, LLC.</div>
+      </div>
+      <div>
+        <div><a href="/gettingstarted.html">Getting Started</a></div>
+        <div><a href="/buy.html">Pricing</a></div>
+        <div><a href="/buy.html">Buy</a></div>
+        <div>
+          <details>
+            <summary>English</summary>
+            
+            <div>
+              <a href="en">English</a>
+            </div></details>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  
+  <!--Start of Tawk.to Script-->
+  <script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/59835f8ed1385b2b2e285765/default';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
+  </script>
+  <!--End of Tawk.to Script-->
+  
+</body>
+</html>
