@@ -61,7 +61,7 @@
 }
 img.main-shot {
   max-width: 100%;
-  top: -20%;
+  top: 2rem;
   position: relative;
 }
 .intro-para {
@@ -97,25 +97,60 @@ img.main-shot {
   line-height: .15rem;
   color: grey;
 }
+.main-title {
+  display: flex;
+  font-size: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid lightgrey;
+}
+.main-title .title {
+  padding: 0 1rem;
+  color: rgba(44, 62, 80,1.0);
+}
+.intro-para .callout {
+  text-align: center;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+#altSectionTop,
+#altSectionBottom {
+  display: block;
+}
+#altSectionTop {
+  margin-top: -3rem;
+}
+#altSectionTop path,
+#altSectionBottom path {
+  fill: rgba(225, 240, 250, 1.0);
+  stroke: none;
+}
+.alt-section {
+  background-color: rgba(225, 240, 250, 1.0);
+}
 </style>
 {% endblock %}
 
 {% block header %}
-<div class="hero">
-  <img src="/static/img/logo.svg" />
-</div>
 {% endblock %}
 
 {% block content %}
-<div class="large wrap spaced" style="margin-bottom: -5rem;">
+<div class="large wrap spaced">
   <div class="side-by-side">
     <div class="main-shot-wrap">
       <img src="/static/img/shots/transactions.png" class="main-shot" />
     </div>
     <div class="intro-para">
-      <span class="callout">
+      <div class="main-title">
+        <img src="/static/favicon.png">
+        <div class="title">Buckets</div>
+      </div>
+      <div class="callout">
         {% trans %}Buckets makes budgeting <em>fast</em>, <em>simple</em> and <em>private.</em>{% endtrans %}
-      </span>
+      </div>
     
       <div class="download-section">
         <a name="download"></a>
@@ -146,76 +181,84 @@ img.main-shot {
     </div>
   </div>
 </div>
-<div class="wrap">
 
-  <div style="text-align: center;">
-    <a class="buttonish buy" href="/{{ lang }}/buy.html">{% trans %}Buy $29{% endtrans %}</a>
-  </div>
+<svg id="altSectionTop" xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path d="M-5 50 C 20 -100 80 200 105 50 L 105 200 L 0 200" />
+</svg><div class="alt-section">
+  <div class="wrap">
 
-  <div class="callout para">
-    {% trans %}Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Really.{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    {% trans %}Buckets is <em>private</em>.{% endtrans %}  {% trans %}Your finances stay on your computer.  You control your data again!{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    {% trans %}Buckets has <em>no monthly fee.</em>  It costs $29.  Once.{% endtrans %}  {% trans %}You're saving money, not shackling yourself to another monthly service.{% endtrans %}  {% trans %}A single license may be used on all your computers and all the computers of family members living in your home.{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    {% trans %}Buckets has <em>amazing support.</em>{% endtrans %}  {% trans %}I'll listen to your ideas, help you with the app and gladly answer questions, no matter how small.{% endtrans %}  {% trans %}I'm serious.  Click that chat bubble and tell me what you ate for dinner last night.{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    {% trans %}Buckets includes some free and novel methods to <em>sync with your bank.</em>{% endtrans %}  {% trans %}Record completely private macros, import files or sign up with SimpleFIN Bridge.{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    {% trans %}Buckets includes some terrific <em>extras</em> such as really fast Amazon why-do-they-split-every-purchase-into-a-hundred-transactions reconciliation.{% endtrans %}
-  </div>
-
-  <div class="leftimg">
-    <a href="/gettingstarted.html"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
-    <div class="callout para">
-      {% trans href="/gettingstarted.html" %}Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ href }}">Check them out!</a>{% endtrans %}
+    <div style="text-align: center;">
+      <a class="buttonish buy" href="/{{ lang }}/buy.html">{% trans %}Buy $29{% endtrans %}</a>
     </div>
-  </div>
 
-  {% macro credit(names) %}
-  <div class="credit">{% trans %}Thanks{% endtrans %} {{ names }}!</div>
-  {% endmacro %}
-
-  <div class="rightimg">
     <div class="callout para">
-      {% trans %}Buckets is <em>multilingual</em>.{% endtrans %}  {% trans %}Currently available languages:{% endtrans %}
-      <ul>
-        <li>Deutsch</li>
-        <li>English</li>
-        <li>español</li>
-        <li>Français {{ credit('Raoul de Limézy') }}</li>
-        <li>Nederlands</li>
-        <li>Português {{ credit('Carlos') }}</li>
-      </ul>
-      <a href="https://github.com/buckets/translations" target="_blank">{% trans %}Want to add your language?{% endtrans %}</a>
+      {% trans %}Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Really.{% endtrans %}
     </div>
-    <img src="/static/img/shots/spanish.png" style="width: 300px;">
-  </div>  
 
-  <div class="callout para">
-    {% trans %}Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.{% endtrans %}  <a href="https://blog.budgetwithbuckets.com/2018/04/23/history-and-future.html">{% trans %}Read more.{% endtrans %}</a>
+    <div class="callout para">
+      {% trans %}Buckets is <em>private</em>.{% endtrans %}  {% trans %}Your finances stay on your computer.  You control your data again!{% endtrans %}
+    </div>
+
+    <div class="callout para">
+      {% trans %}Buckets has <em>no monthly fee.</em>  It costs $29.  Once.{% endtrans %}  {% trans %}You're saving money, not shackling yourself to another monthly service.{% endtrans %}  {% trans %}A single license may be used on all your computers and all the computers of family members living in your home.{% endtrans %}
+    </div>
+
+    <div class="callout para">
+      {% trans %}Buckets has <em>amazing support.</em>{% endtrans %}  {% trans %}I'll listen to your ideas, help you with the app and gladly answer questions, no matter how small.{% endtrans %}  {% trans %}I'm serious.  Click that chat bubble and tell me what you ate for dinner last night.{% endtrans %}
+    </div>
+
+    <div class="callout para">
+      {% trans %}Buckets includes some free and novel methods to <em>sync with your bank.</em>{% endtrans %}  {% trans %}Record completely private macros, import files or sign up with SimpleFIN Bridge.{% endtrans %}
+    </div>
+
+    <div class="callout para">
+      {% trans %}Buckets includes some terrific <em>extras</em> such as really fast Amazon why-do-they-split-every-purchase-into-a-hundred-transactions reconciliation.{% endtrans %}
+    </div>
+
+    <div class="leftimg">
+      <a href="/gettingstarted.html"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
+      <div class="callout para">
+        {% trans href="/gettingstarted.html" %}Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ href }}">Check them out!</a>{% endtrans %}
+      </div>
+    </div>
+
+    {% macro credit(names) %}
+    <div class="credit">{% trans %}Thanks{% endtrans %} {{ names }}!</div>
+    {% endmacro %}
+
+<img src="/static/img/shots/spanish.png" style="width: 100%">
+    <div class="rightimg">
+      <div class="callout para">
+        {% trans %}Buckets is <em>multilingual</em>.{% endtrans %}  <a href="https://github.com/buckets/translations" target="_blank">{% trans %}Want to add your language?{% endtrans %}</a>
+        <ul>
+          <li>Deutsch</li>
+          <li>English</li>
+          <li>español</li>
+          <li>Français {{ credit('Raoul de Limézy') }}</li>
+          <li>Nederlands</li>
+          <li>Português {{ credit('Carlos') }}</li>
+        </ul>
+      </div>
+      
+    </div>  
+
+    <div class="callout para">
+      {% trans %}Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.{% endtrans %}  <a href="https://blog.budgetwithbuckets.com/2018/04/23/history-and-future.html">{% trans %}Read more.{% endtrans %}</a>
+    </div>
+
+    <div class="callout para">
+      {% trans %}<a href="#download">Download it now</a> for free!{% endtrans %}
+    </div>
+
+    <div class="callout para">
+      &mdash; Matt
+    </div>
+
   </div>
-
-  <div class="callout para">
-    {% trans %}<a href="#download">Download it now</a> for free!{% endtrans %}
-  </div>
-
-  <div class="callout para">
-    &mdash; Matt
-  </div>
-
-</div>
+</div> <!-- end of alt-section -->
+<svg id="altSectionBottom" xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path d="M-5 50 C 20 200 80 -100 105 50 L 105 -200 L 0 -200" />
+</svg>
 
 <div class="wrap">
 <!-- Begin MailChimp Signup Form -->
@@ -226,7 +269,7 @@ img.main-shot {
     clear: left;
     width: 100%;
     padding: 0rem 2rem;
-    margin: 1rem auto;
+    margin: 2rem auto;
     border: none;
     border-radius: 3px;
     box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.5);

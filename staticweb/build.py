@@ -17,7 +17,12 @@ def getLatestReleaseVersion():
     if _latest_version is None:
         url = 'https://api.github.com/repos/buckets/application/releases/latest'
         r = requests.get(url, timeout=5)
-        _latest_version = r.json()['tag_name'].strip('v')
+        try:
+            _latest_version = r.json()['tag_name'].strip('v')
+        except Exception as e:
+            print r.text
+            print r.headers
+            raise e
         print 'Latest version', _latest_version
     return _latest_version
 
@@ -69,8 +74,10 @@ def renderFile(template_root, template_name, translation_dir, locale, config):
     help='If given, use dev keys and stuff')
 @click.option('-o', '--output-dir',
     default='_site')
-def build(input_dir, output_dir, translations, dev):
-    
+@click.option('--no-version-check',
+    is_flag=True)
+def build(input_dir, output_dir, translations, dev, no_version_check):
+    global _latest_version
     if dev:
         stripe_public_key = os.environ['STRIPE_PUBLIC_KEY']
         payment_url = 'http://192.168.99.100'
@@ -81,7 +88,10 @@ def build(input_dir, output_dir, translations, dev):
         payment_url = 'https://server.budgetwithbuckets.com'
 
     print 'building', input_dir, 'to', output_dir
-    getLatestReleaseVersion()
+    if no_version_check:
+        _latest_version = '0.1'
+    else:
+        getLatestReleaseVersion()
     for root, dirs, files in os.walk(input_dir):
         for d in list(dirs):
             if d.startswith('_'):
@@ -96,8 +106,10 @@ def build(input_dir, output_dir, translations, dev):
             if fp.endswith('.html'):
                 # render it
                 print 'RENDERING', fp
+
                 locales = list_locales(translations)
                 for locale in locales:
+                    orig_dstpath = dstpath
                     dstpath = os.path.join(output_dir, locale.language, relpath)
                     print '->', dstpath
                     try:
@@ -115,6 +127,11 @@ def build(input_dir, output_dir, translations, dev):
                         })
                     with io.open(dstpath, 'w', encoding='utf8') as fh:
                         fh.write(rendered)
+                    if locale.language == 'en':
+                        # make default page
+                        print '->', orig_dstpath
+                        with io.open(orig_dstpath, 'w', encoding='utf8') as fh:
+                            fh.write(rendered)
             else:
                 # copy it
                 try:

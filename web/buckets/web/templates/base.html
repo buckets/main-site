@@ -75,11 +75,6 @@
 </head>
 <body>
   {% include 'navbar.html' %}
-  {% block header %}
-  <div class="hero mini">
-    <a href="{{ url_for('anon.index') }}"><img src="/static/img/logo.svg" border="0"/></a>
-  </div>
-  {% endblock %}
 
   <div class="flashes">
   {% with messages = get_flashed_messages(with_categories=True) %}
