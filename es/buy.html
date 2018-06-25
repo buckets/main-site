@@ -2,38 +2,46 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Buckets - Private Family Budgeting App</title>
+  <title>Comprar Buckets</title>
   
-  <link rel="alternate" hreflang="en" href="en" />
+  <link rel="alternate" hreflang="en" href="/en/buy.html" />
+  <link rel="alternate" hreflang="es" href="/es/buy.html" />
   <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" type="text/css" href="/static/buckets.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-  <meta name="description" content="Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer." />
+  <meta name="description" content="Buckets es una aplicación privada de finanzas personales para presupuestos familiares. Haga un seguimiento de los gastos, establezca objetivos de ahorro, salga de la deuda todo desde la privacidad de su propia computadora." />
   
 <style>
-pre.license {
-  font-family: monospace;
+.security-notice {
+  padding-top: .5rem;
+}
+.how-to-pay-label {
+  text-align: center;
+  padding-bottom: 1rem;
+}
+table.payment-options {
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 3px;
   border: 1px solid lightgrey;
+}
+table.payment-options td {
   padding: 1rem;
-  border-radius: 4px;
-  display: inline-block;
-  box-shadow: inset 0 1px 4px lightgrey;
-  margin: 1rem auto;
+  vertical-align: middle;
+  border-top: 1px solid lightgrey;
+}
+table.payment-options td:first-child {
+  text-align: right;
+  width: 45%;
+}
+table.payment-options td:last-child {
+  text-align: left;
+}
+table.payment-options tr:first-child td {
+  border-top: 0;
 }
 </style>
-
-<!-- Reddit Conversion Pixel -->
-<script>
-var i=new Image();i.src="https://alb.reddit.com/snoo.gif?q=CAAHAAABAAoACQAAAAACZ8YAAA==&s=9K-xKDqfMNDJouSadnBZ7j2EQUVjWxXFNrVQfPa6p5E=";
-</script>
-<noscript>
-<img height="1" width="1" style="display:none"
-src="https://alb.reddit.com/snoo.gif?q=CAAHAAABAAoACQAAAAACZ8YAAA==&s=9K-xKDqfMNDJouSadnBZ7j2EQUVjWxXFNrVQfPa6p5E="/>
-</noscript>
-<!-- DO NOT MODIFY -->
-<!-- End Reddit Conversion Pixel -->
-
 
   <style>
   .hero {
@@ -130,10 +138,10 @@ src="https://alb.reddit.com/snoo.gif?q=CAAHAAABAAoACQAAAAACZ8YAAA==&s=9K-xKDqfMN
   <div class="buckets-nav">
   <div class="buckets-nav-inner">
     <div class="buckets-nav-left">
-      <a class="logo" href="/index.html">
+      <a class="logo" href="/es/index.html">
         <img src="/static/favicon.png" />
       </a>
-      <a href="https://docs.budgetwithbuckets.com">Guide</a>
+      <a href="https://docs.budgetwithbuckets.com">Guía</a>
       <a href="https://blog.budgetwithbuckets.com">Blog</a>
     </div>
     <div class="buckets-nav-right">
@@ -143,44 +151,63 @@ src="https://alb.reddit.com/snoo.gif?q=CAAHAAABAAoACQAAAAACZ8YAAA==&s=9K-xKDqfMN
 </div>
   
   <div class="hero mini">
-    <a href="/index.html"><img src="/static/img/logo.svg" border="0"/></a>
+    <a href="/es/index.html"><img src="/static/img/logo.svg" border="0"/></a>
   </div>
   
 
   
 <div class="wrap spaced">
-  <p>Thank you for purchasing Buckets!</p>
-
-  <p>Below is your Buckets v1 License.  You should also receive an email with this information.  To use the license:</p>
-
-  <ol>
-    <li>Open the Buckets application (download at <a href="https://www.budgetwithbuckets.com" target="_blank">www.budgetwithbuckets.com</a>)</li>
-    <li>Click the "Trial Version" menu</li>
-    <li>Click "Enter License..."</li>
-    <li>Copy and paste the following license into the box</li>
-    <li>Click the button</li>
-  </ol>
-
-  <pre class="license"></pre>
-
-  <p>
-    This license may be used on any number of computers belonging to you and your immediate family members living in your home.
+  <p class="callout" style="text-align: center;">
+    ¿Cómo quieres pagar?
   </p>
+  <table class="payment-options">
+    <tr>
+        <td>Tarjeta de crédito</td>
+        <td>
+          <form action="https://server.budgetwithbuckets.com/stripe" method="POST">
+            <script
+              src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+              data-image="/static/img/main_logo.png') }}"
+              data-key="pk_test_edwefkKOe0tgKFSHqxxgOeXH"
+              data-amount="2900"
+              data-name="Buckets"
+              data-label="Comprar ahora"
+              data-description="Aplicación de presupuesto familiar"
+              data-zip-code="true"
+              data-billing-address="false"
+              data-locale="auto"
+              data-allow-remember-me="false"
+            >
+            </script>
+          </form>
+        </td>
+    </tr>
 
-  <p>
-    Happy budgeting!
-  </p>
-
-  <p>
+    <tr>
+        <td>PayPal</td>
+        <td>
+          <form method="post" action="https://server.budgetwithbuckets.com/paypal">
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" alt="Buy now with PayPal" />
+          </form>
+        </td>
+    </tr>
+  </table>
+  <div class="callout para">
+    Para <em>un pago único de $29</em>, se le enviará por correo electrónico una Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar.
+  </div>
+  <div class="callout para">
+    Si perdió su licencia, envíeme a hello@budgetwithbuckets.com
+  </div>
+  <div class="callout para">
     - Matt
-  </p>
+  </div>
 </div>
 
 
   <div class="wrap">
     <footer>
       <div>
-        <div>Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
+        <div>Hecho por <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
         </div>
         <div><a href="mailto:hello@budgetwithbuckets.com">hello@budgetwithbuckets.com</a>
         </div>
@@ -188,15 +215,18 @@ src="https://alb.reddit.com/snoo.gif?q=CAAHAAABAAoACQAAAAACZ8YAAA==&s=9K-xKDqfMN
         <div>&copy; One Part Rain, LLC.</div>
       </div>
       <div>
-        <div><a href="/gettingstarted.html">Getting Started</a></div>
-        <div><a href="/buy.html">Pricing</a></div>
-        <div><a href="/buy.html">Buy</a></div>
+        <div><a href="/es/gettingstarted.html">Empezando</a></div>
+        <div><a href="/es/buy.html">Precios</a></div>
+        <div><a href="/es/buy.html">Comprar</a></div>
         <div>
           <details>
-            <summary>English</summary>
+            <summary>español</summary>
             
             <div>
-              <a href="en">English</a>
+              <a href="/en/buy.html">English</a>
+            </div>
+            <div>
+              <a href="/es/buy.html">español</a>
             </div></details>
         </div>
       </div>
