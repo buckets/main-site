@@ -74,6 +74,7 @@ def configureApp(flask_secret_key,
         paypal_client_secret,
         sentry_dsn,
         buckets_license_key,
+        static_site_url,
         debug=False):
     sentry.init_app(f, dsn=sentry_dsn)
 
@@ -82,6 +83,7 @@ def configureApp(flask_secret_key,
         SECRET_KEY=flask_secret_key,
         STRIPE_PUBLIC_KEY=stripe_public_key,
         BUCKETS_LICENSE_KEY=buckets_license_key,
+        STATIC_SITE_URL=static_site_url,
     )
 
     if debug:

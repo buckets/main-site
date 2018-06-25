@@ -4,11 +4,22 @@ import os
 import io
 import shutil
 import click
+import requests
 
 from babel import Locale, support
 from jinja2 import Environment, FileSystemLoader
 
 CATALOGS = {}
+
+_latest_version = None
+def getLatestReleaseVersion():
+    global _latest_version
+    if _latest_version is None:
+        url = 'https://api.github.com/repos/buckets/application/releases/latest'
+        r = requests.get(url, timeout=5)
+        _latest_version = r.json()['tag_name'].strip('v')
+        print 'Latest version', _latest_version
+    return _latest_version
 
 def list_locales(translation_dir):
     # copied largely from https://github.com/python-babel/flask-babel/blob/master/flask_babel/__init__.py
@@ -33,10 +44,10 @@ def renderFile(template_root, template_name, translation_dir, locale, config):
     params = {
         'gettext': catalog.ugettext,
         'all_locales': locales,
-        'lang': '/{0}'.format(locale.language),
+        'lang': locale.language,
         'this_url': template_name,
         'config': config,
-        'latest_version': 'v0.55',
+        'latest_version': getLatestReleaseVersion(),
         'current_locale': locale,
     }
     tmpl = env.get_template(template_name)
@@ -53,11 +64,24 @@ def renderFile(template_root, template_name, translation_dir, locale, config):
 @click.option('-t', '--translations',
     default='translations',
     help='Directory containing translations')
-@click.option('--stripe-public-key', envvar='STRIPE_PUBLIC_KEY')
+@click.option('-d', '--dev',
+    is_flag=True,
+    help='If given, use dev keys and stuff')
 @click.option('-o', '--output-dir',
     default='_site')
-def build(input_dir, output_dir, translations, stripe_public_key):
+def build(input_dir, output_dir, translations, dev):
+    
+    if dev:
+        stripe_public_key = os.environ['STRIPE_PUBLIC_KEY']
+        payment_url = 'http://192.168.99.100'
+        if output_dir == '_site':
+            output_dir = '_dev'
+    else:
+        stripe_public_key = os.environ['STRIPE_LIVE_PUBLIC_KEY']
+        payment_url = 'https://server.budgetwithbuckets.com'
+
     print 'building', input_dir, 'to', output_dir
+    getLatestReleaseVersion()
     for root, dirs, files in os.walk(input_dir):
         for d in list(dirs):
             if d.startswith('_'):
@@ -87,6 +111,7 @@ def build(input_dir, output_dir, translations, stripe_public_key):
                         locale=locale,
                         config={
                             'STRIPE_PUBLIC_KEY': stripe_public_key,
+                            'PAYMENT_URL': payment_url,
                         })
                     with io.open(dstpath, 'w', encoding='utf8') as fh:
                         fh.write(rendered)

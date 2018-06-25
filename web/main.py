@@ -27,6 +27,8 @@ ap.add_argument('--paypal-client-id',
     default=os.environ.get('PAYPAL_CLIENT_ID', ''))
 ap.add_argument('--paypal-client-secret',
     default=os.environ.get('PAYPAL_CLIENT_SECRET', ''))
+ap.add_argument('--static-site-url',
+    default=os.environ.get('STATIC_SITE_URL', 'https://www.budgetwithbuckets.com'))
 ap.add_argument('-H', '--host',
     default='127.0.0.1')
 ap.add_argument('-p', '--port',
@@ -44,6 +46,7 @@ app = configureApp(
     buckets_license_key=args.buckets_license_key,
     paypal_client_id=args.paypal_client_id,
     paypal_client_secret=args.paypal_client_secret,
+    static_site_url=args.static_site_url,
 )
 
 if __name__ == '__main__':

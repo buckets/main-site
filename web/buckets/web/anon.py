@@ -1,8 +1,6 @@
 import structlog
-import time
 import stripe
 import paypalrestsdk
-import requests
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, flash
@@ -16,27 +14,6 @@ blue = Blueprint('anon', __name__)
 
 PRICE_CENTS = 2900
 PRICE_STRING = '29.00'
-
-_latest_version = None
-_latest_version_lastfetch = None
-_latest_version_lifespan = 60 * 60 * 1
-def getLatestReleaseVersion():
-    global _latest_version, _latest_version_lastfetch
-    now = time.time()
-    if _latest_version_lastfetch and now < (_latest_version_lastfetch + _latest_version_lifespan):
-        return _latest_version
-
-    url = 'https://api.github.com/repos/buckets/application/releases/latest'
-    try:
-        r = requests.get(url, timeout=5)
-        _latest_version = r.json()['tag_name'].strip('v')
-    except:
-        import traceback
-        traceback.print_exc()
-        _latest_version = None
-    _latest_version_lastfetch = now
-    logger.info('latest_version', _latest_version=_latest_version)
-    return _latest_version
 
 
 @blue.url_defaults
@@ -54,21 +31,7 @@ def pull_lang_code(endpoint, values):
 #----------------------------------------------------
 @blue.route('/', methods=['GET'])
 def index():
-    latest_version = getLatestReleaseVersion()
-    return render_template('anon/index.html',
-        latest_version=latest_version)
-
-@blue.route('/chat', methods=['GET'])
-def chat():
-    return redirect('https://tawk.to/chat/59835f8ed1385b2b2e285765/default/?$_tawk_popout=true')
-
-@blue.route('/gettingstarted', methods=['GET'])
-def gettingstarted():
-    return render_template('anon/gettingstarted.html')
-
-@blue.route('/help', methods=['GET'])
-def help():
-    return redirect(url_for('.gettingstarted'))
+    return redirect(current_app.config['STATIC_SITE_URL'])
 
 def generateLicense(email):
     return formatLicense(createLicense(
@@ -108,7 +71,6 @@ def buy():
     if request.method == 'POST':
         token = request.form['stripeToken']
         email = request.form['stripeEmail']
-        token_type = request.form.get('stripeTokenType')
 
         # generate the license
         try:
@@ -126,10 +88,7 @@ def buy():
                 statement_descriptor=gettext('Buckets Budgeting App'),
                 receipt_email=email,
                 source=token)
-            if token_type == 'source_bitcoin':
-                flash(gettext('We got your bitcoins.'))
-            else:
-                flash(gettext('Your card was charged.'))
+            flash(gettext('Your card was charged.'))
 
         except stripe.error.CardError as e:
             flash(e.message, 'error')
@@ -138,10 +97,9 @@ def buy():
 
         # email the license
         emailLicense(email, license)
-        return render_template('anon/bought.html', license=license)
+        return render_template('bought.html', license=license)
 
-
-    return render_template('anon/buy.html', PRICE_CENTS=PRICE_CENTS, PRICE_STRING=PRICE_STRING)
+    return redirect(current_app.config['STATIC_SITE_URL'] + '/{0}/buy.html'.format(g.get('lang_code', 'en')))
 
 
 @blue.route('/paypal-create-payment', methods=['POST'])
@@ -154,7 +112,7 @@ def paypal_create_payment():
         },
         "redirect_urls": {
             "return_url": url_for('.paypal_execute_payment', _external=True),
-            "cancel_url": url_for('.buy', _external=True),
+            "cancel_url": current_app.config['STATIC_SITE_URL'] + '/{0}/buy.html'.format(g.get('lang_code', 'en')),
         },
         "transactions": [{
             "amount": {
@@ -172,7 +130,7 @@ def paypal_create_payment():
                 return redirect(link.href)
 
     flash('Error getting to paypal', 'error')
-    return redirect(url_for('.buy'))
+    return redirect(current_app.config['STATIC_SITE_URL'] + '/{0}/buy.html'.format(g.get('lang_code', 'en')))
 
 @blue.route('/paypal-execute-payment', methods=['GET'])
 def paypal_execute_payment():
@@ -203,7 +161,7 @@ def paypal_execute_payment():
         # successful payment
         flash(gettext('Payment received.'))
         emailLicense(email, license)
-        return render_template('anon/bought.html', license=license)
+        return render_template('bought.html', license=license)
     else:
         flash(gettext("Error finalizing payment.  I don't think you were charged, but please email to see.", 'error'))
         raise Exception(payment.error)

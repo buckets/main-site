@@ -46,10 +46,10 @@ table.payment-options tr:first-child td {
     <tr>
         <td>{% trans %}Credit Card{% endtrans %}</td>
         <td>
-          <form action="https://server.budgetwithbuckets.com/stripe" method="POST">
+          <form action="{{ config.PAYMENT_URL }}/{{ lang }}/buy" method="POST">
             <script
               src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-              data-image="/static/img/main_logo.png') }}"
+              data-image="/static/img/main_logo.png"
               data-key="{{ config.STRIPE_PUBLIC_KEY }}"
               data-amount="2900"
               data-name="Buckets"
@@ -68,7 +68,7 @@ table.payment-options tr:first-child td {
     <tr>
         <td>{% trans %}PayPal{% endtrans %}</td>
         <td>
-          <form method="post" action="https://server.budgetwithbuckets.com/paypal">
+          <form method="post" action="{{ config.PAYMENT_URL }}/{{ lang }}/paypal-create-payment">
             <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" alt="Buy now with PayPal" />
           </form>
         </td>

@@ -19,3 +19,12 @@ services:
       BUCKETS_LICENSE_KEY:
       PAYPAL_CLIENT_ID:
       PAYPAL_CLIENT_SECRET:
+      STATIC_SITE_URL: http://192.168.99.100:8080
+  static:
+    image: python:2.7.11
+    volumes:
+    - ../staticweb/_dev:/code
+    command: python -m SimpleHTTPServer 8080
+    working_dir: /code
+    ports:
+    - "8080:8080"

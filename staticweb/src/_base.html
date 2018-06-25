@@ -109,7 +109,7 @@
   {% include '_navbar.html' %}
   {% block header %}
   <div class="hero mini">
-    <a href="{{ lang }}/index.html"><img src="/static/img/logo.svg" border="0"/></a>
+    <a href="/{{ lang }}/index.html"><img src="/static/img/logo.svg" border="0"/></a>
   </div>
   {% endblock %}
 
@@ -126,9 +126,9 @@
         <div>&copy; One Part Rain, LLC.</div>
       </div>
       <div>
-        <div><a href="{{ lang }}/gettingstarted.html">{% trans %}Getting Started{% endtrans %}</a></div>
-        <div><a href="{{ lang }}/buy.html">{% trans %}Pricing{% endtrans %}</a></div>
-        <div><a href="{{ lang }}/buy.html">{% trans %}Buy{% endtrans %}</a></div>
+        <div><a href="/{{ lang }}/gettingstarted.html">{% trans %}Getting Started{% endtrans %}</a></div>
+        <div><a href="/{{ lang }}/buy.html">{% trans %}Pricing{% endtrans %}</a></div>
+        <div><a href="/{{ lang }}/buy.html">{% trans %}Buy{% endtrans %}</a></div>
         <div>
           <details>
             <summary>{{ current_locale.display_name }}</summary>

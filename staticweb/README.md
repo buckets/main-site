@@ -3,6 +3,11 @@ To push a new version out:
     python build.py
     ./deploy2github.sh
 
+## Dev
+
+To build a dev version:
+
+    python build.py --dev
 
 ## I18N and L10N
 

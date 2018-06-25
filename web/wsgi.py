@@ -11,6 +11,7 @@ SENTRY_DSN = os.getenv('SENTRY_DSN', '')
 BUCKETS_LICENSE_KEY = os.getenv('BUCKETS_LICENSE_KEY', '')
 PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID', '')
 PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET', '')
+STATIC_SITE_URL = 'https://www.budgetwithbuckets.com'
 
 
 application = configureApp(
@@ -22,4 +23,5 @@ application = configureApp(
     sentry_dsn=SENTRY_DSN,
     buckets_license_key=BUCKETS_LICENSE_KEY,
     paypal_client_id=PAYPAL_CLIENT_ID,
-    paypal_client_secret=PAYPAL_CLIENT_SECRET)
+    paypal_client_secret=PAYPAL_CLIENT_SECRET,
+    static_site_url=STATIC_SITE_URL)
