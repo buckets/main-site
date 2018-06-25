@@ -1,8 +1,8 @@
  ✔ getLatestReleaseVersion() on static page @done (18-06-25 12:44)
- ☐ Handle navigating to /
- ☐ Pass language code to purchase pages
- ☐ /chat -> tawk.to
- ☐ /help -> /gettingstarted
+ ✔ Handle navigating to / @done (18-06-25 16:11)
+ ✔ Pass language code to purchase pages @done (18-06-25 16:11)
+ ✔ /chat -> tawk.to @done (18-06-25 16:17)
+ ✘ /help -> /gettingstarted @cancelled (18-06-25 16:17)
  ☐ On purchase error, where do you send people?
  ☐ Deploy new buckets version that sends bug reports to the new server
- ☐ Strip out purchase receipt page to just the bare minimum Buckets-branded stuff.
+ ✔ Strip out purchase receipt page to just the bare minimum Buckets-branded stuff. @done (18-06-25 16:21)
