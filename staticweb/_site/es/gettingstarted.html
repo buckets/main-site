@@ -2,18 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}Buckets - {% trans %}Private Family Budgeting App{% endtrans %}{% endblock %}</title>
+  <title>Empezando</title>
   
-  {% for loc in all_locales -%}
-  <link rel="alternate" hreflang="{{ loc.language }}" href="/{{ loc.language }}/{{ this_url }}" />
-  {% endfor -%}
-
+  <link rel="alternate" hreflang="en" href="/en/gettingstarted.html" />
+  <link rel="alternate" hreflang="es" href="/es/gettingstarted.html" />
   <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" type="text/css" href="/static/buckets.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-  <meta name="description" content="{% trans %}Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.{% endtrans %}" />
-  {% block extrahead %}{% endblock %}
+  <meta name="description" content="Buckets es una aplicación privada de finanzas personales para presupuestos familiares. Haga un seguimiento de los gastos, establezca objetivos de ahorro, salga de la deuda todo desde la privacidad de su propia computadora." />
+  
   <style>
   .hero {
     background-color: #2eaef1;
@@ -106,19 +104,40 @@
   </style>
 </head>
 <body>
-  {% include '_navbar.html' %}
-  {% block header %}
-  <div class="hero mini">
-    <a href="{{ lang }}/index.html"><img src="/static/img/logo.svg" border="0"/></a>
+  <div class="buckets-nav">
+  <div class="buckets-nav-inner">
+    <div class="buckets-nav-left">
+      <a class="logo" href="/es/index.html">
+        <img src="/static/favicon.png" />
+      </a>
+      <a href="https://docs.budgetwithbuckets.com">Guía</a>
+      <a href="https://blog.budgetwithbuckets.com">Blog</a>
+    </div>
+    <div class="buckets-nav-right">
+      
+    </div>
   </div>
-  {% endblock %}
+</div>
+  
+  <div class="hero mini">
+    <a href="/es/index.html"><img src="/static/img/logo.svg" border="0"/></a>
+  </div>
+  
 
-  {% block content %}{% endblock %}
+  
+<div class="wrap spaced">
+    <h2>Empezando</h2>
+    <p>
+        Vea estos videos de 1 a 2 minutos para ayudarlo a comenzar a presupuestar con Buckets:
+    </p>
+    <iframe width="480" height="270" src="https://www.youtube.com/embed/videoseries?list=PL3szGdfWlPgmYA3BiYKYiWS5MglvCZIou" frameborder="0" allowfullscreen></iframe>
+</div>
+
 
   <div class="wrap">
     <footer>
       <div>
-        <div>{% trans %}Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>{% endtrans %}
+        <div>Hecho por <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
         </div>
         <div><a href="mailto:hello@budgetwithbuckets.com">hello@budgetwithbuckets.com</a>
         </div>
@@ -126,24 +145,25 @@
         <div>&copy; One Part Rain, LLC.</div>
       </div>
       <div>
-        <div><a href="{{ lang }}/gettingstarted.html">{% trans %}Getting Started{% endtrans %}</a></div>
-        <div><a href="{{ lang }}/buy.html">{% trans %}Pricing{% endtrans %}</a></div>
-        <div><a href="{{ lang }}/buy.html">{% trans %}Buy{% endtrans %}</a></div>
+        <div><a href="/es/gettingstarted.html">Empezando</a></div>
+        <div><a href="/es/buy.html">Precios</a></div>
+        <div><a href="/es/buy.html">Comprar</a></div>
         <div>
           <details>
-            <summary>{{ current_locale.display_name }}</summary>
-            {% for loc in all_locales %}
+            <summary>español</summary>
+            
             <div>
-              <a href="/{{ loc.language }}/{{ this_url }}">{{ loc.display_name }}</a>
+              <a href="/en/gettingstarted.html">English</a>
             </div>
-            {%- endfor -%}
-          </details>
+            <div>
+              <a href="/es/gettingstarted.html">español</a>
+            </div></details>
         </div>
       </div>
     </footer>
   </div>
 
-  {% block chat %}
+  
   <!--Start of Tawk.to Script-->
   <script type="text/javascript">
   var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
@@ -157,6 +177,6 @@
   })();
   </script>
   <!--End of Tawk.to Script-->
-  {% endblock chat %}
+  
 </body>
 </html>
