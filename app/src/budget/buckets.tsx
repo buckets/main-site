@@ -674,10 +674,10 @@ class BucketRow extends React.Component<BucketRowProps, {
               this.doPending();
             },
             ArrowUp: () => {
-              console.log('up');
+              // console.log('up');
             },
             ArrowDown: () => {
-              console.log('down');
+              // console.log('down');
             },
           })}
         />

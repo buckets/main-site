@@ -337,6 +337,9 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         await store.sub.accounts.categorize(trans.id, cats);
       } else if (cats.length > 1 && invalid_cats) {
         makeToast(sss('Invalid categorization.  Categories not set.'), {className: 'warning'})
+      } else if (cats.length === 1 && invalid_cats) {
+        // Single invalid categorization
+        await store.sub.accounts.removeCategorization(trans.id, true);
       }
     }
   }
