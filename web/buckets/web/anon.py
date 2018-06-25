@@ -66,11 +66,7 @@ Happy budgeting!
         flash(gettext("Error emailing license.  If you don't receive an email soon, please reach out to us.", 'error'))
         raise
 
-@blue.route('/MATTTESTBOUGHT', methods=['GET'])
-def bought():
-    return render_template('bought.html')
-
-@blue.route('/buy', methods=['GET', 'POST'])
+@blue.route('/buy', methods=['POST'])
 def buy():
     if request.method == 'POST':
         token = request.form['stripeToken']
