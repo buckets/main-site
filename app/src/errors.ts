@@ -18,7 +18,7 @@ const log = new PrefixLogger('(errors)');
 export const IncorrectPassword = createErrorSubclass('IncorrectPassword');
 
 
-const SUBMIT_URL = process.env.BUCKETS_BUGREPORT_URL || 'https://www.budgetwithbuckets.com/_api/bugreport';
+const SUBMIT_URL = process.env.BUCKETS_BUGREPORT_URL || 'https://server.budgetwithbuckets.com/_api/bugreport';
 
 let last_focused_window:BrowserWindow;
 if (app) {
