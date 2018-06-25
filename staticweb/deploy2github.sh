@@ -6,4 +6,7 @@ rm -r _site
 python build.py
 cd ..
 git subtree push --prefix staticweb/_site github-main-site master
+
+# To force a push
+#   git push github-main-site "$(git subtree split --prefix staticweb/_site/ master):master" --force
 popd
