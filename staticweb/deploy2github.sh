@@ -4,6 +4,8 @@ pwd
 cd staticweb/
 rm -r _site
 python build.py
+git add _site
+git commit -m "New site"
 cd ..
 git subtree push --prefix staticweb/_site github-main-site master
 
