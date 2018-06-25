@@ -116,7 +116,7 @@ table.payment-options tr:first-child td {
   }
   .callout.para {
     margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
+    smargin-bottom: 1.5rem;
   }
   footer {
     display: flex;
@@ -136,23 +136,16 @@ table.payment-options tr:first-child td {
 </head>
 <body>
   <div class="buckets-nav">
-  <div class="buckets-nav-inner">
-    <div class="buckets-nav-left">
-      <a class="logo" href="/es/index.html">
-        <img src="/static/favicon.png" />
-      </a>
-      <a href="https://docs.budgetwithbuckets.com">Guía</a>
-      <a href="https://blog.budgetwithbuckets.com">Blog</a>
-    </div>
-    <div class="buckets-nav-right">
-      
-    </div>
-  </div>
+  <a class="logo" href="/es/index.html">
+    <img src="/static/favicon.png" />
+  </a>
+  <a href="https://docs.budgetwithbuckets.com">Guía</a>
+  <a href="https://blog.budgetwithbuckets.com">Blog</a>
 </div>
   
-  <div class="hero mini">
+  <!-- <div class="hero mini">
     <a href="/es/index.html"><img src="/static/img/logo.svg" border="0"/></a>
-  </div>
+  </div> -->
   
 
   
@@ -164,11 +157,11 @@ table.payment-options tr:first-child td {
     <tr>
         <td>Tarjeta de crédito</td>
         <td>
-          <form action="https://server.budgetwithbuckets.com//buy" method="POST">
+          <form action="https://server.budgetwithbuckets.com/es/buy" method="POST">
             <script
               src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-              data-image="/static/img/main_logo.png') }}"
-              data-key="pk_test_edwefkKOe0tgKFSHqxxgOeXH"
+              data-image="/static/img/main_logo.png"
+              data-key="pk_live_Wnk0BnoZxKPUkW03VR06TEq8"
               data-amount="2900"
               data-name="Buckets"
               data-label="Comprar ahora"
@@ -186,7 +179,7 @@ table.payment-options tr:first-child td {
     <tr>
         <td>PayPal</td>
         <td>
-          <form method="post" action="https://server.budgetwithbuckets.com//es/paypal-create-payment">
+          <form method="post" action="https://server.budgetwithbuckets.com/es/paypal-create-payment">
             <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" alt="Buy now with PayPal" />
           </form>
         </td>
