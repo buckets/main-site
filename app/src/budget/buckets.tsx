@@ -1242,7 +1242,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
           <th className="right">{sss('Amount')}</th>
           {ending_balance === null ? null : <th className="right">{sss('Balance')}</th> }
           <th className="nobr">{sss('noun.transfer', 'Transfer')} <Help>{sss('bucket.transfer.help', "A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.")}</Help></th>
-          <th>{sss('Misc')}</th>
+          <th>{sss('Account')}</th>
         </tr>
       </thead>
       <tbody>
