@@ -1,0 +1,273 @@
+{% extends '_base.html' %}
+
+{% block navlinks %}{% endblock %}
+
+{% block extrahead %}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Product",
+  "name": "Buckets",
+  "image": "https://www.budgetwithbuckets.com/static/img/logo.svg",
+  "description": "{% trans %}Buckets provides you with private, beautiful budgeting that you'll stick with.  Pull yourself out of debt and achieve financial goals you didn't think were in reach.{% endtrans %}",
+  "offers": {
+    "@type": "Offer",
+    "price": "29",
+    "priceCurrency": "USD",
+    "priceValidUntil": "2018-02-01"
+  },
+  "brand": {
+    "@type": "Thing",
+    "name": "Buckets, LLC"
+  }
+}
+</script>
+<style>
+.buttonish.download {
+  margin: .5rem 0 0;
+  white-space: nowrap;
+  display: block;
+}
+.buttonish.buy {
+  text-align: center;
+  font-size: 1.75rem;
+  padding: 1rem 3rem;
+  border: 0;
+  background-color: rgba(241, 196, 15,1.0);
+  background: linear-gradient(15deg, rgba(230, 126, 34,1.0), rgba(241, 196, 15,1.0));
+  
+  transition: transform 0.2s;
+  /*border: 3px solid rgba(230, 126, 34,1.0);
+  background-color: rgba(230, 126, 34,0.1);
+  color: rgba(230, 126, 34,1.0);*/
+}
+.buttonish.buy:hover {
+  background: rgba(26, 188, 156,1.0);
+}
+.download-section {
+  padding: 1rem;
+  border-radius: 3px;
+  text-align: center;
+  display: block;
+  width: 20rem;
+}
+.side-by-side {
+  display: flex;
+  max-width: 100%;
+}
+.main-shot-wrap {
+  flex-basis: 75%;
+  flex-grow: 6;
+}
+img.main-shot {
+  max-width: 100%;
+  top: -20%;
+  position: relative;
+}
+.intro-para {
+  flex-basis: 25%;
+  flex-grow: 4;
+}
+.price-section {
+  text-align: center;
+}
+.price {
+  font-size: 3rem;
+}
+.strikeout {
+  text-decoration: line-through;
+}
+.rightimg {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-right: -5rem;
+}
+.leftimg {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-left: -5rem;
+}
+.credit {
+  display: inline;
+  position: relative;
+  font-size: .5rem;
+  margin-left: .5rem;
+  line-height: .15rem;
+  color: grey;
+}
+</style>
+{% endblock %}
+
+{% block header %}
+<div class="hero">
+  <img src="/static/img/logo.svg" />
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="large wrap spaced" style="margin-bottom: -5rem;">
+  <div class="side-by-side">
+    <div class="main-shot-wrap">
+      <img src="/static/img/shots/transactions.png" class="main-shot" />
+    </div>
+    <div class="intro-para">
+      <span class="callout">
+        {% trans %}Buckets makes budgeting <em>fast</em>, <em>simple</em> and <em>private.</em>{% endtrans %}
+      </span>
+    
+      <div class="download-section">
+        <a name="download"></a>
+        <span class="fa fa-download"></span> {% trans %}Download Buckets v{{ latest_version }} for{% endtrans %}
+        <div>
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}.dmg{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+            <span class="fa fa-apple"></span>
+            {% trans %}macOS{% endtrans %}
+          </a>
+        </div>
+        <div>
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-Setup-{{ latest_version }}.exe{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+            <span class="fa fa-windows"></span>
+            {% trans %}Windows{% endtrans %}
+          </a>
+        </div>
+        <div>
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}-x86_64.AppImage{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+            <span class="fa fa-linux"></span>
+            {% trans %}Linux{% endtrans %}
+          </a>
+        </div>
+        <div>
+          <a class="download" style="line-height: 2rem; text-decoration: none;" href="https://github.com/buckets/application/releases/latest">{% trans %}Other{% endtrans %}</a>
+        </div>
+      </div>  
+
+    </div>
+  </div>
+</div>
+<div class="wrap">
+
+  <div style="text-align: center;">
+    <a class="buttonish buy" href="/buy.html">{% trans %}Buy $29{% endtrans %}</a>
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets gives you an <em>untimed, free trial</em> for as long as you need to decide if it works for you.  Really.{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets is <em>private</em>.{% endtrans %}  {% trans %}Your finances stay on your computer.  You control your data again!{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets has <em>no monthly fee.</em>  It costs $29.  Once.{% endtrans %}  {% trans %}You're saving money, not shackling yourself to another monthly service.{% endtrans %}  {% trans %}A single license may be used on all your computers and all the computers of family members living in your home.{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets has <em>amazing support.</em>{% endtrans %}  {% trans %}I'll listen to your ideas, help you with the app and gladly answer questions, no matter how small.{% endtrans %}  {% trans %}I'm serious.  Click that chat bubble and tell me what you ate for dinner last night.{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets includes some free and novel methods to <em>sync with your bank.</em>{% endtrans %}  {% trans %}Record completely private macros, import files or sign up with SimpleFIN Bridge.{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    {% trans %}Buckets includes some terrific <em>extras</em> such as really fast Amazon why-do-they-split-every-purchase-into-a-hundred-transactions reconciliation.{% endtrans %}
+  </div>
+
+  <div class="leftimg">
+    <a href="/gettingstarted.html"><img src="/static/img/videothumb.svg" style="width: 300px;" border="0"></a>
+    <div class="callout para">
+      {% trans href="/gettingstarted.html" %}Buckets includes <em>helpful videos</em> to teach you how to budget like a master.  <a href="{{ href }}">Check them out!</a>{% endtrans %}
+    </div>
+  </div>
+
+  {% macro credit(names) %}
+  <div class="credit">{% trans %}Thanks{% endtrans %} {{ names }}!</div>
+  {% endmacro %}
+
+  <div class="rightimg">
+    <div class="callout para">
+      {% trans %}Buckets is <em>multilingual</em>.{% endtrans %}  {% trans %}Currently available languages:{% endtrans %}
+      <ul>
+        <li>Deutsch</li>
+        <li>English</li>
+        <li>español</li>
+        <li>Français {{ credit('Raoul de Limézy') }}</li>
+        <li>Nederlands</li>
+        <li>Português {{ credit('Carlos') }}</li>
+      </ul>
+      <a href="https://github.com/buckets/translations" target="_blank">{% trans %}Want to add your language?{% endtrans %}</a>
+    </div>
+    <img src="/static/img/shots/spanish.png" style="width: 300px;">
+  </div>  
+
+  <div class="callout para">
+    {% trans %}Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul.{% endtrans %}  <a href="https://blog.budgetwithbuckets.com/2018/04/23/history-and-future.html">{% trans %}Read more.{% endtrans %}</a>
+  </div>
+
+  <div class="callout para">
+    {% trans %}<a href="#download">Download it now</a> for free!{% endtrans %}
+  </div>
+
+  <div class="callout para">
+    &mdash; Matt
+  </div>
+
+</div>
+
+<div class="wrap">
+<!-- Begin MailChimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+  #mc_embed_signup{
+    background: #fff;
+    clear: left;
+    width: 100%;
+    padding: 0rem 2rem;
+    margin: 1rem auto;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.5);
+
+    background-color: #eee;
+    background-image: url(/static/img/mail.png);
+    background-repeat: no-repeat;
+    background-size: 30%;
+    background-position: bottom 2rem right 3rem;
+  }
+  #mc_embed_signup form {
+    padding: 1rem 0;
+  }
+  #mc_embed_signup .mc-field-group {
+    width: 50%;
+  }
+  #mc_embed_signup #mc-embedded-subscribe {
+  }
+</style>
+<div id="mc_embed_signup">
+<form action="//bucketsisbetter.us8.list-manage.com/subscribe/post?u=bc109895c8df246ae54ad4d71&amp;id=0960a6d05e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+    <div id="mc_embed_signup_scroll">
+  <h2>{% trans %}Subscribe to the Monthly Newsletter{% endtrans %}</h2>
+<div class="mc-field-group">
+  <label for="mce-EMAIL">{% trans %}Email Address{% endtrans %}</label>
+  <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
+</div>
+<div class="mc-field-group">
+  <label for="mce-FNAME">{% trans %}First Name{% endtrans %}</label>
+  <input type="text" value="" name="FNAME" class="required" id="mce-FNAME">
+</div>
+  <div id="mce-responses" class="clear">
+    <div class="response" id="mce-error-response" style="display:none"></div>
+    <div class="response" id="mce-success-response" style="display:none"></div>
+  </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_bc109895c8df246ae54ad4d71_0960a6d05e" tabindex="-1" value=""></div>
+    <div class="clear"><input type="submit" value="{% trans %}Subscribe{% endtrans %}" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    </div>
+</form>
+</div>
+<!--End mc_embed_signup-->
+</div>
+
+{% endblock content %}
