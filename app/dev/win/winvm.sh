@@ -175,6 +175,7 @@ do_up() {
     echo "do_up" $SHOW_WINDOW
     setlogprefix "[do_up]"
     do_create
+    ensure_off
     ensure_booted "$SHOW_WINDOW"
 }
 
