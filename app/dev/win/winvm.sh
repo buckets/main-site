@@ -90,7 +90,8 @@ do_destroy() {
 
 
 do_create() {
-    echo "do_create"
+    SHOW_WINDOW="$1"
+    echo "do_create $SHOW_WINDOW"
     if vboxmanage showvminfo "$VMNAME" >/dev/null 2>/dev/null; then
         echo "$VMNAME already exists"
     else
@@ -162,14 +163,19 @@ project_root_dir() {
 }
 
 do_start() {
-    vboxmanage startvm "$VMNAME" --type headless
+    if [ "$1" = "window" ]; then
+        vboxmanage startvm "$VMNAME"
+    else
+        vboxmanage startvm "$VMNAME" --type headless
+    fi
 }
 
 do_up() {
-    echo "do_up"
+    SHOW_WINDOW="$1"
+    echo "do_up" $SHOW_WINDOW
     setlogprefix "[do_up]"
     do_create
-    ensure_booted
+    ensure_booted "$SHOW_WINDOW"
 }
 
 do_restore() {
@@ -198,7 +204,7 @@ do_prepare_build() {
     tsc -p "${PROJECT_DIR}/app/dev/win/tsconfig.json"
     echo "Built winbuild.ts"
 
-    do_up
+    do_up window
     ensure_shared_folder project "$PROJECT_DIR" y
     ensure_mount project y
 }
@@ -278,8 +284,13 @@ ensure_off() {
 }
 
 ensure_on() {
+    SHOW_WINDOW="$1"
     if ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; then
-        vboxmanage startvm "$VMNAME" --type headless
+        if [ "$SHOW_WINDOW" = "window" ]; then
+            vboxmanage startvm "$VMNAME"
+        else
+            vboxmanage startvm "$VMNAME" --type headless
+        fi
     fi
     while ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; do
         sleep 1
@@ -287,7 +298,7 @@ ensure_on() {
 }
 
 ensure_booted() {
-    ensure_on
+    ensure_on "$1"
 
     # wait for guest additions to be started
     while ! cmd echo hello 2>/dev/null | grep "hello" >/dev/null; do
