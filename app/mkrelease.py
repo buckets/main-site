@@ -207,6 +207,13 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     print('Pushing to origin')
     subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
 
+    # publish new static site
+    if yesno('Publish main static site? (to update the version, mostly)', default=True):
+        subprocess.check_call(['python', 'build.py'], cwd='../staticweb')
+        subprocess.check_call(['git', 'add', '_site'], cwd='../staticweb')
+        subprocess.check_call(['git', 'commit', '-m', 'Update static site'], cwd='../staticweb')
+        subprocess.check_call(['python', 'deploy2github.sh'], cwd='../staticweb')
+
 
 if __name__ == '__main__':
     doit()
