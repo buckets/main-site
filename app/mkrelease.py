@@ -212,7 +212,7 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
         subprocess.check_call(['python', 'build.py'], cwd='../staticweb')
         subprocess.check_call(['git', 'add', '_site'], cwd='../staticweb')
         subprocess.check_call(['git', 'commit', '-m', 'Update static site'], cwd='../staticweb')
-        subprocess.check_call(['python', 'deploy2github.sh'], cwd='../staticweb')
+        subprocess.check_call(['bash', 'deploy2github.sh'], cwd='../staticweb')
 
 
 if __name__ == '__main__':
