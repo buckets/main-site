@@ -34,7 +34,10 @@ async function getLocale():Promise<string> {
   }  
 }
 
+const DEFAULT_LOCALE = 'en'
+
 CONTEXT.configure({
+  default_locale: DEFAULT_LOCALE,
   langpack_basepath: Path.join(APP_ROOT, 'src/langs'),
 })
 CONTEXT.localechanged.on(async ({locale}) => {
@@ -44,7 +47,7 @@ CONTEXT.localechanged.on(async ({locale}) => {
     moment.locale(locale)
     log.info('date format set');
   } catch(err) {
-    if (locale !== 'en') {
+    if (locale !== DEFAULT_LOCALE) {
       log.error('Error setting date locale', err.stack);  
     }
   }

@@ -26,9 +26,9 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@iffycan/events/-/events-1.0.1.tgz#b78b4610effad956cfdd7ed46da6b78dc2c2a8b3"
 
-"@iffycan/i18n@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@iffycan/i18n/-/i18n-0.4.0.tgz#4a0d651e154724a997e9ea3860877f3de7dbd3ae"
+"@iffycan/i18n@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@iffycan/i18n/-/i18n-0.5.0.tgz#2dc7461077690d2b2f6ba448791834f4dc350189"
   dependencies:
     "@iffycan/events" "^1.0.1"
     moment-timezone "^0.5.17"
@@ -791,7 +791,7 @@ browser-stdout@1.3.0:
   version "0.1.0"
   dependencies:
     "@iffycan/events" "^1.0.1"
-    "@iffycan/i18n" "^0.4.0"
+    "@iffycan/i18n" "^0.5.0"
     fs-extra-promise "^1.0.1"
     lodash.sortby "^4.7.0"
     mathjs "^4.0.1"
