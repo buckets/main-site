@@ -56,6 +56,7 @@ export const DEFAULTS:IMessages = {
     h: "ihCgI4A9UaFZ63kuiKXqFHoGsze2dYwzpgSVU0clMfQ=",
     // accounts.tsx:50
     // accounts.tsx:105
+    // buckets.tsx:1244
     // importpage.tsx:455
     // searchpage.tsx:119
     // searchpage.tsx:143
@@ -336,7 +337,7 @@ export const DEFAULTS:IMessages = {
     val: "Cancel",
     translated: false,
     h: "wHdMGFBg/BNmqwwBSIr4TrXk4fT1kilDHgZN5z4N5sU=",
-    // transactions.tsx:958
+    // transactions.tsx:961
   },
   "Cancel sync": {
     val: "Cancel sync",
@@ -366,14 +367,14 @@ export const DEFAULTS:IMessages = {
     val: "Categorization",
     translated: false,
     h: "DShuYOF3daz37AE7lGCN1TajYU1VyorRCvLwh4bM1r8=",
-    // transactions.tsx:918
-    // transactions.tsx:928
+    // transactions.tsx:921
+    // transactions.tsx:931
   },
   "Categorize": {
     val: "Categorize",
     translated: false,
     h: "mA6/TefxgXpo2M+OUx/ATLQ4QYHv4t1+8vy3MmV+EQg=",
-    // transactions.tsx:998
+    // transactions.tsx:1001
   },
   "Category": {
     val: "Category",
@@ -424,7 +425,7 @@ export const DEFAULTS:IMessages = {
     val: "Cleared",
     translated: false,
     h: "j1SmbPuDDBP04XfOH9NNFCDzXmB9xAzSoVG7RcHcdBg=",
-    // transactions.tsx:415
+    // transactions.tsx:418
   },
   "Click the \"Set mapping\" to continue.": {
     val: "Click the \"Set mapping\" to continue.",
@@ -535,7 +536,7 @@ export const DEFAULTS:IMessages = {
     val: "Create Transaction",
     translated: false,
     h: "G5NDAP857MBDE66GWUREcFAJc2pCogndYa6y+m6PRfE=",
-    // transactions.tsx:363
+    // transactions.tsx:366
   },
   "Create budget password:": {
     val: "Create budget password:",
@@ -1050,7 +1051,7 @@ export const DEFAULTS:IMessages = {
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
     // budget.tsx:265
     // reports.tsx:208
-    // transactions.tsx:764
+    // transactions.tsx:767
   },
   "Install and Relaunch Buckets": {
     val: "Install and Relaunch Buckets",
@@ -1243,14 +1244,14 @@ export const DEFAULTS:IMessages = {
     val: "Mark Cleared",
     translated: false,
     h: "Z+NICH1z9EYN3Ub7Z9idiTw/t+QaDF9n3h9br9WhjgE=",
-    // transactions.tsx:421
+    // transactions.tsx:424
   },
   "Mark Not Cleared": {
     /* Name of action for marking a transaction as not having cleared the bank */
     val: "Mark Not Cleared",
     translated: false,
     h: "4VoXUMr4nLIoyueiB8YlIR9HFGPYBhYxJq/cqqwDLs0=",
-    // transactions.tsx:421
+    // transactions.tsx:424
   },
   "Medical": {
     val: "Medical",
@@ -1275,12 +1276,6 @@ export const DEFAULTS:IMessages = {
     h: "ELhkWGGY5oNKpfCzoXXW6TgkfS1nI0ZuJbWyYLmT+ro=",
     // menu.ts:193
     // menu.ts:397
-  },
-  "Misc": {
-    val: "Misc",
-    translated: false,
-    h: "DPoc7CIbzLHJxuar3WnaidO3Ryy1QtYkCswRzVHtVBg=",
-    // buckets.tsx:1244
   },
   "Month to Month": {
     val: "Month to Month",
@@ -1443,7 +1438,7 @@ export const DEFAULTS:IMessages = {
     val: "Not yet cleared",
     translated: false,
     h: "Hf/KSsxHfxvXx0udkqgCw/QkkE8Vi5ex9pdYnX6qzEU=",
-    // transactions.tsx:416
+    // transactions.tsx:419
   },
   "Note": {
     val: "Note",
@@ -1484,9 +1479,9 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "cw3ZD6kn6Mat0qZqOZP0Is9hg7xmOxrKqKCD8CIjmz4=",
     // accounts.tsx:355
-    // transactions.tsx:462
-    // transactions.tsx:483
-    // transactions.tsx:599
+    // transactions.tsx:465
+    // transactions.tsx:486
+    // transactions.tsx:602
   },
   "On": {
     val: "On",
@@ -1732,7 +1727,7 @@ export const DEFAULTS:IMessages = {
     val: "Remove Categorization",
     translated: false,
     h: "b5sIQMfXAnBAqHD2NJfIgIAxclRGe5LJ7NzzF6sOruQ=",
-    // transactions.tsx:923
+    // transactions.tsx:926
   },
   "Rent/Mortgage": {
     val: "Rent/Mortgage",
@@ -1807,7 +1802,7 @@ export const DEFAULTS:IMessages = {
     val: "Save",
     translated: false,
     h: "wduD0WXtkIpIb6B4R8AA7ph724u3/Gtv27uaky6rEAU=",
-    // transactions.tsx:959
+    // transactions.tsx:962
     // record.tsx:487
   },
   "Screenshots:": {
@@ -2154,7 +2149,7 @@ export const DEFAULTS:IMessages = {
     val: "Transfer",
     translated: false,
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
-    // transactions.tsx:761
+    // transactions.tsx:764
   },
   "Trial Version": {
     val: "Trial Version",
@@ -2324,7 +2319,7 @@ export const DEFAULTS:IMessages = {
     val: "Update Transaction",
     translated: false,
     h: "aMF18BJOMjuVOInpbGKf/3jyTE1qYzq4oHzb3sBVcWw=",
-    // transactions.tsx:346
+    // transactions.tsx:349
   },
   "Update account balance": {
     val: "Update account balance",
@@ -2765,7 +2760,7 @@ Would you like to purchase a license now?`,
     val: "Income",
     translated: false,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
-    // transactions.tsx:970
+    // transactions.tsx:973
   },
   "notify-downloaded-file": {
     val: filename => `Downloaded file: ${filename}`,
@@ -2778,7 +2773,7 @@ Would you like to purchase a license now?`,
     translated: false,
     h: "B5GGqjnE8KOjYJjhsFV7zs5TGmGmVPqjihzMVxHJ3sI=",
     // buckets.tsx:1243
-    // transactions.tsx:975
+    // transactions.tsx:978
   },
   "off": {
     val: "off",
@@ -2860,7 +2855,7 @@ Would you like to purchase a license now?`,
     val: "This symbol means the transaction came from an import/sync",
     translated: false,
     h: "S3tDRls+AJYj6f8jSNSCa1FVyNY+ngn6Db1EQJ3dpLE=",
-    // transactions.tsx:411
+    // transactions.tsx:414
   },
   "sync.toast.syncing": {
     val: (start:moment.Moment, end:moment.Moment) => {
@@ -2882,7 +2877,7 @@ Would you like to purchase a license now?`,
               },
     translated: false,
     h: "VJmIMDZGOdMKwBpoqDUYiVdCFhw1pJ4qCmKiszAECL4=",
-    // transactions.tsx:523
+    // transactions.tsx:526
   },
   "transfer-to-account": {
     val: (dropdown:JSX.Element) => {
@@ -2890,7 +2885,7 @@ Would you like to purchase a license now?`,
               },
     translated: false,
     h: "Bd1IGkjXo2ruWofGrT+WwLdiy8IwJ/PW+7SO4TaDcps=",
-    // transactions.tsx:528
+    // transactions.tsx:531
   },
   "version-available": {
     val: (newv:string) => `Version ${newv} available.`,
