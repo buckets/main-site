@@ -92,10 +92,10 @@ img.main-shot {
 .credit {
   display: inline;
   position: relative;
-  font-size: .5rem;
-  margin-left: .5rem;
-  line-height: .15rem;
-  color: grey;
+  font-size: .9rem;
+  margin-left: 0.5rem;
+  opacity: 0.5;
+  bottom: 0.1rem;
 }
 .main-title {
   display: flex;
@@ -222,9 +222,9 @@ img.main-shot {
       </div>
     </div>
 
-    {% macro credit(names) %}
-    <div class="credit">{% trans %}Thanks{% endtrans %} {{ names }}!</div>
-    {% endmacro %}
+    {% macro credit(names) -%}
+    <div class="credit">({% trans %}Thanks{% endtrans %} {{ names }}!)</div>
+    {%- endmacro %}
 
 <img src="/static/img/shots/spanish.png" style="width: 100%; border-radius: 6px;">
     <div class="rightimg">
@@ -234,9 +234,10 @@ img.main-shot {
           <li>Deutsch</li>
           <li>English</li>
           <li>español</li>
-          <li>Français {{ credit('Raoul de Limézy') }}</li>
+          <li>Français{{ credit('Raoul de Limézy') }}</li>
           <li>Nederlands</li>
-          <li>Português {{ credit('Carlos') }}</li>
+          <li>Polski{{ credit('Piotr Bielaska') }}</li>
+          <li>Português{{ credit('Carlos') }}</li>
         </ul>
       </div>
       
