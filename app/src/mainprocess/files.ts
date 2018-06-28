@@ -534,7 +534,7 @@ export const openBudgetFileDialog = onlyRunInMain(() => {
 export const newBudgetFileDialog = onlyRunInMain(() => {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
-      title: sss('Buckets Budget Filename'),
+      title: sss('Buckets Budget Filename'/* 'Buckets' refers to the application name */),
       defaultPath: Path.resolve(app.getPath('documents'), 'My Budget.buckets'),
     }, (filename) => {
       if (filename) {

@@ -833,7 +833,7 @@ export async function start(args:{
     />
   }, args.container);
   renderer.afterUpdate(() => {
-    let title = sss('EXPERIMENTAL Buckets Macro Maker');
+    let title = sss('EXPERIMENTAL Buckets Macro Maker'/* 'Buckets' refers to the application name */);
     if (BANKMACRO.name) {
       title = `${BANKMACRO.name} - ${title}`;
     }

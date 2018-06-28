@@ -45,6 +45,7 @@ const messages:IMessages = {
     h: "z6CqgxENo0xxB0LPp8P8rmnLPp1m2NElecEaJM8GDfI=",
   },
   "About Buckets": {
+    /* 'Buckets' refers to the application name */
     val: "Over Buckets",
     translated: true,
     h: "9bzPsx+kCkNUeLTSVjaygyWCkm3VCdsFaAFRvdS+xEU=",
@@ -207,21 +208,28 @@ const messages:IMessages = {
     h: "NMC+sjsH6UgNhNtiqYeiHDi4zDK/+S5h5yMfZ5CQk1c=",
   },
   "Buckets": {
+    /* Bucket list page title.  Does NOT refer to the application name */
+    /* Refers to a list of buckets, not the application title */
+    /* Refers to a list of buckets, not the application title */
     val: "Emmers",
     translated: true,
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
   },
   "Buckets Budget Filename": {
+    /* 'Buckets' refers to the application name */
     val: "Buckets Budget Bestandsnaam",
     translated: true,
     h: "PMqvee/qJsh/OYtRi+hbcH4fgl07SR6XM0wx4c1C+sU=",
   },
   "Buckets Guide": {
+    /* 'Buckets' refers to the application name. */
     val: "Buckets Gids",
     translated: true,
     h: "iK/jSwFsIOO0YBANlaqC8+gTWFX+9IBYpc+HuiQ2U/c=",
   },
   "Buckets License": {
+    /* 'Buckets' refers to the application name */
+    /* 'Buckets' refers to the application name */
     val: "Buckets Licentie",
     translated: true,
     h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
@@ -544,6 +552,7 @@ const messages:IMessages = {
     h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
   },
   "EXPERIMENTAL Buckets Macro Maker": {
+    /* 'Buckets' refers to the application name */
     val: "EXPERIMENTELE Buckets Makro Ontwerper",
     translated: true,
     h: "NZPVXQ+Dw1vv0fLXY+Z4R1KiEkXjDZtSmY3tVz5L1VI=",
@@ -747,6 +756,7 @@ const messages:IMessages = {
     h: "TvUUB7AuCuFJ9IWiz2SbsjnUvYoDPZAaMPxup/rwosM=",
   },
   "Hide Buckets": {
+    /* 'Buckets' refers to the application name. */
     val: "Verberg Buckets",
     translated: true,
     h: "38YdGXFjndmgDFgXTpfUZ0F+W/D9e267YaAvzYZm4O8=",
@@ -2012,11 +2022,13 @@ const messages:IMessages = {
     h: "9KaivrLeSKn8ROgvad6S9iE9NAz0BZRwQh3/ufRahVA=",
   },
   "account-bal-diff-fix-1": {
+    /* 'Buckets' refers to the application name */
     val: "De bank heeft een toekomstig saldo gemeld. Om dit te verhelpen moet je wachten totdat alle transacties in Buckets ingelezen zijn.",
     translated: true,
     h: "CRYYgg8YHspvP5KI3HGvyzlrOhxZf4rrjjUQbmL6Z7Q=",
   },
   "account-bal-diff-fix-2": {
+    /* 'Buckets' refers to the application name. */
     val: "Er missen transacties in Buckets.",
     translated: true,
     h: "CeKVWaErT3a5EvPpQb/Av2kHD7RtudYjlQntfcMMtS8=",

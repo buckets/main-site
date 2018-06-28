@@ -90,7 +90,7 @@ export class SearchPage extends React.Component<{
 
     if (result.buckets.length) {
       buckets_table = <div>
-        <h2>{sss('Buckets')}</h2>
+        <h2>{sss('Buckets'/* Refers to a list of buckets, not the application title */)}</h2>
         <table className="ledger">
           <thead>
             <tr>

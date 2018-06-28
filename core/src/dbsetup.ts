@@ -67,7 +67,7 @@ async function ensureBucketsLicenseBucket(store:IStore) {
   } catch(e) {
     if (e instanceof NotFound) {
       license_bucket = await store.sub.buckets.add({
-        name: sss('Buckets License'),
+        name: sss('Buckets License'/* 'Buckets' refers to the application name */),
       })
       await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
         $id: license_bucket.id
@@ -101,7 +101,7 @@ async function ensureBucketsLicenseBucket(store:IStore) {
     goal: license_bucket.goal <= 100 ? 2900 : license_bucket.goal,
     deposit: license_bucket.deposit <= 100 ? 500 : license_bucket.deposit,
     kicked: false,
-    name: sss('Buckets License'),
+    name: sss('Buckets License'/* 'Buckets' refers to the application name */),
     ranking: ranking,
     color: 'rgba(52, 152, 219,1.0)',
     group_id: group_id,

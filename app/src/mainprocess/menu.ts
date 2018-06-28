@@ -253,7 +253,7 @@ export async function updateMenu(args:{
         }
       },
       {
-        label: sss('Buckets Guide'),
+        label: sss('Buckets Guide'/* 'Buckets' refers to the application name. */),
         click() {
           openDocs();
         }
@@ -317,7 +317,7 @@ export async function updateMenu(args:{
   let preMenus = [];
 
   const about = {
-    label: sss('About Buckets'),
+    label: sss('About Buckets'/* 'Buckets' refers to the application name */),
     click() {
       openUpdateWindow();
     }
@@ -358,7 +358,7 @@ export async function updateMenu(args:{
         {type: 'separator'},
         {
           role: 'hide',
-          label: sss('Hide Buckets'),
+          label: sss('Hide Buckets'/* 'Buckets' refers to the application name. */),
         },
         {
           role: 'hideothers',

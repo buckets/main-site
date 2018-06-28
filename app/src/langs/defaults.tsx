@@ -45,6 +45,7 @@ export const DEFAULTS:IMessages = {
     // importpage.tsx:38
   },
   "About Buckets": {
+    /* 'Buckets' refers to the application name */
     val: "About Buckets",
     translated: false,
     h: "9bzPsx+kCkNUeLTSVjaygyWCkm3VCdsFaAFRvdS+xEU=",
@@ -160,7 +161,7 @@ export const DEFAULTS:IMessages = {
     val: "Animation",
     translated: false,
     h: "Vk4XaMgXNIEY4+Gcal1n+qdnamgr4Q5af/+wzFRoIHU=",
-    // preferences.tsx:107
+    // preferences.tsx:108
   },
   "Any other monthly bills you have?": {
     val: "Any other monthly bills you have?",
@@ -214,7 +215,7 @@ export const DEFAULTS:IMessages = {
     val: "Beta Updates",
     translated: false,
     h: "xyGKwUoes8hYiGBWy9KIoxkU/BREGx8pGiKIUb6hsEc=",
-    // preferences.tsx:124
+    // preferences.tsx:125
   },
   "Birthdays": {
     val: "Birthdays",
@@ -263,6 +264,9 @@ export const DEFAULTS:IMessages = {
     // buckets.tsx:440
   },
   "Buckets": {
+    /* Bucket list page title.  Does NOT refer to the application name */
+    /* Refers to a list of buckets, not the application title */
+    /* Refers to a list of buckets, not the application title */
     val: "Buckets",
     translated: false,
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
@@ -271,18 +275,22 @@ export const DEFAULTS:IMessages = {
     // searchpage.tsx:92
   },
   "Buckets Budget Filename": {
+    /* 'Buckets' refers to the application name */
     val: "Buckets Budget Filename",
     translated: false,
     h: "PMqvee/qJsh/OYtRi+hbcH4fgl07SR6XM0wx4c1C+sU=",
     // files.ts:536
   },
   "Buckets Guide": {
+    /* 'Buckets' refers to the application name. */
     val: "Buckets Guide",
     translated: false,
     h: "iK/jSwFsIOO0YBANlaqC8+gTWFX+9IBYpc+HuiQ2U/c=",
     // menu.ts:255
   },
   "Buckets License": {
+    /* 'Buckets' refers to the application name */
+    /* 'Buckets' refers to the application name */
     val: "Buckets License",
     translated: false,
     h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
@@ -675,6 +683,7 @@ export const DEFAULTS:IMessages = {
     // menu.ts:206
   },
   "EXPERIMENTAL Buckets Macro Maker": {
+    /* 'Buckets' refers to the application name */
     val: "EXPERIMENTAL Buckets Macro Maker",
     translated: false,
     h: "NZPVXQ+Dw1vv0fLXY+Z4R1KiEkXjDZtSmY3tVz5L1VI=",
@@ -709,7 +718,7 @@ export const DEFAULTS:IMessages = {
     val: "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)",
     translated: false,
     h: "sC2MA2Tqphkt5iblpZFWToDQhdF9U2nk8FpwTxH3Ta8=",
-    // preferences.tsx:137
+    // preferences.tsx:138
   },
   "Ending Balance": {
     val: "Ending Balance",
@@ -922,6 +931,7 @@ export const DEFAULTS:IMessages = {
     // menu.ts:241
   },
   "Hide Buckets": {
+    /* 'Buckets' refers to the application name. */
     val: "Hide Buckets",
     translated: false,
     h: "38YdGXFjndmgDFgXTpfUZ0F+W/D9e267YaAvzYZm4O8=",
@@ -1166,7 +1176,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "B22VmGf23mHOBpC02z4zdK4P34035w3nWPUR86u0Dgg=",
     // csvimport.tsx:567
-    // preferences.tsx:74
+    // preferences.tsx:75
   },
   "Last used": {
     val: "Last used",
@@ -1460,7 +1470,7 @@ export const DEFAULTS:IMessages = {
     val: "Number format",
     translated: false,
     h: "RxooctpubAJr5NcKn57a5kjGBEdlPT5b2h6PUFLqxxE=",
-    // preferences.tsx:62
+    // preferences.tsx:63
   },
   "OK": {
     val: "OK",
@@ -2037,7 +2047,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",
     // preferences.tsx:50
-    // preferences.tsx:95
+    // preferences.tsx:96
   },
   "Target date:": {
     val: "Target date:",
@@ -2086,7 +2096,7 @@ export const DEFAULTS:IMessages = {
     val: "Timezone",
     translated: false,
     h: "y2odAzUKexep7CmO6P8BCj1p4PWG6VZ/RbIg8oOWASI=",
-    // preferences.tsx:83
+    // preferences.tsx:84
   },
   "To": {
     val: "To",
@@ -2484,12 +2494,14 @@ export const DEFAULTS:IMessages = {
     // accounts.tsx:223
   },
   "account-bal-diff-fix-1": {
+    /* 'Buckets' refers to the application name */
     val: "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets.",
     translated: false,
     h: "CRYYgg8YHspvP5KI3HGvyzlrOhxZf4rrjjUQbmL6Z7Q=",
     // accounts.tsx:225
   },
   "account-bal-diff-fix-2": {
+    /* 'Buckets' refers to the application name. */
     val: "Transactions are missing from Buckets.",
     translated: false,
     h: "CeKVWaErT3a5EvPpQb/Av2kHD7RtudYjlQntfcMMtS8=",

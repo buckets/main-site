@@ -154,7 +154,7 @@ class Navbar extends React.Component<{
             <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed'/*! Label for list of closed accounts */)}</Link>
           </Route>
           <Link relative to="/transactions" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Transactions')}</span>{transactions_badge}</Link>
-          <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets')}</span>{buckets_badge}</Link>
+          <Link relative to="/buckets" exactMatchClass="selected"><span>{sss('Buckets'/* Bucket list page title.  Does NOT refer to the application name */)}</span>{buckets_badge}</Link>
           <Route path="/buckets">
             <Link relative to="/kicked" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Kicked'/* Label for list of archived buckets */)}</Link>
           </Route>
@@ -222,7 +222,7 @@ class Application extends React.Component<ApplicationProps, any> {
                                 <td className="right"><Money value={appstate.open_accounts_balance} noFaintCents /></td>
                               </tr>
                               <tr>
-                                <td>{sss('Buckets')}</td>
+                                <td>{sss('Buckets'/* Refers to a list of buckets, not the application title */)}</td>
                                 <td>-</td>
                                 <td className="right"><Money value={appstate.bucket_total_balance} noFaintCents /></td>
                               </tr>

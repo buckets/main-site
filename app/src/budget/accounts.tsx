@@ -223,8 +223,8 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
             </div>
             <span>{sss("account-bal-diff-1", "The running balance does not match the last synced balance for one of these reasons:")} </span>
             <ul>
-              <li>{sss("account-bal-diff-fix-1", "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets.")}</li>
-              <li>{sss("account-bal-diff-fix-2", "Transactions are missing from Buckets.")}</li>
+              <li>{sss("account-bal-diff-fix-1", "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets."/* 'Buckets' refers to the application name */)}</li>
+              <li>{sss("account-bal-diff-fix-2", "Transactions are missing from Buckets."/* 'Buckets' refers to the application name. */)}</li>
             </ul>
           </div>
         </td>
