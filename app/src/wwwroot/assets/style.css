@@ -1704,3 +1704,43 @@ g.hover-labels:hover rect.highlight {
   background-color: var(--faint-blue);
 }
 
+.app .nav a.calc-close-button {
+  text-align: end;
+  color: rgba(255,255,255,0.8);
+  background-color: none;
+  outline: none;
+  border: 0;
+  width: initial;
+  display: block;
+}
+.calculator {
+  padding: 1rem 0.25rem 1rem 1rem;
+  color: rgba(255,255,255,0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 9.35rem;
+}
+.calculator .calc-reminder {
+  font-size: 0.9rem;
+  max-width: 10rem;
+  font-weight: normal;
+}
+.calculator textarea {
+  background-color: white;
+  color: black;
+  border-radius: 3px;
+  width: 100%;
+  flex-basis: 50%;
+}
+.calculator .result {
+  max-width: 10rem;
+  flex-grow: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  word-wrap: break-word;
+  font-size: 1.2rem;
+  flex-basis: 50%;
+}
