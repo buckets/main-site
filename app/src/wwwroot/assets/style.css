@@ -1623,12 +1623,15 @@ g.hover-labels:hover rect.highlight {
   opacity: 0;
 }
 
-.icon.cleared-indicator {
+.icon.green-check {
   font-weight: bold;
   opacity: 0;
   color: var(--darker-green);
 }
-.icon.cleared-indicator.cleared {
+.icon.green-check.on {
+  opacity: 1;
+}
+.icon-hover-trigger:hover .icon.hover.green-check.on {
   opacity: 1;
 }
 

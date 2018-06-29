@@ -418,8 +418,8 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         title={trans.cleared
           ? sss("Cleared"/* Tooltip text indicating that a transaction has cleared. */)
           : sss("Not yet cleared"/* Tooltip text indicating that a transaction has not yet cleared. */)}
-        className={cx("icon hover cleared-indicator", {
-          cleared: trans.cleared,
+        className={cx("icon hover green-check", {
+          on: trans.cleared,
         })}
         onClick={ev => {
           let undo_note = trans.cleared ? sss('Mark Not Cleared'/* Name of action for marking a transaction as not having cleared the bank */) : sss('Mark Cleared'/* Name of action for marking a transaction as having cleared the bank */);

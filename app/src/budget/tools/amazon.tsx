@@ -1,5 +1,7 @@
-
+import * as moment from 'moment-timezone'
 import { remote, shell } from 'electron'
+import * as cx from 'classnames'
+import { cloneDeep } from 'lodash'
 import * as React from 'react'
 import * as querystring from 'querystring'
 import * as fs from 'fs-extra-promise'
@@ -7,9 +9,11 @@ import { sss } from '../../i18n'
 import { AppState } from '../appstate'
 import { Interval } from 'buckets-core/dist/time'
 import { Money } from '../../money'
+import { DateDisplay } from '../../time'
 import { TransactionList } from '../transactions'
 import { Transaction } from 'buckets-core/dist/models/account'
 import { makeToast } from '../toast'
+import { DebouncedInput } from '../../input'
 import { parseCSVStringWithHeader, csvFieldToCents } from '../../csvimport'
 
 
@@ -18,173 +22,277 @@ interface AmazonPageProps {
 }
 export class AmazonPage extends React.Component<AmazonPageProps, {
   reportset: ReportSet;
+  orderset: OrderSet;
+  query: string;
 }> {
   constructor(props) {
     super(props);
     this.state = {
+      query: 'Amazon',
       reportset: {
         orders: [],
-        orders_by_id: {},
         items: [],
-        items_by_id: {},
         refunds: [],
-        refunds_by_id: {},
+      },
+      orderset: {
+        orders: [],
+        refunds: [],
       }
     }
   }
-  makeItemsSection(items:Item[], appstate:AppState) {
-    if (items.length) {
-      return (
-        <table className="ledger">
-          <thead>
-            <tr>
-              <th className="right">{sss('Amount')}</th>
-              <th>{sss('Item'/* Amazon order item description label */)}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item:Item, idx) => {
-              return <tr key={idx}>
-                <td className="right"><Money value={item.item_total} /></td>
-                <td>{item.title}</td>
-              </tr>
-            })}
-          </tbody>
-        </table>);
-    } else {
-      return <div><a href="#" onClick={ev => {
-            ev.preventDefault();
-            openAmazonReportPage({
-              range: appstateToInterval(appstate),
-              type: 'ITEMS',
-            })
-          }}>{sss('Import an Amazon Items report to see order details.')}</a>
-      </div>
-    }
+  updateOrderSet(func:((oset:OrderSet)=>void)) {
+    let clone = cloneDeep(this.state.orderset);
+    func(clone);
+    this.setState({
+      orderset: clone,
+    })
   }
   render() {
     let { appstate } = this.props;
     let { reportset } = this.state;
-    let order_ids = Object.keys(reportset.orders_by_id);
-    let orders_list;
-    if (order_ids.length) {
-      orders_list = order_ids.map(order_id => {
-        let orders_section;
-        let items_section;
 
-        let items = reportset.items_by_id[order_id] || [];
-        let orders = reportset.orders_by_id[order_id] || [];
-        let matching_transactions = [];
+    const amazon_transactions = Object.values<Transaction>(appstate.transactions).filter(trans => {
+      return trans.memo && trans.memo.toLowerCase().indexOf(this.state.query.toLowerCase()) !== -1;
+    })
 
-        if (orders.length) {
-          let total = 0;
-          let shipping = 0;
-          orders.forEach(order => {
-            total += order.total_charged;
-            shipping += order.shipping_charge;
-          })
-          orders_section = (
-            <table className="props">
-              <tbody>
-                <tr>
-                  <th>Order ID</th>
-                  <td>{order_id}</td>
-                </tr>
-                <tr>
-                  <th>Date</th>
-                  <td>{[...orders, ...items][0].order_date}</td>
-                </tr>
-                <tr>
-                  <th>Shipping</th>
-                  <td><Money value={shipping}/></td>
-                </tr>
-                <tr>
-                  <th>Total</th>
-                  <td><Money value={total} /></td>
-                </tr>
-              </tbody>
-            </table>);
-          matching_transactions = Object.values<Transaction>(appstate.transactions).filter(trans => {
-            return -total === trans.amount;
-          })
+    const orders_list = this.state.orderset.orders.map((order, orderidx) => {
+      console.log('order', order);
+      let rows = [];
+      let order_description = order.id;
+      order.shipments.forEach((shipment, shipmentidx) => {
+        let list_items = true;
+        if (order.shipments.length === 1) {
+          // Only one shipment, so don't dispay it
+          if (shipment.items.length === 1) {
+            // Only one shipment and one item, so roll them up
+            order_description = shipment.items[0].title;
+            list_items = false;
+          } else {
+            // One shipment, but multiple items
+            list_items = true;
+          }
         } else {
-          orders_section = <div>
-            Import an <a href="#" onClick={ev => {
-                ev.preventDefault();
-                openAmazonReportPage({
-                  range: appstateToInterval(appstate),
-                  type: 'SHIPMENTS',
-                })
-              }}>Amazon Orders report</a>
-          </div>
+          // Multiple shipments
+          let shipment_description = '';
+          if (shipment.items.length === 1) {
+            // Only one item in this shipment
+            shipment_description = shipment.items[0].title;
+            list_items = false;
+          } else {
+            // Multiple items in this shipment
+            list_items = true;
+          }
+          rows.push(<tr key={`${shipment.order_id}-${shipmentidx}`} className="icon-hover-trigger">
+            <td></td>
+            <td className="nobr">{sss('shipment-number', (number:number)=>`Shipment ${number}`/* Noun labeling this shipment number */)(shipmentidx+1)}</td>
+            <td>{shipment_description}</td>
+            <td></td>
+            <td className="right"><Money value={-shipment.total_charged} /></td>
+            <td></td>
+            <td className="icon-button-wrap">
+              <button
+                className={cx("icon hover green-check", {
+                  on: shipment.done,
+                })}
+                onClick={ev => {
+                  this.updateOrderSet(oset => {
+                    let newshipment = oset.orders[orderidx].shipments[shipmentidx];
+                    newshipment.done = !newshipment.done;
+                  })
+                }}><span className="fa fa-check-circle"/></button>
+            </td>
+          </tr>)
         }
-
-        items_section = this.makeItemsSection(items, appstate);
-
-        return (<div className="record-list-item" key={order_id}>
-            
-            <h3>Order Summary</h3>
-            {orders_section}
-
-            <h3>Details</h3>
-            {items_section}
-
-            <h3>Matching Transaction(s)</h3>
-            {matching_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
-            <TransactionList
-              noCreate
-              appstate={appstate}
-              categories={appstate.categories}
-              transactions={matching_transactions}
-            />}
-        </div>);
-      });
-    }
-    let refunds_list;
-    let refund_ids = Object.keys(reportset.refunds_by_id);
-    if (refund_ids.length) {
-      refunds_list = refund_ids.map(order_id => {
-        let refunds = reportset.refunds_by_id[order_id] || [];
-        let items = reportset.items_by_id[order_id] || [];
-
-        let total = 0;
-        refunds.forEach(refund => {
-          total += refund.refund_amount;
-        })
-        let matching_transactions = [];
-        return (<div className="record-list-item" key={order_id}>
-            <h3>Refund Summary</h3>
-            <table className="props">
+        if (list_items && !shipment.done) {
+          shipment.items.forEach((item, itemidx) => {
+            rows.push(<tr key={`${shipment.order_id}-${shipmentidx}-${itemidx}`} className="icon-hover-trigger">
+              <td></td>
+              <td></td>
+              <td>{item.title}</td>
+              <td className="right"><Money value={-item.item_total} /></td>
+              <td></td>
+              <td></td>
+              <td className="icon-button-wrap">
+                <button
+                  className={cx("icon hover green-check", {
+                    on: item.done,
+                  })}
+                  onClick={ev => {
+                    this.updateOrderSet(oset => {
+                      let newitem = oset.orders[orderidx].shipments[shipmentidx].items[itemidx];
+                      newitem.done = !newitem.done;
+                    })
+                  }}><span className="fa fa-check-circle"/></button>
+              </td>
+            </tr>)
+          })  
+        }
+      })
+      return <tbody key={`order-${orderidx}`}>
+        <tr className="icon-hover-trigger">
+          <td className="nobr"><DateDisplay value={order.date} /></td>
+          <td className="icon-button-wrap">
+            <button
+              className={cx("icon hover green-check", {
+                on: order.done,
+              })}
+              onClick={ev => {
+                this.updateOrderSet(oset => {
+                  let neworder = oset.orders[orderidx];
+                  neworder.done = !neworder.done;
+                })
+              }}><span className="fa fa-check-circle"/></button>
+          </td>
+          <td className="right"><Money value={-order.total} /></td>
+          <td>{sss('Order'/* Noun labeling this row as an Order */)}{order_description}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <table className="ledger">
               <tbody>
-                <tr>
-                  <th>Order ID</th>
-                  <td>{order_id}</td>
-                </tr>
-                <tr>
-                  <th>Date</th>
-                  <td>{[...refunds, ...items][0].order_date}</td>
-                </tr>
-                <tr>
-                  <th>Total Refund</th>
-                  <td><Money value={total} /></td>
-                </tr>
+                {order.done ? null : rows}
               </tbody>
             </table>
+          </td>
+        </tr>
+      </tbody>
+    })
+    const refunds_list = this.state.orderset.refunds.map((refund,idx) => {
+      return <tbody key={idx}>
+        <tr className="icon-hover-trigger">
+          <td><DateDisplay value={moment(refund.refund_date, 'MM/DD/YY')} /></td>
+          <td>{refund.title}</td>
+          <td><Money value={refund.refund_amount + refund.refund_tax} /></td>
+          <td className="icon-button-wrap">
+            <button
+              className={cx("icon hover green-check", {
+                on: refund.done,
+              })}
+              onClick={ev => {
+                this.updateOrderSet(oset => {
+                  let newrefund = oset.refunds[idx];
+                  newrefund.done = !newrefund.done;
+                })
+              }}><span className="fa fa-check-circle"/></button>
+          </td>
+        </tr>
+      </tbody>
+    });
 
-            <h3>Original Purchase Details</h3>
-            {this.makeItemsSection(items, appstate)}
+    // let order_ids = Object.keys(reportset.orders_by_id);
+    // let orders_list = [];
+    // if (order_ids.length) {
+    //   orders_list = order_ids.map(order_id => {
+    //     const order = reportset.orders_by_id[order_id][0];
+    //     const
+    //     let orders_section;
+    //     let items_section;
 
-            <h3>Matching Transaction(s)</h3>
-            {matching_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
-            <TransactionList
-              noCreate
-              appstate={appstate}
-              categories={appstate.categories}
-              transactions={matching_transactions}
-            />}
-          </div>)
-      })
-    }
+    //     let items = reportset.items_by_order_id[order_id] || [];
+    //     let orders = reportset.orders_by_id[order_id] || [];
+        
+
+    //     if (orders.length) {
+    //       let total = 0;
+    //       let shipping = 0;
+    //       orders.forEach(order => {
+    //         total += order.total_charged;
+    //         shipping += order.shipping_charge;
+    //       })
+    //       orders_section = (
+    //         <table className="props">
+    //           <tbody>
+    //             <tr>
+    //               <th>Order ID</th>
+    //               <td>{order_id}</td>
+    //             </tr>
+    //             <tr>
+    //               <th>Date</th>
+    //               <td>{[...orders, ...items][0].order_date}</td>
+    //             </tr>
+    //             <tr>
+    //               <th>Shipping</th>
+    //               <td><Money value={shipping}/></td>
+    //             </tr>
+    //             <tr>
+    //               <th>Total</th>
+    //               <td><Money value={total} /></td>
+    //             </tr>
+    //           </tbody>
+    //         </table>);
+          
+    //     } else {
+    //       orders_section = <div>
+    //         Import an <a href="#" onClick={ev => {
+    //             ev.preventDefault();
+    //             openAmazonReportPage({
+    //               range: appstateToInterval(appstate),
+    //               type: 'SHIPMENTS',
+    //             })
+    //           }}>Amazon Orders report</a>
+    //       </div>
+    //     }
+
+    //     items_section = this.makeItemsSection(items, appstate);
+
+    //     return (<div className="record-list-item" key={order_id}>
+            
+    //         <h3>Order Summary</h3>
+    //         {orders_section}
+
+    //         <h3>Details</h3>
+    //         {items_section}
+    //     </div>);
+    //   });
+    // }
+    // let refunds_list;
+    // let refund_ids = Object.keys(reportset.refunds_by_order_id);
+    // if (refund_ids.length) {
+    //   refunds_list = refund_ids.map(order_id => {
+    //     let refunds = reportset.refunds_by_order_id[order_id] || [];
+    //     let items = reportset.items_by_order_id[order_id] || [];
+
+    //     let total = 0;
+    //     refunds.forEach(refund => {
+    //       total += refund.refund_amount;
+    //     })
+    //     let amazon_transactions = [];
+    //     return (<div className="record-list-item" key={order_id}>
+    //         <h3>Refund Summary</h3>
+    //         <table className="props">
+    //           <tbody>
+    //             <tr>
+    //               <th>Order ID</th>
+    //               <td>{order_id}</td>
+    //             </tr>
+    //             <tr>
+    //               <th>Date</th>
+    //               <td>{[...refunds, ...items][0].order_date}</td>
+    //             </tr>
+    //             <tr>
+    //               <th>Total Refund</th>
+    //               <td><Money value={total} /></td>
+    //             </tr>
+    //           </tbody>
+    //         </table>
+
+    //         <h3>Original Purchase Details</h3>
+    //         {this.makeItemsSection(items, appstate)}
+
+    //         <h3>Matching Transaction(s)</h3>
+    //         {amazon_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
+    //         <TransactionList
+    //           noCreate
+    //           appstate={appstate}
+    //           categories={appstate.categories}
+    //           transactions={amazon_transactions}
+    //         />}
+    //       </div>)
+    //   })
+    // }
     return (
       <div className="rows">
         <div className="panes">
@@ -192,6 +300,13 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
             <h1>{sss('Amazon.com Reconciliation')}</h1>
 
             <ol>
+              <li>
+                {sss('Identify Amazon transactions:')} <DebouncedInput
+                  value={this.state.query}
+                  onChange={val => {
+                    this.setState({query: val});
+                  }}/>
+              </li>
               <li>
                 <a href="#" onClick={ev => {
                   ev.preventDefault();
@@ -248,6 +363,7 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
                         let reportset = combineReportSets(this.state.reportset, result);
                         this.setState({
                           reportset,
+                          orderset: makeOrderSet(reportset),
                         })
                       });
                     }
@@ -256,10 +372,35 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
               </li>
             </ol>
 
-            {orders_list}
+            <h3>{sss('Amazon Transactions')}</h3>
+            {amazon_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
+            <TransactionList
+              noCreate
+              appstate={appstate}
+              categories={appstate.categories}
+              transactions={amazon_transactions}
+            />}
 
-            {refunds_list}
+            <h3>{sss('Orders'/* List of orders */)}</h3>
+            <table className="ledger">
+              <thead>
+                <tr>
+                  <th>{sss('Date')}</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              {orders_list}
+            </table>
 
+            <h3>{sss('Refunds'/* List of refunds */)}</h3>
+            <table className="ledger">
+              <thead>
+              </thead>
+              {refunds_list}
+            </table>
           </div>
         </div>
       </div>
@@ -297,16 +438,89 @@ function openAmazonReportPage(args:{
 }
 
 
-interface ReportSet {
+/**
+ *  Nested collection of Amazon details
+ */
+interface OrderSet {
   orders: Order[];
-  orders_by_id: {[k:string]: Order[]};
-  items: Item[];
-  items_by_id: {[k:string]: Item[]};
   refunds: Refund[];
-  refunds_by_id: {[k:string]: Refund[]};
+}
+interface Order {
+  id: string;
+  date: moment.Moment;
+  order_id: string;
+  total: number;
+  shipments: Shipment[];
+  done: boolean;
+}
+interface Shipment extends OrderRecord {
+  items: Item[];
+  done: boolean;
+}
+interface Item extends ItemRecord {
+  done: boolean;
+}
+interface Refund extends RefundRecord {
+  done: boolean;
 }
 
-interface Order {
+function makeOrderSet(reportset:ReportSet):OrderSet {
+  let orders_by_id:{[k:string]:Order} = {};
+  let shipments_by_tracking_number:{[k:string]:Shipment} = {};
+
+  reportset.orders.forEach(order_record => {
+    const { order_id } = order_record;
+    let shipment:Shipment = Object.assign({}, order_record, {
+      items: [],
+      done: false,
+    });
+    if (!orders_by_id[order_id]) {
+      orders_by_id[order_id] = {
+        id: order_id,
+        done: false,
+        date: null,
+        order_id,
+        total: 0,
+        shipments: [],
+      };
+    }
+    const order = orders_by_id[order_id];
+    order.date = moment(shipment.order_date, 'MM/DD/YY');
+    order.shipments.push(shipment);
+    order.total += shipment.total_charged;
+    shipments_by_tracking_number[shipment.tracking_number] = shipment;
+  })
+
+  reportset.items.forEach(item => {
+    const { tracking_number } = item;
+    const shipment = shipments_by_tracking_number[tracking_number];
+    shipment.items.push(Object.assign({}, item, {
+      done: false,
+    }));
+  })
+  let orders = Object.values(orders_by_id);
+  orders.reverse();
+  return {
+    orders,
+    refunds: reportset.refunds.map(refund => {
+      return Object.assign({done: false}, refund);
+    })
+  }
+}
+
+/**
+ *  Set of Amazon records
+ */
+interface ReportSet {
+  orders: OrderRecord[];
+  items: ItemRecord[];
+  refunds: RefundRecord[];
+}
+
+/**
+ *  An Amazon Order CSV record
+ */
+interface OrderRecord {
   order_date: string;
   order_id: string;
   shipment_date: string;
@@ -314,8 +528,12 @@ interface Order {
   shipping_charge: number;
   tax_charged: number;
   total_charged: number;
+  tracking_number: string;
 }
-interface Item {
+/**
+ *  An Amazon Item CSV record
+ */
+interface ItemRecord {
   order_date: string;
   order_id: string;
   title: string;
@@ -326,13 +544,18 @@ interface Item {
   item_subtotal: number;
   item_subtotal_tax: number;
   item_total: number;
+  tracking_number: string;
 }
-interface Refund {
+/**
+ *  An Amazon Refund CSV record
+ */
+interface RefundRecord {
   order_date: string;
   order_id: string;
   refund_date: string;
   refund_amount: number;
   refund_tax: number;
+  title: string;
 }
 
 async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
@@ -346,18 +569,19 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
     const parsed = await parseCSVStringWithHeader(guts);
     if (parsed.headers.indexOf('Refund Amount') !== -1) {
       // Refund
-      ret.refunds = ret.refunds.concat(parsed.rows.map((row):Refund => {
+      ret.refunds = ret.refunds.concat(parsed.rows.map((row):RefundRecord => {
         return {
           order_date: row['Order Date'],
           order_id: row['Order ID'],
           refund_date: row['Refund Date'],
           refund_amount: csvFieldToCents(row['Refund Amount']),
           refund_tax: csvFieldToCents(row['Refund Tax Amount']),
+          title: row['Title'],
         }
       }))
     } else if (parsed.headers.indexOf('Item Total') !== -1) {
       // Item
-      ret.items = ret.items.concat(parsed.rows.map((row):Item => {
+      ret.items = ret.items.concat(parsed.rows.map((row):ItemRecord => {
         return {
           order_date: row['Order Date'],
           order_id: row['Order ID'],
@@ -369,11 +593,12 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
           item_subtotal: csvFieldToCents(row['Item Subtotal']),
           item_subtotal_tax: csvFieldToCents(row['Item Subtotal Tax']),
           item_total: csvFieldToCents(row['Item Total']),
+          tracking_number: row['Carrier Name & Tracking Number'],
         }
       }))
     } else if (parsed.headers.indexOf('Total Charged') !== -1) {
       // Order
-      ret.orders = ret.orders.concat(parsed.rows.map((row):Order => {
+      ret.orders = ret.orders.concat(parsed.rows.map((row):OrderRecord => {
         return {
           order_date: row['Order Date'],
           order_id: row['Order ID'],
@@ -382,6 +607,7 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
           shipping_charge: csvFieldToCents(row['Shipping Charge']),
           tax_charged: csvFieldToCents(row['Tax Charged']),
           total_charged: csvFieldToCents(row['Total Charged']),
+          tracking_number: row['Carrier Name & Tracking Number'],
         }
       }))
     } else {
@@ -391,28 +617,14 @@ async function processCSVFiles(paths:string[]):Promise<Partial<ReportSet>> {
   return ret;
 }
 
-function mapById<T extends Order|Item|Refund>(list:Array<T>):{[k:string]:T[]} {
-  let byid = {};
-  list.forEach(item => {
-    if (!byid[item.order_id]) {
-      byid[item.order_id] = [];
-    }
-    byid[item.order_id].push(item);
-  })
-  return byid;
-}
-
 function combineReportSets(a:ReportSet, b:ReportSet):ReportSet {
   const orders = [...a.orders, ...b.orders];
   const items = [...a.items, ...b.items];
   const refunds = [...a.refunds, ...b.refunds];
   return {
     orders,
-    orders_by_id: mapById(orders),
     items,
-    items_by_id: mapById(items),
     refunds,
-    refunds_by_id: mapById(refunds),
   }
 }
 
