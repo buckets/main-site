@@ -127,6 +127,7 @@ interface AccountViewState {
   new_balance_with_transaction: boolean;
   balance_date: moment.Moment;
   hasMappings: boolean;
+  uncleared_amount: number;
 }
 export class AccountView extends React.Component<AccountViewProps, AccountViewState> {
   constructor(props:AccountViewProps) {
@@ -137,6 +138,7 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
       new_balance_with_transaction: true,
       balance_date: null,
       hasMappings: false,
+      uncleared_amount: 0,
     }
   }
   componentDidMount() {
@@ -168,6 +170,10 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
     store.hasAccountMappings(props.account.id)
     .then(hasMappings => {
       this.setState({hasMappings});
+    })
+    store.unclearedTotal(props.account.id, props.appstate.viewDateRange.before)
+    .then(uncleared => {
+      this.setState({uncleared_amount: uncleared});
     })
   }
   render() {
@@ -365,6 +371,20 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           </tr>
 
           {import_balance_field}
+
+          <tr>
+            <th>{sss('Uncleared'/* Label for sum of uncleared transaction amounts */)}</th>
+            <td>
+              <Money value={this.state.uncleared_amount} />
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('Cleared balance'/* Label for balance minus uncleared transactions */)}</th>
+            <td>
+              <Money value={current_balance - this.state.uncleared_amount} />
+            </td>
+          </tr>
 
           <tr>
             <th>{sss('account-in', 'In'/* Label for amount put into an account */)}</th>

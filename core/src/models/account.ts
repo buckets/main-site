@@ -530,6 +530,23 @@ export class AccountStore {
       return dumpTS(parseLocalTime(posted))
     }
   }
+  async unclearedTotal(account_id:number, asof:moment.Moment):Promise<number> {
+    const rows = await this.store.query<{amount:number}>(`SELECT sum(amount) as amount
+      FROM account_transaction
+      WHERE
+        account_id = $account_id
+        AND posted < $before
+        AND cleared = 0
+        AND fi_id IS NULL`, {
+        $account_id: account_id,
+        $before: ts2localdb(asof),
+      })
+    if (!rows.length) {
+      return 0;
+    } else {
+      return rows[0].amount || 0;
+    }
+  }
   async list():Promise<Account[]> {
     return this.store.listObjects('account', {
       order: ['name ASC', 'id'],
