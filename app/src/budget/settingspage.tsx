@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { sss } from '../i18n'
 import { AppState, manager } from './appstate'
+import { getCurrentFile } from '../mainprocess/files'
 
 
 interface SettingsPageProps {
@@ -10,9 +11,18 @@ export class SettingsPage extends React.Component<SettingsPageProps, {}> {
   render() {
     const { appstate } = this.props;
     return <div className="padded">
-      <h1><span className="fa fa-cog" /> {sss('Budget Settings'/* Title for budget settings page */)}</h1>
+      <h1><span className="fa fa-cog" /> {sss('Budget Specific Settings'/* Title for budget settings page */)}</h1>
       <table className="fieldlist">
         <tbody>
+          <tr>
+            <th>{sss('Application preferences')}</th>
+            <td>
+              <a href="#" onClick={ev => {
+                ev.preventDefault();
+                getCurrentFile().openPreferences();
+              }}>{sss('Open')}</a>
+            </td>
+          </tr>
           <tr>
             <th>{sss('Currency symbol'/* Label for currency symbol setting */)}</th>
             <td>

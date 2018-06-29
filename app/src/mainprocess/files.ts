@@ -23,6 +23,7 @@ import { SimpleFINSyncer } from 'buckets-core/dist/models/simplefin'
 import { MacroSyncer } from 'buckets-core/dist/models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
 import { updateMenu } from './menu'
+import { openPreferences } from './prefs'
 
 const log = new PrefixLogger('(files)')
 
@@ -75,6 +76,8 @@ export interface IBudgetFile {
       bounds?: Electron.Rectangle;
     }):Electron.BrowserWindow
   
+  openPreferences();
+
   /**
    *  Import a transaction-laden file
    */
@@ -357,6 +360,10 @@ export class BudgetFile implements IBudgetFile {
     return win;
   }
 
+  openPreferences() {
+    openPreferences();
+  }
+
   async importFile(path:string):Promise<ImportResult> {
     try {
       return await importFile(this.store, this, path);  
@@ -435,6 +442,10 @@ class RendererBudgetFile implements IBudgetFile {
     }) {
     this.callInMain('openWindow', path, args);
     return null;
+  }
+
+  openPreferences() {
+    return this.callInMain('openPreferences');
   }
 
   importFile(path:string):Promise<ImportResult> {
