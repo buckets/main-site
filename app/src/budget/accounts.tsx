@@ -177,6 +177,20 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
     let close_button;
     let closed_ribbon;
     let delete_all_transactions_button;
+
+    let amount_in = 0;
+    let amount_out = 0;
+    Object.values(appstate.transactions)
+      .filter(trans => trans.account_id === account.id)
+      .forEach(trans => {
+        if (trans.amount > 0) {
+          amount_in += trans.amount
+        } else {
+          amount_out += trans.amount
+        }
+      })
+    let amount_net = amount_in + amount_out;
+
     if (account.closed) {
       close_button = <button onClick={() => {
         manager
@@ -351,6 +365,27 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           </tr>
 
           {import_balance_field}
+
+          <tr>
+            <th>{sss('account-in', 'In'/* Label for amount put into an account */)}</th>
+            <td>
+              <Money value={amount_in} />
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('account-out', 'Out'/* Label for amount taken out of an account */)}</th>
+            <td>
+              <Money value={amount_out} nocolor />
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('account-net-amount', 'Net'/* Label for net value of amount in - amount out for an account */)}</th>
+            <td>
+              <Money value={amount_net} />
+            </td>
+          </tr>
 
           <tr>
             <th>{sss('Off budget')}</th>

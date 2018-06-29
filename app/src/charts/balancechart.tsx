@@ -1,102 +1,13 @@
 import * as React from 'react'
 import * as moment from 'moment-timezone'
-import * as cx from 'classnames'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
-import { v4 as uuid } from 'uuid'
 import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
 import { COLORS, opacity } from 'buckets-core/dist/color'
 import { cents2decimal } from '../money'
 import { Transaction, computeBucketData } from 'buckets-core/dist/models/bucket'
 import { parseLocalTime } from 'buckets-core/dist/time'
-
-interface SparklineProps {
-  height?: number;
-  width?: number;
-  className?: string;
-  data: Array<{
-    x: number;
-    y: number;
-  }>;
-}
-export class Sparkline extends React.Component<SparklineProps, {}> {
-  render() {
-    let { height, width, data, className } = this.props;
-    const id = uuid();
-    const zeroline = 0;
-    const padding = 2;
-    width = width || 150;
-    height = height || 20;
-    let miny = zeroline;
-    let maxy = zeroline;
-
-    data.forEach(d => {
-      miny = Math.min(d.y, miny);
-      maxy = Math.max(d.y, maxy);
-    })
-
-    let [minx, maxx] = d3.extent(data, d => d.x);
-
-    let x = d3.scaleTime()
-      .domain([minx, maxx])
-      .range([padding, width-padding]);
-    let y = d3.scaleLinear()
-      .domain([miny, maxy])
-      .range([height-padding, padding]);
-
-    let dataline = d3shape.line<any>()
-      .x(d => x(d.x))
-      .y(d => y(d.y));
-      let dataarea = d3shape.area<any>()
-      .x(d => x(d.x))
-      .y1(d => y(d.y))
-      .y0(y(zeroline))
-
-    return <div
-      className={cx("sparkline", className)}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-      }}>
-      <svg viewBox={`0 0 ${width} ${height}`}>
-        <mask id={`hide-top-${id}`}>
-          <rect x={0} y={y(zeroline)} width="100%" height="100%" fill="white" />
-        </mask>
-        <mask id={`hide-bottom-${id}`}>
-          <rect x={0} y="0" width="100%" height={y(zeroline)} fill="white" />
-        </mask>
-
-        <line
-          x1={x(minx)}
-          x2={x(maxx)}
-          y1={y(zeroline)}
-          y2={y(zeroline)}
-          stroke="black"
-          strokeWidth={1}
-        />
-
-        <g mask={`url(#hide-top-${id})`}>
-          <path
-            className="neg-area"
-            d={dataarea(data)} />
-          <path
-            className="neg-line"
-            d={dataline(data)} />
-        </g>
-        <g mask={`url(#hide-bottom-${id})`}>
-          <path
-            className="pos-area"
-            d={dataarea(data)} />
-          <path
-            className="pos-line"
-            d={dataline(data)} />
-        </g>
-      </svg>
-    </div>
-  }
-}
-
 
 interface BucketBalanceChartProps {
   appstate: AppState;
