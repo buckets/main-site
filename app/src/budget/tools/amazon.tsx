@@ -152,12 +152,6 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
       </tbody>
     })
 
-
-
-
-
-
-
     const refunds_list = this.state.orderset.refunds.map((refund,idx) => {
       return <tbody key={idx}>
         <tr className="icon-hover-trigger">
@@ -180,117 +174,6 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
       </tbody>
     });
 
-    // let order_ids = Object.keys(reportset.orders_by_id);
-    // let orders_list = [];
-    // if (order_ids.length) {
-    //   orders_list = order_ids.map(order_id => {
-    //     const order = reportset.orders_by_id[order_id][0];
-    //     const
-    //     let orders_section;
-    //     let items_section;
-
-    //     let items = reportset.items_by_order_id[order_id] || [];
-    //     let orders = reportset.orders_by_id[order_id] || [];
-        
-
-    //     if (orders.length) {
-    //       let total = 0;
-    //       let shipping = 0;
-    //       orders.forEach(order => {
-    //         total += order.total_charged;
-    //         shipping += order.shipping_charge;
-    //       })
-    //       orders_section = (
-    //         <table className="props">
-    //           <tbody>
-    //             <tr>
-    //               <th>Order ID</th>
-    //               <td>{order_id}</td>
-    //             </tr>
-    //             <tr>
-    //               <th>Date</th>
-    //               <td>{[...orders, ...items][0].order_date}</td>
-    //             </tr>
-    //             <tr>
-    //               <th>Shipping</th>
-    //               <td><Money value={shipping}/></td>
-    //             </tr>
-    //             <tr>
-    //               <th>Total</th>
-    //               <td><Money value={total} /></td>
-    //             </tr>
-    //           </tbody>
-    //         </table>);
-          
-    //     } else {
-    //       orders_section = <div>
-    //         Import an <a href="#" onClick={ev => {
-    //             ev.preventDefault();
-    //             openAmazonReportPage({
-    //               range: appstateToInterval(appstate),
-    //               type: 'SHIPMENTS',
-    //             })
-    //           }}>Amazon Orders report</a>
-    //       </div>
-    //     }
-
-    //     items_section = this.makeItemsSection(items, appstate);
-
-    //     return (<div className="record-list-item" key={order_id}>
-            
-    //         <h3>Order Summary</h3>
-    //         {orders_section}
-
-    //         <h3>Details</h3>
-    //         {items_section}
-    //     </div>);
-    //   });
-    // }
-    // let refunds_list;
-    // let refund_ids = Object.keys(reportset.refunds_by_order_id);
-    // if (refund_ids.length) {
-    //   refunds_list = refund_ids.map(order_id => {
-    //     let refunds = reportset.refunds_by_order_id[order_id] || [];
-    //     let items = reportset.items_by_order_id[order_id] || [];
-
-    //     let total = 0;
-    //     refunds.forEach(refund => {
-    //       total += refund.refund_amount;
-    //     })
-    //     let amazon_transactions = [];
-    //     return (<div className="record-list-item" key={order_id}>
-    //         <h3>Refund Summary</h3>
-    //         <table className="props">
-    //           <tbody>
-    //             <tr>
-    //               <th>Order ID</th>
-    //               <td>{order_id}</td>
-    //             </tr>
-    //             <tr>
-    //               <th>Date</th>
-    //               <td>{[...refunds, ...items][0].order_date}</td>
-    //             </tr>
-    //             <tr>
-    //               <th>Total Refund</th>
-    //               <td><Money value={total} /></td>
-    //             </tr>
-    //           </tbody>
-    //         </table>
-
-    //         <h3>Original Purchase Details</h3>
-    //         {this.makeItemsSection(items, appstate)}
-
-    //         <h3>Matching Transaction(s)</h3>
-    //         {amazon_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
-    //         <TransactionList
-    //           noCreate
-    //           appstate={appstate}
-    //           categories={appstate.categories}
-    //           transactions={amazon_transactions}
-    //         />}
-    //       </div>)
-    //   })
-    // }
     return (
       <div className="layout-top-bottom-panes">
         <div className="padded">
