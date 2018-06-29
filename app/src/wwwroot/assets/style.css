@@ -319,6 +319,23 @@ hr.page {
   flex-grow: 2;
 }
 
+
+.layout-top-bottom-panes {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  width: 100%;
+}
+.layout-top-bottom-panes > * {
+  flex-basis: 50%;
+  overflow: auto;
+  border-top: 1px solid var(--lighter-grey);
+}
+.layout-top-bottom-panes > *:first-child {
+  border-top: 0;
+}
+
+
 .layout-two-col {
   display: grid;
   flex-grow: 1;
@@ -1686,3 +1703,4 @@ g.hover-labels:hover rect.highlight {
   border-color: var(--blue);
   background-color: var(--faint-blue);
 }
+

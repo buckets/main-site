@@ -56,116 +56,113 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
     })
 
     const orders_list = this.state.orderset.orders.map((order, orderidx) => {
-      console.log('order', order);
-      let rows = [];
-      let order_description = order.id;
-      order.shipments.forEach((shipment, shipmentidx) => {
-        let list_items = true;
+      let order_description;
+      let shipment_list = order.shipments.map((shipment, shipmentidx) => {
+        let indent_level = 3;
         if (order.shipments.length === 1) {
-          // Only one shipment, so don't dispay it
-          if (shipment.items.length === 1) {
-            // Only one shipment and one item, so roll them up
-            order_description = shipment.items[0].title;
-            list_items = false;
-          } else {
-            // One shipment, but multiple items
-            list_items = true;
+          indent_level = 2;
+        }
+        let item_list = shipment.items.map((item, itemidx) => {
+
+          
+          return <tr key={`${order.id}-${shipmentidx}-${itemidx}`} className="icon-hover-trigger">
+            <td></td>
+            <td></td>
+            {indent_level === 3 ? <td></td> : null }
+
+            <td className="nobr">
+              <button
+                className={cx("icon hover green-check", {
+                  on: item.done,
+                })}
+                onClick={ev => {
+                  this.updateOrderSet(oset => {
+                    let newobj = oset.orders[orderidx].shipments[shipmentidx].items[itemidx];
+                    newobj.done = !newobj.done;
+                  })
+                }}><span className="fa fa-check-circle"/></button>
+              <Money value={-item.item_total} />
+            </td>
+
+            <td colSpan={4 - indent_level}>
+              {item.title}
+            </td>
+          </tr>
+        });
+        let shipment_description;
+        if (item_list.length === 1) {
+          // Only one item in this shipment.
+          shipment_description = shipment.items[0].title;
+          if (order.shipments.length === 1) {
+            // Only one shipment, too
+            order_description = shipment_description;
           }
         } else {
-          // Multiple shipments
-          let shipment_description = '';
-          if (shipment.items.length === 1) {
-            // Only one item in this shipment
-            shipment_description = shipment.items[0].title;
-            list_items = false;
-          } else {
-            // Multiple items in this shipment
-            list_items = true;
+          if (order.shipments.length === 1) {
+            // Only one shipment, but multiple items
+            return item_list
           }
-          rows.push(<tr key={`${shipment.order_id}-${shipmentidx}`} className="icon-hover-trigger">
-            <td></td>
-            <td className="nobr">{sss('shipment-number', (number:number)=>`Shipment ${number}`/* Noun labeling this shipment number */)(shipmentidx+1)}</td>
-            <td>{shipment_description}</td>
-            <td></td>
-            <td className="right"><Money value={-shipment.total_charged} /></td>
-            <td></td>
-            <td className="icon-button-wrap">
-              <button
+        }
+        return [<tr key={`${order.id}-${shipmentidx}`} className="icon-hover-trigger">
+          <td></td>
+          <td></td>
+
+          <td className="nobr">
+            <button
                 className={cx("icon hover green-check", {
                   on: shipment.done,
                 })}
                 onClick={ev => {
                   this.updateOrderSet(oset => {
-                    let newshipment = oset.orders[orderidx].shipments[shipmentidx];
-                    newshipment.done = !newshipment.done;
+                    let newobj = oset.orders[orderidx].shipments[shipmentidx];
+                    newobj.done = !newobj.done;
                   })
                 }}><span className="fa fa-check-circle"/></button>
-            </td>
-          </tr>)
-        }
-        if (list_items && !shipment.done) {
-          shipment.items.forEach((item, itemidx) => {
-            rows.push(<tr key={`${shipment.order_id}-${shipmentidx}-${itemidx}`} className="icon-hover-trigger">
-              <td></td>
-              <td></td>
-              <td>{item.title}</td>
-              <td className="right"><Money value={-item.item_total} /></td>
-              <td></td>
-              <td></td>
-              <td className="icon-button-wrap">
-                <button
-                  className={cx("icon hover green-check", {
-                    on: item.done,
-                  })}
-                  onClick={ev => {
-                    this.updateOrderSet(oset => {
-                      let newitem = oset.orders[orderidx].shipments[shipmentidx].items[itemidx];
-                      newitem.done = !newitem.done;
-                    })
-                  }}><span className="fa fa-check-circle"/></button>
-              </td>
-            </tr>)
-          })  
-        }
+            <Money value={-shipment.total_charged} />
+          </td>
+
+          <td colSpan={3}>
+            {sss('shipment-number', (number:number)=>`Shipment ${number}`/* Noun labeling this shipment number */)(shipmentidx+1)}: {shipment_description}
+          </td>
+        </tr>,
+        ...(shipment.done || item_list.length === 1 ? [] : item_list)]
       })
-      return <tbody key={`order-${orderidx}`}>
+      return <tbody key={order.id}>
         <tr className="icon-hover-trigger">
           <td className="nobr"><DateDisplay value={order.date} /></td>
-          <td className="icon-button-wrap">
+          <td className="nobr">
             <button
               className={cx("icon hover green-check", {
                 on: order.done,
               })}
               onClick={ev => {
                 this.updateOrderSet(oset => {
-                  let neworder = oset.orders[orderidx];
-                  neworder.done = !neworder.done;
+                  let newobj = oset.orders[orderidx];
+                  newobj.done = !newobj.done;
                 })
               }}><span className="fa fa-check-circle"/></button>
+            <Money value={-order.total} />
           </td>
-          <td className="right"><Money value={-order.total} /></td>
-          <td>{sss('Order'/* Noun labeling this row as an Order */)}{order_description}</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>
-            <table className="ledger">
-              <tbody>
-                {order.done ? null : rows}
-              </tbody>
-            </table>
+
+          <td colSpan={5}>
+            {sss('Order'/* Label for an Amazon order row */)} {order.id}: {order_description}
           </td>
         </tr>
+        {order.done || order_description ? null : shipment_list}
       </tbody>
     })
+
+
+
+
+
+
+
     const refunds_list = this.state.orderset.refunds.map((refund,idx) => {
       return <tbody key={idx}>
         <tr className="icon-hover-trigger">
-          <td><DateDisplay value={moment(refund.refund_date, 'MM/DD/YY')} /></td>
-          <td>{refund.title}</td>
-          <td><Money value={refund.refund_amount + refund.refund_tax} /></td>
+          <td className="nobr"><DateDisplay value={moment(refund.refund_date, 'MM/DD/YY')} /></td>
+          <td className="right"><Money value={refund.refund_amount + refund.refund_tax} /></td>
           <td className="icon-button-wrap">
             <button
               className={cx("icon hover green-check", {
@@ -178,6 +175,7 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
                 })
               }}><span className="fa fa-check-circle"/></button>
           </td>
+          <td>{refund.title}</td>
         </tr>
       </tbody>
     });
@@ -294,114 +292,107 @@ export class AmazonPage extends React.Component<AmazonPageProps, {
     //   })
     // }
     return (
-      <div className="rows">
-        <div className="panes">
-          <div className="padded">
-            <h1>{sss('Amazon.com Reconciliation')}</h1>
+      <div className="layout-top-bottom-panes">
+        <div className="padded">
+          <h1>{sss('Amazon.com Reconciliation')}</h1>
 
-            <ol>
-              <li>
-                {sss('Identify Amazon transactions:')} <DebouncedInput
-                  value={this.state.query}
-                  onChange={val => {
-                    this.setState({query: val});
-                  }}/>
-              </li>
-              <li>
-                <a href="#" onClick={ev => {
-                  ev.preventDefault();
-                  openAmazonReportPage({
-                    range: appstateToInterval(appstate),
-                    type: 'ITEMS',
-                  })
-                }}>{sss('Request an Amazon Items report')}</a>
-                {reportset.items.length ? <span className="fa fa-check fa-fw" /> : null}
-              </li>
-              <li>
-                <a href="#" onClick={ev => {
-                  ev.preventDefault();
-                  openAmazonReportPage({
-                    range: appstateToInterval(appstate),
-                    type: 'SHIPMENTS',
-                  })
-                }}>{sss('Request an Amazon Orders report')}</a>
-                {reportset.orders.length ? <span className="fa fa-check fa-fw" /> : null}
-              </li>
-              <li>
-                <a href="#" onClick={ev => {
-                  ev.preventDefault();
-                  openAmazonReportPage({
-                    range: appstateToInterval(appstate),
-                    type: 'REFUNDS',
-                  })
-                }}>{sss('Optionally request a Amazon Refunds report')}</a>
-                {reportset.refunds.length ? <span className="fa fa-check fa-fw" /> : null}
-              </li>
-              <li>
-                <a href="#" onClick={ev => {
-                  ev.preventDefault();
-                  remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-                    defaultPath: remote.app.getPath('downloads'),
-                    properties: ['openFile', 'multiSelections'],
-                    filters: [
-                      {name: 'CSV', extensions: ['csv']},
-                    ],
-                    title: 'Open Amazon.com Reports',
-                  }, (filePaths:string[]) => {
-                    if (filePaths) {
-                      processCSVFiles(filePaths)
-                      .then((result:ReportSet) => {
-                        if (result.items.length) {
-                          makeToast(sss('Successfully imported Amazon Items report'))
-                        }
-                        if (result.orders.length) {
-                          makeToast(sss('Successfully imported Amazon Orders report'))
-                        }
-                        if (result.refunds.length) {
-                          makeToast(sss('Successfully imported Amazon Refunds report'))  
-                        }
-                        let reportset = combineReportSets(this.state.reportset, result);
-                        this.setState({
-                          reportset,
-                          orderset: makeOrderSet(reportset),
-                        })
-                      });
-                    }
-                  })
-                }}>{sss('Import all Amazon Reports')}</a>
-              </li>
-            </ol>
+          <ol>
+            <li>
+              {sss('Search for Amazon transactions:')} <DebouncedInput
+                value={this.state.query}
+                onChange={val => {
+                  this.setState({query: val});
+                }}/>
+            </li>
+            <li>
+              <a href="#" onClick={ev => {
+                ev.preventDefault();
+                openAmazonReportPage({
+                  range: appstateToInterval(appstate),
+                  type: 'ITEMS',
+                })
+              }}>{sss('Request an Amazon Items report')}</a>
+              {reportset.items.length ? <span className="fa fa-check fa-fw" /> : null}
+            </li>
+            <li>
+              <a href="#" onClick={ev => {
+                ev.preventDefault();
+                openAmazonReportPage({
+                  range: appstateToInterval(appstate),
+                  type: 'SHIPMENTS',
+                })
+              }}>{sss('Request an Amazon Orders report')}</a>
+              {reportset.orders.length ? <span className="fa fa-check fa-fw" /> : null}
+            </li>
+            <li>
+              <a href="#" onClick={ev => {
+                ev.preventDefault();
+                openAmazonReportPage({
+                  range: appstateToInterval(appstate),
+                  type: 'REFUNDS',
+                })
+              }}>{sss('Optionally request an Amazon Refunds report')}</a>
+              {reportset.refunds.length ? <span className="fa fa-check fa-fw" /> : null}
+            </li>
+            <li>
+              <a href="#" onClick={ev => {
+                ev.preventDefault();
+                remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+                  defaultPath: remote.app.getPath('downloads'),
+                  properties: ['openFile', 'multiSelections'],
+                  filters: [
+                    {name: 'CSV', extensions: ['csv']},
+                  ],
+                  title: 'Open Amazon.com Reports',
+                }, (filePaths:string[]) => {
+                  if (filePaths) {
+                    processCSVFiles(filePaths)
+                    .then((result:ReportSet) => {
+                      if (result.items.length) {
+                        makeToast(sss('Successfully imported Amazon Items report'))
+                      }
+                      if (result.orders.length) {
+                        makeToast(sss('Successfully imported Amazon Orders report'))
+                      }
+                      if (result.refunds.length) {
+                        makeToast(sss('Successfully imported Amazon Refunds report'))  
+                      }
+                      let reportset = combineReportSets(this.state.reportset, result);
+                      this.setState({
+                        reportset,
+                        orderset: makeOrderSet(reportset),
+                      })
+                    });
+                  }
+                })
+              }}>{sss('Import all Amazon Reports')}</a>
+            </li>
+          </ol>
 
-            <h3>{sss('Amazon Transactions')}</h3>
-            {amazon_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
-            <TransactionList
-              noCreate
-              appstate={appstate}
-              categories={appstate.categories}
-              transactions={amazon_transactions}
-            />}
+          <h3>{sss('Transactions')}</h3>
+          {amazon_transactions.length === 0 ? <span>{sss('No matches found')}</span> :
+          <TransactionList
+            noCreate
+            appstate={appstate}
+            categories={appstate.categories}
+            transactions={amazon_transactions}
+          />}
+        </div>
+        <div className="padded">
+          <h3>{sss('Orders'/* List of orders */)}</h3>
+          <table className="ledger">
+            {orders_list}
+          </table>
+          {!orders_list.length ? sss('No orders imported') : null}
 
-            <h3>{sss('Orders'/* List of orders */)}</h3>
-            <table className="ledger">
-              <thead>
-                <tr>
-                  <th>{sss('Date')}</th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              {orders_list}
-            </table>
+          <h3>{sss('Refunds'/* List of refunds */)}</h3>
+          <table className="ledger">
+            <thead>
+            </thead>
+            {refunds_list}
+          </table>
 
-            <h3>{sss('Refunds'/* List of refunds */)}</h3>
-            <table className="ledger">
-              <thead>
-              </thead>
-              {refunds_list}
-            </table>
-          </div>
+          {!refunds_list.length ? sss('No refunds imported') : null}
         </div>
       </div>
     )
@@ -494,9 +485,11 @@ function makeOrderSet(reportset:ReportSet):OrderSet {
   reportset.items.forEach(item => {
     const { tracking_number } = item;
     const shipment = shipments_by_tracking_number[tracking_number];
-    shipment.items.push(Object.assign({}, item, {
-      done: false,
-    }));
+    if (shipment) {
+      shipment.items.push(Object.assign({}, item, {
+        done: false,
+      }));
+    }
   })
   let orders = Object.values(orders_by_id);
   orders.reverse();
