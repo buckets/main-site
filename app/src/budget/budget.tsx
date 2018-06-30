@@ -34,8 +34,12 @@ setTimezone(PSTATE.timezone || moment.tz.guess())
 import { manager, AppState } from './appstate'
 
 export function setPath(x:string) {
-  window.location.hash = '#' + x;
-  log.info(`window.location.hash = ${window.location.hash}`);
+  if (x === null) {
+    log.warn('Attempted setting path to null');
+  } else {
+    window.location.hash = '#' + x;
+    log.info(`window.location.hash = ${window.location.hash}`);
+  }
 }
 
 export async function start(base_element, room) {
