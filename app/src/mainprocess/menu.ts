@@ -204,6 +204,22 @@ export async function updateMenu(args:{
     label: sss('Budget'),
     submenu: [
       {
+        label: sss('Go To...'),
+        submenu: [
+          {
+            label: sss('This Month'/* Menu item for "Go To This Month"*/),
+            accelerator: 'CmdOrCtrl+T',
+            click() {
+              let win = BrowserWindow.getFocusedWindow();
+              let budgetfile = BudgetFile.fromWindowId(win.id);
+              if (budgetfile) {
+                win.webContents.send('buckets:goto-today');
+              }
+            },
+          }
+        ],
+      },
+      {
         label: sss('Duplicate Window'),
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',

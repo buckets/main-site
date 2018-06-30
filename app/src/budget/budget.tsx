@@ -93,6 +93,14 @@ export async function start(base_element, room) {
   ipcRenderer.on('buckets:goto', (ev, path:string) => {
     setPath(path);
   })
+  ipcRenderer.on('buckets:goto-today', (ev) => {
+    let current_path = window.location.hash.substr(1).split('/').slice(2);
+    let today = localNow();
+    let year = today.year();
+    let month = today.month()+1;
+    const dst = `/y${year}m${month}/${current_path}`;
+    setPath(dst);
+  })
 
   let renderer = new Renderer();
   renderer.registerRendering(() => {
