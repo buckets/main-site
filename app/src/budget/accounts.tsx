@@ -372,19 +372,19 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
 
           {import_balance_field}
 
-          <tr>
+          {this.state.uncleared_amount ? <tr>
             <th>{sss('Uncleared'/* Label for sum of uncleared transaction amounts */)}</th>
             <td>
               <Money value={this.state.uncleared_amount} />
             </td>
-          </tr>
+          </tr> : null}
 
-          <tr>
+          {this.state.uncleared_amount ? <tr>
             <th>{sss('Cleared balance'/* Label for balance minus uncleared transactions */)}</th>
             <td>
               <Money value={current_balance - this.state.uncleared_amount} />
             </td>
-          </tr>
+          </tr> : null}
 
           <tr>
             <th>{sss('account-in', 'In'/* Label for amount put into an account */)}</th>
