@@ -673,6 +673,9 @@ class BucketRow extends React.Component<BucketRowProps, {
             Enter: () => {
               this.doPending();
             },
+            Escape: () => {
+              onPendingChanged({[bucket.id]: undefined});
+            },
             ArrowUp: () => {
               // console.log('up');
             },
