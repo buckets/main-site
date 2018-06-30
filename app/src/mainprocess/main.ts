@@ -104,16 +104,6 @@ app.on('ready', async () => {
   // Create the Menu
   updateMenu();
 
-  // Nag screen
-  eventuallyNag();
-
-  if (!electron_is.dev()) {
-    log.info('Checking for updates...');
-    checkForUpdates()
-  } else {
-    log.info('Not checking for updates in DEV mode.');
-  }
-
   if (openfirst.length) {
     while (openfirst.length) {
       await BudgetFile.openFile(openfirst.shift());  
@@ -139,6 +129,16 @@ app.on('ready', async () => {
 
   if (BrowserWindow.getAllWindows().length === 0) {
     openWizard();
+  }
+
+  // Nag screen
+  eventuallyNag();
+
+  if (!electron_is.dev()) {
+    log.info('Checking for updates...');
+    checkForUpdates()
+  } else {
+    log.info('Not checking for updates in DEV mode.');
   }
 })
 
