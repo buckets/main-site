@@ -1395,6 +1395,8 @@ table.props th {
   width: 30vw;
 }
 .toasts .toast {
+  display: flex;
+  align-items: center;
   position: relative;
   padding: .5rem 1rem;
   margin: 1rem;
@@ -1405,18 +1407,49 @@ table.props th {
   box-shadow: var(--drop-shadow);
   transition: right 200ms ease-in, left 200ms ease-in, opacity 200ms ease-in;
 }
+.toasts .toast .message {
+  flex-grow: 1;
+}
+.toasts .toast a.close {
+  flex-shrink: 0;
+  flex-grow: 0;
+  font-size: 1.5rem;
+  color: inherit; /*white;*/
+  border-radius: 1000px;
+  width: 1.5rem;
+  height: 1.5rem;
+  text-align: center;
+  line-height: 1.5rem;
+}
+.toasts .toast a.close:hover {
+  text-decoration: none;
+  background-color: white;
+  color: var(--blue);
+}
+
 .toasts .toast.error {
   background-color: var(--red);
   color: white;
   font-weight: bold;
   border-color: var(--darker-red);
 }
+.toasts .toast.error a.close:hover {
+  color: var(--darker-red);
+}
+
 .toasts .toast.warning {
   background-color: var(--yellow);
   color: black;
   font-weight: bold;
   border-color: var(--yellow);
 }
+.toasts .toast.warning {
+  
+}
+.toasts .toast.warning a.close:hover {
+  color: var(--yellow);
+}
+
 .toast-enter {
   right: -100%;
   opacity: 0;
