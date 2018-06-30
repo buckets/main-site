@@ -136,6 +136,11 @@ const messages:IMessages = {
     translated: true,
     h: "rmA9D10bvYOVj3U4kE7U6jALpz7WpqBJTv6HZaI4T/M=",
   },
+  "Application preferences": {
+    val: "Application preferences",
+    translated: false,
+    h: "PIhGW3aVUScG87KKiDCF4fLhudwZ3eYbz7n7msHJU1U=",
+  },
   "Attached files are too large.": {
     val: "Les fichiers joints sont trop lourds.",
     translated: true,
@@ -239,11 +244,11 @@ const messages:IMessages = {
     translated: true,
     h: "zOO4DqNSFLa6Z9vlmfaz8OnwggHn8wJeP058V5mUKbE=",
   },
-  "Budget Settings": {
+  "Budget Specific Settings": {
     /* Title for budget settings page */
-    val: "Budget Settings",
+    val: "Budget Specific Settings",
     translated: false,
-    h: "zuw0HcpRRRdvF6TOHxlpW20VLJgfbPvUcTImp1laiKA=",
+    h: "/RQVOKmoXTgeciF+ohehk19BxpvBXud+3HjfZPPw1v8=",
   },
   "Budget password:": {
     /* Label for bank macro password prompt */
@@ -270,6 +275,11 @@ const messages:IMessages = {
     val: "Abonnement TV",
     translated: true,
     h: "wISz6Dh0vnQ1Tjhr9GWcJ2rhiif2af6NXsAzEAXYxfo=",
+  },
+  "Calculator": {
+    val: "Calculator",
+    translated: false,
+    h: "IiaAFlM5LkjsirGL06i1plXy1FoW75TKBiuin2r4s6Q=",
   },
   "Cancel": {
     val: "Annuler",
@@ -347,6 +357,12 @@ const messages:IMessages = {
     val: "Cleared",
     translated: false,
     h: "j1SmbPuDDBP04XfOH9NNFCDzXmB9xAzSoVG7RcHcdBg=",
+  },
+  "Cleared balance": {
+    /* Label for balance minus uncleared transactions */
+    val: "Cleared balance",
+    translated: false,
+    h: "3SpY0eBe4gJ1WtupFnV904/a1Xlfx5Y4ybAdHQGzGV0=",
   },
   "Click the \"Set mapping\" to continue.": {
     val: "Cliquez sur \"Valider la correspondance\" pour continuer.",
@@ -714,6 +730,12 @@ const messages:IMessages = {
     translated: true,
     h: "XD8GQYEIDrNjTMPX4TjGeAbbCIEBcAONlYPd/D8Hz84=",
   },
+  "Go To...": {
+    /* Submenu title for navigation shortcuts */
+    val: "Go To...",
+    translated: false,
+    h: "AsKW6buNlZ7YlWHN1pVgNlCAzqiFIsJGL1cg8CkVGkg=",
+  },
   "Goal completion:": {
     val: "Atteinte de l'objectif:",
     translated: true,
@@ -821,11 +843,6 @@ const messages:IMessages = {
     translated: false,
     h: "EwzV2gCi/cxxLtdXGeSBJLDZhAhXqomL1rdi7QPOQxA=",
   },
-  "Import an Amazon Items report to see order details.": {
-    val: "Import an Amazon Items report to see order details.",
-    translated: false,
-    h: "wYXwxlFC+5KEx6+/6kqpqcHLs1Xfkt7mHrY683QmQPk=",
-  },
   "Import file": {
     val: "Importer fichier",
     translated: true,
@@ -901,12 +918,6 @@ const messages:IMessages = {
     val: "Il devrait dire:",
     translated: true,
     h: "RjwjZtmUgFzGUxR0zMmyXh0cHzpzsbj4nk6R7tGe+i4=",
-  },
-  "Item": {
-    /* Amazon order item description label */
-    val: "Item",
-    translated: false,
-    h: "J0Og6dJ0OAeNyx49ggQ07tKx/Pu/fyej6BKciFOMU0s=",
   },
   "Keep account transactions": {
     val: "Garder les transactions de comptes",
@@ -1163,6 +1174,16 @@ const messages:IMessages = {
     translated: true,
     h: "p4er9wMKH/YiF5PrBRKpfEzR8HINC3N0d9Iol4zqgtQ=",
   },
+  "No orders imported": {
+    val: "No orders imported",
+    translated: false,
+    h: "BSXGKYKVKCk7fbaNo3wAigIjqpZPNfJFNISloGmngZg=",
+  },
+  "No refunds imported": {
+    val: "No refunds imported",
+    translated: false,
+    h: "J8bwMBTknpk9dMKKsTWTqNlncBVGlUjhrnjwN6Z7uJk=",
+  },
   "Not Transfer": {
     val: "Ne pas transférer",
     translated: true,
@@ -1245,15 +1266,27 @@ const messages:IMessages = {
     translated: true,
     h: "zVM8610w5Mn1yRIYOsmOY5ZxBd2KLIudsimw610auYU=",
   },
-  "Optionally request a Amazon Refunds report": {
-    val: "Optionally request a Amazon Refunds report",
+  "Optionally request an Amazon Refunds report": {
+    val: "Optionally request an Amazon Refunds report",
     translated: false,
-    h: "0Gpd84fiRS78S1bJAzdSplsljFZorKyMIlg+IP0Yjys=",
+    h: "j+ZBzvgoK0z7wbJ25sNsy9fYopXOCUEqjbTFdt559Zo=",
   },
   "Or click to download the new version manually.": {
     val: "Or click to download the new version manually.",
     translated: false,
     h: "J+hkW+8xOyf72R6IgkvGlwWYNzHN+/aWRtotPks3C5U=",
+  },
+  "Order": {
+    /* Label for an Amazon order row */
+    val: "Order",
+    translated: false,
+    h: "Ggkvvwng4JyzP26RBZ9LrevWhrb766Qq+yTffZWmefg=",
+  },
+  "Orders": {
+    /* List of orders */
+    val: "Orders",
+    translated: false,
+    h: "0W3ENYY4AiEiX9CGdCzK/r0XLyqTqbYi8N91GQpTqnM=",
   },
   "Out": {
     val: "Pris",
@@ -1393,6 +1426,12 @@ const messages:IMessages = {
     translated: true,
     h: "7buMF65dyGtKDY/ZW/Lkn7eUmdudCsdGV3KR2lYLLA0=",
   },
+  "Refunds": {
+    /* List of refunds */
+    val: "Refunds",
+    translated: false,
+    h: "4I/iPkFh9gYRoT0f6GWUl2eb1/8WRv59q6yPjB1KOOU=",
+  },
   "Reload": {
     val: "Raffraîchir",
     translated: true,
@@ -1473,6 +1512,11 @@ const messages:IMessages = {
     val: "Rechercher",
     translated: true,
     h: "vembE+Cp1aKCKR2j2LCJD29QyiQxfGPUcGI1I8l5/5Y=",
+  },
+  "Search for Amazon transactions:": {
+    val: "Search for Amazon transactions:",
+    translated: false,
+    h: "FGAckk6wNL4OYfSaGK3CYf8NLHv4tvh6bf9YErgSb5E=",
   },
   "Search:": {
     val: "Chercher:",
@@ -1781,6 +1825,12 @@ const messages:IMessages = {
     translated: true,
     h: "MxbgnQR4Cyi549ltzzIDDAI1qRGqoeRm0zOApQMS2DY=",
   },
+  "Uncleared": {
+    /* Label for sum of uncleared transaction amounts */
+    val: "Uncleared",
+    translated: false,
+    h: "1GBgqlG+RCS8dFTG2z15jLFFd4PCVVXDefXwBRq0oTs=",
+  },
   "Undo": {
     val: "Annuler",
     translated: true,
@@ -1971,6 +2021,11 @@ const messages:IMessages = {
     translated: true,
     h: "hShy87A6GAhRqqtK+8VdVeGD70zA64iiV0/SwectQ0I=",
   },
+  "You can do math in all number inputs, not just here in the calculator.": {
+    val: "You can do math in all number inputs, not just here in the calculator.",
+    translated: false,
+    h: "dn2W/ktTrcwSzYNSq6IQL7Sl2k8lxZQRsFehzG9Mf7g=",
+  },
   "You don't have any recurring expense buckets yet.": {
     val: "Vous n'avez pas encore de godet de dépenses régulières.",
     translated: true,
@@ -2032,6 +2087,24 @@ const messages:IMessages = {
     val: "Il manque des transactions dans Buckets.",
     translated: true,
     h: "CeKVWaErT3a5EvPpQb/Av2kHD7RtudYjlQntfcMMtS8=",
+  },
+  "account-in": {
+    /* Label for amount put into an account */
+    val: "In",
+    translated: false,
+    h: "TcCPpYF7/U7vM5pPmpqvJipZt0WPk3A/vC7Ec8pfDvo=",
+  },
+  "account-net-amount": {
+    /* Label for net value of amount in - amount out for an account */
+    val: "Net",
+    translated: false,
+    h: "QITdwYnhK1fVfALCDc6jQhY2jLIUBpPp0/bSHOX6p9M=",
+  },
+  "account-out": {
+    /* Label for amount taken out of an account */
+    val: "Out",
+    translated: false,
+    h: "v4Oj0CQx7cmHP4mcJsZX4xMTzMzeFS81XA9gU3qOFKU=",
   },
   "accounts.balance_mismatch_msg": {
     val: "Le solde synchronisé le plus récent est différent du solde calculé à partir de vos transactions. Cliquez ... pour plus d'information.",
@@ -2197,6 +2270,12 @@ const messages:IMessages = {
     translated: true,
     h: "9NGQRvIxlAaOF9i+zWPXMFQubcY+5jtA7Td/lii16aM=",
   },
+  "go-to-this-month": {
+    /* Menu item for "Go To... This Month" */
+    val: "This Month",
+    translated: false,
+    h: "pjcOO9o+UFMLsp6ovyVzksVtCLcFsauwEITWoeq//bg=",
+  },
   "in the bank": {
     val: "À la banque",
     translated: true,
@@ -2298,6 +2377,12 @@ Voudriez-vous acheter une licence maintenant?`,
     translated: true,
     h: "boezbSGkVm3dnfFvodJOAeCgAEMIQN9L+8TwEHLpU/o=",
   },
+  "shipment-number": {
+    /* Noun labeling this shipment number */
+    val: (number:number)=>`Shipment ${number}`,
+    translated: false,
+    h: "kOj0AkivxHYJj3IKqIFziGCcIwk1yxyUrloX+kGlOd0=",
+  },
   "simplefin-connect-intro": {
     val: "Pour vous connecter, suivez les étapes ci-dessous:",
     translated: true,
@@ -2360,6 +2445,12 @@ Voudriez-vous acheter une licence maintenant?`,
               },
     translated: true,
     h: "Bd1IGkjXo2ruWofGrT+WwLdiy8IwJ/PW+7SO4TaDcps=",
+  },
+  "verb-open": {
+    /* Verb to open a page */
+    val: "Open",
+    translated: false,
+    h: "PlLwT5LggHCmpOqXIa1xXdU/K/ztbasiD703lhOnltA=",
   },
   "version-available": {
     val: (newv:string) => `Version ${newv} disponible.`,

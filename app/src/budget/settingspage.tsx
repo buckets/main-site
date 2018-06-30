@@ -20,7 +20,7 @@ export class SettingsPage extends React.Component<SettingsPageProps, {}> {
               <a href="#" onClick={ev => {
                 ev.preventDefault();
                 getCurrentFile().openPreferences();
-              }}>{sss('Open')}</a>
+              }}>{sss('verb-open', 'Open'/* Verb to open a page */)}</a>
             </td>
           </tr>
           <tr>

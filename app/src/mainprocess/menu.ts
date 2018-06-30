@@ -204,10 +204,10 @@ export async function updateMenu(args:{
     label: sss('Budget'),
     submenu: [
       {
-        label: sss('Go To...'),
+        label: sss('Go To...'/* Submenu title for navigation shortcuts */),
         submenu: [
           {
-            label: sss('This Month'/* Menu item for "Go To This Month"*/),
+            label: sss('go-to-this-month', 'This Month'/* Menu item for "Go To... This Month"*/),
             accelerator: 'CmdOrCtrl+T',
             click() {
               let win = BrowserWindow.getFocusedWindow();
