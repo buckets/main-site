@@ -2,7 +2,6 @@ import * as Path from 'path'
 import * as URL from 'url';
 import * as electron_is from 'electron-is'
 import * as fs from 'fs-extra-promise'
-import * as querystring from 'querystring'
 import { app, ipcMain, ipcRenderer, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
@@ -12,7 +11,7 @@ import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from 'buckets-core/d
 import { SQLiteStore } from 'buckets-core/dist/dbstore';
 import { openSqlite } from '../async-sqlite'
 import { RPCMainStoreHookup, RPCRendererStore } from '../rpcstore';
-import { addRecentFile, PSTATE } from './persistent'
+import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
 import { onlyRunInMain } from '../rpc'
@@ -297,12 +296,7 @@ export class BudgetFile implements IBudgetFile {
         }, 0);
       }
     } else {
-      const qs = querystring.stringify({
-        args: JSON.stringify({
-          noanimation: !PSTATE.animation ? true : undefined,
-        })
-      })
-      this.openWindow(`/budget/index.html?${qs}`);
+      this.openWindow(`/budget/index.html`);
     }
 
   }

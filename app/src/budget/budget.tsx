@@ -38,9 +38,7 @@ export function setPath(x:string) {
   log.info(`window.location.hash = ${window.location.hash}`);
 }
 
-export async function start(base_element, room, args: {
-  noanimation?:boolean,
-} = {}) {
+export async function start(base_element, room) {
   await localizeThisPage();
   log.info(`  localNow(): ${localNow().format()}`);
   log.info(`    utcNow(): ${utcNow().format()}`);
@@ -50,11 +48,9 @@ export async function start(base_element, room, args: {
   log.info(`moment: ${moment.version}`)
   log.info(`moment.locale: ${moment.locale()}`);
 
-  if (args) {
-    if (args.noanimation) {
-      log.info('Disabling money animation');
-      setAnimationEnabled(false);
-    }
+  if (!PSTATE.animation) {
+    log.info('Disabling money animation');
+    setAnimationEnabled(false);
   }
 
   // listen for uncaught exceptions
