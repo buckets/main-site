@@ -161,13 +161,15 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     print('Opening the app for testing...')
     subprocess.check_call(['open', 'dist/mac/Buckets.app'], env={})
 
-    if not yesno('Can you create a new budget?'):
+    if not yesno("Can you submit a bug report? (I'll ask at the end if you received it)"):
         abort()
-    if not yesno('Can you submit a bug report?'):
+    if not yesno('Can you create a new budget?'):
         abort()
     if not yesno('Can you open your own budget?'):
         abort()
     if not yesno('Can you open the application on Windows?'):
+        abort()
+    if not yesno('Did you receive the bug report?'):
         abort()
 
     # Manually publish it
@@ -211,8 +213,14 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     if yesno('Publish main static site? (to update the version, mostly)', default=True):
         subprocess.check_call(['python', 'build.py'], cwd='../staticweb')
         subprocess.check_call(['git', 'add', '_site'], cwd='../staticweb')
-        subprocess.check_call(['git', 'commit', '-m', 'Update static site'], cwd='../staticweb')
-        subprocess.check_call(['bash', 'deploy2github.sh'], cwd='../staticweb')
+        do_push = False
+        try:
+            subprocess.check_call(['git', 'commit', '-m', 'Update static site'], cwd='../staticweb')
+            do_push = True
+        except:
+            pass
+        if do_push:
+            subprocess.check_call(['bash', 'deploy2github.sh'], cwd='../staticweb')
 
 
 if __name__ == '__main__':
