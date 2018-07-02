@@ -186,7 +186,7 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
 
     let amount_in = 0;
     let amount_out = 0;
-    Object.values(appstate.transactions)
+    Object.values<Transaction>(appstate.transactions)
       .filter(trans => trans.account_id === account.id)
       .forEach(trans => {
         if (trans.amount > 0) {
