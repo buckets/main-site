@@ -82,10 +82,13 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
         .map(id => appstate.transactions[id])
         .filter(x => x);
     } else {
-      transactions = _.values(appstate.transactions);
+      transactions = Object.values<Transaction>(appstate.transactions);
     }
 
-    let dupes = findPotentialDupes(transactions);
+    let dupes = findPotentialDupes([
+      ...Object.values<Transaction>(appstate.transactions),
+      ...Object.values<Transaction>(appstate.outside_transactions),
+    ]);
     let dupe_list;
     if (dupes.length) {
       dupe_list = <div>

@@ -24,7 +24,7 @@ export function findPotentialDupes(transactions:Transaction[], opts:{
       for (const a of translist) {
         let a_posted = parseLocalTime(a.posted);
         for (const b of translist) {
-          if (a === b) {
+          if (a.id === b.id) {
             continue;
           }
           let b_posted = parseLocalTime(b.posted);

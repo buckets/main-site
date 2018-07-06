@@ -57,6 +57,12 @@ export class AppState implements IComputedAppState {
   transactions: {
     [k: number]: ATrans;
   } = {};
+  /**
+   *  Transaction outside the current AppState's date window
+   */
+  outside_transactions: {
+    [k: number]: ATrans;
+  } = {};
   groups: {
     [k: number]: Group;
   } = {};
@@ -443,12 +449,24 @@ export class StateManager {
       }
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
-      if (!inrange || ev.event === 'delete') {
-        if (this.appstate.transactions[obj.id]) {
-          delete this.appstate.transactions[obj.id];  
+      if (inrange) {
+        // inside date range
+        if (ev.event === 'update') {
+          this.appstate.transactions[obj.id] = obj;
+        } else {
+          if (this.appstate.transactions[obj.id]) {
+            delete this.appstate.transactions[obj.id];
+          }
         }
-      } else if (ev.event === 'update') {
-        this.appstate.transactions[obj.id] = obj;
+      } else {
+        // Outside date range
+        if (ev.event === 'update') {
+          this.appstate.outside_transactions[obj.id] = obj;
+        } else {
+          if (this.appstate.outside_transactions[obj.id]) {
+            delete this.appstate.outside_transactions[obj.id];
+          }
+        }
       }
       this.store.sub.accounts.getCategories(obj.id)
       .then(cats => {
@@ -604,14 +622,21 @@ export class StateManager {
     let range = this.appstate.viewDateRange;
     const transactions = await this.store.sub.accounts.listTransactions({
       posted: {
-        onOrAfter: range.onOrAfter,
-        before: range.before,
+        onOrAfter: range.onOrAfter.subtract(4, 'days'),
+        before: range.before.add(4, 'days'),
       }
     })
     this.appstate.transactions = {};
+    this.appstate.outside_transactions = {};
     let trans_ids = [];
+    const dr = this.appstate.viewDateRange;
     transactions.forEach(trans => {
-      this.appstate.transactions[trans.id] = trans;
+      const inrange = isBetween(parseLocalTime(trans.posted), dr.onOrAfter, dr.before)
+      if (inrange) {
+        this.appstate.transactions[trans.id] = trans;  
+      } else {
+        this.appstate.outside_transactions[trans.id] = trans;
+      }
       trans_ids.push(trans.id);
     })
     const categories = await this.store.sub.accounts.getManyCategories(trans_ids);
