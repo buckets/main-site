@@ -706,6 +706,18 @@ class BucketRow extends React.Component<BucketRowProps, {
             bucket={bucket}
             balance={balance}
             posting_date={posting_date} /></td>
+      <td x-name="delete" className="icon-button-wrap">
+        <SafetySwitch
+          className="icon grey show-on-row-hover"
+          onClick={ev => {
+            manager
+            .checkpoint(sss('Kick Bucket'))
+            .sub.buckets.kick(bucket.id);
+          }}
+        >
+          <span className="fa fa-trash" />
+        </SafetySwitch>
+      </td>
       <td x-name="more">
         <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-ellipsis-h"></span></Link>
       </td>
@@ -828,6 +840,7 @@ class GroupRow extends React.Component<{
           <th x-name="in" className="right nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
           <th x-name="activity" className="right nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
           <th x-name="details">{sss('bucket.detailslabel', 'Details')}</th>
+          <th x-name="delete"></th>
           <th x-name="more"></th>
         </tr>
       <tr className="group-row icon-hover-trigger">
@@ -881,8 +894,8 @@ class GroupRow extends React.Component<{
         </td>
         <td x-name="details">
         </td>
-        <td x-name="more">
-          <SafetySwitch
+        <td x-name="delete" className="icon-button-wrap">
+          {group.id === NOGROUP ? null : <SafetySwitch
             className="icon grey show-on-row-hover"
             onClick={ev => {
               manager
@@ -891,8 +904,9 @@ class GroupRow extends React.Component<{
             }}
           >
             <span className="fa fa-trash" />
-          </SafetySwitch>
+          </SafetySwitch>}
         </td>
+        <td x-name="more"></td>
       </tr>
       {bucket_rows}
     </tbody>);
