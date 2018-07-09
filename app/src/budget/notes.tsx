@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { IObject, TABLE2CLASS } from '../store'
+import { IObject, IObjectTypes } from 'buckets-core/dist/store'
 import { manager } from './appstate'
 import { debounceChange } from '../input'
-import { sss } from '../i18n'
+import { sss } from '@iffycan/i18n'
 
 export interface INotable {
   notes: string;
@@ -37,7 +37,7 @@ export class NoteMaker extends React.PureComponent<NoteProps, {
     }
     manager
     .checkpoint(sss('Update Note'))
-    .updateObject(TABLE2CLASS[this.props.obj._type], this.props.obj.id, {notes:newval} as any)
+    .updateObject(this.props.obj._type as keyof IObjectTypes, this.props.obj.id, {notes:newval} as any)
   })
   render() {
     let { obj } = this.props;

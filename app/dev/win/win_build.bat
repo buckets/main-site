@@ -2,7 +2,8 @@ echo "win_build.bat start"
 c:
 cd \
 md proj
-md proj\dist
+md proj\app
+md proj\app\dist
 rem net use y: \\vboxsvr\project
 rmdir c:\proj\app\src /s /q
 rmdir c:\proj\app\migrations /s /q
@@ -10,10 +11,16 @@ type C:\builder\copyexclude.txt
 xcopy y:\ c:\proj /d /F /I /s /Y /EXCLUDE:C:\builder\copyexclude.txt
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+cd \proj\app\
+cmd /c node dev\win\winbuild.js "%1"
+exit /b 1
+
 set PYTHON=C:\Users\IEUser\.windows-build-tools\python27\python.exe
 set PATH=%PATH%;C:\Users\IEUser\.windows-build-tools\python27
 set ELECTRON_BUILDER_CACHE=Y:\cache\electron-cache
 set ELECTRON_CACHE=Y:\cache\electron-cache
+set CSC_LINK=Y:\csc_link.p12
+set /P CSC_KEY_PASSWORD=< Y:\csc_key_password.txt
 set
 cmd /c npm config set msvs_version 2015 --global
 cmd /c npm install -g node-gyp

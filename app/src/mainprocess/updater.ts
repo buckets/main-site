@@ -14,6 +14,7 @@ let win:Electron.BrowserWindow;
 
 export function checkForUpdates() {
   autoUpdater.autoDownload = false;
+  autoUpdater.allowPrerelease = PSTATE.download_beta_versions;
   autoUpdater.on('checking-for-update', () => {
     log.info('checking for updates...');
     setUpdateWindowStatus({
@@ -45,7 +46,7 @@ export function checkForUpdates() {
   autoUpdater.on('error', (err) => {
     log.error(err);
     let alert_user = true;
-    if (err.toString.indexOf('net::ERR_INTERNET_DISCONNECTED') !== -1) {
+    if (err.toString().indexOf('net::ERR_INTERNET_DISCONNECTED') !== -1) {
       // They have no internet connection
       alert_user = false;
     }
@@ -67,7 +68,7 @@ export function checkForUpdates() {
     }, true);
   });
 
-  if (electron_is.linux() && process.env.APPIMAGE === null) {
+  if (electron_is.linux()) {
     linux_checkForUpdates();
   } else {
     autoUpdater.checkForUpdates();
@@ -110,10 +111,10 @@ export function openUpdateWindow() {
   }
   win = new BrowserWindow({
     frame: false,
-    width: 350,
-    height: 120,
+    width: 400,
+    height: 200,
     minWidth: 350,
-    minHeight: 120,
+    minHeight: 200,
     show: false,
   });
   win.once('ready-to-show', () => {

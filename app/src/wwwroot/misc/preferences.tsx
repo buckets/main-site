@@ -3,6 +3,7 @@ import * as moment from 'moment-timezone'
 import { sss, localizeThisPage } from '../../i18n'
 import { PSTATE, updateState, PersistentState } from '../../mainprocess/persistent'
 import { Renderer } from '../../budget/render'
+import { NUMBER_FORMAT_EXAMPLES } from '@iffycan/i18n'
 
 let CURRENT_PSTATE = PSTATE;
 let renderer:Renderer = new Renderer();
@@ -48,9 +49,12 @@ class PreferencesApp extends React.Component<{
                   })
                 }}>
                 <option value="">{sss('System default'/* Option for Buckets language preference */)}</option>
+                <option value="de">Deutsch</option>
                 <option value="en">English</option>
                 <option value="es">español</option>
                 <option value="fr">Français</option>
+                <option value="nl">Nederlands</option>
+                <option value="pl">Polski</option>
                 <option value="pt">Português</option>
               </select>
             </td>
@@ -70,9 +74,9 @@ class PreferencesApp extends React.Component<{
                   })
                 }}>
                 <option value="">{sss('Language default')}</option>
-                <option value="comma-period">1,500.22</option>
-                <option value="period-comma">1.500,22</option>
-                <option value="space-comma">1 500,22</option>
+                <option value="comma-period">{NUMBER_FORMAT_EXAMPLES['comma-period']}</option>
+                <option value="period-comma">{NUMBER_FORMAT_EXAMPLES['period-comma']}</option>
+                <option value="space-comma">{NUMBER_FORMAT_EXAMPLES['space-comma']}</option>
               </select>
             </td>
           </tr>
@@ -115,6 +119,24 @@ class PreferencesApp extends React.Component<{
                     })
                   })
                 }} />
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('Beta Updates'/* Label for checkbox indicating if users want to receive Beta version of Buckets before wide release */)}</th>
+            <td>
+              <input
+                type="checkbox"
+                checked={pstate.download_beta_versions}
+                onChange={ev => {
+                  let newval = ev.target.checked;
+                  renderer.doUpdate(async () => {
+                    CURRENT_PSTATE = await updateState({
+                      download_beta_versions: newval,
+                    })
+                  })
+                }} />
+              <div className="helptext">{sss('Enable to get new versions of Buckets before everyone else.  There might be more bugs :)')}</div>
             </td>
           </tr>
         </tbody>

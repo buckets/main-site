@@ -4,8 +4,8 @@ import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
 import { sss } from '../i18n'
 import { shell } from 'electron'
-import {Balances} from '../models/balances'
-import { Account, Transaction, expectedBalance } from '../models/account'
+import {Balances} from 'buckets-core/dist/models/balances'
+import { Account, Transaction, expectedBalance } from 'buckets-core/dist/models/account'
 import { Route, Link, WithRouting, Redirect } from './routing'
 import { Money, MoneyInput } from '../money'
 import { makeToast } from './toast'
@@ -14,7 +14,8 @@ import { ClickToEdit, SafetySwitch } from '../input';
 import { manager, AppState } from './appstate';
 import { setPath } from './budget';
 import { Help } from '../tooltip'
-import { DateDisplay, loadTS } from '../time'
+import { DateDisplay } from '../time'
+import { loadTS } from 'buckets-core/dist/time'
 import { NoteMaker } from './notes'
 
 function getImportBalance(account:Account, balance:number):number {
@@ -32,7 +33,7 @@ export class ClosedAccountsPage extends React.Component<{appstate:AppState}, {}>
             manager
             .checkpoint(sss('Reopen Account'))
             .sub.accounts.unclose(account.id)
-          }}>{sss('Reopen')}</button></td>
+          }}>{sss('Reopen'/* Label for button to reopen a close account */)}</button></td>
           <td>
             <Link relative to={`../${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link>
           </td>
@@ -125,6 +126,8 @@ interface AccountViewState {
   balance_edit_showing: boolean;
   new_balance_with_transaction: boolean;
   balance_date: moment.Moment;
+  hasMappings: boolean;
+  uncleared_amount: number;
 }
 export class AccountView extends React.Component<AccountViewProps, AccountViewState> {
   constructor(props:AccountViewProps) {
@@ -134,6 +137,8 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
       balance_edit_showing: false,
       new_balance_with_transaction: true,
       balance_date: null,
+      hasMappings: false,
+      uncleared_amount: 0,
     }
   }
   componentDidMount() {
@@ -158,10 +163,17 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
     })
     store.balanceDate(props.account.id, props.appstate.viewDateRange.before)
     .then(balance_date => {
-      console.log('got balance_date', balance_date);
       this.setState({
         balance_date: balance_date ? loadTS(balance_date) : null,
       })
+    })
+    store.hasAccountMappings(props.account.id)
+    .then(hasMappings => {
+      this.setState({hasMappings});
+    })
+    store.unclearedTotal(props.account.id, props.appstate.viewDateRange.before)
+    .then(uncleared => {
+      this.setState({uncleared_amount: uncleared});
     })
   }
   render() {
@@ -171,6 +183,20 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
     let close_button;
     let closed_ribbon;
     let delete_all_transactions_button;
+
+    let amount_in = 0;
+    let amount_out = 0;
+    Object.values<Transaction>(appstate.transactions)
+      .filter(trans => trans.account_id === account.id)
+      .forEach(trans => {
+        if (trans.amount > 0) {
+          amount_in += trans.amount
+        } else {
+          amount_out += trans.amount
+        }
+      })
+    let amount_net = amount_in + amount_out;
+
     if (account.closed) {
       close_button = <button onClick={() => {
         manager
@@ -217,12 +243,27 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
             </div>
             <span>{sss("account-bal-diff-1", "The running balance does not match the last synced balance for one of these reasons:")} </span>
             <ul>
-              <li>{sss("account-bal-diff-fix-1", "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets.")}</li>
-              <li>{sss("account-bal-diff-fix-2", "Transactions are missing from Buckets.")}</li>
+              <li>{sss("account-bal-diff-fix-1", "The bank has reported a future balance.  To fix this, wait until all transactions have arrived in Buckets."/* 'Buckets' refers to the application name */)}</li>
+              <li>{sss("account-bal-diff-fix-2", "Transactions are missing from Buckets."/* 'Buckets' refers to the application name. */)}</li>
             </ul>
           </div>
         </td>
       </tr>
+    }
+
+    let break_mappings;
+    if (this.state.hasMappings) {
+      break_mappings = <SafetySwitch
+        onClick={ev => {
+          manager
+          .checkpoint(sss('Break Import Links'))
+          .sub.accounts.deleteAccountMappings(account.id)
+          .then(() => {
+            makeToast(sss('Import links broken' /* Notification indicating that the links between imported transaction files and a particular account have been broken. */))
+          });
+        }}>
+        {sss('Break Import Links')}
+      </SafetySwitch>
     }
 
     let balance_edit_form;
@@ -331,6 +372,41 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
 
           {import_balance_field}
 
+          {this.state.uncleared_amount ? <tr>
+            <th>{sss('Uncleared'/* Label for sum of uncleared transaction amounts */)}</th>
+            <td>
+              <Money value={this.state.uncleared_amount} />
+            </td>
+          </tr> : null}
+
+          {this.state.uncleared_amount ? <tr>
+            <th>{sss('Cleared balance'/* Label for balance minus uncleared transactions */)}</th>
+            <td>
+              <Money value={current_balance - this.state.uncleared_amount} />
+            </td>
+          </tr> : null}
+
+          <tr>
+            <th>{sss('account-in', 'In'/* Label for amount put into an account */)}</th>
+            <td>
+              <Money value={amount_in} />
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('account-out', 'Out'/* Label for amount taken out of an account */)}</th>
+            <td>
+              <Money value={amount_out} nocolor />
+            </td>
+          </tr>
+
+          <tr>
+            <th>{sss('account-net-amount', 'Net'/* Label for net value of amount in - amount out for an account */)}</th>
+            <td>
+              <Money value={amount_net} />
+            </td>
+          </tr>
+
           <tr>
             <th>{sss('Off budget')}</th>
             <td>
@@ -355,6 +431,7 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           <tr>
             <th>{sss('Actions')}</th>
             <td>
+              {break_mappings}
               {close_button}
               {delete_all_transactions_button}
             </td>
@@ -435,7 +512,10 @@ export class AccountsPage extends React.Component<AccountsPageProps, any> {
   addAccount = () => {
     manager
     .checkpoint(sss('Create Account'))
-    .sub.accounts.add(sss('default account name', 'Savings'));  
+    .sub.accounts.add(sss('default account name', 'Savings'))
+    .then(account => {
+      setPath(`/accounts/${account.id}`);
+    })
   }
   createConnection = () => {
     setPath('/import')

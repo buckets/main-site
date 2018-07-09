@@ -1,20 +1,20 @@
 import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 
-import { EventSource } from 'buckets-core'
-import {isObj, ObjectEvent, IStore} from '../store'
-import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from '../models/account'
-import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
-import { Connection } from '../models/simplefin'
-import { isBetween, loadTS, parseLocalTime, localNow, makeLocalDate } from '../time'
-import {Balances} from '../models/balances'
-import { BankMacro } from '../models/bankmacro'
-import { ISettings, Setting, DEFAULTS as DefaultSettings } from '../models/settings'
+import { EventSource } from '@iffycan/events'
+import {isObj, IStore, IObjectEvent} from 'buckets-core/dist/store'
+import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from 'buckets-core/dist/models/account'
+import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from 'buckets-core/dist/models/bucket'
+import { Connection } from 'buckets-core/dist/models/simplefin'
+import { isBetween, loadTS, parseLocalTime, localNow, makeLocalDate } from 'buckets-core/dist/time'
+import {Balances} from 'buckets-core/dist/models/balances'
+import { BankMacro } from 'buckets-core/dist/models/bankmacro'
+import { ISettings, DEFAULTS as DefaultSettings } from 'buckets-core/dist/models/settings'
 import { makeToast } from './toast'
 import { sss } from '../i18n'
-import { IBudgetFile } from '../mainprocess/files'
 import { PrefixLogger } from '../logging'
 import { CSVNeedsMapping, CSVNeedsAccountAssigned } from '../csvimport'
+import { setDefaultSymbol } from '../money'
 
 const log = new PrefixLogger('(appstate)')
 
@@ -55,6 +55,12 @@ export class AppState implements IComputedAppState {
     [k: number]: Account;
   } = {};
   transactions: {
+    [k: number]: ATrans;
+  } = {};
+  /**
+   *  Transaction outside the current AppState's date window
+   */
+  outside_transactions: {
     [k: number]: ATrans;
   } = {};
   groups: {
@@ -316,16 +322,15 @@ class DelayingCounter<T> {
 
 export class StateManager {
   private store:IStore;
-  private file:IBudgetFile;
 
   public appstate:AppState;
-  private queue: ObjectEvent<any>[] = [];
+  private queue: IObjectEvent[] = [];
   private posttick: Set<keyof StateManager> = new Set();
 
   private updated_trans_counter = new DelayingCounter();
 
   public events = {
-    obj: new EventSource<ObjectEvent<any>>(),
+    obj: new EventSource<IObjectEvent>(),
     change: new EventSource<AppState>(),
   }
 
@@ -339,18 +344,17 @@ export class StateManager {
     })
   }
   checkpoint(label:string) {
-    this.file.doAction(label, () => {});
+    this.store.doAction(label, () => {});
     return this.store;
   }
   get nocheckpoint() {
     return this.store;
   }
-  attach(store: IStore, file:IBudgetFile) {
+  attach(store: IStore) {
     this.store = store;
-    this.file = file;
 
     // Syncing events
-    file.room.events('sync_started').on(message => {
+    store.events.get('sync_started').on(message => {
       let onOrAfter = loadTS(message.onOrAfter);
       let before = loadTS(message.before);
       makeToast(sss('sync.toast.syncing', (start:moment.Moment, end:moment.Moment) => {
@@ -359,7 +363,7 @@ export class StateManager {
       this.appstate.syncing++;
       this.signalChange();
     })
-    file.room.events('sync_done').on(message => {
+    store.events.get('sync_done').on(message => {
       let { result } = message;
       let onOrAfter = loadTS(message.onOrAfter);
       let before = loadTS(message.before);
@@ -377,33 +381,33 @@ export class StateManager {
     })
 
     // Macro playback events
-    file.room.events('macro_started').on(message => {
+    store.events.get('macro_started').on(message => {
       this.appstate.running_bank_macros.add(message.id);
       this.signalChange();
     })
-    file.room.events('macro_stopped').on(message => {
+    store.events.get('macro_stopped').on(message => {
       this.appstate.running_bank_macros.delete(message.id);
       this.signalChange();
     })
 
-    file.room.events('csv_needs_mapping').on(obj => {
+    store.events.get('csv_needs_mapping').on(obj => {
       this.appstate.csvs_needing_mapping.push(obj);
       this.signalChange();
     });
-    file.room.events('csv_mapping_response').on(obj => {
+    store.events.get('csv_mapping_response').on(obj => {
       this.appstate.csvs_needing_mapping = this.appstate.csvs_needing_mapping.filter(x => x.id !== obj.id);
       this.signalChange();
     })
-    file.room.events('csv_needs_account_assigned').on(obj => {
+    store.events.get('csv_needs_account_assigned').on(obj => {
       this.appstate.csvs_needing_account.push(obj);
       this.signalChange();
     })
-    file.room.events('csv_account_response').on(obj => {
+    store.events.get('csv_account_response').on(obj => {
       this.appstate.csvs_needing_account = this.appstate.csvs_needing_account.filter(x => x.id !== obj.id);
       this.signalChange();
     })
   }
-  async processEvent(ev:ObjectEvent<any>):Promise<AppState> {
+  async processEvent(ev:IObjectEvent):Promise<AppState> {
     this.queue.push(ev);
     this.events.obj.emit(ev);
     return this.tick();
@@ -414,7 +418,7 @@ export class StateManager {
     }
     let ev = this.queue.shift();
     let obj = ev.obj;
-    if (isObj(Account, obj)) {
+    if (isObj('account', obj)) {
       if (ev.event === 'update') {
         if (!this.appstate.accounts[obj.id]) {
           makeToast(sss('Account created: ') + obj.name);
@@ -424,7 +428,7 @@ export class StateManager {
         delete this.appstate.accounts[obj.id];
       }
       this.posttick.add('fetchAccountBalances');
-    } else if (isObj(Bucket, obj)) {
+    } else if (isObj('bucket', obj)) {
       if (ev.event === 'update') {
         this.appstate.buckets[obj.id] = obj;
       } else if (ev.event === 'delete') {
@@ -433,31 +437,43 @@ export class StateManager {
       this.posttick.add('fetchBucketBalances');
       this.posttick.add('fetchBucketFlow');
       this.posttick.add('fetchFutureRainfall');
-    } else if (isObj(Group, obj)) {
+    } else if (isObj('bucket_group', obj)) {
       if (ev.event === 'update') {
         this.appstate.groups[obj.id] = obj;
       } else if (ev.event === 'delete') {
         delete this.appstate.groups[obj.id];
       }
-    } else if (isObj(ATrans, obj)) {
+    } else if (isObj('account_transaction', obj)) {
       if (ev.event === 'update') {
         this.updated_trans_counter.add(obj.id);
       }
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
-      if (!inrange || ev.event === 'delete') {
-        if (this.appstate.transactions[obj.id]) {
-          delete this.appstate.transactions[obj.id];  
+      if (inrange) {
+        // inside date range
+        if (ev.event === 'update') {
+          this.appstate.transactions[obj.id] = obj;
+        } else {
+          if (this.appstate.transactions[obj.id]) {
+            delete this.appstate.transactions[obj.id];
+          }
         }
-      } else if (ev.event === 'update') {
-        this.appstate.transactions[obj.id] = obj;
+      } else {
+        // Outside date range
+        if (ev.event === 'update') {
+          this.appstate.outside_transactions[obj.id] = obj;
+        } else {
+          if (this.appstate.outside_transactions[obj.id]) {
+            delete this.appstate.outside_transactions[obj.id];
+          }
+        }
       }
       this.store.sub.accounts.getCategories(obj.id)
       .then(cats => {
         this.appstate.categories[obj.id] = cats;
         this.signalChange();
       })
-    } else if (isObj(BTrans, obj)) {
+    } else if (isObj('bucket_transaction', obj)) {
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
       if (!inrange || ev.event === 'delete') {
@@ -467,13 +483,13 @@ export class StateManager {
       } else if (ev.event === 'update') {
         this.appstate.btransactions[obj.id] = obj;
       }
-    } else if (isObj(Connection, obj)) {
+    } else if (isObj('simplefin_connection', obj)) {
       if (ev.event === 'update') {
         this.appstate.sfinconnections[obj.id] = obj;
       } else if (ev.event === 'delete') {
         delete this.appstate.sfinconnections[obj.id];
       }
-    } else if (isObj(UnknownAccount, obj)) {
+    } else if (isObj('unknown_account', obj)) {
       if (ev.event === 'update') {
         if (!this.appstate.unknown_accounts[obj.id]) {
           makeToast(sss('Unknown account: ') + obj.description);
@@ -482,14 +498,17 @@ export class StateManager {
       } else if (ev.event === 'delete') {
         delete this.appstate.unknown_accounts[obj.id];
       }
-    } else if (isObj(BankMacro, obj)) {
+    } else if (isObj('bank_macro', obj)) {
       if (ev.event === 'update') {
         this.appstate.bank_macros[obj.id] = obj;
       } else if (ev.event === 'delete') {
         delete this.appstate.bank_macros[obj.id];
       }
-    } else if (isObj(Setting, obj)) {
+    } else if (isObj('settings', obj)) {
       this.appstate.settings[obj.key] = obj.value;
+      if (obj.key === 'money_symbol') {
+        setDefaultSymbol(obj.value);
+      }
     }
     this.signalChange();
     return this.appstate;
@@ -542,6 +561,7 @@ export class StateManager {
   }
   async fetchSettings() {
     this.appstate.settings = await this.store.sub.settings.getSettings();
+    setDefaultSymbol(this.appstate.settings.money_symbol);
   }
   fetchAllAccounts() {
     return this.store.sub.accounts.list()
@@ -602,14 +622,21 @@ export class StateManager {
     let range = this.appstate.viewDateRange;
     const transactions = await this.store.sub.accounts.listTransactions({
       posted: {
-        onOrAfter: range.onOrAfter,
-        before: range.before,
+        onOrAfter: range.onOrAfter.subtract(4, 'days'),
+        before: range.before.add(4, 'days'),
       }
     })
     this.appstate.transactions = {};
+    this.appstate.outside_transactions = {};
     let trans_ids = [];
+    const dr = this.appstate.viewDateRange;
     transactions.forEach(trans => {
-      this.appstate.transactions[trans.id] = trans;
+      const inrange = isBetween(parseLocalTime(trans.posted), dr.onOrAfter, dr.before)
+      if (inrange) {
+        this.appstate.transactions[trans.id] = trans;  
+      } else {
+        this.appstate.outside_transactions[trans.id] = trans;
+      }
       trans_ids.push(trans.id);
     })
     const categories = await this.store.sub.accounts.getManyCategories(trans_ids);
@@ -640,7 +667,7 @@ export class StateManager {
     })
   }
   fetchUnknownAccounts() {
-    return this.store.listObjects(UnknownAccount)
+    return this.store.listObjects('unknown_account')
     .then(accounts => {
       this.appstate.unknown_accounts = {};
       accounts.forEach(obj => {
@@ -649,7 +676,7 @@ export class StateManager {
     })
   }
   fetchBankMacros() {
-    return this.store.listObjects(BankMacro)
+    return this.store.listObjects('bank_macro')
     .then(macros => {
       this.appstate.bank_macros = {};
       macros.forEach(obj => {

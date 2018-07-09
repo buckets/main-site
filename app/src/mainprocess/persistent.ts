@@ -1,11 +1,13 @@
+import * as os from 'os'
 import { app, remote } from 'electron'
 import * as electron_is from 'electron-is'
 import * as Path from 'path'
 import * as fs from 'fs'
-import { EventSource } from 'buckets-core'
+import { EventSource } from '@iffycan/events'
 import { onlyRunInMain } from '../rpc'
 import { PrefixLogger } from '../logging'
 import { IOpenWindow } from './files'
+import { getNiceStat } from '../util'
 
 const log = new PrefixLogger(electron_is.renderer() ? '(persistent.r)' : '(persistent)');
 
@@ -16,6 +18,7 @@ export interface PersistentState {
   number_format: ''|'comma-period'|'period-comma';
   skipVersion: string;
   animation: boolean;
+  download_beta_versions: boolean;
   last_opened_windows: Array<{
     filename: string;
     windows: Array<IOpenWindow>;
@@ -30,6 +33,7 @@ export let PSTATE:PersistentState = {
   number_format: '',
   skipVersion: null,
   animation: true,
+  download_beta_versions: false,
   last_opened_windows: [],
   timezone: '',
 };
@@ -60,8 +64,18 @@ function stateFilename() {
 export const updateState = onlyRunInMain(async (update:Partial<PersistentState>):Promise<PersistentState> => {
     let new_state = Object.assign({}, PSTATE, update);
     PSTATE = await new Promise<PersistentState>((resolve, reject) => {
-      fs.writeFile(stateFilename(), JSON.stringify(new_state, null, 2), 'utf8' as any, err => {
+      const filename = stateFilename();
+      fs.writeFile(filename, JSON.stringify(new_state, null, 2), 'utf8' as any, err => {
         if (err) {
+          log.error(`Error writing ${filename}`);
+          log.info(`user=${JSON.stringify(os.userInfo())}`);
+          log.info(`platform=${process.platform}`);
+          log.info(`release=${os.release()}`);
+          log.info(`arch=${process.arch}`);
+          const real_app = remote ? remote.app : app;
+          logStat(filename)
+          logStat(real_app.getPath('userData'))
+          logStat(real_app.getPath('appData'))
           throw err;
         }
         resolve(new_state);
@@ -72,6 +86,21 @@ export const updateState = onlyRunInMain(async (update:Partial<PersistentState>)
 
 export const PersistEvents = {
   added_recent_file: new EventSource<string>(),
+}
+
+/**
+ *  Log the stat output for a path
+ */
+function logStat(path:string) {
+  try {
+    const stat = JSON.stringify(fs.statSync(path));
+    const nicestat = JSON.stringify(getNiceStat(path));
+    log.info(`stat of ${path}`);
+    log.info(nicestat);
+    log.info(stat);  
+  } catch(err2) {
+    log.info(`Error doing stat of ${path}`);
+  }
 }
 
 /**

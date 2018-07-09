@@ -2,21 +2,21 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { shell } from 'electron'
 import { makeToast } from './toast'
-import { Account, UnknownAccount } from '../models/account'
-import { Connection } from '../models/simplefin'
-import { BankMacro } from '../models/bankmacro'
+import { Account, UnknownAccount } from 'buckets-core/dist/models/account'
+import { Connection } from 'buckets-core/dist/models/simplefin'
+import { BankMacro } from 'buckets-core/dist/models/bankmacro'
 import { manager, AppState } from './appstate'
 import { DateTime } from '../time'
 import { sss } from '../i18n'
 import { ClickToEdit, SafetySwitch } from '../input'
-import { current_file } from '../mainprocess/files'
+import { getCurrentFile } from '../mainprocess/files'
 import { Help } from '../tooltip'
 import { setPath } from './budget'
 import { CSVMapper, CSVAssigner } from '../csvimport'
 
 function syncCurrentMonth(appstate:AppState) {
   let range = appstate.viewDateRange;
-  return current_file.startSync(range.onOrAfter, range.before)
+  return getCurrentFile().startSync(range.onOrAfter, range.before)
 }
 
 
@@ -172,7 +172,7 @@ export class ImportPage extends React.Component<{
             <button
               onClick={() => {
                 if (appstate.syncing) {
-                  current_file.cancelSync();
+                  getCurrentFile().cancelSync();
                 } else {
                   syncCurrentMonth(appstate);
                 }
@@ -181,7 +181,7 @@ export class ImportPage extends React.Component<{
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
             <button onClick={() => {
-                current_file.openImportFileDialog();
+                getCurrentFile().openImportFileDialog();
               }}>
                 <span className="fa fa-upload"></span> Import file
               </button>
@@ -259,7 +259,7 @@ export class ImportPage extends React.Component<{
               <h3>File import</h3>
 
               <button className="primary" onClick={() => {
-                current_file.openImportFileDialog();
+                getCurrentFile().openImportFileDialog();
               }}>
                 <span className="fa fa-upload"></span> Import file
               </button>
@@ -295,7 +295,7 @@ export class ImportPage extends React.Component<{
     let macro = await manager
     .checkpoint(sss('Create Macro'))
     .sub.bankmacro.add({name: ''});
-    current_file.openRecordWindow(macro.id);
+    manager.nocheckpoint.ui.openBankMacroBrowser(macro.id);
   }
   connect = async () => {
     try {
@@ -343,7 +343,7 @@ class BankMacroList extends React.Component<{
             play_button = <button className="icon"
               onClick={() => {
                 let { onOrAfter, before } = manager.appstate.viewDateRange;
-                manager.nocheckpoint.sub.bankmacro.runMacro(current_file, macro.id, onOrAfter, before);
+                manager.nocheckpoint.sub.bankmacro.runMacro(macro.id, onOrAfter, before);
               }}><span className="fa fa-play"></span></button>
           }
           return <tr key={idx}>
@@ -373,7 +373,8 @@ class BankMacroList extends React.Component<{
             <td className="icon-button-wrap">
               <button className="icon"
                 onClick={() => {
-                  current_file.openRecordWindow(macro.id);
+                  manager
+                  .nocheckpoint.ui.openBankMacroBrowser(macro.id);
                 }}>
                 <span className="fa fa-gear"></span>
               </button>
@@ -414,7 +415,7 @@ class ConnectionList extends React.Component<{
             onClick={(ev) => {
               manager
               .checkpoint(sss('Delete Connection'))
-              .deleteObject(Connection, conn.id);
+              .deleteObject('simplefin_connection', conn.id);
             }}
           >
             <span className="fa fa-trash"></span>
@@ -434,7 +435,6 @@ class ConnectionList extends React.Component<{
     </table>
   }
 }
-
 
 class UnknownAccountList extends React.Component<{
   appstate: AppState,

@@ -2,19 +2,19 @@ import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import * as React from 'react'
 import { manager, AppState } from './appstate'
-import { ObjectEvent, isObj } from '../store'
+import { IObjectEvent, isObj } from 'buckets-core/dist/store'
 import { Money, cents2decimal } from '../money'
 import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
-import { COLORS, opacity } from '../color'
-import { chunkTime, Interval } from '../time'
+import { COLORS, opacity } from 'buckets-core/dist/color'
+import { chunkTime, Interval } from 'buckets-core/dist/time'
 
 import { debounceChange } from '../input'
 import { Help } from '../tooltip'
 import { Link, Route, Switch, WithRouting } from './routing'
-import { Transaction as ATrans } from '../models/account'
-import { Bucket, computeBucketData } from '../models/bucket'
-import { IncomeExpenseSum } from '../models/reports'
+import { Transaction as ATrans } from 'buckets-core/dist/models/account'
+import { Bucket, computeBucketData } from 'buckets-core/dist/models/bucket'
+import { IncomeExpenseSum } from 'buckets-core/dist/models/reports'
 import { TransactionList } from './transactions'
 
 import { SizeAwareDiv } from '../charts/util'
@@ -115,8 +115,8 @@ class TransferTransactions extends React.Component<TransferTransactionsProps, {
     })
     this.setState({transactions: transactions});
   }
-  processEvent = (ev:ObjectEvent<any>) => {
-    if (isObj(ATrans, ev.obj)) {
+  processEvent = (ev:IObjectEvent) => {
+    if (isObj('account_transaction', ev.obj)) {
       for (let i = 0; i < this.state.transactions.length; i++) {
         let trans = this.state.transactions[i];
         if (trans.id === ev.obj.id) {
@@ -605,7 +605,7 @@ class BucketExpenseSummary extends React.Component<BucketExpenseSummaryProps, Bu
               <th className="right right-padded">{sss('Bucket')}</th>
               <th className="center">{sss('Budgeted')}</th>
               <th className="center">{sss('Average')}</th>
-              <th className="left left-padded">
+              <th className="left left-padded full-width">
                 <input
                   type="range"
                   min="2"

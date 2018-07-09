@@ -3,7 +3,7 @@ import { app, remote, shell, BrowserWindow, dialog } from 'electron'
 import { APP_ROOT } from './globals'
 import * as jwt from 'jsonwebtoken'
 import * as fs from 'fs'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { PSTATE, updateState } from './persistent'
 import { onlyRunInMain } from '../rpc'
 import { sss } from '../i18n'
@@ -92,8 +92,8 @@ export function nag() {
 
 Would you like to purchase a license now?`)(),
       buttons: [
-        sss('Later'),
-        sss('Purchase'),
+        sss('Later'/* Button label for purchasing a license later */),
+        sss('Purchase'/* Button label for purchasing a license */),
       ],
       defaultId: 1,
     }, (indexClicked) => {

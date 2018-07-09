@@ -15,10 +15,21 @@ To run:
 
     tsc && yarn start
 
+# To generate a license
 
-# Get issues
+    python ../web/buckets/drm.py
 
-    dev/getissues.py && dev/formatissues.py
+
+# Refresh buckets-core
+
+One time:
+
+    yarn add file:../core
+
+Or during development (sort of doesn't work):
+
+    pushd ../core && yarn link && popd && yarn link buckets-core
+
 
 # Internationalization
 
@@ -28,7 +39,6 @@ To add a new language do:
 
 To add the language as an option in the preferences dropdown do:
 
-- Import it in `i18n.tsx`
 - Add it as an option in `preferences.tsx`
 
 Other use:

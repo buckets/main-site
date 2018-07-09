@@ -4,9 +4,9 @@ import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { SizeAwareDiv, CHART_STYLES } from './util'
 import { AppState, manager } from '../budget/appstate'
-import { parseLocalTime } from '../time'
-import { COLORS } from '../color'
-import { computeBucketData } from '../models/bucket'
+import { parseLocalTime } from 'buckets-core/dist/time'
+import { COLORS } from 'buckets-core/dist/color'
+import { computeBucketData } from 'buckets-core/dist/models/bucket'
 import { cents2decimal } from '../money'
 
 interface BucketGoalChartProps {
@@ -32,7 +32,7 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
   }
   async recomputeState(props:BucketGoalChartProps) {
     let promises = props.bucket_ids.map(async bucket_id => {
-      let rows = await manager.nocheckpoint.query(`
+      let rows = await manager.nocheckpoint.query<{amount:number, posted:string}>(`
         SELECT
           amount,
           posted

@@ -34,6 +34,8 @@ for i,release in enumerate(releases):
         next_release = None
 
     name = release['name']
+    if release['prerelease']:
+        name += ' (BETA)'
     seconds = 1
 
     # get time it was published

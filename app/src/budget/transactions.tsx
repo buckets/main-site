@@ -4,18 +4,19 @@ import * as _ from 'lodash'
 import * as sortBy from 'lodash.sortby'
 import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
-import { IStore } from '../store'
+import { IStore } from 'buckets-core/dist/store'
 import { manager, AppState } from './appstate'
-import { Bucket } from '../models/bucket'
-import { Account, Category, Transaction, GeneralCatType } from '../models/account'
-import { DateDisplay, moment2LocalDay, localDay2moment, DateInput, parseLocalTime } from '../time'
+import { Bucket } from 'buckets-core/dist/models/bucket'
+import { Account, Category, Transaction, GeneralCatType } from 'buckets-core/dist/models/account'
+import { DateDisplay, DateInput } from '../time'
+import { moment2LocalDay, localDay2moment, parseLocalTime } from 'buckets-core/dist/time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
 import { sss } from '../i18n'
-import { current_file } from '../mainprocess/files'
+import { getCurrentFile } from '../mainprocess/files'
 import { makeToast } from './toast'
-import { isNil } from '../util'
+import { isNil } from 'buckets-core/dist/util'
 import { findPotentialDupes } from './dupes'
 import { NoteMaker } from './notes'
 // import { PrefixLogger } from '../logging'
@@ -81,10 +82,13 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
         .map(id => appstate.transactions[id])
         .filter(x => x);
     } else {
-      transactions = _.values(appstate.transactions);
+      transactions = Object.values<Transaction>(appstate.transactions);
     }
 
-    let dupes = findPotentialDupes(transactions);
+    let dupes = findPotentialDupes([
+      ...Object.values<Transaction>(appstate.transactions),
+      ...Object.values<Transaction>(appstate.outside_transactions),
+    ]);
     let dupe_list;
     if (dupes.length) {
       dupe_list = <div>
@@ -117,8 +121,7 @@ export class TransactionPage extends React.Component<TransactionPageProps, {
         <div className="group">
           <button
             onClick={ev => {
-              current_file.openImportFileDialog();
-
+              getCurrentFile().openImportFileDialog();
             }}>
             <span className="fa fa-upload"></span> {sss('Import file')}
           </button>
@@ -328,15 +331,18 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       return ret;
     }
   }
-  async alsoCategorize(store:IStore, trans:Transaction) {
+  async alsoCategorize(store:IStore, trans:Transaction, cats:Category[]) {
     if (trans) {
-      const invalid_cats = this.state.cats.filter(x => x.bucket_id===null).length;
+      const invalid_cats = cats.filter(x => x.bucket_id===null).length;
       if (this.state.general_cat) {
         await store.sub.accounts.categorizeGeneral(trans.id, this.state.general_cat);
-      } else if (this.state.cats.length && !invalid_cats) {
-        await store.sub.accounts.categorize(trans.id, this.state.cats);
-      } else if (this.state.cats.length > 1 && invalid_cats) {
+      } else if (cats.length && !invalid_cats) {
+        await store.sub.accounts.categorize(trans.id, cats);
+      } else if (cats.length > 1 && invalid_cats) {
         makeToast(sss('Invalid categorization.  Categories not set.'), {className: 'warning'})
+      } else if (cats.length === 1 && invalid_cats) {
+        // Single invalid categorization
+        await store.sub.accounts.removeCategorization(trans.id, true);
       }
     }
   }
@@ -345,13 +351,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       // update
       const store = manager
       .checkpoint(sss('Update Transaction'))
+      const cats = this.state.cats;
       const trans = await store.sub.accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
         amount: this.state.amount,
         memo: this.state.memo,
         posted: this.state.posted,
       })
-      await this.alsoCategorize(store, trans);
+      await this.alsoCategorize(store, trans, cats);
       this.setState({
         editing: false,
       })
@@ -362,13 +369,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           const store = manager
           .checkpoint(sss('Create Transaction'))
 
+          const cats = this.state.cats;
           const trans = await store.sub.accounts.transact({
             account_id: this.state.account_id,
             amount: this.state.amount,
             memo: this.state.memo,
             posted: this.state.posted,
           })
-          await this.alsoCategorize(store, trans);
+          await this.alsoCategorize(store, trans, cats);
           if (this.state.general_cat === 'transfer' && this.state.transfer_account_id) {
             // Create a second, opposite transaction
             const xfer_trans = await store.sub.accounts.transact({
@@ -411,13 +419,13 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
     } else if (trans) {
       source_icon = <button
         title={trans.cleared
-          ? sss("Cleared")
-          : sss("Not yet cleared")}
-        className={cx("icon hover cleared-indicator", {
-          cleared: trans.cleared,
+          ? sss("Cleared"/* Tooltip text indicating that a transaction has cleared. */)
+          : sss("Not yet cleared"/* Tooltip text indicating that a transaction has not yet cleared. */)}
+        className={cx("icon hover green-check", {
+          on: trans.cleared,
         })}
         onClick={ev => {
-          let undo_note = trans.cleared ? sss('Mark Not Cleared') : sss('Mark Cleared');
+          let undo_note = trans.cleared ? sss('Mark Not Cleared'/* Name of action for marking a transaction as not having cleared the bank */) : sss('Mark Cleared'/* Name of action for marking a transaction as having cleared the bank */);
           manager.checkpoint(undo_note)
           .sub.accounts.updateTransaction(trans.id, {cleared: !trans.cleared})
         }}><span className="fa fa-check-circle"/></button>
@@ -509,7 +517,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               })
             }}>
             <option></option>
-            {appstate.open_accounts.map(account => {
+            {Object.values<Account>(appstate.accounts).map(account => {
               if (account.id === this.state.account_id) {
                 // Can't transfer to/from the same account
                 return null;

@@ -1,20 +1,20 @@
 import * as React from 'react'
 import * as cx from 'classnames'
-import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from '../../time'
+import { SerializedTimestamp, ensureLocalMoment, localNow, loadTS } from 'buckets-core/dist/time'
 import { remote, ipcRenderer } from 'electron'
-import { isObj, IStore } from '../../store'
-import { BankMacro } from '../../models/bankmacro'
-import { current_file } from '../../mainprocess/files'
+import { isObj, IStore } from 'buckets-core/dist/store'
+import { BankMacro } from 'buckets-core/dist/models/bankmacro'
+import { getCurrentFile } from '../../mainprocess/files'
 import { IS_DEBUG } from '../../mainprocess/globals'
 import { Renderer } from '../../budget/render'
 import { RecordingDirector, Recording, ChangeStep, TabRecStep, TimeoutError } from '../../recordlib'
-import { sss } from '../../i18n'
+import { sss, localizeThisPage } from '../../i18n'
 import { SafetySwitch } from '../../input'
-import { IncorrectPassword } from '../../error'
+import { IncorrectPassword } from '../../errors'
 import { makeToast, ToastDisplay } from '../../budget/toast'
 import { PrefixLogger } from '../../logging'
 import { Help } from '../../tooltip'
-import { SyncResult } from '../../sync'
+import { SyncResult } from 'buckets-core/dist/models/sync'
 
 const log = new PrefixLogger('(record)')
 
@@ -123,7 +123,7 @@ class Browser extends React.Component<BrowserProps, {
       throw new Error('Trying to set URL before webview exists');
     }
     if (!url.startsWith('http')) {
-      url = `https://${url}`
+      url = `http://${url}`
     }
     if (wv.getWebContents) {
       let wc = wv.getWebContents();
@@ -703,8 +703,10 @@ export async function start(args:{
       before: SerializedTimestamp,
     }
   }) {
+  await localizeThisPage();
   const renderer = new Renderer();
   
+  const current_file = getCurrentFile();
   let store = current_file.store;
   let BANKMACRO = await store.sub.bankmacro.get(args.macro_id);
   let recording:Recording = null
@@ -717,8 +719,8 @@ export async function start(args:{
   let i = 0;
   while (true) {
     try {
-      let plaintext = await store.sub.bankmacro.decryptRecording(BANKMACRO);
-      recording = plaintext.recording;
+      let { recording_str } = await store.sub.bankmacro.decryptRecording(BANKMACRO);
+      recording = Recording.parse(recording_str);
       break;
     } catch(err) {
       if (err instanceof IncorrectPassword) {
@@ -823,15 +825,15 @@ export async function start(args:{
           });
         }
       }}
-      onRecordingChange={(new_recording) => {
+      onRecordingChange={(new_recording:Recording) => {
         store.sub.bankmacro.update(args.macro_id, {
-          recording: new_recording,
+          recording_str: new_recording.stringify(),
         })
       }}
     />
   }, args.container);
   renderer.afterUpdate(() => {
-    let title = sss('EXPERIMENTAL Buckets Macro Maker');
+    let title = sss('EXPERIMENTAL Buckets Macro Maker'/* 'Buckets' refers to the application name */);
     if (BANKMACRO.name) {
       title = `${BANKMACRO.name} - ${title}`;
     }
@@ -847,9 +849,9 @@ export async function start(args:{
   //   renderer.doUpdate();
   // })
 
-  store.bus.obj.on(async (ev) => {
+  store.events.get('obj').on(async (ev) => {
     let obj = ev.obj;
-    if (isObj(BankMacro, obj) && obj.id === args.macro_id) {
+    if (isObj('bank_macro', obj) && obj.id === args.macro_id) {
       BANKMACRO = Object.assign(BANKMACRO, obj);
       renderer.doUpdate();
     }

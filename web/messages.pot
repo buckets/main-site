@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-04-23 12:27-0600\n"
+"POT-Creation-Date: 2018-06-26 11:06-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 
-#: buckets/web/anon.py:88
-msgid "Error generating license.  Your card was not charged."
-msgstr ""
-
-#: buckets/web/anon.py:97
-msgid "Buckets Budgeting App"
-msgstr ""
-
-#: buckets/web/anon.py:101
-msgid "We got your bitcoins."
-msgstr ""
-
-#: buckets/web/anon.py:103
-msgid "Your card was charged."
-msgstr ""
-
-#: buckets/web/anon.py:114
+#: buckets/web/anon.py:45
 msgid "Buckets v1 License"
 msgstr ""
 
-#: buckets/web/anon.py:115
+#: buckets/web/anon.py:46
 msgid ""
 "Thank you for purchasing Buckets!\n"
 "\n"
@@ -57,43 +41,95 @@ msgid ""
 "Happy budgeting!\n"
 "\n"
 "- Matt\n"
+"    "
 msgstr ""
 
-#: buckets/web/anon.py:135
+#: buckets/web/anon.py:66
 msgid ""
 "Error emailing license.  If you don't receive an email soon, please reach"
 " out to us."
+msgstr ""
+
+#: buckets/web/anon.py:79 buckets/web/anon.py:155
+msgid "Error generating license.  Your card was not charged."
+msgstr ""
+
+#: buckets/web/anon.py:88
+msgid "Buckets Budgeting App"
+msgstr ""
+
+#: buckets/web/anon.py:91
+msgid "Your card was charged."
+msgstr ""
+
+#: buckets/web/anon.py:146
+msgid ""
+"No email address provided.  Each license must be associated with an email"
+" address.  You were not charged."
+msgstr ""
+
+#: buckets/web/anon.py:161
+msgid "Payment received."
+msgstr ""
+
+#: buckets/web/anon.py:165
+msgid ""
+"Error finalizing payment.  I don't think you were charged, but please "
+"email to see."
 msgstr ""
 
 #: buckets/web/templates/base.html:4
 msgid "Private Family Budgeting App"
 msgstr ""
 
-#: buckets/web/templates/base.html:16
+#: buckets/web/templates/base.html:10
 msgid ""
 "Buckets is a private, personal finance app for family budgeting.  Track "
 "expenses, make savings goals, get out of debt all from the privacy of "
 "your own computer."
 msgstr ""
 
-#: buckets/web/templates/base.html:135
+#: buckets/web/templates/bought.html:33
+msgid "Thank you for purchasing Buckets!"
+msgstr ""
+
+#: buckets/web/templates/bought.html:35
 msgid ""
-"Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
-"Haggard</a>"
+"Below is your Buckets v1 License.  You should also receive an email with "
+"this information.  To use the license:"
 msgstr ""
 
-#: buckets/web/templates/anon/gettingstarted.html:3
-#: buckets/web/templates/anon/gettingstarted.html:9
-#: buckets/web/templates/base.html:143
-msgid "Getting Started"
+#: buckets/web/templates/bought.html:38
+msgid ""
+"Open the Buckets application (download at <a "
+"href=\"https://www.budgetwithbuckets.com\" "
+"target=\"_blank\">www.budgetwithbuckets.com</a>)"
 msgstr ""
 
-#: buckets/web/templates/base.html:144
-msgid "Pricing"
+#: buckets/web/templates/bought.html:39
+msgid "Click the \"Trial Version\" menu"
 msgstr ""
 
-#: buckets/web/templates/base.html:145
-msgid "Buy"
+#: buckets/web/templates/bought.html:40
+msgid "Click \"Enter License...\""
+msgstr ""
+
+#: buckets/web/templates/bought.html:41
+msgid "Copy and paste the following license into the box"
+msgstr ""
+
+#: buckets/web/templates/bought.html:42
+msgid "Click the button"
+msgstr ""
+
+#: buckets/web/templates/bought.html:48
+msgid ""
+"This license may be used on any number of computers belonging to you and "
+"your immediate family members living in your home."
+msgstr ""
+
+#: buckets/web/templates/bought.html:52
+msgid "Happy budgeting!"
 msgstr ""
 
 #: buckets/web/templates/err404.html:7
@@ -131,237 +167,11 @@ msgid ""
 " information in your email:"
 msgstr ""
 
-#: buckets/web/templates/navbar.html:7
+#: buckets/web/templates/navbar.html:5
 msgid "Guide"
 msgstr ""
 
-#: buckets/web/templates/navbar.html:8
+#: buckets/web/templates/navbar.html:6
 msgid "Blog"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:33
-msgid "Thank you for purchasing Buckets!"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:35
-msgid ""
-"Below is your Buckets v1 License.  You should also receive an email with "
-"this information.  To use the license:"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:38
-msgid ""
-"Open the Buckets application (download at <a "
-"href=\"https://www.budgetwithbuckets.com\" "
-"target=\"_blank\">www.budgetwithbuckets.com</a>)"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:39
-msgid "Click the \"Trial Version\" menu"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:40
-msgid "Click \"Enter License...\""
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:41
-msgid "Copy and paste the following license into the box"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:42
-msgid "Click the button"
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:48
-msgid ""
-"This license may be used on any number of computers belonging to you and "
-"your immediate family members living in your home."
-msgstr ""
-
-#: buckets/web/templates/anon/bought.html:52
-msgid "Happy budgeting!"
-msgstr ""
-
-#: buckets/web/templates/anon/buy.html:3
-msgid "Buy Buckets"
-msgstr ""
-
-#: buckets/web/templates/anon/buy.html:25
-msgid "Purchase License"
-msgstr ""
-
-#: buckets/web/templates/anon/buy.html:26
-msgid "Family budgeting app"
-msgstr ""
-
-#: buckets/web/templates/anon/buy.html:39
-msgid ""
-"For a <em>one-time $29 payment,</em> you will be emailed a Buckets "
-"License which may be used on any number of computers belonging to you and"
-" your immediate family members living in your home."
-msgstr ""
-
-#: buckets/web/templates/anon/buy.html:42
-msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
-msgstr ""
-
-#: buckets/web/templates/anon/gettingstarted.html:11
-msgid ""
-"Check out these 1-2 minute videos to help you get started budgeting with "
-"Buckets:"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:12
-msgid ""
-"Buckets provides you with private, beautiful budgeting that you'll stick "
-"with.  Pull yourself out of debt and achieve financial goals you didn't "
-"think were in reach."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:117
-msgid ""
-"Buckets makes budgeting <em>fast</em>, <em>simple</em> and "
-"<em>private.</em>"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:122
-#, python-format
-msgid "Download Buckets v%(latest_version)s for"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:126
-msgid "macOS"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:132
-msgid "Windows"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:138
-msgid "Linux"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:142
-msgid "Other"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:152
-msgid "Buy $29"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:156
-msgid ""
-"Buckets gives you an <em>untimed, free trial</em> for as long as you need"
-" to decide if it works for you.  Really."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:160
-msgid "Buckets is <em>private</em>."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:160
-msgid "Your finances stay on your computer.  You control your data again!"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:164
-msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:164
-msgid "You're saving money, not shackling yourself to another monthly service."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:164
-msgid ""
-"A single license may be used on all your computers and all the computers "
-"of family members living in your home."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:168
-msgid "Buckets has <em>amazing support.</em>"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:168
-msgid ""
-"I'll listen to your ideas, help you with the app and gladly answer "
-"questions, no matter how small."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:168
-msgid ""
-"I'm serious.  Click that chat bubble and tell me what you ate for dinner "
-"last night."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:172
-msgid ""
-"Buckets includes some free and novel methods to <em>sync with your "
-"bank.</em>"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:172
-msgid ""
-"Record completely private macros, import files or sign up with SimpleFIN "
-"Bridge."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:176
-msgid ""
-"Buckets includes some terrific <em>extras</em> such as really fast Amazon"
-" why-do-they-split-every-purchase-into-a-hundred-transactions "
-"reconciliation."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:182
-#, python-format
-msgid ""
-"Buckets includes <em>helpful videos</em> to teach you how to budget like "
-"a master.  <a href=\"%(href)s\">Check them out!</a>"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:187
-msgid "Thanks"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:192
-msgid "Buckets is <em>multilingual</em>."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:192
-msgid "Currently available languages:"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:199
-msgid "Want to add your language?"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:205
-msgid ""
-"Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
-"haul."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:205
-msgid "Read more."
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:209
-msgid "<a href=\"#download\">Download it now</a> for free!"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:250
-msgid "Subscribe to the Monthly Newsletter"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:252
-msgid "Email Address"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:256
-msgid "First Name"
-msgstr ""
-
-#: buckets/web/templates/anon/index.html:264
-msgid "Subscribe"
 msgstr ""
 

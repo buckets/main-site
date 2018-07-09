@@ -1,6 +1,6 @@
 import * as ReactDOM from 'react-dom'
 import * as _ from 'lodash'
-import { EventSource } from 'buckets-core'
+import { EventSource } from '@iffycan/events'
 import { tx } from '../i18n'
 
 function ensureFunction<T>(x:T|(()=>T)):()=>T {

@@ -1,14 +1,7 @@
 <div class="buckets-nav">
-  <div class="buckets-nav-inner">
-    <div class="buckets-nav-left">
-      <a class="logo" href="{{ url_for('anon.index') }}">
-        <img src="/static/favicon.png" />
-      </a>
-      <a href="https://docs.budgetwithbuckets.com">{% trans %}Guide{% endtrans %}</a>
-      <a href="https://blog.budgetwithbuckets.com">{% trans %}Blog{% endtrans %}</a>
-    </div>
-    <div class="buckets-nav-right">
-      
-    </div>
-  </div>
+  <a class="logo" href="{{config.STATIC_SITE_URL}}/{{ g.lang_code }}/">
+    <img src="/static/favicon.png" />
+  </a>
+  <a href="https://docs.budgetwithbuckets.com">{% trans %}Guide{% endtrans %}</a>
+  <a href="https://blog.budgetwithbuckets.com">{% trans %}Blog{% endtrans %}</a>
 </div>

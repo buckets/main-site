@@ -12,7 +12,6 @@ import { openBugReporter } from '../errors'
 import { openUpdateWindow } from './updater'
 import { openPreferences } from './prefs'
 import { IS_DEBUG } from './globals'
-import { findYNAB4FileAndImport } from '../ynab'
 import { openDocs } from '../docs'
 
 export async function updateMenu(args:{
@@ -80,9 +79,9 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            budgetfile.doUndo();
+            budgetfile.store.doUndo();
           } else {
-            // do the default action
+            // do the default electron action
             win.webContents.undo();
           }
         }
@@ -95,9 +94,9 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            budgetfile.doRedo();
+            budgetfile.store.doRedo();
           } else {
-            // do the default action
+            // do the default electron action
             win.webContents.redo();
           }
         }
@@ -136,14 +135,14 @@ export async function updateMenu(args:{
         }
       },
       {
-        label: sss('Find Next'),
+        label: sss('Find Next'/* Edit menu label for finding the next match.  Perhaps use what your browser or other applications use. */),
         accelerator: 'CmdOrCtrl+G',
         click() {
           findNext();
         }
       },
       {
-        label: sss('Find Previous'),
+        label: sss('Find Previous'/* Edit menu label for finding the previous match.  Perhaps use what your browser or other applications use. */),
         accelerator: 'CmdOrCtrl+Shift+G',
         click() {
           findPrev();
@@ -205,6 +204,22 @@ export async function updateMenu(args:{
     label: sss('Budget'),
     submenu: [
       {
+        label: sss('Go To...'/* Submenu title for navigation shortcuts */),
+        submenu: [
+          {
+            label: sss('go-to-this-month', 'This Month'/* Menu item for "Go To... This Month"*/),
+            accelerator: 'CmdOrCtrl+T',
+            click() {
+              let win = BrowserWindow.getFocusedWindow();
+              let budgetfile = BudgetFile.fromWindowId(win.id);
+              if (budgetfile) {
+                win.webContents.send('buckets:goto-today');
+              }
+            },
+          }
+        ],
+      },
+      {
         label: sss('Duplicate Window'),
         id: 'only4budgets duplicate',
         accelerator: 'CmdOrCtrl+N',
@@ -230,7 +245,7 @@ export async function updateMenu(args:{
           let win = BrowserWindow.getFocusedWindow();
           let budgetfile = BudgetFile.fromWindowId(win.id);
           if (budgetfile) {
-            findYNAB4FileAndImport(budgetfile, budgetfile.store);
+            budgetfile.store.ui.promptToStartYNABImport();
             win.webContents.send('buckets:goto', '/tools/ynabimport');
           }
         }
@@ -254,7 +269,7 @@ export async function updateMenu(args:{
         }
       },
       {
-        label: sss('Buckets Guide'),
+        label: sss('Buckets Guide'/* 'Buckets' refers to the application name. */),
         click() {
           openDocs();
         }
@@ -318,7 +333,7 @@ export async function updateMenu(args:{
   let preMenus = [];
 
   const about = {
-    label: sss('About Buckets'),
+    label: sss('About Buckets'/* 'Buckets' refers to the application name */),
     click() {
       openUpdateWindow();
     }
@@ -359,7 +374,7 @@ export async function updateMenu(args:{
         {type: 'separator'},
         {
           role: 'hide',
-          label: sss('Hide Buckets'),
+          label: sss('Hide Buckets'/* 'Buckets' refers to the application name. */),
         },
         {
           role: 'hideothers',

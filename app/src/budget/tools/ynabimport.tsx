@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { sss } from '../../i18n'
 import { AppState, manager } from '../appstate'
-import { LeftoverTrans } from '../../ynab'
-import { current_file } from '../../mainprocess/files'
+import { LeftoverTrans } from 'buckets-core/dist/models/ynab'
 import { ProgressBar } from '../../ui'
 
 import { TransactionList } from '../transactions'
@@ -33,7 +32,7 @@ export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImp
   }
   componentDidMount() {
     this.refreshLeftovers();
-    current_file.room.events('ynab_import_progress').onceSuccessfully(message => {
+    manager.nocheckpoint.events.get('ynab_import_progress').untilTrue(message => {
       if (message.error) {
         this.refreshLeftovers();
         return true;
@@ -65,7 +64,7 @@ export class YNABImportPage extends React.Component<YNABImportPageProps, YNABImp
     return <div className="padded full-width">
       <h1><span className="fa fa-upload"/> {sss('Import from YNAB4')}</h1>
       <button onClick={() => {
-        current_file.importYNAB4File();
+        manager.nocheckpoint.ui.promptToStartYNABImport();
       }}>
         <span className="fa fa-upload"/> {sss('Import file')}
       </button> {this.state.progress === null

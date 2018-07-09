@@ -2,12 +2,6 @@
 <html>
 <head>
   <title>{% block title %}Buckets - {% trans %}Private Family Budgeting App{% endtrans %}{% endblock %}</title>
-  
-  {%- if request.endpoint not in ['static'] %}
-  {% for loc in all_locales -%}
-  <link rel="alternate" hreflang="{{ loc.language }}" href="{{ url_for(request.endpoint, lang_code=loc.language) }}" />
-  {% endfor -%}
-  {% endif -%}
 
   <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
@@ -76,44 +70,11 @@
     color: red;
     border-color: red;
   }
-  .callout {
-    font-size: 1.25rem;
-    line-height: 2rem;
-  }
-  .callout em {
-    color: rgba(26, 188, 156,1.0);
-    font-size: 1.75rem;
-    font-style: normal;
-    font-weight: bold;
-  }
-  .callout.para {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  footer {
-    display: flex;
-    border: 1px solid lightgrey;
-    border-width: 1px 0 0;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    margin-bottom: 5rem;
-  }
-  footer > div {
-    flex-basis: 50%;
-    padding: 1rem 0;
-    text-align: left;
-    line-height: 1.5rem;
-  }
   </style>
   <script src="/static/js/vend/raven-2.3.0.min.js"></script>
 </head>
 <body>
   {% include 'navbar.html' %}
-  {% block header %}
-  <div class="hero mini">
-    <a href="{{ url_for('anon.index') }}"><img src="/static/img/logo.svg" border="0"/></a>
-  </div>
-  {% endblock %}
 
   <div class="flashes">
   {% with messages = get_flashed_messages(with_categories=True) %}
@@ -128,36 +89,6 @@
   </div>
 
   {% block content %}{% endblock %}
-
-  <div class="wrap">
-    <footer>
-      <div>
-        <div>{% trans %}Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>{% endtrans %}
-        </div>
-        <div><a href="mailto:hello@budgetwithbuckets.com">hello@budgetwithbuckets.com</a>
-        </div>
-        <div><a href="https://www.paypal.me/onepartrain/5" target="_blank">Donate</a></div>
-        <div>&copy; One Part Rain, LLC.</div>
-      </div>
-      <div>
-        <div><a href="{{ url_for('anon.gettingstarted') }}">{% trans %}Getting Started{% endtrans %}</a></div>
-        <div><a href="{{ url_for('anon.buy') }}">{% trans %}Pricing{% endtrans %}</a></div>
-        <div><a href="{{ url_for('anon.buy') }}">{% trans %}Buy{% endtrans %}</a></div>
-        {%- if request.endpoint not in ['static'] -%}
-        <div>
-          <details>
-            <summary>{{ locale.display_name }}</summary>
-            {% for loc in all_locales %}
-            <div>
-              <a href="{{ url_for(request.endpoint, lang_code=loc.language) }}">{{ loc.display_name }}</a>
-            </div>
-            {%- endfor -%}
-          </details>
-        </div>
-        {%- endif -%}
-      </div>
-    </footer>
-  </div>
 
   {% block chat %}
   <!--Start of Tawk.to Script-->

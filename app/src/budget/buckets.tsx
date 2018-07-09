@@ -4,21 +4,22 @@ import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
 import * as Color from 'color'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
-import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from '../models/bucket'
-import { ts2utcdb, DateDisplay, parseUTCTime, localNow, makeLocalDate, PerMonth } from '../time'
-import {Balances} from '../models/balances'
+import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from 'buckets-core/dist/models/bucket'
+import { ts2utcdb, parseUTCTime, localNow, makeLocalDate, parseLocalTime } from 'buckets-core/dist/time'
+import {Balances} from 'buckets-core/dist/models/balances'
 import { Money, MoneyInput, cents2decimal } from '../money'
 import { onKeys, MonthSelector, ClickToEdit, SafetySwitch, DebouncedInput } from '../input'
 import { manager, AppState } from './appstate'
-import { ColorPicker, COLORS } from '../color'
+import { ColorPicker } from '../color'
+import { COLORS } from 'buckets-core/dist/color'
 import { makeToast } from './toast'
 import { pageY } from '../position'
 import { Help } from '../tooltip'
 import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
-import { isNil, isDifferent } from '../util'
+import { isNil, isDifferent } from 'buckets-core/dist/util'
 import { NoteMaker } from './notes'
-import { parseLocalTime } from '../time'
+import { DateDisplay, PerMonth } from '../time'
 import { createTemplateBucketSet } from './gettingstarted'
 import { ProgressBar } from '../ui'
 
@@ -48,9 +49,9 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
           <td>{bucket.name}</td>
           <td><button onClick={() => {
             manager
-            .checkpoint(sss('Un-kick Bucket'))
+            .checkpoint(sss('Un-kick Bucket'/* Name of action for undo/redo labels (i.e. Control-Z will "Undo Un-kick Bucket") Consider this the opposite of "Archive Bucket" */))
             .sub.buckets.unkick(bucket.id);
-          }}>{sss('Un-kick')}</button></td>
+          }}>{sss('Un-kick'/* Button label for unarchiving a bucket */)}</button></td>
           <td>
             <Link relative to={`../${bucket.id}`} className="subtle">{sss('more')}</Link>
           </td>
@@ -142,7 +143,7 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
       if (total > 0 && total > appstate.rain) {
         doPendingButton = <SafetySwitch
           onClick={this.doPending}
-        >{sss('Make it so')}</SafetySwitch>
+        >{sss('Make it so'/* Button label for causing the set of pending deposits/withdrawls to happen.  Synonyms could be: "Do it" or "Run" or "Go" */)}</SafetySwitch>
         warning = <Help className="right" icon={<span className="error fa fa-exclamation-triangle" />}>{sss("Warning: Doing this will use rain you don't have and could steal rain from future months (if available).")}</Help>
       } else {
         doPendingButton = <button className="primary" onClick={this.doPending}>{sss('Make it so')}</button>;  
@@ -672,11 +673,14 @@ class BucketRow extends React.Component<BucketRowProps, {
             Enter: () => {
               this.doPending();
             },
+            Escape: () => {
+              onPendingChanged({[bucket.id]: undefined});
+            },
             ArrowUp: () => {
-              console.log('up');
+              // console.log('up');
             },
             ArrowDown: () => {
-              console.log('down');
+              // console.log('down');
             },
           })}
         />
@@ -702,6 +706,18 @@ class BucketRow extends React.Component<BucketRowProps, {
             bucket={bucket}
             balance={balance}
             posting_date={posting_date} /></td>
+      <td x-name="delete" className="icon-button-wrap">
+        <SafetySwitch
+          className="icon grey show-on-row-hover"
+          onClick={ev => {
+            manager
+            .checkpoint(sss('Kick Bucket'))
+            .sub.buckets.kick(bucket.id);
+          }}
+        >
+          <span className="fa fa-trash" />
+        </SafetySwitch>
+      </td>
       <td x-name="more">
         <Link relative to={`/${bucket.id}`} className="subtle"><span className="fa fa-ellipsis-h"></span></Link>
       </td>
@@ -819,11 +835,12 @@ class GroupRow extends React.Component<{
           <th x-name="color/note"></th>
           <th x-name="name"></th>
           <th x-name="balance" className="right">{sss('Balance')}</th>
-          <th x-name="in/out" className="center"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
+          <th x-name="in/out" className="left"><Help icon={sss('In/Out')}><span>{sss('bucketinout.help', 'Use this to put money in and take money out of each bucket.')}</span></Help></th>
           <th x-name="want" className="right nobr"><Help icon={sss('Want')}><span>{sss('bucketrain.help', 'This is how much money these buckets want each month.  The little box indicates how much they have received.')}</span></Help></th>
-          <th x-name="in" className="center nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
-          <th x-name="activity" className="center nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
+          <th x-name="in" className="right nobr"><Help icon={sss("In")}><span>{sss('buckethead.in', 'Amount of money put in this month.')}</span></Help></th>
+          <th x-name="activity" className="right nobr"><Help icon={sss("Activity")}><span>{sss('bucketactivity.help', 'This is the sum of money taken out of this bucket and transfers in from other buckets this month.')}</span></Help></th>
           <th x-name="details">{sss('bucket.detailslabel', 'Details')}</th>
+          <th x-name="delete"></th>
           <th x-name="more"></th>
         </tr>
       <tr className="group-row icon-hover-trigger">
@@ -877,8 +894,8 @@ class GroupRow extends React.Component<{
         </td>
         <td x-name="details">
         </td>
-        <td x-name="more">
-          <SafetySwitch
+        <td x-name="delete" className="icon-button-wrap">
+          {group.id === NOGROUP ? null : <SafetySwitch
             className="icon grey show-on-row-hover"
             onClick={ev => {
               manager
@@ -887,8 +904,9 @@ class GroupRow extends React.Component<{
             }}
           >
             <span className="fa fa-trash" />
-          </SafetySwitch>
+          </SafetySwitch>}
         </td>
+        <td x-name="more"></td>
       </tr>
       {bucket_rows}
     </tbody>);
@@ -1058,7 +1076,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
       kick_button = <button
         onClick={() => {
           manager
-          .checkpoint(sss('Un-kick Bucket'))
+          .checkpoint(sss('Un-kick Bucket'/* Name of action.  Consider this "Unarchive Bucket" */))
           .sub.buckets.unkick(bucket.id);
         }}>{sss('Un-kick')}</button>
     } else {
@@ -1066,7 +1084,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
         className="delete"
         onClick={() => {
           manager
-          .checkpoint(sss('Kick Bucket'))
+          .checkpoint(sss('Kick Bucket'/* Name of action.  Consider this "Archive Bucket" */))
           .sub.buckets.kick(bucket.id)
           .then(new_bucket => {
             if (!new_bucket.kicked) {
@@ -1074,7 +1092,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
               makeToast(sss('Bucket deleted completely'));
             }
           })
-        }}>{sss('Kick the bucket')}</button>
+        }}>{sss('Kick the bucket'/* Button label for archiving a bucket */)}</button>
     }
 
     let chart;
@@ -1241,7 +1259,7 @@ class TransactionList extends React.Component<TransactionListProps, TransactionL
           <th className="right">{sss('Amount')}</th>
           {ending_balance === null ? null : <th className="right">{sss('Balance')}</th> }
           <th className="nobr">{sss('noun.transfer', 'Transfer')} <Help>{sss('bucket.transfer.help', "A transfer is a transaction from one bucket to another.  If the transaction isn't income or an expense, it's likely a transfer.")}</Help></th>
-          <th>{sss('Misc')}</th>
+          <th>{sss('Account')}</th>
         </tr>
       </thead>
       <tbody>

@@ -81,12 +81,7 @@ setTimeout(() => {
     document.body.classList.add('os-linux');
   }
 
-  const qs = querystring.parse(window.location.search.substr(1));
-  const args = JSON.parse(qs.args);
-
-  start(document.getElementById('root'), hostname, {
-    noanimation: args.noanimation,
-  })
+  start(document.getElementById('root'), hostname)
   .then(() => {
     loading.classList.add('off');
     setTimeout(() => {

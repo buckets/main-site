@@ -1,7 +1,7 @@
 import { test } from 'tap'
 import { ofx2importable } from './ofx'
 import * as moment from 'moment-timezone'
-import { loadTS } from './time'
+import { loadTS } from 'buckets-core/dist/time'
 
 
 test('sample1', async t => {

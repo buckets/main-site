@@ -1,23 +1,7 @@
 import * as math from 'mathjs';
-
-
-export let seps = {
-  group: null,
-  decimal: null,
-  group_regex: null,
-  decimal_regex: null,
-}
-
-export function setSeparators(group:string, group_regex:RegExp, decimal:string, decimal_regex:RegExp) {
-  seps.group = group;
-  seps.decimal = decimal;
-  seps.group_regex = group_regex;
-  seps.decimal_regex = decimal_regex;
-}
-setSeparators(',', /,/g, '.', /\./g);
-
-// pt
-// setSeparators('.', /\./g, ',', /,/g);
+import { CONTEXT, ISeps } from '@iffycan/i18n'
+// import { PrefixLogger } from './logging'
+// const log = new PrefixLogger('(money)');
 
 math.config({
   number: 'BigNumber',
@@ -27,11 +11,11 @@ export function fancyEval(x:string) {
   // convert from whatever locale it's in to en_us
   // without thousand seps
   x = x
-    .replace(seps.group_regex, '')
-    .replace(seps.decimal_regex, '.');
+    .replace(CONTEXT.number_seps.group_regex, '')
+    .replace(CONTEXT.number_seps.decimal_regex, '.');
   return math.eval(x)
     .toString()
-    .replace(/\./g, seps.decimal);
+    .replace(/\./g, CONTEXT.number_seps.decimal);
 }
 
 
@@ -87,7 +71,7 @@ export function cents2decimal(cents:number|null|string, args:{
       parts.push(d);
     }
     parts.reverse();
-    stem = parts.join(seps.group);
+    stem = parts.join(CONTEXT.number_seps.group);
   }
 
   // After decimal
@@ -98,12 +82,15 @@ export function cents2decimal(cents:number|null|string, args:{
     if (suffix.length < 2) {
       suffix = '0' + suffix;
     }
-    suffix = seps.decimal + suffix;
+    suffix = CONTEXT.number_seps.decimal + suffix;
   }
   return sign + stem + suffix;
 }
 
-export function decimal2cents(string:string):number {
+export function decimal2cents(string:string, opts:{
+  seps?: Partial<ISeps>
+}={}):number {
+  const seps:ISeps = Object.assign({}, CONTEXT.number_seps, opts.seps || {});
   string = string.trim();
 
   var negative = false;

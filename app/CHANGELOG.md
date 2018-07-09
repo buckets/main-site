@@ -1,4 +1,147 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.48.0 - 9 Jul 2018
+
+- **NEW:** You can now kick buckets right from the buckets list view. ([#225](https://github.com/buckets/application/issues/225))
+
+- **FIX:** Possible duplicate transaction detection is now limited to transactions that have nearby dates and is expanded to look for transactions in adjacent months.  ([#261](https://github.com/buckets/application/issues/261))
+
+## v0.47.0 - 2 Jul 2018
+
+- **NEW:** Added a calculator for doing quick calculations.  ([#255](https://github.com/buckets/application/issues/255))
+
+- **NEW:** You can now see the cleared balance and uncleared total on individual accounts.  ([#194](https://github.com/buckets/application/issues/194))
+
+- **NEW:** You can now dismiss notifications if they are covering up some things you want to see.  ([#223](https://github.com/buckets/application/issues/223))
+
+- **NEW:** Pressing escape while focused on the Buckets In/Out field will clear the selected field now.  ([#241](https://github.com/buckets/application/issues/241))
+
+- **NEW:** Added a new 'Go To This Month' menu option and shortcut key.  ([#246](https://github.com/buckets/application/issues/246))
+
+- **NEW:** Individual account views now include the amount in/out for that account for the current month.  ([#216](https://github.com/buckets/application/issues/216))
+
+- **NEW:** Now available in Polski, thanks to Piotr Bielaska!
+
+- **FIX:** Amazon reconciliation is much easier to use now.  ([#124](https://github.com/buckets/application/issues/124))
+
+- **FIX:** Fixed bug where budget failed to load after error. ([#253](https://github.com/buckets/application/issues/253))
+
+- **FIX:** Fixed the situation where sometimes the update available window would get covered up by the last opened budget window.  ([#177](https://github.com/buckets/application/issues/177))
+
+- It's now a little more clear how (Budget Specific) Settings differ from (Application) Preferences.
+
+- Clearly indicated to translators which instances of *Buckets* refers to the application rather than buckets within the program.  ([#173](https://github.com/buckets/application/issues/173))
+
+## v0.46.2 - 27 Jun 2018
+
+- **FIX:** Fix missing locale bug ([#252](https://github.com/buckets/application/issues/252))
+
+## v0.46.1 - 26 Jun 2018
+
+- **FIX:** Renamed bucket transaction "Misc" column to "Account" ([#245](https://github.com/buckets/application/issues/245))
+
+- **FIX:** Fixed bug that prevented removing categories while editing a transaction ([#239](https://github.com/buckets/application/issues/239))
+
+## v0.46.0 - 25 Jun 2018
+
+- **NEW:** Now available in Deutsch!
+
+- **FIX:** Added more verbose logging for Linux file read/write issues, including a message to instruct the user about how to possibly fix the problem. ([#224](https://github.com/buckets/application/issues/224))
+
+- **FIX:** Override number format set in Preferences is now honored ([#237](https://github.com/buckets/application/issues/237))
+
+- Massive code refactoring to get ready for the mobile app.
+
+- Added a little more context for translators.  ([#234](https://github.com/buckets/application/issues/234))
+
+## v0.45.0 - 18 Jun 2018
+
+- **NEW:** Added a preference for getting Beta releases of Buckets.
+
+- **FIX:** You can now negate values when importing from CSV files.  This allows you to handle banks that list both debits and credits as positive values.  ([#222](https://github.com/buckets/application/issues/222))
+
+## v0.44.2 - 4 Jun 2018
+
+- **NEW:** When you create a new account, the account's details are shown ([#176](https://github.com/buckets/application/issues/176))
+
+- **FIX:** Fix the bug where a category is removed when editing a transaction in the account view.  ([#217](https://github.com/buckets/application/issues/217))
+
+- **FIX:** Exclude off-budget accounts from analysis ending balance field.  Don't worry, there will be more reports later that include off-budget accounts :) ([#220](https://github.com/buckets/application/issues/220))
+
+- **FIX:** [afcu.com-209 4cf27da] Fixed bank macro bug where a bank's short HTTP-only domain did not properly redirect to the full HTTPS domain.  ([#209](https://github.com/buckets/application/issues/209))
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+- **FIX:** You can now transfer to/from off-budget accounts when making transactions.  ([#213](https://github.com/buckets/application/issues/213))
+
+- **FIX:** Prevent accidentally opening the same file twice (as with a double click) from the starting file-chooser pane ([#211](https://github.com/buckets/application/issues/211))
+
+- **FIX:** You can now unlink accounts from import files so that the next time you import a file for that account, you will be prompted to choose which account the file belongs to.  ([#210](https://github.com/buckets/application/issues/210))
+
+- Internal refactorings to get ready for mobile app
+
+## v0.44.1 - 25 May 2018
+
+- **FIX:** Fix analysis reports so that they no longer include off-budget accounts.  There will be other reports for off-budget accounts.  ([#206](https://github.com/buckets/application/issues/206))
+
+- **FIX:** Handle non-unicode CSV files.  ([#202](https://github.com/buckets/application/issues/202))
+
+- **FIX:** Potential fix for update error on start on Ubuntu ([#207](https://github.com/buckets/application/issues/207))
+
+## v0.44.0 - 10 May 2018
+
+- **NEW:** Buckets is now signed for macOS and Windows!  This means you shouldn't get as many warnings when trying to install it.  ([#150](https://github.com/buckets/application/issues/150))
+
+- **FIX:** Indicate that you might have to download the new version manually ([#203](https://github.com/buckets/application/issues/203))
+
+- Switched out sqlite for sqlite3-offline ([#183](https://github.com/buckets/application/issues/183))
+
+## v0.43.1 - 8 May 2018
+
+- **FIX:** Fix bug preventing the remapping of CSV files ([#199](https://github.com/buckets/application/issues/199))
+
+- **FIX:** Fix for bug with CSV importing where numbers were multiplied by 100 because the chosen language's default number format was not honored. ([#200](https://github.com/buckets/application/issues/200))
+
+## v0.43.0 - 7 May 2018
+
+- **NEW:** You can now choose a currency symbol to be displayed with the top summary numbers.  Go to the new *Settings* tab (look on the bottom left corner) and type in your favorite symbol. ([#107](https://github.com/buckets/application/issues/107))
+
+- **FIX:** Fixed alignment on Buckets table headings.  ([#193](https://github.com/buckets/application/issues/193))
+
+- **FIX:** Fix CSV import bug ([#190](https://github.com/buckets/application/issues/190))
+
+- **FIX:** Dates are properly formatted according to your chosen locale again.  ([#186](https://github.com/buckets/application/issues/186))
+
+- **FIX:** "Save X by depositing Z/mo" buckets no longer keep wanting after the goal has been reached ([#192](https://github.com/buckets/application/issues/192))
+
+- **FIX:** When launching from the command line, look for custom BUCKETS_LANG environment variable instead of LANG.
+
+- **FIX:** Fix no-internet false positive error ([#195](https://github.com/buckets/application/issues/195))
+
+- **FIX:** The Recurring Expenses month slider is no longer impossible to use ([#188](https://github.com/buckets/application/issues/188))
+
+- **FIX:** Fix Starting over bug when you want to delete everything, including buckets ([#191](https://github.com/buckets/application/issues/191))
+
+## v0.42.0
+
+- **NEW:** Transactions can now be marked as cleared or not. ([#172](https://github.com/buckets/application/issues/172))
+
+- **NEW:** CSV importing supports CSVs where the postive/negative amount is broken out into a column separate from the amount.  ([#185](https://github.com/buckets/application/issues/185))
+
+- **NEW:** Now translated into Nederlands!
+
+- **FIX:** Fixed CSV parsing bug with Amazon Reconiler ([#178](https://github.com/buckets/application/issues/178))
+
+- **FIX:** You can now import CSV files that don't have a header row ([#119](https://github.com/buckets/application/issues/119))
+
+- **FIX:** CSV import supports amounts that use commas for decimal points.  ([#184](https://github.com/buckets/application/issues/184))
+
+- **FIX:** Fix date picker problem with macOS High Sierra ([#112](https://github.com/buckets/application/issues/112))
+
+- **FIX:** Removed 'Chat' as an option when an error occurs.
+
+- **FIX:** Semicolon-delimited CSVs (so SSV?) are now supported.  ([#181](https://github.com/buckets/application/issues/181))
+
+- **FIX:** You can now set the timezone in Preferences in case Buckets detects your timezone incorrectly.
+
 ## v0.41.0
 
 - **NEW:** You can now click on a bucket's want to fill in the remaining amount.  ([#ZFU7DkdT](https://trello.com/c/ZFU7DkdT))

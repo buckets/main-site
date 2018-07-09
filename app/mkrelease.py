@@ -102,6 +102,27 @@ def abort():
 @click.option('--skip-win', is_flag=True)
 @click.option('--no-publish', is_flag=True)
 def doit(no_publish, skip_mac, skip_linux, skip_win):
+    # make sure the repo is not dirty
+    stdout = subprocess.check_output(['git', 'status', '--short']).strip()
+    if stdout:
+        print(stdout)
+        raise Exception("Uncommitted changes")
+
+    if yesno('Export translations?', default=True):
+        subprocess.check_call(['dev/update_translations.sh'])
+        subprocess.check_call(['dev/export_translations.sh'])
+        try:
+            subprocess.check_call(['git', 'add', 'src/langs'])
+            subprocess.check_call(['git', 'commit', '-m', 'Update translation strings'])
+        except:
+            # nothing to commit
+            pass
+
+    # run tests?
+    if yesno('Run tests?', default=True):
+        subprocess.check_call(['yarn', 'test'], cwd='.')
+        subprocess.check_call(['yarn', 'test'], cwd='../core')
+
     # choose version
     package_version = getPackageVersion()
     guess_target_version = package_version
@@ -156,13 +177,15 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
     print('Opening the app for testing...')
     subprocess.check_call(['open', 'dist/mac/Buckets.app'], env={})
 
-    if not yesno('Can you create a new budget?'):
+    if not yesno("Can you submit a bug report? (I'll ask at the end if you received it)"):
         abort()
-    if not yesno('Can you submit a bug report?'):
+    if not yesno('Can you create a new budget?'):
         abort()
     if not yesno('Can you open your own budget?'):
         abort()
     if not yesno('Can you open the application on Windows?'):
+        abort()
+    if not yesno('Did you receive the bug report?'):
         abort()
 
     # Manually publish it
@@ -189,18 +212,31 @@ def doit(no_publish, skip_mac, skip_linux, skip_win):
             github.closeIssue(issue_number)
 
     # publish CHANGELOG
-    if yesno('Publish CHANGELOG.md to https://github.com/buckets/application?', default=True):
-        github_dir = os.path.abspath('../../buckets-application')
-        subprocess.check_call(['git', 'fetch', 'origin'], cwd=github_dir)
-        subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
-        subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
-        subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
-        subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
-        subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
+    print('Publishing CHANGELOG.md')
+    github_dir = os.path.abspath('../../buckets-application')
+    subprocess.check_call(['git', 'fetch', 'origin'], cwd=github_dir)
+    subprocess.check_call(['git', 'merge', 'origin/master'], cwd=github_dir)
+    subprocess.check_call(['cp', 'CHANGELOG.md', github_dir])
+    subprocess.check_call(['git', 'add', 'CHANGELOG.md'], cwd=github_dir)
+    subprocess.check_call(['git', 'commit', '-m', 'Updated CHANGELOG.md for v{0}'.format(target_version)], cwd=github_dir)
+    subprocess.check_call(['git', 'push', 'origin', 'master'], cwd=github_dir)
 
     # push to origin
-    if yesno('Push to origin?', default=True):
-        subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
+    print('Pushing to origin')
+    subprocess.check_call(['git', 'push', 'origin', 'master', '--tags'])
+
+    # publish new static site
+    if yesno('Publish main static site? (to update the version, mostly)', default=True):
+        subprocess.check_call(['python', 'build.py'], cwd='../staticweb')
+        subprocess.check_call(['git', 'add', '_site'], cwd='../staticweb')
+        do_push = False
+        try:
+            subprocess.check_call(['git', 'commit', '-m', 'Update static site'], cwd='../staticweb')
+            do_push = True
+        except:
+            pass
+        if do_push:
+            subprocess.check_call(['bash', 'deploy2github.sh'], cwd='../staticweb')
 
 
 if __name__ == '__main__':

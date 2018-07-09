@@ -43,7 +43,7 @@ r = requests.patch('https://api.github.com/repos/buckets/application/releases/{0
         'name': latest_release['name'],
         'body': block,
         'draft': True,
-        'prerelease': False,
+        'prerelease': True,
     }), auth=(GH_USER, GH_TOKEN))
 if not r.ok:
     raise Exception(r.text)

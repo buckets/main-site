@@ -1,7 +1,7 @@
 import * as _ from 'lodash'
 import * as moment from 'moment-timezone'
 import { parse as parseOFX } from 'ofx-js'
-import { dumpTS } from './time'
+import { dumpTS } from 'buckets-core/dist/time'
 import { decimal2cents } from './money'
 import { ImportableTrans, ImportableAccountSet } from './importing'
 import { PrefixLogger } from './logging'

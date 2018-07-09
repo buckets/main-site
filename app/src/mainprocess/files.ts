@@ -2,29 +2,27 @@ import * as Path from 'path'
 import * as URL from 'url';
 import * as electron_is from 'electron-is'
 import * as fs from 'fs-extra-promise'
-import * as tmp from 'tmp'
-import * as querystring from 'querystring'
-import { app, ipcMain, ipcRenderer, dialog, BrowserWindow, session } from 'electron';
+import { app, ipcMain, ipcRenderer, dialog, BrowserWindow } from 'electron';
 import {} from 'bluebird';
 import { v4 as uuid } from 'uuid';
 
-import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from '../time'
-import { IBudgetBus, BudgetBus, BudgetBusRenderer, TABLE2CLASS } from '../store'
-import { DBStore } from './dbstore';
-import { RPCMainStore, RPCRendererStore } from '../rpcstore';
-import { addRecentFile, PSTATE } from './persistent'
+import { DesktopFunctions } from '../desktop'
+import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from 'buckets-core/dist/time'
+import { SQLiteStore } from 'buckets-core/dist/dbstore';
+import { openSqlite } from '../async-sqlite'
+import { RPCMainStoreHookup, RPCRendererStore } from '../rpcstore';
+import { addRecentFile } from './persistent'
 import { reportErrorToUser, displayError } from '../errors'
 import { sss } from '../i18n'
-import { onlyRunInMain, Room } from '../rpc'
+import { onlyRunInMain } from '../rpc'
 import { importFile, ImportResult } from '../importing'
 import { PrefixLogger } from '../logging'
-import { SyncResult, MultiSyncer, ASyncening } from '../sync'
-import { findYNAB4FileAndImport } from '../ynab'
-import { SimpleFINSyncer } from '../models/simplefin'
-import { MacroSyncer } from '../models/bankmacro'
+import { SyncResult, MultiSyncer, ASyncening } from 'buckets-core/dist/models/sync'
+import { SimpleFINSyncer } from 'buckets-core/dist/models/simplefin'
+import { MacroSyncer } from 'buckets-core/dist/models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
-import { UndoRedoResult } from '../undo'
 import { updateMenu } from './menu'
+import { openPreferences } from './prefs'
 
 const log = new PrefixLogger('(files)')
 
@@ -34,52 +32,56 @@ export interface IOpenWindow {
   focused: boolean,
 }
 
-export interface BudgetFileEvents {
-  sync_started: {
-    onOrAfter: SerializedTimestamp;
-    before: SerializedTimestamp;
-  };
-  sync_done: {
-    onOrAfter: SerializedTimestamp;
-    before: SerializedTimestamp;
-    result: SyncResult;
-  };
-  macro_started: {
-    id: number;
-  };
-  macro_stopped: {
-    id: number;
-  };
-  csv_needs_mapping: CSVNeedsMapping;
-  csv_mapping_response: CSVMappingResponse;
-  csv_needs_account_assigned: CSVNeedsAccountAssigned;
-  csv_account_response: CSVAssignAccountResponse;
+declare module 'buckets-core/dist/store' {
+  interface IStoreEvents {
+    sync_started: {
+      onOrAfter: SerializedTimestamp;
+      before: SerializedTimestamp;
+    };
+    sync_done: {
+      onOrAfter: SerializedTimestamp;
+      before: SerializedTimestamp;
+      result: SyncResult;
+    };
+    macro_started: {
+      id: number;
+    };
+    macro_stopped: {
+      id: number;
+    };
+    csv_needs_mapping: CSVNeedsMapping;
+    csv_mapping_response: CSVMappingResponse;
+    csv_needs_account_assigned: CSVNeedsAccountAssigned;
+    csv_account_response: CSVAssignAccountResponse;
+  }
 }
 
 export interface IBudgetFile {
-  bus:IBudgetBus;
-
-  room: Room<BudgetFileEvents>;
-  
   /**
    *  Get the filename for this budget.
    */
   getFilename():Promise<string>;
 
   /**
-   *  Cause the recording window to open for a particular recording
+   *  Open a new budget-specific window in an already-open budget.
+   *
+   *  @param path  Relative path to open
+   *  @param hide  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.
+   *  @param options  Extra BrowserWindow options
    */
-  openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: MaybeMoment;
-    before: MaybeMoment;
-  }):Promise<SyncResult>;
+  openWindow(path:string, args: {
+      hide?: boolean;
+      options?: Partial<Electron.BrowserWindowConstructorOptions>;
+      bounds?: Electron.Rectangle;
+    }):Electron.BrowserWindow
   
+  openPreferences();
+
   /**
    *  Import a transaction-laden file
    */
   importFile(path:string):Promise<ImportResult>;
   openImportFileDialog();
-  importYNAB4File();
 
   /**
    *  Start a sync
@@ -90,13 +92,6 @@ export interface IBudgetFile {
    *  Cancel sync
    */
   cancelSync();
-
-  /**
-   *  Undo
-   */
-  doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T>;
-  doUndo();
-  doRedo();
 }
 
 interface IBudgetFileRPCMessage {
@@ -129,29 +124,38 @@ export class BudgetFile implements IBudgetFile {
     [win_id:number]: BudgetFile;
   } = {};
 
-  public store:DBStore;
-  private rpc_store:RPCMainStore = null;
-  
-  readonly bus:BudgetBus;
-  readonly room:Room<BudgetFileEvents>;
+  public store:SQLiteStore;
+  private rpc_main_hookup:RPCMainStoreHookup = null;
 
   public running_syncs:ASyncening[] = [];
   private syncer:MultiSyncer;
 
   readonly id:string;
   readonly filename:string;
+
   constructor(filename?:string) {
     log.info('opening', filename);
-    this.id = uuid();
-    this.room = new Room<BudgetFileEvents>(this.id);
     this.filename = filename || '';
-    this.bus = new BudgetBus(this.id);
-    this.store = new DBStore(filename, this.bus, true);
-    this.syncer = new MultiSyncer([
-      new MacroSyncer(this.store, this),
-      new SimpleFINSyncer(this.store),
-    ]);
+    this.id = uuid();
     BudgetFile.REGISTRY[this.id] = this;
+  }
+
+  /**
+   *  Open or create a budget file.
+   */
+  static async openFile(filename:string, args:{
+    create?:boolean,
+    windows?:Array<IOpenWindow>,
+  } = {}):Promise<BudgetFile> {
+    if (!args.create) {
+      // open the file or fail if it doesn't exist
+      if (! await fs.existsAsync(filename)) {
+        displayError(sss('File does not exist:') + ` ${filename}`)
+        return;
+      }
+    }
+    let bf = new BudgetFile(filename);
+    return bf.start(args.windows);
   }
 
   /**
@@ -206,12 +210,15 @@ export class BudgetFile implements IBudgetFile {
   }
 
   /**
-
+   *  Open the file, hook up all communication channels and event
+   *  processors and create windows.
    */
   async start(windows:Array<IOpenWindow>=[]) {
     // connect to database
     try {
-      await this.store.open();  
+      const db = openSqlite(this.filename);
+      this.store = new SQLiteStore(db, new DesktopFunctions(this));
+      await this.store.doSetup();
     } catch(err) {
       log.error(`Error opening file: ${this.filename}`);
       log.error(err.stack);
@@ -232,9 +239,14 @@ export class BudgetFile implements IBudgetFile {
       ev.sender.send(message.reply_ch, response);
     })
 
+    this.syncer = new MultiSyncer([
+      new MacroSyncer(this.store),
+      new SimpleFINSyncer(this.store),
+    ]);
+
     // listen for child store requests
-    this.rpc_store = new RPCMainStore(this.store, this.id);
-    await this.rpc_store.start();
+    this.rpc_main_hookup = new RPCMainStoreHookup(this.store, this.id);
+    await this.rpc_main_hookup.start();
 
     this.store.undo.events.stackchange.on(() => {
       updateMenu({budget: this});
@@ -253,15 +265,12 @@ export class BudgetFile implements IBudgetFile {
    */
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
-    this.rpc_store.stop();
+    this.rpc_main_hookup.stop();
     ipcMain.removeAllListeners(`budgetfile.rpc.${this.id}`)
   }
 
   /**
    *  Open the "default" set of windows for a newly opened budget.
-   *
-   *  Currently, this just opens the accounts page, but in the future
-   *  It might open the set of last-opened windows.
    */
   async openDefaultWindows(windows:Array<IOpenWindow>=[]) {
     if (windows.length) {
@@ -287,18 +296,13 @@ export class BudgetFile implements IBudgetFile {
         }, 0);
       }
     } else {
-      const qs = querystring.stringify({
-        args: JSON.stringify({
-          noanimation: !PSTATE.animation ? true : undefined,
-        })
-      })
-      this.openWindow(`/budget/index.html?${qs}`);
+      this.openWindow(`/budget/index.html`);
     }
 
   }
 
   /**
-   *  Open a new budget-specific window.
+   *  Open a new budget-specific window in an already-open budget.
    *
    *  @param path  Relative path to open
    *  @param hide  If given, don't immediately show this window.  By default, all windows are shown as soon as they are ready.
@@ -350,145 +354,8 @@ export class BudgetFile implements IBudgetFile {
     return win;
   }
 
-  private _sessions:{
-    [parition:string]: Electron.Session,
-  } = {};
-  ensureSession(partition:string):Electron.Session {
-    if (!this._sessions[partition]) {
-      log.info('Creating session for partition', partition);
-      let sesh = session.fromPartition(partition, {cache:false});
-      this._sessions[partition] = sesh;
-      
-      sesh.clearCache(() => {
-      });
-
-      // User-Agent
-      let user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
-      if (electron_is.macOS()) {
-        user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36';
-      } else if (electron_is.windows()) {
-        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36';
-      } else {
-        // linux
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
-      }
-      sesh.setUserAgent(user_agent);
-      
-      // Cookies
-      sesh.cookies.on('changed', (ev, cookie, cause) => {
-        sesh.cookies.flushStore(() => {});
-      })
-
-      // Downloads
-      sesh.on('will-download', (ev, item, webContents) => {
-        let dlid = uuid();
-        let logger = new PrefixLogger(`(dl ${dlid})`);
-        logger.info(`will-download`, item.getFilename(), item.getMimeType());
-
-        // XXX does this need to be explicitly cleaned up?
-        let tmpdir = tmp.dirSync();
-
-        // webContents.send('buckets:will-download', {
-        //   filename: item.getFilename(),
-        //   mimetype: item.getMimeType(),
-        // })
-        // console.log('getFilename', item.getFilename())
-        // console.log('mimetype', item.getMimeType());
-        // console.log('state', item.getState());
-        // console.log('getURL', item.getURL());
-        
-        let save_path = Path.join(tmpdir.name, item.getFilename());
-        logger.info(`saving ${item.getFilename()} to ${save_path}`);
-        
-        item.setSavePath(save_path);
-        item.on('updated', (event, state) => {
-          if (state === 'interrupted') {
-            logger.info(`${state} - Download is interrupted but can be resumed`)
-          } else if (state === 'progressing') {
-            if (item.isPaused()) {
-              logger.info(`${state} - Download is paused`)
-            } else {
-              logger.info(`${state} - received bytes: ${item.getReceivedBytes()}`)
-            }
-          }
-        })
-        item.once('done', async (event, state) => {
-          if (state === 'completed') {
-            logger.info(`Downloaded`);
-            
-            // Tell the renderer or webview's parent about the download
-            let wc = webContents.hostWebContents || webContents;
-            wc.send('buckets:file-downloaded', {
-              localpath: save_path,
-              filename: item.getFilename(),
-              mimetype: item.getMimeType(),
-            })
-          } else {
-            logger.warn(`Download failed: ${state}`)
-          }
-        })
-      })
-    }
-    return this._sessions[partition];
-  }
-  /**
-   *
-   */
-  async openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: MaybeMoment,
-    before: MaybeMoment,
-  }) {
-    let win:Electron.BrowserWindow;
-    const bankmacro = await this.store.sub.bankmacro.get(macro_id);
-
-    const partition = `persist:rec-${bankmacro.uuid}`;
-    this.ensureSession(partition);
-
-    let response_id:string;
-    let hide:boolean = false;
-    let serialized_autoplay;
-    if (autoplay) {
-      response_id = uuid();
-      hide = true;
-      this.room.broadcast('macro_started', {id: macro_id});
-      serialized_autoplay = JSON.stringify({
-        onOrAfter: dumpTS(autoplay.onOrAfter),
-        before: dumpTS(autoplay.before),
-      })
-    }
-
-    // Load the url
-    const qs = querystring.stringify({
-      macro_id,
-      partition,
-      response_id,
-      autoplay: serialized_autoplay,
-    })
-    win = this.openWindow(`/record/record.html?${qs}`, {
-      hide,
-      options: {
-        width: 1100,
-        height: 800,
-      }
-    });
-    
-    if (autoplay) {
-      return new Promise<SyncResult>((resolve, reject) => {
-        ipcMain.once('buckets:playback-response', (ev:Electron.IpcMessageEvent, message:SyncResult) => {
-          if (!message.errors.length) {
-            log.info('closing macro window', win.id);
-            win.close();  
-          }
-          this.room.broadcast('macro_stopped', {id: macro_id});
-          resolve(message);
-        })
-      })
-    } else {
-      return Promise.resolve<SyncResult>({
-        errors: [],
-        imported_count: 0,
-      });
-    }
+  openPreferences() {
+    openPreferences();
   }
 
   async importFile(path:string):Promise<ImportResult> {
@@ -517,39 +384,19 @@ export class BudgetFile implements IBudgetFile {
     })
   }
 
-  importYNAB4File() {
-    findYNAB4FileAndImport(this, this.store);
-  }
-
-  static async openFile(filename:string, args:{
-    create?:boolean,
-    windows?:Array<IOpenWindow>,
-  } = {}):Promise<BudgetFile> {
-    if (!args.create) {
-      // open the file or fail if it doesn't exist
-      if (! await fs.existsAsync(filename)) {
-        displayError(sss('File does not exist:') + ` ${filename}`)
-        return;
-      }
-    }
-    let bf = new BudgetFile(filename);
-    return bf.start(args.windows);
-  }
-
-
   async startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
     let m_onOrAfter = loadTS(onOrAfter);
     let m_before = loadTS(before);
     let sync = this.syncer.syncTransactions(m_onOrAfter, m_before);
     this.running_syncs.push(sync);
     let p = sync.start();
-    this.room.broadcast('sync_started', {
+    this.store.events.broadcast('sync_started', {
       onOrAfter: dumpTS(onOrAfter),
       before: dumpTS(before),
     })
     let result = await p;
     this.running_syncs.splice(this.running_syncs.indexOf(sync), 1);
-    this.room.broadcast('sync_done', {
+    this.store.events.broadcast('sync_done', {
       onOrAfter: dumpTS(onOrAfter),
       before: dumpTS(before),
       result,
@@ -560,44 +407,6 @@ export class BudgetFile implements IBudgetFile {
     this.running_syncs.forEach(sync => {
       sync.cancel();
     })
-  }
-
-  /**
-   *  Run a function, recording it as undo-able
-   */
-  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
-    return this.store.undo.doAction(label, func);
-  }
-  async doUndo() {
-    let result = await this.store.undo.undoLastAction();
-    return this._handleUndoRedoResult(result)
-  }
-  async doRedo() {
-    let result = await this.store.undo.redoLastAction();
-    return this._handleUndoRedoResult(result);
-  }
-  private async _handleUndoRedoResult(result:UndoRedoResult) {
-    let promises = result.changes.map(async change => {
-      if (change.change === 'delete') {
-        return this.store.publishObject('delete', {
-          _type: change.table,
-          id: change.id,
-          created: null,
-        })
-      } else {
-        let obj = await this.store.getObject(TABLE2CLASS[change.table], change.id);
-        return this.store.publishObject('update', obj);
-      }
-    })
-    return Promise.all(promises);
-  }
-
-  // These are for use by RendererBudgetFile
-  async startAction(label:string) {
-    return this.store.undo.startAction(label);
-  }
-  async finishAction(id:number) {
-    return this.store.undo.finishAction(id);
   }
 }
 
@@ -610,36 +419,27 @@ export class BudgetFile implements IBudgetFile {
  *  In-renderer interface to a main process `BudgetFile`
  */
 class RendererBudgetFile implements IBudgetFile {
-  readonly bus:BudgetBusRenderer;
-  readonly room:Room<BudgetFileEvents>;
   readonly store:RPCRendererStore;
+
   constructor(readonly id:string) {
-    this.bus = new BudgetBusRenderer(id);
-    this.store = new RPCRendererStore(id, this.bus);
-    this.room = new Room<BudgetFileEvents>(this.id);
+    this.store = new RPCRendererStore(id);
   }
 
   async getFilename() {
     return this.callInMain('getFilename');
   }
 
-  async openRecordWindow(macro_id:number, autoplay?:{
-    onOrAfter: MaybeMoment,
-    before: MaybeMoment,
-  }) {
-    try {
-      let serialized_autoplay;
-      if (autoplay) {
-        serialized_autoplay = {
-          onOrAfter: dumpTS(autoplay.onOrAfter),
-          before: dumpTS(autoplay.before),
-        }
-      }
-      return await this.callInMain('openRecordWindow', macro_id, serialized_autoplay)
-    } catch(err) {
-      log.error(err.stack)
-      log.error(err);
-    }
+  openWindow(path:string, args: {
+      hide?: boolean;
+      options?: Partial<Electron.BrowserWindowConstructorOptions>;
+      bounds?: Electron.Rectangle;
+    }) {
+    this.callInMain('openWindow', path, args);
+    return null;
+  }
+
+  openPreferences() {
+    return this.callInMain('openPreferences');
   }
 
   importFile(path:string):Promise<ImportResult> {
@@ -648,32 +448,12 @@ class RendererBudgetFile implements IBudgetFile {
   openImportFileDialog() {
     return this.callInMain('openImportFileDialog');
   }
-  importYNAB4File() {
-    return this.callInMain('importYNAB4File');
-  }
 
   startSync(onOrAfter:MaybeMoment, before:MaybeMoment) {
     return this.callInMain('startSync', dumpTS(onOrAfter), dumpTS(before));
   }
   cancelSync() {
     return this.callInMain('cancelSync');
-  }
-
-  async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {
-    const action_id = await this.callInMain('startAction', label);
-    try {
-      return await func()
-    } catch(err) {
-      throw err;
-    } finally {
-      await this.callInMain('finishAction', action_id);
-    }
-  }
-  doUndo() {
-    return this.callInMain('doUndo');
-  }
-  doRedo() {
-    return this.callInMain('doRedo');
   }
 
   /**
@@ -703,10 +483,16 @@ class RendererBudgetFile implements IBudgetFile {
  *
  *  In the main process this is `undefined`
  */
-export let current_file:RendererBudgetFile;
-if (electron_is.renderer()) {
-  let hostname = window.location.hostname;
-  current_file = new RendererBudgetFile(hostname);
+let _current_file:RendererBudgetFile;
+export function getCurrentFile() {
+  if (!electron_is.renderer()) {
+    throw new Error('getCurrentFile may only be called from the renderer processes');
+  }
+  if (_current_file === undefined) {
+    let hostname = window.location.hostname;
+    _current_file = new RendererBudgetFile(hostname);
+  }
+  return _current_file;
 }
 
 //------------------------------------------------------------------------------
@@ -753,7 +539,7 @@ export const openBudgetFileDialog = onlyRunInMain(() => {
 export const newBudgetFileDialog = onlyRunInMain(() => {
   return new Promise((resolve, reject) => {
     dialog.showSaveDialog({
-      title: sss('Buckets Budget Filename'),
+      title: sss('Buckets Budget Filename'/* 'Buckets' refers to the application name */),
       defaultPath: Path.resolve(app.getPath('documents'), 'My Budget.buckets'),
     }, (filename) => {
       if (filename) {

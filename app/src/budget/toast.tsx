@@ -9,15 +9,20 @@ class Toast {
   public className?: string;
   public id: number;
   static IDS: number = 0;
+  private _timer;
   constructor(private toaster:Toaster) {
     this.id = Toast.IDS++;
   }
   close() {
     this.toaster.removeToast(this);
+    if (this._timer) {
+      clearTimeout(this._timer);
+    }
   }
   start() {
-    setTimeout(() => {
-      this.toaster.removeToast(this);
+    this._timer = setTimeout(() => {
+      this._timer = null;
+      this.close();
     }, this.duration);
   }
 }
@@ -137,7 +142,16 @@ export class ToastDisplay extends React.Component<any, {toasts: Toast[]}> {
           key={toast.id}
           classNames="toast"
           timeout={200}>
-        <div className={className}>{toast.message}</div>
+        <div className={className}>
+          <div className="message">{toast.message}</div>
+          <a
+            href="#"
+            className="close"
+            onClick={ev => {
+              ev.preventDefault();
+              toast.close();
+            }} >&times;</a> 
+        </div>
       </CSSTransition>
     })
     return <div className="toasts">

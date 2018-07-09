@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { IStore } from '../store'
-import { Account, Transaction as ATrans } from '../models/account'
-import { Bucket, Transaction as BTrans } from '../models/bucket'
+import { IStore } from 'buckets-core/dist/store'
+import { Account, Transaction as ATrans } from 'buckets-core/dist/models/account'
+import { Bucket, Transaction as BTrans } from 'buckets-core/dist/models/bucket'
 import { manager, AppState } from './appstate'
 import { sss } from '../i18n'
 import { DebouncedInput } from '../input'
@@ -16,22 +16,22 @@ interface QueryResult {
 }
 async function queryStore(store: IStore, query:string):Promise<QueryResult> {
   const params = {$query: query};
-  let accounts = store.listObjects(Account, {
+  let accounts = store.listObjects('account', {
     where: "name LIKE '%'||$query||'%' OR notes LIKE '%'||$query||'%'",
     params,
     order: ['name', 'id'],
   })
-  let atrans = store.listObjects(ATrans, {
+  let atrans = store.listObjects('account_transaction', {
     where: "memo LIKE '%'||$query||'%' OR notes LIKE '%'||$query||'%'",
     params,
     order: ['posted desc', 'id desc'],
   })
-  let buckets = store.listObjects(Bucket, {
+  let buckets = store.listObjects('bucket', {
     where: "name LIKE '%'||$query||'%' OR notes LIKE '%'||$query||'%'",
     params,
     order: ['name', 'id'],
   })
-  let btrans = store.listObjects(BTrans, {
+  let btrans = store.listObjects('bucket_transaction', {
     where: "memo LIKE '%'||$query||'%' OR notes LIKE '%'||$query||'%'",
     params,
     order: ['posted desc', 'id desc'],
@@ -90,7 +90,7 @@ export class SearchPage extends React.Component<{
 
     if (result.buckets.length) {
       buckets_table = <div>
-        <h2>{sss('Buckets')}</h2>
+        <h2>{sss('Buckets'/* Refers to a list of buckets, not the application title */)}</h2>
         <table className="ledger">
           <thead>
             <tr>

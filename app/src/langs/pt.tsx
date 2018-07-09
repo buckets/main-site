@@ -1,7 +1,8 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 
-import { ILangPack, IMessages } from './spec';
+import { ILangPack } from '@iffycan/i18n'
+import { IMessages } from './base'
 
 // Contributors, include your name and optionally a link to
 // a website as you want it to appear in any credits.
@@ -48,6 +49,7 @@ const messages:IMessages = {
     h: "z6CqgxENo0xxB0LPp8P8rmnLPp1m2NElecEaJM8GDfI=",
   },
   "About Buckets": {
+    /* 'Buckets' refers to the application name */
     val: "Sobre Buckets",
     translated: true,
     h: "9bzPsx+kCkNUeLTSVjaygyWCkm3VCdsFaAFRvdS+xEU=",
@@ -138,6 +140,11 @@ const messages:IMessages = {
     translated: true,
     h: "rmA9D10bvYOVj3U4kE7U6jALpz7WpqBJTv6HZaI4T/M=",
   },
+  "Application preferences": {
+    val: "Application preferences",
+    translated: false,
+    h: "PIhGW3aVUScG87KKiDCF4fLhudwZ3eYbz7n7msHJU1U=",
+  },
   "Attached files are too large.": {
     val: "O arquivo em anexo é muito grande.",
     translated: true,
@@ -168,10 +175,21 @@ const messages:IMessages = {
     translated: true,
     h: "hHHAAGXs0oscbD5jkMQSQUQ5sLsgo/sPaBumUBAq+CA=",
   },
+  "Beta Updates": {
+    /* Label for checkbox indicating if users want to receive Beta version of Buckets before wide release */
+    val: "Updates do Beta",
+    translated: true,
+    h: "xyGKwUoes8hYiGBWy9KIoxkU/BREGx8pGiKIUb6hsEc=",
+  },
   "Birthdays": {
     val: "Aniversários",
     translated: true,
     h: "rzI9rIMV5VD86pAzRZf+uFAA8rWYhz1rIH5N9fDesSk=",
+  },
+  "Break Import Links": {
+    val: "Tirar Links Importados",
+    translated: true,
+    h: "XQYKw3qJ7xKoR/DX6K6NdZxbJLHVJhxy9mFVV8r1ZU4=",
   },
   "Bring All to Front": {
     val: "Trazer Todos Para a Frente",
@@ -199,21 +217,28 @@ const messages:IMessages = {
     h: "NMC+sjsH6UgNhNtiqYeiHDi4zDK/+S5h5yMfZ5CQk1c=",
   },
   "Buckets": {
+    /* Bucket list page title.  Does NOT refer to the application name */
+    /* Refers to a list of buckets, not the application title */
+    /* Refers to a list of buckets, not the application title */
     val: "Buckets",
     translated: true,
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
   },
   "Buckets Budget Filename": {
+    /* 'Buckets' refers to the application name */
     val: "Nome do arquivo de Despesas Buckets",
     translated: true,
     h: "PMqvee/qJsh/OYtRi+hbcH4fgl07SR6XM0wx4c1C+sU=",
   },
   "Buckets Guide": {
+    /* 'Buckets' refers to the application name. */
     val: "Guia Buckets",
     translated: true,
     h: "iK/jSwFsIOO0YBANlaqC8+gTWFX+9IBYpc+HuiQ2U/c=",
   },
   "Buckets License": {
+    /* 'Buckets' refers to the application name */
+    /* 'Buckets' refers to the application name */
     val: "Licença Buckets",
     translated: true,
     h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
@@ -222,6 +247,18 @@ const messages:IMessages = {
     val: "Despesa",
     translated: true,
     h: "zOO4DqNSFLa6Z9vlmfaz8OnwggHn8wJeP058V5mUKbE=",
+  },
+  "Budget Specific Settings": {
+    /* Title for budget settings page */
+    val: "Budget Specific Settings",
+    translated: false,
+    h: "/RQVOKmoXTgeciF+ohehk19BxpvBXud+3HjfZPPw1v8=",
+  },
+  "Budget password:": {
+    /* Label for bank macro password prompt */
+    val: "Senha de Orçamento:",
+    translated: true,
+    h: "yB5u4awiXu76+/Pw81ZYhBtgYQktcAVe6KU4WreiReU=",
   },
   "Budgeted": {
     val: "Orçado",
@@ -242,6 +279,11 @@ const messages:IMessages = {
     val: "TV a Cabe",
     translated: true,
     h: "wISz6Dh0vnQ1Tjhr9GWcJ2rhiif2af6NXsAzEAXYxfo=",
+  },
+  "Calculator": {
+    val: "Calculator",
+    translated: false,
+    h: "IiaAFlM5LkjsirGL06i1plXy1FoW75TKBiuin2r4s6Q=",
   },
   "Cancel": {
     val: "Cancelar",
@@ -289,6 +331,7 @@ const messages:IMessages = {
     h: "5OqY1JRI3brWCHQyu9VDY9hpjXzg1cVB1oQnXLQjZ4U=",
   },
   "Chat with Matt": {
+    /* If "Chat with Matt" is too wide, you can translate this as just "Chat" */
     val: "Conversar com o Matt",
     translated: true,
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
@@ -314,9 +357,16 @@ const messages:IMessages = {
     h: "wjjhyYhYEFdJWUmwdJIEdxm0iAq2bwrWU79ANObzzZY=",
   },
   "Cleared": {
-    val: "Cleared",
-    translated: false,
+    /* Tooltip text indicating that a transaction has cleared. */
+    val: "Liquidado",
+    translated: true,
     h: "j1SmbPuDDBP04XfOH9NNFCDzXmB9xAzSoVG7RcHcdBg=",
+  },
+  "Cleared balance": {
+    /* Label for balance minus uncleared transactions */
+    val: "Cleared balance",
+    translated: false,
+    h: "3SpY0eBe4gJ1WtupFnV904/a1Xlfx5Y4ybAdHQGzGV0=",
   },
   "Click the \"Set mapping\" to continue.": {
     val: "Clique em \"Selecionar Mapeamento\" para continuar.",
@@ -424,6 +474,12 @@ const messages:IMessages = {
     translated: true,
     h: "SmoVFbeAWSO4cW1YQJbuDJQz8kenVz5++WTJEkS6Vos=",
   },
+  "Currency symbol": {
+    /* Label for currency symbol setting */
+    val: "Símbolo de moeda",
+    translated: true,
+    h: "/zaBMXJh747DLHbqocisO7iV5wDJpVTSCx8RhH7Ye0E=",
+  },
   "Cut": {
     val: "Cortar",
     translated: true,
@@ -435,6 +491,7 @@ const messages:IMessages = {
     h: "3A+vhaBB21UASdnwmNYVGMV9qH/U43D3DCsVSXlWasY=",
   },
   "Debt": {
+    /* Name of bucket group for debts */
     val: "Débito",
     translated: true,
     h: "y9kslXhW17gMMFZ9Dq8g/tabfINzlmzT+39QNbWiWGA=",
@@ -515,6 +572,7 @@ const messages:IMessages = {
     h: "tjwFTBARBKQ5uC9Fh0zm7ag/RViV95pptJBJn9eVqHE=",
   },
   "EXPERIMENTAL Buckets Macro Maker": {
+    /* 'Buckets' refers to the application name */
     val: "EXPERIMENTAL Criador de Macro Buckets",
     translated: true,
     h: "NZPVXQ+Dw1vv0fLXY+Z4R1KiEkXjDZtSmY3tVz5L1VI=",
@@ -538,6 +596,11 @@ const messages:IMessages = {
     val: "Habilitar Macro",
     translated: true,
     h: "9SWFr96CNVD21JQ30lw4cj1JCAZ44RNlKkDzQJ/RyuE=",
+  },
+  "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)": {
+    val: "Habilte para receber novas versões do Buckets antes de todo mundo.  Pode conter mais bugs :)",
+    translated: true,
+    h: "sC2MA2Tqphkt5iblpZFWToDQhdF9U2nk8FpwTxH3Ta8=",
   },
   "Ending Balance": {
     val: "Saldo Final",
@@ -620,11 +683,13 @@ const messages:IMessages = {
     h: "Z6QnadHff9fEji/vnFxKuxbfAKGNb263Hm13z3txfSM=",
   },
   "Find Next": {
+    /* Edit menu label for finding the next match.  Perhaps use what your browser or other applications use. */
     val: "Encontrar próximo",
     translated: true,
     h: "LALfI5V4TsQo0DcGJwmNmrm3xNPtY5PmQuxB1voZo34=",
   },
   "Find Previous": {
+    /* Edit menu label for finding the previous match.  Perhaps use what your browser or other applications use. */
     val: "Encontrar anterior",
     translated: true,
     h: "0n6Dq5KDTxxsTAKrJE+RDdgi9ln6FyfUEPNBJ6ejZ5o=",
@@ -669,6 +734,12 @@ const messages:IMessages = {
     translated: true,
     h: "XD8GQYEIDrNjTMPX4TjGeAbbCIEBcAONlYPd/D8Hz84=",
   },
+  "Go To...": {
+    /* Submenu title for navigation shortcuts */
+    val: "Go To...",
+    translated: false,
+    h: "AsKW6buNlZ7YlWHN1pVgNlCAzqiFIsJGL1cg8CkVGkg=",
+  },
   "Goal completion:": {
     val: "Objetivo completado:",
     translated: true,
@@ -691,8 +762,8 @@ const messages:IMessages = {
   },
   "Header row": {
     /* Label for checkbox indicating whether a CSV file has a header row or not */
-    val: "Header row",
-    translated: false,
+    val: "Linha do cabeçalho",
+    translated: true,
     h: "uRtdJlb7w3q8Zl9lZhtY0JReqNVI7CfOdo5I9SW5lfw=",
   },
   "Health Insurance": {
@@ -711,6 +782,7 @@ const messages:IMessages = {
     h: "TvUUB7AuCuFJ9IWiz2SbsjnUvYoDPZAaMPxup/rwosM=",
   },
   "Hide Buckets": {
+    /* 'Buckets' refers to the application name. */
     val: "Esconder Buckets",
     translated: true,
     h: "38YdGXFjndmgDFgXTpfUZ0F+W/D9e267YaAvzYZm4O8=",
@@ -760,11 +832,6 @@ const messages:IMessages = {
     translated: true,
     h: "F3sijvfYz3oB4iz2rVHjUvNDLQs43MbXDVIr5VFA2/c=",
   },
-  "Import Amazon Reports": {
-    val: "Importar Amazon Reports",
-    translated: true,
-    h: "Mlif1y6Q52PbHr5bzc3mqcxGJBv1uosR7E+eLTi79kA=",
-  },
   "Import From YNAB4...": {
     val: "Importar do YNAB4...",
     translated: true,
@@ -775,6 +842,11 @@ const messages:IMessages = {
     translated: true,
     h: "PPLzf/61MKc3iWfDMTRo6ERH/TYu6TxBH2vmVbZD5Lk=",
   },
+  "Import all Amazon Reports": {
+    val: "Importar todos os Relatórios da Amazon",
+    translated: true,
+    h: "EwzV2gCi/cxxLtdXGeSBJLDZhAhXqomL1rdi7QPOQxA=",
+  },
   "Import file": {
     val: "Importar arquivo",
     translated: true,
@@ -784,6 +856,12 @@ const messages:IMessages = {
     val: "Importar do YNAB4",
     translated: true,
     h: "FJ55mGfxitbc5YeY1s6YEji8I54ILSi3sfzQALSx50I=",
+  },
+  "Import links broken": {
+    /* Notification indicating that the links between imported transaction files and a particular account have been broken. */
+    val: "Links importados estão quebrados",
+    translated: true,
+    h: "rLgGF32tMx7KSWu+vRLEbr+IbkedxhS8ELcYZhNCqTs=",
   },
   "In": {
     val: "In",
@@ -866,24 +944,27 @@ const messages:IMessages = {
     h: "4lGk6/xvGOvn8z5vLVpqCLE6WQwpEoizH0LM95z1Tvo=",
   },
   "Kick Bucket": {
+    /* Name of action.  Consider this "Archive Bucket" */
     val: "Chutar balde(Bucket)",
     translated: true,
     h: "3hmOuv1hNsjpQJ5cSDTlSqN4jGOGFnSPw9r0bK68RWY=",
   },
   "Kick the bucket": {
+    /* Button label for archiving a bucket */
     val: "Chutar o balde",
     translated: true,
     h: "IvzeGJ9G+Rns8Rbnal26flTFzd+yBNSEBQSptdNy8t8=",
   },
   "Kicked": {
+    /* Label for list of archived buckets */
     val: "Chutado",
     translated: true,
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
   },
   "Language": {
     /* Label for application language preference */
-    val: "Language",
-    translated: false,
+    val: "Idioma",
+    translated: true,
     h: "H6JLSQVzeo1QvqYd6ewWITP1MyGheSF5eFCeaP6nQwk=",
   },
   "Language default": {
@@ -897,6 +978,7 @@ const messages:IMessages = {
     h: "G5a6Jdor9jRT/Wtcg9SfXQsvqL7VFvnVD2+gq7yT1Jg=",
   },
   "Later": {
+    /* Button label for purchasing a license later */
     val: "Depois",
     translated: true,
     h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
@@ -942,18 +1024,21 @@ const messages:IMessages = {
     h: "GCU3Hru9VCit7F+BYEMKmg5U8gsc1/UZ+o5wsbMAkeY=",
   },
   "Make it so": {
+    /* Button label for causing the set of pending deposits/withdrawls to happen.  Synonyms could be: "Do it" or "Run" or "Go" */
     val: "Confirmar",
     translated: true,
     h: "XRTIWjylWKAy5BW8/0C0rOSW5S1QC+CxmgmFfhi81pk=",
   },
   "Mark Cleared": {
-    val: "Mark Cleared",
-    translated: false,
+    /* Name of action for marking a transaction as having cleared the bank */
+    val: "Marcar Liquidado",
+    translated: true,
     h: "Z+NICH1z9EYN3Ub7Z9idiTw/t+QaDF9n3h9br9WhjgE=",
   },
   "Mark Not Cleared": {
-    val: "Mark Not Cleared",
-    translated: false,
+    /* Name of action for marking a transaction as not having cleared the bank */
+    val: "Marcar Não Liquidado",
+    translated: true,
     h: "4VoXUMr4nLIoyueiB8YlIR9HFGPYBhYxJq/cqqwDLs0=",
   },
   "Medical": {
@@ -970,11 +1055,6 @@ const messages:IMessages = {
     val: "Minimizar",
     translated: true,
     h: "ELhkWGGY5oNKpfCzoXXW6TgkfS1nI0ZuJbWyYLmT+ro=",
-  },
-  "Misc": {
-    val: "Misc",
-    translated: true,
-    h: "DPoc7CIbzLHJxuar3WnaidO3Ryy1QtYkCswRzVHtVBg=",
   },
   "Month to Month": {
     val: "Mês a mês",
@@ -1020,6 +1100,18 @@ const messages:IMessages = {
     val: "Precisa",
     translated: true,
     h: "RbGrwaVYaT8OdEbNo5YBRWxoGZNYzZKjiDz7JrZVuuc=",
+  },
+  "Negate": {
+    /* Verb meaning to make a number have the opposite sign */
+    val: "Negativar",
+    translated: true,
+    h: "dZDdZz59qbx8gpMDeqIXTcDabOUtC1qWeUHncjptLo0=",
+  },
+  "Negative": {
+    /* Label for choosing the word/symbol that signifies a negative number */
+    val: "Negativo",
+    translated: true,
+    h: "uu+tZJYytTWkRjWGnhq7P28TYmWJ58RmQcbAv4QEakg=",
   },
   "Net": {
     val: "Líquido",
@@ -1086,14 +1178,25 @@ const messages:IMessages = {
     translated: true,
     h: "p4er9wMKH/YiF5PrBRKpfEzR8HINC3N0d9Iol4zqgtQ=",
   },
+  "No orders imported": {
+    val: "No orders imported",
+    translated: false,
+    h: "BSXGKYKVKCk7fbaNo3wAigIjqpZPNfJFNISloGmngZg=",
+  },
+  "No refunds imported": {
+    val: "No refunds imported",
+    translated: false,
+    h: "J8bwMBTknpk9dMKKsTWTqNlncBVGlUjhrnjwN6Z7uJk=",
+  },
   "Not Transfer": {
     val: "Não Transferir",
     translated: true,
     h: "GJsf5+RmvoXTk3dewQIb90+6xb+mujI/mpSM8cmgUEI=",
   },
   "Not yet cleared": {
-    val: "Not yet cleared",
-    translated: false,
+    /* Tooltip text indicating that a transaction has not yet cleared. */
+    val: "Ainda não foi liquidado",
+    translated: true,
     h: "Hf/KSsxHfxvXx0udkqgCw/QkkE8Vi5ex9pdYnX6qzEU=",
   },
   "Note": {
@@ -1167,6 +1270,28 @@ const messages:IMessages = {
     translated: true,
     h: "zVM8610w5Mn1yRIYOsmOY5ZxBd2KLIudsimw610auYU=",
   },
+  "Optionally request an Amazon Refunds report": {
+    val: "Optionally request an Amazon Refunds report",
+    translated: false,
+    h: "j+ZBzvgoK0z7wbJ25sNsy9fYopXOCUEqjbTFdt559Zo=",
+  },
+  "Or click to download the new version manually.": {
+    val: "Ou clique para baixar a nova versão manualmente.",
+    translated: true,
+    h: "J+hkW+8xOyf72R6IgkvGlwWYNzHN+/aWRtotPks3C5U=",
+  },
+  "Order": {
+    /* Label for an Amazon order row */
+    val: "Order",
+    translated: false,
+    h: "Ggkvvwng4JyzP26RBZ9LrevWhrb766Qq+yTffZWmefg=",
+  },
+  "Orders": {
+    /* List of orders */
+    val: "Orders",
+    translated: false,
+    h: "0W3ENYY4AiEiX9CGdCzK/r0XLyqTqbYi8N91GQpTqnM=",
+  },
   "Out": {
     val: "Fora",
     translated: true,
@@ -1238,6 +1363,7 @@ const messages:IMessages = {
     h: "hAU2jJdFn2hdOUvG6S3yousGGeHnblb2/CsaRHWvQwQ=",
   },
   "Prompt": {
+    /* Title for prompt window */
     val: "Prompt",
     translated: true,
     h: "56HrS6R0zfyg5ruiVb/J04UP3T8O2V99V+mXHvVfEZ0=",
@@ -1248,6 +1374,7 @@ const messages:IMessages = {
     h: "WFHwJzRVIraGkeqDS03YjWe0vMsPsiRE1qM6V/Ef/xE=",
   },
   "Purchase": {
+    /* Button label for purchasing a license */
     val: "Comprar",
     translated: true,
     h: "SfwhUMXO5ckJhwUkBjdC9n17k8zH4+hoAlFoUdOwE/g=",
@@ -1303,6 +1430,12 @@ const messages:IMessages = {
     translated: true,
     h: "7buMF65dyGtKDY/ZW/Lkn7eUmdudCsdGV3KR2lYLLA0=",
   },
+  "Refunds": {
+    /* List of refunds */
+    val: "Refunds",
+    translated: false,
+    h: "4I/iPkFh9gYRoT0f6GWUl2eb1/8WRv59q6yPjB1KOOU=",
+  },
   "Reload": {
     val: "Recarregar",
     translated: true,
@@ -1319,6 +1452,7 @@ const messages:IMessages = {
     h: "sCLO0xIawRUzVC3QV8aqowoCCfwYNvtXW848jCLfT10=",
   },
   "Reopen": {
+    /* Label for button to reopen a close account */
     val: "Reabrir",
     translated: true,
     h: "5497b4yxPFO2M524tL0qmmNk47Qv/aca/7n0zMEeX/o=",
@@ -1343,6 +1477,16 @@ const messages:IMessages = {
     translated: true,
     h: "/jSK7LcBLJ1FsOYb9ntsVYAxwAyGLLUZXlTL/zrC020=",
   },
+  "Request an Amazon Items report": {
+    val: "Pedir um relatório de Itens da Amazon",
+    translated: true,
+    h: "P4rrDh5nDkcbT6+2mP6w2/DdQS+Hlhu7u/AEo7usOGc=",
+  },
+  "Request an Amazon Orders report": {
+    val: "Pedir um relatório de pedidos da Amazon",
+    translated: true,
+    h: "c+Qi3RJelGSlC9MybLul6oqMPosN10WOFW6k+roCtxk=",
+  },
   "Required deposit:": {
     val: "Depósito obrigatório:",
     translated: true,
@@ -1354,8 +1498,8 @@ const messages:IMessages = {
     h: "TNcYWk7YxhZ0U9Q+mFMRedeWB36VsDXoYgBapDvZCgM=",
   },
   "Restart Buckets for changes to take effect.": {
-    val: "Restart Buckets for changes to take effect.",
-    translated: false,
+    val: "Reinicie o Buckets para que as mudanças apareçam.",
+    translated: true,
     h: "WDqnfUftItQB8zteFdZrFOknNYODkXCwU89Lk/Hs/SQ=",
   },
   "Save": {
@@ -1372,6 +1516,11 @@ const messages:IMessages = {
     val: "Procurar",
     translated: true,
     h: "vembE+Cp1aKCKR2j2LCJD29QyiQxfGPUcGI1I8l5/5Y=",
+  },
+  "Search for Amazon transactions:": {
+    val: "Search for Amazon transactions:",
+    translated: false,
+    h: "FGAckk6wNL4OYfSaGK3CYf8NLHv4tvh6bf9YErgSb5E=",
   },
   "Search:": {
     val: "Procurar:",
@@ -1413,6 +1562,11 @@ const messages:IMessages = {
     translated: true,
     h: "0GImzkG1VPzFzjFdepzZz8+Ysis4xn7QQRVGlxVrQIw=",
   },
+  "Settings": {
+    val: "Opções",
+    translated: true,
+    h: "g5CfgkRu6cPoKgSs58kE8baksjDRuXC1WTLWKVn75z0=",
+  },
   "Show All": {
     val: "Mostrar Tudo",
     translated: true,
@@ -1427,6 +1581,12 @@ const messages:IMessages = {
     val: "Mostrar não-categorizado",
     translated: true,
     h: "ZHhB69+qL72sD+upbAXLXIDMlEWXgSbwb5RupMV5K0c=",
+  },
+  "Sign": {
+    /* Noun referring to the sign of a number (positive or negative) */
+    val: "Sinal",
+    translated: true,
+    h: "uw6BT7o9vlsgV2TpwBFx/MfF1npvA+6ru4lXXcSzoCM=",
   },
   "SimpleFIN Connections": {
     val: "Conexões SimpleFIN",
@@ -1541,8 +1701,8 @@ const messages:IMessages = {
   "System default": {
     /* Option for Buckets language preference */
     /* Option for timezone auto-detection */
-    val: "System default",
-    translated: false,
+    val: "Padrão do sistema",
+    translated: true,
     h: "A9haWZjRR5Su694Q278jjqi/xmRweA6I6et1Q9L3ahI=",
   },
   "Target date:": {
@@ -1582,8 +1742,8 @@ const messages:IMessages = {
   },
   "Timezone": {
     /* Label for timezone selection preference */
-    val: "Timezone",
-    translated: false,
+    val: "Fuso Horário",
+    translated: true,
     h: "y2odAzUKexep7CmO6P8BCj1p4PWG6VZ/RbIg8oOWASI=",
   },
   "To": {
@@ -1647,11 +1807,14 @@ const messages:IMessages = {
     h: "UpDg7j7/mXJnP7WdFJe4hMlLw2XtH7X3Cj669aLHzec=",
   },
   "Un-kick": {
+    /* Button label for unarchiving a bucket */
     val: "Desfazer chutar",
     translated: true,
     h: "P5Z1ij4jmS06jNOQiHymi+/D+uYJktoalTdw+AHGukM=",
   },
   "Un-kick Bucket": {
+    /* Name of action for undo/redo labels (i.e. Control-Z will "Undo Un-kick Bucket") Consider this the opposite of "Archive Bucket" */
+    /* Name of action.  Consider this "Unarchive Bucket" */
     val: "Desfazer Chutar o balde(Bucket)",
     translated: true,
     h: "7WOQPepkeOH+dwwSbEjomy0amoqY5JtvtlyCSG02c1Q=",
@@ -1665,6 +1828,12 @@ const messages:IMessages = {
     val: "Não é possivel abrir o arquivo:",
     translated: true,
     h: "MxbgnQR4Cyi549ltzzIDDAI1qRGqoeRm0zOApQMS2DY=",
+  },
+  "Uncleared": {
+    /* Label for sum of uncleared transaction amounts */
+    val: "Uncleared",
+    translated: false,
+    h: "1GBgqlG+RCS8dFTG2z15jLFFd4PCVVXDefXwBRq0oTs=",
   },
   "Undo": {
     val: "Desfazer",
@@ -1856,6 +2025,11 @@ const messages:IMessages = {
     translated: true,
     h: "hShy87A6GAhRqqtK+8VdVeGD70zA64iiV0/SwectQ0I=",
   },
+  "You can do math in all number inputs, not just here in the calculator.": {
+    val: "You can do math in all number inputs, not just here in the calculator.",
+    translated: false,
+    h: "dn2W/ktTrcwSzYNSq6IQL7Sl2k8lxZQRsFehzG9Mf7g=",
+  },
   "You don't have any recurring expense buckets yet.": {
     val: "Você ainda não tem buckets com despesa recorrente.",
     translated: true,
@@ -1907,14 +2081,34 @@ const messages:IMessages = {
     h: "9KaivrLeSKn8ROgvad6S9iE9NAz0BZRwQh3/ufRahVA=",
   },
   "account-bal-diff-fix-1": {
+    /* 'Buckets' refers to the application name */
     val: "O banco informou um saldo futuro.  Para consertar isso, espere que todas as transações chegem aos seus baldes.",
     translated: true,
     h: "CRYYgg8YHspvP5KI3HGvyzlrOhxZf4rrjjUQbmL6Z7Q=",
   },
   "account-bal-diff-fix-2": {
+    /* 'Buckets' refers to the application name. */
     val: "Transações estão sumidas dos Baldes.",
     translated: true,
     h: "CeKVWaErT3a5EvPpQb/Av2kHD7RtudYjlQntfcMMtS8=",
+  },
+  "account-in": {
+    /* Label for amount put into an account */
+    val: "In",
+    translated: false,
+    h: "TcCPpYF7/U7vM5pPmpqvJipZt0WPk3A/vC7Ec8pfDvo=",
+  },
+  "account-net-amount": {
+    /* Label for net value of amount in - amount out for an account */
+    val: "Net",
+    translated: false,
+    h: "QITdwYnhK1fVfALCDc6jQhY2jLIUBpPp0/bSHOX6p9M=",
+  },
+  "account-out": {
+    /* Label for amount taken out of an account */
+    val: "Out",
+    translated: false,
+    h: "v4Oj0CQx7cmHP4mcJsZX4xMTzMzeFS81XA9gU3qOFKU=",
   },
   "accounts.balance_mismatch_msg": {
     val: "O saldo mais recente que foi sincronizado não confere com o saldo computado das transações.  Clique ... para mais informações.",
@@ -2080,6 +2274,12 @@ const messages:IMessages = {
     translated: true,
     h: "9NGQRvIxlAaOF9i+zWPXMFQubcY+5jtA7Td/lii16aM=",
   },
+  "go-to-this-month": {
+    /* Menu item for "Go To... This Month" */
+    val: "This Month",
+    translated: false,
+    h: "pjcOO9o+UFMLsp6ovyVzksVtCLcFsauwEITWoeq//bg=",
+  },
   "in the bank": {
     val: "no banco",
     translated: true,
@@ -2181,6 +2381,12 @@ Você gostaria de comprar uma licença agora?`,
     translated: true,
     h: "boezbSGkVm3dnfFvodJOAeCgAEMIQN9L+8TwEHLpU/o=",
   },
+  "shipment-number": {
+    /* Noun labeling this shipment number */
+    val: (number:number)=>`Shipment ${number}`,
+    translated: false,
+    h: "kOj0AkivxHYJj3IKqIFziGCcIwk1yxyUrloX+kGlOd0=",
+  },
   "simplefin-connect-intro": {
     val: "Para conectar, faça o seguinte:",
     translated: true,
@@ -2243,6 +2449,12 @@ Você gostaria de comprar uma licença agora?`,
               },
     translated: true,
     h: "Bd1IGkjXo2ruWofGrT+WwLdiy8IwJ/PW+7SO4TaDcps=",
+  },
+  "verb-open": {
+    /* Verb to open a page */
+    val: "Open",
+    translated: false,
+    h: "PlLwT5LggHCmpOqXIa1xXdU/K/ztbasiD703lhOnltA=",
   },
   "version-available": {
     val: (newv:string) => `Versão ${newv} disponível.`,
