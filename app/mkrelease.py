@@ -102,6 +102,10 @@ def abort():
 @click.option('--skip-win', is_flag=True)
 @click.option('--no-publish', is_flag=True)
 def doit(no_publish, skip_mac, skip_linux, skip_win):
+    if yesno('Export translations?', default=True):
+        subprocess.check_call(['dev/update_translations.sh'])
+        subprocess.check_call(['dev/export_translations.sh'])
+
     # run tests?
     if yesno('Run tests?', default=True):
         subprocess.check_call(['yarn', 'test'], cwd='.')

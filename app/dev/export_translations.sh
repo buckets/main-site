@@ -13,8 +13,10 @@ dev/insert_into_file.py -i "${DST}/README.md" -s '<!-- trans stats start -->' -e
 
 pushd "${DST}"
 git diff --stat
-read -n1 -r -p "Press anything to proceeed with git push..." key
+DELAY=5
+echo "Will proceeed with git push in ${DELAY} seconds..."
+sleep "$DELAY"
 
-git commit -a -m "Update app strings"
+git commit -a -m "Update app strings" || echo "It's okay that there's nothing to commit"
 git push origin master
 popd
