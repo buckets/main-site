@@ -102,9 +102,21 @@ def abort():
 @click.option('--skip-win', is_flag=True)
 @click.option('--no-publish', is_flag=True)
 def doit(no_publish, skip_mac, skip_linux, skip_win):
+    # make sure the repo is not dirty
+    stdout = subprocess.check_output(['git', 'status', '--short']).strip()
+    if stdout:
+        print(stdout)
+        raise Exception("Uncommitted changes")
+
     if yesno('Export translations?', default=True):
         subprocess.check_call(['dev/update_translations.sh'])
         subprocess.check_call(['dev/export_translations.sh'])
+        try:
+            subprocess.check_call(['git', 'add', 'src/langs'])
+            subprocess.check_call(['git', 'commit', '-m', 'Update translation strings'])
+        except:
+            # nothing to commit
+            pass
 
     # run tests?
     if yesno('Run tests?', default=True):
