@@ -1,6 +1,10 @@
-import { SQLite, FileSystem, DocumentPicker } from 'expo';
+import {
+  SQLite,
+  FileSystem,
+  // DocumentPicker,
+} from 'expo';
 
-export async function dostuff():string {
+export async function dostuff() {
   console.log('stuff done');
 
   // const result = await DocumentPicker.getDocumentAsync({
@@ -12,7 +16,7 @@ export async function dostuff():string {
   await new Promise<any>((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        'select sqlite_version()',
+        'select sqlite_version() as theversion',
         [],
         (_, result) => {
           console.log('result', result);
