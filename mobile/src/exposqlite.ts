@@ -59,19 +59,60 @@ export class WebSQLDatabase implements IAsyncSqlite {
     return new Promise<AsyncRunResult>((resolve, reject) => {
       this.db.transaction(tx => {
         let {sql, args} = sqlo2a(query, params);
-        console.log('sql', sql, args);
-        tx.executeSql(sql, args, results => {
-          console.log('results', results);
+        tx.executeSql(sql, args, (tx, results) => {
+          // resolve
+          resolve({
+            lastID: results.insertId,
+          })
+        }, err => {
+          reject(err)
         })
       })
     })
   }
   async exec(query:string):Promise<null> {
-    return null
+    return new Promise<null>((resolve, reject) => {
+      this.db.transaction(tx => {
+        tx.executeSql(query, [], results => {
+          resolve(null);
+        }, err => {
+          reject(err);
+        })
+      })
+    })
   }
   async all<T>(query:string, params?:object):Promise<Array<T>> {
-    return [];
+    return new Promise<Array<T>>((resolve, reject) => {
+      this.db.transaction(tx => {
+        let {sql, args} = sqlo2a(query, params);
+        tx.executeSql(sql, args, (tx, results) => {
+          let rows:T[] = [];
+          for (var i = 0; i < results.rows.length; i++) {
+            rows.push(results.rows.item(i) as T);
+          }
+          resolve(rows)
+        }, err => {
+          reject(err)
+        })
+      })
+    })
   }
   async get<T>(query:string, params?:object):Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.db.transaction(tx => {
+        let {sql, args} = sqlo2a(query, params);
+        tx.executeSql(sql, args, (tx, results) => {
+          // resolve
+          if (results.rows.length === 1) {
+            resolve(results.rows.item(0))
+          } else {
+            resolve(null as any);
+          }
+        }, err => {
+          reject(err)
+        })
+      })
+    })
   }
 }
+

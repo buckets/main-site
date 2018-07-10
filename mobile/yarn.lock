@@ -588,6 +588,18 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-1.2.0.tgz#81a6731ce4df43619e5c8c945383b3e62a89ea86"
 
+"@types/expo@^27.0.6":
+  version "27.0.6"
+  resolved "https://registry.yarnpkg.com/@types/expo/-/expo-27.0.6.tgz#2bc1720c66ca85836fd5bb4bf1c0aabbac729034"
+  dependencies:
+    "@types/fbemitter" "*"
+    "@types/react" "*"
+    "@types/react-native" "*"
+
+"@types/fbemitter@*":
+  version "2.0.32"
+  resolved "https://registry.yarnpkg.com/@types/fbemitter/-/fbemitter-2.0.32.tgz#8ed204da0f54e9c8eaec31b1eec91e25132d082c"
+
 "@types/glob@*":
   version "5.0.35"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-5.0.35.tgz#1ae151c802cece940443b5ac246925c85189f32a"
@@ -603,6 +615,18 @@
 "@types/node@*":
   version "10.5.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.2.tgz#f19f05314d5421fe37e74153254201a7bf00a707"
+
+"@types/react-native@*":
+  version "0.56.0"
+  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.56.0.tgz#f61f8f056d1af672621e44b5918204a2ad087081"
+  dependencies:
+    "@types/react" "*"
+
+"@types/react@*":
+  version "16.4.6"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.4.6.tgz#5024957c6bcef4f02823accf5974faba2e54fada"
+  dependencies:
+    csstype "^2.2.0"
 
 abab@^1.0.4:
   version "1.0.4"
@@ -2222,6 +2246,10 @@ cssom@0.3.x, "cssom@>= 0.3.2 < 0.4.0":
   resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-0.3.1.tgz#6da9b4cff1bc5d716e6e5fe8e04fcb1b50a49adf"
   dependencies:
     cssom "0.3.x"
+
+csstype@^2.2.0:
+  version "2.5.5"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.5.tgz#4125484a3d42189a863943f23b9e4b80fedfa106"
 
 dashdash@^1.12.0:
   version "1.14.1"

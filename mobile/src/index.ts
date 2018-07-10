@@ -1,29 +1,24 @@
 import {
   SQLite,
-  FileSystem,
+  // FileSystem,
   // DocumentPicker,
 } from 'expo';
 import {
-  sqlo2a
+  WebSQLDatabase
 } from './exposqlite'
+import {
+  SQLiteStore
+} from 'buckets-core/dist/dbstore'
+import { Bucket } from 'buckets-core/dist/models/bucket'
 
 export async function dostuff() {
-  console.log('stuff done');
-  console.log('Query:', sqlo2a(
-    'SELECT foo, $something, $a, $aoo FROM ho WHERE a = $a or b = $something',
-    {
-      $something: 'hello',
-      $a: 'another thing',
-      $aoo: 'hoopa',
-    }
-  ));
+  const _db = SQLite.openDatabase(":memory:");
+  const store = new SQLiteStore(new WebSQLDatabase(_db), null as any);
 
-  // const result = await DocumentPicker.getDocumentAsync({
-  //   type: '*/*',
-  // })
-  // console.log('result', result);
-
-  // const db = SQLite.openDatabase("test.db");
+  await store.doSetup();
+  let bucket:Bucket = await store.sub.buckets.add({name: 'New bucket'})
+  console.log('bucket', bucket);
+  
   // await new Promise<any>((resolve, reject) => {
   //   db.transaction(tx => {
   //     tx.executeSql(
