@@ -7,7 +7,7 @@
     "declaration": true,
     "experimentalDecorators": true,
     "jsx": "react-native",
-    "lib": ["ES6"],
+    "lib": ["ES6", "dom"],
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "noEmitHelpers": true,
@@ -18,8 +18,6 @@
     "noUnusedLocals": true,
     "outDir": "dist",
     "types": [
-      "react",
-      "expo"
     ]
   },
   "include": [
