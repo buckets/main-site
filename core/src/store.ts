@@ -175,6 +175,7 @@ export interface IUserInterfaceFunctions {
    *  Thing for making HTTP requests
    */
   http:IHTTPRequester;
+
 }
 
 /**
