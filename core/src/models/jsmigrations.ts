@@ -21,7 +21,7 @@ export interface IMigration {
 
 export const migrations:IMigration[] = [
   {
-    name: 'initial.sql',
+    name: 'initial',
     func: justSQL(`
 -- -----------------------------------------------------
 -- Accounts
@@ -155,13 +155,13 @@ CREATE UNIQUE INDEX unknown_account_hash ON unknown_account(account_hash);
     `),
   },
   {
-    name: 'import_balance.sql',
+    name: 'import_balance',
     func: justSQL(`
 ALTER TABLE account ADD COLUMN import_balance INTEGER DEFAULT NULL;
     `),
   },
   {
-    name: 'deletetrans.sql',
+    name: 'deletetrans',
     func: justSQL(`
 CREATE TRIGGER account_transaction_delete
     AFTER DELETE ON account_transaction
@@ -177,7 +177,7 @@ DELETE FROM bucket_transaction
     `),
   },
   {
-    name: 'dearhacker.sql',
+    name: 'dearhacker',
     func: justSQL(`
 CREATE TABLE _dear_hacker (
     id INTEGER PRIMARY KEY,
@@ -187,7 +187,7 @@ INSERT INTO _dear_hacker (note) VALUES ('As you can probably tell, this file is 
     `),
   },
   {
-    name: 'bankmacro.sql',
+    name: 'bankmacro',
     func: justSQL(`
 CREATE TABLE bank_macro (
     id INTEGER PRIMARY KEY,
@@ -202,13 +202,13 @@ CREATE UNIQUE INDEX account_mapping_hash ON account_mapping(account_hash);
     `),
   },
   {
-    name: 'closeaccount.sql',
+    name: 'closeaccount',
     func: justSQL(`
 ALTER TABLE account ADD COLUMN closed TINYINT DEFAULT 0;
     `),
   },
   {
-    name: 'notes.sql',
+    name: 'notes',
     func: justSQL(`
 ALTER TABLE account ADD COLUMN notes TEXT DEFAULT '';
 UPDATE account SET notes = '';
@@ -221,7 +221,7 @@ UPDATE bucket_group SET notes = '';
     `),
   },
   {
-    name: 'csvimport.sql',
+    name: 'csvimport',
     func: justSQL(`
 CREATE TABLE csv_import_mapping (
     id INTEGER PRIMARY KEY,
@@ -334,7 +334,7 @@ CREATE TRIGGER account_transaction_delete
     }
   },
   {
-    name: 'nullamounttriggers.sql',
+    name: 'nullamounttriggers',
     func: justSQL(`
 -- Drop them all
 
@@ -400,7 +400,7 @@ WHERE balance IS NULL;
     `),
   },
   {
-    name: 'settings.sql',
+    name: 'settings',
     func: justSQL(`
 CREATE TABLE settings (
     id INTEGER PRIMARY KEY,
@@ -417,13 +417,13 @@ CREATE TRIGGER there_can_be_only_one_setting
     `),
   },
   {
-    name: 'offbudget.sql',
+    name: 'offbudget',
     func: justSQL(`
 ALTER TABLE account ADD COLUMN offbudget TINYINT DEFAULT 0;
     `),
   },
   {
-    name: 'cleared.sql',
+    name: 'cleared',
     func: justSQL(`
 ALTER TABLE account_transaction ADD COLUMN cleared TINYINT DEFAULT 0;
 UPDATE account_transaction SET cleared = 1;

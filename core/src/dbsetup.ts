@@ -158,7 +158,8 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[]):Promise
   for (const migration of migrations) {
     order++;
     const name = migration.name;
-    const fullname = `${migration.name}`
+    const padded = `0000${order}`.slice(-4);
+    const fullname = `${padded}-${migration.name}`
     const plog = logger.child(`(patch ${fullname})`)
     if (applied.has(fullname)) {
       // already applied
