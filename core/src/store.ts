@@ -170,7 +170,30 @@ export interface IUserInterfaceFunctions {
    *  Attach these functions to a particular IStore instance
    */
   attachStore(store:IStore);
+
+  /**
+   *  Thing for making HTTP requests
+   */
+  http:IHTTPRequester;
 }
+
+/**
+ *  Options for HTTP requests
+ */
+export interface IHTTPRequestOptions {
+  uri: string;
+  method: string;
+  qs?: {
+    [k:string]: string|number;
+  };
+}
+/**
+ *  Interface for an HTTP Request maker
+ */
+export interface IHTTPRequester {
+  fetchBody(args:IHTTPRequestOptions):Promise<string>;
+}
+
 
 
 export interface IEventCollectionBroadcast<T, K extends keyof T> {

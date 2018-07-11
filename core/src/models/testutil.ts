@@ -31,6 +31,7 @@ export class TestUIFunctions implements IUserInterfaceFunctions {
   async getPassword():Promise<string> {
     return 'password';
   }
+  http: null;
 }
 
 
