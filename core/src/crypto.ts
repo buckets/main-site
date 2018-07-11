@@ -1,15 +1,24 @@
-interface Crypter {
+import * as cryptojs from 'crypto-js'
+
+export interface Crypter {
   encrypt(plaintext:string, password:string):Promise<string>;
   decrypt(ciphertext:string, password:string):Promise<string>;
 }
 
 
-class TriplesecCrypter implements Crypter {
-  async triplesec() {
-    return import('triplesec')
+//------------------------------------------------------------
+// Triplesec (deprecated)
+//------------------------------------------------------------
+export interface ITriplesecModule {
+  encrypt(args:{key:Buffer, data:Buffer}, callback:(err:Error, ciphertext:Buffer)=>void);
+  decrypt(args:{key:Buffer, data:Buffer}, callback:(err:Error, plaintext:Buffer)=>void);
+}
+let triplesec:ITriplesecModule = null;
+export class TriplesecCrypter implements Crypter {
+  static setPackage(mod:ITriplesecModule) {
+    triplesec = mod;
   }
   async encrypt(plaintext:string, password:string):Promise<string> {
-    const triplesec = await this.triplesec();
     return new Promise<string>((resolve, reject) => {
       let key = new Buffer(password, 'utf8')
       let ptbuffer = new Buffer(plaintext, 'utf8')
@@ -23,7 +32,6 @@ class TriplesecCrypter implements Crypter {
     })
   }
   async decrypt(ciphertext:string, password:string):Promise<string> {
-    const triplesec = await this.triplesec();
     return new Promise<string>((resolve, reject) => {
       let key = new Buffer(password, 'utf8')
       let ctbuffer = new Buffer(ciphertext, 'base64')
@@ -38,17 +46,20 @@ class TriplesecCrypter implements Crypter {
   }
 }
 
+//------------------------------------------------------------
+// AES v1
+//------------------------------------------------------------
 class AESCrypter implements Crypter {
   async encrypt(plaintext:string, password:string):Promise<string> {
-    const cryptojs = await import('crypto-js');
     return cryptojs.AES.encrypt(plaintext, password).toString();
   }
   async decrypt(ciphertext:string, password:string):Promise<string> {
-    const cryptojs = await import('crypto-js');
     const bytes = cryptojs.AES.decrypt(ciphertext, password);
     return bytes.toString(cryptojs.enc.Utf8);
   }
 }
+
+//------------------------------------------------------------
 
 const CRYPTERS = {
   '0': TriplesecCrypter,

@@ -1,4 +1,5 @@
 import * as Path from 'path'
+import * as fs from 'fs-extra-promise'
 import * as req from 'request-promise'
 import * as querystring from 'querystring'
 import { dialog, session, ipcMain } from 'electron'
@@ -48,7 +49,7 @@ export class DesktopFunctions implements IUserInterfaceFunctions {
         if (paths) {
           for (let path of paths) {
             try {
-              await importYNAB4(this.store, path);
+              await importYNAB4(fs, this.store, path);
             } catch(err) {
               log.error(err.stack);
               reportErrorToUser(sss('Error importing'), {err: err});

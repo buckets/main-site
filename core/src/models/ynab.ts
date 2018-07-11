@@ -1,8 +1,6 @@
-import * as fs from 'fs-extra-promise'
 import * as Path from 'path'
+import * as Bluebird from 'bluebird'
 import {v4 as uuid} from 'uuid'
-
-// import { dialog } from 'electron'
 
 import * as sortby from 'lodash.sortby'
 import { sss } from '@iffycan/i18n'
@@ -11,9 +9,6 @@ import * as Bucket from './bucket'
 import * as Account from './account'
 import { decimal2cents } from '../money'
 import { parseLocalTime } from '../time'
-// import { IBudgetFile } from './mainprocess/files'
-
-// import { reportErrorToUser } from './errors'
 
 import { PrefixLogger } from '../logging'
 
@@ -239,7 +234,7 @@ export class YNABStore {
   }
 }
 
-async function loadJSONFile<T>(path:string):Promise<T> {
+async function loadJSONFile<T>(fs:FileSystem, path:string):Promise<T> {
   const guts = await fs.readFileAsync(path)
   return JSON.parse(guts.toString('utf8')) as T;
 }
@@ -256,14 +251,30 @@ function sortByIndex(a, b) {
   return compare(a.sortableIndex, b.sortableIndex);
 }
 
-export async function importYNAB4(store:IStore, path:string) {
+/**
+ *  Portions of fs-extra-promise used by this module
+ */
+export interface FileSystem {
+  readdirAsync(dir:string):Promise<string[]>|Bluebird<string[]>;
+  readFileAsync(path:string):Promise<Buffer>|Bluebird<Buffer>;
+  statSync(path:string):{
+    mtime: {
+      getTime():number;
+    };
+  };
+}
+
+/**
+ *  fs: fs-extra-promise compatible module
+ */
+export async function importYNAB4(fs:FileSystem, store:IStore, path:string) {
   const import_id = uuid();
   store.events.broadcast('ynab_import_progress', {
     id: import_id,
     percent: 0,
   })
   try {
-    const ymeta = await loadJSONFile<YNAB.Meta>(Path.resolve(path, 'Budget.ymeta'));
+    const ymeta = await loadJSONFile<YNAB.Meta>(fs, Path.resolve(path, 'Budget.ymeta'));
     const datadir = Path.resolve(path, ymeta.relativeDataFolderName);
     const filenames = await fs.readdirAsync(datadir);
 
@@ -297,7 +308,7 @@ export async function importYNAB4(store:IStore, path:string) {
     if (budget_files.length > 1) {
       log.info("More than one Budget.yfull found.  Choosing the most recent of:", budget_files)
     }
-    budget = await loadJSONFile<YNAB.Budget>(budget_files[0].path);
+    budget = await loadJSONFile<YNAB.Budget>(fs, budget_files[0].path);
 
     let payees:{[k:string]: YNAB.Payee} = {};
     let yaccounts:{[k:string]: YNAB.Account} = {};
