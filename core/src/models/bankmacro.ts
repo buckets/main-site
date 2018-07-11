@@ -147,7 +147,6 @@ export class BankMacroStore {
     if (args.recording_str) {
       const password = await this.getPassword();  
       bank_macro.enc_recording = await encrypt(args.recording_str, password)
-      console.log('encrypted', bank_macro.enc_recording);
     }
     return bank_macro;
   }
