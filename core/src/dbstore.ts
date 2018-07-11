@@ -1,11 +1,11 @@
 // import { EventSource } from '@iffycan/events'
 import { IStore, ISubStore, IStoreEvents, EventCollection, IObjectTypes, ObjectEventType, IObject, IUserInterfaceFunctions } from './store'
-import { createErrorSubclass } from './errors'
+import { CustomError } from './errors'
 import { SubStore } from './models/substore'
 import { setupDatabase } from './dbsetup'
 import { UndoTracker, UndoRedoResult } from './undo'
 
-export const NotFound = createErrorSubclass('NotFound');
+export class NotFound extends CustomError {}
 
 export interface AsyncRunResult {
   lastID: number;

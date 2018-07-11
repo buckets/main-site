@@ -3,7 +3,7 @@ import {v4 as uuid} from 'uuid'
 
 import { IObject, IStore } from '../store'
 import { encrypt, decrypt } from '../crypto'
-import { createErrorSubclass } from '../errors'
+import { CustomError } from '../errors'
 import { sss, CONTEXT } from '@iffycan/i18n'
 import { ISyncChannel, ASyncening, SyncResult } from './sync'
 import { PrefixLogger } from '../logging'
@@ -11,7 +11,7 @@ import { localNow, SerializedTimestamp, dumpTS } from '../time'
 
 const log = new PrefixLogger('(bankmacro)');
 
-export const IncorrectPassword = createErrorSubclass('IncorrectPassword');
+export class IncorrectPassword extends CustomError {}
 
 //-------------------------------------------------------
 // Database objects
