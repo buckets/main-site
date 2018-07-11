@@ -570,9 +570,9 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@iffycan/events/-/events-1.0.1.tgz#b78b4610effad956cfdd7ed46da6b78dc2c2a8b3"
 
-"@iffycan/i18n@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@iffycan/i18n/-/i18n-0.5.0.tgz#2dc7461077690d2b2f6ba448791834f4dc350189"
+"@iffycan/i18n@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@iffycan/i18n/-/i18n-0.6.0.tgz#9353d9f468186e8ef628c3fccbdf234b13175613"
   dependencies:
     "@iffycan/events" "^1.0.1"
     moment-timezone "^0.5.17"
@@ -1808,15 +1808,14 @@ bser@^2.0.0:
   version "0.1.0"
   dependencies:
     "@iffycan/events" "^1.0.1"
-    "@iffycan/i18n" "^0.5.0"
+    "@iffycan/i18n" "^0.6.0"
     crypto-js "^3.1.9-1"
     lodash.sortby "^4.7.0"
-    mathjs "^4.0.1"
+    mathjs "4.2.2"
     moment "^2.22.1"
     moment-timezone "^0.5.17"
     path "^0.12.7"
     sha.js "^2.4.11"
-    triplesec "^3.0.26"
 
 buffer-alloc-unsafe@^1.1.0:
   version "1.1.0"
@@ -2096,9 +2095,9 @@ compare-versions@^3.1.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-3.3.0.tgz#af93ea705a96943f622ab309578b9b90586f39c3"
 
-complex.js@2.0.10:
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/complex.js/-/complex.js-2.0.10.tgz#afac74e4fb9131e8709f9c300420ce58fa36f18d"
+complex.js@2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/complex.js/-/complex.js-2.0.4.tgz#d8e7cfb9652d1e853e723386421c1a0ca7a48373"
 
 component-emitter@^1.2.0, component-emitter@^1.2.1:
   version "1.2.1"
@@ -2254,6 +2253,12 @@ cssom@0.3.x, "cssom@>= 0.3.2 < 0.4.0":
 csstype@^2.2.0:
   version "2.5.5"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.5.tgz#4125484a3d42189a863943f23b9e4b80fedfa106"
+
+d@1:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/d/-/d-1.0.0.tgz#754bb5bfe55451da69a58b94d45f4c5b0462d58f"
+  dependencies:
+    es5-ext "^0.10.9"
 
 dashdash@^1.12.0:
   version "1.14.1"
@@ -2496,9 +2501,25 @@ es-to-primitive@^1.1.1:
     is-date-object "^1.0.1"
     is-symbol "^1.0.1"
 
+es5-ext@^0.10.35, es5-ext@^0.10.9, es5-ext@~0.10.14:
+  version "0.10.45"
+  resolved "https://registry.yarnpkg.com/es5-ext/-/es5-ext-0.10.45.tgz#0bfdf7b473da5919d5adf3bd25ceb754fccc3653"
+  dependencies:
+    es6-iterator "~2.0.3"
+    es6-symbol "~3.1.1"
+    next-tick "1"
+
 es6-error@^4.0.2:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/es6-error/-/es6-error-4.1.1.tgz#9e3af407459deed47e9a91f9b885a84eb05c561d"
+
+es6-iterator@~2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/es6-iterator/-/es6-iterator-2.0.3.tgz#a7de889141a05a94b0854403b2d0a0fbfa98f3b7"
+  dependencies:
+    d "1"
+    es5-ext "^0.10.35"
+    es6-symbol "^3.1.1"
 
 es6-promise@^4.0.3:
   version "4.2.4"
@@ -2509,6 +2530,13 @@ es6-promisify@^5.0.0:
   resolved "https://registry.yarnpkg.com/es6-promisify/-/es6-promisify-5.0.0.tgz#5109d62f3e56ea967c4b63505aef08291c8a5203"
   dependencies:
     es6-promise "^4.0.3"
+
+es6-symbol@^3.1.1, es6-symbol@~3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/es6-symbol/-/es6-symbol-3.1.1.tgz#bf00ef4fdab6ba1b46ecb7b629b4c7ed5715cc77"
+  dependencies:
+    d "1"
+    es5-ext "~0.10.14"
 
 escape-html@~1.0.3:
   version "1.0.3"
@@ -2965,9 +2993,9 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
 
-fraction.js@4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.0.8.tgz#e53618112e3b36b348c61a81323173bceb01e418"
+fraction.js@4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.0.4.tgz#04e567110718adf7b52974a10434ab4c67a5183e"
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -3342,20 +3370,6 @@ https-proxy-agent@^2.2.1:
   dependencies:
     agent-base "^4.1.0"
     debug "^3.1.0"
-
-iced-error@>=0.0.9:
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/iced-error/-/iced-error-0.0.12.tgz#e0a861462817cf0ce974b13fca612d3a0d5d10be"
-
-iced-lock@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/iced-lock/-/iced-lock-1.1.0.tgz#6116ef1cab3acd6e6b10893bb27ba622fd3fde72"
-  dependencies:
-    iced-runtime "^1.0.0"
-
-iced-runtime@>=0.0.1, iced-runtime@^1.0.0, iced-runtime@^1.0.2:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/iced-runtime/-/iced-runtime-1.0.3.tgz#2d4f4fb999ab7aa5430b193c77a7fce4118319ce"
 
 iconv-lite@0.4.19:
   version "0.4.19"
@@ -4526,14 +4540,14 @@ math-random@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/math-random/-/math-random-1.0.1.tgz#8b3aac588b8a66e4975e3cdea67f7bb329601fac"
 
-mathjs@^4.0.1:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-4.4.2.tgz#79a5c8ad92a6434e22dbfac13e223a9bd62d6981"
+mathjs@4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-4.2.2.tgz#a56785d49ff23da32c1e4eb26763e380592d22ae"
   dependencies:
-    complex.js "2.0.10"
+    complex.js "2.0.4"
     decimal.js "9.0.1"
     escape-latex "1.0.3"
-    fraction.js "4.0.8"
+    fraction.js "4.0.4"
     javascript-natural-sort "0.7.1"
     seed-random "2.2.0"
     tiny-emitter "2.0.2"
@@ -4849,12 +4863,6 @@ moment@2.x.x, "moment@>= 2.9.0", moment@^2.10.6, moment@^2.22.1:
   version "2.22.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
-more-entropy@>=0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/more-entropy/-/more-entropy-0.0.7.tgz#67bfc6f7a86f26fbc37aac83fd46d88c61d109b5"
-  dependencies:
-    iced-runtime ">=0.0.1"
-
 morgan@^1.9.0:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/morgan/-/morgan-1.9.0.tgz#d01fa6c65859b76fcf31b3cb53a3821a311d8051"
@@ -4937,7 +4945,7 @@ netmask@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
 
-next-tick@^1.0.0:
+next-tick@1, next-tick@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
 
@@ -5471,10 +5479,6 @@ process@~0.5.1:
 progress@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.0.tgz#8a1be366bf8fc23db2bd23f10c6fe920b4389d1f"
-
-progress@~1.1.2:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
 
 promise@^7.1.1:
   version "7.3.1"
@@ -6852,16 +6856,6 @@ tree-kill@^1.1.0:
 trim-right@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
-
-triplesec@^3.0.26:
-  version "3.0.26"
-  resolved "https://registry.yarnpkg.com/triplesec/-/triplesec-3.0.26.tgz#dff2bb4758a423372e739a397d8991f0597d0ac1"
-  dependencies:
-    iced-error ">=0.0.9"
-    iced-lock "^1.0.1"
-    iced-runtime "^1.0.2"
-    more-entropy ">=0.0.7"
-    progress "~1.1.2"
 
 tunnel-agent@^0.6.0:
   version "0.6.0"

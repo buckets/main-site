@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
+import 'es6-symbol/implement';
 import { dostuff } from './dist'
+
 
 export default class App extends React.Component {
   render() {

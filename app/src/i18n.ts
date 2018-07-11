@@ -3,7 +3,7 @@ import * as moment from 'moment-timezone'
 import { remote, app } from 'electron'
 import { PSTATE } from './mainprocess/persistent'
 import { APP_ROOT } from './mainprocess/globals'
-import { CONTEXT, NUMBER_FORMATS } from '@iffycan/i18n'
+import { CONTEXT, NUMBER_FORMATS, ILangPack } from '@iffycan/i18n'
 export { sss } from '@iffycan/i18n'
 import { PrefixLogger } from './logging'
 
@@ -35,15 +35,28 @@ async function getLocale():Promise<string> {
 }
 
 const DEFAULT_LOCALE = 'en'
+const LANGPACK_BASEPATH = Path.join(APP_ROOT, 'src/langs');
+
+async function langPackFetcher(locale:string):Promise<ILangPack> {
+  const mod = await import(`${LANGPACK_BASEPATH}/${locale}`);
+  try {
+    await import(`moment/locale/${locale}`);
+  } catch(err) {
+    if (locale !== DEFAULT_LOCALE) {
+      log.error(`Error loading moment/locale/${locale}`, err.stack);
+    }
+  }
+  return mod.pack as ILangPack;
+}
 
 CONTEXT.configure({
   default_locale: DEFAULT_LOCALE,
-  langpack_basepath: Path.join(APP_ROOT, 'src/langs'),
+  fetcher: langPackFetcher,
 })
 CONTEXT.localechanged.on(async ({locale}) => {
   // date
   try {
-    await import(`moment/locale/${locale}`);
+    // await import(`moment/locale/${locale}`);
     moment.locale(locale)
     log.info('date format set');
   } catch(err) {
