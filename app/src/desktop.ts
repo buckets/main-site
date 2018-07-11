@@ -1,11 +1,12 @@
 import * as Path from 'path'
+import * as req from 'request-promise'
 import * as querystring from 'querystring'
 import { dialog, session, ipcMain } from 'electron'
 import * as tmp from 'tmp'
 import * as electron_is from 'electron-is'
 import { v4 as uuid } from 'uuid';
 
-import { IStore, IUserInterfaceFunctions } from 'buckets-core/dist/store'
+import { IStore, IUserInterfaceFunctions, IHTTPRequester, IHTTPRequestOptions } from 'buckets-core/dist/store'
 import { importYNAB4 } from 'buckets-core/dist/models/ynab'
 import { SyncResult } from 'buckets-core/dist/models/sync'
 import { dumpTS, SerializedTimestamp } from 'buckets-core/dist/time'
@@ -23,6 +24,7 @@ const log = new PrefixLogger('(desktop)');
  */
 export class DesktopFunctions implements IUserInterfaceFunctions {
   private store:IStore;
+  readonly http = new ElectronHTTPRequester();
 
   constructor(private budgetfile:IBudgetFile) {
 
@@ -207,5 +209,12 @@ export class DesktopFunctions implements IUserInterfaceFunctions {
         imported_count: 0,
       });
     }
+  }
+}
+
+
+export class ElectronHTTPRequester implements IHTTPRequester {
+  async fetchBody(args:IHTTPRequestOptions):Promise<string> {
+    return req(args);
   }
 }

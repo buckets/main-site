@@ -6,6 +6,7 @@ import { SerializedTimestamp } from 'buckets-core/dist/time'
 import { ipcMain, ipcRenderer } from 'electron'
 import { PrefixLogger } from './logging'
 import { MainEventCollection, RendererEventCollection } from './rpc'
+import { ElectronHTTPRequester } from './desktop'
 
 const log = new PrefixLogger('(rpcstore)')
 
@@ -189,6 +190,7 @@ export class RPCRendererStore implements IStore {
 
 class RendererUserInterfaceFunctions implements IUserInterfaceFunctions {
   private caller:RPCCaller<IUserInterfaceFunctions>;
+  readonly http = new ElectronHTTPRequester();
 
   constructor(room:string) {
     this.caller = new RPCCaller<IUserInterfaceFunctions>(`rpc-ui-${room}`)
