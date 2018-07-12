@@ -17,7 +17,10 @@ const log = new PrefixLogger('(dbsetup)')
  *  - Adds Buckets License bucket if asked
  *  - Starts undo/redo tracking
  */
-export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=false) {
+export async function setupDatabase(store:SQLiteStore, opts:{
+  addBucketsLicenseBucket?: boolean;
+  noUndo?: boolean;
+}={}) {
 
   // upgrade database
   try {
@@ -38,7 +41,7 @@ export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=f
     throw err;
   }
 
-  if (addBucketsLicenseBucket) {
+  if (opts.addBucketsLicenseBucket) {
     try {
       await ensureBucketsLicenseBucket(store);  
     } catch(err) {
@@ -47,8 +50,10 @@ export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=f
     }
   }
   
-  // track undos
-  await store.undo.start();
+  if (!opts.noUndo) {
+    // track undos
+    await store.undo.start();  
+  }
 }
 
 /**

@@ -7,15 +7,30 @@ import {
   WebSQLDatabase
 } from './exposqlite'
 import {
-  SQLiteStore
+  SQLiteStore,
 } from 'buckets-core/dist/dbstore'
-// import { Bucket } from 'buckets-core/dist/models/bucket'
+import {
+  IUserInterfaceFunctions
+} from 'buckets-core/dist/store'
+import { Bucket } from 'buckets-core/dist/models/bucket'
+
+class MobileUIFunctions implements IUserInterfaceFunctions {
+  attachStore(store) {
+
+  }
+}
 
 export async function dostuff() {
-  const _db = SQLite.openDatabase(":memory:");
-  const store = new SQLiteStore(new WebSQLDatabase(_db), null as any);
+  const _db = SQLite.openDatabase("gooba7");
+  const store = new SQLiteStore(new WebSQLDatabase(_db), new MobileUIFunctions());
 
-  await store.doSetup();
-  // let bucket:Bucket = await store.sub.buckets.add({name: 'New bucket'})
-  // console.log('bucket', bucket);
+  try {
+    await store.doSetup();  
+  } catch(err) {
+    console.log('Error FROM dostuff', err);
+    return;
+  }
+  
+  let bucket:Bucket = await store.sub.buckets.add({name: 'New bucket'})
+  console.log('bucket', bucket);
 }

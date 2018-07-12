@@ -55,31 +55,88 @@ export class WebSQLDatabase implements IAsyncSqlite {
   constructor(readonly db:SQLite.Database) {
 
   }
+  private _run<T>(func:(tx:SQLite.Transaction)=>Promise<T>):Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      let ret:T;
+      this.db.transaction(
+        async tx => {
+          ret = await func(tx)
+        },
+        err => {
+          reject(err)
+        },
+        () => {
+          resolve(ret)
+        })
+    })
+  }
   async run(query:string, params?:object):Promise<AsyncRunResult> {
-    return new Promise<AsyncRunResult>((resolve, reject) => {
-      this.db.transaction(tx => {
+    return this._run(tx => {
+      return new Promise<AsyncRunResult>((resolve, reject) => {
         let {sql, args} = sqlo2a(query, params);
         tx.executeSql(sql, args, (tx, results) => {
           // resolve
           resolve({
             lastID: results.insertId,
           })
-        }, err => {
-          reject(err)
         })
       })
     })
+    // return new Promise<AsyncRunResult>((resolve, reject) => {
+    //   this.db.transaction(tx => {
+    //     let {sql, args} = sqlo2a(query, params);
+    //     tx.executeSql(sql, args, (tx, results) => {
+    //       // resolve
+    //       resolve({
+    //         lastID: results.insertId,
+    //       })
+    //     }, (tx, err) => {
+    //       reject(err)
+    //     })
+    //   })
+    // })
   }
-  async exec(query:string):Promise<null> {
-    return new Promise<null>((resolve, reject) => {
+  async executeMany(queries:string[]):Promise<null> {
+    console.log('executeMany', queries.length);
+    console.log('queries', queries);
+    await new Promise<null>((resolve, reject) => {
       this.db.transaction(tx => {
-        tx.executeSql(query, [], results => {
-          resolve(null);
-        }, err => {
-          reject(err);
-        })
+        for (const sql of queries) {
+          console.log('Queueing sql', sql);
+          tx.executeSql(sql, [])
+        }
+      },
+      err => {
+        console.log('transaction err');
+        reject(err)
+      },
+      () => {
+        console.log('transaction done');
+        resolve(null)
       })
     })
+    console.log('done w/ executeMany');
+    return null;
+    // return this._run(tx => {
+    //   return new Promise<null>((resolve, reject) => {
+        
+    //     tx.executeSql(query, [], results => {
+    //       resolve(null);
+    //     })
+    //   })
+    // })
+    // return new Promise<null>((resolve, reject) => {
+    //   this.db.transaction(tx => {
+    //     console.log("Executing SQL:", query);
+    //     tx.executeSql(query, [], results => {
+    //       console.log("GOT Results");
+    //       resolve(null);
+    //     }, (tx, err) => {
+    //       console.log("Error", JSON.stringify(err));
+    //       reject(err);
+    //     })
+    //   })
+    // })
   }
   async all<T>(query:string, params?:object):Promise<Array<T>> {
     return new Promise<Array<T>>((resolve, reject) => {
@@ -91,7 +148,7 @@ export class WebSQLDatabase implements IAsyncSqlite {
             rows.push(results.rows.item(i) as T);
           }
           resolve(rows)
-        }, err => {
+        }, (tx, err) => {
           reject(err)
         })
       })
@@ -108,7 +165,7 @@ export class WebSQLDatabase implements IAsyncSqlite {
           } else {
             resolve(null as any);
           }
-        }, err => {
+        }, (tx, err) => {
           reject(err)
         })
       })

@@ -98,10 +98,10 @@ export interface IStore {
   query<T>(sql:string, params:{}):Promise<Array<T>>;
 
   /**
-   *  Execute a blob of SQL.  Can include multiple statements.
+   *  Execute an array of SQL statements
    *  No result is returned.
    */
-  exec(sql:string):Promise<null>;
+  executeMany(sqls:string[]):Promise<null>;
 
   /**
    *  Run a function, recording its effects so that it can be undone

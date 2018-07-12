@@ -63,30 +63,30 @@ export class UndoTracker {
 
   }
   async start() {
-    const sql = `
-      CREATE TEMP TABLE undo_status (
+    const init_sqls = [
+      `CREATE TEMP TABLE undo_status (
         direction TEXT,
         temporary TINYINT DEFAULT 0
-      );
-      INSERT INTO undo_status (direction) values ('undo');
+      )`,
+      `INSERT INTO undo_status (direction) values ('undo')`,
 
-      CREATE TEMP TABLE undo_checkpoint (
+      `CREATE TEMP TABLE undo_checkpoint (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         undo_log_id INTEGER,
         direction TEXT,
         label TEXT
-      );
+      )`,
       
-      CREATE TEMP TABLE undo_log (
+      `CREATE TEMP TABLE undo_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         table_name TEXT,
         object_id INTEGER,
         direction TEXT,
         sql TEXT
-      );
+      )`,
 
-      CREATE TEMP TRIGGER wipe_redos
+      `CREATE TEMP TRIGGER wipe_redos
       AFTER INSERT ON undo_checkpoint
       WHEN
         NEW.direction = 'undo'
@@ -94,12 +94,12 @@ export class UndoTracker {
       BEGIN
         DELETE FROM undo_checkpoint WHERE direction='redo';
         DELETE FROM undo_log WHERE direction='redo';
-      END;
-    `;
+      END`,
+    ];
     try {
-      await this.store.exec(sql);  
+      await this.store.executeMany(init_sqls);  
     } catch(err) {
-      log.error('Error setting up undo_log', sql);
+      log.error('Error setting up undo_log', init_sqls);
       log.error(err.stack)
       throw err;
     }
@@ -116,13 +116,11 @@ export class UndoTracker {
     .filter(table_name => !exclude_tables.has(table_name))
     .map(table_name => this.enableTableSQL(table_name)))
 
-    const full_sql = sqls.join('\n')
-
     try {
-      await this.store.db.exec(full_sql)
+      await this.store.db.executeMany(sqls)
     } catch(err) {
       log.error('Error enabling undo tracking')
-      log.info(full_sql)
+      log.info(sqls)
       throw err;
     }
   }
@@ -333,9 +331,7 @@ export class UndoTracker {
       // Remove checkpoint
       sqls.push(`DELETE FROM undo_checkpoint WHERE id = ${checkpoint.id}`)
 
-      const full_sql = sqls.join(';');
-
-      await this.store.exec(full_sql);
+      await this.store.executeMany(sqls);
     })
 
     // Switch back to undo mode, which is the default mode
