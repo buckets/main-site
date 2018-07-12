@@ -19,7 +19,7 @@
     "fakebank": "http-server -a localhost -p 8080 test/fakebank"
   },
   "dependencies": {
-    "@iffycan/i18n": "^0.6.0",
+    "@iffycan/i18n": "^0.7.0",
     "bluebird": "3.5.0",
     "buckets-core": "file:../core",
     "chardet": "^0.5.0",
