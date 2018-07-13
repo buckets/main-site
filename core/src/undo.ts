@@ -110,7 +110,7 @@ export class UndoTracker {
       '_dear_hacker',
       'x_trigger_disabled',
     ])
-    const all_tables = await this.store.query<{name:string}>(`SELECT name FROM sqlite_master WHERE type='table';`, {});
+    const all_tables = await this.store.query<{name:string}>(`SELECT name FROM sqlite_master WHERE type='table'`, {});
     const sqls = await Promise.all(all_tables
     .map(x => x.name)
     .filter(table_name => !exclude_tables.has(table_name))

@@ -74,8 +74,10 @@ export class WebSQLDatabase implements IAsyncSqlite {
     return this._run(tx => {
       return new Promise<AsyncRunResult>((resolve, reject) => {
         let {sql, args} = sqlo2a(query, params);
+        console.log('.run', sql, args);
         tx.executeSql(sql, args, (tx, results) => {
           // resolve
+          console.log('got result', results);
           resolve({
             lastID: results.insertId,
           })
@@ -142,6 +144,7 @@ export class WebSQLDatabase implements IAsyncSqlite {
     return new Promise<Array<T>>((resolve, reject) => {
       this.db.transaction(tx => {
         let {sql, args} = sqlo2a(query, params);
+        console.log('.all', sql, args);
         tx.executeSql(sql, args, (tx, results) => {
           let rows:T[] = [];
           for (var i = 0; i < results.rows.length; i++) {
@@ -158,6 +161,7 @@ export class WebSQLDatabase implements IAsyncSqlite {
     return new Promise<T>((resolve, reject) => {
       this.db.transaction(tx => {
         let {sql, args} = sqlo2a(query, params);
+        console.log('.get', sql, args);
         tx.executeSql(sql, args, (tx, results) => {
           // resolve
           if (results.rows.length === 1) {
