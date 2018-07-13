@@ -415,6 +415,9 @@ const DATE_FORMATS = [
   "DD/MM/YYYY",
   "DD/MM/YY",
   "MMM DD, YYYY",
+  "DD/MMM/YY",
+  "DD/MMM/YYYY",
+  "DD MMM YYYY",
 ]
 
 
@@ -423,7 +426,6 @@ interface CSVMapperProps {
 }
 interface CSVMapperState {
   mapping: CSVMapping;
-  format_options: string[];
 }
 export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
   constructor(props:CSVMapperProps) {
@@ -435,42 +437,38 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
       seps: undefined,
       negative_signifier: undefined,
     }
-    let guess = this.computeFormatOptionsAndBestGuess(mapping, props.obj);
-    if (guess.posted_format !== undefined) {
-      mapping.posted_format = guess.posted_format;
+    if (!mapping.posted_format) {
+      mapping.posted_format = this.guessDateFormat(mapping, props.obj)
     }
     this.state = {
       mapping: mapping,
-      format_options: guess.format_options,
     }
   }
-  computeFormatOptionsAndBestGuess(mapping:CSVMapping, obj:CSVNeedsMapping) {
-    let ret:{
-      posted_format?: string,
-      format_options: string[],
-    } = {
-      format_options: [],
-    };
-    let format_options = DATE_FORMATS;
+  guessDateFormat(mapping:CSVMapping, obj:CSVNeedsMapping):string {
+    let format_options = [...DATE_FORMATS];
+    if (mapping.posted_format) {
+      format_options.push(mapping.posted_format);
+    }
     let inverted_mapping = invertMapping(mapping);
     if (inverted_mapping.posted.length) {
       let date_strings = obj.parsed_data.rows.map(row => {
         return row[inverted_mapping.posted[0]]
       })
-      format_options = guessDateFormat(DATE_FORMATS, date_strings);
-      if (format_options.length) {
-        if (!mapping.posted_format) {
-          // XXX you really shouldn't be setting state in here
-          ret.posted_format = format_options[0]
-        }
-        ret.format_options = format_options;
+      const possibles = guessDateFormat(format_options, date_strings);
+      console.log('possibles', possibles);
+      if (possibles.length && !mapping.posted_format) {
+        return possibles[0];
       }
     }
-    return ret;
+    return null;
   }
   render() {
     let { obj } = this.props;
-    let { mapping, format_options } = this.state;
+    let { mapping } = this.state;
+    let format_options = [...DATE_FORMATS];
+    if (mapping.posted_format && format_options.indexOf(mapping.posted_format) === -1) {
+      format_options.push(mapping.posted_format);
+    }
 
     let mapped_fields = Object.values(mapping.fields);
     const mapping_acceptable = (
@@ -525,11 +523,12 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                       let newstate:any = {mapping: new_mapping}
 
                       if (newvalue === 'posted') {
-                        let guess = this.computeFormatOptionsAndBestGuess(new_mapping, obj)
-                        if (!new_mapping.posted_format && guess.posted_format) {
-                          new_mapping.posted_format = guess.posted_format
+                        if (!new_mapping.posted_format) {
+                          const guess = this.guessDateFormat(new_mapping, obj);
+                          if (guess) {
+                            new_mapping.posted_format = guess;
+                          }
                         }
-                        newstate.format_options = guess.format_options;
                       }
                       this.setState(newstate);
                     }}
@@ -555,6 +554,17 @@ export class CSVMapper extends React.Component<CSVMapperProps, CSVMapperState> {
                       return <option key={option}>{option}</option>
                     })}
                   </select>
+                  <input
+                    type="text"
+                    value={mapping.posted_format || ''}
+                    onChange={ev => {
+                      this.setState({
+                        mapping: Object.assign(mapping, {
+                          posted_format: ev.target.value,
+                        }),
+                      })
+                    }}
+                  />
                 </div> : null}
                 {value === 'amount' ? <div>
                   <select
