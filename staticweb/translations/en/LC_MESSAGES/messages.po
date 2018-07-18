@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-06-26 10:55-0600\n"
+"POT-Creation-Date: 2018-07-18 10:00-0600\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -53,6 +53,10 @@ msgstr ""
 
 #: src/_base.html:131
 msgid "Buy"
+msgstr ""
+
+#: src/_base.html:132
+msgid "Privacy"
 msgstr ""
 
 #: src/_navbar.html:5
@@ -117,146 +121,146 @@ msgid ""
 "think were in reach."
 msgstr ""
 
-#: src/index.html:152
+#: src/index.html:156
 msgid ""
 "Buckets makes budgeting <em>fast</em>, <em>simple</em> and "
 "<em>private.</em>"
 msgstr ""
 
-#: src/index.html:157
+#: src/index.html:161
 #, python-format
 msgid "Download Buckets v%(latest_version)s for"
 msgstr ""
 
-#: src/index.html:161
+#: src/index.html:165
 msgid "macOS"
 msgstr ""
 
-#: src/index.html:167
+#: src/index.html:171
 msgid "Windows"
 msgstr ""
 
-#: src/index.html:173
+#: src/index.html:177
 msgid "Linux"
 msgstr ""
 
-#: src/index.html:177
+#: src/index.html:181
 msgid "Other"
 msgstr ""
 
-#: src/index.html:191
+#: src/index.html:195
 msgid "Buy $29"
 msgstr ""
 
-#: src/index.html:195
+#: src/index.html:199
 msgid ""
 "Buckets gives you an <em>untimed, free trial</em> for as long as you need"
 " to decide if it works for you.  Really."
 msgstr ""
 
-#: src/index.html:199
+#: src/index.html:203
 msgid "Buckets is <em>private</em>."
 msgstr ""
 
-#: src/index.html:199
+#: src/index.html:203
 msgid "Your finances stay on your computer.  You control your data again!"
 msgstr ""
 
-#: src/index.html:203
+#: src/index.html:207
 msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
 msgstr ""
 
-#: src/index.html:203
+#: src/index.html:207
 msgid "You're saving money, not shackling yourself to another monthly service."
 msgstr ""
 
-#: src/index.html:203
+#: src/index.html:207
 msgid ""
 "A single license may be used on all your computers and all the computers "
 "of family members living in your home."
 msgstr ""
 
-#: src/index.html:207
+#: src/index.html:211
 msgid "Buckets has <em>amazing support.</em>"
 msgstr ""
 
-#: src/index.html:207
+#: src/index.html:211
 msgid ""
 "I'll listen to your ideas, help you with the app and gladly answer "
 "questions, no matter how small."
 msgstr ""
 
-#: src/index.html:207
+#: src/index.html:211
 msgid ""
 "I'm serious.  Click that chat bubble and tell me what you ate for dinner "
 "last night."
 msgstr ""
 
-#: src/index.html:211
+#: src/index.html:215
 msgid ""
 "Buckets includes some free and novel methods to <em>sync with your "
 "bank.</em>"
 msgstr ""
 
-#: src/index.html:211
+#: src/index.html:215
 msgid ""
 "Record completely private macros, import files or sign up with SimpleFIN "
 "Bridge."
 msgstr ""
 
-#: src/index.html:215
+#: src/index.html:219
 msgid ""
 "Buckets includes some terrific <em>extras</em> such as really fast Amazon"
 " why-do-they-split-every-purchase-into-a-hundred-transactions "
 "reconciliation."
 msgstr ""
 
-#: src/index.html:221
+#: src/index.html:225
 #, python-format
 msgid ""
 "Buckets includes <em>helpful videos</em> to teach you how to budget like "
 "a master.  <a href=\"%(href)s\">Check them out!</a>"
 msgstr ""
 
-#: src/index.html:226
+#: src/index.html:230
 msgid "Thanks"
 msgstr ""
 
-#: src/index.html:232
+#: src/index.html:240
 msgid "Buckets is <em>multilingual</em>."
 msgstr ""
 
-#: src/index.html:232
+#: src/index.html:240
 msgid "Want to add your language?"
 msgstr ""
 
-#: src/index.html:246
+#: src/index.html:255
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
 "haul."
 msgstr ""
 
-#: src/index.html:246
+#: src/index.html:255
 msgid "Read more."
 msgstr ""
 
-#: src/index.html:250
+#: src/index.html:259
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr ""
 
-#: src/index.html:295
+#: src/index.html:304
 msgid "Subscribe to the Monthly Newsletter"
 msgstr ""
 
-#: src/index.html:297
+#: src/index.html:306
 msgid "Email Address"
 msgstr ""
 
-#: src/index.html:301
+#: src/index.html:310
 msgid "First Name"
 msgstr ""
 
-#: src/index.html:309
+#: src/index.html:318
 msgid "Subscribe"
 msgstr ""
 
