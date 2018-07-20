@@ -16,6 +16,14 @@ import { PrefixLogger } from '../../logging'
 import { Help } from '../../tooltip'
 import { SyncResult } from 'buckets-core/dist/models/sync'
 
+//----------------------------------------------------------
+// For deprecated triplesec encryption
+//----------------------------------------------------------
+import * as triplesec from 'triplesec'
+import { TriplesecCrypter } from 'buckets-core/dist/crypto'
+TriplesecCrypter.setPackage(triplesec)
+//----------------------------------------------------------
+
 const log = new PrefixLogger('(record)')
 
 

@@ -2,9 +2,9 @@ import * as moment from 'moment-timezone'
 import {v4 as uuid} from 'uuid'
 
 import { IObject, IStore } from '../store'
-import { encrypt, decrypt } from '../crypto'
+import { encrypt, decrypt, upgradeEncryption, LATEST_ENC_PREFIX } from '../crypto'
 import { CustomError } from '../errors'
-import { sss, CONTEXT } from '@iffycan/i18n'
+import { sss } from '@iffycan/i18n'
 import { ISyncChannel, ASyncening, SyncResult } from './sync'
 import { PrefixLogger } from '../logging'
 import { localNow, SerializedTimestamp, dumpTS } from '../time'
@@ -101,7 +101,6 @@ export class BankMacroStore {
     // this to something unique to the budget file
     if (! await this.hasPassword() ) {
       // No password set yet
-      log.info(`MATT going to use sss, current locale is ${CONTEXT.locale}`);
       let password = await createPassword(this.store, pwkey, sss('Create budget password:'));
       await this.store.sub.passwords.cachePassword(pwkey, password);
       return password;
@@ -117,8 +116,29 @@ export class BankMacroStore {
       } else {
         throw new IncorrectPassword('Incorrect password');
       }
+      await this.upgradeAllEncryption(password)
       return password;
     }
+  }
+  /**
+   *  Upgrade all macros to the latest encryption method
+   */
+  private async upgradeAllEncryption(password:string):Promise<any> {
+    let macros = await this.getOldEncryptionMacros();
+    return Promise.all(macros.map(async macro => {
+      const upgraded_cipher = await upgradeEncryption(macro.enc_recording, password);
+      this.store.updateObject('bank_macro', macro.id, {
+        enc_recording: upgraded_cipher,
+      });
+    }))
+  }
+  /**
+   *  List all BankMacros with encryption that isn't the latest
+   */
+  private async getOldEncryptionMacros():Promise<BankMacro[]> {
+    return this.store.listObjects('bank_macro', {
+      where: `enc_recording NOT LIKE '${LATEST_ENC_PREFIX}%'`
+    })
   }
   private async isPasswordCorrect(password:string):Promise<boolean> {
     let rows = await this.store.query<{enc_recording:string}>(

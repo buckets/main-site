@@ -1,4 +1,7 @@
 import * as cryptojs from 'crypto-js'
+import { PrefixLogger } from './logging'
+
+const log = new PrefixLogger('(crypto)')
 
 export interface Crypter {
   encrypt(plaintext:string, password:string):Promise<string>;
@@ -65,15 +68,16 @@ const CRYPTERS = {
   '0': TriplesecCrypter,
   '1': AESCrypter,
 }
-const LATEST = '1';
+export const LATEST_VERSION = '1';
+export const LATEST_ENC_PREFIX = `buckets:${LATEST_VERSION}:`;
 
 /**
  *  Encrypt some plaintext with a password
  */
 export async function encrypt(plaintext:string, password:string):Promise<string> {
-  let crypter = new CRYPTERS[LATEST]();
+  let crypter = new CRYPTERS[LATEST_VERSION]();
   let ciphertext = await crypter.encrypt(plaintext, password)
-  return `buckets:${LATEST}:${ciphertext}`
+  return `${LATEST_ENC_PREFIX}${ciphertext}`
 }
 
 /**
@@ -81,8 +85,14 @@ export async function encrypt(plaintext:string, password:string):Promise<string>
  */
 export async function decrypt(ciphertext:string, password:string):Promise<string> {
   let parsed = getCipherEncryptionVersion(ciphertext);
+  log.info(`Decrypting using version: ${parsed.version}`);
   let crypter = new CRYPTERS[parsed.version]();
-  return crypter.decrypt(parsed.ciphertext, password);
+  try {
+    return await crypter.decrypt(parsed.ciphertext, password);
+  } catch(err) {
+    log.info(`Decryption error: ${err}`);
+    throw err;
+  }
 }
 
 function getCipherEncryptionVersion(ciphertext:string):{version:string, ciphertext:string} {
@@ -105,6 +115,14 @@ function getCipherEncryptionVersion(ciphertext:string):{version:string, cipherte
  */
 export function isEncryptionLatest(ciphertext:string):boolean {
   let parsed = getCipherEncryptionVersion(ciphertext);
-  return parsed.version === LATEST
+  return parsed.version === LATEST_VERSION
+}
+
+/**
+ *  Upgrade a ciphertext to the latest encryption method.
+ */
+export async function upgradeEncryption(ciphertext:string, password:string):Promise<string> {
+  const plain = await decrypt(ciphertext, password);
+  return await encrypt(plain, password);
 }
 
