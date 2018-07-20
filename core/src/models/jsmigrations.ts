@@ -218,7 +218,7 @@ export const migrations:IMigration[] = [
     ]),
   },
   {
-    name: 'triggercontrol',
+    name: 'triggercontrol-andundo',
     func: SQLList([
       // Drop them all
       `DROP TRIGGER update_account_balance_insert`,
