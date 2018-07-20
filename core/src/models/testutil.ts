@@ -16,6 +16,17 @@ setBaseLogger(new QuietLogger());
 import * as sqlite3 from 'sqlite3-offline'
 import { IObjectEvent, IUserInterfaceFunctions } from '../store'
 import { SQLiteStore, AsyncRunResult, IAsyncSqlite } from '../dbstore'
+import { CONTEXT } from '@iffycan/i18n'
+
+// Configure language to be English
+CONTEXT.configure({
+  default_locale: 'en',
+  fetcher: async (locale:string) => {
+    const mod = await import(`${__dirname}/../../../app/src/langs/${locale}`);
+    return mod.pack;
+  }
+})
+CONTEXT.setLocale('en');
 
 
 export class TestUIFunctions implements IUserInterfaceFunctions {

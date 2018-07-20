@@ -402,4 +402,49 @@ export const migrations:IMigration[] = [
       `UPDATE account_transaction SET cleared = 1`,
     ]),
   },
+  {
+    name: 'debt-accounts',
+    func: SQLList([
+      `ALTER TABLE account ADD COLUMN is_debt TINYINT DEFAULT 0`,
+      `ALTER TABLE account ADD COLUMN debt_payment INTEGER DEFAULT 0`,
+      `UPDATE account SET is_debt = 0, debt_payment = 0`,
+      
+      `CREATE TRIGGER debt_transaction_insert
+        AFTER INSERT ON account_transaction
+        WHEN (SELECT count(*) FROM x_trigger_disabled) = 0
+        BEGIN
+            UPDATE account
+            SET debt_payment = coalesce(debt_payment,0) - coalesce(NEW.amount,0)
+            WHERE
+              id = new.account_id
+              AND is_debt = 1;
+        END`,
+      `CREATE TRIGGER debt_transaction_update
+        AFTER UPDATE ON account_transaction
+        WHEN (SELECT count(*) FROM x_trigger_disabled) = 0
+        BEGIN
+            UPDATE account
+            SET debt_payment = coalesce(debt_payment,0) + coalesce(OLD.amount,0)
+            WHERE
+              id = OLD.account_id
+              AND is_debt = 1;
+            
+            UPDATE account
+            SET debt_payment = coalesce(debt_payment,0) - coalesce(NEW.amount,0)
+            WHERE
+              id = NEW.account_id
+              AND is_debt = 1;
+        END`,
+      `CREATE TRIGGER debt_transaction_delete
+        AFTER DELETE ON account_transaction
+        WHEN (SELECT count(*) FROM x_trigger_disabled) = 0
+        BEGIN
+            UPDATE account
+            SET debt_payment = coalesce(debt_payment,0) + coalesce(OLD.amount,0)
+            WHERE
+              id = OLD.account_id
+              AND is_debt = 1;
+        END`,
+    ])
+  },
 ]

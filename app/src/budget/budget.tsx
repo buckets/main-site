@@ -305,6 +305,11 @@ class Application extends React.Component<ApplicationProps, any> {
                                 <td>-</td>
                                 <td className="right"><Money value={appstate.bucket_total_balance} noFaintCents /></td>
                               </tr>
+                              {appstate.debt_balance ? <tr>
+                                <td>{sss('Debt'/* Label for a total debt amount */)}</td>
+                                <td>-</td>
+                                <td className="right"><Money value={appstate.debt_balance} noFaintCents /></td>
+                              </tr> : null }
                               <tr>
                                 <td>{sss('Used in future')}</td>
                                 <td>-</td>

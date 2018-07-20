@@ -21,7 +21,7 @@ const log = new PrefixLogger('(appstate)')
 
 interface IComputedAppState {
   /**
-   *  The total current rain for the current time period
+   *  The total current rain for the current time period computed from various other things
    */
   rain: number;
   /**
@@ -36,6 +36,10 @@ interface IComputedAppState {
    *  Sum of all open, on-budget account balances
    */
   open_accounts_balance: number;
+  /**
+   *  Sum of all open, on-budget debt-account balances
+   */
+  debt_balance: number;
 
   /**
    *  This time period's total income (for on-budget accounts)
@@ -126,6 +130,7 @@ export class AppState implements IComputedAppState {
   rain: number = 0;
   bucket_total_balance: number = 0;
   open_accounts_balance: number = 0;
+  debt_balance: number = 0;
   income: number = 0;
   expenses: number = 0;
   gain: number = 0;
@@ -171,6 +176,7 @@ export class AppState implements IComputedAppState {
 function computeTotals(appstate:AppState):IComputedAppState {
   let bucket_neg_balance = 0;
   let bucket_pos_balance = 0;
+  let debt_balance = 0;
   Object.values(appstate.bucket_balances)
     .forEach(bal => {
       if (bal <= 0) {
@@ -226,17 +232,22 @@ function computeTotals(appstate:AppState):IComputedAppState {
     if (account.closed) {
       closed_accounts.push(account);
     } else {
-      const bal = appstate.account_balances[account.id];
+      // Open account
       if (account.offbudget) {
         offbudget_accounts.push(account);
       } else {
+        // Open and on-budget
+        const bal = appstate.account_balances[account.id];
         open_accounts.push(account);
         open_accounts_balance += bal;
+        if (account.is_debt) {
+          debt_balance += bal;
+        }
       }
     }
   })
 
-  let rain = open_accounts_balance - bucket_total_balance;
+  let rain = open_accounts_balance - bucket_total_balance - debt_balance;
   let rain_used_in_future = 0;
 
   if (rain > 0) {
@@ -258,6 +269,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     open_accounts_balance,
     rain,
     rain_used_in_future,
+    debt_balance,
     income,
     expenses,
     gain,

@@ -41,6 +41,8 @@ export interface Account extends IObject, INotable {
   currency: string;
   closed: boolean;
   offbudget: boolean;
+  is_debt: boolean;
+  debt_payment: number;
 }
 
 export interface Transaction extends IObject, INotable {
@@ -188,6 +190,12 @@ export class AccountStore {
 
     // Delete the account itself
     await this.store.deleteObject('account', account_id);
+  }
+  /**
+   *  Make this account a debt account or not
+   */
+  async setDebtMode(account_id:number, is_debt:boolean):Promise<Account> {
+    return this.store.updateObject('account', account_id, {is_debt: is_debt})
   }
 
   async transact(args:{
