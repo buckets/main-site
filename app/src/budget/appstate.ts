@@ -20,9 +20,11 @@ const log = new PrefixLogger('(appstate)')
 
 
 interface IComputedAppState {
+  // The total current rain for the current time period
   rain: number;
-  // Amount of this month's rain used in the future
-  adjusted_future_rain: number;
+  // Amount of this month's rain being used in the future
+  rain_used_in_future: number;
+
   bucket_total_balance: number;
   open_accounts_balance: number;
   all_accounts_assets: number;
@@ -32,7 +34,6 @@ interface IComputedAppState {
   income: number;
   expenses: number;
   gain: number;
-  nodebt_balances: Balances;
 
   num_unknowns: number;
   unmatched_account_balances: number;
@@ -89,7 +90,6 @@ export class AppState implements IComputedAppState {
   running_bank_macros = new Set<number>();
   account_balances: Balances = {};
   bucket_balances: Balances = {};
-  nodebt_balances: Balances = {};
 
   // The amount in/out for each bucket for this month.
   bucket_flow: BucketFlowMap = {}
@@ -100,7 +100,7 @@ export class AppState implements IComputedAppState {
   // The amount of rain used in future months
   actual_future_rain: number = 0;
   // The amount of this month's rain used in future months.
-  adjusted_future_rain: number = 0;
+  rain_used_in_future: number = 0;
   month: number = localNow().month()+1;
   year: number = localNow().year();
 
@@ -207,20 +207,11 @@ function computeTotals(appstate:AppState):IComputedAppState {
 
   let kicked_buckets = [];
   let unkicked_buckets = [];
-  let nodebt_balances = {};
   Object.values<Bucket>(appstate.buckets).forEach(bucket => {
     if (bucket.kicked) {
       kicked_buckets.push(bucket);
     } else {
       unkicked_buckets.push(bucket);
-      let bal = appstate.bucket_balances[bucket.id];
-      if (bal <= 0) {
-        // negative
-        nodebt_balances[bucket.id] = 0;
-      } else {
-        // positive
-        nodebt_balances[bucket.id] = (bal / bucket_pos_balance) * bucket_total_balance;
-      }
     }
   })
   let unmatched_account_balances = 0;
@@ -254,19 +245,19 @@ function computeTotals(appstate:AppState):IComputedAppState {
   })
 
   let rain = open_accounts_balance - bucket_total_balance;
-  let adjusted_future_rain = 0;
+  let rain_used_in_future = 0;
 
   if (rain > 0) {
     // Some of this rain might be used in future months
     if (appstate.actual_future_rain > 0) {
       if (rain >= appstate.actual_future_rain) {
         // future rain being used is less than the rain available this month.
-        adjusted_future_rain = appstate.actual_future_rain;
+        rain_used_in_future = appstate.actual_future_rain;
       } else {
         // future rain being used exceeds rain available this month
-        adjusted_future_rain = rain;
+        rain_used_in_future = rain;
       }
-      rain -= adjusted_future_rain;
+      rain -= rain_used_in_future;
     }
   }
 
@@ -279,7 +270,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
     all_accounts_assets,
     all_accounts_debt,
     rain,
-    adjusted_future_rain,
+    rain_used_in_future,
     transfers_in,
     transfers_out,
     income,
@@ -294,7 +285,6 @@ function computeTotals(appstate:AppState):IComputedAppState {
     closed_accounts,
     offbudget_accounts,
     unmatched_account_balances,
-    nodebt_balances,
     can_sync,
   };
 }
