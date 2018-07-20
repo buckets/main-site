@@ -20,9 +20,13 @@ const log = new PrefixLogger('(appstate)')
 
 
 interface IComputedAppState {
-  // The total current rain for the current time period
+  /**
+   * The total current rain for the current time period
+   */
   rain: number;
-  // Amount of THIS MONTH'S rain being used in the future
+  /**
+   * Amount of THIS MONTH'S rain being used in the future
+   */
   rain_used_in_future: number;
 
   bucket_total_balance: number;
@@ -100,7 +104,6 @@ export class AppState implements IComputedAppState {
 
   // The amount of rain used in future months
   total_future_rain: number = 0;
-  // The amount of THIS MONTH'S rain used in future months.
   rain_used_in_future: number = 0;
   month: number = localNow().month()+1;
   year: number = localNow().year();
