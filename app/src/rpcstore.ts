@@ -157,8 +157,8 @@ export class RPCRendererStore implements IStore {
   query<T>(sql:string, params:{}):Promise<Array<T>> {
     return this.callRemote('query', sql, params);
   }
-  exec(sql:string):Promise<null> {
-    return this.callRemote('exec', sql);
+  executeMany(sqls:string[]):Promise<null> {
+    return this.callRemote('executeMany', sqls);
   }
   deleteObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<any> {
     return this.callRemote('deleteObject', cls, id);

@@ -23,9 +23,9 @@ export class AsyncDatabase implements IAsyncSqlite {
       })
     })
   }
-  async exec(query:string):Promise<null> {
+  async executeMany(sqls:string[]):Promise<null> {
     return new Promise<null>((resolve, reject) => {
-      this.db.exec(query, (err) => {
+      this.db.exec(sqls.join(';'), (err) => {
         if (err) {
           reject(err);
         } else {
