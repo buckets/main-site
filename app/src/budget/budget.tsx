@@ -156,18 +156,18 @@ class Navbar extends React.Component<{
     }
     
     let import_badge_count = (
-      appstate.num_unknowns
+      appstate.num_unknown_accounts
       + appstate.csvs_needing_mapping.length
       + appstate.csvs_needing_account.length
     );
     let import_badge = import_badge_count ? <div className="badge">{import_badge_count}</div> : null;
 
     let transactions_badge;
-    if (appstate.num_uncategorized_trans) {
-      transactions_badge = <div className="badge">{appstate.num_uncategorized_trans}</div>
+    if (appstate.uncategorized_trans.length) {
+      transactions_badge = <div className="badge">{appstate.uncategorized_trans.length}</div>
     }
     let buckets_badge;
-    if (!appstate.num_uncategorized_trans && appstate.rain) {
+    if (!appstate.uncategorized_trans.length && appstate.rain) {
       let cls = cx('badge', {
         'red': appstate.rain < 0,
       })

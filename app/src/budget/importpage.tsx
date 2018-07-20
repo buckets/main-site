@@ -38,7 +38,7 @@ export class SyncWidget extends React.Component<{
           if (syncing) {
             makeToast(sss('A sync is already in progress'), {className: 'warning'})
           } else {
-            if (appstate.can_sync) {
+            if (appstate.canSync()) {
               try {
                 await syncCurrentMonth(appstate);  
               } catch(err) {
@@ -177,7 +177,7 @@ export class ImportPage extends React.Component<{
                   syncCurrentMonth(appstate);
                 }
               }}
-              disabled={!appstate.can_sync}><span className={cx("fa fa-refresh", {
+              disabled={!appstate.canSync()}><span className={cx("fa fa-refresh", {
                 'fa-spin': appstate.syncing,
               })}/> {appstate.syncing ? sss('Cancel sync') : sss('Sync')}</button>
             <button onClick={() => {
