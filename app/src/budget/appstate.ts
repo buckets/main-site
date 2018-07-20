@@ -22,11 +22,12 @@ const log = new PrefixLogger('(appstate)')
 interface IComputedAppState {
   // The total current rain for the current time period
   rain: number;
-  // Amount of this month's rain being used in the future
+  // Amount of THIS MONTH'S rain being used in the future
   rain_used_in_future: number;
 
   bucket_total_balance: number;
   open_accounts_balance: number;
+
   all_accounts_assets: number;
   all_accounts_debt: number;
   transfers_in: number;
@@ -98,8 +99,8 @@ export class AppState implements IComputedAppState {
   }
 
   // The amount of rain used in future months
-  actual_future_rain: number = 0;
-  // The amount of this month's rain used in future months.
+  total_future_rain: number = 0;
+  // The amount of THIS MONTH'S rain used in future months.
   rain_used_in_future: number = 0;
   month: number = localNow().month()+1;
   year: number = localNow().year();
@@ -249,10 +250,10 @@ function computeTotals(appstate:AppState):IComputedAppState {
 
   if (rain > 0) {
     // Some of this rain might be used in future months
-    if (appstate.actual_future_rain > 0) {
-      if (rain >= appstate.actual_future_rain) {
+    if (appstate.total_future_rain > 0) {
+      if (rain >= appstate.total_future_rain) {
         // future rain being used is less than the rain available this month.
-        rain_used_in_future = appstate.actual_future_rain;
+        rain_used_in_future = appstate.total_future_rain;
       } else {
         // future rain being used exceeds rain available this month
         rain_used_in_future = rain;
@@ -605,7 +606,7 @@ export class StateManager {
       onOrAfter: this.appstate.viewDateRange.before,
     })
     .then(rainfall => {
-      this.appstate.actual_future_rain = rainfall;
+      this.appstate.total_future_rain = rainfall;
     })
   }
   async fetchTransactions() {
