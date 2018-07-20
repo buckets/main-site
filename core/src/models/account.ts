@@ -1,5 +1,5 @@
 import * as moment from 'moment-timezone'
-import { createErrorSubclass } from '../errors'
+import { CustomError } from '../errors'
 import { IObject, IStore } from '../store';
 import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
 import { Balances, computeBalances } from './balances';
@@ -21,8 +21,8 @@ declare module '../store' {
 
 export class Failure extends Error {}
 
-export const SignMismatch = createErrorSubclass('SignMismatch')
-export const SumMismatch = createErrorSubclass('SumMismatch')
+export class SignMismatch extends CustomError {}
+export class SumMismatch extends CustomError {}
 
 export type GeneralCatType =
   ''

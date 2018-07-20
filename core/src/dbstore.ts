@@ -1,11 +1,11 @@
 // import { EventSource } from '@iffycan/events'
 import { IStore, ISubStore, IStoreEvents, EventCollection, IObjectTypes, ObjectEventType, IObject, IUserInterfaceFunctions } from './store'
-import { createErrorSubclass } from './errors'
+import { CustomError } from './errors'
 import { SubStore } from './models/substore'
 import { setupDatabase } from './dbsetup'
 import { UndoTracker, UndoRedoResult } from './undo'
 
-export const NotFound = createErrorSubclass('NotFound');
+export class NotFound extends CustomError {}
 
 export interface AsyncRunResult {
   lastID: number;
@@ -17,7 +17,7 @@ export interface AsyncRunResult {
  */
 export interface IAsyncSqlite {
   run(query:string, params?:object):Promise<AsyncRunResult>;
-  exec(query:string):Promise<null>;
+  executeMany(queries:string[]):Promise<null>;
   all<T>(query:string, params?:object):Promise<Array<T>>;
   get<T>(query:string, params?:object):Promise<T>;
 }
@@ -150,8 +150,8 @@ export class SQLiteStore implements IStore {
     return this.db.all<T>(sql, params);
   }
 
-  async exec(sql:string):Promise<null> {
-    return this.db.exec(sql);
+  async executeMany(sqls:string[]):Promise<null> {
+    return this.db.executeMany(sqls);
   }
 
   async doAction<T>(label:string, func:(...args)=>T|Promise<T>):Promise<T> {

@@ -6,6 +6,7 @@ import { SerializedTimestamp } from 'buckets-core/dist/time'
 import { ipcMain, ipcRenderer } from 'electron'
 import { PrefixLogger } from './logging'
 import { MainEventCollection, RendererEventCollection } from './rpc'
+import { ElectronHTTPRequester } from './desktop'
 
 const log = new PrefixLogger('(rpcstore)')
 
@@ -156,8 +157,8 @@ export class RPCRendererStore implements IStore {
   query<T>(sql:string, params:{}):Promise<Array<T>> {
     return this.callRemote('query', sql, params);
   }
-  exec(sql:string):Promise<null> {
-    return this.callRemote('exec', sql);
+  executeMany(sqls:string[]):Promise<null> {
+    return this.callRemote('executeMany', sqls);
   }
   deleteObject<T extends keyof IObjectTypes>(cls:T, id:number):Promise<any> {
     return this.callRemote('deleteObject', cls, id);
@@ -189,6 +190,7 @@ export class RPCRendererStore implements IStore {
 
 class RendererUserInterfaceFunctions implements IUserInterfaceFunctions {
   private caller:RPCCaller<IUserInterfaceFunctions>;
+  readonly http = new ElectronHTTPRequester();
 
   constructor(room:string) {
     this.caller = new RPCCaller<IUserInterfaceFunctions>(`rpc-ui-${room}`)

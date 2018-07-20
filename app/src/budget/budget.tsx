@@ -28,6 +28,14 @@ import { PrefixLogger } from '../logging'
 import { PSTATE } from '../mainprocess/persistent'
 import { utcNow, localNow, setTimezone } from 'buckets-core/dist/time'
 
+//----------------------------------------------------------
+// For deprecated triplesec encryption
+//----------------------------------------------------------
+import * as triplesec from 'triplesec'
+import { TriplesecCrypter } from 'buckets-core/dist/crypto'
+TriplesecCrypter.setPackage(triplesec)
+//----------------------------------------------------------
+
 const log = new PrefixLogger('(budget.r)');
 setTimezone(PSTATE.timezone || moment.tz.guess())
 

@@ -11,11 +11,11 @@ import { APP_ROOT } from './mainprocess/globals'
 import { onlyRunInMain } from './rpc'
 import { isRegistered } from './mainprocess/drm'
 import { PrefixLogger } from './logging'
-import { createErrorSubclass } from 'buckets-core/dist/errors'
+import { CustomError } from 'buckets-core/dist/errors'
 
 const log = new PrefixLogger('(errors)');
 
-export const IncorrectPassword = createErrorSubclass('IncorrectPassword');
+export class IncorrectPassword extends CustomError {}
 
 
 const SUBMIT_URL = process.env.BUCKETS_BUGREPORT_URL || 'https://server.budgetwithbuckets.com/_api/bugreport';

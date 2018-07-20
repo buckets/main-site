@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import * as crypto from 'crypto'
+import * as shajs from 'sha.js'
 
 export function isNil(x:any):boolean {
   return x === null || x === undefined;
@@ -9,9 +9,9 @@ export function isNil(x:any):boolean {
  *  Hash a list of strings in a consistent way.
  */
 export function hashStrings(strings:string[]):string {
-  let ret = crypto.createHash('sha256');
+  let ret = shajs('sha256');
   strings.forEach(s => {
-    let hash = crypto.createHash('sha256');
+    let hash = shajs('sha256');
     hash.update(s)
     ret.update(hash.digest('hex'))
   });

@@ -1,7 +1,6 @@
-import * as req from 'request-promise'
 import * as moment from 'moment-timezone'
 
-import { IObject, IStore } from '../store'
+import { IObject, IStore, IHTTPRequester, IHTTPRequestOptions } from '../store'
 import { ts2utcdb, localNow, ensureUTCMoment } from '../time'
 import { decimal2cents } from '../money'
 import { Transaction } from './account'
@@ -150,7 +149,7 @@ export class SimpleFINStore {
   private client:SimpleFINClient;
   
   constructor(private store:IStore) {
-    this.client = new SimpleFINClient();
+    this.client = new SimpleFINClient(store.ui.http);
   }
   async consumeToken(token:string):Promise<Connection> {
     let access_url = await this.client.consumeToken(token);
@@ -235,6 +234,9 @@ class SimpleFinError extends Error {
 
 // https://www.simplefin.org/protocol.html
 class SimpleFINClient {
+  constructor(private req:IHTTPRequester) {
+
+  }
   async consumeToken(token:string) {
     // base64 decode
     let claim_url;
@@ -248,7 +250,7 @@ class SimpleFINClient {
     // claim it
     let access_url;
     try {
-      access_url = await req({
+      access_url = await this.req.fetchBody({
         uri: claim_url,
         method: 'POST',
       })
@@ -262,12 +264,12 @@ class SimpleFINClient {
     let result;
     let uri = `${access_url}/accounts`;
     try {
-      let options:req.Options = {uri, qs: {}};
+      let options:IHTTPRequestOptions = {uri, method: 'GET', qs: {}};
       since = ensureUTCMoment(since);
       enddate = ensureUTCMoment(enddate);
       options.qs['start-date'] = since.unix();
       options.qs['end-date'] = enddate.unix();
-      result = await req(options);
+      result = await this.req.fetchBody(options);
     } catch(err) {
       log.error(err);
       throw new SimpleFinError(sss('Error fetching data'));

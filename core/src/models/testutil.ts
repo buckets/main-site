@@ -31,6 +31,7 @@ export class TestUIFunctions implements IUserInterfaceFunctions {
   async getPassword():Promise<string> {
     return 'password';
   }
+  http: null;
 }
 
 
@@ -74,9 +75,9 @@ export class AsyncDatabase implements IAsyncSqlite {
       })
     })
   }
-  async exec(query:string):Promise<null> {
+  async executeMany(queries:string[]):Promise<null> {
     return new Promise<null>((resolve, reject) => {
-      this.db.exec(query, (err) => {
+      this.db.exec(queries.join(';'), (err) => {
         if (err) {
           reject(err);
         } else {

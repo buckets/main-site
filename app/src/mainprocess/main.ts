@@ -20,6 +20,14 @@ import { PSTATE, updateState } from './persistent'
 // import { doesPathExist, isPathExecutable, getNiceStat } from '../util'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
 
+//----------------------------------------------------------
+// For deprecated triplesec encryption
+//----------------------------------------------------------
+import * as triplesec from 'triplesec'
+import { TriplesecCrypter } from 'buckets-core/dist/crypto'
+TriplesecCrypter.setPackage(triplesec)
+//----------------------------------------------------------
+
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
 electron_log.transports.file.maxSize = 5 * 1024 * 1024;
