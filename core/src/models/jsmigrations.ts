@@ -405,45 +405,46 @@ export const migrations:IMigration[] = [
   {
     name: 'debt-accounts',
     func: SQLList([
+      `ALTER TABLE bucket ADD COLUMN debt_account_id INTEGER`,
+      `ALTER TABLE bucket_transaction ADD COLUMN linked_trans_id INTEGER`,
       `ALTER TABLE account ADD COLUMN is_debt TINYINT DEFAULT 0`,
-      `ALTER TABLE account ADD COLUMN debt_payment INTEGER DEFAULT 0`,
-      `UPDATE account SET is_debt = 0, debt_payment = 0`,
+      `UPDATE account SET is_debt = 0`,
       
       `CREATE TRIGGER debt_transaction_insert
         AFTER INSERT ON account_transaction
-        WHEN (SELECT count(*) FROM x_trigger_disabled) = 0
+        WHEN
+          MATT RIGHT HERE
+          (SELECT count(*) FROM x_trigger_disabled) = 0
+          AND (SELECT count(*) FROM account WHERE
+            is_debt = 1debt_account_id = NEW)
         BEGIN
-            UPDATE account
-            SET debt_payment = coalesce(debt_payment,0) - coalesce(NEW.amount,0)
-            WHERE
-              id = new.account_id
-              AND is_debt = 1;
+          INSERT INTO UPDATE bucket
+          SET balance = coalesce(balance,0) - coalesce(NEW.amount,0)
+          WHERE debt_account_id = NEW.account_id;
         END`,
+
+
       `CREATE TRIGGER debt_transaction_update
         AFTER UPDATE ON account_transaction
-        WHEN (SELECT count(*) FROM x_trigger_disabled) = 0
+        WHEN
+          (SELECT count(*) FROM x_trigger_disabled) = 0
         BEGIN
-            UPDATE account
-            SET debt_payment = coalesce(debt_payment,0) + coalesce(OLD.amount,0)
-            WHERE
-              id = OLD.account_id
-              AND is_debt = 1;
-            
-            UPDATE account
-            SET debt_payment = coalesce(debt_payment,0) - coalesce(NEW.amount,0)
-            WHERE
-              id = NEW.account_id
-              AND is_debt = 1;
+          UPDATE bucket
+          SET balance = coalesce(balance,0) + coalesce(OLD.amount,0)
+          WHERE debt_account_id = OLD.account_id;
+
+          UPDATE bucket
+          SET balance = coalesce(balance,0) - coalesce(NEW.amount,0)
+          WHERE debt_account_id = NEW.account_id;
         END`,
       `CREATE TRIGGER debt_transaction_delete
         AFTER DELETE ON account_transaction
-        WHEN (SELECT count(*) FROM x_trigger_disabled) = 0
+        WHEN
+          (SELECT count(*) FROM x_trigger_disabled) = 0
         BEGIN
-            UPDATE account
-            SET debt_payment = coalesce(debt_payment,0) + coalesce(OLD.amount,0)
-            WHERE
-              id = OLD.account_id
-              AND is_debt = 1;
+          UPDATE bucket
+          SET balance = coalesce(balance,0) + coalesce(OLD.amount,0)
+          WHERE debt_account_id = OLD.account_id;
         END`,
     ])
   },

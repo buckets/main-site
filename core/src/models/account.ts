@@ -4,6 +4,7 @@ import { IObject, IStore } from '../store';
 import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from './notes'
+import { Bucket } from './bucket'
 
 
 declare module '../store' {
@@ -42,7 +43,6 @@ export interface Account extends IObject, INotable {
   closed: boolean;
   offbudget: boolean;
   is_debt: boolean;
-  debt_payment: number;
 }
 
 export interface Transaction extends IObject, INotable {
@@ -195,7 +195,40 @@ export class AccountStore {
    *  Make this account a debt account or not
    */
   async setDebtMode(account_id:number, is_debt:boolean):Promise<Account> {
+    // let existing = await this.get(account_id)
+    if (is_debt) {
+      // setting to debt account
+      let bucket = await this.getDebtBucket(account_id);
+      if (!bucket) {
+        // create a debt bucket
+        bucket = await this.store.sub.buckets.add({name:'', debt_account_id: account_id})
+      } else {
+        await this.store.sub.buckets.unkick(bucket.id);
+      }
+    } else {
+      // setting to normal account
+      let bucket = await this.getDebtBucket(account_id);
+      if (bucket) {
+        await this.store.sub.buckets.kick(bucket.id);
+      }
+    }
     return this.store.updateObject('account', account_id, {is_debt: is_debt})
+  }
+  /**
+   *  Get the Bucket that tracks this account's debt payment
+   */
+  async getDebtBucket(account_id:number):Promise<Bucket> {
+    let buckets = await this.store.listObjects('bucket', {
+      where: 'debt_account_id = $account_id',
+      params: {
+        $account_id: account_id,
+      }
+    })
+    if (buckets.length === 1) {
+      return buckets[0]
+    } else {
+      return null;
+    }
   }
 
   async transact(args:{
@@ -234,24 +267,31 @@ export class AccountStore {
   }):Promise<Transaction> {
     let affected_account_ids = new Set<number>();
     let existing = await this.store.getObject('account_transaction', trans_id);
+    let newdata: Partial<Transaction> = {}
 
     if (args.account_id !== undefined && existing.account_id !== args.account_id) {
       affected_account_ids.add(existing.account_id);
       affected_account_ids.add(args.account_id);
+      newdata.account_id = args.account_id;
     }
     if (args.amount !== undefined && existing.amount !== args.amount) {
       affected_account_ids.add(existing.account_id);
       this.removeCategorization(trans_id, false);
-      args.amount = args.amount || 0;
+      newdata.amount = args.amount || 0;
     }
-    let trans = await this.store.updateObject('account_transaction', trans_id, {
-      account_id: args.account_id,
-      amount: args.amount,
-      memo: args.memo,
-      posted: args.posted ? ts2localdb(args.posted) : undefined,
-      fi_id: args.fi_id,
-      cleared: args.cleared,
-    });
+    if (args.memo !== undefined) {
+      newdata.memo = args.memo
+    }
+    if (args.posted !== undefined) {
+      newdata.posted = ts2localdb(args.posted)
+    }
+    if (args.fi_id !== undefined) {
+      newdata.fi_id = args.fi_id;
+    }
+    if (args.cleared !== undefined) {
+      newdata.cleared = args.cleared;
+    }
+    let trans = await this.store.updateObject('account_transaction', trans_id, newdata);
 
     // publish affected accounts
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {

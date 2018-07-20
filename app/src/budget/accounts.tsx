@@ -429,6 +429,27 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           </tr>
 
           <tr>
+            <th>{sss('Track Debt Payment')}</th>
+            <td>
+              <input
+                type="checkbox"
+                checked={account.is_debt}
+                onChange={ev => {
+                  if (ev.target.checked) {
+                    manager
+                    .checkpoint(sss('Track Account Debt Payment'))
+                    .sub.accounts.setDebtMode(account.id, true);
+                  } else {
+                    manager
+                    .checkpoint(sss('Stop Tracking Account Debt Payment'))
+                    .sub.accounts.setDebtMode(account.id, false);
+                  }
+                }}
+              />
+            </td>
+          </tr>
+
+          <tr>
             <th>{sss('Actions')}</th>
             <td>
               {break_mappings}

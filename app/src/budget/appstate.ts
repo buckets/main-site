@@ -37,7 +37,7 @@ interface IComputedAppState {
    */
   open_accounts_balance: number;
   /**
-   *  Sum of all open, on-budget debt-account balances
+   *  Sum of all open, on-budget, debt account balances
    */
   debt_balance: number;
 
@@ -176,7 +176,6 @@ export class AppState implements IComputedAppState {
 function computeTotals(appstate:AppState):IComputedAppState {
   let bucket_neg_balance = 0;
   let bucket_pos_balance = 0;
-  let debt_balance = 0;
   Object.values(appstate.bucket_balances)
     .forEach(bal => {
       if (bal <= 0) {
@@ -228,6 +227,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
   let open_accounts = [];
   let closed_accounts = [];
   let offbudget_accounts = [];
+  let debt_balance = 0;
   Object.values<Account>(appstate.accounts).forEach(account => {
     if (account.closed) {
       closed_accounts.push(account);
