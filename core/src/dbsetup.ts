@@ -1,10 +1,8 @@
-import * as Path from 'path'
-import * as fs from 'fs-extra-promise'
 import { sss } from '@iffycan/i18n'
 import { IAsyncSqlite, NotFound, SQLiteStore } from './dbstore'
 import { IStore } from './store'
 import { PrefixLogger } from './logging'
-import { Migration, migrations as jsmigrations } from './models/jsmigrations'
+import { IMigration, migrations as jsmigrations } from './models/jsmigrations'
 import { rankBetween } from './ranking'
 
 const log = new PrefixLogger('(dbsetup)')
@@ -19,13 +17,15 @@ const log = new PrefixLogger('(dbsetup)')
  *  - Adds Buckets License bucket if asked
  *  - Starts undo/redo tracking
  */
-export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=false) {
-  const migrations_dir = Path.join(__dirname, '../migrations');
+export async function setupDatabase(store:SQLiteStore, opts:{
+  addBucketsLicenseBucket?: boolean;
+  noUndo?: boolean;
+}={}) {
 
   // upgrade database
   try {
     log.info('Doing database migrations');
-    await upgradeDatabase(store.db, migrations_dir, jsmigrations);
+    await upgradeDatabase(store.db, jsmigrations);
   } catch(err) {
     log.error('Error during database migrations');
     log.error(err.stack);
@@ -41,7 +41,7 @@ export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=f
     throw err;
   }
 
-  if (addBucketsLicenseBucket) {
+  if (opts.addBucketsLicenseBucket) {
     try {
       await ensureBucketsLicenseBucket(store);  
     } catch(err) {
@@ -50,8 +50,10 @@ export async function setupDatabase(store:SQLiteStore, addBucketsLicenseBucket=f
     }
   }
   
-  // track undos
-  await store.undo.start();
+  if (!opts.noUndo) {
+    // track undos
+    await store.undo.start();  
+  }
 }
 
 /**
@@ -108,10 +110,12 @@ async function ensureBucketsLicenseBucket(store:IStore) {
   })
 }
 
+
+
 /**
  *  Apply database schema patches
  */
-async function upgradeDatabase(db:IAsyncSqlite, migrations_path:string, js_migrations:Migration[]):Promise<any> {
+async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[]):Promise<any> {
 
   let logger = new PrefixLogger('(dbup)');
   await db.run(`CREATE TABLE IF NOT EXISTS _schema_version (
@@ -145,72 +149,21 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations_path:string, js_migra
   const applied = new Set<string>((await db.all<any>('SELECT name FROM _schema_version')).map(x => x.name));
   logger.info('Applied migrations:', Array.from(applied).join(', '))
 
-  // collect all migrations (first js)
-  let all_migrations:Migration[] = [...js_migrations];
-
-  // collect file-based migrations
-  const migrations = await new Promise<string[]>((resolve, reject) => {
-    fs.readdir(migrations_path, (err, files) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(files);
-      }
-    })
-  })
-  for (const path of migrations) {
-    const fullname = path.split('.')[0].toLowerCase();
-    const order = Number(fullname.split('-')[0]);
-    const name = fullname.split('-').slice(1).join('-');
-
-    const fullpath = Path.resolve(migrations_path, path);
-    const fullsql = await new Promise<string>((resolve, reject) => {
-      fs.readFile(fullpath, 'utf-8', (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data.toString());
-        }
-      });
-    });
-    all_migrations.push({
-      order,
-      name,
-      func: (db) => {
-        return db.exec(fullsql);
-      },
-    })
-  }
-
   // Check for duplicate patch names/orders
   let encountered_names = new Set<string>();
-  let encountered_orders = new Set<number>();
-  all_migrations.forEach(mig => {
+  migrations.forEach(mig => {
     if (encountered_names.has(mig.name)) {
-      throw new Error(`Duplicate schema patch name not allowed: ${mig.name} (${mig.order}) <${Array.from(encountered_names).join(',')}>`);
-    }
-    if (encountered_orders.has(mig.order)) {
-      throw new Error(`Duplicate schema order not allowed: ${mig.order} ${Array.from(encountered_orders)}`);
+      throw new Error(`Duplicate schema patch name not allowed: ${mig.name} <${Array.from(encountered_names).join(',')}>`);
     }
     encountered_names.add(mig.name);
-    encountered_orders.add(mig.order);
-  })
-
-  // Sort by order
-  all_migrations.sort((a,b) => {
-    if (a.order < b.order) {
-      return -1
-    } else if (a.order > b.order) {
-      return 1
-    } else {
-      return 0
-    }
   })
 
   // Apply patches
-  for (const migration of all_migrations) {
+  let order = 0;
+  for (const migration of migrations) {
+    order++;
     const name = migration.name;
-    const padded = `0000${migration.order}`.slice(-4);
+    const padded = `0000${order}`.slice(-4);
     const fullname = `${padded}-${migration.name}`
     const plog = logger.child(`(patch ${fullname})`)
     if (applied.has(fullname)) {
@@ -229,7 +182,7 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations_path:string, js_migra
         await db.run('ROLLBACK');
 
         // hold over from prior flakey migrations
-        if (migration.order <= 7 && (
+        if (order <= 7 && (
             err.toString().indexOf('duplicate column name') !== -1
             || err.toString().indexOf('already exists') !== -1
           )) {

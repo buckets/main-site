@@ -46,17 +46,17 @@ export class PasswordFetcher {
     this._loadSchema()
   }
   private async _loadSchema() {
-    await this._store.exec(`
-      CREATE TEMPORARY TABLE IF NOT EXISTS _password_cache (
+    await this._store.executeMany([
+      `CREATE TEMPORARY TABLE IF NOT EXISTS _password_cache (
         pwkey TEXT PRIMARY KEY NOT NULL,
         password TEXT
-      );
-      CREATE TEMPORARY TRIGGER IF NOT EXISTS there_can_be_only_one_pw_key
+      )`,
+      `CREATE TEMPORARY TRIGGER IF NOT EXISTS there_can_be_only_one_pw_key
       BEFORE INSERT ON _password_cache
       BEGIN
         DELETE FROM _password_cache WHERE pwkey=NEW.pwkey;
-      END;
-      `)
+      END`,
+    ])
     this.store.resolve(this._store);
   }
   /**

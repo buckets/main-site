@@ -98,10 +98,10 @@ export interface IStore {
   query<T>(sql:string, params:{}):Promise<Array<T>>;
 
   /**
-   *  Execute a blob of SQL.  Can include multiple statements.
+   *  Execute an array of SQL statements
    *  No result is returned.
    */
-  exec(sql:string):Promise<null>;
+  executeMany(sqls:string[]):Promise<null>;
 
   /**
    *  Run a function, recording its effects so that it can be undone
@@ -170,7 +170,31 @@ export interface IUserInterfaceFunctions {
    *  Attach these functions to a particular IStore instance
    */
   attachStore(store:IStore);
+
+  /**
+   *  Thing for making HTTP requests
+   */
+  http:IHTTPRequester;
+
 }
+
+/**
+ *  Options for HTTP requests
+ */
+export interface IHTTPRequestOptions {
+  uri: string;
+  method: string;
+  qs?: {
+    [k:string]: string|number;
+  };
+}
+/**
+ *  Interface for an HTTP Request maker
+ */
+export interface IHTTPRequester {
+  fetchBody(args:IHTTPRequestOptions):Promise<string>;
+}
+
 
 
 export interface IEventCollectionBroadcast<T, K extends keyof T> {
