@@ -6,4 +6,6 @@
    ☐ What happens to debt bucket?
  ☐ Change account from debt to not-debt
  ☐ Change account from not-debt to debt
- 
+ ☐ Publish bucket transactions and buckets created by triggers
+ ☐ Show warning about payment bucket balances when there is self debt
+ ☐ Finish docs
