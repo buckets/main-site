@@ -769,11 +769,9 @@ class CategoryInput extends React.Component<CategoryInputProps, CategoryInputSta
       let extra_options;
       if (idx === 0) {
         extra_options = [
-          <option key="transfer" value="transfer">{sss('Transfer')}</option>
+          <option key="transfer" value="transfer">{sss('Transfer')}</option>,
+          <option key="income" value="income">{amount >= 0 ? sss('Income') : sss('Debt')}</option>,
         ];
-        if (amount >= 0) {
-          extra_options.push(<option key="income" value="income">{sss('Income')}</option>)
-        }
       }
       return <div className="category" key={idx}>
         <div className={className}>
@@ -976,10 +974,13 @@ class Categorizer extends React.Component<CategorizerProps, {
     let cats = this.state.cats;
     let guts;
     if (transaction.general_cat === 'income') {
-      // income
-      guts = <a className="general-tag" onClick={this.openCategorizer}>
-          💰 {sss('noin.income', 'Income')}
+      // income/debt
+      guts = <span>
+        {transaction.amount >= 0 ? <span>💰</span> : null }
+        <a className="general-tag" onClick={this.openCategorizer}>
+          {transaction.amount >= 0 ? sss('noin.income', 'Income') : sss('noun.debt', 'Debt')}
         </a>
+      </span>
     } else if (transaction.general_cat === 'transfer') {
       // transfer
       guts = <a className="general-tag" onClick={this.openCategorizer}>

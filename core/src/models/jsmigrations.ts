@@ -413,38 +413,55 @@ export const migrations:IMigration[] = [
       `CREATE TRIGGER debt_transaction_insert
         AFTER INSERT ON account_transaction
         WHEN
-          MATT RIGHT HERE
           (SELECT count(*) FROM x_trigger_disabled) = 0
           AND (SELECT count(*) FROM account WHERE
-            is_debt = 1debt_account_id = NEW)
+            is_debt = 1 AND NEW.account_id = id) = 1
         BEGIN
-          INSERT INTO UPDATE bucket
-          SET balance = coalesce(balance,0) - coalesce(NEW.amount,0)
-          WHERE debt_account_id = NEW.account_id;
+          INSERT INTO bucket_transaction
+          (bucket_id, amount, posted, linked_trans_id)
+          SELECT
+            b.id,
+            -coalesce(NEW.amount, 0),
+            NEW.posted,
+            NEW.id
+          FROM
+            bucket as b
+          WHERE
+            b.debt_account_id = NEW.account_id
+            AND coalesce(b.kicked, 0) <> 1;
         END`,
 
-
-      `CREATE TRIGGER debt_transaction_update
+      `CREATE TRIGGER linked_trans_update
         AFTER UPDATE ON account_transaction
         WHEN
           (SELECT count(*) FROM x_trigger_disabled) = 0
         BEGIN
-          UPDATE bucket
-          SET balance = coalesce(balance,0) + coalesce(OLD.amount,0)
-          WHERE debt_account_id = OLD.account_id;
-
-          UPDATE bucket
-          SET balance = coalesce(balance,0) - coalesce(NEW.amount,0)
-          WHERE debt_account_id = NEW.account_id;
+          DELETE FROM bucket_transaction
+          WHERE
+            linked_trans_id = OLD.id;
+            
+          INSERT INTO bucket_transaction
+          (bucket_id, amount, posted, linked_trans_id)
+          SELECT
+            b.id,
+            -coalesce(NEW.amount, 0),
+            NEW.posted,
+            NEW.id
+          FROM
+            bucket as b
+          WHERE
+            b.debt_account_id = NEW.account_id
+            AND coalesce(b.kicked, 0) <> 1;
         END`,
-      `CREATE TRIGGER debt_transaction_delete
+
+      `CREATE TRIGGER linked_trans_delete
         AFTER DELETE ON account_transaction
         WHEN
           (SELECT count(*) FROM x_trigger_disabled) = 0
         BEGIN
-          UPDATE bucket
-          SET balance = coalesce(balance,0) + coalesce(OLD.amount,0)
-          WHERE debt_account_id = OLD.account_id;
+          DELETE FROM bucket_transaction
+          WHERE
+            linked_trans_id = OLD.id;
         END`,
     ])
   },

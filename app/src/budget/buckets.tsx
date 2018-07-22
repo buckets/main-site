@@ -654,7 +654,7 @@ class BucketRow extends React.Component<BucketRowProps, {
       </td>
       <td x-name="name" className="nobr">
         {bucket.debt_account_id
-          ? <span>{getDebtBucketName(bucket, debt_account)}</span>
+          ? <span>{getDebtBucketName(bucket, debt_account)} <Help icon={<span className="fa fa-credit-card" />}>{sss('debt-bucket-explanation', 'This is a special debt payment bucket.')}</Help></span>
           : <ClickToEdit
             value={bucket.name}
             placeholder="no name"
@@ -1101,7 +1101,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
           .checkpoint(sss('Un-kick Bucket'/* Name of action.  Consider this "Unarchive Bucket" */))
           .sub.buckets.unkick(bucket.id);
         }}>{sss('Un-kick')}</button>
-    } else {
+    } else  {
       kick_button = <button
         className="delete"
         onClick={() => {
@@ -1115,6 +1115,10 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
             }
           })
         }}>{sss('Kick the bucket'/* Button label for archiving a bucket */)}</button>
+    }
+    if (bucket.debt_account_id) {
+      // Not allowed to kick/un-kick debt payment buckets
+      kick_button = null;
     }
 
     let chart;

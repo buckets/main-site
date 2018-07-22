@@ -269,7 +269,7 @@ export async function updateMenu(args:{
         }
       },
       {
-        label: sss('Buckets Guide'/* 'Buckets' refers to the application name. */),
+        label: sss('Guide'/* Menu label for the Buckets user guide */),
         click() {
           openDocs();
         }

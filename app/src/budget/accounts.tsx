@@ -429,7 +429,7 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           </tr>
 
           <tr>
-            <th>{sss('Track Debt Payment')}</th>
+            <th>{sss('In Debt')}</th>
             <td>
               <input
                 type="checkbox"
@@ -437,11 +437,11 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
                 onChange={ev => {
                   if (ev.target.checked) {
                     manager
-                    .checkpoint(sss('Track Account Debt Payment'))
+                    .checkpoint(sss('Make Debt Account'))
                     .sub.accounts.setDebtMode(account.id, true);
                   } else {
                     manager
-                    .checkpoint(sss('Stop Tracking Account Debt Payment'))
+                    .checkpoint(sss('Make Not Debt Account'))
                     .sub.accounts.setDebtMode(account.id, false);
                   }
                 }}
