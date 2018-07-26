@@ -111,13 +111,34 @@ test('closing a debt account will kick the bucket', async t => {
   let debt_account = await store.sub.accounts.add('Credit Card');
   await store.sub.accounts.setDebtMode(debt_account.id, true);
   let debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
-  t.equal(debt_bucket.kicked, false);
+  t.notOk(debt_bucket.kicked);
   
   await store.sub.accounts.close(debt_account.id);
   debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
-  t.equal(debt_bucket.kicked, true, "Closing debt account should kick debt payment bucket");
+  t.equal(debt_bucket, null, "Closing debt account should kick debt payment bucket");
 
   await store.sub.accounts.unclose(debt_account.id);
   debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
-  t.equal(debt_bucket.kicked, false, "Unclosing debt account should unkick debt payment bucket");
+  t.notOk(debt_bucket.kicked, "Unclosing debt account should unkick debt payment bucket");
+})
+
+test('marking a debt account as off-budget will kick the bucket', async t => {
+  let { store } = await getStore();
+  let debt_account = await store.sub.accounts.add('Credit Card');
+  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  let debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
+  t.notOk(debt_bucket.kicked);
+  
+  await store.sub.accounts.update(debt_account.id, {offbudget: true});
+  debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
+  t.equal(debt_bucket, null, "Making a debt account off budget should kick debt payment bucket")
+  debt_account = await store.sub.accounts.get(debt_account.id);
+  t.notOk(debt_account.is_debt, "Making a debt account off budget should make it not a debt account");
+
+  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
+  t.notOk(debt_bucket.kicked, "Setting an off-budget account to debt mode should unkick the debt bucket");
+  debt_account = await store.sub.accounts.get(debt_account.id);
+  t.ok(debt_account.is_debt, "Setting an off-budget account to debt mode should mark it as a debt account");
+  t.notOk(debt_account.offbudget, "Setting an off-budget account to debt mode should mark it as not offbudget anymore");
 })

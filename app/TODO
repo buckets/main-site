@@ -7,5 +7,7 @@
  ☐ Change account from debt to not-debt
  ☐ Change account from not-debt to debt
  ☐ Publish bucket transactions and buckets created by triggers
- ☐ Show warning about payment bucket balances when there is self debt
+ ✔ Show warning about payment bucket balances when there is self debt @done (18-07-26 16:56)
  ☐ Finish docs
+ ☐ An account should not be allowed to be in debt and off budget
+ 

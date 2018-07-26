@@ -146,23 +146,25 @@ export class AccountStore {
       import_balance?:number,
       offbudget?:boolean,
   }):Promise<any> {
+    if (data.offbudget) {
+      await this.setDebtMode(account_id, false);
+    }
     return this.store.updateObject('account', account_id, data);
   }
   async close(account_id:number):Promise<Account> {
-    if (await this.hasTransactions(account_id)) {
-      // mark as close
-      return this.store.updateObject('account', account_id, {closed: true});
-    } else {
-      // actually delete it
-      let old_account = await this.get(account_id);
-      return this.deleteWholeAccount(account_id)
-      .then(() => {
-        return old_account
-      });
+    // mark as closed
+    let debt_bucket = await this.getDebtBucket(account_id)
+    if (debt_bucket) {
+      await this.store.sub.buckets.kick(debt_bucket.id);
     }
+    return this.store.updateObject('account', account_id, {closed: true});
   }
   async unclose(account_id:number):Promise<Account> {
-    return this.store.updateObject('account', account_id, {closed: false});
+    let account = await this.store.updateObject('account', account_id, {closed: false});
+    if (account.is_debt) {
+      await this.setDebtMode(account_id, true);
+    }
+    return account;
   }
   /**
    *  Delete an account and all its transactions
@@ -196,8 +198,10 @@ export class AccountStore {
    */
   async setDebtMode(account_id:number, is_debt:boolean):Promise<Account> {
     // let existing = await this.get(account_id)
+    let update_args:Partial<Account> = {is_debt}
     if (is_debt) {
       // setting to debt account
+      update_args.offbudget = false;
       let bucket = await this.getDebtBucket(account_id);
       if (!bucket) {
         // create a debt bucket
@@ -212,7 +216,7 @@ export class AccountStore {
         await this.store.sub.buckets.kick(bucket.id);
       }
     }
-    return this.store.updateObject('account', account_id, {is_debt: is_debt})
+    return this.store.updateObject('account', account_id, update_args)
   }
   /**
    *  Get the Bucket that tracks this account's debt payment

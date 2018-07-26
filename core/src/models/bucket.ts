@@ -127,13 +127,21 @@ export class BucketStore {
       return this.update(bucket_id, {kicked: true});
     } else {
       // bucket is unused
-      let old_bucket = await this.get(bucket_id);
-      await this.store.deleteObject('bucket', bucket_id);
-      return old_bucket;
+      return this.deleteBucket(bucket_id);
     }
   }
   async unkick(bucket_id:number):Promise<Bucket> {
     return this.update(bucket_id, {kicked: false});
+  }
+  async deleteBucket(bucket_id:number) {
+    // Delete bucket transactions
+    let btrans_ids = (await this.store.query<{id:number}>(`SELECT id FROM bucket_transaction WHERE bucket_id=$id;`, {$id: bucket_id}))
+      .map(x=>x.id);
+    await this.deleteTransactions(btrans_ids)
+
+    let old_bucket = await this.get(bucket_id);
+    await this.store.deleteObject('bucket', bucket_id);
+    return old_bucket;
   }
   async earliestTransaction(bucket_id:number):Promise<moment.Moment> {
     let rows = await this.store.query<{d:string}>(`
