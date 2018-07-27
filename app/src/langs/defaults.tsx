@@ -103,8 +103,8 @@ export const DEFAULTS:IMessages = {
     val: "Accounts",
     translated: false,
     h: "1oHDkv2zB1yiCABVTWBY5oX4Ccu36nJBCG7Q+JVg8TA=",
-    // budget.tsx:207
-    // budget.tsx:290
+    // budget.tsx:215
+    // budget.tsx:298
     // searchpage.tsx:115
   },
   "Actions": {
@@ -153,7 +153,7 @@ export const DEFAULTS:IMessages = {
     val: "Analysis",
     translated: false,
     h: "+LNAOPSLW2rpFCrT+U1suhdnoYyZa1k8ALddRlddDlI=",
-    // budget.tsx:216
+    // budget.tsx:224
   },
   "Animation": {
     /* Label for application preference enabling/disabling animations */
@@ -275,8 +275,8 @@ export const DEFAULTS:IMessages = {
     val: "Buckets",
     translated: false,
     h: "fMPIWzGvVEG0t7+bZX1ucgzulk8FaQfqioLgwLsj+oE=",
-    // budget.tsx:212
-    // budget.tsx:295
+    // budget.tsx:220
+    // budget.tsx:303
     // searchpage.tsx:92
   },
   "Buckets Budget Filename": {
@@ -299,8 +299,8 @@ export const DEFAULTS:IMessages = {
     val: "Buckets License",
     translated: false,
     h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
-    // dbsetup.ts:69
-    // dbsetup.ts:103
+    // dbsetup.ts:71
+    // dbsetup.ts:105
   },
   "Budget": {
     val: "Budget",
@@ -320,7 +320,7 @@ export const DEFAULTS:IMessages = {
     val: "Budget password:",
     translated: false,
     h: "yB5u4awiXu76+/Pw81ZYhBtgYQktcAVe6KU4WreiReU=",
-    // bankmacro.ts:111
+    // bankmacro.ts:110
   },
   "Budgeted": {
     val: "Budgeted",
@@ -350,8 +350,8 @@ export const DEFAULTS:IMessages = {
     val: "Calculator",
     translated: false,
     h: "IiaAFlM5LkjsirGL06i1plXy1FoW75TKBiuin2r4s6Q=",
-    // budget.tsx:176
-    // budget.tsx:190
+    // budget.tsx:184
+    // budget.tsx:198
   },
   "Cancel": {
     val: "Cancel",
@@ -413,7 +413,7 @@ export const DEFAULTS:IMessages = {
     val: "Chat with Matt",
     translated: false,
     h: "9nQjbkjkf8l2mX6xeNaU///NYhxxWFqnvTKOmakMmRY=",
-    // budget.tsx:199
+    // budget.tsx:207
   },
   "Chat...": {
     val: "Chat...",
@@ -484,7 +484,7 @@ export const DEFAULTS:IMessages = {
     val: "Closed",
     translated: false,
     h: "8pZrnvzAUQTJhDN/XX31DLvx0wIs1Ww3fV6pktEKEHs=",
-    // budget.tsx:209
+    // budget.tsx:217
   },
   "Clothing": {
     val: "Clothing",
@@ -569,7 +569,7 @@ export const DEFAULTS:IMessages = {
     val: "Create budget password:",
     translated: false,
     h: "Bf9XVrpN9UpVSKpZNRpBUw/IaFjMkNCmH4gpAfhYFkY=",
-    // bankmacro.ts:104
+    // bankmacro.ts:103
   },
   "Create macro": {
     val: "Create macro",
@@ -651,7 +651,7 @@ export const DEFAULTS:IMessages = {
     val: "Delete all",
     translated: false,
     h: "nKzti1takFUxZyWfLTGqgvdL3dJMx6CdNwVfBH1jUYE=",
-    // record.tsx:657
+    // record.tsx:665
   },
   "Description": {
     val: "Description",
@@ -707,7 +707,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "NZPVXQ+Dw1vv0fLXY+Z4R1KiEkXjDZtSmY3tVz5L1VI=",
     // record.html:0
-    // record.tsx:835
+    // record.tsx:843
   },
   "Eating out": {
     val: "Eating out",
@@ -774,25 +774,25 @@ export const DEFAULTS:IMessages = {
     val: "Error fetching data",
     translated: false,
     h: "z94B0956dECmmaMVLZFW0oZMVtA92etw+2ZqumR4K9Q=",
-    // simplefin.ts:272
+    // simplefin.ts:274
   },
   "Error importing": {
     val: "Error importing",
     translated: false,
     h: "rekzwWcY0HRZEhFebX1fJrp4aDJ/NTPxIwWaCYAk+7k=",
-    // desktop.ts:51
+    // desktop.ts:54
   },
   "Error parsing response": {
     val: "Error parsing response",
     translated: false,
     h: "PsIRbom+m8Y5OIEPW2rzJYVlNA2NQrZmEQnpW7Y/9KI=",
-    // simplefin.ts:279
+    // simplefin.ts:281
   },
   "Error running recording": {
     val: "Error running recording",
     translated: false,
     h: "eE9Fw8G4vQpND3fFWnfGNvtN5LxCcQQecWO6fQgBmpM=",
-    // record.tsx:773
+    // record.tsx:781
   },
   "Error running sync": {
     val: "Error running sync",
@@ -804,14 +804,14 @@ export const DEFAULTS:IMessages = {
     val: "Expenses",
     translated: false,
     h: "d6aKytFAPwPUzFOv41R0itfcMu11VdE29vkM05dnpBU=",
-    // budget.tsx:341
+    // budget.tsx:349
     // reports.tsx:219
   },
   "Export": {
     val: "Export",
     translated: false,
     h: "mZJs0iE089tMZ5BWqTUBp+2aJ90wKL4act4hUPt7zkA=",
-    // budget.tsx:193
+    // budget.tsx:201
     // exportpage.tsx:99
   },
   "File": {
@@ -1015,7 +1015,7 @@ export const DEFAULTS:IMessages = {
     val: "Import",
     translated: false,
     h: "F3sijvfYz3oB4iz2rVHjUvNDLQs43MbXDVIr5VFA2/c=",
-    // budget.tsx:222
+    // budget.tsx:230
   },
   "Import From YNAB4...": {
     val: "Import From YNAB4...",
@@ -1079,7 +1079,7 @@ export const DEFAULTS:IMessages = {
     val: "Income",
     translated: false,
     h: "D2fJbta5d1Z5QYuRC5zzkBHsItZOOgY4FKrFJ64BvRs=",
-    // budget.tsx:336
+    // budget.tsx:344
     // reports.tsx:208
     // transactions.tsx:774
   },
@@ -1106,7 +1106,7 @@ export const DEFAULTS:IMessages = {
     val: "Invalid SimpleFIN Token",
     translated: false,
     h: "C6BzeT0S0G+xUVzgdubtVeH39oIVS4hUaVBd2gKS3Uo=",
-    // simplefin.ts:244
+    // simplefin.ts:246
   },
   "Invalid categorization.  Categories not set.": {
     val: "Invalid categorization.  Categories not set.",
@@ -1176,7 +1176,7 @@ export const DEFAULTS:IMessages = {
     val: "Kicked",
     translated: false,
     h: "cWApfoLlcBvoHizIFtrDQq3uwrZIYMXKO1iLMvv8szI=",
-    // budget.tsx:214
+    // budget.tsx:222
   },
   "Language": {
     /* Label for application language preference */
@@ -1559,7 +1559,7 @@ export const DEFAULTS:IMessages = {
     val: "Open YNAB4 File",
     translated: false,
     h: "BrKgvN0SgW410a7e11V3gP+FgW67iTGIY+o/cKI1Ftk=",
-    // desktop.ts:36
+    // desktop.ts:39
   },
   "Optional message:": {
     val: "Optional message:",
@@ -1622,7 +1622,7 @@ export const DEFAULTS:IMessages = {
     val: "Paused",
     translated: false,
     h: "sMAADusAjpKEUapa7bSzeAnEAbEGpH+NKBgGh068Ifw=",
-    // record.tsx:524
+    // record.tsx:532
   },
   "Permanently delete account": {
     val: "Permanently delete account",
@@ -1646,7 +1646,7 @@ export const DEFAULTS:IMessages = {
     val: "Playing",
     translated: false,
     h: "69elN/r6NyshRWtcjLOKso9OmdOJhvg/ix+Xy/fE+Z0=",
-    // record.tsx:536
+    // record.tsx:544
   },
   "Possible Duplicates": {
     val: "Possible Duplicates",
@@ -1719,8 +1719,8 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "fqeHyOaOYnCtGAcJlJbhAR37DG6YMrsasUNtiL6z8hc=",
     // buckets.tsx:219
-    // budget.tsx:286
-    // budget.tsx:309
+    // budget.tsx:294
+    // budget.tsx:317
   },
   "Rain left": {
     val: "Rain left",
@@ -1751,13 +1751,13 @@ export const DEFAULTS:IMessages = {
     val: "Recording",
     translated: false,
     h: "s1hytW8ZlaU8eRtoTfV+4aCpW5biiyifheE3t0kouUo=",
-    // record.tsx:530
+    // record.tsx:538
   },
   "Recurring Expenses": {
     val: "Recurring Expenses",
     translated: false,
     h: "yDp5Agru+QzDSy583s3kjOdZbbe6X1WDfMeSNXsYlaY=",
-    // budget.tsx:219
+    // budget.tsx:227
     // reports.tsx:600
   },
   "Redo": {
@@ -1859,7 +1859,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "wduD0WXtkIpIb6B4R8AA7ph724u3/Gtv27uaky6rEAU=",
     // transactions.tsx:969
-    // record.tsx:487
+    // record.tsx:495
   },
   "Screenshots:": {
     val: "Screenshots:",
@@ -1871,7 +1871,7 @@ export const DEFAULTS:IMessages = {
     val: "Search",
     translated: false,
     h: "vembE+Cp1aKCKR2j2LCJD29QyiQxfGPUcGI1I8l5/5Y=",
-    // budget.tsx:192
+    // budget.tsx:200
   },
   "Search for Amazon transactions:": {
     val: "Search for Amazon transactions:",
@@ -1931,7 +1931,7 @@ export const DEFAULTS:IMessages = {
     val: "Settings",
     translated: false,
     h: "g5CfgkRu6cPoKgSs58kE8baksjDRuXC1WTLWKVn75z0=",
-    // budget.tsx:200
+    // budget.tsx:208
   },
   "Show All": {
     val: "Show All",
@@ -2005,7 +2005,7 @@ export const DEFAULTS:IMessages = {
     val: "Step took too long",
     translated: false,
     h: "Py3rsk0guEg0d8Ce9Lbfwzf1zP7E4Z8YPSOu165mOc0=",
-    // record.tsx:769
+    // record.tsx:777
   },
   "Stop Speaking": {
     val: "Stop Speaking",
@@ -2072,7 +2072,7 @@ export const DEFAULTS:IMessages = {
     val: "Sync failed",
     translated: false,
     h: "jBGq60u/Y2WKAulnVvspUq9tLPFtXOnQYczjXXViGA0=",
-    // simplefin.ts:115
+    // simplefin.ts:114
   },
   "Sync has not yet been set up.": {
     val: "Sync has not yet been set up.",
@@ -2172,7 +2172,7 @@ export const DEFAULTS:IMessages = {
     val: "Tools",
     translated: false,
     h: "mPsch0seV0ZNaU+41My/wS+DkAGfYqzWpPlJpfT1sBs=",
-    // budget.tsx:223
+    // budget.tsx:231
   },
   "Tot:": {
     val: "Tot:",
@@ -2198,7 +2198,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "4+yGUer/b71cfxTdeUa5QbonqN9ezC8Eii7KO22Ety0=",
     // buckets.tsx:296
-    // budget.tsx:211
+    // budget.tsx:219
     // exportpage.tsx:149
     // amazon.tsx:254
   },
@@ -2218,7 +2218,7 @@ export const DEFAULTS:IMessages = {
     val: "Trial Version",
     translated: false,
     h: "GtZIXrHILA84HlpKlxi3BErHwR7WIYkQ/e5BE0Fiaxg=",
-    // budget.tsx:142
+    // budget.tsx:150
     // menu.ts:307
   },
   "Tuition": {
@@ -2248,7 +2248,7 @@ export const DEFAULTS:IMessages = {
     val: "Unable to claim access token",
     translated: false,
     h: "Gao95RuT9JvhdAoZ5winV9os7iMaPIex3Vq9CMSjhzs=",
-    // simplefin.ts:256
+    // simplefin.ts:258
   },
   "Unable to open the file:": {
     val: "Unable to open the file:",
@@ -2273,7 +2273,7 @@ export const DEFAULTS:IMessages = {
     val: "Unexpected sync error",
     translated: false,
     h: "78kYsQMTfGS8BNaZVuqYaRojJlTpcmN6CF9PQKKO0ME=",
-    // simplefin.ts:124
+    // simplefin.ts:123
   },
   "Unique ID": {
     val: "Unique ID",
@@ -2291,7 +2291,7 @@ export const DEFAULTS:IMessages = {
     val: "Unknown category",
     translated: false,
     h: "bK4teMnFOuofJ4sX76ozAla50yDaLbvb5pCj+New5f4=",
-    // ynab.ts:449
+    // ynab.ts:460
   },
   "Unlinked Accounts": {
     val: "Unlinked Accounts",
@@ -2419,7 +2419,7 @@ export const DEFAULTS:IMessages = {
     val: "Used in future",
     translated: false,
     h: "O0zGsqv23d44/pWJqCSt+qkDtG/nBrBI2W0aRA9XoDw=",
-    // budget.tsx:300
+    // budget.tsx:308
   },
   "Vacation ": {
     val: "Vacation ",
@@ -2497,7 +2497,7 @@ export const DEFAULTS:IMessages = {
     val: "You can do math in all number inputs, not just here in the calculator.",
     translated: false,
     h: "dn2W/ktTrcwSzYNSq6IQL7Sl2k8lxZQRsFehzG9Mf7g=",
-    // budget.tsx:176
+    // budget.tsx:184
   },
   "You don't have any recurring expense buckets yet.": {
     val: "You don't have any recurring expense buckets yet.",
@@ -2804,7 +2804,7 @@ export const DEFAULTS:IMessages = {
     val: "in the bank",
     translated: false,
     h: "7gl7ZdgJ3HfhOcQMiU7hVkFpXIR3KFxXtlMhKyE/Irw=",
-    // budget.tsx:352
+    // budget.tsx:360
   },
   "match-count": {
     val: (current_match:number, total_matches:number) => {
@@ -2834,7 +2834,7 @@ export const DEFAULTS:IMessages = {
                       },
     translated: false,
     h: "lGcEnJfZJau2h5ohbKNxY1FjL0vJoW3oJOJQwSCt+Kg=",
-    // budget.tsx:346
+    // budget.tsx:354
   },
   "more": {
     val: "more",
@@ -2854,7 +2854,7 @@ Would you like to purchase a license now?`,
     val: (url) => `Go to ${url}`,
     translated: false,
     h: "nI/J4GfYlL6BgRZRSiPFfA5o7ASdx2VVYW6x3vgCuKE=",
-    // record.tsx:353
+    // record.tsx:361
   },
   "net-transfers.help": {
     val: "Net transfers are the sum total of all transactions marked as a transfer.  It should be 0.  If it's not, click through to make sure there aren't duplicate transactions or transactions miscategorized as transfers.",
@@ -2872,7 +2872,7 @@ Would you like to purchase a license now?`,
     val: filename => `Downloaded file: ${filename}`,
     translated: false,
     h: "HwxJ2TVx57Qef6bXYySekL/eoBzvIEFUqBxQdxgcyCs=",
-    // record.tsx:746
+    // record.tsx:754
   },
   "noun.transfer": {
     val: "Transfer",
@@ -2885,13 +2885,13 @@ Would you like to purchase a license now?`,
     val: "off",
     translated: false,
     h: "nzvsum5LFYOz4ZRB3eTVliJTfZvVSpTSImJ4XkhThNA=",
-    // record.tsx:360
+    // record.tsx:368
   },
   "on": {
     val: "on",
     translated: false,
     h: "mQwjhouWWBSxF8+abE3+RUUurcIXHh+YGGXr/ITxByQ=",
-    // record.tsx:362
+    // record.tsx:370
   },
   "press Escape to close": {
     val: "press Escape to close",
@@ -2907,7 +2907,7 @@ Would you like to purchase a license now?`,
                                     },
     translated: false,
     h: "tqXmJxZXqyA0mN/8ugZkpCyspyO7XlPnGlEYGWgQ7jk=",
-    // budget.tsx:321
+    // budget.tsx:329
   },
   "rain.help.pos": {
     val: (abs_amount:JSX.Element) => {
@@ -2917,7 +2917,7 @@ Would you like to purchase a license now?`,
                                     },
     translated: false,
     h: "boezbSGkVm3dnfFvodJOAeCgAEMIQN9L+8TwEHLpU/o=",
-    // budget.tsx:316
+    // budget.tsx:324
   },
   "shipment-number": {
     /* Noun labeling this shipment number */
