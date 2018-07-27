@@ -407,15 +407,16 @@ export const migrations:IMigration[] = [
     func: SQLList([
       `ALTER TABLE bucket ADD COLUMN debt_account_id INTEGER`,
       `ALTER TABLE bucket_transaction ADD COLUMN linked_trans_id INTEGER`,
-      `ALTER TABLE account ADD COLUMN is_debt TINYINT DEFAULT 0`,
-      `UPDATE account SET is_debt = 0`,
+      `ALTER TABLE account ADD COLUMN kind TEXT DEFAULT ''`,
+      `UPDATE account SET kind = '' WHERE coalesce(offbudget,0) = 0`,
+      `UPDATE account SET kind = 'offbudget' WHERE coalesce(offbudget,0) = 1`,
       
       `CREATE TRIGGER debt_transaction_insert
         AFTER INSERT ON account_transaction
         WHEN
           (SELECT count(*) FROM x_trigger_disabled) = 0
           AND (SELECT count(*) FROM account WHERE
-            is_debt = 1 AND NEW.account_id = id) = 1
+            kind = 'debt' AND NEW.account_id = id) = 1
         BEGIN
           INSERT INTO bucket_transaction
           (bucket_id, amount, posted, linked_trans_id)

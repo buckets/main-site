@@ -195,7 +195,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
   let uncategorized_trans = [];
   Object.values(appstate.transactions)
   .forEach((trans:ATrans) => {
-    if (appstate.accounts[trans.account_id].offbudget) {
+    if (appstate.accounts[trans.account_id].kind === 'offbudget') {
       // Off-budget transaction
     } else {
       if (trans.general_cat !== 'transfer') {
@@ -233,14 +233,14 @@ function computeTotals(appstate:AppState):IComputedAppState {
       closed_accounts.push(account);
     } else {
       // Open account
-      if (account.offbudget) {
+      if (account.kind === 'offbudget') {
         offbudget_accounts.push(account);
       } else {
         // Open and on-budget
         const bal = appstate.account_balances[account.id];
         open_accounts.push(account);
         open_accounts_balance += bal;
-        if (account.is_debt) {
+        if (account.kind === 'debt') {
           debt_balance += bal;
         }
       }

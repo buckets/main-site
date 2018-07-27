@@ -30,6 +30,10 @@ export type GeneralCatType =
   | 'income'
   | 'transfer';
 
+export type AccountType =
+  ''
+  | 'offbudget'
+  | 'debt'
 
 export interface Account extends IObject, INotable {
   _type: 'account';
@@ -41,8 +45,7 @@ export interface Account extends IObject, INotable {
   import_balance: number;
   currency: string;
   closed: boolean;
-  offbudget: boolean;
-  is_debt: boolean;
+  kind: AccountType;
 }
 
 export interface Transaction extends IObject, INotable {
@@ -144,11 +147,7 @@ export class AccountStore {
       name?:string,
       balance?:number,
       import_balance?:number,
-      offbudget?:boolean,
   }):Promise<any> {
-    if (data.offbudget) {
-      await this.setDebtMode(account_id, false);
-    }
     return this.store.updateObject('account', account_id, data);
   }
   /**
@@ -156,10 +155,8 @@ export class AccountStore {
    */
   async close(account_id:number):Promise<Account> {
     // if it's a debt bucket, clean up
-    let debt_bucket = await this.getDebtBucket(account_id)
-    if (debt_bucket) {
-      await this.store.sub.buckets.kick(debt_bucket.id);
-    }
+    await this.disableDebtMode(account_id)
+
     // mark as closed
     return this.store.updateObject('account', account_id, {closed: true});
   }
@@ -168,8 +165,8 @@ export class AccountStore {
    */
   async unclose(account_id:number):Promise<Account> {
     let account = await this.store.updateObject('account', account_id, {closed: false});
-    if (account.is_debt) {
-      await this.setDebtMode(account_id, true);
+    if (account.kind === 'debt') {
+      await this.enableDebtMode(account_id);
     }
     return account;
   }
@@ -206,30 +203,42 @@ export class AccountStore {
     // Delete the account itself
     await this.store.deleteObject('account', account_id);
   }
+
+
   /**
-   *  Make this account a debt account or not
+   *  Set an account's type
    */
-  async setDebtMode(account_id:number, is_debt:boolean):Promise<Account> {
-    // let existing = await this.get(account_id)
-    let update_args:Partial<Account> = {is_debt}
-    if (is_debt) {
-      // setting to debt account
-      update_args.offbudget = false;
-      let bucket = await this.getDebtBucket(account_id);
-      if (!bucket) {
-        // create a debt bucket
-        bucket = await this.store.sub.buckets.add({name:'', debt_account_id: account_id})
-      } else {
-        await this.store.sub.buckets.unkick(bucket.id);
-      }
+  async setAccountKind(account_id:number, kind:AccountType):Promise<Account> {
+    if (kind == 'debt') {
+      await this.enableDebtMode(account_id);
+    } else if (kind == 'offbudget') {
+      await this.disableDebtMode(account_id);
     } else {
-      // setting to normal account
-      let bucket = await this.getDebtBucket(account_id);
-      if (bucket) {
-        await this.store.sub.buckets.kick(bucket.id);
-      }
+      await this.disableDebtMode(account_id);
     }
-    return this.store.updateObject('account', account_id, update_args)
+    return await this.store.updateObject('account', account_id, {
+      kind,
+    })
+  }
+
+  private async enableDebtMode(account_id:number) {
+    let bucket = await this.getDebtBucket(account_id);
+    if (!bucket) {
+      // create a debt bucket
+      bucket = await this.store.sub.buckets.add({name:'', debt_account_id: account_id})
+    } else {
+      await this.store.sub.buckets.unkick(bucket.id);
+    }
+    return await this.store.updateObject('account', account_id, {
+      kind: 'debt',
+    })
+  }
+  private async disableDebtMode(account_id:number) {
+    // setting to normal account
+    let bucket = await this.getDebtBucket(account_id);
+    if (bucket) {
+      await this.store.sub.buckets.kick(bucket.id);
+    }
   }
   /**
    *  Get the Bucket that tracks this account's debt payment
@@ -291,24 +300,14 @@ export class AccountStore {
     }
     let trans = await this.store.createObject('account_transaction', data);
     let account = await this.store.getObject('account', args.account_id);
-    if (account.is_debt) {
-      // publish related-bucket changes
-      const btrans = await this.store.listObjects('bucket_transaction', {
-        where: 'linked_trans_id = $trans_id',
-        params: {$trans_id: trans.id},
-      })
-      let bucket_ids = new Set<number>();
-      for (const t of btrans) {
-        this.store.publishObject('update', t);
-        bucket_ids.add(t.bucket_id);
-      }
-      const buckets = await this.store.listObjects('bucket', {
-        where: `id in (${Array.from(bucket_ids).join(',')})`,
-      })
-      for (const b of buckets) {
-        this.store.publishObject('update', b);
-      }
+    let linked = await this.getLinkedBucketData(trans.id);
+    linked.transactions.forEach(btrans => {
+      this.store.publishObject('update', btrans);
+    })
+    if (linked.bucket) {
+      this.store.publishObject('update', linked.bucket);
     }
+
     this.store.publishObject('update', account);
     return trans;
   }
@@ -640,7 +639,7 @@ export class AccountStore {
     let where = 'a.closed <> 1'
     let params = {};
     if (opts.onbudget_only) {
-      where += ' AND a.offbudget = 0'
+      where += " AND a.kind <> 'offbudget'"
     }
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }

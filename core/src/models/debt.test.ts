@@ -5,14 +5,14 @@ test('normal -> debt account', async (t) => {
   let { store } = await getStore();
   let account = await store.sub.accounts.add('Credit Card');
 
-  account = await store.sub.accounts.setDebtMode(account.id, true);
-  t.ok(account.is_debt);
+  account = await store.sub.accounts.setAccountKind(account.id, 'debt');
+  t.equal(account.kind, 'debt');
 })
 
 test('creating a transaction adds to the debt payment', async t => {
   let { store, events } = await getStore();
   let account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(account.id, true);
+  await store.sub.accounts.setAccountKind(account.id, 'debt');
   events.length = 0;
 
   await store.sub.accounts.transact({
@@ -39,7 +39,7 @@ test('creating a transaction adds to the debt payment', async t => {
 test('updating a transaction amount updates the debt payment', async t => {
   let { store, events } = await getStore();
   let account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(account.id, true);
+  await store.sub.accounts.setAccountKind(account.id, 'debt');
   let tx = await store.sub.accounts.transact({
     account_id: account.id,
     amount: -1000,
@@ -78,7 +78,7 @@ test('updating a transaction amount updates the debt payment', async t => {
 test('deleting a debt transaction', async t => {
   let { store, events } = await getStore();
   let account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(account.id, true);
+  await store.sub.accounts.setAccountKind(account.id, 'debt');
 
   let tx = await store.sub.accounts.transact({
     account_id: account.id,
@@ -115,7 +115,7 @@ test('switch accounts on a transaction updates the debt payment', async t => {
   let { store, events } = await getStore();
   let debt_account = await store.sub.accounts.add('Credit Card');
   let norm_account = await store.sub.accounts.add('Checking');
-  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  await store.sub.accounts.setAccountKind(debt_account.id, 'debt');
 
   let tx = await store.sub.accounts.transact({
     account_id: debt_account.id,
@@ -179,7 +179,7 @@ test('switch accounts on a transaction updates the debt payment', async t => {
 test('closing and unclosing a debt account', async t => {
   let { store } = await getStore();
   let debt_account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  await store.sub.accounts.setAccountKind(debt_account.id, 'debt');
   let debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
   t.notOk(debt_bucket.kicked);
   
@@ -195,28 +195,27 @@ test('closing and unclosing a debt account', async t => {
 test('debt account -> off-budget account', async t => {
   let { store } = await getStore();
   let debt_account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  await store.sub.accounts.setAccountKind(debt_account.id, 'debt');
   let debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
   t.notOk(debt_bucket.kicked);
   
-  await store.sub.accounts.update(debt_account.id, {offbudget: true});
+  await store.sub.accounts.setAccountKind(debt_account.id, 'offbudget');
   debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
   t.equal(debt_bucket, null, "should kick debt payment bucket")
   debt_account = await store.sub.accounts.get(debt_account.id);
-  t.notOk(debt_account.is_debt, "should make it not a debt account");
+  t.equal(debt_account.kind, "offbudget", "should make it not a debt account");
 
-  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  await store.sub.accounts.setAccountKind(debt_account.id, 'debt');
   debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
   t.notOk(debt_bucket.kicked, "should unkick the debt bucket");
   debt_account = await store.sub.accounts.get(debt_account.id);
-  t.ok(debt_account.is_debt, "should mark it as a debt account");
-  t.notOk(debt_account.offbudget, "should mark it as not offbudget anymore");
+  t.equal(debt_account.kind, "debt", "should mark it as a debt account");
 })
 
 test('debt -> normal account', async t => {
   let { store } = await getStore();
   let debt_account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  await store.sub.accounts.setAccountKind(debt_account.id, 'debt');
   await store.sub.accounts.transact({
     account_id: debt_account.id,
     amount: 1000,
@@ -226,7 +225,7 @@ test('debt -> normal account', async t => {
   t.notOk(debt_bucket.kicked);
   
   // switch it back
-  await store.sub.accounts.setDebtMode(debt_account.id, false);
+  await store.sub.accounts.setAccountKind(debt_account.id, '');
   debt_bucket = await store.sub.accounts.getDebtBucket(debt_account.id);
   t.ok(debt_bucket.kicked, "should kick bucket");
 })
@@ -234,7 +233,7 @@ test('debt -> normal account', async t => {
 test('delete debt account', async t => {
   let { store } = await getStore();
   let debt_account = await store.sub.accounts.add('Credit Card');
-  await store.sub.accounts.setDebtMode(debt_account.id, true);
+  await store.sub.accounts.setAccountKind(debt_account.id, 'debt');
   await store.sub.accounts.transact({
     account_id: debt_account.id,
     amount: 1000,
