@@ -11,6 +11,6 @@
  ✔ Change account from not-debt to debt @done (18-07-26 22:39)
  ✔ Publish bucket transactions and buckets created by triggers @done (18-07-27 16:59)
  ✔ Show warning about payment bucket balances when there is self debt @done (18-07-26 16:56)
- ☐ Finish docs
- ☐ An account should not be allowed to be in debt and off budget
- ☐ on Account.tsx don't capitalize In Debt (to match Off-budget)
+ ✔ Finish docs @done (18-07-27 17:41)
+ ✔ An account should not be allowed to be in debt and off budget @done (18-07-27 17:32)
+ ✔ on Account.tsx don't capitalize In Debt (to match Off-budget) @done (18-07-27 17:32)
