@@ -24,54 +24,58 @@ test('creating a transaction adds to the debt payment', async t => {
   let bucket = await store.sub.accounts.getDebtBucket(account.id);
   t.equal(bucket.balance, 1000);
 
-  t.containsObjects(events, [
+  t.matchAndRemoveObject(events,
     {event: 'update', obj: {
       _type: 'bucket_transaction',
       bucket_id: bucket.id,
-    }},
+    }}, "should publish bucket_transaction update")
+ t.matchAndRemoveObject(events,
     {event: 'update', obj: {
       _type: 'bucket',
       id: bucket.id,
-    }}
-  ])
+    }}, "should publish bucket update")
 })
 
 test('updating a transaction amount updates the debt payment', async t => {
   let { store, events } = await getStore();
   let account = await store.sub.accounts.add('Credit Card');
   await store.sub.accounts.setDebtMode(account.id, true);
-
   let tx = await store.sub.accounts.transact({
     account_id: account.id,
     amount: -1000,
     memo: 'some memo',
   });
-
   let bucket = await store.sub.accounts.getDebtBucket(account.id);
   t.equal(bucket.balance, 1000);
 
+  // Update the transaction
   events.length = 0;
   tx = await store.sub.accounts.updateTransaction(tx.id, {amount: -1500});
-
   t.equal(tx.amount, -1500)
   t.equal(tx.memo, 'some memo')
-
+  
+  // bucket
   bucket = await store.sub.accounts.getDebtBucket(account.id);
   t.equal(bucket.balance, 1500);
-
-  t.containsObjects(events, [
-    {event: 'update', obj: {
+  
+  // events
+  t.matchAndRemoveObject(events, {
+    event: 'update',
+    obj: {
       _type: 'bucket_transaction',
       bucket_id: bucket.id,
-    }},
-    {event: 'update', obj: {
+    }
+  }, "should publish bucket transaction update")
+  t.matchAndRemoveObject(events, {
+    event: 'update',
+    obj: {
       _type: 'bucket',
       id: bucket.id,
-    }}
-  ])
+    }
+  }, "should publish bucket update");
 });
 
-test('deleting a transaction updates the debt payment', async t => {
+test('deleting a debt transaction', async t => {
   let { store, events } = await getStore();
   let account = await store.sub.accounts.add('Credit Card');
   await store.sub.accounts.setDebtMode(account.id, true);
@@ -89,18 +93,22 @@ test('deleting a transaction updates the debt payment', async t => {
   await store.sub.accounts.deleteTransactions([tx.id])
 
   bucket = await store.sub.accounts.getDebtBucket(account.id);
-  t.equal(bucket.balance, 0);
+  t.equal(bucket.balance, 0, "Should adjust bucket balance");
 
-  t.containsObjects(events, [
-    {event: 'update', obj: {
+  t.matchAndRemoveObject(events, {
+    event: 'delete',
+    obj: {
       _type: 'bucket_transaction',
       bucket_id: bucket.id,
-    }},
-    {event: 'update', obj: {
+    }
+  }, "should publish bucket transaction update")
+  t.matchAndRemoveObject(events, {
+    event: 'update',
+    obj: {
       _type: 'bucket',
       id: bucket.id,
-    }}
-  ])
+    }
+  }, "should publish bucket update");
 });
 
 test('switch accounts on a transaction updates the debt payment', async t => {
@@ -128,16 +136,20 @@ test('switch accounts on a transaction updates the debt payment', async t => {
   t.equal(debt_bucket.balance, 0);
   let bucket_transactions = await store.sub.buckets.listTransactions({})
   t.equal(bucket_transactions.length, 0, "Should remove linked bucket transaction");
-  t.containsObjects(events, [
-    {event: 'delete', obj: {
+  t.matchAndRemoveObject(events, {
+    event: 'delete',
+    obj: {
       _type: 'bucket_transaction',
       bucket_id: debt_bucket.id,
-    }},
-    {event: 'update', obj: {
+    }
+  }, "debt -> norm should publish bucket transaction delete")
+  t.matchAndRemoveObject(events, {
+    event: 'update',
+    obj: {
       _type: 'bucket',
       id: debt_bucket.id,
-    }}
-  ])
+    }
+  }, "debt -> norm should publish bucket update");
 
   // Switch from norm to debt account
   events.length = 0;
@@ -148,16 +160,20 @@ test('switch accounts on a transaction updates the debt payment', async t => {
   t.equal(debt_bucket.balance, 1000);
   bucket_transactions = await store.sub.buckets.listTransactions({})
   t.equal(bucket_transactions.length, 1, "Should have linked bucket transaction");
-  t.containsObjects(events, [
-    {event: 'update', obj: {
+  t.matchAndRemoveObject(events, {
+    event: 'update',
+    obj: {
       _type: 'bucket_transaction',
       bucket_id: debt_bucket.id,
-    }},
-    {event: 'update', obj: {
+    }
+  }, "norm -> debt should publish bucket transaction update")
+  t.matchAndRemoveObject(events, {
+    event: 'update',
+    obj: {
       _type: 'bucket',
       id: debt_bucket.id,
-    }}
-  ])
+    }
+  }, "norm -> debt should publish bucket update");
 })
 
 test('closing and unclosing a debt account', async t => {

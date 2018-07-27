@@ -63,14 +63,32 @@ export function matchObjectArrays(expected:object[], actual:object[]) {
 export function repr(x):string {
   return util.inspect(x, {breakLength: Infinity})
 }
-tap.Test.prototype.addAssert('containsObjects', 2, function(actual:object[], expected:object[], message, extra) {
-  message = message || '';
-  let { unmatched } = matchObjectArrays(expected, actual);
-  if (unmatched.length === 0) {
-    return this.pass(message);
-  } else {
-    return this.fail(`${repr(actual)} missing ${repr(unmatched)} (${message})`, extra);
+// tap.Test.prototype.addAssert('containsObjects', 2, function(actual:object[], expected:object[], message, extra) {
+//   message = message || '';
+//   let { unmatched } = matchObjectArrays(expected, actual);
+//   if (unmatched.length === 0) {
+//     return this.pass(message);
+//   } else {
+//     return this.fail(`${repr(actual)} missing ${repr(unmatched)} (${message})`, extra);
+//   }
+// })
+
+/**
+ *  Check that a list of object contains the given object
+ *  and remove that object from the list.
+ */
+tap.Test.prototype.addAssert('matchAndRemoveObject', 2, function(actual:object[], expected:object, message, extra) {
+  for (let i = 0; i < actual.length; i++) {
+    if (tmatch(actual[i], expected)) {
+      // remove this object
+      actual.splice(i, 1);
+      return this.pass(message);
+    }
   }
+  message && console.log(message)
+  console.log('missing', expected)
+  console.log('from', actual)
+  return this.fail(`${message} OBJECT ${repr(expected)} MISSING FROM ${repr(actual)})`, extra);
 })
 
 export class TestUIFunctions implements IUserInterfaceFunctions {

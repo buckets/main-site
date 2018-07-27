@@ -4,7 +4,7 @@ import { IObject, IStore } from '../store';
 import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from './notes'
-import { Bucket } from './bucket'
+import { Bucket, Transaction as BTrans } from './bucket'
 
 
 declare module '../store' {
@@ -247,6 +247,26 @@ export class AccountStore {
       return null;
     }
   }
+  /**
+   *  Get the debt buckets and transactions associated with a
+   *  transaction
+   */
+  async getLinkedBucketData(trans_id:number):Promise<{bucket: Bucket, transactions:BTrans[]}> {
+    const transactions = await this.store.listObjects('bucket_transaction', {
+      where: 'linked_trans_id = $trans_id',
+      params: {
+        $trans_id: trans_id,
+      }
+    })
+    let bucket:Bucket;
+    if (transactions.length) {
+      bucket = await this.store.getObject('bucket', transactions[0].bucket_id);
+    }
+    return {
+      transactions,
+      bucket,
+    }
+  }
 
   async transact(args:{
     account_id:number,
@@ -292,6 +312,9 @@ export class AccountStore {
     this.store.publishObject('update', account);
     return trans;
   }
+  /**
+   *  Update the attributes of a transaction
+   */
   async updateTransaction(trans_id:number, args:{
     account_id?: number,
     amount?: number,
@@ -302,8 +325,10 @@ export class AccountStore {
   }):Promise<Transaction> {
     let affected_account_ids = new Set<number>();
     let existing = await this.store.getObject('account_transaction', trans_id);
-    let newdata: Partial<Transaction> = {}
 
+    const old_linked_bucket_data = await this.getLinkedBucketData(trans_id);
+
+    let newdata: Partial<Transaction> = {}
     if (args.account_id !== undefined && existing.account_id !== args.account_id) {
       affected_account_ids.add(existing.account_id);
       affected_account_ids.add(args.account_id);
@@ -333,6 +358,26 @@ export class AccountStore {
       let account = await this.store.getObject('account', account_id);
       this.store.publishObject('update', account);
     }));
+
+    const new_linked_bucket_data = await this.getLinkedBucketData(trans_id);
+
+    // publish affected bucket transactions
+    old_linked_bucket_data.transactions.forEach(trans => {
+      this.store.publishObject('delete', trans);
+    })
+    new_linked_bucket_data.transactions.forEach(trans => {
+      this.store.publishObject('update', trans);
+    })
+    if (old_linked_bucket_data.bucket) {
+      if (new_linked_bucket_data.bucket && new_linked_bucket_data.bucket.id === old_linked_bucket_data.bucket.id) {
+        this.store.publishObject('update', new_linked_bucket_data.bucket);
+      } else {
+        this.store.publishObject('update', old_linked_bucket_data.bucket);
+      }
+    }
+    if (new_linked_bucket_data.bucket) {
+      this.store.publishObject('update', new_linked_bucket_data.bucket);
+    }
     return trans;
   }
 
@@ -478,6 +523,11 @@ export class AccountStore {
       btrans_list.forEach(btrans => {
         deleted_btrans.push(btrans);
         affected_bucket_ids.add(btrans.bucket_id);  
+      })
+      let linked = await this.getLinkedBucketData(transid);
+      linked.transactions.forEach(btrans => {
+        deleted_btrans.push(btrans);
+        affected_bucket_ids.add(btrans.bucket_id);
       })
       await this.store.deleteObject('account_transaction', transid);
     }));
