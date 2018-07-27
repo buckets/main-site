@@ -151,14 +151,21 @@ export class AccountStore {
     }
     return this.store.updateObject('account', account_id, data);
   }
+  /**
+   *  Mark an account as closed
+   */
   async close(account_id:number):Promise<Account> {
-    // mark as closed
+    // if it's a debt bucket, clean up
     let debt_bucket = await this.getDebtBucket(account_id)
     if (debt_bucket) {
       await this.store.sub.buckets.kick(debt_bucket.id);
     }
+    // mark as closed
     return this.store.updateObject('account', account_id, {closed: true});
   }
+  /**
+   *  Mark an account as not closed
+   */
   async unclose(account_id:number):Promise<Account> {
     let account = await this.store.updateObject('account', account_id, {closed: false});
     if (account.is_debt) {
@@ -188,6 +195,12 @@ export class AccountStore {
       .map(x=>x.id);
     for (let mapping_id of mapping_ids) {
       await this.store.deleteObject('account_mapping', mapping_id);
+    }
+
+    // Delete debt bucket stuff
+    let debt_bucket = await this.getDebtBucket(account_id);
+    if (debt_bucket) {
+      await this.store.sub.buckets.deleteBucket(debt_bucket.id);
     }
 
     // Delete the account itself
@@ -258,6 +271,24 @@ export class AccountStore {
     }
     let trans = await this.store.createObject('account_transaction', data);
     let account = await this.store.getObject('account', args.account_id);
+    if (account.is_debt) {
+      // publish related-bucket changes
+      const btrans = await this.store.listObjects('bucket_transaction', {
+        where: 'linked_trans_id = $trans_id',
+        params: {$trans_id: trans.id},
+      })
+      let bucket_ids = new Set<number>();
+      for (const t of btrans) {
+        this.store.publishObject('update', t);
+        bucket_ids.add(t.bucket_id);
+      }
+      const buckets = await this.store.listObjects('bucket', {
+        where: `id in (${Array.from(bucket_ids).join(',')})`,
+      })
+      for (const b of buckets) {
+        this.store.publishObject('update', b);
+      }
+    }
     this.store.publishObject('update', account);
     return trans;
   }
