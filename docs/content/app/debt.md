@@ -15,7 +15,7 @@ Many users treat fixed-payment credit (e.g. mortgages and car loans) as expenses
 
 If you always pay off your credit card in full every statement, then you are safe to leave your credit card account as a *Normal* account.
 
-If, however, you are trying to pay off a credit card balance, it may be helpful to mark the account as *Debt*.
+If, however, you are trying to pay off a credit card balance, it may be helpful to mark the account as *Debt*.  Click the account details and change the account type from *Normal* to *Debt*.
 
 ## Debt Accounts
 
@@ -62,6 +62,10 @@ The debt payment bucket will mirror every transaction into your account.  For in
 You are also welcome to put additional funds into the debt payment bucket as you have them.
 
 <warning>Because of complicated deadlines associated with credit card billing, don't assume that the amount in the payment bucket is the exact amount you should pay.</warning>
+
+## Syncing the payment balance with the billing cycle
+
+
 
 ## Another Great Idea
 
