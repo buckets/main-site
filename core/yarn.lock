@@ -2401,6 +2401,10 @@ tmatch@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/tmatch/-/tmatch-3.1.0.tgz#701264fd7582d0144a80c85af3358cca269c71e3"
 
+tmatch@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/tmatch/-/tmatch-4.0.0.tgz#ba178007f30bf6a70f37c643fca5045fb2f8c448"
+
 tmp@^0.0.33:
   version "0.0.33"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.33.tgz#6d34335889768d21b2bcda0aa277ced3b1bfadf9"

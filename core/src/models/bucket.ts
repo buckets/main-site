@@ -25,6 +25,7 @@ export type BucketKind =
   | 'goal-deposit'
   | 'goal-date'
   | 'deposit-date';
+
 export interface Bucket extends IObject,INotable {
   _type:'bucket';
   name: string;
@@ -39,6 +40,7 @@ export interface Bucket extends IObject,INotable {
   end_date: string;
   deposit: number;
   notes: string;
+  debt_account_id: number;
 }
 export interface Transaction extends IObject,INotable {
   _type: 'bucket_transaction';
@@ -50,6 +52,7 @@ export interface Transaction extends IObject,INotable {
   account_trans_id: number;
   transfer: boolean;
   notes: string;
+  linked_trans_id: number;
 }
 export interface Group extends IObject,INotable {
   _type: 'bucket_group';
@@ -84,7 +87,7 @@ export class BucketStore {
   /**
    *  Create a new bucket
    */
-  async add(args?:{name:string, group_id?:number}):Promise<Bucket> {
+  async add(args?:{name:string, group_id?:number, debt_account_id?:number}):Promise<Bucket> {
     let data:Partial<Bucket> = args || {};
     let group_id = args.group_id || null;
     let rows = await this.store.query<{highrank:string}>(`
@@ -95,6 +98,9 @@ export class BucketStore {
         })
     data.ranking = rankBetween(rows[0].highrank, 'z')
     data.color = DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)];
+    if (args.debt_account_id !== undefined) {
+      data.debt_account_id = args.debt_account_id;
+    }
     return this.store.createObject('bucket', data);
   }
   async list():Promise<Bucket[]> {
@@ -121,13 +127,21 @@ export class BucketStore {
       return this.update(bucket_id, {kicked: true});
     } else {
       // bucket is unused
-      let old_bucket = await this.get(bucket_id);
-      await this.store.deleteObject('bucket', bucket_id);
-      return old_bucket;
+      return this.deleteBucket(bucket_id);
     }
   }
   async unkick(bucket_id:number):Promise<Bucket> {
     return this.update(bucket_id, {kicked: false});
+  }
+  async deleteBucket(bucket_id:number) {
+    // Delete bucket transactions
+    let btrans_ids = (await this.store.query<{id:number}>(`SELECT id FROM bucket_transaction WHERE bucket_id=$id;`, {$id: bucket_id}))
+      .map(x=>x.id);
+    await this.deleteTransactions(btrans_ids)
+
+    let old_bucket = await this.get(bucket_id);
+    await this.store.deleteObject('bucket', bucket_id);
+    return old_bucket;
   }
   async earliestTransaction(bucket_id:number):Promise<moment.Moment> {
     let rows = await this.store.query<{d:string}>(`

@@ -66,6 +66,17 @@ Simple categorizing  Click Categorize on a transaction Choose a bucket from the 
     </item>
     
     <item>
+      <title>Debt</title>
+      <link>https://docs.budgetwithbuckets.com/app/debt/</link>
+      <pubDate>Sat, 20 Jan 2018 15:35:19 -0700</pubDate>
+      
+      <guid>https://docs.budgetwithbuckets.com/app/debt/</guid>
+      <description>If you are trying to pay off debt, there are a few things Buckets can offer you.
+Mortgage/Loan Many users treat fixed-payment credit (e.g. mortgages and car loans) as expenses to the budget rather than accounts within the budget. It makes sense to mark these kinds of debt accounts as Off Budget rather than Debt.
+Credit Cards and Other Debt If you always pay off your credit card in full every statement, then you are safe to leave your credit card account as a Normal account.</description>
+    </item>
+    
+    <item>
       <title>File Format</title>
       <link>https://docs.budgetwithbuckets.com/fileformat/</link>
       <pubDate>Tue, 09 Jan 2018 11:36:13 -0700</pubDate>

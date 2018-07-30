@@ -402,4 +402,68 @@ export const migrations:IMigration[] = [
       `UPDATE account_transaction SET cleared = 1`,
     ]),
   },
+  {
+    name: 'debt-accounts',
+    func: SQLList([
+      `ALTER TABLE bucket ADD COLUMN debt_account_id INTEGER`,
+      `ALTER TABLE bucket_transaction ADD COLUMN linked_trans_id INTEGER`,
+      `ALTER TABLE account ADD COLUMN kind TEXT DEFAULT ''`,
+      `UPDATE account SET kind = '' WHERE coalesce(offbudget,0) = 0`,
+      `UPDATE account SET kind = 'offbudget' WHERE coalesce(offbudget,0) = 1`,
+      
+      `CREATE TRIGGER debt_transaction_insert
+        AFTER INSERT ON account_transaction
+        WHEN
+          (SELECT count(*) FROM x_trigger_disabled) = 0
+          AND (SELECT count(*) FROM account WHERE
+            kind = 'debt' AND NEW.account_id = id) = 1
+        BEGIN
+          INSERT INTO bucket_transaction
+          (bucket_id, amount, posted, linked_trans_id)
+          SELECT
+            b.id,
+            -coalesce(NEW.amount, 0),
+            NEW.posted,
+            NEW.id
+          FROM
+            bucket as b
+          WHERE
+            b.debt_account_id = NEW.account_id
+            AND coalesce(b.kicked, 0) <> 1;
+        END`,
+
+      `CREATE TRIGGER linked_trans_update
+        AFTER UPDATE ON account_transaction
+        WHEN
+          (SELECT count(*) FROM x_trigger_disabled) = 0
+        BEGIN
+          DELETE FROM bucket_transaction
+          WHERE
+            linked_trans_id = OLD.id;
+            
+          INSERT INTO bucket_transaction
+          (bucket_id, amount, posted, linked_trans_id)
+          SELECT
+            b.id,
+            -coalesce(NEW.amount, 0),
+            NEW.posted,
+            NEW.id
+          FROM
+            bucket as b
+          WHERE
+            b.debt_account_id = NEW.account_id
+            AND coalesce(b.kicked, 0) <> 1;
+        END`,
+
+      `CREATE TRIGGER linked_trans_delete
+        AFTER DELETE ON account_transaction
+        WHEN
+          (SELECT count(*) FROM x_trigger_disabled) = 0
+        BEGIN
+          DELETE FROM bucket_transaction
+          WHERE
+            linked_trans_id = OLD.id;
+        END`,
+    ])
+  },
 ]

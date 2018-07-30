@@ -993,7 +993,9 @@ table.ledger .icon-button-wrap button.icon,
   border-bottom-color: red;
 }
 
-
+.inline {
+  display: inline-block;
+}
 .changing-value {
   position: relative;
 }

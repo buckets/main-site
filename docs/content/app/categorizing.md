@@ -50,4 +50,4 @@ Categorize both of those as *Transfers* and then your income won't be artificial
 
 # Next
 
-Read about <a href="{{< relref "general.md" >}}">app-wide stuff.</a>
+Learn about <a href="{{< relref "debt.md" >}}">Debt.</a>

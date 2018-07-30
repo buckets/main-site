@@ -84,6 +84,10 @@ export class AccountList extends React.Component<AccountListProps,any> {
         </div>}>{sss('accounts.balance_mismatch_msg', 'The most recent synced balance does not match the balance computed from transactions.  Click ... for more information.')}</Help>
 
       }
+      let badge;
+      if (account.kind === 'debt') {
+        badge = <span className="fa fa-credit-card" />
+      }
       return (<tr key={account.id} className="icon-hover-trigger">
           <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
           <td className="nobr"><ClickToEdit
@@ -94,7 +98,7 @@ export class AccountList extends React.Component<AccountListProps,any> {
               .checkpoint(sss('Update Account Name'))
               .sub.accounts.update(account.id, {name: val});  
             }}
-          /></td>
+          /> {badge}</td>
           <td className="right nobr"><Money value={balances[account.id]} />{import_balance_note}</td>
           <td><Link relative to={`/${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link></td>
         </tr>);
@@ -408,23 +412,20 @@ export class AccountView extends React.Component<AccountViewProps, AccountViewSt
           </tr>
 
           <tr>
-            <th>{sss('Off budget')}</th>
+            <th>{sss('account-type', 'Type')}</th>
             <td>
-              <input
-                type="checkbox"
-                checked={account.offbudget}
+              <select
+                value={account.kind}
                 onChange={ev => {
-                  if (ev.target.checked) {
-                    manager
-                    .checkpoint(sss('Make Account Off Budget'))
-                    .sub.accounts.update(account.id, {offbudget:true});
-                  } else {
-                    manager
-                    .checkpoint(sss('Make Account On Budget'))
-                    .sub.accounts.update(account.id, {offbudget:false});
-                  }
+                  manager
+                  .checkpoint(sss('Change Account Type'))
+                  .sub.accounts.setAccountKind(account.id, ev.target.value as any);
                 }}
-              /> 
+              >
+                <option value="">{sss('Normal')}</option>
+                <option value="offbudget">{sss('Off budget')}</option>
+                <option value="debt">{sss('Debt')}</option>
+              </select>
             </td>
           </tr>
 

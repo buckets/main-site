@@ -19,6 +19,7 @@ function mkBucket(data?:Partial<Bucket>):Bucket {
     end_date: null,
     deposit: null,
     notes: '',
+    debt_account_id: null,
   };
   Object.assign(b, data || {});
   return b;

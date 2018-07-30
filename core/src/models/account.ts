@@ -4,6 +4,7 @@ import { IObject, IStore } from '../store';
 import { ts2localdb, parseLocalTime, dumpTS, SerializedTimestamp } from '../time';
 import { Balances, computeBalances } from './balances';
 import { INotable } from './notes'
+import { Bucket, Transaction as BTrans } from './bucket'
 
 
 declare module '../store' {
@@ -29,6 +30,10 @@ export type GeneralCatType =
   | 'income'
   | 'transfer';
 
+export type AccountType =
+  ''
+  | 'offbudget'
+  | 'debt'
 
 export interface Account extends IObject, INotable {
   _type: 'account';
@@ -40,7 +45,7 @@ export interface Account extends IObject, INotable {
   import_balance: number;
   currency: string;
   closed: boolean;
-  offbudget: boolean;
+  kind: AccountType;
 }
 
 export interface Transaction extends IObject, INotable {
@@ -142,25 +147,28 @@ export class AccountStore {
       name?:string,
       balance?:number,
       import_balance?:number,
-      offbudget?:boolean,
   }):Promise<any> {
     return this.store.updateObject('account', account_id, data);
   }
+  /**
+   *  Mark an account as closed
+   */
   async close(account_id:number):Promise<Account> {
-    if (await this.hasTransactions(account_id)) {
-      // mark as close
-      return this.store.updateObject('account', account_id, {closed: true});
-    } else {
-      // actually delete it
-      let old_account = await this.get(account_id);
-      return this.deleteWholeAccount(account_id)
-      .then(() => {
-        return old_account
-      });
-    }
+    // if it's a debt bucket, clean up
+    await this.disableDebtMode(account_id)
+
+    // mark as closed
+    return this.store.updateObject('account', account_id, {closed: true});
   }
+  /**
+   *  Mark an account as not closed
+   */
   async unclose(account_id:number):Promise<Account> {
-    return this.store.updateObject('account', account_id, {closed: false});
+    let account = await this.store.updateObject('account', account_id, {closed: false});
+    if (account.kind === 'debt') {
+      await this.enableDebtMode(account_id);
+    }
+    return account;
   }
   /**
    *  Delete an account and all its transactions
@@ -186,8 +194,87 @@ export class AccountStore {
       await this.store.deleteObject('account_mapping', mapping_id);
     }
 
+    // Delete debt bucket stuff
+    let debt_bucket = await this.getDebtBucket(account_id);
+    if (debt_bucket) {
+      await this.store.sub.buckets.deleteBucket(debt_bucket.id);
+    }
+
     // Delete the account itself
     await this.store.deleteObject('account', account_id);
+  }
+
+
+  /**
+   *  Set an account's type
+   */
+  async setAccountKind(account_id:number, kind:AccountType):Promise<Account> {
+    if (kind == 'debt') {
+      await this.enableDebtMode(account_id);
+    } else if (kind == 'offbudget') {
+      await this.disableDebtMode(account_id);
+    } else {
+      await this.disableDebtMode(account_id);
+    }
+    return await this.store.updateObject('account', account_id, {
+      kind,
+    })
+  }
+
+  private async enableDebtMode(account_id:number) {
+    let bucket = await this.getDebtBucket(account_id);
+    if (!bucket) {
+      // create a debt bucket
+      bucket = await this.store.sub.buckets.add({name:'', debt_account_id: account_id})
+    } else {
+      await this.store.sub.buckets.unkick(bucket.id);
+    }
+    return await this.store.updateObject('account', account_id, {
+      kind: 'debt',
+    })
+  }
+  private async disableDebtMode(account_id:number) {
+    // setting to normal account
+    let bucket = await this.getDebtBucket(account_id);
+    if (bucket) {
+      await this.store.sub.buckets.kick(bucket.id);
+    }
+  }
+  /**
+   *  Get the Bucket that tracks this account's debt payment
+   */
+  async getDebtBucket(account_id:number):Promise<Bucket> {
+    let buckets = await this.store.listObjects('bucket', {
+      where: 'debt_account_id = $account_id',
+      params: {
+        $account_id: account_id,
+      }
+    })
+    if (buckets.length === 1) {
+      return buckets[0]
+    } else {
+      return null;
+    }
+  }
+  /**
+   *  Get the debt buckets and transactions associated with a
+   *  transaction
+   */
+  async getLinkedBucketData(trans_id:number):Promise<{bucket: Bucket, transactions:BTrans[]}> {
+    const transactions = await this.store.listObjects('bucket_transaction', {
+      where: 'linked_trans_id = $trans_id',
+      params: {
+        $trans_id: trans_id,
+      }
+    })
+    let bucket:Bucket;
+    if (transactions.length) {
+      bucket = await this.store.getObject('bucket', transactions[0].bucket_id);
+    }
+    return {
+      transactions,
+      bucket,
+    }
   }
 
   async transact(args:{
@@ -213,9 +300,20 @@ export class AccountStore {
     }
     let trans = await this.store.createObject('account_transaction', data);
     let account = await this.store.getObject('account', args.account_id);
+    let linked = await this.getLinkedBucketData(trans.id);
+    linked.transactions.forEach(btrans => {
+      this.store.publishObject('update', btrans);
+    })
+    if (linked.bucket) {
+      this.store.publishObject('update', linked.bucket);
+    }
+
     this.store.publishObject('update', account);
     return trans;
   }
+  /**
+   *  Update the attributes of a transaction
+   */
   async updateTransaction(trans_id:number, args:{
     account_id?: number,
     amount?: number,
@@ -227,29 +325,58 @@ export class AccountStore {
     let affected_account_ids = new Set<number>();
     let existing = await this.store.getObject('account_transaction', trans_id);
 
+    const old_linked_bucket_data = await this.getLinkedBucketData(trans_id);
+
+    let newdata: Partial<Transaction> = {}
     if (args.account_id !== undefined && existing.account_id !== args.account_id) {
       affected_account_ids.add(existing.account_id);
       affected_account_ids.add(args.account_id);
+      newdata.account_id = args.account_id;
     }
     if (args.amount !== undefined && existing.amount !== args.amount) {
       affected_account_ids.add(existing.account_id);
       this.removeCategorization(trans_id, false);
-      args.amount = args.amount || 0;
+      newdata.amount = args.amount || 0;
     }
-    let trans = await this.store.updateObject('account_transaction', trans_id, {
-      account_id: args.account_id,
-      amount: args.amount,
-      memo: args.memo,
-      posted: args.posted ? ts2localdb(args.posted) : undefined,
-      fi_id: args.fi_id,
-      cleared: args.cleared,
-    });
+    if (args.memo !== undefined) {
+      newdata.memo = args.memo
+    }
+    if (args.posted !== undefined) {
+      newdata.posted = ts2localdb(args.posted)
+    }
+    if (args.fi_id !== undefined) {
+      newdata.fi_id = args.fi_id;
+    }
+    if (args.cleared !== undefined) {
+      newdata.cleared = args.cleared;
+    }
+    let trans = await this.store.updateObject('account_transaction', trans_id, newdata);
 
     // publish affected accounts
     await Promise.all(Array.from(affected_account_ids).map(async (account_id) => {
       let account = await this.store.getObject('account', account_id);
       this.store.publishObject('update', account);
     }));
+
+    const new_linked_bucket_data = await this.getLinkedBucketData(trans_id);
+
+    // publish affected bucket transactions
+    old_linked_bucket_data.transactions.forEach(trans => {
+      this.store.publishObject('delete', trans);
+    })
+    new_linked_bucket_data.transactions.forEach(trans => {
+      this.store.publishObject('update', trans);
+    })
+    if (old_linked_bucket_data.bucket) {
+      if (new_linked_bucket_data.bucket && new_linked_bucket_data.bucket.id === old_linked_bucket_data.bucket.id) {
+        this.store.publishObject('update', new_linked_bucket_data.bucket);
+      } else {
+        this.store.publishObject('update', old_linked_bucket_data.bucket);
+      }
+    }
+    if (new_linked_bucket_data.bucket) {
+      this.store.publishObject('update', new_linked_bucket_data.bucket);
+    }
     return trans;
   }
 
@@ -396,6 +523,11 @@ export class AccountStore {
         deleted_btrans.push(btrans);
         affected_bucket_ids.add(btrans.bucket_id);  
       })
+      let linked = await this.getLinkedBucketData(transid);
+      linked.transactions.forEach(btrans => {
+        deleted_btrans.push(btrans);
+        affected_bucket_ids.add(btrans.bucket_id);
+      })
       await this.store.deleteObject('account_transaction', transid);
     }));
 
@@ -507,7 +639,7 @@ export class AccountStore {
     let where = 'a.closed <> 1'
     let params = {};
     if (opts.onbudget_only) {
-      where += ' AND a.offbudget = 0'
+      where += " AND a.kind <> 'offbudget'"
     }
     return computeBalances(this.store, 'account', 'account_transaction', 'account_id', asof, where, params);
   }

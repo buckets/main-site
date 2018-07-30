@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 
 import { EventSource } from '@iffycan/events'
 import {isObj, IStore, IObjectEvent} from 'buckets-core/dist/store'
-import { Account, UnknownAccount, expectedBalance, Transaction as ATrans, Category } from 'buckets-core/dist/models/account'
+import { Account, UnknownAccount, Transaction as ATrans, Category } from 'buckets-core/dist/models/account'
 import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from 'buckets-core/dist/models/bucket'
 import { Connection } from 'buckets-core/dist/models/simplefin'
 import { isBetween, loadTS, parseLocalTime, localNow, makeLocalDate } from 'buckets-core/dist/time'
@@ -20,23 +20,47 @@ const log = new PrefixLogger('(appstate)')
 
 
 interface IComputedAppState {
+  /**
+   *  The total current rain for the current time period computed from various other things
+   */
   rain: number;
-  // Amount of this month's rain used in the future
-  adjusted_future_rain: number;
+  /**
+   *  Amount of THIS TIME PERIOD'S rain being used in the future
+   */
+  rain_used_in_future: number;
+  /**
+   *  Sum of all bucket balances
+   */
   bucket_total_balance: number;
+  /**
+   *  Sum of all open, on-budget account balances
+   */
   open_accounts_balance: number;
-  all_accounts_assets: number;
-  all_accounts_debt: number;
-  transfers_in: number;
-  transfers_out: number;
-  income: number;
-  expenses: number;
-  gain: number;
-  nodebt_balances: Balances;
+  /**
+   *  Sum of all open, on-budget, debt account balances
+   */
+  debt_balance: number;
 
-  num_unknowns: number;
-  unmatched_account_balances: number;
-  num_uncategorized_trans: number;
+  /**
+   *  This time period's total income (for on-budget accounts)
+   */
+  income: number;
+  /**
+   *  This time period's total expenses (for on-budget accounts)
+   */
+  expenses: number;
+  /**
+   *  This time period's income + expenses
+   */
+  gain: number;
+
+  /**
+   *  Number of unknown accounts (i.e. imports that don't know which account they should be tied to)
+   */
+  num_unknown_accounts: number;
+  /**
+   *  List of uncategorized transactions for this time period.
+   */
   uncategorized_trans: ATrans[];
 
   unkicked_buckets: Bucket[];
@@ -45,8 +69,6 @@ interface IComputedAppState {
   open_accounts: Account[];
   closed_accounts: Account[];
   offbudget_accounts: Account[];
-
-  can_sync: boolean;
 }
 
 export class AppState implements IComputedAppState {
@@ -89,7 +111,6 @@ export class AppState implements IComputedAppState {
   running_bank_macros = new Set<number>();
   account_balances: Balances = {};
   bucket_balances: Balances = {};
-  nodebt_balances: Balances = {};
 
   // The amount in/out for each bucket for this month.
   bucket_flow: BucketFlowMap = {}
@@ -98,9 +119,8 @@ export class AppState implements IComputedAppState {
   }
 
   // The amount of rain used in future months
-  actual_future_rain: number = 0;
-  // The amount of this month's rain used in future months.
-  adjusted_future_rain: number = 0;
+  total_future_rain: number = 0;
+  rain_used_in_future: number = 0;
   month: number = localNow().month()+1;
   year: number = localNow().year();
 
@@ -110,17 +130,13 @@ export class AppState implements IComputedAppState {
   rain: number = 0;
   bucket_total_balance: number = 0;
   open_accounts_balance: number = 0;
-  all_accounts_assets: number = 0;
-  all_accounts_debt: number = 0;
-  transfers_in: number = 0;
-  transfers_out: number = 0;
+  debt_balance: number = 0;
   income: number = 0;
   expenses: number = 0;
   gain: number = 0;
 
-  num_unknowns: number = 0;
+  num_unknown_accounts: number = 0;
   unmatched_account_balances: number = 0;
-  num_uncategorized_trans: number = 0;
   uncategorized_trans: ATrans[] = [];
 
   unkicked_buckets: Bucket[] = [];
@@ -129,8 +145,6 @@ export class AppState implements IComputedAppState {
   open_accounts: Account[] = [];
   closed_accounts: Account[] = [];
   offbudget_accounts: Account[] = [];
-
-  can_sync = false;
 
   get defaultPostingDate():moment.Moment {
     let today = localNow();
@@ -152,6 +166,11 @@ export class AppState implements IComputedAppState {
       before: end,
     }
   }
+
+  canSync():boolean {
+    return !!Object.keys(this.sfinconnections).length
+      ||!!Object.keys(this.bank_macros).length;
+  }
 }
 
 function computeTotals(appstate:AppState):IComputedAppState {
@@ -168,34 +187,24 @@ function computeTotals(appstate:AppState):IComputedAppState {
   let bucket_total_balance = bucket_pos_balance + bucket_neg_balance;
   let income = 0;
   let expenses = 0;
-  let transfers_in = 0;
-  let transfers_out = 0;
   let trans_with_buckets = {};
   Object.values(appstate.btransactions)
   .forEach((btrans:BTrans) => {
     trans_with_buckets[btrans.account_trans_id] = true;
   })
   let uncategorized_trans = [];
-  let num_uncategorized_trans = 0;
   Object.values(appstate.transactions)
   .forEach((trans:ATrans) => {
-    if (appstate.accounts[trans.account_id].offbudget) {
+    if (appstate.accounts[trans.account_id].kind === 'offbudget') {
       // Off-budget transaction
     } else {
-      if (trans.general_cat === 'transfer') {
-        if (trans.amount > 0) {
-          transfers_in += trans.amount;
-        } else {
-          transfers_out += trans.amount;
-        }
-      } else {
+      if (trans.general_cat !== 'transfer') {
         if (trans.amount > 0) {
           income += trans.amount;
         } else {
           expenses += trans.amount;
         }
         if (!trans.general_cat && !trans_with_buckets[trans.id]) {
-          num_uncategorized_trans += 1;
           uncategorized_trans.push(trans);
         }
       }
@@ -203,99 +212,74 @@ function computeTotals(appstate:AppState):IComputedAppState {
   })
   
   let gain = income + expenses;
-  let num_unknowns = _.values(appstate.unknown_accounts).length;
+  let num_unknown_accounts = _.values(appstate.unknown_accounts).length;
 
   let kicked_buckets = [];
   let unkicked_buckets = [];
-  let nodebt_balances = {};
   Object.values<Bucket>(appstate.buckets).forEach(bucket => {
     if (bucket.kicked) {
       kicked_buckets.push(bucket);
     } else {
       unkicked_buckets.push(bucket);
-      let bal = appstate.bucket_balances[bucket.id];
-      if (bal <= 0) {
-        // negative
-        nodebt_balances[bucket.id] = 0;
-      } else {
-        // positive
-        nodebt_balances[bucket.id] = (bal / bucket_pos_balance) * bucket_total_balance;
-      }
     }
   })
-  let unmatched_account_balances = 0;
   let open_accounts_balance = 0;
-  let all_accounts_assets = 0;
-  let all_accounts_debt = 0;
   let open_accounts = [];
   let closed_accounts = [];
   let offbudget_accounts = [];
+  let debt_balance = 0;
   Object.values<Account>(appstate.accounts).forEach(account => {
     if (account.closed) {
       closed_accounts.push(account);
     } else {
-      const bal = appstate.account_balances[account.id];
-      if (bal > 0) {
-        all_accounts_assets += bal;
-      } else {
-        all_accounts_debt += bal;
-      }
-      if (account.offbudget) {
+      // Open account
+      if (account.kind === 'offbudget') {
         offbudget_accounts.push(account);
-         
       } else {
+        // Open and on-budget
+        const bal = appstate.account_balances[account.id];
         open_accounts.push(account);
         open_accounts_balance += bal;
-      }
-      if (expectedBalance(account) !== account.balance) {
-        unmatched_account_balances += 1;
+        if (account.kind === 'debt') {
+          debt_balance += bal;
+        }
       }
     }
   })
 
-  let rain = open_accounts_balance - bucket_total_balance;
-  let adjusted_future_rain = 0;
+  let rain = open_accounts_balance - bucket_total_balance - debt_balance;
+  let rain_used_in_future = 0;
 
   if (rain > 0) {
     // Some of this rain might be used in future months
-    if (appstate.actual_future_rain > 0) {
-      if (rain >= appstate.actual_future_rain) {
+    if (appstate.total_future_rain > 0) {
+      if (rain >= appstate.total_future_rain) {
         // future rain being used is less than the rain available this month.
-        adjusted_future_rain = appstate.actual_future_rain;
+        rain_used_in_future = appstate.total_future_rain;
       } else {
         // future rain being used exceeds rain available this month
-        adjusted_future_rain = rain;
+        rain_used_in_future = rain;
       }
-      rain -= adjusted_future_rain;
+      rain -= rain_used_in_future;
     }
   }
 
-  let can_sync = 
-      !!Object.keys(appstate.sfinconnections).length
-    ||!!Object.keys(appstate.bank_macros).length;
   return {
     bucket_total_balance,
     open_accounts_balance,
-    all_accounts_assets,
-    all_accounts_debt,
     rain,
-    adjusted_future_rain,
-    transfers_in,
-    transfers_out,
+    rain_used_in_future,
+    debt_balance,
     income,
     expenses,
     gain,
-    num_unknowns,
-    num_uncategorized_trans,
+    num_unknown_accounts,
     uncategorized_trans,
     kicked_buckets,
     unkicked_buckets,
     open_accounts,
     closed_accounts,
     offbudget_accounts,
-    unmatched_account_balances,
-    nodebt_balances,
-    can_sync,
   };
 }
 
@@ -615,7 +599,7 @@ export class StateManager {
       onOrAfter: this.appstate.viewDateRange.before,
     })
     .then(rainfall => {
-      this.appstate.actual_future_rain = rainfall;
+      this.appstate.total_future_rain = rainfall;
     })
   }
   async fetchTransactions() {
