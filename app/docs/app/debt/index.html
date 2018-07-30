@@ -85,21 +85,21 @@ Debt
 
 <h2 id="mortgage-loan">Mortgage/Loan</h2>
 
-<p>Many users treat fixed-payment credit (e.g. mortgages and car loans) as expenses to the budget rather than accounts within the budget.  It makes sense to mark these kinds of debt accounts as <em>Off budget</em> rather than <em>Debt</em>.</p>
+<p>Many users treat fixed-payment credit (e.g. mortgages and car loans) as expenses to the budget rather than accounts within the budget.  It makes sense to mark these kinds of debt accounts as <strong>Off Budget</strong> rather than <strong>Debt</strong>.</p>
 
 <h2 id="credit-cards-and-other-debt">Credit Cards and Other Debt</h2>
 
-<p>If you always pay off your credit card in full every statement, then you are safe to leave your credit card account as a <em>Normal</em> account.</p>
+<p>If you always pay off your credit card in full every statement, then you are safe to leave your credit card account as a <strong>Normal</strong> account.</p>
 
-<p>If, however, you are trying to pay off a credit card balance, it may be helpful to mark the account as <em>Debt</em>.</p>
+<p>If, however, you are trying to pay off a credit card balance, it may be helpful to mark the account as <strong>Debt</strong>.  Click the account details and change the account type from <strong>Normal</strong> to <strong>Debt</strong>.</p>
 
 <h2 id="debt-accounts">Debt Accounts</h2>
 
-<p>Changing an account to a <em>Debt</em> account causes two things to happen:</p>
+<p>Changing an account to a <strong>Debt</strong> account causes two things to happen:</p>
 
 <ol>
 <li>The account&rsquo;s negative balance is removed from your total rain.</li>
-<li>A special payment bucket is created.</li>
+<li>A debt payment bucket is automatically created.</li>
 </ol>
 
 <h3 id="1-rain-without-debt">1. Rain without Debt</h3>
@@ -165,7 +165,7 @@ Debt
 </tbody>
 </table>
 
-<p>Budgeting with a bunch of negative amounts doesn&rsquo;t match reality, though.  In real life, you would never allocate a negative amount for food.  So, when you mark an account as <em>Debt</em> it removes that debt from your rain amount so that you can budget like this:</p>
+<p>Budgeting with a bunch of negative amounts doesn&rsquo;t match reality, though.  In real life, you would never allocate a negative amount for food.  So, when you mark an account as <strong>Debt</strong> it removes that debt from your rain amount so that you can budget like this:</p>
 
 <table>
 <thead>
@@ -198,18 +198,91 @@ Debt
 </tbody>
 </table>
 
-<h3 id="2-special-payment-bucket">2. Special Payment Bucket</h3>
+<h3 id="2-debt-payment-bucket">2. Debt Payment Bucket</h3>
 
-<p>The special payment bucket will mirror every transaction into your account.  For instance:</p>
+<p>The debt payment bucket will mirror every transaction into your account.  For instance:</p>
 
 <ul>
 <li>if you deposit $50 into your debt account, the payment bucket balance will decrease by $50 indicating that your pending payment has gone down.</li>
 <li>if you withdraw $50 from your debt account, the payment bucket balance will increase by $50 indicating that your pending payment has gone up.</li>
 </ul>
 
-<p>You are also welcome to put additional funds into the payment bucket as you have them.</p>
+<p>You are also welcome to put additional funds into the debt payment bucket as you have them.</p>
 
-<p><warning>Because of complicated deadlines associated with credit card billing, don&rsquo;t assume that the amount in the payment bucket is the exact amount you should pay.</warning></p>
+<p><warning>Because of complicated deadlines associated with credit card billing, don&rsquo;t assume that the amount in the payment bucket is the exact amount you should pay. See the next section for help with this.</warning></p>
+
+<h2 id="syncing-the-payment-balance-with-the-billing-cycle">Syncing the payment balance with the billing cycle</h2>
+
+<p>Credit cards can have very complicated billing cycles.  And even the simplest cycles can create confusion.  In the simplest case, you&rsquo;ll have one billing cycle&rsquo;s payment due just as the next billing cycle ends, as shown here:</p>
+
+<p><svg viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <marker
+            id="arrow"
+            viewBox="0 0 10 10"
+            markerWidth="6"
+            markerHeight="6"
+            refX="8"
+            refY="5"
+            orient="auto-start-reverse"
+        >
+            <path d="M0,0 L10,5 L0,10 z" />
+        </marker>
+    </defs>
+    <sline x1="10" y1="100" x2="490" y2="100" stroke="grey" />
+    <g name="cycle1" transform="translate(50,50)">
+        <rect x="0" y="-5" height="10" width="100" fill="rgba(52, 152, 219, 1)" />
+        <rect x="100" y="-5" height="10" width="100" fill="rgba(189, 195, 199, 1)" />
+        <path
+            d="M100 5 Q 150 60, 200 5"
+            stroke="black"
+            fill="none"
+            stroke-width="2"
+            marker-end="url(#arrow)" />
+        <text x="0" y="0" dy="-10" text-anchor="middle">Start</text>
+        <text x="100" y="0" dy="-10" text-anchor="middle">End</text>
+        <text x="200" y="0" dy="-10" text-anchor="middle">Due</text>
+    </g>
+    <g name="cycle2" transform="translate(150,100)">
+        <rect x="0" y="-5" height="10" width="100" fill="rgba(52, 152, 219, 1)" />
+        <rect x="100" y="-5" height="10" width="100" fill="rgba(189, 195, 199, 1)" />
+        <path
+            d="M100 5 Q 150 60, 200 5"
+            stroke="black"
+            fill="none"
+            stroke-width="2"
+            marker-end="url(#arrow)" />
+        <text x="0" y="0" dy="-10" text-anchor="middle">Start</text>
+        <text x="100" y="0" dy="-10" text-anchor="middle">End</text>
+        <text x="200" y="0" dy="-10" text-anchor="middle">Due</text>
+    </g>
+</svg></p>
+
+<p>If you&rsquo;re using a <strong>Debt</strong> account, this means that your debt payment bucket can often include money meant for 2 or more cycles at once.  Here are some tips to help ease the confusion:</p>
+
+<ol>
+<li><p>Pay off each billing cycle as close to the end date as you can.  This limits the amount of overlap with other cycles.</p></li>
+
+<li><p>The first month you use a <strong>Debt</strong> account, just before you make your first payment, add your payment amount to the debt payment bucket.</p>
+
+<p>For instance, if your debt payment bucket has accumulated $400 and you&rsquo;re about to pay $600 for the previous billing cycle, first add $600 to your debt payment bucket to bring the balance to $1000.  Make your payment and the balance should now reflect the amount due on your next cycle.</p></li>
+
+<li><p>Consult the debt payment bucket&rsquo;s transaction list and use the balance <em>at the end of the previous billing cycle</em> as your payment amount.</p>
+
+<p>For instance, if your billing cycle ends on the 4th of the month, though your bucket might have $690 in it <em>now</em>, at the end of the previous billing cycle it only had $450.  Pay $450 rather than $690.
+<img src="../debt_img/btrans_balanceasof.png" alt="Bucket transaction list" /></p></li>
+</ol>
+
+<p>Always double check that the amount you plan to pay matches what you&rsquo;ve been billed.</p>
+
+<h2 id="another-great-idea">Another Great Idea</h2>
+
+<p>You&rsquo;ll have more success paying off your debt if you budget for it.  Consider these two ideas:</p>
+
+<ol>
+<li>Create an <em>additional</em> recurring expense bucket and choose an amount to pay toward your debt every month.  After making it rain each month, transfer the balance to the debt payment bucket.</li>
+<li>After making it rain each month, put any extra money into the debt payment bucket.</li>
+</ol>
 
 <h1 id="next">Next</h1>
 
