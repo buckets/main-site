@@ -160,11 +160,11 @@ if (ipcMain) {
 }
 
 export async function linux_checkForUpdates() {
-  let new_version = await new Promise((resolve, reject) => {
+  let releases = await new Promise<any[]>((resolve, reject) => {
     https.get({
       hostname: 'api.github.com',
       port: 443,
-      path: '/repos/buckets/application/releases/latest',
+      path: '/repos/buckets/application/releases',
       method: 'GET',
       headers: {
         'User-Agent': 'Buckets App (hello@budgetwithbuckets.com)',
@@ -177,8 +177,7 @@ export async function linux_checkForUpdates() {
       })
       res.on('end', () => {
         try {
-          const data = JSON.parse(payload);
-          resolve(data.tag_name);
+          resolve(JSON.parse(payload));
         } catch(err) {
           log.error(`Error parsing payload: ${err.stack}`)
           resolve(null);
@@ -189,6 +188,17 @@ export async function linux_checkForUpdates() {
       resolve(null);
     })
   });
+  let new_version;
+  if (PSTATE.download_beta_versions) {
+    new_version = releases[0].tag_name;
+  } else {
+    for (const release of releases) {
+      if (!release.prerelease) {
+        new_version = release.tag_name;
+        break;
+      }
+    }
+  }
   let current_version = `v${app.getVersion()}`;
   if (new_version && current_version !== new_version) {
     dialog.showMessageBox({
@@ -202,7 +212,7 @@ export async function linux_checkForUpdates() {
     }, (indexClicked) => {
       if (indexClicked === 1) {
         // Download
-        shell.openExternal('https://github.com/buckets/application/releases/latest')
+        shell.openExternal(`https://github.com/buckets/application/releases/tag/${new_version}`)
       }
     })
   }
