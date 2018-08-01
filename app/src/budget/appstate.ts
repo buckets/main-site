@@ -433,22 +433,25 @@ export class StateManager {
       }
       let dr = this.appstate.viewDateRange;
       let inrange = isBetween(parseLocalTime(obj.posted), dr.onOrAfter, dr.before)
-      if (inrange) {
-        // inside date range
-        if (ev.event === 'update') {
-          this.appstate.transactions[obj.id] = obj;
-        } else {
-          if (this.appstate.transactions[obj.id]) {
-            delete this.appstate.transactions[obj.id];
-          }
+      if (ev.event === 'delete') {
+        if (this.appstate.transactions[obj.id]) {
+          delete this.appstate.transactions[obj.id];
+        }
+        if (this.appstate.outside_transactions[obj.id]) {
+          delete this.appstate.outside_transactions[obj.id];
         }
       } else {
-        // Outside date range
-        if (ev.event === 'update') {
-          this.appstate.outside_transactions[obj.id] = obj;
-        } else {
+        if (inrange) {
+          // inside date range
+          this.appstate.transactions[obj.id] = obj;
           if (this.appstate.outside_transactions[obj.id]) {
             delete this.appstate.outside_transactions[obj.id];
+          }
+        } else {
+          // Outside date range
+          this.appstate.outside_transactions[obj.id] = obj;
+          if (this.appstate.transactions[obj.id]) {
+            delete this.appstate.transactions[obj.id];
           }
         }
       }
