@@ -50,6 +50,42 @@ export function setPath(x:string) {
   }
 }
 
+/**
+ *  Set the URL to the same page on a different time
+ *  period
+ *
+ *  month is 1-indexed [1,12]
+ */
+function setTimePeriod(year:number, month:number) {
+  let current_path = window.location.hash.substr(1).split('/').slice(2).join('/');
+  const dst = `/y${year}m${month}/${current_path}`;
+  setPath(dst);
+}
+
+/**
+ *  Go to the nth next period (e.g. month)
+ */
+function incTimePeriod(count:number) {
+  const match = window.location.hash.substr(1).split('/')[1].match(/y(\d+)m(\d+)/)
+  if (!match.length) {
+    return;
+  }
+  let year = Number(match[1]);
+  let month = Number(match[2]) - 1;
+  month = month + count;
+  year = year;
+  while (month < 0) {
+    year -= 1;
+    month += 12;
+  }
+  while (month >= 12) {
+    year += 1;
+    month -= 12;
+  }
+  month = month + 1;
+  setTimePeriod(year, month);
+}
+
 export async function start(base_element, room) {
   await localizeThisPage();
   log.info(`  localNow(): ${localNow().format()}`);
@@ -102,12 +138,25 @@ export async function start(base_element, room) {
     setPath(path);
   })
   ipcRenderer.on('buckets:goto-today', (ev) => {
-    let current_path = window.location.hash.substr(1).split('/').slice(2).join('/');
-    let today = localNow();
-    let year = today.year();
-    let month = today.month()+1;
-    const dst = `/y${year}m${month}/${current_path}`;
-    setPath(dst);
+  })
+  ipcRenderer.on('buckets:handle-shortcut', (ev, shortcut:string) => {
+    switch (shortcut) {
+      case 'goto-today': {
+        let today = localNow();
+        let year = today.year();
+        let month = today.month()+1;
+        setTimePeriod(year, month);
+        break;
+      }
+      case 'goto-prev-timeperiod': {
+        incTimePeriod(-1);
+        break;
+      }
+      case 'goto-next-timeperiod': {
+        incTimePeriod(1);
+        break;
+      }
+    }
   })
 
   let renderer = new Renderer();

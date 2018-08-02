@@ -213,10 +213,34 @@ export async function updateMenu(args:{
               let win = BrowserWindow.getFocusedWindow();
               let budgetfile = BudgetFile.fromWindowId(win.id);
               if (budgetfile) {
-                win.webContents.send('buckets:goto-today');
+                win.webContents.send('buckets:handle-shortcut', 'goto-today');
               }
             },
-          }
+          },
+          {
+            label: sss('go-to-prev-month', 'Previous Month'/* Menu label for "Go To... Previous Month" */),
+            // Handle RTL languages, eh?
+            accelerator: 'CmdOrCtrl+[',
+            click() {
+              let win = BrowserWindow.getFocusedWindow();
+              let budgetfile = BudgetFile.fromWindowId(win.id);
+              if (budgetfile) {
+                win.webContents.send('buckets:handle-shortcut', 'goto-prev-timeperiod');
+              }
+            }
+          },
+          {
+            label: sss('go-to-next-month', 'Next Month'/* Menu label for "Go To... Next Month" */),
+            // Handle RTL languages, eh?
+            accelerator: 'CmdOrCtrl+]',
+            click() {
+              let win = BrowserWindow.getFocusedWindow();
+              let budgetfile = BudgetFile.fromWindowId(win.id);
+              if (budgetfile) {
+                win.webContents.send('buckets:handle-shortcut', 'goto-next-timeperiod');
+              }
+            }
+          },
         ],
       },
       {
