@@ -9,7 +9,7 @@ import { manager, AppState } from './appstate'
 import { Bucket } from 'buckets-core/dist/models/bucket'
 import { Account, Category, Transaction, GeneralCatType } from 'buckets-core/dist/models/account'
 import { DateDisplay, DateInput } from '../time'
-import { moment2LocalDay, localDay2moment, parseLocalTime } from 'buckets-core/dist/time'
+import { moment2LocalDay, localDay2moment, parseLocalTime, isBetween } from 'buckets-core/dist/time'
 import { Money, MoneyInput } from '../money'
 import { Help } from '../tooltip'
 import { onKeys, SafetySwitch } from '../input'
@@ -390,6 +390,14 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               posted: this.state.posted,
             })
             await store.sub.accounts.categorizeGeneral(xfer_trans.id, 'transfer');
+          }
+          const dr = this.props.appstate.viewDateRange;
+          const posted = parseLocalTime(trans.posted);
+          if (!isBetween(posted, dr.onOrAfter, dr.before)) {
+            // out of view transaction
+            makeToast(sss('trans-created-outofview', (month:JSX.Element) => {
+              return <span>Transaction created in {month} </span>;
+            })(<DateDisplay value={posted} format="MMM YYYY" />))
           }
           this.setState({
             amount: 0,
