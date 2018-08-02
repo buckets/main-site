@@ -1,3 +1,6 @@
+/*
+  CSS shared by the 2 flavors of docs output
+*/
 .main-wrap {
   display: flex;
   min-height: 100vh;
@@ -117,4 +120,18 @@ th:last-child {
 td:first-child,
 th:first-child {
   border-left-width: 1px;
+}
+
+a.anchor-link {
+  color: grey;
+  display: inline-block;
+  margin-left: 1rem;
+  text-decoration: none;
+  opacity: 0.1;
+}
+a.anchor-link:hover {
+  opacity: 1;
+}
+a.anchor-link:visited {
+  color: grey;
 }

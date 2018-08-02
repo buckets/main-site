@@ -35,6 +35,6 @@ Closed accounts are hidden in certain places, but all existing transactions will
 If you want to delete an account *and* all its transactions, first close it, then click the **Delete** button.
 
 
-# Next
+## Next
 
 Learn about <a href="{{< relref "buckets.md" >}}">Buckets.</a>

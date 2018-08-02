@@ -85,6 +85,6 @@ XXX Putting money in/out
 XXX Transfers
  -->
 
-# Next
+## Next
 
 Learn about <a href="{{< relref "transactions.md" >}}">Transactions.</a>

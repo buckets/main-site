@@ -132,6 +132,6 @@ You'll have more success paying off your debt if you budget for it.  Consider th
 1. Create an *additional* recurring expense bucket and choose an amount to pay toward your debt every month.  After making it rain each month, transfer the balance to the debt payment bucket.
 2. After making it rain each month, put any extra money into the debt payment bucket.
 
-# Next
+## Next
 
 Read about <a href="{{< relref "general.md" >}}">app-wide stuff.</a>

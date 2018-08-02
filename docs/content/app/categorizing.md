@@ -48,6 +48,6 @@ For instance, if you transfer $100 from Savings and put it into Checking, you'll
 
 Categorize both of those as *Transfers* and then your income won't be artificially inflated.
 
-# Next
+## Next
 
 Learn about <a href="{{< relref "debt.md" >}}">Debt.</a>
