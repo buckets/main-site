@@ -40,6 +40,10 @@ interface Dims {
   width: number;
 }
 
+/**
+ *  A component that knows how big it is and runs `guts(args:Dims)`
+ *  every tiem it's resized.
+ */
 export class SizeAwareDiv extends React.Component<{
   guts: (args:Dims)=>JSX.Element;
   [x:string]: any;

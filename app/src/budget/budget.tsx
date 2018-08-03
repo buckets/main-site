@@ -276,6 +276,9 @@ class Navbar extends React.Component<{
             <div>
               <Link relative to="/recurring-expenses" className="sub" exactMatchClass="selected">{sss('Recurring Expenses')}</Link>
             </div>
+            <div>
+              <Link relative to="/netwealth" className="sub" exactMatchClass="selected">{sss('Net Wealth')}</Link>
+            </div>
           </Route>
           <Link relative to="/import" exactMatchClass="selected" matchClass="selected"><span>{sss('Import')}</span>{import_badge}</Link>
           <Link relative to="/tools" exactMatchClass="selected" matchClass="selected-parent"><span>{sss('Tools')}</span></Link>

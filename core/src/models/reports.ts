@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment-timezone'
 import { IStore } from '../store'
 import { ts2localdb, Interval, chunkTime } from '../time'
+import { Balances } from './balances'
 
 //-------------------------------------------------------
 // Database objects
@@ -100,6 +101,25 @@ export class ReportStore {
       item.end_balance += balance;
     })
     return item;
+  }
+  /**
+   *  Gets end-of-period debt/wealth statistics
+   */
+  async debtAndWealth(args:{
+    dates: moment.Moment[],
+  }):Promise<Array<{
+    date: moment.Moment,
+    balances: Balances,
+  }>> {
+    return Promise.all(args.dates.map(date => {
+      return this.store.sub.accounts.balances(date)
+      .then(balances => {
+        return {
+          date,
+          balances,
+        }
+      })
+    }))
   }
 
   /**

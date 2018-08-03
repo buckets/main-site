@@ -20,6 +20,8 @@ import { TransactionList } from './transactions'
 import { SizeAwareDiv } from '../charts/util'
 import { sss } from '../i18n'
 
+import { NetWealthPage } from './analysis/netwealth'
+
 export class ReportsPage extends React.Component<{
   appstate: AppState;
 }, {}> {
@@ -61,6 +63,11 @@ export class ReportsPage extends React.Component<{
           </Route>
           <Route path="/recurring-expenses">
             <BucketExpenseSummary
+              appstate={appstate}
+            />
+          </Route>
+          <Route path="/netwealth">
+            <NetWealthPage
               appstate={appstate}
             />
           </Route>
