@@ -172,7 +172,7 @@
           </a>
         </div>
         <div>
-          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}-x86_64.AppImage{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}-x86_64.AppImage{% else %}https://github.com/buckets/application/releases/latest{% endif %}" onclick="setTimeout(function() { alert('{% trans %}After the AppImage file has been downloaded, make it executable then double-click it to run.{% endtrans %}')}, 0)">
             <span class="fa fa-linux"></span>
             {% trans %}Linux{% endtrans %}
           </a>
