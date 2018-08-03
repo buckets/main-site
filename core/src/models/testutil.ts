@@ -117,7 +117,9 @@ export async function getStore():Promise<{
   const ui = new TestUIFunctions();
   const store = new SQLiteStore(openSqlite(':memory:'), ui);
   let events = [];
-  await store.doSetup();
+  await store.doSetup({
+    addBucketsLicenseBucket: false,
+  });
   store.events.get('obj').on(message => {
     events.push(message as IObjectEvent);
   })

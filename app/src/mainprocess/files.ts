@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid';
 
 import { DesktopFunctions } from '../desktop'
 import { dumpTS, loadTS, SerializedTimestamp, MaybeMoment } from 'buckets-core/dist/time'
-import { SQLiteStore } from 'buckets-core/dist/dbstore';
+import { SQLiteStore, NewerSchemaError } from 'buckets-core/dist/dbstore';
 import { openSqlite } from '../async-sqlite'
 import { RPCMainStoreHookup, RPCRendererStore } from '../rpcstore';
 import { addRecentFile } from './persistent'
@@ -23,6 +23,7 @@ import { MacroSyncer } from 'buckets-core/dist/models/bankmacro'
 import { CSVNeedsMapping, CSVMappingResponse, CSVNeedsAccountAssigned, CSVAssignAccountResponse } from '../csvimport'
 import { updateMenu } from './menu'
 import { openPreferences } from './prefs'
+import { isRegistered } from './drm'
 
 const log = new PrefixLogger('(files)')
 
@@ -215,15 +216,48 @@ export class BudgetFile implements IBudgetFile {
    */
   async start(windows:Array<IOpenWindow>=[]) {
     // connect to database
-    try {
-      const db = openSqlite(this.filename);
-      this.store = new SQLiteStore(db, new DesktopFunctions(this));
-      await this.store.doSetup();
-    } catch(err) {
+    function logUnableToOpenErr(err:Error) {
       log.error(`Error opening file: ${this.filename}`);
       log.error(err.stack);
       reportErrorToUser(sss('Unable to open the file:') + ` ${this.filename}`, {err});
-      return;
+    }
+    try {
+      const db = openSqlite(this.filename);
+      this.store = new SQLiteStore(db, new DesktopFunctions(this));
+      await this.store.doSetup({
+        addBucketsLicenseBucket: !isRegistered(),
+      });
+    } catch(err) {
+      if (err instanceof NewerSchemaError) {
+        const choice = dialog.showMessageBox({
+          type: "warning",
+          buttons: [
+            sss("Open Anyway"/* Label for button to indicate that a budget file should be opened even though it was made with a newer version of Buckets */),
+            sss("Cancel" /* Button label */),
+          ],
+          message: sss("This budget was upgraded for a newer version of Buckets.  Using it with this older version may not work."),
+          cancelId: 1,
+          defaultId: 0,
+        })
+        if (choice === 0) {
+          // Open Anyway
+          try {
+            await this.store.doSetup({
+              addBucketsLicenseBucket: !isRegistered(),
+              openNewerSchemas: true,
+            });
+          } catch(err) {
+            logUnableToOpenErr(err);
+            return;
+          }
+        } else {
+          await this.stop();
+          return;
+        }
+      } else {
+        logUnableToOpenErr(err);   
+        return;
+      }
     }
 
     // listen for child renderer processes
@@ -265,7 +299,7 @@ export class BudgetFile implements IBudgetFile {
    */
   async stop() {
     delete BudgetFile.REGISTRY[this.id];
-    this.rpc_main_hookup.stop();
+    this.rpc_main_hookup && this.rpc_main_hookup.stop();
     ipcMain.removeAllListeners(`budgetfile.rpc.${this.id}`)
   }
 

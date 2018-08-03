@@ -1,4 +1,5 @@
 import { sss } from '@iffycan/i18n'
+import { CustomError } from './errors'
 import { IAsyncSqlite, NotFound, SQLiteStore } from './dbstore'
 import { IStore } from './store'
 import { PrefixLogger } from './logging'
@@ -6,6 +7,8 @@ import { IMigration, migrations as jsmigrations } from './models/jsmigrations'
 import { rankBetween } from './ranking'
 
 const log = new PrefixLogger('(dbsetup)')
+
+export class NewerSchemaError extends CustomError {}
 
 
 /**
@@ -20,12 +23,15 @@ const log = new PrefixLogger('(dbsetup)')
 export async function setupDatabase(store:SQLiteStore, opts:{
   addBucketsLicenseBucket?: boolean;
   noUndo?: boolean;
+  openNewerSchemas?: boolean;
 }={}) {
 
   // upgrade database
   try {
     log.info('Doing database migrations');
-    await upgradeDatabase(store.db, jsmigrations);
+    await upgradeDatabase(store.db, jsmigrations, {
+      openNewerSchemas: opts.openNewerSchemas,
+    });
   } catch(err) {
     log.error('Error during database migrations');
     log.error(err.stack);
@@ -115,7 +121,9 @@ async function ensureBucketsLicenseBucket(store:IStore) {
 /**
  *  Apply database schema patches
  */
-async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[]):Promise<any> {
+async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[], opts:{
+  openNewerSchemas?: boolean;
+}={}):Promise<any> {
 
   let logger = new PrefixLogger('(dbup)');
   await db.run(`CREATE TABLE IF NOT EXISTS _schema_version (
@@ -197,8 +205,21 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[]):Promise
       }
       plog.info('applied.');
     }
+    applied.delete(fullname);
   }
+
   logger.info('schema is in sync');
+
+  if (applied.size) {
+    // There have been patches applies that I don't know about
+    // This likely indicates that a newer version of Buckets
+    // has patched this budget file and it could be bad if
+    // I tried to use it.
+    log.warn(`Patches unknown to this version of Buckets: ${Array.from(applied)}`);
+    if (!opts.openNewerSchemas) {
+      throw new NewerSchemaError('Unknown patches');
+    }
+  }
 
   // logger.info('schema list:')
   // let sqlite_master = await db.all('SELECT * FROM sqlite_master');

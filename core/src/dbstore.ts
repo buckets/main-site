@@ -4,6 +4,7 @@ import { CustomError } from './errors'
 import { SubStore } from './models/substore'
 import { setupDatabase } from './dbsetup'
 import { UndoTracker, UndoRedoResult } from './undo'
+export { NewerSchemaError } from './dbsetup'
 
 export class NotFound extends CustomError {}
 
@@ -42,8 +43,14 @@ export class SQLiteStore implements IStore {
     ui.attachStore(this);
   }
 
-  async doSetup() {
-    await setupDatabase(this);
+  async doSetup(opts:{
+    openNewerSchemas?: boolean;
+    addBucketsLicenseBucket: boolean;
+  }) {
+    await setupDatabase(this, {
+      openNewerSchemas: opts.openNewerSchemas,
+      addBucketsLicenseBucket: opts.addBucketsLicenseBucket,
+    });
   }
 
   publishObject(event:ObjectEventType, obj:IObject) {
