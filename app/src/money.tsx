@@ -106,6 +106,7 @@ interface MoneyProps {
   noFaintCents?: boolean;
   noanimate?: boolean;
   nocolor?: boolean;
+  colorPositive?: boolean;
   symbol?: string|boolean;
   round?: boolean;
   [x:string]: any;
@@ -191,7 +192,7 @@ export class Money extends React.Component<MoneyProps, {
     })
   }
   render() {
-    let { value, className, hidezero, noanimate, nocolor, symbol, round, hideCents, hideZeroCents, noFaintCents, ...rest } = this.props;
+    let { value, className, hidezero, noanimate, nocolor, colorPositive, symbol, round, hideCents, hideZeroCents, noFaintCents, ...rest } = this.props;
     let going_up = true;
     if (ANIMATION_ENABLED && !noanimate) {
       // animating
@@ -234,6 +235,8 @@ export class Money extends React.Component<MoneyProps, {
       className, {
         number: !nocolor,
         negative: value < 0 && !nocolor,
+        'color-positive': colorPositive,
+        positive: value >= 0 && !nocolor,
         zero: value === 0,
         hidezero: hidezero,
         'faint-cents': !noFaintCents,

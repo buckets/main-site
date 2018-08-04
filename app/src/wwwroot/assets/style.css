@@ -481,6 +481,9 @@ h3:first-child {
   display: inline-block;
   transition: transform 0.1s, opacity 0.1s, color 0.1s;
 }
+.number.positive.color-positive {
+  color: var(--darker-green);
+}
 .number.negative {
   color: var(--red);
 }
