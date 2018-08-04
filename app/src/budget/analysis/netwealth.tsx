@@ -51,9 +51,17 @@ export class NetWealthPage extends React.Component<NetWealthProps, NetWealthStat
     }
   }
   async recomputeData() {
+    const earliest = await manager.nocheckpoint.sub.reports.earliestTransaction();
     const end_date = this.props.appstate.viewDateRange.before.clone();
-    const month_start = end_date.clone().subtract(6, 'months');
-    const year_start = end_date.clone().subtract(5, 'years');
+
+    let month_start = end_date.clone().subtract(6, 'months');
+    if (month_start.isBefore(earliest)) {
+      month_start = earliest.clone().startOf('month');
+    }
+    let year_start = end_date.clone().subtract(5, 'years');
+    if (year_start.isBefore(earliest)) {
+      year_start = earliest.clone().startOf('year');
+    }
     let months = chunkTime({
       start: month_start,
       end: end_date,
@@ -82,8 +90,13 @@ export class NetWealthPage extends React.Component<NetWealthProps, NetWealthStat
       return <div>loading...</div>
     }
     return <div>
-      <h2>{sss('Yearly')}</h2>
-      {netWealthTable(this.state.yearly_history, 'YYYY')}
+      {this.state.yearly_history.length > 1
+      ? <div>
+          <h2>{sss('Yearly')}</h2>
+          {netWealthTable(this.state.yearly_history, 'YYYY')}
+        </div>
+      : null
+      }
       <h2>{sss('Monthly')}</h2>
       {netWealthTable(this.state.monthly_history, 'MMM YYYY')}
     </div>

@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as moment from 'moment-timezone'
 import { IStore } from '../store'
-import { ts2localdb, Interval, chunkTime } from '../time'
+import { ts2localdb, Interval, chunkTime, parseLocalTime } from '../time'
 import { Balances } from './balances'
 
 //-------------------------------------------------------
@@ -120,6 +120,9 @@ export class ReportStore {
         }
       })
     }))
+  }
+  async earliestTransaction():Promise<moment.Moment> {
+    return this.store.query<{min_posted:string}>('SELECT min(posted) AS min_posted FROM account_transaction', {}).then(x => parseLocalTime(x[0].min_posted))
   }
 
   /**
