@@ -389,6 +389,11 @@ class BucketKindDetails extends React.Component<{
           value={bucket.goal}
           element={MoneyInput}
           changeArgIsValue
+          onKeyDown={ev => {
+            if (ev.key === 'Enter') {
+              this.setState({open: false});
+            }
+          }}
           onChange={val => {
             manager
             .checkpoint(sss('Update Goal'))
@@ -428,6 +433,11 @@ class BucketKindDetails extends React.Component<{
           changeArgIsValue
           element={MoneyInput}
           value={bucket.deposit}
+          onKeyDown={ev => {
+            if (ev.key === 'Enter') {
+              this.setState({open: false});
+            }
+          }}
           onChange={val => {
             manager
             .checkpoint(sss('Update Monthly Deposit'))
