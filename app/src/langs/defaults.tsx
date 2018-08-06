@@ -174,6 +174,12 @@ export const DEFAULTS:IMessages = {
     h: "PIhGW3aVUScG87KKiDCF4fLhudwZ3eYbz7n7msHJU1U=",
     // settingspage.tsx:17
   },
+  "Assets": {
+    val: "Assets",
+    translated: false,
+    h: "VBLBowZo0Lx8GWGbWVcEEFzSxnwQmcEOSxwtD5yIhwQ=",
+    // netwealth.tsx:252
+  },
   "Attached files are too large.": {
     val: "Attached files are too large.",
     translated: false,
@@ -611,7 +617,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "y9kslXhW17gMMFZ9Dq8g/tabfINzlmzT+39QNbWiWGA=",
     // accounts.tsx:426
-    // netwealth.tsx:255
+    // netwealth.tsx:258
     // budget.tsx:360
     // gettingstarted.ts:82
     // transactions.tsx:780
@@ -1312,7 +1318,7 @@ export const DEFAULTS:IMessages = {
     val: "Monthly",
     translated: false,
     h: "r+AvQ06eYho/PFxjGz8FzHFmEfN+fjBpG0Yzic6/UgU=",
-    // netwealth.tsx:99
+    // netwealth.tsx:102
   },
   "Monthly deposit:": {
     val: "Monthly deposit:",
@@ -1393,7 +1399,7 @@ export const DEFAULTS:IMessages = {
     val: "Net Wealth",
     translated: false,
     h: "XKjeMQyciPmv55LHmQ9l0ulp6PwrF1QA1lN2Pua1Kk8=",
-    // netwealth.tsx:261
+    // netwealth.tsx:264
     // budget.tsx:279
   },
   "New Bucket": {
@@ -2496,12 +2502,6 @@ export const DEFAULTS:IMessages = {
     h: "BOL+IhrDsm6ooEqGpFPieQoyXrWpV6LvKh0DvkAJ2bw=",
     // gettingstarted.ts:38
   },
-  "Wealth": {
-    val: "Wealth",
-    translated: false,
-    h: "3RuJtPU0Q7PHnPvGvNFjE2ZioBaxal3OxXU0Yvs2QLI=",
-    // netwealth.tsx:249
-  },
   "When \"On\" this macro will be run during a normal sync.": {
     val: "When \"On\" this macro will be run during a normal sync.",
     translated: false,
@@ -2530,7 +2530,7 @@ export const DEFAULTS:IMessages = {
     val: "Yearly",
     translated: false,
     h: "LjMZRIZX3jdNUpbBBgqpPR9Az6c4sBWYUwd2WDVb9Rw=",
-    // netwealth.tsx:94
+    // netwealth.tsx:97
   },
   "Years": {
     val: "Years",
