@@ -159,7 +159,7 @@ export class ImportPage extends React.Component<{
         {appstate.csvs_needing_account.map(csv => {
           return <CSVAssigner
             key={csv.id}
-            accounts={appstate.open_accounts}
+            accounts={[...appstate.open_accounts, ...appstate.offbudget_accounts]}
             obj={csv} />
         })}
       </div>
@@ -441,7 +441,7 @@ class UnknownAccountList extends React.Component<{
 }, {}> {
   render() {
     let { appstate } = this.props;
-    let accounts = Object.values<Account>(appstate.accounts);
+    let accounts = [...appstate.open_accounts, ...appstate.offbudget_accounts];
     let rows = Object.values<UnknownAccount>(appstate.unknown_accounts)
     .map((unknown:UnknownAccount) => {
       return <UnknownAccountRow
