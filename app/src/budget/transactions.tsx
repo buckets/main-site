@@ -397,7 +397,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             // out of view transaction
             makeToast(sss('trans-created-outofview', (month:JSX.Element) => {
               return <span>Transaction created in {month} </span>;
-            })(<DateDisplay value={posted} format="MMM YYYY" />))
+            })(<DateDisplay value={posted} format="MMM YYYY" islocal />))
           }
           this.setState({
             amount: 0,

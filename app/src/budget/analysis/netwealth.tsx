@@ -4,7 +4,6 @@ import * as d3 from 'd3'
 import * as d3shape from 'd3-shape'
 import { manager, AppState } from '../appstate'
 import { Balances } from 'buckets-core/dist/models/balances'
-import { chunkTime } from 'buckets-core/dist/time'
 import { DateDisplay } from '../../time'
 import { Money } from '../../money'
 import { sss } from '../../i18n'
@@ -22,12 +21,14 @@ interface NetWealthProps {
 }
 interface NetWealthState {
   fetched_date: moment.Moment;
+  fetched: boolean;
   monthly_history: BalanceHistory[];
   yearly_history: BalanceHistory[];
 }
 export class NetWealthPage extends React.Component<NetWealthProps, NetWealthState> {
   state = {
     fetched_date: null,
+    fetched: false,
     monthly_history: null,
     yearly_history: null,
   }
@@ -35,8 +36,9 @@ export class NetWealthPage extends React.Component<NetWealthProps, NetWealthStat
   static getDerivedStateFromProps(props:NetWealthProps, state:NetWealthState) {
     if (props.appstate.viewDateRange.before !== state.fetched_date) {
       return {
-        monthly_history: null,
-        yearly_history: null,
+        // monthly_history: null,
+        // yearly_history: null,
+        fetched: false,
         fetched_date: props.appstate.viewDateRange.before,
       }
     }
@@ -46,34 +48,34 @@ export class NetWealthPage extends React.Component<NetWealthProps, NetWealthStat
     this.recomputeData();
   }
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.monthly_history === null || this.state.yearly_history === null) {
+    if (!this.state.fetched) {
       this.recomputeData();
     }
   }
   async recomputeData() {
+    const NUM_MONTHS = 6;
+    const NUM_YEARS = 6;
     const earliest = await manager.nocheckpoint.sub.reports.earliestTransaction();
-    const end_date = this.props.appstate.viewDateRange.before.clone();
+    const end_date = this.props.appstate.viewDateRange.onOrAfter.clone().endOf('month');
 
-    let month_start = end_date.clone().subtract(6, 'months');
+    let month_start = end_date.clone().subtract(NUM_MONTHS, 'months');
     if (month_start.isBefore(earliest)) {
       month_start = earliest.clone().startOf('month');
     }
-    let year_start = end_date.clone().subtract(5, 'years');
+    let year_start = end_date.clone().subtract(NUM_YEARS, 'years');
     if (year_start.isBefore(earliest)) {
       year_start = earliest.clone().startOf('year');
     }
-    let months = chunkTime({
-      start: month_start,
-      end: end_date,
-      unit: 'month',
-      step: 1,
-    }).map(x => x.end);
-    let years = chunkTime({
-      start: year_start,
-      end: end_date,
-      unit: 'year',
-      step: 1,
-    }).map(x => x.end);
+    let months = [];
+    while (month_start.isSameOrBefore(end_date)) {
+      months.push(month_start.clone().endOf('month'))
+      month_start.add(1, 'month');
+    }
+    let years = [];
+    while (year_start.isSameOrBefore(end_date)) {
+      years.push(year_start.clone().endOf('year'))
+      year_start.add(1, 'year');
+    }
     let monthly_history = await manager.nocheckpoint.sub.reports.debtAndWealth({
       dates: months,
     })
@@ -81,13 +83,14 @@ export class NetWealthPage extends React.Component<NetWealthProps, NetWealthStat
       dates: years,
     })
     this.setState({
+      fetched: true,
       monthly_history,
       yearly_history,
     })
   }
   render() {
     if (this.state.monthly_history === null) {
-      return <div>loading...</div>
+      return <div><span className="fa fa-refresh fa-fw fa-spin"/></div>
     }
     return <div>
       {this.state.yearly_history.length > 1
@@ -98,12 +101,12 @@ export class NetWealthPage extends React.Component<NetWealthProps, NetWealthStat
       : null
       }
       <h2>{sss('Monthly')}</h2>
-      {netWealthTable(this.state.monthly_history, 'MMM YYYY')}
+      {netWealthTable(this.state.monthly_history, 'MMM', 'MMM YYYY')}
     </div>
   }
 }
 
-function netWealthChart(history:BalanceHistory[], datefmt:string) {
+function netWealthChart(history:BalanceHistory[]) {
   let min_val = null;
   let max_val = null;
   let debt_totals = {};
@@ -213,7 +216,7 @@ function netWealthChart(history:BalanceHistory[], datefmt:string) {
   />
 }
 
-function netWealthTable(history:BalanceHistory[], datefmt:string) {
+function netWealthTable(history:BalanceHistory[], datefmt:string, lastdatefmt:string=datefmt) {
   let debt_totals = {};
   let wealth_totals = {};
   let totals = {};
@@ -235,19 +238,19 @@ function netWealthTable(history:BalanceHistory[], datefmt:string) {
       <tr>
         <td></td>
         <td colSpan={history.length}>
-          {netWealthChart(history, datefmt)}
+          {netWealthChart(history)}
         </td>
       </tr>
       <tr>
         <th></th>
         {history.map((item, i) => {
-          return <th className="right" key={i}><DateDisplay value={item.date} format={datefmt} /></th>
+          return <th className="right" key={i}><DateDisplay value={item.date} format={i === (history.length-1) ? lastdatefmt : datefmt} islocal /></th>
         })}
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>{sss('Wealth')}</td>
+        <td>{sss('Assets')}</td>
         {history.map((item, i) => {
           return <td className="right" key={i}><Money value={wealth_totals[i]} nocolor /></td>
         })}
