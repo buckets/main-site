@@ -14,10 +14,17 @@ import {
 } from 'buckets-core/dist/store'
 import { Bucket } from 'buckets-core/dist/models/bucket'
 
+class HTTPRequester {
+  fetchBody(args:any):Promise<string> {
+
+  }
+}
+
 class MobileUIFunctions implements IUserInterfaceFunctions {
   attachStore(store) {
 
   }
+  http = new HTTPRequester();
 }
 
 const dbname = `gooba${(new Date()).getTime()}.sqlite`;
@@ -68,26 +75,34 @@ export async function dostuff() {
   //     }
   //   })
   // });
-  await db.transaction(tx => {
-    const sql = 'PRAGMA user_version'
-    tx.executeSql(sql, [], undefined, undefined, true);
-  },
-  err => {
-    console.log('error', err);
-  },
-  () => {
-    console.log('success');
-  })
+  // await db.transaction(tx => {
+  //   const sql = 'PRAGMA user_version'
+  //   tx.executeSql(sql, [], (tx, results) => {
+  //     console.log('results', results);
+  //   }, (tx, err) => {
+  //     console.log('error', err);
+  //   });
+  // },
+  // err => {
+  //   console.log('error', err);
+  // },
+  // () => {
+  //   console.log('success');
+  // })
 
-  // const store = new SQLiteStore(new WebSQLDatabase(_db), new MobileUIFunctions());
+  const store = new SQLiteStore(new WebSQLDatabase(db), new MobileUIFunctions());
 
-  // try {
-  //   await store.doSetup();  
-  // } catch(err) {
-  //   console.log('Error FROM dostuff', err);
-  //   return;
-  // }
+  try {
+    await store.doSetup({
+      addBucketsLicenseBucket: false,
+      openNewerSchemas: true,
+    })
+  } catch(err) {
+    console.log('Error FROM dostuff', err);
+    return;
+  }
   
-  // let bucket:Bucket = await store.sub.buckets.add({name: 'New bucket'})
-  // console.log('bucket', bucket);
+  console.log('About to make a bucket');
+  let bucket:Bucket = await store.sub.buckets.add({name: 'New bucket'})
+  console.log('bucket', bucket);
 }
