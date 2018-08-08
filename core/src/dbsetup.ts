@@ -210,12 +210,38 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[], opts:{
 
   logger.info('schema is in sync');
 
+  // Remove old 3-digit patches (bug fix for #280)
+  // You can safely remove this code in 2019
+  if (applied.size) {
+    const bug280_patches = [
+      '001-initial',
+      '002-import_balance',
+      '003-deletetrans',
+      '004-dearhacker',
+      '005-bankmacro',
+      '006-closeaccount',
+      '007-notes',
+    ]
+    for (const name of bug280_patches) {
+      if (applied.has(name)) {
+        applied.delete(name)
+        logger.info('Removing old-style schema record', name)
+        try {
+          await db.run(`DELETE FROM _schema_version WHERE name=$name`, {$name: name});
+        } catch(err) {
+          logger.warn('Error removing old-style schema record', err);
+        }
+      }
+    }
+  }
+
   if (applied.size) {
     // There have been patches applies that I don't know about
     // This likely indicates that a newer version of Buckets
     // has patched this budget file and it could be bad if
     // I tried to use it.
     log.warn(`Patches unknown to this version of Buckets: ${Array.from(applied)}`);
+
     if (!opts.openNewerSchemas) {
       throw new NewerSchemaError('Unknown patches');
     }
