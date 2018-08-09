@@ -4,7 +4,7 @@ import {
   // DocumentPicker,
 } from 'expo';
 import {
-  WebSQLDatabase
+  ExpoSQLiteDatabase
 } from './exposqlite'
 import {
   SQLiteStore,
@@ -16,7 +16,7 @@ import { Bucket } from 'buckets-core/dist/models/bucket'
 
 class HTTPRequester {
   fetchBody(args:any):Promise<string> {
-
+    return Promise.resolve('');
   }
 }
 
@@ -90,7 +90,7 @@ export async function dostuff() {
   //   console.log('success');
   // })
 
-  const store = new SQLiteStore(new WebSQLDatabase(db), new MobileUIFunctions());
+  const store = new SQLiteStore(new ExpoSQLiteDatabase(db), new MobileUIFunctions());
 
   try {
     await store.doSetup({
