@@ -179,15 +179,14 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[], opts:{
     } else {
       plog.info('applying...');
       try {
-        await db.run('BEGIN EXCLUSIVE TRANSACTION');
-        await migration.func(db);
-        await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: fullname});
-        await db.run('COMMIT TRANSACTION');
+        await db.doTransaction(async tx => {
+          await migration.func(tx);
+          await db.run(`INSERT INTO _schema_version (name) VALUES ($name)`, {$name: fullname});
+        })
         plog.info('commit');
       } catch(err) {
-        plog.error('Error while running patch');
-        plog.warn(err);
-        await db.run('ROLLBACK');
+        plog.error(`Error while running patch: ${err.toString()}`);
+        plog.error(err);
 
         // hold over from prior flakey migrations
         if (order <= 7 && (

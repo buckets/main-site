@@ -12,15 +12,35 @@ export interface AsyncRunResult {
   lastID: number;
 }
 
+export interface ICursor {
+  /**
+   *  Execute a single query inside its own transaction
+   */
+  run(query:string, params?:object):Promise<AsyncRunResult>;
+  /**
+   *  Execute multiple queries within a single transaction
+   */
+  executeMany(queries:string[]):Promise<null>;
+  /**
+   *  Fetch the results of a single query.
+   */
+  all<T>(query:string, params?:object):Promise<Array<T>>;
+  /**
+   *  Get a single result.
+   */
+  get<T>(query:string, params?:object):Promise<T>;
+}
+
 /**
  *  This is the interface that needs to be implemented
  *  by an SQLite library in order to be used with SQLiteStore.
  */
-export interface IAsyncSqlite {
-  run(query:string, params?:object):Promise<AsyncRunResult>;
-  executeMany(queries:string[]):Promise<null>;
-  all<T>(query:string, params?:object):Promise<Array<T>>;
-  get<T>(query:string, params?:object):Promise<T>;
+export interface IAsyncSqlite extends ICursor {
+  /**
+   *  Execute a function within the context of a single
+   *  database transaction.
+   */
+  doTransaction<T>(func:(tx:ICursor)=>Promise<T>):Promise<T>;
 }
 
 let ALLOWED_RE = /[^a-zA-Z0-9_]+/g

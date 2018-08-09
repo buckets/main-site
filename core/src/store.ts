@@ -98,7 +98,7 @@ export interface IStore {
   query<T>(sql:string, params:{}):Promise<Array<T>>;
 
   /**
-   *  Execute an array of SQL statements
+   *  Execute an array of SQL statements within single transaction
    *  No result is returned.
    */
   executeMany(sqls:string[]):Promise<null>;

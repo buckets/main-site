@@ -1,12 +1,12 @@
 import * as moment from 'moment-timezone'
 import { ts2localdb, utcToLocal } from '../time'
 import { PrefixLogger } from '../logging'
-import { IAsyncSqlite } from '../dbstore'
+import { IAsyncSqlite, ICursor } from '../dbstore'
 
 const log = new PrefixLogger('(jsmig)');
 
 function SQLList(sqls:string[]) {
-  return function(db:IAsyncSqlite) {
+  return function(db:ICursor) {
     return db.executeMany(sqls)
   }
 }
@@ -16,7 +16,7 @@ function SQLList(sqls:string[]) {
  */
 export interface IMigration {
   name: string;
-  func: (db:IAsyncSqlite)=>Promise<any>;
+  func: (db:ICursor)=>Promise<any>;
 }
 
 export const migrations:IMigration[] = [

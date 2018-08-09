@@ -1,6 +1,6 @@
-import { AsyncRunResult, IAsyncSqlite, ICursor } from 'buckets-core/dist/dbstore'
+import { AsyncRunResult, IAsyncSqlite, ICursor } from './dbstore'
 //=============================================================
-// DUPLICATE of core/src/async-sqlite.ts
+// DUPLICATE of app/src/async-sqlite.ts
 //
 // XXX TODO Make it into a separate module
 //
