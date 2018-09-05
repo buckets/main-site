@@ -307,3 +307,117 @@ NEWFILEUID:NONE
   t.equal(t1.fi_id, '2016050624445006126100312436287')
   t.equal(loadTS(t1.posted).format(), moment.utc({y:2016, M:5-1, d:6, h:12}).format())
 })
+
+test('multi account per bank message', async t => {
+  let data = `
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+
+<OFX>
+ <SIGNONMSGSRSV1>
+  <SONRS>
+   <STATUS>
+    <CODE>0
+    <SEVERITY>INFO
+   </STATUS>
+   <DTSERVER>20180905094022.662
+   <LANGUAGE>ENG
+   <FI>
+    <ORG>MACU
+    <FID>000000000
+   </FI>
+  </SONRS>
+ </SIGNONMSGSRSV1>
+ <BANKMSGSRSV1>
+  <STMTTRNRS>
+   <TRNUID>0
+   <STATUS>
+    <CODE>0
+    <SEVERITY>INFO
+   </STATUS>
+   <STMTRS>
+    <CURDEF>USD
+    <BANKACCTFROM>
+     <BANKID>000000000
+     <ACCTID>0000000000-S0001
+     <ACCTTYPE>SAVINGS
+    </BANKACCTFROM>
+    <BANKTRANLIST>
+     <DTSTART>20180309000000.000
+     <DTEND>20180905000000.000
+    </BANKTRANLIST>
+    <LEDGERBAL>
+     <BALAMT>5.00
+     <DTASOF>20180905094022.693
+    </LEDGERBAL>
+   </STMTRS>
+  </STMTTRNRS>
+  <STMTTRNRS>
+   <TRNUID>0
+   <STATUS>
+    <CODE>0
+    <SEVERITY>INFO
+   </STATUS>
+   <STMTRS>
+    <CURDEF>USD
+    <BANKACCTFROM>
+     <BANKID>000000000
+     <ACCTID>0000000000-S0050
+     <ACCTTYPE>CHECKING
+    </BANKACCTFROM>
+    <BANKTRANLIST>
+     <DTSTART>20180309000000.000
+     <DTEND>20180905000000.000
+    </BANKTRANLIST>
+    <LEDGERBAL>
+     <BALAMT>7.94
+     <DTASOF>20180905094022.709
+    </LEDGERBAL>
+   </STMTRS>
+  </STMTTRNRS>
+ </BANKMSGSRSV1>
+ <CREDITCARDMSGSRSV1>
+  <CCSTMTTRNRS>
+   <TRNUID>0
+   <STATUS>
+    <CODE>0
+    <SEVERITY>INFO
+   </STATUS>
+   <CCSTMTRS>
+    <CURDEF>USD
+    <CCACCTFROM>
+     <ACCTID>0000000000-L0075
+    </CCACCTFROM>
+    <BANKTRANLIST>
+     <DTSTART>20180309000000.000
+     <DTEND>20180905000000.000
+    </BANKTRANLIST>
+    <LEDGERBAL>
+     <BALAMT>0.00
+     <DTASOF>20180905094022.724
+    </LEDGERBAL>
+   </CCSTMTRS>
+  </CCSTMTTRNRS>
+ </CREDITCARDMSGSRSV1>
+</OFX>
+`
+  let accountset = await ofx2importable(data);
+  t.equal(accountset.accounts.length, 3, "Should find all 3 accounts");
+
+  let [account1, account2, account3] = accountset.accounts;
+  t.equal(account1.transactions.length, 0);
+  t.equal(account1.currency, 'USD');
+
+  t.equal(account2.transactions.length, 0);
+  t.equal(account2.currency, 'USD');
+
+  t.equal(account3.transactions.length, 0);
+  t.equal(account3.currency, 'USD');
+})
