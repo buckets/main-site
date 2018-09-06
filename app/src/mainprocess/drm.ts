@@ -1,4 +1,5 @@
 import * as Path from 'path'
+import * as os from 'os'
 import { app, remote, shell, BrowserWindow, dialog } from 'electron'
 import { APP_ROOT } from './globals'
 import * as jwt from 'jsonwebtoken'
@@ -78,7 +79,17 @@ export function enterLicense(license:string) {
   let unformatted = unformatLicense(license);
   verifyLicense(unformatted);
   let filepath = licenseFilePath();
-  fs.writeFileSync(filepath, license.trim(), {encoding:'utf8'});
+  try {
+    fs.writeFileSync(filepath, license.trim(), {encoding:'utf8'});
+  } catch(err) {
+    log.error(`Error writing license file: ${filepath}`);
+    log.error(err);
+    log.info(`user=${JSON.stringify(os.userInfo())}`);
+    log.info(`platform=${process.platform}`);
+    log.info(`release=${os.release()}`);
+    log.info(`arch=${process.arch}`);
+    throw err;
+  }
   log.info('Wrote license to', filepath);
   ISREGISTERED = true;
 }
