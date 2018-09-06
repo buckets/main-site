@@ -1536,18 +1536,20 @@ table.props th {
 .help {
   display: inline-block;
   cursor: help;
+  position: relative;
 }
 .help .icon {
   color: var(--lighter-grey);
 }
 .help .note-outer {
-  position: relative;
+  position: absolute;
   display: inline-block;
   height: 0;
   width: 0;
   margin: 0;
   padding: 0;
-  z-index: 6;
+  bottom: 0;
+  right: 0;
 }
 .help .note-inner {
   position: absolute;
@@ -1555,6 +1557,21 @@ table.props th {
   left: 0;
   min-width: 12rem;
   max-width: 20rem;
+  z-index: 6;
+}
+.help.show-on-top .note-outer {
+  top: 0;
+}
+.help.show-on-top .note-inner {
+  top: initial;
+  bottom: 0;
+}
+.help.show-on-left .note-outer {
+  left: 0;
+}
+.help.show-on-left .note-inner {
+  left: initial;
+  right: 0;
 }
 .help .note {
   position: relative;
