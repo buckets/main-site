@@ -171,7 +171,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
     ]
     let elems:Element = sortBy(this.props.transactions, sortFunc)
     .map((trans:Transaction) => {
-      let balance;
+      let balance:number;
       if (!isNil(ending_balance)) {
         balance = ending_balance;
         ending_balance -= trans.amount;  
@@ -477,7 +477,8 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       let relatedAccountSelect;
       if (trans) {
         // Editing an existing transaction
-        if (appstate.accounts[trans.account_id].kind === 'offbudget') {
+        const this_account = appstate.accounts[trans.account_id]
+        if (this_account && this_account.kind === 'offbudget') {
           categoryInput = sss('Off budget');
         } else {
           categoryInput = <CategoryInput
@@ -498,7 +499,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         }
       } else {
         // Creating a new transaction
-        if (!isNil(this.state.account_id) && appstate.accounts[this.state.account_id].kind === 'offbudget') {
+        if (!isNil(this.state.account_id) && appstate.accounts[this.state.account_id] && appstate.accounts[this.state.account_id].kind === 'offbudget') {
           categoryInput = sss('Off budget');
         } else {
           categoryInput = <CategoryInput
@@ -602,6 +603,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         )
     } else {
       // viewing
+      const this_account = appstate.accounts[trans.account_id];
       return <tr className="icon-hover-trigger">
         <td>{checkbox}</td>
         <td className="nobr">
@@ -614,7 +616,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
         <td className="right"><Money value={trans.amount} /></td>
         {isNil(running_bal) ? null : <td className="right"><Money value={running_bal} /></td> }
         <td x-name="categorize">
-          {appstate.accounts[trans.account_id].kind === 'offbudget'
+          {this_account && this_account.kind === 'offbudget'
            ? <div>{sss('Off budget')}</div>
            : <Categorizer
               transaction={trans}
