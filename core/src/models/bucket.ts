@@ -536,10 +536,10 @@ export interface IComputedData {
 /**
  *  Compute the amount a bucket wants (and other information)
  **/
-export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs);
-export function computeBucketData(kind:'', b:Bucket);
-export function computeBucketData(kind:'deposit', b:Bucket);
-export function computeBucketData(kind:'goal-deposit'|'goal-date'|'deposit-date', b:Bucket, args:ComputeArgs);
+export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):IComputedData;
+export function computeBucketData(kind:'', b:Bucket):IComputedData;
+export function computeBucketData(kind:'deposit', b:Bucket):IComputedData;
+export function computeBucketData(kind:'goal-deposit'|'goal-date'|'deposit-date', b:Bucket, args:ComputeArgs):IComputedData;
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):IComputedData {
   let ret = {
     deposit: 0,
