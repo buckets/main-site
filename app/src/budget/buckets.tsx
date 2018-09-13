@@ -20,7 +20,7 @@ import { BucketBalanceChart } from '../charts/balancechart'
 import { sss } from '../i18n'
 import { isNil, isDifferent } from 'buckets-core/dist/util'
 import { NoteMaker } from './notes'
-import { DateDisplay, PerMonth } from '../time'
+import { DateDisplay, PerMonth, formatDate } from '../time'
 import { createTemplateBucketSet } from './gettingstarted'
 import { ProgressBar } from '../ui'
 
@@ -533,7 +533,7 @@ class BucketKindDetails extends React.Component<{
       } else {
         let label_parts = [cents2decimal(computed.goal)];
         if (computed.end_date && computed.end_date.isValid()) {
-          label_parts.push(computed.end_date.format('MMM YYYY'))
+          label_parts.push(formatDate(computed.end_date, {format: 'MMM YYYY'}))
         }
 
         summary = <div className="goal-summary">

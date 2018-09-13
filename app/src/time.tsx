@@ -21,20 +21,34 @@ interface DateDisplayProps {
 export class DateDisplay extends React.Component<DateDisplayProps, any> {
   render() {
     let { value, className, islocal, format, ...rest } = this.props;
-    format = format || 'll';
-    let mom:moment.Moment;
-    if (islocal) {
-      mom = parseLocalTime(value)
-    } else {
-      mom = parseUTCTime(value)
-    }
-    let display = utcToLocal(mom).format(format);
-    if (!mom.isValid()) {
-      display = '';
-    }
+    const display = formatDate(value, {
+      islocal,
+      format,
+    })
     let cls = cx(className, 'date');
     return <span className={cls} {...rest}>{display}</span>
   }
+}
+
+/**
+ *  formatDate will format a date uniformly in local time.
+ */
+export function formatDate(value:string|moment.Moment, args:{
+  islocal?: boolean,
+  format?: string;
+}={}):string {
+  const format = args.format || 'll';
+  let mom:moment.Moment;
+  if (args.islocal) {
+    mom = parseLocalTime(value)
+  } else {
+    mom = parseUTCTime(value)
+  }
+  let display = utcToLocal(mom).format(format);
+  if (!mom.isValid()) {
+    display = '';
+  }
+  return display;
 }
 
 export class DateTime extends React.Component<DateDisplayProps, any> {

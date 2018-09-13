@@ -73,7 +73,7 @@ export class BucketGoalChart extends React.Component<BucketGoalChartProps, {
         balance: bucket.balance,
       })
       max_goal = Math.max(c.goal, max_goal);
-      if (c.end_date !== null && !isNaN(c.end_date)) {
+      if (c.end_date !== null && c.end_date.isValid()) {
         max_enddate = Math.max(c.end_date.unix(), max_enddate);  
       }
     })

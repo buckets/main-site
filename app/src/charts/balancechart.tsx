@@ -56,6 +56,10 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
     let endTime = parseLocalTime(transactions[0].posted);
     let endSeconds = endTime.valueOf();
 
+    if (computed.end_date && computed.end_date.isAfter(endTime)) {
+      endSeconds = computed.end_date.valueOf();
+    }
+
     let date_tick_format = 'MMM YYYY';
     if (endTime.diff(startTime, 'months') <= 2) {
       date_tick_format = 'DD MMM';
@@ -87,17 +91,16 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
         if (bucket.kind === 'goal-date' || bucket.kind === 'goal-deposit' || bucket.kind === 'deposit-date') {
           lowval = Math.min(lowval, computed.goal);
           highval = Math.max(highval, computed.goal);
-          if (computed.end_date && computed.end_date.isAfter(endTime)) {
-            endTime = computed.end_date.valueOf();
-          }
           extra = () => {
             let last = balancehistory[0];
             let end_date = computed.end_date;
             if (!end_date) {
               end_date = moment.utc();
             }
+
             let goal_x = x(end_date.valueOf());
             let goal_y = y(computed.goal);
+
             return <g>
               
               <line
@@ -108,6 +111,7 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
                 style={CHART_STYLES.forecastLine}
               />
               <circle
+                // Goal circle
                 r={5}
                 fill={bucket.color}
                 cx={goal_x}
@@ -115,6 +119,7 @@ export class BucketBalanceChart extends React.Component<BucketBalanceChartProps,
               />
               <circle
                 r={3}
+                // Current place
                 fill={COLORS.blackish}
                 cx={x(last.date.valueOf())}
                 cy={y(last.balance)}
