@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-07-18 10:00-0600\n"
-"PO-Revision-Date: 2018-07-18 10:00-0600\n"
+"POT-Creation-Date: 2018-09-13 17:00-0600\n"
+"PO-Revision-Date: 2018-09-13 17:02-0600\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -155,6 +155,14 @@ msgstr "macOS"
 msgid "Windows"
 msgstr "Windows"
 
+#: src/index.html:175
+msgid ""
+"After the AppImage file has been downloaded, make it executable then double-"
+"click it to run."
+msgstr ""
+"Después de descargando el archivo de AppImage, hágalo ejecutable y haga doble "
+"clic para ejecutarlo."
+
 #: src/index.html:177
 msgid "Linux"
 msgstr "Linux"
@@ -205,20 +213,9 @@ msgid "Buckets has <em>amazing support.</em>"
 msgstr "Buckets tiene <em>apoyo increíble.</em>"
 
 #: src/index.html:211
-msgid ""
-"I'll listen to your ideas, help you with the app and gladly answer questions, "
-"no matter how small."
+msgid "Want to try it?  Click the chat bubble and ask me anything."
 msgstr ""
-"Escucharé tus ideas, te ayudaré con la aplicación y responderé preguntas, sin "
-"importar cuán pequeñas sean."
-
-#: src/index.html:211
-msgid ""
-"I'm serious.  Click that chat bubble and tell me what you ate for dinner last "
-"night."
-msgstr ""
-"Lo digo en serio. Haz clic en ese botón de chat y dime qué comiste para la cena "
-"anoche."
+"¿Quieres probarlo? Haz clic en la burbuja de chat y preguntame cualquier cosa."
 
 #: src/index.html:215
 msgid ""
@@ -293,3 +290,17 @@ msgstr "Nombre de pila"
 #: src/index.html:318
 msgid "Subscribe"
 msgstr "Suscribir"
+
+#~ msgid ""
+#~ "I'll listen to your ideas, help you with the app and gladly answer "
+#~ "questions, no matter how small."
+#~ msgstr ""
+#~ "Escucharé tus ideas, te ayudaré con la aplicación y responderé preguntas, "
+#~ "sin importar cuán pequeñas sean."
+
+#~ msgid ""
+#~ "I'm serious.  Click that chat bubble and tell me what you ate for dinner "
+#~ "last night."
+#~ msgstr ""
+#~ "Lo digo en serio. Haz clic en ese botón de chat y dime qué comiste para la "
+#~ "cena anoche."

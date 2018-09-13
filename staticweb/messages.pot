@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-18 10:00-0600\n"
+"POT-Creation-Date: 2018-09-13 17:00-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -139,6 +139,12 @@ msgstr ""
 msgid "Windows"
 msgstr ""
 
+#: src/index.html:175
+msgid ""
+"After the AppImage file has been downloaded, make it executable then "
+"double-click it to run."
+msgstr ""
+
 #: src/index.html:177
 msgid "Linux"
 msgstr ""
@@ -184,15 +190,7 @@ msgid "Buckets has <em>amazing support.</em>"
 msgstr ""
 
 #: src/index.html:211
-msgid ""
-"I'll listen to your ideas, help you with the app and gladly answer "
-"questions, no matter how small."
-msgstr ""
-
-#: src/index.html:211
-msgid ""
-"I'm serious.  Click that chat bubble and tell me what you ate for dinner "
-"last night."
+msgid "Want to try it?  Click the chat bubble and ask me anything."
 msgstr ""
 
 #: src/index.html:215
