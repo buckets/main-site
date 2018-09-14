@@ -577,6 +577,9 @@ export const newBudgetFileDialog = onlyRunInMain(() => {
       defaultPath: Path.resolve(app.getPath('documents'), 'My Budget.buckets'),
     }, (filename) => {
       if (filename) {
+        if (!filename.endsWith('.buckets')) {
+          filename = filename + '.buckets';
+        }
         resolve(BudgetFile.openFile(filename, {create:true}));  
       } else {
         reject(new Error(sss('No file chosen')));
