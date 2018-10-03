@@ -293,7 +293,7 @@ class Calculator extends React.PureComponent<{value:string, onChange:(newval:str
   render() {
     let output;
     try {
-      output = fancyEval(this.props.value);
+      output = fancyEval(this.props.value.trim());
       if (isNaN(Number(output))) {
         output = '?'
       }
