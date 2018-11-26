@@ -1,4 +1,12 @@
 <!-- THIS FILE IS AUTOMATICALLY UPDATED. SEE THE README -->
+## v0.52.1 - 26 Nov 2018
+
+- **FIX:** Fixed a bug where calculator wouldn't work if you had whitespace ([#313](https://github.com/buckets/application/issues/313))
+
+- **FIX:** Dutch translation corrections
+
+- **FIX:** French translation corrections
+
 ## v0.52.0 - 2018-09-17
 
 - **FIX:** Attempted fix at unreproducible account deletion error. ([#301](https://github.com/buckets/application/issues/301))
