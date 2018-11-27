@@ -1,0 +1,1 @@
+switch("path", "../../wiish.git")

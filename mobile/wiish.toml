@@ -1,0 +1,31 @@
+[main]
+version      = "0.1.0"
+dst          = "dist"
+windowFormat = "webview"
+resourceDir  = "resources"
+
+[desktop]
+name        = "Buckets"
+src         = "main_desktop.nim"
+# Path to an image file to use for the application icon.
+# The file will automatically be converted to the correct
+# format.
+icon        = ""
+
+[mobile]
+name        = "Buckets"
+src         = "main_mobile.nim"
+icon        = ""
+
+[macos]
+bundle_identifier = "com.buckets.app"
+category_type = "public.app-category.example"
+
+[ios]
+bundle_identifier = "com.buckets.app"
+sdk_version = "" # If blank, auto-detect the latest installed version
+icon = "buckets_square.png"
+
+[android]
+java_package_name = "com.buckets.app"
+icon = "buckets_round.png"
