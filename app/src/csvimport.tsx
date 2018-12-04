@@ -33,7 +33,7 @@ export async function parseCSVStringWithHeader<T>(guts:string, opts:{
       relax_column_count: true,
       delimiter: opts.delimiter,
       columns(header_row:string[]) {
-        headers = header_row
+        headers = header_row.filter(x => x.length);
         return header_row;
       }
     }, (err, data) => {
@@ -325,6 +325,7 @@ export async function csv2importable(store:IStore, guts:string, args:{
   let mapping:CSVMapping;
   if (csv_mapping === null || args.force_mapping) {
     // no current mapping
+    log.info('No current mapping');
     let need:CSVNeedsMapping = {
       id: uuid(),
       parsed_data: parsed,
@@ -352,6 +353,7 @@ export async function csv2importable(store:IStore, guts:string, args:{
       })
     });
   } else {
+    log.info('Using existing mapping');
     mapping = JSON.parse(csv_mapping.mapping_json) as CSVMapping;
   }
 
