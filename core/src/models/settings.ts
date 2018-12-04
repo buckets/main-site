@@ -57,7 +57,6 @@ export class SettingsStore {
     const rows = await this.store.query<{key:keyof ISettings,value:any}>('SELECT key, value FROM settings', {})
     let ret:Partial<ISettings> = {};
     rows.forEach(row => {
-      console.log("row", row);
       let value;
       try {
         value = JSON.parse(row.value);

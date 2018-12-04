@@ -190,7 +190,6 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
         >{sss('Start with a template')}</button>
       </div>
     }
-    console.log('self_debt_amount', self_debt_amount);
         
     return (
       <Switch>
@@ -606,7 +605,6 @@ class BucketRow extends React.Component<BucketRowProps, {
   render() {
     let { posting_date, bucket, balance, flow, onPendingChanged, pending, debt_account, is_self_debt } = this.props;
     
-    console.log('is_self_debt', is_self_debt)
     let balance_warning;
     if (is_self_debt && bucket.debt_account_id !== null) {
       balance_warning = <div className="inline"><Help
@@ -854,6 +852,7 @@ class GroupRow extends React.Component<{
     let total_in = 0;
     let total_activity = 0;
     let total_balance = 0;
+    let total_want = 0;
 
     let bucket_rows = _.sortBy(buckets || [], ['ranking'])
     .map(bucket => {
@@ -861,6 +860,11 @@ class GroupRow extends React.Component<{
       total_in += flow.rain_in;
       total_activity += flow.total_activity;
       total_balance += balances[bucket.id];
+      let computed = computeBucketData(bucket.kind, bucket, {
+        today: posting_date,
+        balance: balances[bucket.id],
+      })
+      total_want += computed.deposit;
       return <BucketRow
         key={bucket.id}
         bucket={bucket}
@@ -935,6 +939,7 @@ class GroupRow extends React.Component<{
         </td>
         <td x-name="in/out"></td>
         <td x-name="want" className="right">
+          <Money value={total_want} nocolor hidezero />
         </td>
         <td x-name="in" className="right">
           <Money value={total_in} hidezero/>

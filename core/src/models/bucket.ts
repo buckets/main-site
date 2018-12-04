@@ -533,6 +533,16 @@ export interface IComputedData {
   end_date: moment.Moment;
 }
 
+
+let BUCKET_DATA_CACHE:{[k:string]:IComputedData} = {};
+
+/**
+ *  Clear the cache used for computeBucketData
+ */
+export function clearBucketWantCache() {
+  BUCKET_DATA_CACHE = {};
+}
+
 /**
  *  Compute the amount a bucket wants (and other information)
  **/
@@ -541,6 +551,11 @@ export function computeBucketData(kind:'', b:Bucket):IComputedData;
 export function computeBucketData(kind:'deposit', b:Bucket):IComputedData;
 export function computeBucketData(kind:'goal-deposit'|'goal-date'|'deposit-date', b:Bucket, args:ComputeArgs):IComputedData;
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):IComputedData {
+  const key = `${kind}:${b.kind}:${b.deposit}:${b.goal}:${b.end_date}:${args.today}:${args.balance}`;
+  console.log("key", key);
+  if (BUCKET_DATA_CACHE[key] !== undefined) {
+    return BUCKET_DATA_CACHE[key];
+  }
   let ret = {
     deposit: 0,
     goal: 0,
@@ -590,6 +605,7 @@ export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):
       })
     }
   }
+  BUCKET_DATA_CACHE[key] = ret;
   return ret;
 }
 
