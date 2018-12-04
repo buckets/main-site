@@ -588,7 +588,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               }}
             />
           </td>
-          <td className="right">
+          <td className="right nobr">
             <button className="icon"
               tabIndex={-1}
               onClick={() => {

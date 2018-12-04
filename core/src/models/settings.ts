@@ -19,12 +19,14 @@ export interface ISettings {
   reports_timeback_number: number;
   reports_timeback_unit: 'month'|'year';
   money_symbol: string,
+  accounts_in_sidebar: boolean;
 }
 
 export const DEFAULTS:ISettings = {
   reports_timeback_number: 18,
   reports_timeback_unit: 'month',
   money_symbol: '',
+  accounts_in_sidebar: false,
 }
 
 export interface ISettingsObject extends IObject {
