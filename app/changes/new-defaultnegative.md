@@ -1,0 +1,1 @@
+This change might annoy you at first, but once you get used to it, you'll like it :)  When entering transactions, the amount now defaults to a **negative** amount since most transactions are expenses.  You can enter positive amounts by clicking the big *minus* button or by entering a negative number.  (#307)
