@@ -273,6 +273,17 @@ export async function importYNAB4(fs:FileSystem, store:IStore, path:string) {
     id: import_id,
     percent: 0,
   })
+  // Find a file/dir that ends with .ynab4
+  let segments = path.split(Path.sep);
+  for (var i = 0; i < segments.length; i++) {
+    let segment = segments[segments.length - 1 - i];
+    if (segment.endsWith(".ynab4")) {
+      break
+    }
+  }
+  path = segments.slice(0, segments.length-i).join(Path.sep);
+  log.info(`Normalized path: ${path}`);
+
   try {
     const ymeta = await loadJSONFile<YNAB.Meta>(fs, Path.resolve(path, 'Budget.ymeta'));
     const datadir = Path.resolve(path, ymeta.relativeDataFolderName);
