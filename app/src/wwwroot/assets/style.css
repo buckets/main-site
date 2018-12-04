@@ -74,6 +74,13 @@ a {
 a:hover {
   text-decoration: underline;
 }
+a.nocolor {
+  color: black;
+}
+a.nocolor:hover {
+  text-decoration: none;
+  color: var(--blue);
+}
 
 ol.spaced li {
   margin: 1rem 0;
