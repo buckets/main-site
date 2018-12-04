@@ -405,7 +405,7 @@ class Application extends React.Component<ApplicationProps, any> {
                     <inter-total>-</inter-total>
                     <total>
                       <name>{sss('Expenses')}</name>
-                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} symbol /></amount>
+                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} symbol nocolor /></amount>
                     </total>
                     <inter-total>=</inter-total>
                     <total>
