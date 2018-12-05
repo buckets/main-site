@@ -1,4 +1,4 @@
-FROM node:8.1
+FROM node:8.14
 
 RUN apt-get update -q
 RUN apt-get install -y apt-transport-https icnsutils graphicsmagick xz-utils rpm bsdtar libsecret-1-dev rsync
