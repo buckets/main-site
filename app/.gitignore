@@ -8,3 +8,4 @@ out
 *.buckets
 *.bkts
 _CHANGELOG.md
+package-lock.json

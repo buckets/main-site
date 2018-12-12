@@ -14,7 +14,7 @@
     "start": "electron .",
     "clean": "find src -name '*.js' -exec rm {} \\;",
     "compile": "cross-env NODE_ENV=production tsc",
-    "test": "./test.sh && nsp check",
+    "test": "./test.sh && npm i --package-lock --package-lock-only && npm audit --audit-level high && rm package-lock.json",
     "postinstall": "electron-builder install-app-deps",
     "fakebank": "http-server -a localhost -p 8080 test/fakebank"
   },
@@ -139,8 +139,6 @@
     "electron": "^3.0.10",
     "electron-builder": "^20.38.2",
     "http-server": "^0.10.0",
-    "mocha": "3.4.2",
-    "nsp": "^3.2.1",
     "tap": "^10.7.0",
     "ts-node": "3.0.6",
     "typescript": "^3.2.1",

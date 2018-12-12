@@ -551,8 +551,7 @@ export function computeBucketData(kind:'', b:Bucket):IComputedData;
 export function computeBucketData(kind:'deposit', b:Bucket):IComputedData;
 export function computeBucketData(kind:'goal-deposit'|'goal-date'|'deposit-date', b:Bucket, args:ComputeArgs):IComputedData;
 export function computeBucketData(kind:BucketKind, b:Bucket, args?:ComputeArgs):IComputedData {
-  const key = `${kind}:${b.kind}:${b.deposit}:${b.goal}:${b.end_date}:${args.today}:${args.balance}`;
-  console.log("key", key);
+  const key = `${kind}:${b.kind}:${b.deposit}:${b.goal}:${b.end_date}` + (args ? `${args.today}:${args.balance}` : "");
   if (BUCKET_DATA_CACHE[key] !== undefined) {
     return BUCKET_DATA_CACHE[key];
   }
