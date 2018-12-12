@@ -178,7 +178,7 @@ def doit(no_publish, skip_mac, skip_linux, skip_win, resume):
             env['SKIP_MAC'] = 'yes'
         if skip_linux:
             env['SKIP_LINUX'] = 'yes'
-        print('Publishing draft release to GitHub...')
+        print('Building and uploading to GitHub...')
         subprocess.check_call(['./publish.sh'], env=env)
         print('[X] Done uploading to GitHub.')
 
