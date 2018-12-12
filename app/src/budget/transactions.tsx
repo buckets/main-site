@@ -384,7 +384,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           const amount = Math.abs(this.state.amount) * sign;
           const trans = await store.sub.accounts.transact({
             account_id: this.state.account_id,
-            amount: amount,
+            amount,
             memo: this.state.memo,
             posted: this.state.posted,
           })
