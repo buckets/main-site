@@ -36,7 +36,7 @@ if [ -z "$SKIP_LINUX" ]; then
         echo "FAILED TO MAKE .tar.gz"
         exit 1
     fi
-    if [ ! -e "dist/Buckets-${V}-x86_64.AppImage" ]; then
+    if [ ! -e "dist/Buckets ${V}.AppImage" ]; then
         echo "FAILED TO MAKE .AppImage"
         exit 1
     fi
