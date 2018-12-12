@@ -74,6 +74,12 @@ def getLatestReleaseVersion():
             continue
         return release['name']
 
+def getTopChangelogVersion():
+    with io.open('CHANGELOG.md', 'r') as fh:
+        for line in fh:
+            if line.startswith('##'):
+                return line.split()[1]
+
 #------------------------------------------------------------------------------
 # GitHub stuff
 #------------------------------------------------------------------------------
@@ -97,62 +103,69 @@ def abort():
 
 
 @click.command()
+@click.option('--resume', is_flag=True)
 @click.option('--skip-mac', is_flag=True)
 @click.option('--skip-linux', is_flag=True)
 @click.option('--skip-win', is_flag=True)
 @click.option('--no-publish', is_flag=True)
-def doit(no_publish, skip_mac, skip_linux, skip_win):
+def doit(no_publish, skip_mac, skip_linux, skip_win, resume):
     # make sure the repo is not dirty
-    stdout = subprocess.check_output(['git', 'status', '--short']).strip()
-    if stdout:
-        print(stdout)
-        raise Exception("Uncommitted changes")
+    if not resume:
+        stdout = subprocess.check_output(['git', 'status', '--short']).strip()
+        if stdout:
+            print(stdout)
+            raise Exception("Uncommitted changes")
 
-    if yesno('Export translations?', default=True):
-        subprocess.check_call(['dev/update_translations.sh'])
-        subprocess.check_call(['dev/export_translations.sh'])
-        try:
-            subprocess.check_call(['git', 'add', 'src/langs'])
-            subprocess.check_call(['git', 'commit', '-m', 'Update translation strings'])
-        except:
-            # nothing to commit
-            pass
+    if not resume:
+        if yesno('Export translations?', default=True):
+            subprocess.check_call(['dev/update_translations.sh'])
+            subprocess.check_call(['dev/export_translations.sh'])
+            try:
+                subprocess.check_call(['git', 'add', 'src/langs'])
+                subprocess.check_call(['git', 'commit', '-m', 'Update translation strings'])
+            except:
+                # nothing to commit
+                pass
 
     # run tests?
-    if yesno('Run tests?', default=True):
-        subprocess.check_call(['yarn', 'test'], cwd='.')
-        subprocess.check_call(['yarn', 'test'], cwd='../core')
+    if not resume:
+        if yesno('Run tests?', default=True):
+            subprocess.check_call(['yarn', 'test'], cwd='.')
+            subprocess.check_call(['yarn', 'test'], cwd='../core')
 
-    # choose version
-    package_version = getPackageVersion()
-    guess_target_version = package_version
-    if guess_target_version.count('-'):
-        guess_target_version = guess_target_version.split('-')[0]
-    latest_version = getLatestReleaseVersion()
-    print('package.json version:', package_version)
-    print('Latest released version on GitHub:', latest_version)
-    target_version = prompt('Version to release?',
-        default=guess_target_version)
-    parts = map(int, target_version.split('.'))
-    next_version = '.'.join(map(str, [parts[0], parts[1]+1, 0])) + '-dev'
-    next_version = prompt('Next version?',
-        default=next_version)
+    if resume:
+        next_version = getTopChangelogVersion()
+    else:
+        # choose version
+        package_version = getPackageVersion()
+        guess_target_version = package_version
+        if guess_target_version.count('-'):
+            guess_target_version = guess_target_version.split('-')[0]
+        latest_version = getLatestReleaseVersion()
+        print('package.json version:', package_version)
+        print('Latest released version on GitHub:', latest_version)
+        target_version = prompt('Version to release?',
+            default=guess_target_version)
+        parts = map(int, target_version.split('.'))
+        next_version = '.'.join(map(str, [parts[0], parts[1]+1, 0])) + '-dev'
+        next_version = prompt('Next version?',
+            default=next_version)
 
-    # verify CHANGELOG
-    print('=== CHANGELOG ===')
-    new_changelog = subprocess.check_output(['dev/changelog/combine_changes.sh'])
-    issue_numbers = extractIssueNumbers(new_changelog)
-    print(new_changelog)
-    if not yesno('Does this look correct?', default=True):
-        abort()
+        # verify CHANGELOG
+        print('=== CHANGELOG ===')
+        new_changelog = subprocess.check_output(['dev/changelog/combine_changes.sh'])
+        issue_numbers = extractIssueNumbers(new_changelog)
+        print(new_changelog)
+        if not yesno('Does this look correct?', default=True):
+            abort()
 
-    # update version
-    updatePackageVersion(target_version)
-    print('[X] Updated package.json version to {0}'.format(target_version))
+        # update version
+        updatePackageVersion(target_version)
+        print('[X] Updated package.json version to {0}'.format(target_version))
 
-    # update CHANGELOG
-    subprocess.check_call(['dev/changelog/updatechangelog.sh'])
-    print('[X] Updated CHANGELOG.')
+        # update CHANGELOG
+        subprocess.check_call(['dev/changelog/updatechangelog.sh'])
+        print('[X] Updated CHANGELOG.')
 
     if no_publish:
         print('\nSKIPPING PUBLISH\n')
