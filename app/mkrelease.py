@@ -78,7 +78,7 @@ def getTopChangelogVersion():
     with io.open('CHANGELOG.md', 'r') as fh:
         for line in fh:
             if line.startswith('##'):
-                return line.split()[1]
+                return line.split()[1][1:]
 
 #------------------------------------------------------------------------------
 # GitHub stuff
@@ -135,6 +135,7 @@ def doit(no_publish, skip_mac, skip_linux, skip_win, resume):
 
     if resume:
         next_version = getTopChangelogVersion()
+        target_version = next_version
     else:
         # choose version
         package_version = getPackageVersion()
