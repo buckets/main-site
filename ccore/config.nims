@@ -1,0 +1,1 @@
+switch("dynlibOverride", "sqlite3")
