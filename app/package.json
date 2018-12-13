@@ -1,6 +1,6 @@
 {
   "name": "Buckets",
-  "version": "0.54.0-dev",
+  "version": "0.53.1",
   "homepage": "https://www.budgetwithbuckets.com",
   "main": "src/mainprocess/main.js",
   "description": "Buckets Family Budgeting",
