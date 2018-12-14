@@ -1,6 +1,8 @@
-var libbuckets = require('./build/Release/bucketslib');
-libbuckets.start();
+var buckets = require('./build/Release/bucketslib');
+buckets.start();
 
-console.log("Buckets version:", libbuckets.version());
+console.log("Buckets version:", buckets.version());
 
-console.log("SPC:", libbuckets.stringpc("foo", "bar"));
+console.log("SPC:", buckets.stringpc("foo", "bar\u0000and stuff"));
+console.log("SPC:", buckets.stringpc("Foo", "bar"));
+console.log("SPC:", buckets.stringpc("Hey", "bar"));

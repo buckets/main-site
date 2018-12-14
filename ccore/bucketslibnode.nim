@@ -26,14 +26,13 @@ NAN_METHOD(JS_buckets_version) {
 // buckets_stringpc
 NAN_METHOD(JS_buckets_stringpc) {
   String::Utf8Value v8command(info[0]->ToString());
-  String::Utf8Value v8arg(info[0]->ToString());
-  char* command = (char *)(*v8command);
-  char* arg = (char *)(*v8arg);
+  String::Utf8Value v8arg(info[1]->ToString());
   info.GetReturnValue().Set(
     Nan::New(
       buckets_stringpc(
-        command,
-        arg
+        (char *)(*v8command),
+        (char *)(*v8arg),
+        v8arg.length()
       )
     ).ToLocalChecked()
   );
