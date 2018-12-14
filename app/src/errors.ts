@@ -12,6 +12,7 @@ import { onlyRunInMain } from './rpc'
 import { isRegistered } from './mainprocess/drm'
 import { PrefixLogger } from './logging'
 import { CustomError } from 'buckets-core/dist/errors'
+import { PSTATE, updateState } from './mainprocess/persistent'
 
 const log = new PrefixLogger('(errors)');
 
@@ -45,6 +46,7 @@ export function openBugReporter(args:{
     template: args.template || '',
     nittygritty: nittyGritty(args.err),
     logfile_path: electron_log.transports.file.file,
+    email: PSTATE.bug_report_email,
   }
   win.loadURL(`file://${Path.join(APP_ROOT, 'src/wwwroot/misc/reportbug.html')}?${querystring.stringify(qs)}`)
 }
@@ -61,6 +63,9 @@ export async function submitFeedback(body:{
   throwerr?: boolean;
 } = {}) {
   log.info('Submitting feedback to', SUBMIT_URL)
+  await updateState({
+    bug_report_email: body.from_email,
+  })
   try {
     let r = await rp({
       method: 'POST',
