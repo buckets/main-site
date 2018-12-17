@@ -1,13 +1,5 @@
-## This file contains the NodeJS bindings into the buckets library.
-## It is essentially a C++ file emitted by Nim.
-include "src/buckets.nim"
-
-#-------------------------
-# JS Functions
-#-------------------------
-
-{.emit: """
 #include <nan.h>
+#include <buckets.h>
 
 N_CDECL(void, NimMain)(void);
 
@@ -37,22 +29,17 @@ NAN_METHOD(JS_buckets_stringpc) {
     ).ToLocalChecked()
   );
 }
-""".}
 
-#-------------------------
-# JS module definition
-#-------------------------
+//-------------------------
+// JS module definition
+//-------------------------
 
-{.emit: """
 void Init(Local<Object> exports) {
   exports->Set(Nan::New("start").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_start)->GetFunction());
   exports->Set(Nan::New("version").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_version)->GetFunction());
   exports->Set(Nan::New("stringpc").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_stringpc)->GetFunction());
 }
-""".}
 
-#-------------------------
-
-{.emit: """
+//-------------------------
 NODE_MODULE(bucketslib, Init)
-""".}
+
