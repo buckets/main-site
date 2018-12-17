@@ -1,8 +1,8 @@
 ## Main entrypoint for buckets library
-# import db_sqlite
+import db_sqlite
 import buckets/budgetfile
-# import buckets/dbschema
-# import buckets/db
+import buckets/dbschema
+import buckets/db
 import strformat
 import strutils
 
@@ -27,9 +27,9 @@ proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.expor
   of Foo:
     result = &"Foo({fullarg.repr}) executed"
   of Bar:
-    # var db = db_sqlite.open(":memory:", "", "", "")
-    # for row in db.instantRows(sql"SELECT sqlite_version()"):
-    #   result = row[0]
-    result = &"Bar({fullarg.repr}) executed"
+    var db = db_sqlite.open(":memory:", "", "", "")
+    for row in db.instantRows(sql"SELECT sqlite_version()"):
+      result = row[0]
+    # result = &"Bar({fullarg.repr}) executed"
   of Unknown:
     result = "Unknown function"
