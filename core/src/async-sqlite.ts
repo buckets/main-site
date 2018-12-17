@@ -5,7 +5,8 @@ import { AsyncRunResult, IAsyncSqlite, ICursor } from './dbstore'
 // XXX TODO Make it into a separate module
 //
 //=============================================================
-import * as sqlite3 from 'sqlite3-offline'
+import * as bucketslib from 'bucketslib'
+
 export function openSqlite(filename:string) {
   return new NodeSQLiteDatabase(new sqlite3.Database(filename))
 }

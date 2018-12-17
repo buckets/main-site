@@ -1,5 +1,5 @@
 #include <nan.h>
-#include <buckets.h>
+#include <clib.h>
 
 N_CDECL(void, NimMain)(void);
 

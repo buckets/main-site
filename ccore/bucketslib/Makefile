@@ -7,7 +7,7 @@ lib/bucketslib.node: csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h compile
 	node-gyp rebuild
 
 compile: $(NIMFILES)
-	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly ../src/buckets.nim
+	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly ../src/buckets/clib.nim
 
 csrc/nimbase.h: ~/lib/Nim/lib/nimbase.h
 	mkdir -p csrc

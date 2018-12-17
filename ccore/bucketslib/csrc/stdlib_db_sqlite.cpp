@@ -191,9 +191,6 @@ tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ marked;
 tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w additionalRoots;
 NI gcThreadId;
 };
-struct tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA {
-char dummy;
-};
 struct tyObject_StackTraceEntry_oLyohQ7O2XOvGnflOss8EA {
 NCSTRING procname;
 NI line;
@@ -225,7 +222,6 @@ static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1z
 N_LIB_PRIVATE N_NOINLINE(void, addZCT_fCDI7oO1NNVXXURtxSzsRw)(tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w& s, tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
 N_NIMCALL(void, popCurrentExceptionEx)(NU id);
 N_NIMCALL(void, raiseException)(Exception* e, NCSTRING ename);
-extern "C" N_CDECL(NI32, sqlite3_open)(NCSTRING filename, tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*& ppDb);
 extern TNimType NTI_ZVbaMVrRDW1Cj9bby6YsVhA_;
 extern TNimType NTI_9cp8FUMATyqFmLaAKCXEjCQ_;
 extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
@@ -424,43 +420,6 @@ N_LIB_PRIVATE N_NIMCALL(void, exec_kASFnJjvwTJpKpmn9aQHmPg)(tyObject_Sqlite3_xRZ
 {		dbError_yRzNipQFOsKqLVySy7Je9bw(db);
 }	}
 	LA4_: ;
-}
-
-N_LIB_PRIVATE N_NIMCALL(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*, open_SRJkmN7JR2aulOhbafCrYA)(NimStringDesc* connection, NimStringDesc* user, NimStringDesc* password, NimStringDesc* database) {
-	tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* result;
-	tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db;
-	result = (tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*)0;
-	db = (tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*)0;
-	{
-		NI32 T3_;
-		T3_ = (NI32)0;
-		T3_ = sqlite3_open(nimToCStringConv(connection), db);
-		if (!(T3_ == ((NI32) 0))) goto LA4_;
-{		result = db;
-}	}
-	goto LA1_;
-	LA4_: ;
-	{
-		dbError_yRzNipQFOsKqLVySy7Je9bw(db);
-	}
-	LA1_: ;
-	return result;
-}
-
-N_LIB_PRIVATE N_NIMCALL(tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw*, setupQuery_6EQAJlzQgp6Lnc8upW20sQ)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db, NimStringDesc* query, NimStringDesc** args, NI argsLen_0) {
-	tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw* result;
-	NimStringDesc* q;
-	result = (tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw*)0;
-	q = dbFormat_4xitxSXjtmpEVS63UNhgwA(query, args, argsLen_0);
-	{
-		int T3_;
-		T3_ = (int)0;
-		T3_ = sqlite3_prepare_v2(db, nimToCStringConv(q), ((int) ((q ? q->len : 0))), result, NIM_NIL);
-		if (!!((T3_ == ((NI32) 0)))) goto LA4_;
-{		dbError_yRzNipQFOsKqLVySy7Je9bw(db);
-}	}
-	LA4_: ;
-	return result;
 }
 N_LIB_PRIVATE N_NIMCALL(void, stdlib_db_sqliteInit000)(void) {
 {

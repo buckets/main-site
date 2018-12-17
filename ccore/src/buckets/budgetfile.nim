@@ -3,13 +3,19 @@ import db_sqlite
 import strformat
 import sequtils
 import strutils
+import tables
 
 import dbschema
 
 type
   BudgetFile* = ref object
+    id*: int
     db*: DbConn
     filename*: string
+
+var
+  nextid: int
+  id2BudgetFile = initTable[int, BudgetFile]()
 
 
 proc upgradeSchema*(bf:Budgetfile) =
@@ -52,10 +58,17 @@ proc upgradeSchema*(bf:Budgetfile) =
 proc openBudgetFile*(filename:string) : BudgetFile =
   new(result)
   logging.info &"Opening file {filename}"
+  result.id = nextid
+  inc(nextid)
+  id2BudgetFile[result.id] = result
   result.db = db_sqlite.open(filename, "", "", "")
   result.filename = filename
   result.upgradeSchema()
 
+proc getBudgetFile*(id:int):BudgetFile =
+  id2BudgetFile[id]
+
 proc close*(bf:Budgetfile) =
   logging.info &"Closing file {bf.filename}"
   bf.db.close()
+  id2BudgetFile.del(bf.id)

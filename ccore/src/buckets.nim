@@ -1,34 +1,31 @@
-## Main entrypoint for buckets library
+## Main entrypoint for buckets C library
 import db_sqlite
 import buckets/budgetfile
 import buckets/dbschema
 import buckets/db
 import strformat
 import strutils
+import tables
+import sequtils
+
+export openBudgetFile, close
+
+const PACKAGE_VERSION* = toSeq(
+  slurp"../buckets.nimble".splitLines()
+).filterIt(
+  it.startsWith("version"))[0].split('"')[1]
 
 type
   Commands* = enum
     Unknown,
-    Foo,
-    Bar,
+    Echo,
 
-
-proc buckets_version*():cstring {.exportc.} =
-  "0.1.0"
-
-proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc.} =
+proc stringRPC*(command:string, arg:string):string =
   ## String-based RPC interface
-  var fullarg:string
-  fullarg = newString(arglen)
-  copyMem(fullarg[0].unsafeAddr, arg, arglen)
   
-  let cmd = parseEnum($command, Unknown)
+  let cmd = parseEnum(command, Unknown)
   case cmd
-  of Foo:
-    result = &"Foo({fullarg.repr}) executed"
-  of Bar:
-    var db = db_sqlite.open(":memory:", "", "", "")
-    for row in db.instantRows(sql"SELECT sqlite_version()"):
-      result = &"SQLite version: {row[0]}"
+  of Echo:
+    result = arg
   of Unknown:
     result = "Unknown function"

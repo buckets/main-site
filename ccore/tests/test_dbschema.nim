@@ -7,31 +7,18 @@
 
 import unittest
 import os
-import random
 import strformat
-import logging
-
-var L = newConsoleLogger()
-addHandler(L)
-
-randomize()
-
-proc tmpDir(): string {.used.} =
-  result = os.getTempDir() / &"bucketstest{random.rand(10000000)}"
-  result.createDir()
-
-proc pathToWiishRoot(): string =
-  currentSourcePath.absolutePath.parentDir.parentDir
-
-
 import buckets
 
+import ./util
+
 test "new file":
-  let filename = tmpDir()/"budget.buckets"
+  let filename = tmpDir()/"newfile.buckets"
   discard openBudgetFile(filename)
 
 test "reopen file":
-  let filename = tmpDir()/"budget.buckets"
+  let filename = tmpDir()/"reopen.buckets"
   let bf = openBudgetFile(filename)
   bf.close()
-  discard openBudgetFile(filename)
+  let bf2 = openBudgetFile(filename)
+  check bf.id != bf2.id

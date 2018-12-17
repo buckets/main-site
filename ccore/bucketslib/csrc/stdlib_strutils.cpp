@@ -246,7 +246,7 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA, parseEnum_F2m6Tx
 		NI res = ((NI) 0);
 		{
 			while (1) {
-				if (!(res <= ((NI) 2))) goto LA3;
+				if (!(res <= ((NI) 1))) goto LA3;
 				e = ((tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA) (res));
 				{
 					NI T6_;
