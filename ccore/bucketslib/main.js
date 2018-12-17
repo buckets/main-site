@@ -1,5 +1,5 @@
 var buckets = require('./build/Release/bucketslib');
-// buckets.start();
+buckets.start();
 
 console.log("Buckets version:", buckets.version());
 
