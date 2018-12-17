@@ -29,7 +29,6 @@ proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.expor
   of Bar:
     var db = db_sqlite.open(":memory:", "", "", "")
     for row in db.instantRows(sql"SELECT sqlite_version()"):
-      result = row[0]
-    # result = &"Bar({fullarg.repr}) executed"
+      result = &"SQLite version: {row[0]}"
   of Unknown:
     result = "Unknown function"

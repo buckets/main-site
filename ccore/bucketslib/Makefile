@@ -21,3 +21,4 @@ csrc/sqlite3.c: ../src/buckets/sqlite3/sqlite3.c
 clean:
 	-rm -r csrc
 	-rm -r build
+	-rm -r lib

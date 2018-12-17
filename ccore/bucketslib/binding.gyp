@@ -28,6 +28,17 @@
           }
         }]
       ]
+    },
+    {
+      "target_name": "action_after_build",
+      "type": "none",
+      "dependencies": ["bucketslib"],
+      "copies": [
+        {
+          "files": ["<(PRODUCT_DIR)/bucketslib.node"],
+          "destination": "lib/",
+        }
+      ]
     }
   ]
 }
