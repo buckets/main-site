@@ -1,15 +1,8 @@
 # Quick Map
 
-- `bucketslib/` - NodeJS module with bindings to this library
 - `src/buckets.nim` - Nim library main import (but you can also import things inside `src/buckets/`)
 - `src/buckets/clib.nim` - C library main interface
-
-# Building the bucketslib NodeJS package
-
-Go into `bucketslib/` and run:
-
-    make clean && make && make test
-
+- `../nodebuckets/` - NodeJS module with bindings to this library
 
 # Updating SQLite
 
