@@ -1,9 +1,12 @@
-.PHONY: clean compile
+NIMFILES = $(shell find .. -name '*.nim')
 
-build/Release/bucketslib.node: compile csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h
+
+.PHONY: clean compile test
+
+lib/bucketslib.node: csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h compile
 	node-gyp rebuild
 
-compile:
+compile: $(NIMFILES)
 	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly ../src/buckets.nim
 
 csrc/nimbase.h: ~/lib/Nim/lib/nimbase.h
@@ -17,6 +20,9 @@ csrc/sqlite3.h: ../src/buckets/sqlite3/sqlite3.h
 csrc/sqlite3.c: ../src/buckets/sqlite3/sqlite3.c
 	mkdir -p csrc
 	cp $^ $@
+
+test:
+	node test.js
 
 clean:
 	-rm -r csrc

@@ -1,4 +1,6 @@
-csrc
 node_modules
+*.o
+csrc/*.json
+csrc/*.sha1
 build/
 lib
