@@ -1,11 +1,13 @@
 import logging
 import db_sqlite
+import sqlite3 except close
 import strformat
 import sequtils
 import strutils
 import tables
 
 import dbschema
+import db
 
 type
   BudgetFile* = ref object
@@ -54,6 +56,7 @@ proc upgradeSchema*(bf:Budgetfile) =
       bf.db.exec(sql"ROLLBACK")
       raise
   logging.debug "Schema upgrade complete"
+  logging.debug bf.db.fetchAll(sql"SELECT * from _schema_version")
 
 proc openBudgetFile*(filename:string) : BudgetFile =
   new(result)
@@ -66,9 +69,13 @@ proc openBudgetFile*(filename:string) : BudgetFile =
   result.upgradeSchema()
 
 proc getBudgetFile*(id:int):BudgetFile =
+  ## Convert a budget file handle id to a BudgetFile object
   id2BudgetFile[id]
 
 proc close*(bf:Budgetfile) =
   logging.info &"Closing file {bf.filename}"
-  bf.db.close()
+  db_sqlite.close(bf.db)
   id2BudgetFile.del(bf.id)
+
+
+  

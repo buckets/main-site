@@ -6,67 +6,82 @@ import { AsyncRunResult, IAsyncSqlite, ICursor } from './dbstore'
 //
 //=============================================================
 import * as bucketslib from 'bucketslib'
+bucketslib.register_logger((msg:string) => {
+  console.log("FROM bucketslib:", msg);
+});
 
 export function openSqlite(filename:string) {
-  return new NodeSQLiteDatabase(new sqlite3.Database(filename))
+  return new NodeSQLiteDatabase(bucketslib.openfile(filename));
 }
 export class NodeSQLiteCursor implements ICursor {
-  constructor(readonly db:sqlite3.Database) {
+  constructor(readonly db_id:number) {
 
+  }
+  private convertToArray(query:string, params:{}):{query:string, params:Array<string>} {
+    let indexes = bucketslib.db_paramArray(this.db_id, query);
+    console.log("indexes", indexes);
+    let param_array = indexes.map(name => {
+      console.log("Param name:", name);
+      return `${params[name]}`;
+    });
+    return {query: query, params: param_array};
   }
   async run(query:string, params={}):Promise<AsyncRunResult> {
     return new Promise<AsyncRunResult>((resolve, reject) => {
-      this.db.run(query, params, function callback(err) {
-        if (err) {
-          reject(err);
-        } else {
-          const result:AsyncRunResult = {
-            lastID: this.lastID,
-          }
-          resolve(result);
-        }
-      })
+      try {
+        let conv = this.convertToArray(query, params);
+        const lastID = bucketslib.db_run(this.db_id, conv.query, conv.params);
+        resolve({
+          lastID,
+        })
+      } catch(err) {
+        reject(err);
+      }
     })
   }
   async executeMany(queries:string[]):Promise<null> {
     return new Promise<null>((resolve, reject) => {
-      this.db.exec(queries.join(';'), (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(null);
-        }
-      })
+      try {
+        bucketslib.db_executeMany(this.db_id, queries);
+        resolve(null);
+      } catch(err) {
+        reject(err);
+      }
     })
   }
   async all<T>(query:string, params={}):Promise<Array<T>> {
     return new Promise<Array<T>>((resolve, reject) => {
-      this.db.all(query, params, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      })
+      try {
+        let conv = this.convertToArray(query, params);
+        const result = bucketslib.db_all(this.db_id, conv.query, conv.params);
+        console.log("all result", result);
+        resolve(result);
+      } catch(err) {
+        reject(err);
+      }
     });
   }
   async get<T>(query:string, params={}):Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      this.db.get(query, params, (err, row) => {
-        if (err) {
-          reject(err);
+      try {
+        let conv = this.convertToArray(query, params);
+        const result = bucketslib.db_all(this.db_id, conv.query, conv.params);
+        if (result.length) {
+          resolve(result[0]);
         } else {
-          resolve(row);
+          resolve(null);
         }
-      })
+      } catch(err) {
+        reject(err);
+      }
     })
   }
 }
 
 export class NodeSQLiteDatabase implements IAsyncSqlite {
   private cursor:NodeSQLiteCursor;
-  constructor(readonly db:sqlite3.Database) {
-    this.cursor = new NodeSQLiteCursor(db);
+  constructor(readonly db_id:number) {
+    this.cursor = new NodeSQLiteCursor(db_id);
   }
   async run(query:string, params={}):Promise<AsyncRunResult> {
     return this.cursor.run(query, params)

@@ -155,7 +155,7 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[], opts:{
   //--------------------------------------------------------
 
   const applied = new Set<string>((await db.all<any>('SELECT name FROM _schema_version')).map(x => x.name));
-  logger.info('Applied migrations:', Array.from(applied).join(', '))
+  logger.warn('Applied migrations:', Array.from(applied).join(', '))
 
   // Check for duplicate patch names/orders
   let encountered_names = new Set<string>();

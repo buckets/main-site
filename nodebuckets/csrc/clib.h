@@ -20,9 +20,16 @@
 #undef far
 #undef powerpc
 #undef unix
+typedef N_CDECL_PTR(void, tyProc_5cp59bim9aJ4WupX5aVaD1Sg) (NCSTRING msg);
 N_NOCONV(void, signalHandler)(int sign);
 N_NIMCALL(NI, getRefcount)(void* p);
 N_NIMCALL(NCSTRING, buckets_version)(void);
 N_NIMCALL(NCSTRING, buckets_stringpc)(NCSTRING command, NCSTRING arg, NI arglen);
+N_NIMCALL(void, buckets_register_logger)(tyProc_5cp59bim9aJ4WupX5aVaD1Sg fn);
+N_NIMCALL(NI, buckets_openfile)(NCSTRING filename);
+N_NIMCALL(NCSTRING, buckets_db_param_array_json)(NI budget_handle, NCSTRING query);
+N_NIMCALL(NCSTRING, buckets_db_all_json)(NI budget_handle, NCSTRING query, NCSTRING params_json);
+N_NIMCALL(NCSTRING, buckets_db_run_json)(NI budget_handle, NCSTRING query, NCSTRING params_json);
+N_NIMCALL(NCSTRING, buckets_db_execute_many_json)(NI budget_handle, NCSTRING queries_json);
 N_CDECL(void, NimMain)(void);
 #endif /* __clib__ */

@@ -35,6 +35,22 @@ struct Exception;
 struct tySequence_uB9b75OUPRENsBAu4AnoePA;
 struct tyObject_FileLoggercolonObjectType__IRs4hY6GNcXZ1akep9cf7jA;
 struct tyObject_RollingFileLoggercolonObjectType__RVbeT0aVEu0OfdbVn1KX0g;
+struct tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g;
+struct tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w;
+struct tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ;
+struct tyObject_GcStack_7fytPA5bBsob6See21YMRA;
+struct tyObject_MemRegion_x81NhDv59b8ercDZ9bi85jyg;
+struct tyObject_SmallChunk_tXn60W2f8h3jgAYdEmy5NQ;
+struct tyObject_BigChunk_Rv9c70Uhp2TytkX7eH78qEg;
+struct tyObject_LLChunk_XsENErzHIZV9bhvyJx56wGw;
+struct tyObject_IntSet_EZObFrE3NC9bIb3YMkY9crZA;
+struct tyObject_Trunk_W0r8S0Y3UGke6T9bIUWnnuw;
+struct tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw;
+struct tyObject_HeapLinks_PDV1HBZ8CQSQJC9aOBFNRSg;
+struct tyTuple_ujsjpB2O9cjj3uDHsXbnSzg;
+struct tyObject_GcStat_0RwLoVBHZPfUAcLczmfQAg;
+struct tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ;
+struct tyObject_PageDesc_fublkgIY4LG3mT51LU2WHg;
 struct tyObject_StackTraceEntry_oLyohQ7O2XOvGnflOss8EA;
 typedef NU8 tyEnum_Level_pW4mH4lipH6u2NKDGEWdGg;
 struct TGenericSeq {
@@ -113,6 +129,95 @@ tyEnum_FileMode_fVUBHvW79bXUw1j55Oo9avSQ baseMode;
 NI logFiles;
 NI bufSize;
 };
+struct tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g {
+NI refcount;
+TNimType* typ;
+};
+struct tyObject_GcStack_7fytPA5bBsob6See21YMRA {
+void* bottom;
+};
+struct tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w {
+NI len;
+NI cap;
+tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g** d;
+};
+typedef tyObject_SmallChunk_tXn60W2f8h3jgAYdEmy5NQ* tyArray_SiRwrEKZdLgxqz9a9aoVBglg[512];
+typedef NU32 tyArray_BHbOSqU1t9b3Gt7K2c6fQig[24];
+typedef tyObject_BigChunk_Rv9c70Uhp2TytkX7eH78qEg* tyArray_N1u1nqOgmuJN9cSZrnMHgOQ[32];
+typedef tyArray_N1u1nqOgmuJN9cSZrnMHgOQ tyArray_B6durA4ZCi1xjJvRtyYxMg[24];
+typedef tyObject_Trunk_W0r8S0Y3UGke6T9bIUWnnuw* tyArray_lh2A89ahMmYg9bCmpVaplLbA[256];
+struct tyObject_IntSet_EZObFrE3NC9bIb3YMkY9crZA {
+tyArray_lh2A89ahMmYg9bCmpVaplLbA data;
+};
+typedef tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw* tyArray_0aOLqZchNi8nWtMTi8ND8w[2];
+struct tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw {
+tyArray_0aOLqZchNi8nWtMTi8ND8w link;
+NI key;
+NI upperBound;
+NI level;
+};
+struct tyTuple_ujsjpB2O9cjj3uDHsXbnSzg {
+tyObject_BigChunk_Rv9c70Uhp2TytkX7eH78qEg* Field0;
+NI Field1;
+};
+typedef tyTuple_ujsjpB2O9cjj3uDHsXbnSzg tyArray_LzOv2eCDGiceMKQstCLmhw[30];
+struct tyObject_HeapLinks_PDV1HBZ8CQSQJC9aOBFNRSg {
+NI len;
+tyArray_LzOv2eCDGiceMKQstCLmhw chunks;
+tyObject_HeapLinks_PDV1HBZ8CQSQJC9aOBFNRSg* next;
+};
+struct tyObject_MemRegion_x81NhDv59b8ercDZ9bi85jyg {
+NI minLargeObj;
+NI maxLargeObj;
+tyArray_SiRwrEKZdLgxqz9a9aoVBglg freeSmallChunks;
+NU32 flBitmap;
+tyArray_BHbOSqU1t9b3Gt7K2c6fQig slBitmap;
+tyArray_B6durA4ZCi1xjJvRtyYxMg matrix;
+tyObject_LLChunk_XsENErzHIZV9bhvyJx56wGw* llmem;
+NI currMem;
+NI maxMem;
+NI freeMem;
+NI occ;
+NI lastSize;
+tyObject_IntSet_EZObFrE3NC9bIb3YMkY9crZA chunkStarts;
+tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw* root;
+tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw* deleted;
+tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw* last;
+tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw* freeAvlNodes;
+NIM_BOOL locked;
+NIM_BOOL blockChunkSizeIncrease;
+NI nextChunkSize;
+tyObject_AvlNode_IaqjtwKhxLEpvDS9bct9blEw bottomData;
+tyObject_HeapLinks_PDV1HBZ8CQSQJC9aOBFNRSg heapLinks;
+};
+struct tyObject_GcStat_0RwLoVBHZPfUAcLczmfQAg {
+NI stackScans;
+NI cycleCollections;
+NI maxThreshold;
+NI maxStackSize;
+NI maxStackCells;
+NI cycleTableSize;
+NI64 maxPause;
+};
+struct tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ {
+NI counter;
+NI max;
+tyObject_PageDesc_fublkgIY4LG3mT51LU2WHg* head;
+tyObject_PageDesc_fublkgIY4LG3mT51LU2WHg** data;
+};
+struct tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ {
+tyObject_GcStack_7fytPA5bBsob6See21YMRA stack;
+NI cycleThreshold;
+tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w zct;
+tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w decStack;
+tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w tempStack;
+NI recGcLock;
+tyObject_MemRegion_x81NhDv59b8ercDZ9bi85jyg region;
+tyObject_GcStat_0RwLoVBHZPfUAcLczmfQAg stat;
+tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ marked;
+tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w additionalRoots;
+NI gcThreadId;
+};
 struct tyObject_StackTraceEntry_oLyohQ7O2XOvGnflOss8EA {
 NCSTRING procname;
 NI line;
@@ -163,6 +268,14 @@ N_NIMCALL(NimStringDesc*, nimIntToStr)(NI x);
 N_LIB_PRIVATE N_NIMCALL(void, nosmoveFile)(NimStringDesc* source, NimStringDesc* dest);
 N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, slash__lXoMhn1ZYc9cAJa9bfA61msg)(NimStringDesc* head, NimStringDesc* tail);
 N_LIB_PRIVATE N_NIMCALL(FILE*, open_hqzpWQbdA2B8l9a6wwNoP4g)(NimStringDesc* filename, tyEnum_FileMode_fVUBHvW79bXUw1j55Oo9avSQ mode, NI bufSize);
+N_NIMCALL(TGenericSeq*, incrSeqV3)(TGenericSeq* s, TNimType* typ);
+static N_INLINE(void, asgnRef)(void** dest, void* src);
+static N_INLINE(void, incRef_9cAA5YuQAAC3MVbnGeV86swsystem)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
+static N_INLINE(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*, usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem)(void* usr);
+static N_INLINE(void, decRef_MV4BBk6J1qu70IbBxwEn4wsystem)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
+static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
+N_LIB_PRIVATE N_NOINLINE(void, addZCT_fCDI7oO1NNVXXURtxSzsRw)(tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w& s, tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
+N_LIB_PRIVATE N_NIMCALL(void, log_3UB9b0flreHbZSduHV9cBGOA)(tyObject_LoggercolonObjectType__9bhietBQiofDPLK3sBa0qPQ* logger, tyEnum_Level_pW4mH4lipH6u2NKDGEWdGg level, NimStringDesc** args, NI argsLen_0);
 tyEnum_Level_pW4mH4lipH6u2NKDGEWdGg level_hzbRBHMSEnpbC61ptpdKmA;
 tySequence_ZE4llUwluRK7Sqp4MtXogQ* handlers_OpA9asfHAsjfRTcLDwhkNfA;
 extern TNimType NTI_ytyiCJqK439aF9cIibuRVpAg_;
@@ -171,6 +284,7 @@ TNimType NTI_pW4mH4lipH6u2NKDGEWdGg_;
 extern TNimType NTI_77mFvmsOLKik79ci2hXkHEg_;
 TNimType NTI_WMDZAmMy1jpL9cg9ccJjI2LQ_;
 TNimType NTI_ZE4llUwluRK7Sqp4MtXogQ_;
+extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
 TNimType NTI_IRs4hY6GNcXZ1akep9cf7jA_;
 extern TNimType NTI_7BHnQsEj49a9c6QtudqWTo1w_;
 TNimType NTI_RVbeT0aVEu0OfdbVn1KX0g_;
@@ -610,6 +724,74 @@ N_LIB_PRIVATE N_NIMCALL(void, log_rG6osqE0luZSJUlLifxyVg)(tyObject_RollingFileLo
 		(*logger).curLine += ((NI) 1);
 }	}
 	LA5_: ;
+}
+
+static N_INLINE(void, incRef_9cAA5YuQAAC3MVbnGeV86swsystem)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
+	(*c).refcount = (NI)((NU64)((*c).refcount) + (NU64)(((NI) 8)));
+}
+
+static N_INLINE(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*, usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem)(void* usr) {
+	tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* result;
+	result = (tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*)0;
+	result = ((tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*) ((NI)((NU64)(((NI) (ptrdiff_t) (usr))) - (NU64)(((NI) 16)))));
+	return result;
+}
+
+static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
+	addZCT_fCDI7oO1NNVXXURtxSzsRw(gch_IcYaEuuWivYAS86vFMTS3Q.zct, c);
+}
+
+static N_INLINE(void, decRef_MV4BBk6J1qu70IbBxwEn4wsystem)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
+	{
+		(*c).refcount -= ((NI) 8);
+		if (!((NU64)((*c).refcount) < (NU64)(((NI) 8)))) goto LA3_;
+{		rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system(c);
+}	}
+	LA3_: ;
+}
+
+static N_INLINE(void, asgnRef)(void** dest, void* src) {
+	{
+		if (!!((src == NIM_NIL))) goto LA3_;
+{		incRef_9cAA5YuQAAC3MVbnGeV86swsystem(usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem(src));
+}	}
+	LA3_: ;
+	{
+		if (!!(((*dest) == NIM_NIL))) goto LA7_;
+{		decRef_MV4BBk6J1qu70IbBxwEn4wsystem(usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem((*dest)));
+}	}
+	LA7_: ;
+	(*dest) = src;
+}
+
+N_LIB_PRIVATE N_NIMCALL(void, addHandler_JMzV3oNQoqgx3BNo3w87bg)(tyObject_LoggercolonObjectType__9bhietBQiofDPLK3sBa0qPQ* handler) {
+	NI T1_;
+	asgnRef((void**) (&handlers_OpA9asfHAsjfRTcLDwhkNfA), (tySequence_ZE4llUwluRK7Sqp4MtXogQ*) incrSeqV3(handlers_OpA9asfHAsjfRTcLDwhkNfA, (&NTI_ZE4llUwluRK7Sqp4MtXogQ_)));
+	T1_ = handlers_OpA9asfHAsjfRTcLDwhkNfA->len++;
+	asgnRef((void**) (&handlers_OpA9asfHAsjfRTcLDwhkNfA->data[T1_]), handler);
+}
+
+N_LIB_PRIVATE N_NIMCALL(void, logLoop_Y1QvvdpC0FmKBCafruMWGQ)(tyEnum_Level_pW4mH4lipH6u2NKDGEWdGg level, NimStringDesc** args, NI argsLen_0) {
+	{
+		tyObject_LoggercolonObjectType__9bhietBQiofDPLK3sBa0qPQ* logger;
+		NI T2_;
+		logger = (tyObject_LoggercolonObjectType__9bhietBQiofDPLK3sBa0qPQ*)0;
+		NI i = ((NI) 0);
+		T2_ = (handlers_OpA9asfHAsjfRTcLDwhkNfA ? handlers_OpA9asfHAsjfRTcLDwhkNfA->len : 0);
+		NI L = T2_;
+		{
+			while (1) {
+				if (!(i < L)) goto LA4;
+				logger = handlers_OpA9asfHAsjfRTcLDwhkNfA->data[i];
+				{
+					if (!((*logger).levelThreshold <= level)) goto LA7_;
+{					log_3UB9b0flreHbZSduHV9cBGOA(logger, level, args, argsLen_0);
+}				}
+				LA7_: ;
+				i += ((NI) 1);
+			} LA4: ;
+		}
+	}
 }
 N_LIB_PRIVATE N_NIMCALL(void, stdlib_loggingInit000)(void) {
 {

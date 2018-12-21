@@ -9,6 +9,7 @@ import tables
 import sequtils
 
 export openBudgetFile, close
+export db
 
 const PACKAGE_VERSION* = toSeq(
   slurp"../buckets.nimble".splitLines()
@@ -19,13 +20,15 @@ type
   Commands* = enum
     Unknown,
     Echo,
+    Exec,
 
 proc stringRPC*(command:string, arg:string):string =
   ## String-based RPC interface
-  
   let cmd = parseEnum(command, Unknown)
   case cmd
   of Echo:
     result = arg
+  of Exec:
+    result = "Not implemented yet"
   of Unknown:
     result = "Unknown function"

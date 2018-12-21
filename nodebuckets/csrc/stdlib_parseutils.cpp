@@ -18,6 +18,190 @@
 #undef far
 #undef powerpc
 #undef unix
+struct NimStringDesc;
+struct TGenericSeq;
+struct TGenericSeq {
+NI len;
+NI reserved;
+};
+typedef NIM_CHAR tyUncheckedArray_py3s8sMDoAoBkn8uuh0ZzQ[1];
+struct NimStringDesc : public TGenericSeq {
+tyUncheckedArray_py3s8sMDoAoBkn8uuh0ZzQ data;
+};
+N_LIB_PRIVATE N_NIMCALL(NI, rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ)(NimStringDesc* s, NI64& b, NI start);
+static N_INLINE(NI, addInt)(NI a, NI b);
+N_NOINLINE(void, raiseOverflow)(void);
+N_NIMCALL(NI64, mulInt64)(NI64 a, NI64 b);
+static N_INLINE(NI, subInt)(NI a, NI b);
+static N_INLINE(NI64, subInt64)(NI64 a, NI64 b);
+N_NIMCALL(NI, nimParseBiggestFloat)(NimStringDesc* s, NF& number, NI start);
+N_NIMCALL(NI, nimParseBiggestFloat)(NimStringDesc* s, NF& number, NI start);
+
+static N_INLINE(NI, addInt)(NI a, NI b) {
+	NI result;
+{	result = (NI)0;
+	result = (NI)((NU64)(a) + (NU64)(b));
+	{
+		NIM_BOOL T3_;
+		T3_ = (NIM_BOOL)0;
+		T3_ = (((NI) 0) <= (NI)(result ^ a));
+		if (T3_) goto LA4_;
+		T3_ = (((NI) 0) <= (NI)(result ^ b));
+		LA4_: ;
+		if (!T3_) goto LA5_;
+{		goto BeforeRet_;
+}	}
+	LA5_: ;
+	raiseOverflow();
+	}BeforeRet_: ;
+	return result;
+}
+
+static N_INLINE(NI, subInt)(NI a, NI b) {
+	NI result;
+{	result = (NI)0;
+	result = (NI)((NU64)(a) - (NU64)(b));
+	{
+		NIM_BOOL T3_;
+		T3_ = (NIM_BOOL)0;
+		T3_ = (((NI) 0) <= (NI)(result ^ a));
+		if (T3_) goto LA4_;
+		T3_ = (((NI) 0) <= (NI)(result ^ (NI)((NU64) ~(b))));
+		LA4_: ;
+		if (!T3_) goto LA5_;
+{		goto BeforeRet_;
+}	}
+	LA5_: ;
+	raiseOverflow();
+	}BeforeRet_: ;
+	return result;
+}
+
+static N_INLINE(NI64, subInt64)(NI64 a, NI64 b) {
+	NI64 result;
+{	result = (NI64)0;
+	result = (NI64)((NU64)(a) - (NU64)(b));
+	{
+		NIM_BOOL T3_;
+		T3_ = (NIM_BOOL)0;
+		T3_ = (IL64(0) <= (NI64)(result ^ a));
+		if (T3_) goto LA4_;
+		T3_ = (IL64(0) <= (NI64)(result ^ (NI64)((NU64) ~(b))));
+		LA4_: ;
+		if (!T3_) goto LA5_;
+{		goto BeforeRet_;
+}	}
+	LA5_: ;
+	raiseOverflow();
+	}BeforeRet_: ;
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(NI, rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ)(NimStringDesc* s, NI64& b, NI start) {
+	NI result;
+	result = (NI)0;
+	NI64 sign = IL64(-1);
+	NI i = start;
+	{
+		if (!(i < (s ? s->len : 0))) goto LA3_;
+{		{
+			NI TM_vI9aZNKIcImom6dDyKXW1ZA_2;
+			if (!((NU8)(s->data[i]) == (NU8)(43))) goto LA7_;
+{			TM_vI9aZNKIcImom6dDyKXW1ZA_2 = addInt(i, ((NI) 1));
+			i = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_2);
+}		}
+		goto LA5_;
+		LA7_: ;
+		{
+			NI TM_vI9aZNKIcImom6dDyKXW1ZA_3;
+			if (!((NU8)(s->data[i]) == (NU8)(45))) goto LA10_;
+{			TM_vI9aZNKIcImom6dDyKXW1ZA_3 = addInt(i, ((NI) 1));
+			i = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_3);
+			sign = IL64(1);
+}		}
+		goto LA5_;
+		LA10_: ;
+		LA5_: ;
+}	}
+	LA3_: ;
+	{
+		NIM_BOOL T14_;
+		NI64 TM_vI9aZNKIcImom6dDyKXW1ZA_9;
+		NI TM_vI9aZNKIcImom6dDyKXW1ZA_10;
+		T14_ = (NIM_BOOL)0;
+		T14_ = (i < (s ? s->len : 0));
+		if (!(T14_)) goto LA15_;
+		T14_ = (((NU8)(s->data[i])) >= ((NU8)(48)) && ((NU8)(s->data[i])) <= ((NU8)(57)));
+		LA15_: ;
+		if (!T14_) goto LA16_;
+{		b = IL64(0);
+		{
+			while (1) {
+				NIM_BOOL T20_;
+				NI64 TM_vI9aZNKIcImom6dDyKXW1ZA_4;
+				NI TM_vI9aZNKIcImom6dDyKXW1ZA_5;
+				NI64 TM_vI9aZNKIcImom6dDyKXW1ZA_6;
+				NI TM_vI9aZNKIcImom6dDyKXW1ZA_7;
+				T20_ = (NIM_BOOL)0;
+				T20_ = (i < (s ? s->len : 0));
+				if (!(T20_)) goto LA21_;
+				T20_ = (((NU8)(s->data[i])) >= ((NU8)(48)) && ((NU8)(s->data[i])) <= ((NU8)(57)));
+				LA21_: ;
+				if (!T20_) goto LA19;
+				TM_vI9aZNKIcImom6dDyKXW1ZA_4 = mulInt64(b, IL64(10));
+				TM_vI9aZNKIcImom6dDyKXW1ZA_5 = subInt(((NU8)(s->data[i])), ((NI) 48));
+				TM_vI9aZNKIcImom6dDyKXW1ZA_6 = subInt64((NI64)(TM_vI9aZNKIcImom6dDyKXW1ZA_4), ((NI64) ((NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_5))));
+				b = (NI64)(TM_vI9aZNKIcImom6dDyKXW1ZA_6);
+				TM_vI9aZNKIcImom6dDyKXW1ZA_7 = addInt(i, ((NI) 1));
+				i = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_7);
+				{
+					while (1) {
+						NIM_BOOL T24_;
+						NI TM_vI9aZNKIcImom6dDyKXW1ZA_8;
+						T24_ = (NIM_BOOL)0;
+						T24_ = (i < (s ? s->len : 0));
+						if (!(T24_)) goto LA25_;
+						T24_ = ((NU8)(s->data[i]) == (NU8)(95));
+						LA25_: ;
+						if (!T24_) goto LA23;
+						TM_vI9aZNKIcImom6dDyKXW1ZA_8 = addInt(i, ((NI) 1));
+						i = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_8);
+					} LA23: ;
+				}
+			} LA19: ;
+		}
+		TM_vI9aZNKIcImom6dDyKXW1ZA_9 = mulInt64(b, sign);
+		b = (NI64)(TM_vI9aZNKIcImom6dDyKXW1ZA_9);
+		TM_vI9aZNKIcImom6dDyKXW1ZA_10 = subInt(i, start);
+		result = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_10);
+}	}
+	LA16_: ;
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(NI, npuParseBiggestInt)(NimStringDesc* s, NI64& number, NI start) {
+	NI result;
+	NI64 res;
+	result = (NI)0;
+	res = (NI64)0;
+	result = rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ(s, res, start);
+	number = res;
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(NI, npuParseFloat)(NimStringDesc* s, NF& number, NI start) {
+	NI result;
+	NF bf;
+	result = (NI)0;
+	bf = (NF)0;
+	result = nimParseBiggestFloat(s, bf, start);
+	{
+		if (!!((result == ((NI) 0)))) goto LA3_;
+{		number = bf;
+}	}
+	LA3_: ;
+	return result;
+}
 N_LIB_PRIVATE N_NIMCALL(void, stdlib_parseutilsInit000)(void) {
 {
 	TFrame FR_; FR_.len = 0;

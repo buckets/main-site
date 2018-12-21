@@ -48,6 +48,7 @@ struct tyTuple_ujsjpB2O9cjj3uDHsXbnSzg;
 struct tyObject_GcStat_0RwLoVBHZPfUAcLczmfQAg;
 struct tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ;
 struct tyObject_PageDesc_fublkgIY4LG3mT51LU2WHg;
+struct tySequence_sM4lkSb7zS6F7OVMvW9cffQ;
 struct tyObject_StackTraceEntry_oLyohQ7O2XOvGnflOss8EA;
 struct TGenericSeq {
 NI len;
@@ -191,10 +192,16 @@ tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ marked;
 tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w additionalRoots;
 NI gcThreadId;
 };
+struct tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA {
+char dummy;
+};
 struct tyObject_StackTraceEntry_oLyohQ7O2XOvGnflOss8EA {
 NCSTRING procname;
 NI line;
 NCSTRING filename;
+};
+struct tySequence_sM4lkSb7zS6F7OVMvW9cffQ : TGenericSeq {
+  NimStringDesc* data[SEQ_DECL_SIZE];
 };
 struct tySequence_uB9b75OUPRENsBAu4AnoePA : TGenericSeq {
   tyObject_StackTraceEntry_oLyohQ7O2XOvGnflOss8EA data[SEQ_DECL_SIZE];
@@ -222,9 +229,16 @@ static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1z
 N_LIB_PRIVATE N_NOINLINE(void, addZCT_fCDI7oO1NNVXXURtxSzsRw)(tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w& s, tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
 N_NIMCALL(void, popCurrentExceptionEx)(NU id);
 N_NIMCALL(void, raiseException)(Exception* e, NCSTRING ename);
+extern "C" N_CDECL(NI32, sqlite3_open)(NCSTRING filename, tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*& ppDb);
+N_NIMCALL(void*, newSeq)(TNimType* typ, NI len);
+extern "C" N_CDECL(NI32, sqlite3_column_bytes)(tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw* para1, NI32 iCol);
+N_NIMCALL(NimStringDesc*, setLengthStr)(NimStringDesc* s, NI newLen);
+extern "C" N_CDECL(NCSTRING, sqlite3_column_text)(tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw* para1, NI32 iCol);
+N_LIB_PRIVATE N_NIMCALL(void, add_XyS0BXa1E5ylXzhvUQlY9cg)(NimStringDesc*& x, NCSTRING y);
 extern TNimType NTI_ZVbaMVrRDW1Cj9bby6YsVhA_;
 extern TNimType NTI_9cp8FUMATyqFmLaAKCXEjCQ_;
 extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
+extern TNimType NTI_sM4lkSb7zS6F7OVMvW9cffQ_;
 STRING_LITERAL(TM_Y7t52g9b69cVuzHT832OjgmA_2, "\'", 1);
 STRING_LITERAL(TM_Y7t52g9b69cVuzHT832OjgmA_3, "\'\'", 2);
 
@@ -420,6 +434,95 @@ N_LIB_PRIVATE N_NIMCALL(void, exec_kASFnJjvwTJpKpmn9aQHmPg)(tyObject_Sqlite3_xRZ
 {		dbError_yRzNipQFOsKqLVySy7Je9bw(db);
 }	}
 	LA4_: ;
+}
+
+N_LIB_PRIVATE N_NIMCALL(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*, open_SRJkmN7JR2aulOhbafCrYA)(NimStringDesc* connection, NimStringDesc* user, NimStringDesc* password, NimStringDesc* database) {
+	tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* result;
+	tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db;
+	result = (tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*)0;
+	db = (tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*)0;
+	{
+		NI32 T3_;
+		T3_ = (NI32)0;
+		T3_ = sqlite3_open(nimToCStringConv(connection), db);
+		if (!(T3_ == ((NI32) 0))) goto LA4_;
+{		result = db;
+}	}
+	goto LA1_;
+	LA4_: ;
+	{
+		dbError_yRzNipQFOsKqLVySy7Je9bw(db);
+	}
+	LA1_: ;
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw*, setupQuery_6EQAJlzQgp6Lnc8upW20sQ)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db, NimStringDesc* query, NimStringDesc** args, NI argsLen_0) {
+	tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw* result;
+	NimStringDesc* q;
+	result = (tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw*)0;
+	q = dbFormat_4xitxSXjtmpEVS63UNhgwA(query, args, argsLen_0);
+	{
+		int T3_;
+		T3_ = (int)0;
+		T3_ = sqlite3_prepare_v2(db, nimToCStringConv(q), ((int) ((q ? q->len : 0))), result, NIM_NIL);
+		if (!!((T3_ == ((NI32) 0)))) goto LA4_;
+{		dbError_yRzNipQFOsKqLVySy7Je9bw(db);
+}	}
+	LA4_: ;
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(tySequence_sM4lkSb7zS6F7OVMvW9cffQ*, newRow_yziwAL431pdzkjLvusuw3Q)(NI L) {
+	tySequence_sM4lkSb7zS6F7OVMvW9cffQ* result;
+	result = (tySequence_sM4lkSb7zS6F7OVMvW9cffQ*)0;
+	result = (tySequence_sM4lkSb7zS6F7OVMvW9cffQ*) newSeq((&NTI_sM4lkSb7zS6F7OVMvW9cffQ_), ((NI) (L)));
+	{
+		NI i;
+		NI colontmp_;
+		i = (NI)0;
+		colontmp_ = (NI)0;
+		colontmp_ = (NI)(L - ((NI) 1));
+		NI res = ((NI) 0);
+		{
+			while (1) {
+				if (!(res <= colontmp_)) goto LA3;
+				i = res;
+				asgnRefNoCycle((void**) (&result->data[i]), ((NimStringDesc*) NIM_NIL));
+				res += ((NI) 1);
+			} LA3: ;
+		}
+	}
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(void, setRow_i9caC20eiZfH0Cu9czRpxoPQ)(tyObject_Tstmt_KEhcjAECDwKIYLLjIzakvw* stmt, tySequence_sM4lkSb7zS6F7OVMvW9cffQ*& r, int cols) {
+	{
+		NI32 col;
+		NI32 colontmp_;
+		col = (NI32)0;
+		colontmp_ = (NI32)0;
+		colontmp_ = (NI32)(cols - ((NI32) 1));
+		NI32 res = ((NI32) 0);
+		{
+			while (1) {
+				NI32 T4_;
+				if (!(res <= colontmp_)) goto LA3;
+				col = res;
+				T4_ = (NI32)0;
+				T4_ = sqlite3_column_bytes(stmt, col);
+				asgnRefNoCycle((void**) (&r->data[col]), setLengthStr(r->data[col], ((NI) (T4_))));
+				asgnRefNoCycle((void**) (&r->data[col]), setLengthStr(r->data[col], ((NI) 0)));
+				NCSTRING x = sqlite3_column_text(stmt, col);
+				{
+					if (!!((x == 0))) goto LA7_;
+{					add_XyS0BXa1E5ylXzhvUQlY9cg(r->data[col], x);
+}				}
+				LA7_: ;
+				res += ((NI) 1);
+			} LA3: ;
+		}
+	}
 }
 N_LIB_PRIVATE N_NIMCALL(void, stdlib_db_sqliteInit000)(void) {
 {

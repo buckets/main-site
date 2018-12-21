@@ -57,7 +57,8 @@ TNimNode** sons;
 N_LIB_PRIVATE N_NIMCALL(tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA, parseEnum_F2m6TxOYlOgS9b1zJlysJMw)(NimStringDesc* s, tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA default_0);
 N_NIMCALL(NimStringDesc*, copyString)(NimStringDesc* src);
 TNimType NTI_1nKXODQf4pVTsjJDOlhgTA_;
-STRING_LITERAL(TM_N9cGyzi9aEspHXroBx9c4suKA_5, "Unknown function", 16);
+STRING_LITERAL(TM_N9cGyzi9aEspHXroBx9c4suKA_5, "Not implemented yet", 19);
+STRING_LITERAL(TM_N9cGyzi9aEspHXroBx9c4suKA_6, "Unknown function", 16);
 
 N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, stringRPC_NXNco20FAG0NBry9bX8ez9cA)(NimStringDesc* command, NimStringDesc* arg) {
 	NimStringDesc* result;
@@ -69,9 +70,14 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, stringRPC_NXNco20FAG0NBry9bX8ez9cA)(NimS
 		result = copyString(arg);
 	}
 	break;
-	case ((tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA) 0):
+	case ((tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA) 2):
 	{
 		result = copyString(((NimStringDesc*) &TM_N9cGyzi9aEspHXroBx9c4suKA_5));
+	}
+	break;
+	case ((tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA) 0):
+	{
+		result = copyString(((NimStringDesc*) &TM_N9cGyzi9aEspHXroBx9c4suKA_6));
 	}
 	break;
 	}
@@ -84,23 +90,24 @@ N_LIB_PRIVATE N_NIMCALL(void, buckets_bucketsInit000)(void) {
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, buckets_bucketsDatInit000)(void) {
-static TNimNode* TM_N9cGyzi9aEspHXroBx9c4suKA_2[2];
+static TNimNode* TM_N9cGyzi9aEspHXroBx9c4suKA_2[3];
 NI TM_N9cGyzi9aEspHXroBx9c4suKA_4;
-static char* NIM_CONST TM_N9cGyzi9aEspHXroBx9c4suKA_3[2] = {
+static char* NIM_CONST TM_N9cGyzi9aEspHXroBx9c4suKA_3[3] = {
 "Unknown", 
-"Echo"};
-static TNimNode TM_N9cGyzi9aEspHXroBx9c4suKA_0[3];
+"Echo", 
+"Exec"};
+static TNimNode TM_N9cGyzi9aEspHXroBx9c4suKA_0[4];
 NTI_1nKXODQf4pVTsjJDOlhgTA_.size = sizeof(tyEnum_Commands_1nKXODQf4pVTsjJDOlhgTA);
 NTI_1nKXODQf4pVTsjJDOlhgTA_.kind = 14;
 NTI_1nKXODQf4pVTsjJDOlhgTA_.base = 0;
 NTI_1nKXODQf4pVTsjJDOlhgTA_.flags = 3;
-for (TM_N9cGyzi9aEspHXroBx9c4suKA_4 = 0; TM_N9cGyzi9aEspHXroBx9c4suKA_4 < 2; TM_N9cGyzi9aEspHXroBx9c4suKA_4++) {
+for (TM_N9cGyzi9aEspHXroBx9c4suKA_4 = 0; TM_N9cGyzi9aEspHXroBx9c4suKA_4 < 3; TM_N9cGyzi9aEspHXroBx9c4suKA_4++) {
 TM_N9cGyzi9aEspHXroBx9c4suKA_0[TM_N9cGyzi9aEspHXroBx9c4suKA_4+0].kind = 1;
 TM_N9cGyzi9aEspHXroBx9c4suKA_0[TM_N9cGyzi9aEspHXroBx9c4suKA_4+0].offset = TM_N9cGyzi9aEspHXroBx9c4suKA_4;
 TM_N9cGyzi9aEspHXroBx9c4suKA_0[TM_N9cGyzi9aEspHXroBx9c4suKA_4+0].name = TM_N9cGyzi9aEspHXroBx9c4suKA_3[TM_N9cGyzi9aEspHXroBx9c4suKA_4];
 TM_N9cGyzi9aEspHXroBx9c4suKA_2[TM_N9cGyzi9aEspHXroBx9c4suKA_4] = &TM_N9cGyzi9aEspHXroBx9c4suKA_0[TM_N9cGyzi9aEspHXroBx9c4suKA_4+0];
 }
-TM_N9cGyzi9aEspHXroBx9c4suKA_0[2].len = 2; TM_N9cGyzi9aEspHXroBx9c4suKA_0[2].kind = 2; TM_N9cGyzi9aEspHXroBx9c4suKA_0[2].sons = &TM_N9cGyzi9aEspHXroBx9c4suKA_2[0];
-NTI_1nKXODQf4pVTsjJDOlhgTA_.node = &TM_N9cGyzi9aEspHXroBx9c4suKA_0[2];
+TM_N9cGyzi9aEspHXroBx9c4suKA_0[3].len = 3; TM_N9cGyzi9aEspHXroBx9c4suKA_0[3].kind = 2; TM_N9cGyzi9aEspHXroBx9c4suKA_0[3].sons = &TM_N9cGyzi9aEspHXroBx9c4suKA_2[0];
+NTI_1nKXODQf4pVTsjJDOlhgTA_.node = &TM_N9cGyzi9aEspHXroBx9c4suKA_0[3];
 }
 

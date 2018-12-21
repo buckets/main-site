@@ -17,7 +17,7 @@
   "dependencies": {
     "@iffycan/events": "^1.0.1",
     "@iffycan/i18n": "^0.7.0",
-    "bucketslib": "file:../ccore/bucketslib",
+    "bucketslib": "file:../nodebuckets",
     "crypto-js": "^3.1.9-1",
     "lodash.sortby": "^4.7.0",
     "mathjs": "4.2.2",
