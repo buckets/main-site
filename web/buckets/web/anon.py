@@ -162,7 +162,7 @@ def paypal_execute_payment():
         emailLicense(email, license)
         return render_template('bought.html', license=license)
     else:
-        flash(gettext("Error finalizing payment.  I don't think you were charged, but please email to see.", 'error'))
+        flash(gettext("Error finalizing payment.  I don't think you were charged, but please email to see."), 'error')
         raise Exception(payment.error)
 
 @blue.route('/paypal-return', methods=['GET'])
