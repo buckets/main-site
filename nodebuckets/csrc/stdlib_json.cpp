@@ -253,6 +253,7 @@ struct tyTuple_jq7X5k7hWG0tdTZTDkiyGQ {
 NimStringDesc* Field0;
 tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* Field1;
 };
+typedef NU8 tyEnum_DataType_WRq6Jv2bvs9b3t9bKN7EgcWA;
 typedef NU8 tyEnum_ParserState_Na0rM2Zdr3RpxeNeXbvLrQ;
 struct tySequence_oLpBKXzW3hF9aCVMo5EymfQ : TGenericSeq {
   tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* data[SEQ_DECL_SIZE];
@@ -322,6 +323,8 @@ static N_INLINE(void, close_c9akwugdNVZsy5liLqKKwWgjson)(tyObject_JsonParser_KWI
 N_LIB_PRIVATE N_NIMCALL(void, close_CbKzA44X2DxZAmasZ72O9ag_2)(tyObject_BaseLexer_MAw8rJZtJ279bVV3TWMtXSg& L);
 N_LIB_PRIVATE N_NIMCALL(tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw*, newStringStream_aIf1Q9cTTlEW5dnj9ciC0odg)(NimStringDesc* s);
 N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__vO189c2smbCN8BrCT7W3o8A)(NimStringDesc** elements, NI elementsLen_0);
+N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__iV7FXZOcDK6hSf79aJuiRQQ)(tyEnum_DataType_WRq6Jv2bvs9b3t9bKN7EgcWA o);
+N_NIMCALL(NimStringDesc*, reprEnum)(NI e, TNimType* typ);
 TNimType NTI_df9bshXB7C9cTiWPIOtX3j1Q_;
 TNimType NTI_RUngo7nCHe6O8aBGIcrhtg_;
 extern TNimType NTI_77mFvmsOLKik79ci2hXkHEg_;
@@ -334,6 +337,7 @@ TNimType NTI_zfzzuQ8txrdZAYK0WGWpHg_;
 extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
 extern TNimType NTI_KWIQnzXEOUqdWsnCUL9atyQ_;
 TNimType NTI_jq7X5k7hWG0tdTZTDkiyGQ_;
+extern TNimType NTI_WRq6Jv2bvs9b3t9bKN7EgcWA_;
 STRING_LITERAL(TM_9b9bytt1stv9cZ8uqII7HFgew_2, "[", 1);
 STRING_LITERAL(TM_9b9bytt1stv9cZ8uqII7HFgew_3, ",", 1);
 STRING_LITERAL(TM_9b9bytt1stv9cZ8uqII7HFgew_4, "]", 1);
@@ -1052,6 +1056,33 @@ N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent_
 				if (!(i < elementsLen_0)) goto LA3;
 				elem = elements[i];
 				add_NE4BWkXVxUMFtDmmA5ZcHw(result, percent__vO189c2smbCN8BrCT7W3o8A(elem->data, (elem ? elem->len : 0)));
+				i += ((NI) 1);
+			} LA3: ;
+		}
+	}
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__iV7FXZOcDK6hSf79aJuiRQQ)(tyEnum_DataType_WRq6Jv2bvs9b3t9bKN7EgcWA o) {
+	tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* result;
+	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*)0;
+	result = percent__8iXO9aRAijCPe58pujCBbuQ(reprEnum((NI)o, (&NTI_WRq6Jv2bvs9b3t9bKN7EgcWA_)));
+	return result;
+}
+
+N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__BrPi1JiNCuuyNKjHO9bzz9bA)(tyEnum_DataType_WRq6Jv2bvs9b3t9bKN7EgcWA* elements, NI elementsLen_0) {
+	tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* result;
+	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*)0;
+	result = newJArray_phgxr9cKlc0dmrJpCth52pw();
+	{
+		tyEnum_DataType_WRq6Jv2bvs9b3t9bKN7EgcWA elem;
+		elem = (tyEnum_DataType_WRq6Jv2bvs9b3t9bKN7EgcWA)0;
+		NI i = ((NI) 0);
+		{
+			while (1) {
+				if (!(i < elementsLen_0)) goto LA3;
+				elem = elements[i];
+				add_NE4BWkXVxUMFtDmmA5ZcHw(result, percent__iV7FXZOcDK6hSf79aJuiRQQ(elem));
 				i += ((NI) 1);
 			} LA3: ;
 		}

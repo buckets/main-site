@@ -2,10 +2,15 @@
   "name": "bucketslib",
   "version": "0.1.0",
   "description": "Node.js Bindings to C Buckets lib",
-  "main": "main.js",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "private": true,
   "gypfile": true,
   "dependencies": {
     "nan": "^2.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18",
+    "typescript": "^3.2.2"
   }
 }

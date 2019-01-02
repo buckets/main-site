@@ -2,7 +2,12 @@ NIMFILES = $(shell find ../ccore -name '*.nim')
 NIMBASE = ~/lib/Nim/lib/nimbase.h
 
 
-.PHONY: clean compile test
+.PHONY: clean compile test all
+
+all: dist/main.js lib/bucketslib.node
+
+dist/main.js: jssrc/main.ts
+	tsc
 
 lib/bucketslib.node: csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h compile
 	node-gyp rebuild

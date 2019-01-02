@@ -1,3 +1,4 @@
+// When you edit/update methods in this file, update the type declaration in jssrc/main.ts accordingly.
 #include <nan.h>
 #include <clib.h>
 
@@ -137,8 +138,8 @@ NAN_METHOD(JS_buckets_db_execute_many_json) {
 void Init(Local<Object> exports) {
   exports->Set(Nan::New("start").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_start)->GetFunction());
   exports->Set(Nan::New("version").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_version)->GetFunction());
-  exports->Set(Nan::New("stringpc").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_stringpc)->GetFunction());
   exports->Set(Nan::New("register_logger").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_register_logger)->GetFunction());
+  exports->Set(Nan::New("stringpc").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_stringpc)->GetFunction());
   exports->Set(Nan::New("openfile").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_openfile)->GetFunction());
   exports->Set(Nan::New("db_param_array_json").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_db_param_array_json)->GetFunction());
   exports->Set(Nan::New("db_all_json").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_db_all_json)->GetFunction());
