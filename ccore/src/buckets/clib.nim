@@ -1,5 +1,8 @@
 ## This file contains the C interface to the buckets library
-import sqlite3
+## It mostly does this:
+##  - wraps other library functions in buckets_ prefixed names
+##  - provides access to log messages emitted by Nim
+import ./db
 import ./budgetfile
 import ../buckets
 import strformat
@@ -12,8 +15,8 @@ import logging
 # Function-call logging
 #-----------------------------------
 type
-  FunctionLogger* = ref object of Logger
-  LogFunc* = proc(msg:cstring) {.cdecl.}
+  FunctionLogger = ref object of Logger
+  LogFunc = proc(msg:cstring) {.cdecl.}
 
 var LOG_FUNCTIONS:seq[LogFunc]
 
@@ -26,6 +29,11 @@ method log*(logger: FunctionLogger, level: Level, args: varargs[string, `$`]) =
 #-----------------------------------
 
 proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
+  ## Convert a C string containing a JSON-encoded array of strings
+  ## into a sequence of strings.
+  runnableExamples:
+    let res = jsonStringToStringSeq("""["hi", "ho"]""")
+    assert res == @["hi", "ho"]
   let
     node = parseJson($jsonstring)
   doAssert node.kind == JArray
@@ -37,6 +45,7 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
 #-----------------------------------
 
 proc buckets_version*():cstring {.exportc.} =
+  ## Return the current buckets lib version
   PACKAGE_VERSION
 
 proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc.} =
@@ -47,7 +56,8 @@ proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.expor
   result = stringRPC($command, fullarg)
 
 proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
-  ## Register a function to receive logging events
+  ## Register a function to receive logging events from Nim.
+  ## The function will be called with strings to be logged.
   LOG_FUNCTIONS.add(fn)
   if LOG_FUNCTIONS.len == 1:
     var logger:FunctionLogger
@@ -61,12 +71,13 @@ proc buckets_openfile*(filename:cstring):int {.exportc.} =
 proc buckets_db_param_array_json*(budget_handle:int, query:cstring):cstring {.exportc.} =
   ## Given an SQL query, return a JSON string array of the
   ## order that named params should be passed in as an array of args
-  ##
-  ## buckets_db_param_array("SELECT $face, $name, $face")
-  ## -> ["$face", "$name"]
+  # runnableExamples:
+  #   let db = buckets_openfile(":memory:")
+  #   let r = buckets_db_param_array_json(db, "SELECT $face, $name, $face")
+  #   assert r == """["$face", "$name"]"""
   let db = budget_handle.getBudgetFile().db
   var
-    sqlite_stmt: sqlite3.Pstmt
+    sqlite_stmt: Pstmt
     params: seq[string]
   if prepare_v2(db, query, query.len.cint, sqlite_stmt, nil) == SQLITE_OK:
     for i in 1..bind_parameter_count(sqlite_stmt):
@@ -75,6 +86,7 @@ proc buckets_db_param_array_json*(budget_handle:int, query:cstring):cstring {.ex
 
 proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return the result as a JSON string
+  ##    params_json should be an array of strings encoded as a JSON string
   var params:seq[string]
   try:
     params = jsonStringToStringSeq(params_json)
@@ -82,7 +94,9 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
     return $ %*
       {
         "err": getCurrentExceptionMsg(),
+        "cols": @[],
         "rows": @[],
+        "types": @[],
       }
   
   let
@@ -91,7 +105,9 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
   let j = %*
     {
       "err": res.err,
+      "cols": res.cols,
       "rows": res.rows,
+      "types": res.types,
     }
   result = $j
 
