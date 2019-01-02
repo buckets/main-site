@@ -6,12 +6,12 @@ import { AsyncRunResult, IAsyncSqlite, ICursor } from './dbstore'
 //
 //=============================================================
 import * as bucketslib from 'bucketslib'
-bucketslib.register_logger((msg:string) => {
+bucketslib.main.register_logger((msg:string) => {
   console.log("FROM bucketslib:", msg);
 });
 
 export function openSqlite(filename:string) {
-  return new NodeSQLiteDatabase(bucketslib.openfile(filename));
+  return new NodeSQLiteDatabase(bucketslib.main.openfile(filename));
 }
 export class NodeSQLiteCursor implements ICursor {
   constructor(readonly db_id:number) {
@@ -19,17 +19,17 @@ export class NodeSQLiteCursor implements ICursor {
   }
   private convertToArray(query:string, params:{}):{query:string, params:Array<string>} {
     let indexes = bucketslib.db_paramArray(this.db_id, query);
-    console.log("indexes", indexes);
     let param_array = indexes.map(name => {
-      console.log("Param name:", name);
       return `${params[name]}`;
     });
     return {query: query, params: param_array};
   }
   async run(query:string, params={}):Promise<AsyncRunResult> {
+    console.log("RUN", query, params);
     return new Promise<AsyncRunResult>((resolve, reject) => {
       try {
         let conv = this.convertToArray(query, params);
+        console.log("conv", conv);
         const lastID = bucketslib.db_run(this.db_id, conv.query, conv.params);
         resolve({
           lastID,
@@ -37,6 +37,10 @@ export class NodeSQLiteCursor implements ICursor {
       } catch(err) {
         reject(err);
       }
+    })
+    .then(res => {
+      console.log("result", res);
+      return res;
     })
   }
   async executeMany(queries:string[]):Promise<null> {
@@ -50,31 +54,50 @@ export class NodeSQLiteCursor implements ICursor {
     })
   }
   async all<T>(query:string, params={}):Promise<Array<T>> {
+    console.log("ALL", query, params);
     return new Promise<Array<T>>((resolve, reject) => {
       try {
         let conv = this.convertToArray(query, params);
-        const result = bucketslib.db_all(this.db_id, conv.query, conv.params);
-        console.log("all result", result);
-        resolve(result);
-      } catch(err) {
-        reject(err);
-      }
-    });
-  }
-  async get<T>(query:string, params={}):Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      try {
-        let conv = this.convertToArray(query, params);
-        const result = bucketslib.db_all(this.db_id, conv.query, conv.params);
-        if (result.length) {
-          resolve(result[0]);
-        } else {
-          resolve(null);
-        }
+        console.log("conv", conv);
+        const {rows, cols, types} = bucketslib.db_all(this.db_id, conv.query, conv.params);
+        let converters = types.map(typename => {
+          switch (typename) {
+            case "Int":
+            case "Float": {
+              return (x:string) => Number(x);
+            }
+            case "Null": {
+              return (x:string) => x;
+            }
+            default: {
+              return (x:string) => x;
+            }
+          }
+        })
+        resolve(rows.map(row => {
+          let ret = {};
+          cols.forEach((col, idx) => {
+            ret[col] = converters[idx](row[idx]);
+          })
+          return ret as T;
+        }))
       } catch(err) {
         reject(err);
       }
     })
+    .then(res => {
+      console.log("result", res);
+      return res;
+    });
+  }
+  get<T>(query:string, params={}):Promise<T> {
+    return this.all<T>(query, params).then(rows => {
+      if (rows.length) {
+        return rows[0] as T;
+      } else {
+        return null;
+      }
+    });
   }
 }
 

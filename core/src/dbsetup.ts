@@ -154,6 +154,10 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[], opts:{
   // end old style of migrations
   //--------------------------------------------------------
 
+  console.log("SELECT name FROM _schema_version output:");
+  console.log(await db.all<any>('SELECT 1, 2, 3 as foo'));
+  console.log(await db.all<any>('SELECT name FROM _schema_version'));
+
   const applied = new Set<string>((await db.all<any>('SELECT name FROM _schema_version')).map(x => x.name));
   logger.warn('Applied migrations:', Array.from(applied).join(', '))
 

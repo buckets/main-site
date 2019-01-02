@@ -15,15 +15,31 @@ interface BucketsCLib {
   db_execute_many_json(db:number, queries_json_array:string):string;
 }
 
+type SqliteDataType =
+  | "Unknown"
+  | "Int"
+  | "Float"
+  | "Text"
+  | "Blob"
+  | "Null"
+
 bucketslib.start();
 
-export function db_all(bf_id:number, query:string, params:string[]) {
+export function db_all(bf_id:number, query:string, params:string[]):{
+  rows: Array<Array<string>>,
+  cols: Array<string>,
+  types: Array<SqliteDataType>,
+} {
   params = params || [];
   let res = JSON.parse(bucketslib.db_all_json(bf_id, query, JSON.stringify(params)));
   if (res.err) {
     throw Error(res.err);
   } else {
-    return res.rows;
+    return {
+      rows: res.rows,
+      cols: res.cols,
+      types: res.types,
+    };
   }
 }
 

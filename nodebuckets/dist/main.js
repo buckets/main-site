@@ -17,7 +17,11 @@ function db_all(bf_id, query, params) {
         throw Error(res.err);
     }
     else {
-        return res.rows;
+        return {
+            rows: res.rows,
+            cols: res.cols,
+            types: res.types,
+        };
     }
 }
 exports.db_all = db_all;

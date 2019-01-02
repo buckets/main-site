@@ -27,6 +27,12 @@ test "fetchOne param":
   check res.err == ""
   check res.row == @["2"]
 
+test "fetchOne $param":
+  let db = openDB(":memory:")
+  let res = db.fetchOne(sql"SELECT $foo", @["2"])
+  check res.err == ""
+  check res.row == @["2"]
+
 test "runQuery SELECT no params":
   let db = openDB(":memory:")
   let res = db.runQuery(sql"SELECT 1")
@@ -44,6 +50,13 @@ test "runQuery failure":
   let res = db.runQuery(sql"SELECT slkdflskdjf")
   check res.err != ""
   echo res.err
+
+test "runQuery $param":
+  let db = openDB(":memory:")
+  discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
+  let res = db.runQuery(sql"INSERT INTO foo (name) VALUES ($name)", @["something"])
+  check res.lastID == 1
+  check res.err == ""
 
 test "executeMany":
   let db = openDB(":memory:")
@@ -80,3 +93,11 @@ test "all param":
   let res = db.fetchAll(sql"SELECT ? UNION SELECT ?", @["first", "second"])
   check res.err == ""
   check res.rows == @[@["first"], @["second"]]
+
+test "all $param":
+  let db = openDB(":memory:")
+  let res = db.fetchAll(sql"SELECT $foo UNION SELECT $bar", @["first", "second"])
+  check res.err == ""
+  check res.rows == @[@["first"], @["second"]]
+
+HEY MATT, YOU NEED TO MAKE THE $param tests above pass
