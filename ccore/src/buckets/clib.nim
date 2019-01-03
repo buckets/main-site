@@ -87,10 +87,24 @@ proc buckets_db_param_array_json*(budget_handle:int, query:cstring):cstring {.ex
 proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return the result as a JSON string
   ##    params_json should be an array of strings encoded as a JSON string
+  logging.debug(&"db_all_json: {query}")
+  logging.debug(&"params_json: {params_json}")
   var params:seq[string]
   try:
     params = jsonStringToStringSeq(params_json)
-  except AssertionError:
+    logging.debug(&"params: {params}")
+    let
+      db = budget_handle.getBudgetFile().db
+      res = db.fetchAll(sql($query), params)
+    let j = %*
+      {
+        "err": "",
+        "cols": res.cols,
+        "rows": res.rows,
+        "types": res.types,
+      }
+    result = $j
+  except:
     return $ %*
       {
         "err": getCurrentExceptionMsg(),
@@ -98,39 +112,27 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
         "rows": @[],
         "types": @[],
       }
-  
-  let
-    db = budget_handle.getBudgetFile().db
-    res = db.fetchAll(sql($query), params)
-  let j = %*
-    {
-      "err": res.err,
-      "cols": res.cols,
-      "rows": res.rows,
-      "types": res.types,
-    }
-  result = $j
 
 proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.
   var params:seq[string]
   try:
     params = jsonStringToStringSeq(params_json)
-  except AssertionError:
+    let
+      db = budget_handle.getBudgetFile().db
+      res = db.runQuery(sql($query), params)
+    let j = %*
+      {
+        "err": "",
+        "lastID": res.lastID,
+      }
+    result = $j
+  except:
     return $ %*
       {
         "err": getCurrentExceptionMsg(),
         "lastID": 0,
       }
-  let
-    db = budget_handle.getBudgetFile().db
-    res = db.runQuery(sql($query), params)
-  let j = %*
-    {
-      "err": res.err,
-      "lastID": res.lastID,
-    }
-  result = $j
 
 proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstring {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
@@ -141,4 +143,7 @@ proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstr
     return getCurrentExceptionMsg()
   let
     db = budget_handle.getBudgetFile().db
-  result = $db.executeMany(queries)
+  try:
+    db.executeMany(queries)
+  except:
+    result = getCurrentExceptionMsg()

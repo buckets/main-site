@@ -8,96 +8,74 @@ import ./util
 proc openDB(name:string):DbConn =
   open(name, "", "", "")
 
-test "fetchOne":
-  let db = openDB(":memory:")
-  let res = db.fetchOne(sql"SELECT 1")
-  check res.err == ""
-  check res.row == @["1"]
-
-test "fetchOne not found":
-  let db = openDB(":memory:")
-  discard db.runQuery(sql"CREATE TABLE foo (name TEXT)")
-  let res = db.fetchOne(sql"SELECT name FROM foo")
-  check res.err == ""
-  check res.row == []
-
-test "fetchOne param":
-  let db = openDB(":memory:")
-  let res = db.fetchOne(sql"SELECT ?", @["2"])
-  check res.err == ""
-  check res.row == @["2"]
-
-test "fetchOne $param":
-  let db = openDB(":memory:")
-  let res = db.fetchOne(sql"SELECT $foo", @["2"])
-  check res.err == ""
-  check res.row == @["2"]
-
 test "runQuery SELECT no params":
   let db = openDB(":memory:")
   let res = db.runQuery(sql"SELECT 1")
-  check res.err == ""
 
 test "runQuery INSERT":
   let db = openDB(":memory:")
   discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
   let res = db.runQuery(sql"INSERT INTO foo (name) VALUES (?)", @["something"])
   check res.lastID == 1
-  check res.err == ""
 
 test "runQuery failure":
   let db = openDB(":memory:")
-  let res = db.runQuery(sql"SELECT slkdflskdjf")
-  check res.err != ""
-  echo res.err
+  doAssertRaises(DbError):
+    let res = db.runQuery(sql"SELECT slkdflskdjf")
 
 test "runQuery $param":
   let db = openDB(":memory:")
   discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
   let res = db.runQuery(sql"INSERT INTO foo (name) VALUES ($name)", @["something"])
   check res.lastID == 1
-  check res.err == ""
 
 test "executeMany":
   let db = openDB(":memory:")
-  let err = db.executeMany([
+  db.executeMany([
     "CREATE TABLE foo (name TEXT)",
     "INSERT INTO foo (name) VALUES ('hey')",
   ])
-  check err == ""
-  let res = db.fetchOne(sql"SELECT name FROM foo")
-  check res.row[0] == "hey"
+  let res = db.fetchAll(sql"SELECT name FROM foo")
+  check res.rows[0][0] == "hey"
 
 test "executeMany error":
   let db = openDB(":memory:")
-  let err = db.executeMany([
-    "CREATE TABLE foo (name TEXT)",
-    "INSERT INTO foo (name) garbage VALUES ('hey')",
-  ])
-  check err != ""
+  doAssertRaises(DbError):
+    db.executeMany([
+      "CREATE TABLE foo (name TEXT)",
+      "INSERT INTO foo (name) garbage VALUES ('hey')",
+    ])
 
 test "all":
   let db = openDB(":memory:")
   let res = db.fetchAll(sql"SELECT 1 UNION SELECT 2")
-  check res.err == ""
   check res.rows == @[@["1"], @["2"]]
 
 test "all error":
   let db = openDB(":memory:")
-  let res = db.fetchAll(sql"SELECT 1 garbagehey' UNION SELECT 2")
-  check res.err != ""
-  check res.rows == []
+  doAssertRaises(DbError):
+    discard db.fetchAll(sql"SELECT 1 garbagehey' UNION SELECT 2")
 
 test "all param":
   let db = openDB(":memory:")
   let res = db.fetchAll(sql"SELECT ? UNION SELECT ?", @["first", "second"])
-  check res.err == ""
   check res.rows == @[@["first"], @["second"]]
 
 test "all $param":
   let db = openDB(":memory:")
   let res = db.fetchAll(sql"SELECT $foo UNION SELECT $bar", @["first", "second"])
-  check res.err == ""
   check res.rows == @[@["first"], @["second"]]
 
-HEY MATT, YOU NEED TO MAKE THE $param tests above pass
+test "update sequence":
+  let db = openDB(":memory:")
+  discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
+  let res = db.runQuery(sql"INSERT INTO foo (name) values ($name)", @["some name"])
+  let res2 = db.fetchAll(sql"SELECT id, name FROM foo")
+  check res2.rows == @[@["1", "some name"]]
+  discard db.runQuery(sql"UPDATE foo SET name = $another", @["renamed name"])
+  let res3 = db.fetchAll(sql"SELECT id, name FROM foo")
+  check res3.rows == @[@["1", "renamed name"]]
+
+YOU NEED TO ALLOW SPECIFYING THE PARAM TYPE so that NULLs can be bound
+
+# HEY MATT, YOU NEED TO MAKE THE $param tests above pass
