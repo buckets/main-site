@@ -28,17 +28,8 @@ method log*(logger: FunctionLogger, level: Level, args: varargs[string, `$`]) =
 
 #-----------------------------------
 
-proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
-  ## Convert a C string containing a JSON-encoded array of strings
-  ## into a sequence of strings.
-  runnableExamples:
-    let res = jsonStringToStringSeq("""["hi", "ho"]""")
-    assert res == @["hi", "ho"]
-  let
-    node = parseJson($jsonstring)
-  doAssert node.kind == JArray
-  for item in node.items:
-    result.add(item.getStr())
+proc toDB*(budget_handle:int):DbConn =
+  budget_handle.getBudgetFile().db
 
 #-----------------------------------
 # C-friendly named Nim functions
@@ -68,21 +59,41 @@ proc buckets_openfile*(filename:cstring):int {.exportc.} =
   ## Open a budget file
   openBudgetFile($filename).id
 
-proc buckets_db_param_array_json*(budget_handle:int, query:cstring):cstring {.exportc.} =
-  ## Given an SQL query, return a JSON string array of the
-  ## order that named params should be passed in as an array of args
-  # runnableExamples:
-  #   let db = buckets_openfile(":memory:")
-  #   let r = buckets_db_param_array_json(db, "SELECT $face, $name, $face")
-  #   assert r == """["$face", "$name"]"""
-  let db = budget_handle.getBudgetFile().db
-  var
-    sqlite_stmt: Pstmt
-    params: seq[string]
-  if prepare_v2(db, query, query.len.cint, sqlite_stmt, nil) == SQLITE_OK:
-    for i in 1..bind_parameter_count(sqlite_stmt):
-      params.add($bind_parameter_name(sqlite_stmt, i))
-  return $ %* params
+template jsonObjToParam(node:JsonNode):Param =
+  case node.kind
+  of JInt:
+    P(node.getInt())
+  of JString:
+    P(node.getStr())
+  of JFloat:
+    P(node.getFloat())
+  of JNull:
+    Pnull
+  else:
+    raise newException(CatchableError, "Unsupported argument type:" & $node.kind)
+
+proc json_to_params*(db:DbConn, query:cstring, params_json:cstring):seq[Param] =
+  ## Convert a JSON Object or Array of query parameters into
+  ## a sequence of Params suitable for using in a query.
+  let parsed = parseJson($params_json)
+  assert(parsed.kind == JArray or parsed.kind == JObject, "Only Arrays and Objects are supported for db params")
+  case parsed.kind
+  of JArray:
+    for item in parsed.getElems():
+      result.add(jsonObjToParam(item))
+  of JObject:
+    var
+      pstmt: Pstmt
+    if prepare_v2(db, query, query.len.cint, pstmt, nil) != SQLITE_OK:
+      dbError(db)
+    for i in 1..bind_parameter_count(pstmt):
+      let key = $bind_parameter_name(pstmt, i)
+      if parsed.hasKey(key):
+        result.add(jsonObjToParam(parsed[key]))
+      else:
+        raise newException(CatchableError, &"Missing value for parameter: {key}")
+  else:
+    raise newException(CatchableError, "Invalid argument type for db params")
 
 proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return the result as a JSON string
@@ -91,10 +102,9 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
   logging.debug(&"params_json: {params_json}")
   var params:seq[string]
   try:
-    params = jsonStringToStringSeq(params_json)
-    logging.debug(&"params: {params}")
     let
       db = budget_handle.getBudgetFile().db
+      params = db.json_to_params(query, params_json)
       res = db.fetchAll(sql($query), params)
     let j = %*
       {
@@ -115,11 +125,10 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
 
 proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.
-  var params:seq[string]
   try:
-    params = jsonStringToStringSeq(params_json)
     let
       db = budget_handle.getBudgetFile().db
+      params = db.json_to_params(query, params_json)
       res = db.runQuery(sql($query), params)
     let j = %*
       {
@@ -133,6 +142,18 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
         "err": getCurrentExceptionMsg(),
         "lastID": 0,
       }
+
+proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
+  ## Convert a C string containing a JSON-encoded array of strings
+  ## into a sequence of strings.
+  runnableExamples:
+    let res = jsonStringToStringSeq("""["hi", "ho"]""")
+    assert res == @["hi", "ho"]
+  let
+    node = parseJson($jsonstring)
+  doAssert node.kind == JArray
+  for item in node.items:
+    result.add(item.getStr())
 
 proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstring {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
