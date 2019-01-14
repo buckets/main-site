@@ -23,7 +23,7 @@ export db_sqlite
 export sqlite3
 
 type
-  DataType = enum
+  DataType* = enum
     Null,
     Int,
     Float,
@@ -33,13 +33,13 @@ type
   ParamObj {.acyclic.} = object
     case kind*: DataType
     of Int:
-      intval: BiggestInt
+      intval*: BiggestInt
     of Float:
-      floatval: BiggestFloat
+      floatval*: BiggestFloat
     of Text:
-      textval: string
+      textval*: string
     of Blob:
-      blobval: string
+      blobval*: string
     of Null:
       nil
     
@@ -61,7 +61,7 @@ proc newParam*(x:string):Param =
   result.kind = Text
   result.textval = x
 
-proc newParam*(x:int):Param =
+proc newParam*(x: int):Param =
   new(result)
   result.kind = Int
   result.intval = x
@@ -71,7 +71,9 @@ proc newParam*(x:float):Param =
   result.kind = Float
   result.floatval = x
 
-let Pnull*:Param = new(Param)
+proc newParam*(x: type(nil)):Param =
+  new(result)
+  result.kind = Null
 
 template P*(x:untyped):untyped = newParam(x)
 
@@ -95,9 +97,11 @@ proc `==`*(a, b: Param):bool =
     of Text:
       result = a.textval == b.textval
 
-proc prepareAndBindArgs(db:DbConn, query:SqlQuery, params:seq[Param] = @[]):Pstmt =
+proc prepareAndBindArgs(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]):Pstmt =
   let querystring = query.string
   if db.prepare_v2(querystring, querystring.len.cint, result, nil) != SQLITE_OK:
+    dbError(db)
+  if clear_bindings(result) != SQLITE_OK:
     dbError(db)
   for i,param in params:
     case param.kind
@@ -116,14 +120,14 @@ proc prepareAndBindArgs(db:DbConn, query:SqlQuery, params:seq[Param] = @[]):Pstm
     else:
       raise newException(CatchableError, &"Unbindable data type: {param.kind}")
 
-iterator queryRows(db:DbConn, query:SqlQuery, params:seq[Param] = @[]): InstantRow =
+iterator queryRows(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): InstantRow =
   var pstmt = db.prepareAndBindArgs(query, params)
   while step(pstmt) == SQLITE_ROW:
     yield pstmt
   if finalize(pstmt) != SQLITE_OK:
     dbError(db)
 
-proc fetchAll*(db:DbConn, statement:SqlQuery, params:seq[Param] = @[]): AllResult =
+proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]): AllResult =
   ## Execute a multi-row-returning SQL statement.
   for row in db.queryRows(statement, params):
     var res:seq[string]
@@ -149,7 +153,7 @@ proc fetchAll*(db:DbConn, statement:SqlQuery, params:seq[Param] = @[]): AllResul
       res.add(row[coli])
     result.rows.add(res)
 
-proc runQuery*(db:DbConn, query:SqlQuery, params:seq[Param] = @[]): RunResult =
+proc runQuery*(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): RunResult =
   ## Execute an SQL statement.
   ## If there was an error running the statement, .err will be non-empty.
   ## If it was a successful INSERT statement, .lastID will be the id of the last inserted row

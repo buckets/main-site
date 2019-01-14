@@ -30,7 +30,7 @@ suite "jsonToParams":
   test "seq null":
     let db = buckets_openfile(":memory:").toDB
     let params = db.json_to_params("SELECT $foo, $bar", "[1.5,null]")
-    check params == @[P(1.5), Pnull]
+    check params == @[P(1.5), P(nil)]
   
   test "obj text":
     let db = buckets_openfile(":memory:").toDB
@@ -49,4 +49,4 @@ suite "jsonToParams":
         "$banana": 2.4,
         "$car": 2,
       })
-    check params == @[P(2.4), Pnull, P(2)]
+    check params == @[P(2.4), P(nil), P(2)]

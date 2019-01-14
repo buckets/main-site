@@ -43,10 +43,4 @@ function db_executeMany(bf_id, queries) {
     }
 }
 exports.db_executeMany = db_executeMany;
-function db_paramArray(bf_id, query) {
-    var orig = bucketslib.db_param_array_json(bf_id, query);
-    var res = JSON.parse(orig);
-    return res;
-}
-exports.db_paramArray = db_paramArray;
 exports.main = bucketslib;

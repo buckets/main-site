@@ -68,7 +68,7 @@ template jsonObjToParam(node:JsonNode):Param =
   of JFloat:
     P(node.getFloat())
   of JNull:
-    Pnull
+    P(nil)
   else:
     raise newException(CatchableError, "Unsupported argument type:" & $node.kind)
 
@@ -97,7 +97,7 @@ proc json_to_params*(db:DbConn, query:cstring, params_json:cstring):seq[Param] =
 
 proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return the result as a JSON string
-  ##    params_json should be an array of strings encoded as a JSON string
+  ##    params_json should be a JSON-encoded array/object
   logging.debug(&"db_all_json: {query}")
   logging.debug(&"params_json: {params_json}")
   var params:seq[string]
@@ -125,6 +125,7 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
 
 proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.
+  ##    params_json should be a JSON-encoded array/object
   try:
     let
       db = budget_handle.getBudgetFile().db
@@ -149,8 +150,7 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
   runnableExamples:
     let res = jsonStringToStringSeq("""["hi", "ho"]""")
     assert res == @["hi", "ho"]
-  let
-    node = parseJson($jsonstring)
+  let node = parseJson($jsonstring)
   doAssert node.kind == JArray
   for item in node.items:
     result.add(item.getStr())
@@ -158,12 +158,13 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
 proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstring {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
   var queries:seq[string]
+  result = ""
   try:
     queries = jsonStringToStringSeq(queries_json)
   except AssertionError:
     return getCurrentExceptionMsg()
-  let
-    db = budget_handle.getBudgetFile().db
+  
+  let db = budget_handle.getBudgetFile().db
   try:
     db.executeMany(queries)
   except:

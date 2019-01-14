@@ -20,6 +20,21 @@ NAN_METHOD(JS_buckets_version) {
   );
 }
 
+// buckets_stringpc
+NAN_METHOD(JS_buckets_stringpc) {
+  String::Utf8Value v8command(info[0]->ToString());
+  String::Utf8Value v8arg(info[1]->ToString());
+  info.GetReturnValue().Set(
+    Nan::New(
+      buckets_stringpc(
+        (char *)(*v8command),
+        (char *)(*v8arg),
+        v8arg.length()
+      )
+    ).ToLocalChecked()
+  );
+}
+
 // buckets_register_logger
 Persistent<Function> r_log;
 void JS_callLog(char* msg) {
@@ -47,21 +62,6 @@ NAN_METHOD(JS_buckets_register_logger) {
   }
 }
 
-// buckets_stringpc
-NAN_METHOD(JS_buckets_stringpc) {
-  String::Utf8Value v8command(info[0]->ToString());
-  String::Utf8Value v8arg(info[1]->ToString());
-  info.GetReturnValue().Set(
-    Nan::New(
-      buckets_stringpc(
-        (char *)(*v8command),
-        (char *)(*v8arg),
-        v8arg.length()
-      )
-    ).ToLocalChecked()
-  );
-}
-
 // buckets_openfile
 NAN_METHOD(JS_buckets_openfile) {
   String::Utf8Value v8filename(info[0]->ToString());
@@ -69,20 +69,6 @@ NAN_METHOD(JS_buckets_openfile) {
     (char *)(*v8filename)
   );
   info.GetReturnValue().Set(retval);
-}
-
-// buckets_db_param_array_json
-NAN_METHOD(JS_buckets_db_param_array_json) {
-  int bf_handle = Nan::To<int>(info[0]).FromJust();
-  String::Utf8Value v8query(info[1]->ToString());
-  info.GetReturnValue().Set(
-    Nan::New(
-      buckets_db_param_array_json(
-        bf_handle,
-        (char *)(*v8query)
-      )
-    ).ToLocalChecked() 
-  );
 }
 
 // buckets_db_all_json
@@ -141,7 +127,6 @@ void Init(Local<Object> exports) {
   exports->Set(Nan::New("register_logger").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_register_logger)->GetFunction());
   exports->Set(Nan::New("stringpc").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_stringpc)->GetFunction());
   exports->Set(Nan::New("openfile").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_openfile)->GetFunction());
-  exports->Set(Nan::New("db_param_array_json").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_db_param_array_json)->GetFunction());
   exports->Set(Nan::New("db_all_json").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_db_all_json)->GetFunction());
   exports->Set(Nan::New("db_run_json").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_db_run_json)->GetFunction());
   exports->Set(Nan::New("db_execute_many_json").ToLocalChecked(), Nan::New<FunctionTemplate>(JS_buckets_db_execute_many_json)->GetFunction());

@@ -34,3 +34,4 @@ clean:
 	-rm -r csrc
 	-rm -r build
 	-rm -r lib
+	-rm -r dist

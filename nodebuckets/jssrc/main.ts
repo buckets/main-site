@@ -9,23 +9,34 @@ interface BucketsCLib {
   register_logger(proc:(x:string)=>void):string;
   stringpc(command:string, arg:string):string;
   openfile(filename:string):number;
-  db_param_array_json(db:number, query:string):string;
   db_all_json(db:number, query:string, params_json_array:string):string;
   db_run_json(db:number, query:string, params_json_array:string):string;
   db_execute_many_json(db:number, queries_json_array:string):string;
 }
 
 type SqliteDataType =
-  | "Unknown"
+  | "Null"
   | "Int"
   | "Float"
   | "Text"
   | "Blob"
-  | "Null"
+
+type SqliteParam =
+  | string
+  | number
+  | null
+
+interface SqliteParamObj {
+  [k:string]: SqliteParam
+}
+
+type SqliteParams =
+  | SqliteParam[]
+  | SqliteParamObj
 
 bucketslib.start();
 
-export function db_all(bf_id:number, query:string, params:string[]):{
+export function db_all(bf_id:number, query:string, params:SqliteParams):{
   rows: Array<Array<string>>,
   cols: Array<string>,
   types: Array<SqliteDataType>,
@@ -43,7 +54,7 @@ export function db_all(bf_id:number, query:string, params:string[]):{
   }
 }
 
-export function db_run(bf_id:number, query:string, params:string[]) {
+export function db_run(bf_id:number, query:string, params:SqliteParams) {
   params = params || [];
   let res = JSON.parse(bucketslib.db_run_json(bf_id, query, JSON.stringify(params)));
   if (res.err) {
@@ -58,12 +69,6 @@ export function db_executeMany(bf_id:number, queries:string[]) {
   if (err) {
     throw Error(err);
   }
-}
-
-export function db_paramArray(bf_id:number, query:string) {
-  let orig = bucketslib.db_param_array_json(bf_id, query);
-  let res:string[] = JSON.parse(orig);
-  return res;
 }
 
 export const main:BucketsCLib = bucketslib;

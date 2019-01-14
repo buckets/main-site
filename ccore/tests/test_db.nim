@@ -8,6 +8,11 @@ import ./util
 proc openDB(name:string):DbConn =
   open(name, "", "", "")
 
+test "P(int)":
+  let a = P(23)
+  check a.kind == Int
+  check a.intval == 23
+
 test "runQuery SELECT no params":
   let db = openDB(":memory:")
   let res = db.runQuery(sql"SELECT 1")
@@ -15,7 +20,7 @@ test "runQuery SELECT no params":
 test "runQuery INSERT":
   let db = openDB(":memory:")
   discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
-  let res = db.runQuery(sql"INSERT INTO foo (name) VALUES (?)", @[P("something")])
+  let res = db.runQuery(sql"INSERT INTO foo (name) VALUES (?)", "something")
   check res.lastID == 1
 
 test "runQuery failure":
@@ -26,12 +31,12 @@ test "runQuery failure":
 test "runQuery $param":
   let db = openDB(":memory:")
   discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
-  let res = db.runQuery(sql"INSERT INTO foo (name) VALUES ($name)", @[P("something")])
+  let res = db.runQuery(sql"INSERT INTO foo (name) VALUES ($name)", "something")
   check res.lastID == 1
 
 test "runQuery $param null":
   let db = openDB(":memory:")
-  discard db.runQuery(sql"SELECT $foo", @[Pnull])
+  discard db.runQuery(sql"SELECT $foo", nil)
 
 test "executeMany":
   let db = openDB(":memory:")
@@ -62,26 +67,25 @@ test "all error":
 
 test "all param":
   let db = openDB(":memory:")
-  let res = db.fetchAll(sql"SELECT ? UNION SELECT ?", @[P("first"), P("second")])
+  let res = db.fetchAll(sql"SELECT ? UNION SELECT ?", "first", "second")
   check res.rows == @[@["first"], @["second"]]
 
 test "all $param":
   let db = openDB(":memory:")
-  let res = db.fetchAll(sql"SELECT $foo UNION SELECT $bar", @[P("first"), P("second")])
+  let res = db.fetchAll(sql"SELECT $foo UNION SELECT $bar", "first", "second")
   check res.rows == @[@["first"], @["second"]]
 
 test "all $param all datatypes":
   let db = openDB(":memory:")
-  let res = db.fetchAll(sql"SELECT $s, $i, $f, $n",
-    @[P("string"), P(5), P(4.3), Pnull])
+  let res = db.fetchAll(sql"SELECT $s, $i, $f, $n", "string", 5, 4.3, nil)
   check res.rows == @[@["string", "5", "4.3", ""]]
 
 test "update sequence":
   let db = openDB(":memory:")
   discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
-  let res = db.runQuery(sql"INSERT INTO foo (name) values ($name)", @[P("some name")])
+  let res = db.runQuery(sql"INSERT INTO foo (name) values ($name)", "some name")
   let res2 = db.fetchAll(sql"SELECT id, name FROM foo")
   check res2.rows == @[@["1", "some name"]]
-  discard db.runQuery(sql"UPDATE foo SET name = $another", @[P("renamed name")])
+  discard db.runQuery(sql"UPDATE foo SET name = $another", "renamed name")
   let res3 = db.fetchAll(sql"SELECT id, name FROM foo")
   check res3.rows == @[@["1", "renamed name"]]
