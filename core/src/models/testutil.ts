@@ -12,6 +12,11 @@ export class QuietLogger implements ILogger {
 }
 setBaseLogger(new QuietLogger());
 
+import * as bucketslib from 'bucketslib'
+bucketslib.main.register_logger(x => {
+  console.log(x);
+})
+
 
 import * as util from 'util'
 import { openSqlite } from '../async-sqlite'
@@ -114,12 +119,15 @@ export async function getStore():Promise<{
   events:IObjectEvent[],
   ui:TestUIFunctions,
 }> {
+  console.log('getStore');
   const ui = new TestUIFunctions();
   const store = new SQLiteStore(openSqlite(':memory:'), ui);
+  console.log('got store');
   let events = [];
   await store.doSetup({
     addBucketsLicenseBucket: false,
   });
+  console.log('store setup');
   store.events.get('obj').on(message => {
     events.push(message as IObjectEvent);
   })

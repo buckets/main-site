@@ -1,6 +1,6 @@
 NIMFILES = $(shell find ../ccore -name '*.nim')
 NIMBASE = ~/lib/Nim/lib/nimbase.h
-RELEASE_TYPE = release
+RELEASE_TYPE = debug
 
 
 .PHONY: clean release debug test all
@@ -17,7 +17,7 @@ release: $(NIMFILES)
 	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly ../ccore/src/buckets/clib.nim
 
 debug: $(NIMFILES)
-	nim cpp --checks:on --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly -d:useSysAssert -d:useGcAssert ../ccore/src/buckets/clib.nim
+	nim cpp --checks:on -d:traceGC --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly -d:useSysAssert -d:useGcAssert ../ccore/src/buckets/clib.nim
 
 csrc/nimbase.h: $(NIMBASE)
 	mkdir -p csrc

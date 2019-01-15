@@ -46,18 +46,17 @@ type
     of Null:
       nil
     
-  GetResult* = tuple[
-    row: seq[string],
-    cols: seq[string],
-  ]
-  AllResult* = tuple[
-    rows: seq[seq[string]],
-    cols: seq[string],
-    types: seq[DataType],
-  ]
-  RunResult* = tuple[
-    lastID: int64,
-  ]
+  GetResult* = object
+    row*: seq[string]
+    cols*: seq[string]
+    
+  AllResult* = object
+    rows*: seq[seq[string]]
+    cols*: seq[string]
+    types*: seq[DataType]
+
+  RunResult* = object
+    lastID*: int64
 
 proc newParam*(x:string):Param =
   new(result)

@@ -17,8 +17,9 @@ import logging
 #-----------------------------------
 var STRINGS_TO_CLEAR:seq[string]
 template clearOldStrings():untyped =
-  while STRINGS_TO_CLEAR.len > 0:
-    discard STRINGS_TO_CLEAR.pop()
+  discard
+  # while STRINGS_TO_CLEAR.len > 0:
+  #   discard STRINGS_TO_CLEAR.pop()
 
 proc keepString(x:string):string = 
   if x != "":
@@ -119,7 +120,6 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
   ##    params_json should be a JSON-encoded array/object
   clearOldStrings
   var res_string:string = ""
-  var params:seq[string]
   try:
     let db = budget_handle.getBudgetFile().db
     let params = db.json_to_params(query, params_json)
@@ -142,7 +142,7 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
       }
     toUgly(res_string, j)
   result = keepString(res_string)
-  logging.debug("all: ", query, " ", params_json, " -> ", result)
+  # logging.debug("all: ", query, " ", params_json, " -> ", result)
 
 proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.

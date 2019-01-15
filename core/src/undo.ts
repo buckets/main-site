@@ -63,6 +63,7 @@ export class UndoTracker {
 
   }
   async start() {
+    console.log("UndoTracker.start");
     const init_sqls = [
       `CREATE TEMP TABLE undo_status (
         direction TEXT,
@@ -104,18 +105,22 @@ export class UndoTracker {
       throw err;
     }
 
+    console.log("Decide which tables Don't have UNDO");
     // Decide which tables DON'T get undo tracking
     const exclude_tables = new Set([
       '_schema_version',
       '_dear_hacker',
       'x_trigger_disabled',
     ])
+    console.log("get all tables");
     const all_tables = await this.store.query<{name:string}>(`SELECT name FROM sqlite_master WHERE type='table'`, {});
+    console.log("Got all tables", all_tables);
     const sqls = await Promise.all(all_tables
     .map(x => x.name)
     .filter(table_name => !exclude_tables.has(table_name))
     .map(table_name => this.enableTableSQL(table_name)))
 
+    console.log("Gonna execute sqls", sqls.length);
     try {
       await this.store.db.executeMany(sqls)
     } catch(err) {
@@ -144,7 +149,10 @@ export class UndoTracker {
     }).join('\n'))
   }
   async enableTableSQL(table_name:string) {
+    console.log("enableTableSQL", table_name);
     const columns = Array.from(await this.store.query<SQLiteTableInfoRow>(`pragma table_info(${table_name})`, {}));
+
+    console.log("columns", columns);
 
     return `
       -- INSERT

@@ -22,8 +22,8 @@ test: all
 	cd app && tsc && yarn test
 
 clean:
-	cd nodebuckets && $(MAKE) clean
-	cd core && rm -r dist
+	-cd nodebuckets && $(MAKE) clean
+	-cd core && rm -r dist
 	-rm -rf core/node_modules/bucketslib 
 	-rm -rf app/node_modules/bucketslib
 
@@ -38,7 +38,6 @@ $(CORE_JS_FILES): $(CORE_TS_FILES) $(CORE_NODELIB)
 
 $(APP_NODELIB): $(CORE_NODELIB) $(CORE_JS_FILES)
 	cd app && (rm -r node_modules/bucketslib ; yarn add file:../core)
-	cd app && electron-builder install-app-deps
 
 $(APP_JS_FILES): $(APP_TS_FILES) $(APP_NODELIB)
 	cd app && tsc

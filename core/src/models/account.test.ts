@@ -12,7 +12,9 @@ import { parseLocalTime } from '../time'
 //-----------------------------
 
 test('add account', async (t) => {
+  console.log('add account');
   let { store, events } = await getStore();
+  console.log('got store');
   let account = await store.sub.accounts.add('Checking');
 
   // event
