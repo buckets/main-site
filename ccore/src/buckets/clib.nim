@@ -11,6 +11,20 @@ import sequtils
 import json
 import logging
 
+
+#-----------------------------------
+# String-returning helpers
+#-----------------------------------
+var STRINGS_TO_CLEAR:seq[string]
+template clearOldStrings():untyped =
+  while STRINGS_TO_CLEAR.len > 0:
+    discard STRINGS_TO_CLEAR.pop()
+
+proc keepString(x:string):string = 
+  if x != "":
+    STRINGS_TO_CLEAR.add(x)
+  result = x
+
 #-----------------------------------
 # Function-call logging
 #-----------------------------------
@@ -39,9 +53,8 @@ proc toDB*(budget_handle:int):DbConn =
 
 proc buckets_version*():cstring {.exportc.} =
   ## Return the current buckets lib version
-  var ret = PACKAGE_VERSION
-  GC_ref(ret)
-  result = ret
+  clearOldStrings
+  PACKAGE_VERSION
 
 proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc.} =
   ## String-based RPC interface
@@ -81,9 +94,6 @@ template jsonObjToParam(node:JsonNode):Param =
 proc json_to_params*(db:DbConn, query:cstring, params_json:cstring):seq[Param] =
   ## Convert a JSON Object or Array of query parameters into
   ## a sequence of Params suitable for using in a query.
-  logging.debug "json_to_params"
-  logging.debug query
-  logging.debug params_json
   let parsed = parseJson($params_json)
   assert(parsed.kind == JArray or parsed.kind == JObject, "Only Arrays and Objects are supported for db params")
   case parsed.kind
@@ -107,63 +117,58 @@ proc json_to_params*(db:DbConn, query:cstring, params_json:cstring):seq[Param] =
 proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return the result as a JSON string
   ##    params_json should be a JSON-encoded array/object
-  logging.debug "db_all_json:"
-  logging.debug "query", query
-  logging.debug "params", params_json
+  clearOldStrings
   var res_string:string = ""
   var params:seq[string]
   try:
     let db = budget_handle.getBudgetFile().db
-    logging.debug "got budget file"
     let params = db.json_to_params(query, params_json)
-    logging.debug "Got params: ", params.repr
     let res = db.fetchAll(sql($query), params)
-    logging.debug "post fetchAll"
-    res_string = $ %*
+    let j = %*
       {
         "err": "",
         "cols": res.cols,
         "rows": res.rows,
         "types": res.types,
       }
-    logging.debug "post jsonify"
+    toUgly(res_string, j)
   except:
-    logging.debug "exception?"
-    res_string = $ %*
+    let j = %*
       {
         "err": getCurrentExceptionMsg(),
         "cols": @[],
         "rows": @[],
         "types": @[],
       }
-  logging.debug("db_all_json done")
-  GC_ref(res_string)
-  result = res_string
-  logging.debug("all: ", query, " params: ", params_json, " -> ", result)
+    toUgly(res_string, j)
+  result = keepString(res_string)
+  logging.debug("all: ", query, " ", params_json, " -> ", result)
 
 proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.
   ##    params_json should be a JSON-encoded array/object
+  clearOldStrings
   var res_string:string
   try:
     let
       db = budget_handle.getBudgetFile().db
       params = db.json_to_params(query, params_json)
       res = db.runQuery(sql($query), params)
-    res_string = $ %*
+    let j = %*
       {
         "err": "",
         "lastID": res.lastID,
       }
+    toUgly(res_string, j)
   except:
-    res_string = $ %*
+    let j = %*
       {
         "err": getCurrentExceptionMsg(),
         "lastID": 0,
       }
-  GC_ref(res_string)
-  result = res_string
-  logging.debug("run: ", query, " params: ", params_json, " -> ", result)
+    toUgly(res_string, j)
+  result = keepString(res_string)
+  logging.debug("run: ", query, " ", params_json, " -> ", result)
 
 proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
   ## Convert a C string containing a JSON-encoded array of strings
@@ -178,18 +183,19 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
 
 proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstring {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
+  clearOldStrings
   var queries:seq[string]
   var res_string:string = ""
   try:
     queries = jsonStringToStringSeq(queries_json)
   except AssertionError:
-    return getCurrentExceptionMsg()
+    result = keepString(getCurrentExceptionMsg())
+    return
   
   let db = budget_handle.getBudgetFile().db
   try:
     db.executeMany(queries)
   except:
     res_string = getCurrentExceptionMsg()
-  GC_ref(res_string)
-  result = res_string
-  logging.debug("many: ", $queries, " -> ", result)
+  result = keepString(res_string)
+  logging.debug("many: ", queries.repr, " -> ", res_string)
