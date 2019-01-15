@@ -11,12 +11,18 @@ APP_NODELIB = app/node_modules/bucketslib/lib/bucketslib.node
 APP_TS_FILES = $(shell find app/src/ -type f -name '*.ts')
 APP_JS_FILES = $(patsubst app/src/%.ts, app/src/%.js, $(APP_TS_FILES))
 
-.PHONY: all
+.PHONY: all test
 
 all: $(APP_NODELIB)
 
+test: all
+	cd ccore && nimble test
+	cd nodebuckets && $(MAKE) test
+	cd core && tsc && yarn test
+	cd app && tsc && yarn test	
+
 $(NB_NODELIB): $(CCORE_NIM_FILES)
-	cd nodebuckets && $(MAKE) && $(MAKE) test
+	cd nodebuckets && $(MAKE)
 
 $(CORE_NODELIB): $(NB_NODELIB)
 	cd core && yarn add file:../nodebuckets
