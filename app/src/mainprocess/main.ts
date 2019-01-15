@@ -19,6 +19,11 @@ import { PrefixLogger } from '../logging'
 import { PSTATE, updateState } from './persistent'
 // import { doesPathExist, isPathExecutable, getNiceStat } from '../util'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
+import * as bucketslib from 'bucketslib'
+
+bucketslib.main.register_logger((msg:string) => {
+  log.info(msg);
+});
 
 //----------------------------------------------------------
 // For deprecated triplesec encryption

@@ -5,7 +5,6 @@
 #define NIM_INTBITS 64
 
 #include "nimbase.h"
-#include <stdlib.h>
 #include <string.h>
 #undef LANGUAGE_C
 #undef MIPSEB
@@ -27,10 +26,10 @@ struct tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA;
 struct TNimType;
 struct TNimNode;
 struct tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g;
-struct tyObject_MemRegion_x81NhDv59b8ercDZ9bi85jyg;
+struct tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w;
 struct tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ;
 struct tyObject_GcStack_7fytPA5bBsob6See21YMRA;
-struct tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w;
+struct tyObject_MemRegion_x81NhDv59b8ercDZ9bi85jyg;
 struct tyObject_SmallChunk_tXn60W2f8h3jgAYdEmy5NQ;
 struct tyObject_BigChunk_Rv9c70Uhp2TytkX7eH78qEg;
 struct tyObject_LLChunk_XsENErzHIZV9bhvyJx56wGw;
@@ -80,7 +79,6 @@ NI len;
 TNimNode** sons;
 };
 typedef N_NIMCALL_PTR(void, tyProc_T4eqaYlFJYZUv9aG9b1TV0bQ) (void);
-typedef NimStringDesc* tyArray_Re75IspeoxXy2oCZHwcRrA[2];
 struct tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g {
 NI refcount;
 TNimType* typ;
@@ -176,12 +174,8 @@ static N_NIMCALL(void, TM_TYzg4Hpff8OdutKr0rh87w_3)(void);
 N_NIMCALL(void, nimRegisterGlobalMarker)(tyProc_T4eqaYlFJYZUv9aG9b1TV0bQ markerProc);
 N_NIMCALL(NimStringDesc*, copyStringRC1)(NimStringDesc* src);
 static N_INLINE(void, nimGCunrefNoCycle)(void* p);
-N_NIMCALL(void, echoBinSafe)(NimStringDesc** args, NI argsLen_0);
 static N_INLINE(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*, usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem)(void* usr);
-N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, isAllocatedPtr_z2vVXV0fNaF6us30VoVfIw)(tyObject_MemRegion_x81NhDv59b8ercDZ9bi85jyg* a, void* p);
-static N_INLINE(void, GC_disable_neD9cJp4S9clvdaq5qqNFZAQsystem)(void);
-N_LIB_PRIVATE N_NIMCALL(void, writeStackTrace_BDp9bawgAP2bl9ay9bR0TJdMg)(void);
-static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_3system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
+static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
 N_LIB_PRIVATE N_NOINLINE(void, addZCT_fCDI7oO1NNVXXURtxSzsRw)(tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w& s, tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db);
 N_LIB_PRIVATE N_NIMCALL(void, exec_kASFnJjvwTJpKpmn9aQHmPg)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db, NimStringDesc* query, NimStringDesc** args, NI argsLen_0);
@@ -208,56 +202,38 @@ TNimType NTI_Ct1Mg728R1V16bUJA7EJ8A_;
 TNimType NTI_3elISlPUynt0R48Wr6G2wg_;
 extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
 STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_4, "initial", 7);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_6, "[SYSASSERT] ", 12);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_7, "begin nimGCunrefNoCycle", 23);
-NIM_CONST tyArray_Re75IspeoxXy2oCZHwcRrA TM_TYzg4Hpff8OdutKr0rh87w_5 = {((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_6),
-((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_7)}
-;
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_9, "[GCASSERT] ", 11);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_10, "nimGCunrefNoCycle: isAllocatedPtr", 33);
-NIM_CONST tyArray_Re75IspeoxXy2oCZHwcRrA TM_TYzg4Hpff8OdutKr0rh87w_8 = {((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_9),
-((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_10)}
-;
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_12, "end nimGCunrefNoCycle 2", 23);
-NIM_CONST tyArray_Re75IspeoxXy2oCZHwcRrA TM_TYzg4Hpff8OdutKr0rh87w_11 = {((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_6),
-((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_12)}
-;
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_14, "end nimGCunrefNoCycle 5", 23);
-NIM_CONST tyArray_Re75IspeoxXy2oCZHwcRrA TM_TYzg4Hpff8OdutKr0rh87w_13 = {((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_6),
-((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_14)}
-;
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_15, "CREATE TABLE account (\012            id INTEGER PRIMARY KEY,\012    "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_5, "CREATE TABLE account (\012            id INTEGER PRIMARY KEY,\012    "
 "        created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012           "
 " name TEXT DEFAULT \'\',\012            balance INTEGER DEFAULT 0,\012  "
 "          currency TEXT\012        )", 224);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_16, "CREATE TABLE account_transaction (\012            id INTEGER PRIMA"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_6, "CREATE TABLE account_transaction (\012            id INTEGER PRIMA"
 "RY KEY,\012            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
 "\012            posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012       "
 "     account_id INTEGER,\012            amount INTEGER,\012           "
 " memo TEXT,\012            fi_id TEXT,\012            general_cat TEXT"
 " DEFAULT \'\',\012            FOREIGN KEY(account_id) REFERENCES acco"
 "unt(id)\012        )", 400);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_17, "CREATE INDEX account_transaction_posted\012            ON account_"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_7, "CREATE INDEX account_transaction_posted\012            ON account_"
 "transaction(posted)", 82);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_18, "CREATE INDEX account_transaction_fi_id\012            ON account_t"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_8, "CREATE INDEX account_transaction_fi_id\012            ON account_t"
 "ransaction(fi_id)", 80);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_19, "CREATE TRIGGER update_account_balance_insert\012            AFTER "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_9, "CREATE TRIGGER update_account_balance_insert\012            AFTER "
 "INSERT ON account_transaction\012            BEGIN\012                "
 "UPDATE account SET balance = balance + new.amount WHERE id = new"
 ".account_id;\012            END", 219);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_20, "CREATE TRIGGER update_account_balance_delete\012            AFTER "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_10, "CREATE TRIGGER update_account_balance_delete\012            AFTER "
 "DELETE ON account_transaction\012            BEGIN\012                "
 "UPDATE account SET balance = balance - old.amount WHERE id = old"
 ".account_id;\012            END", 219);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_21, "CREATE TRIGGER update_account_balance_update\012            AFTER "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_11, "CREATE TRIGGER update_account_balance_update\012            AFTER "
 "UPDATE ON account_transaction\012            BEGIN\012                "
 "UPDATE account SET balance = balance - old.amount WHERE id = old"
 ".account_id;\012                UPDATE account SET balance = balanc"
 "e + new.amount WHERE id = new.account_id;\012            END", 312);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_22, "CREATE TABLE bucket_group (\012            id INTEGER PRIMARY KEY,"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_12, "CREATE TABLE bucket_group (\012            id INTEGER PRIMARY KEY,"
 "\012            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012      "
 "      name TEXT,\012            ranking TEXT\012        )", 178);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_23, "CREATE TABLE bucket (\012            id INTEGER PRIMARY KEY,\012     "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_13, "CREATE TABLE bucket (\012            id INTEGER PRIMARY KEY,\012     "
 "       created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012            "
 "name TEXT,\012            notes TEXT DEFAULT \'\',\012            balanc"
 "e INTEGER DEFAULT 0,\012            kicked TINYINT DEFAULT 0,\012     "
@@ -266,194 +242,194 @@ STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_23, "CREATE TABLE bucket (\012         
 "TEGER,\012            end_date DATE,\012            deposit INTEGER,\012 "
 "           color TEXT,\012            FOREIGN KEY(group_id) REFEREN"
 "CES bucket_group(id)\012        )", 541);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_24, "CREATE TABLE bucket_transaction (\012            id INTEGER PRIMAR"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_14, "CREATE TABLE bucket_transaction (\012            id INTEGER PRIMAR"
 "Y KEY,\012            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012"
 "            posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012        "
 "    bucket_id INTEGER,\012            amount INTEGER,\012            m"
 "emo TEXT,\012            account_trans_id INTEGER,\012            tran"
 "sfer TINYINT DEFAULT 0,\012            FOREIGN KEY(bucket_id) REFER"
 "ENCES bucket(id)\012        )", 409);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_25, "CREATE INDEX bucket_transaction_posted\012            ON bucket_tr"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_15, "CREATE INDEX bucket_transaction_posted\012            ON bucket_tr"
 "ansaction(posted)", 80);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_26, "CREATE INDEX bucket_transaction_account_trans_id\012            ON"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_16, "CREATE INDEX bucket_transaction_account_trans_id\012            ON"
 " bucket_transaction(account_trans_id)", 100);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_27, "CREATE TRIGGER update_bucket_balance_insert\012            AFTER I"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_17, "CREATE TRIGGER update_bucket_balance_insert\012            AFTER I"
 "NSERT ON bucket_transaction\012            BEGIN\012                UP"
 "DATE bucket SET balance = balance + new.amount WHERE id = new.bu"
 "cket_id;\012            END", 215);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_28, "CREATE TRIGGER update_bucket_balance_delete\012            AFTER D"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_18, "CREATE TRIGGER update_bucket_balance_delete\012            AFTER D"
 "ELETE ON bucket_transaction\012            BEGIN\012                UP"
 "DATE bucket SET balance = balance - old.amount WHERE id = old.bu"
 "cket_id;\012            END", 215);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_29, "CREATE TRIGGER update_bucket_balance_update\012            AFTER U"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_19, "CREATE TRIGGER update_bucket_balance_update\012            AFTER U"
 "PDATE ON bucket_transaction\012            BEGIN\012                UP"
 "DATE bucket SET balance = balance - old.amount WHERE id = old.bu"
 "cket_id;\012                UPDATE bucket SET balance = balance + n"
 "ew.amount WHERE id = new.bucket_id;\012            END", 306);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_30, "CREATE TABLE simplefin_connection (\012            id INTEGER PRIM"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_20, "CREATE TABLE simplefin_connection (\012            id INTEGER PRIM"
 "ARY KEY,\012            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
 ",\012            access_token TEXT,\012            last_used TIMESTAMP"
 "\012        )", 201);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_31, "CREATE TABLE account_mapping (\012            id INTEGER PRIMARY K"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_21, "CREATE TABLE account_mapping (\012            id INTEGER PRIMARY K"
 "EY,\012            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012   "
 "         account_id INTEGER,\012            account_hash TEXT,\012    "
 "        FOREIGN KEY(account_id) REFERENCES account(id)\012        )", 255);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_32, "CREATE TABLE unknown_account (\012            id INTEGER PRIMARY K"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_22, "CREATE TABLE unknown_account (\012            id INTEGER PRIMARY K"
 "EY,\012            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012   "
 "         description TEXT,\012            account_hash TEXT\012       "
 " )", 193);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_33, "CREATE UNIQUE INDEX unknown_account_hash ON unknown_account(acc"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_23, "CREATE UNIQUE INDEX unknown_account_hash ON unknown_account(acc"
 "ount_hash)", 73);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_34, "import_balance", 14);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_35, "ALTER TABLE account ADD COLUMN import_balance INTEGER DEFAULT N"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_24, "import_balance", 14);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_25, "ALTER TABLE account ADD COLUMN import_balance INTEGER DEFAULT N"
 "ULL", 66);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_36, "deletetrans", 11);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_37, "CREATE TRIGGER account_transaction_delete\012        AFTER DELETE "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_26, "deletetrans", 11);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_27, "CREATE TRIGGER account_transaction_delete\012        AFTER DELETE "
 "ON account_transaction\012        BEGIN\012            DELETE FROM buc"
 "ket_transaction WHERE account_trans_id=OLD.id;\012        END", 185);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_38, "DELETE FROM bucket_transaction\012        WHERE\012            accoun"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_28, "DELETE FROM bucket_transaction\012        WHERE\012            accoun"
 "t_trans_id IS NOT NULL\012            AND account_trans_id NOT IN ("
 "SELECT id FROM account_transaction)", 162);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_39, "dearhacker", 10);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_40, "CREATE TABLE _dear_hacker (\012          id INTEGER PRIMARY KEY,\012 "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_29, "dearhacker", 10);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_30, "CREATE TABLE _dear_hacker (\012          id INTEGER PRIMARY KEY,\012 "
 "         note TEXT\012      )", 89);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_41, "INSERT INTO _dear_hacker (note) VALUES (\'As you can probably te"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_31, "INSERT INTO _dear_hacker (note) VALUES (\'As you can probably te"
 "ll, this file is just an SQLite file.  You are welcome to hack i"
 "t in any way you want -- it doesn\'\'t void the warranty or anythi"
 "ng :)  Just be careful, and be aware that the schema might chang"
 "e without warning from version to version.\')", 299);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_42, "bankmacro", 9);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_43, "CREATE TABLE bank_macro (\012          id INTEGER PRIMARY KEY,\012   "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_32, "bankmacro", 9);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_33, "CREATE TABLE bank_macro (\012          id INTEGER PRIMARY KEY,\012   "
 "       created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012          uu"
 "id TEXT,\012          name TEXT,\012          enc_recording TEXT,\012    "
 "      enabled TINYINT default 1\012      )", 230);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_44, "CREATE UNIQUE INDEX account_mapping_hash ON account_mapping(acc"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_34, "CREATE UNIQUE INDEX account_mapping_hash ON account_mapping(acc"
 "ount_hash)", 73);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_45, "closeaccount", 12);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_46, "ALTER TABLE account ADD COLUMN closed TINYINT DEFAULT 0", 55);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_47, "notes", 5);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_48, "ALTER TABLE account ADD COLUMN notes TEXT DEFAULT \'\'", 52);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_49, "UPDATE account SET notes = \'\'", 29);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_50, "ALTER TABLE account_transaction ADD COLUMN notes TEXT DEFAULT \'"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_35, "closeaccount", 12);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_36, "ALTER TABLE account ADD COLUMN closed TINYINT DEFAULT 0", 55);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_37, "notes", 5);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_38, "ALTER TABLE account ADD COLUMN notes TEXT DEFAULT \'\'", 52);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_39, "UPDATE account SET notes = \'\'", 29);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_40, "ALTER TABLE account_transaction ADD COLUMN notes TEXT DEFAULT \'"
 "\'", 64);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_51, "UPDATE account_transaction SET notes = \'\'", 41);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_52, "ALTER TABLE bucket_transaction ADD COLUMN notes TEXT DEFAULT \'\'", 63);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_53, "UPDATE bucket_transaction SET notes = \'\'", 40);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_54, "ALTER TABLE bucket_group ADD COLUMN notes TEXT DEFAULT \'\'", 57);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_55, "UPDATE bucket_group SET notes = \'\'", 34);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_56, "csvimport", 9);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_57, "CREATE TABLE csv_import_mapping (\012          id INTEGER PRIMARY "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_41, "UPDATE account_transaction SET notes = \'\'", 41);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_42, "ALTER TABLE bucket_transaction ADD COLUMN notes TEXT DEFAULT \'\'", 63);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_43, "UPDATE bucket_transaction SET notes = \'\'", 40);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_44, "ALTER TABLE bucket_group ADD COLUMN notes TEXT DEFAULT \'\'", 57);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_45, "UPDATE bucket_group SET notes = \'\'", 34);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_46, "csvimport", 9);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_47, "CREATE TABLE csv_import_mapping (\012          id INTEGER PRIMARY "
 "KEY,\012          created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012    "
 "      fingerprint_hash TEXT,\012          mapping_json TEXT\012      )", 191);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_58, "triggercontrol-andundo", 22);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_59, "DROP TRIGGER update_account_balance_insert", 42);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_60, "DROP TRIGGER update_account_balance_delete", 42);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_61, "DROP TRIGGER update_account_balance_update", 42);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_62, "DROP TRIGGER update_bucket_balance_insert", 41);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_63, "DROP TRIGGER update_bucket_balance_delete", 41);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_64, "DROP TRIGGER update_bucket_balance_update", 41);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_65, "DROP TRIGGER account_transaction_delete", 39);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_66, "CREATE TABLE x_trigger_disabled (\012          col TINYINT\012      )", 63);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_67, "CREATE TRIGGER update_account_balance_insert\012          AFTER IN"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_48, "triggercontrol-andundo", 22);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_49, "DROP TRIGGER update_account_balance_insert", 42);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_50, "DROP TRIGGER update_account_balance_delete", 42);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_51, "DROP TRIGGER update_account_balance_update", 42);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_52, "DROP TRIGGER update_bucket_balance_insert", 41);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_53, "DROP TRIGGER update_bucket_balance_delete", 41);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_54, "DROP TRIGGER update_bucket_balance_update", 41);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_55, "DROP TRIGGER account_transaction_delete", 39);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_56, "CREATE TABLE x_trigger_disabled (\012          col TINYINT\012      )", 63);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_57, "CREATE TRIGGER update_account_balance_insert\012          AFTER IN"
 "SERT ON account_transaction\012          WHEN (SELECT count(*) FROM"
 " x_trigger_disabled) = 0\012          BEGIN\012              UPDATE ac"
 "count SET balance = balance + new.amount WHERE id = new.account_"
 "id;\012          END", 272);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_68, "CREATE TRIGGER update_account_balance_delete\012          AFTER DE"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_58, "CREATE TRIGGER update_account_balance_delete\012          AFTER DE"
 "LETE ON account_transaction\012          WHEN (SELECT count(*) FROM"
 " x_trigger_disabled) = 0\012          BEGIN\012              UPDATE ac"
 "count SET balance = balance - old.amount WHERE id = old.account_"
 "id;\012          END", 272);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_69, "CREATE TRIGGER update_account_balance_update\012          AFTER UP"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_59, "CREATE TRIGGER update_account_balance_update\012          AFTER UP"
 "DATE ON account_transaction\012          WHEN (SELECT count(*) FROM"
 " x_trigger_disabled) = 0\012          BEGIN\012              UPDATE ac"
 "count SET balance = balance - old.amount WHERE id = old.account_"
 "id;\012              UPDATE account SET balance = balance + new.amo"
 "unt WHERE id = new.account_id;\012          END", 363);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_70, "CREATE TRIGGER update_bucket_balance_insert\012          AFTER INS"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_60, "CREATE TRIGGER update_bucket_balance_insert\012          AFTER INS"
 "ERT ON bucket_transaction\012          WHEN (SELECT count(*) FROM x"
 "_trigger_disabled) = 0\012          BEGIN\012              UPDATE buck"
 "et SET balance = balance + new.amount WHERE id = new.bucket_id;\012"
 "          END", 268);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_71, "CREATE TRIGGER update_bucket_balance_delete\012          AFTER DEL"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_61, "CREATE TRIGGER update_bucket_balance_delete\012          AFTER DEL"
 "ETE ON bucket_transaction\012          WHEN (SELECT count(*) FROM x"
 "_trigger_disabled) = 0\012          BEGIN\012              UPDATE buck"
 "et SET balance = balance - old.amount WHERE id = old.bucket_id;\012"
 "          END", 268);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_72, "CREATE TRIGGER update_bucket_balance_update\012          AFTER UPD"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_62, "CREATE TRIGGER update_bucket_balance_update\012          AFTER UPD"
 "ATE ON bucket_transaction\012          WHEN (SELECT count(*) FROM x"
 "_trigger_disabled) = 0\012          BEGIN\012              UPDATE buck"
 "et SET balance = balance - old.amount WHERE id = old.bucket_id;\012"
 "              UPDATE bucket SET balance = balance + new.amount W"
 "HERE id = new.bucket_id;\012          END", 357);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_73, "CREATE TRIGGER account_transaction_delete\012          AFTER DELET"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_63, "CREATE TRIGGER account_transaction_delete\012          AFTER DELET"
 "E ON account_transaction\012          WHEN (SELECT count(*) FROM x_"
 "trigger_disabled) = 0\012          BEGIN\012              DELETE FROM "
 "bucket_transaction WHERE account_trans_id=OLD.id;\012          END", 254);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_74, "postedtolocal", 13);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_75, "nullamounttriggers", 18);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_76, "CREATE TRIGGER update_account_balance_insert\012        AFTER INSE"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_64, "postedtolocal", 13);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_65, "nullamounttriggers", 18);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_66, "CREATE TRIGGER update_account_balance_insert\012        AFTER INSE"
 "RT ON account_transaction\012        WHEN (SELECT count(*) FROM x_t"
 "rigger_disabled) = 0\012        BEGIN\012            UPDATE account SE"
 "T balance = coalesce(balance,0) + coalesce(new.amount,0) WHERE i"
 "d = new.account_id;\012        END", 286);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_77, "CREATE TRIGGER update_account_balance_delete\012        AFTER DELE"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_67, "CREATE TRIGGER update_account_balance_delete\012        AFTER DELE"
 "TE ON account_transaction\012        WHEN (SELECT count(*) FROM x_t"
 "rigger_disabled) = 0\012        BEGIN\012            UPDATE account SE"
 "T balance = coalesce(balance,0) - coalesce(old.amount,0) WHERE i"
 "d = old.account_id;\012        END", 286);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_78, "CREATE TRIGGER update_account_balance_update\012        AFTER UPDA"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_68, "CREATE TRIGGER update_account_balance_update\012        AFTER UPDA"
 "TE ON account_transaction\012        WHEN (SELECT count(*) FROM x_t"
 "rigger_disabled) = 0\012        BEGIN\012            UPDATE account SE"
 "T balance = coalesce(balance,0) - coalesce(old.amount,0) WHERE i"
 "d = old.account_id;\012            UPDATE account SET balance = coa"
 "lesce(balance,0) + coalesce(new.amount,0) WHERE id = new.account"
 "_id;\012        END", 399);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_79, "CREATE TRIGGER update_bucket_balance_insert\012        AFTER INSER"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_69, "CREATE TRIGGER update_bucket_balance_insert\012        AFTER INSER"
 "T ON bucket_transaction\012        WHEN (SELECT count(*) FROM x_tri"
 "gger_disabled) = 0\012        BEGIN\012            UPDATE bucket SET b"
 "alance = coalesce(balance,0) + coalesce(new.amount,0) WHERE id ="
 " new.bucket_id;\012        END", 282);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_80, "CREATE TRIGGER update_bucket_balance_delete\012        AFTER DELET"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_70, "CREATE TRIGGER update_bucket_balance_delete\012        AFTER DELET"
 "E ON bucket_transaction\012        WHEN (SELECT count(*) FROM x_tri"
 "gger_disabled) = 0\012        BEGIN\012            UPDATE bucket SET b"
 "alance = coalesce(balance,0) - coalesce(old.amount,0) WHERE id ="
 " old.bucket_id;\012        END", 282);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_81, "CREATE TRIGGER update_bucket_balance_update\012        AFTER UPDAT"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_71, "CREATE TRIGGER update_bucket_balance_update\012        AFTER UPDAT"
 "E ON bucket_transaction\012        WHEN (SELECT count(*) FROM x_tri"
 "gger_disabled) = 0\012        BEGIN\012            UPDATE bucket SET b"
 "alance = coalesce(balance,0) - coalesce(old.amount,0) WHERE id ="
 " old.bucket_id;\012            UPDATE bucket SET balance = coalesce"
 "(balance,0) + coalesce(new.amount,0) WHERE id = new.bucket_id;\012 "
 "       END", 393);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_82, "UPDATE account_transaction SET amount=0 WHERE amount IS NULL", 60);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_83, "UPDATE bucket_transaction SET amount=0 WHERE amount IS NULL", 59);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_84, "UPDATE account\012    SET balance = COALESCE((SELECT SUM(COALESCE("
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_72, "UPDATE account_transaction SET amount=0 WHERE amount IS NULL", 60);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_73, "UPDATE bucket_transaction SET amount=0 WHERE amount IS NULL", 59);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_74, "UPDATE account\012    SET balance = COALESCE((SELECT SUM(COALESCE("
 "amount, 0))\012                   FROM account_transaction\012        "
 "           WHERE account_id = account.id), 0)\012    WHERE balance "
 "IS NULL", 198);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_85, "settings", 8);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_86, "CREATE TABLE settings (\012          id INTEGER PRIMARY KEY,\012     "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_75, "settings", 8);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_76, "CREATE TABLE settings (\012          id INTEGER PRIMARY KEY,\012     "
 "     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\012          key "
 "TEXT,\012          value TEXT\012      )", 161);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_87, "CREATE TRIGGER there_can_be_only_one_setting\012          BEFORE I"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_77, "CREATE TRIGGER there_can_be_only_one_setting\012          BEFORE I"
 "NSERT ON settings\012          BEGIN\012              DELETE FROM sett"
 "ings WHERE key=NEW.key;\012          END", 164);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_88, "offbudget", 9);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_89, "ALTER TABLE account ADD COLUMN offbudget TINYINT DEFAULT 0", 58);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_90, "cleared", 7);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_91, "ALTER TABLE account_transaction ADD COLUMN cleared TINYINT DEFA"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_78, "offbudget", 9);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_79, "ALTER TABLE account ADD COLUMN offbudget TINYINT DEFAULT 0", 58);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_80, "cleared", 7);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_81, "ALTER TABLE account_transaction ADD COLUMN cleared TINYINT DEFA"
 "ULT 0", 68);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_92, "UPDATE account_transaction SET cleared = 1", 42);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_93, "debt-accounts", 13);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_94, "ALTER TABLE bucket ADD COLUMN debt_account_id INTEGER", 53);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_95, "ALTER TABLE bucket_transaction ADD COLUMN linked_trans_id INTEG"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_82, "UPDATE account_transaction SET cleared = 1", 42);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_83, "debt-accounts", 13);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_84, "ALTER TABLE bucket ADD COLUMN debt_account_id INTEGER", 53);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_85, "ALTER TABLE bucket_transaction ADD COLUMN linked_trans_id INTEG"
 "ER", 65);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_96, "ALTER TABLE account ADD COLUMN kind TEXT DEFAULT \'\'", 51);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_97, "UPDATE account SET kind = \'\' WHERE coalesce(offbudget,0) = 0", 60);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_98, "UPDATE account SET kind = \'offbudget\' WHERE coalesce(offbudget,"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_86, "ALTER TABLE account ADD COLUMN kind TEXT DEFAULT \'\'", 51);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_87, "UPDATE account SET kind = \'\' WHERE coalesce(offbudget,0) = 0", 60);
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_88, "UPDATE account SET kind = \'offbudget\' WHERE coalesce(offbudget,"
 "0) = 1", 69);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_99, "CREATE TRIGGER debt_transaction_insert\012        AFTER INSERT ON "
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_89, "CREATE TRIGGER debt_transaction_insert\012        AFTER INSERT ON "
 "account_transaction\012        WHEN\012          (SELECT count(*) FROM"
 " x_trigger_disabled) = 0\012          AND (SELECT count(*) FROM acc"
 "ount WHERE\012            kind = \'debt\' AND NEW.account_id = id) = "
@@ -464,7 +440,7 @@ STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_99, "CREATE TRIGGER debt_transaction_in
 "ucket as b\012          WHERE\012            b.debt_account_id = NEW.a"
 "ccount_id\012            AND coalesce(b.kicked, 0) <> 1;\012        EN"
 "D", 640);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_100, "CREATE TRIGGER linked_trans_update\012        AFTER UPDATE ON acco"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_90, "CREATE TRIGGER linked_trans_update\012        AFTER UPDATE ON acco"
 "unt_transaction\012        WHEN\012          (SELECT count(*) FROM x_t"
 "rigger_disabled) = 0\012        BEGIN\012          DELETE FROM bucket_"
 "transaction\012          WHERE\012            linked_trans_id = OLD.id"
@@ -474,7 +450,7 @@ STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_100, "CREATE TRIGGER linked_trans_updat
 "    NEW.posted,\012            NEW.id\012          FROM\012            bu"
 "cket as b\012          WHERE\012            b.debt_account_id = NEW.ac"
 "count_id\012            AND coalesce(b.kicked, 0) <> 1;\012        END", 639);
-STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_101, "CREATE TRIGGER linked_trans_delete\012        AFTER DELETE ON acco"
+STRING_LITERAL(TM_TYzg4Hpff8OdutKr0rh87w_91, "CREATE TRIGGER linked_trans_delete\012        AFTER DELETE ON acco"
 "unt_transaction\012        WHEN\012          (SELECT count(*) FROM x_t"
 "rigger_disabled) = 0\012        BEGIN\012          DELETE FROM bucket_"
 "transaction\012          WHERE\012            linked_trans_id = OLD.id"
@@ -494,51 +470,18 @@ static N_INLINE(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*, usrToCell_yB9aH5WIlwd0xk
 	return result;
 }
 
-static N_INLINE(void, GC_disable_neD9cJp4S9clvdaq5qqNFZAQsystem)(void) {
-	gch_IcYaEuuWivYAS86vFMTS3Q.recGcLock += ((NI) 1);
-}
-
-static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_3system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
+static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
 	addZCT_fCDI7oO1NNVXXURtxSzsRw(gch_IcYaEuuWivYAS86vFMTS3Q.zct, c);
 }
 
 static N_INLINE(void, nimGCunrefNoCycle)(void* p) {
-	{
-		if (!NIM_FALSE) goto LA3_;
-{		echoBinSafe(TM_TYzg4Hpff8OdutKr0rh87w_5, 2);
-		exit(((NI) 1));
-}	}
-	LA3_: ;
 	tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c = usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem(p);
 	{
-		NIM_BOOL T7_;
-		T7_ = (NIM_BOOL)0;
-		T7_ = isAllocatedPtr_z2vVXV0fNaF6us30VoVfIw((&gch_IcYaEuuWivYAS86vFMTS3Q.region), ((void*) (c)));
-		if (!!(T7_)) goto LA8_;
-{		echoBinSafe(TM_TYzg4Hpff8OdutKr0rh87w_8, 2);
-		GC_disable_neD9cJp4S9clvdaq5qqNFZAQsystem();
-		writeStackTrace_BDp9bawgAP2bl9ay9bR0TJdMg();
-		exit(((NI) 1));
-}	}
-	LA8_: ;
-	{
 		(*c).refcount -= ((NI) 8);
-		if (!((NU64)((*c).refcount) < (NU64)(((NI) 8)))) goto LA12_;
-{		rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_3system(c);
-		{
-			if (!NIM_FALSE) goto LA16_;
-{			echoBinSafe(TM_TYzg4Hpff8OdutKr0rh87w_11, 2);
-			exit(((NI) 1));
-}		}
-		LA16_: ;
+		if (!((NU64)((*c).refcount) < (NU64)(((NI) 8)))) goto LA3_;
+{		rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system(c);
 }	}
-	LA12_: ;
-	{
-		if (!NIM_FALSE) goto LA20_;
-{		echoBinSafe(TM_TYzg4Hpff8OdutKr0rh87w_13, 2);
-		exit(((NI) 1));
-}	}
-	LA20_: ;
+	LA3_: ;
 }
 
 static N_INLINE(void, nimSetMem_cNwQQ4PlSJsZSwvoN5Uafwsystem)(void* a, int v, NI size) {
@@ -572,82 +515,82 @@ N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw)(tyObject_S
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T18_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T19_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_15), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_5), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_16), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_6), T2_, 0);
 	nimZeroMem((void*)T3_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_17), T3_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_7), T3_, 0);
 	nimZeroMem((void*)T4_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_18), T4_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_8), T4_, 0);
 	nimZeroMem((void*)T5_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_19), T5_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_9), T5_, 0);
 	nimZeroMem((void*)T6_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_20), T6_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_10), T6_, 0);
 	nimZeroMem((void*)T7_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_21), T7_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_11), T7_, 0);
 	nimZeroMem((void*)T8_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_22), T8_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_12), T8_, 0);
 	nimZeroMem((void*)T9_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_23), T9_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_13), T9_, 0);
 	nimZeroMem((void*)T10_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_24), T10_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_14), T10_, 0);
 	nimZeroMem((void*)T11_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_25), T11_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_15), T11_, 0);
 	nimZeroMem((void*)T12_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_26), T12_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_16), T12_, 0);
 	nimZeroMem((void*)T13_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_27), T13_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_17), T13_, 0);
 	nimZeroMem((void*)T14_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_28), T14_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_18), T14_, 0);
 	nimZeroMem((void*)T15_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_29), T15_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_19), T15_, 0);
 	nimZeroMem((void*)T16_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_30), T16_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_20), T16_, 0);
 	nimZeroMem((void*)T17_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_31), T17_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_21), T17_, 0);
 	nimZeroMem((void*)T18_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_32), T18_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_22), T18_, 0);
 	nimZeroMem((void*)T19_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_33), T19_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_23), T19_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_2)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_35), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_25), T1_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_3)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T2_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_37), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_27), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_38), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_28), T2_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_4)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T2_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_40), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_30), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_41), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_31), T2_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_5)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T2_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_43), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_33), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_44), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_34), T2_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_6)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_46), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_36), T1_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_7)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
@@ -660,27 +603,27 @@ N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_7)(tyObject
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T7_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T8_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_48), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_38), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_49), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_39), T2_, 0);
 	nimZeroMem((void*)T3_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_50), T3_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_40), T3_, 0);
 	nimZeroMem((void*)T4_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_51), T4_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_41), T4_, 0);
 	nimZeroMem((void*)T5_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_52), T5_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_42), T5_, 0);
 	nimZeroMem((void*)T6_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_53), T6_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_43), T6_, 0);
 	nimZeroMem((void*)T7_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_54), T7_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_44), T7_, 0);
 	nimZeroMem((void*)T8_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_55), T8_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_45), T8_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_8)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_57), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_47), T1_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_9)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
@@ -700,35 +643,35 @@ N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_9)(tyObject
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T14_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T15_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_59), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_49), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_60), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_50), T2_, 0);
 	nimZeroMem((void*)T3_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_61), T3_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_51), T3_, 0);
 	nimZeroMem((void*)T4_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_62), T4_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_52), T4_, 0);
 	nimZeroMem((void*)T5_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_63), T5_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_53), T5_, 0);
 	nimZeroMem((void*)T6_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_64), T6_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_54), T6_, 0);
 	nimZeroMem((void*)T7_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_65), T7_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_55), T7_, 0);
 	nimZeroMem((void*)T8_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_66), T8_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_56), T8_, 0);
 	nimZeroMem((void*)T9_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_67), T9_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_57), T9_, 0);
 	nimZeroMem((void*)T10_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_68), T10_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_58), T10_, 0);
 	nimZeroMem((void*)T11_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_69), T11_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_59), T11_, 0);
 	nimZeroMem((void*)T12_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_70), T12_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_60), T12_, 0);
 	nimZeroMem((void*)T13_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_71), T13_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_61), T13_, 0);
 	nimZeroMem((void*)T14_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_72), T14_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_62), T14_, 0);
 	nimZeroMem((void*)T15_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_73), T15_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_63), T15_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_10)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
@@ -751,59 +694,59 @@ N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_11)(tyObjec
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T14_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T15_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_59), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_49), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_60), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_50), T2_, 0);
 	nimZeroMem((void*)T3_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_61), T3_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_51), T3_, 0);
 	nimZeroMem((void*)T4_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_62), T4_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_52), T4_, 0);
 	nimZeroMem((void*)T5_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_63), T5_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_53), T5_, 0);
 	nimZeroMem((void*)T6_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_64), T6_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_54), T6_, 0);
 	nimZeroMem((void*)T7_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_76), T7_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_66), T7_, 0);
 	nimZeroMem((void*)T8_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_77), T8_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_67), T8_, 0);
 	nimZeroMem((void*)T9_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_78), T9_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_68), T9_, 0);
 	nimZeroMem((void*)T10_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_79), T10_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_69), T10_, 0);
 	nimZeroMem((void*)T11_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_80), T11_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_70), T11_, 0);
 	nimZeroMem((void*)T12_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_81), T12_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_71), T12_, 0);
 	nimZeroMem((void*)T13_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_82), T13_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_72), T13_, 0);
 	nimZeroMem((void*)T14_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_83), T14_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_73), T14_, 0);
 	nimZeroMem((void*)T15_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_84), T15_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_74), T15_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_12)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T2_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_86), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_76), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_87), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_77), T2_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_13)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_89), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_79), T1_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_14)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T1_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T2_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_91), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_81), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_92), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_82), T2_, 0);
 }
 
 N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_15)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* db) {
@@ -816,21 +759,21 @@ N_LIB_PRIVATE N_NIMCALL(void, colonanonymous__eqKIbD7pD2fwovNaA5fRnw_15)(tyObjec
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T7_;
 	tyArray_8ZvwQIddfpj2THRVPsFzIQ T8_;
 	nimZeroMem((void*)T1_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_94), T1_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_84), T1_, 0);
 	nimZeroMem((void*)T2_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_95), T2_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_85), T2_, 0);
 	nimZeroMem((void*)T3_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_96), T3_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_86), T3_, 0);
 	nimZeroMem((void*)T4_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_97), T4_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_87), T4_, 0);
 	nimZeroMem((void*)T5_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_98), T5_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_88), T5_, 0);
 	nimZeroMem((void*)T6_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_99), T6_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_89), T6_, 0);
 	nimZeroMem((void*)T7_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_100), T7_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_90), T7_, 0);
 	nimZeroMem((void*)T8_, sizeof(tyArray_8ZvwQIddfpj2THRVPsFzIQ));
-	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_101), T8_, 0);
+	exec_kASFnJjvwTJpKpmn9aQHmPg(db, ((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_91), T8_, 0);
 }
 N_LIB_PRIVATE N_NIMCALL(void, buckets_dbschemaInit000)(void) {
 {
@@ -857,59 +800,59 @@ nimRegisterGlobalMarker(TM_TYzg4Hpff8OdutKr0rh87w_3);
 	if (T1_) nimGCunrefNoCycle(T1_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[0].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw;
 	T2_ = (NimStringDesc*)0;
-	T2_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[1].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[1].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_34));
+	T2_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[1].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[1].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_24));
 	if (T2_) nimGCunrefNoCycle(T2_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[1].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_2;
 	T3_ = (NimStringDesc*)0;
-	T3_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[2].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[2].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_36));
+	T3_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[2].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[2].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_26));
 	if (T3_) nimGCunrefNoCycle(T3_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[2].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_3;
 	T4_ = (NimStringDesc*)0;
-	T4_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[3].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[3].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_39));
+	T4_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[3].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[3].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_29));
 	if (T4_) nimGCunrefNoCycle(T4_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[3].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_4;
 	T5_ = (NimStringDesc*)0;
-	T5_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[4].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[4].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_42));
+	T5_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[4].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[4].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_32));
 	if (T5_) nimGCunrefNoCycle(T5_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[4].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_5;
 	T6_ = (NimStringDesc*)0;
-	T6_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[5].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[5].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_45));
+	T6_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[5].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[5].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_35));
 	if (T6_) nimGCunrefNoCycle(T6_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[5].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_6;
 	T7_ = (NimStringDesc*)0;
-	T7_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[6].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[6].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_47));
+	T7_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[6].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[6].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_37));
 	if (T7_) nimGCunrefNoCycle(T7_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[6].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_7;
 	T8_ = (NimStringDesc*)0;
-	T8_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[7].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[7].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_56));
+	T8_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[7].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[7].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_46));
 	if (T8_) nimGCunrefNoCycle(T8_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[7].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_8;
 	T9_ = (NimStringDesc*)0;
-	T9_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[8].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[8].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_58));
+	T9_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[8].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[8].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_48));
 	if (T9_) nimGCunrefNoCycle(T9_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[8].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_9;
 	T10_ = (NimStringDesc*)0;
-	T10_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[9].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[9].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_74));
+	T10_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[9].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[9].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_64));
 	if (T10_) nimGCunrefNoCycle(T10_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[9].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_10;
 	T11_ = (NimStringDesc*)0;
-	T11_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[10].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[10].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_75));
+	T11_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[10].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[10].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_65));
 	if (T11_) nimGCunrefNoCycle(T11_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[10].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_11;
 	T12_ = (NimStringDesc*)0;
-	T12_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[11].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[11].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_85));
+	T12_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[11].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[11].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_75));
 	if (T12_) nimGCunrefNoCycle(T12_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[11].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_12;
 	T13_ = (NimStringDesc*)0;
-	T13_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[12].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[12].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_88));
+	T13_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[12].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[12].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_78));
 	if (T13_) nimGCunrefNoCycle(T13_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[12].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_13;
 	T14_ = (NimStringDesc*)0;
-	T14_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[13].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[13].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_90));
+	T14_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[13].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[13].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_80));
 	if (T14_) nimGCunrefNoCycle(T14_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[13].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_14;
 	T15_ = (NimStringDesc*)0;
-	T15_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[14].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[14].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_93));
+	T15_ = migrations_XP1BT1YxTzkGsU62UYEcJQ[14].Field0; migrations_XP1BT1YxTzkGsU62UYEcJQ[14].Field0 = copyStringRC1(((NimStringDesc*) &TM_TYzg4Hpff8OdutKr0rh87w_83));
 	if (T15_) nimGCunrefNoCycle(T15_);
 	migrations_XP1BT1YxTzkGsU62UYEcJQ[14].Field1 = colonanonymous__eqKIbD7pD2fwovNaA5fRnw_15;
 }

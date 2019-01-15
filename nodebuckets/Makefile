@@ -1,19 +1,23 @@
 NIMFILES = $(shell find ../ccore -name '*.nim')
 NIMBASE = ~/lib/Nim/lib/nimbase.h
+RELEASE_TYPE = release
 
 
-.PHONY: clean compile test all
+.PHONY: clean release debug test all
 
 all: dist/main.js lib/bucketslib.node
 
 dist/main.js: jssrc/main.ts
 	tsc
 
-lib/bucketslib.node: csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h compile
+lib/bucketslib.node: csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h $(RELEASE_TYPE)
 	node-gyp rebuild
 
-compile: $(NIMFILES)
-	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly -d:useSysAssert -d:useGcAssert ../ccore/src/buckets/clib.nim
+release: $(NIMFILES)
+	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly ../ccore/src/buckets/clib.nim
+
+debug: $(NIMFILES)
+	nim cpp --checks:on --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly -d:useSysAssert -d:useGcAssert ../ccore/src/buckets/clib.nim
 
 csrc/nimbase.h: $(NIMBASE)
 	mkdir -p csrc

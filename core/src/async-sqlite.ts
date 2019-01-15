@@ -6,9 +6,6 @@ import { AsyncRunResult, IAsyncSqlite, ICursor } from './dbstore'
 //
 //=============================================================
 import * as bucketslib from 'bucketslib'
-bucketslib.main.register_logger((msg:string) => {
-  console.log("FROM bucketslib:", msg);
-});
 
 export function openSqlite(filename:string) {
   return new NodeSQLiteDatabase(bucketslib.main.openfile(filename));
