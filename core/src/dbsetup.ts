@@ -71,16 +71,12 @@ export async function setupDatabase(store:SQLiteStore, opts:{
 async function ensureBucketsLicenseBucket(store:IStore) {
   let license_bucket;
   try {
-    console.log("Trying to get bucket");
     license_bucket = await store.sub.buckets.get(-1);  
-    console.log("Got bucket");
   } catch(e) {
     if (e instanceof NotFound) {
-      console.log("Creating new bucket");
       license_bucket = await store.sub.buckets.add({
         name: sss('Buckets License'/* 'Buckets' refers to the application name */),
       })
-      console.log("Created");
       await store.query('UPDATE bucket SET id=-1 WHERE id=$id', {
         $id: license_bucket.id
       })
@@ -157,10 +153,6 @@ async function upgradeDatabase(db:IAsyncSqlite, migrations:IMigration[], opts:{
   }
   // end old style of migrations
   //--------------------------------------------------------
-
-  console.log("SELECT name FROM _schema_version output:");
-  console.log(await db.all<any>('SELECT 1, 2, 3 as foo'));
-  console.log(await db.all<any>('SELECT name FROM _schema_version'));
 
   const applied = new Set<string>((await db.all<any>('SELECT name FROM _schema_version')).map(x => x.name));
   logger.warn('Applied migrations:', Array.from(applied).join(', '))
