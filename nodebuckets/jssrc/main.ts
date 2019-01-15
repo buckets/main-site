@@ -19,12 +19,14 @@ type SqliteDataType =
   | "Int"
   | "Float"
   | "Text"
+  | "Bool"
   | "Blob"
 
 type SqliteParam =
   | string
   | number
   | null
+  | boolean
 
 interface SqliteParamObj {
   [k:string]: SqliteParam
@@ -36,7 +38,7 @@ type SqliteParams =
 
 bucketslib.start();
 
-export function db_all(bf_id:number, query:string, params:SqliteParams):{
+export function db_all_arrays(bf_id:number, query:string, params:SqliteParams):{
   rows: Array<Array<string>>,
   cols: Array<string>,
   types: Array<SqliteDataType>,
@@ -52,6 +54,41 @@ export function db_all(bf_id:number, query:string, params:SqliteParams):{
       types: res.types,
     };
   }
+}
+
+export function db_all<T>(bf_id:number, query:string, params:SqliteParams):T[] {
+  let result = db_all_arrays(bf_id, query, params);
+  function convert(row:string[]) {
+    let ret:any = {};
+    for (let i = 0; i < result.cols.length; i++) {
+      let colname = result.cols[i];
+      switch(result.types[i]) {
+        case "Null": {
+          ret[colname] = null;
+          break;
+        }
+        case "Blob":
+        case "Text": {
+          ret[colname] = row[i];
+          break;
+        }
+        case "Int": {
+          ret[colname] = parseInt(row[i]);
+          break;
+        }
+        case "Float": {
+          ret[colname] = Number(row[i]);
+          break;
+        }
+        case "Bool": {
+          ret[colname] = !!parseInt(row[i]);
+          break;
+        }
+      }
+    }
+    return ret;
+  }
+  return result.rows.map<T>(convert);
 }
 
 export function db_run(bf_id:number, query:string, params:SqliteParams) {

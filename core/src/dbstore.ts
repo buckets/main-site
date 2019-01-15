@@ -101,7 +101,7 @@ export class SQLiteStore implements IStore {
     let sql = `SELECT *,'${cls}' as _type FROM ${cls}
     WHERE id=$id`;
     let ret = await this.db.get<IObjectTypes[T]>(sql, {$id: id});
-    if (ret === undefined) {
+    if (ret === null) {
       throw new NotFound(`${cls} ${id}`);
     }
     const fromdb = this.sub.fromDB[cls as string];
@@ -138,6 +138,8 @@ export class SQLiteStore implements IStore {
     let select = `SELECT *,'${cls}' as _type FROM ${cls}`;
     if (where) {
       where = `WHERE ${where}`;
+    } else {
+      where = '';
     }
     if (!params) {
       params = {};

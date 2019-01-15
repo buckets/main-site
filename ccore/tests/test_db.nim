@@ -13,6 +13,20 @@ test "P(int)":
   check a.kind == Int
   check a.intval == 23
 
+test "P(string)":
+  check P("foo").textval == "foo"
+
+test "P(nil)":
+  check P(nil).kind == Null
+
+test "P(float)":
+  check P(2.34).floatval == 2.34
+
+test "P(bool)":
+  let a = P(true)
+  check a.kind == Bool
+  check a.boolval == true
+
 test "runQuery SELECT no params":
   let db = openDB(":memory:")
   let res = db.runQuery(sql"SELECT 1")

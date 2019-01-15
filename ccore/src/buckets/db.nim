@@ -28,6 +28,7 @@ type
     Int,
     Float,
     Text,
+    Bool,
     Blob,
   Param* = ref ParamObj
   ParamObj {.acyclic.} = object
@@ -40,6 +41,8 @@ type
       textval*: string
     of Blob:
       blobval*: string
+    of Bool:
+      boolval*: bool
     of Null:
       nil
     
@@ -75,6 +78,11 @@ proc newParam*(x: type(nil)):Param =
   new(result)
   result.kind = Null
 
+proc newParam*(x: bool):Param =
+  new(result)
+  result.kind = Bool
+  result.boolval = x
+
 template P*(x:untyped):untyped = newParam(x)
 
 proc `==`*(a, b: Param):bool =
@@ -96,6 +104,8 @@ proc `==`*(a, b: Param):bool =
       result = true
     of Text:
       result = a.textval == b.textval
+    of Bool:
+      result = a.boolval == b.boolval
 
 proc prepareAndBindArgs(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]):Pstmt =
   let querystring = query.string
@@ -117,7 +127,10 @@ proc prepareAndBindArgs(db:DbConn, query:SqlQuery, params: varargs[Param, `newPa
     of Float:
       if result.bind_double((i+1).cint, param.floatval) != SQLITE_OK:
         dbError(db)
-    else:
+    of Bool:
+      if result.bind_int64((i+1).cint, if param.boolval: 1 else: 0) != SQLITE_OK:
+        dbError(db)
+    of Blob:
       raise newException(CatchableError, &"Unbindable data type: {param.kind}")
 
 iterator queryRows(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): InstantRow =

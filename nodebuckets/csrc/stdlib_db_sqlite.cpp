@@ -221,7 +221,7 @@ extern "C" N_CDECL(NCSTRING, sqlite3_errmsg)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9
 N_NIMCALL(NimStringDesc*, cstrToNimstr)(NCSTRING str);
 static N_INLINE(void, asgnRefNoCycle)(void** dest, void* src);
 static N_INLINE(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*, usrToCell_yB9aH5WIlwd0xkYrcdPeXrQsystem)(void* usr);
-static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
+static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_3system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
 N_LIB_PRIVATE N_NOINLINE(void, addZCT_fCDI7oO1NNVXXURtxSzsRw)(tyObject_CellSeq_Axo1XVm9aaQueTOldv8le5w& s, tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c);
 N_NIMCALL(void, popCurrentExceptionEx)(NU id);
 N_NIMCALL(void, raiseException)(Exception* e, NCSTRING ename);
@@ -377,7 +377,7 @@ static N_INLINE(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g*, usrToCell_yB9aH5WIlwd0xk
 	return result;
 }
 
-static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
+static N_INLINE(void, rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_3system)(tyObject_Cell_1zcF9cV8XIAtbN8h5HRUB8g* c) {
 	addZCT_fCDI7oO1NNVXXURtxSzsRw(gch_IcYaEuuWivYAS86vFMTS3Q.zct, c);
 }
 
@@ -394,7 +394,7 @@ static N_INLINE(void, asgnRefNoCycle)(void** dest, void* src) {
 		{
 			(*c_2).refcount -= ((NI) 8);
 			if (!((NU64)((*c_2).refcount) < (NU64)(((NI) 8)))) goto LA11_;
-{			rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_2system(c_2);
+{			rtlAddZCT_MV4BBk6J1qu70IbBxwEn4w_3system(c_2);
 }		}
 		LA11_: ;
 }	}

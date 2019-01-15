@@ -17,20 +17,10 @@ export class NodeSQLiteCursor implements ICursor {
   constructor(readonly db_id:number) {
 
   }
-  private convertToArray(query:string, params:{}):{query:string, params:Array<string>} {
-    let indexes = bucketslib.db_paramArray(this.db_id, query);
-    let param_array = indexes.map(name => {
-      return `${params[name]}`;
-    });
-    return {query: query, params: param_array};
-  }
   async run(query:string, params={}):Promise<AsyncRunResult> {
-    console.log("RUN", query, params);
     return new Promise<AsyncRunResult>((resolve, reject) => {
       try {
-        let conv = this.convertToArray(query, params);
-        console.log("conv", conv);
-        const lastID = bucketslib.db_run(this.db_id, conv.query, conv.params);
+        const lastID = bucketslib.db_run(this.db_id, query, params);
         resolve({
           lastID,
         })
@@ -39,7 +29,6 @@ export class NodeSQLiteCursor implements ICursor {
       }
     })
     .then(res => {
-      console.log("result", res);
       return res;
     })
   }
@@ -54,39 +43,14 @@ export class NodeSQLiteCursor implements ICursor {
     })
   }
   async all<T>(query:string, params={}):Promise<Array<T>> {
-    console.log("ALL", query, params);
     return new Promise<Array<T>>((resolve, reject) => {
       try {
-        let conv = this.convertToArray(query, params);
-        console.log("conv", conv);
-        const {rows, cols, types} = bucketslib.db_all(this.db_id, conv.query, conv.params);
-        let converters = types.map(typename => {
-          switch (typename) {
-            case "Int":
-            case "Float": {
-              return (x:string) => Number(x);
-            }
-            case "Null": {
-              return (x:string) => x;
-            }
-            default: {
-              return (x:string) => x;
-            }
-          }
-        })
-        resolve(rows.map(row => {
-          let ret = {};
-          cols.forEach((col, idx) => {
-            ret[col] = converters[idx](row[idx]);
-          })
-          return ret as T;
-        }))
+        resolve(bucketslib.db_all<T>(this.db_id, query, params) as T[]);
       } catch(err) {
         reject(err);
       }
     })
     .then(res => {
-      console.log("result", res);
       return res;
     });
   }

@@ -4,14 +4,15 @@ const { main, db_all, db_run, db_executeMany } = bucketslib;
 
 console.log("BucketsLib version:", main.version());
 
-console.log("echo('something'):", main.stringpc("echo", "something"));
-console.log("unknownthing(''):", main.stringpc("unknownthing", ""));
+// console.log("echo('something'):", main.stringpc("echo", "something"));
+// console.log("unknownthing(''):", main.stringpc("unknownthing", ""));
 
 main.register_logger(x => {
   console.log(x);
 })
 
 var bf = main.openfile(":memory:");
+console.log("JS done opening budget file");
 console.log("SELECT:", main.db_all_json(bf, "SELECT 1,2,3", "[]"));
 console.log("Nice interface:", db_all(bf, "SELECT 1,2,3"));
 try {

@@ -56,7 +56,11 @@ proc upgradeSchema*(bf:Budgetfile) =
       bf.db.exec(sql"ROLLBACK")
       raise
   logging.debug "Schema upgrade complete"
-  logging.debug bf.db.fetchAll(sql"SELECT * from _schema_version")
+  let allofthem = bf.db.fetchAll(sql"SELECT * from _schema_version")
+  logging.debug "Got all of them"
+  logging.debug allofthem.rows.len
+  logging.debug "All of them length: hi"
+  logging.debug allofthem.repr
 
 proc openBudgetFile*(filename:string) : BudgetFile =
   new(result)
@@ -67,6 +71,7 @@ proc openBudgetFile*(filename:string) : BudgetFile =
   result.db = db_sqlite.open(filename, "", "", "")
   result.filename = filename
   result.upgradeSchema()
+  logging.debug "Done opening budget file"
 
 proc getBudgetFile*(id:int):BudgetFile =
   ## Convert a budget file handle id to a BudgetFile object
