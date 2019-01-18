@@ -15,41 +15,17 @@ export class NodeSQLiteCursor implements ICursor {
 
   }
   async run(query:string, params={}):Promise<AsyncRunResult> {
-    return new Promise<AsyncRunResult>((resolve, reject) => {
-      try {
-        const lastID = bucketslib.db_run(this.db_id, query, params);
-        resolve({
-          lastID,
-        })
-      } catch(err) {
-        reject(err);
-      }
-    })
-    .then(res => {
-      return res;
-    })
+    const lastID = await bucketslib.db_run(this.db_id, query, params);
+    return {
+      lastID,
+    }
   }
   async executeMany(queries:string[]):Promise<null> {
-    return new Promise<null>((resolve, reject) => {
-      try {
-        bucketslib.db_executeMany(this.db_id, queries);
-        resolve(null);
-      } catch(err) {
-        reject(err);
-      }
-    })
+    await bucketslib.db_executeMany(this.db_id, queries);
+    return null;
   }
   async all<T>(query:string, params={}):Promise<Array<T>> {
-    return new Promise<Array<T>>((resolve, reject) => {
-      try {
-        resolve(bucketslib.db_all<T>(this.db_id, query, params) as T[]);
-      } catch(err) {
-        reject(err);
-      }
-    })
-    .then(res => {
-      return res;
-    });
+    return await bucketslib.db_all<T>(this.db_id, query, params) as T[];
   }
   get<T>(query:string, params={}):Promise<T> {
     return this.all<T>(query, params).then(rows => {

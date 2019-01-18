@@ -16,7 +16,6 @@ test "everything":
   echo buckets_db_all_json(db, "SELECT 1,2,3", "[]")
   echo buckets_db_all_json(db, "SELECT 1,2,3", "{}")
   echo buckets_db_all_json(db, "SELECT 1, sd'f", "[]")
-  echo GC_getStatistics()
   discard buckets_db_execute_many_json(db, """[
     "CREATE TABLE customer (id INTEGER PRIMARY KEY, email TEXT)",
     "CREATE TABLE company (id INTEGER PRIMARY KEY, name TEXT)"

@@ -46,14 +46,10 @@ type
     of Null:
       nil
     
-  GetResult* = object
-    row*: seq[string]
-    cols*: seq[string]
-    
   AllResult* = object
     rows*: seq[seq[string]]
     cols*: seq[string]
-    types*: seq[DataType]
+    types*: seq[string]
 
   RunResult* = object
     lastID*: int64
@@ -139,8 +135,10 @@ iterator queryRows(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]
   if finalize(pstmt) != SQLITE_OK:
     dbError(db)
 
-proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]): AllResult =
+proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]): ref AllResult =
   ## Execute a multi-row-returning SQL statement.
+  new(result)
+  echo "fetchall start"
   for row in db.queryRows(statement, params):
     var res:seq[string]
     # XXX do this outside of the loop by passing columns in to queryRows
@@ -150,35 +148,41 @@ proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]
         result.cols.add($column_name(row, coli))
         case column_type(row, coli)
         of SQLITE_INTEGER:
-          result.types.add(Int)
+          result.types.add($Int)
         of SQLITE_NULL:
-          result.types.add(Null)
+          result.types.add($Null)
         of SQLITE_TEXT:
-          result.types.add(Text)
+          result.types.add($Text)
         of SQLITE_FLOAT:
-          result.types.add(Float)
+          result.types.add($Float)
         of SQLITE_BLOB:
-          result.types.add(Blob)
+          result.types.add($Blob)
         else:
-          result.types.add(Null)
+          result.types.add($Null)
     for coli in 0'i32 ..< L:
       res.add(row[coli])
     result.rows.add(res)
+  echo "fetchall done"
 
-proc runQuery*(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): RunResult =
+proc runQuery*(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): ref RunResult =
   ## Execute an SQL statement.
   ## If there was an error running the statement, .err will be non-empty.
   ## If it was a successful INSERT statement, .lastID will be the id of the last inserted row
+  echo "runQuery start"
+  new(result)
   assert(not db.isNil, "Database not connected.")
   var pstmt = db.prepareAndBindArgs(query, params)
   if pstmt.step() in {SQLITE_DONE, SQLITE_ROW}:
     result.lastID = last_insert_rowid(db)
     if finalize(pstmt) != SQLITE_OK:
       dbError(db)
+  echo "runQuery done"
 
 proc executeMany*(db:DbConn, statements:openArray[string]) =
   ## Execute many SQL statements.
   ## Return any error as a string.
+  echo "executeMany start"
   for s in statements:
     db.exec(sql(s))
-    
+  echo "executeMany done"
+

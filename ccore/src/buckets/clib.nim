@@ -122,13 +122,25 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
     let db = budget_handle.getBudgetFile().db
     let params = db.json_to_params(query, params_json)
     let res = db.fetchAll(sql($query), params)
-    let j = %*
-      {
-        "err": "",
-        "cols": res.cols,
-        "rows": res.rows,
-        "types": res.types,
-      }
+    let j = newJObject()
+    
+    let jcols = newJArray()
+    for col in res.cols:
+      jcols.add(newJString(col))
+    let jrows = newJArray()
+    for row in res.rows:
+      let jrow = newJArray()
+      for col in row:
+        jrow.add(newJString(col))
+      jrows.add(jrow)
+    let jtypes = newJArray()
+    for t in res.types:
+      let tstring = $t
+      jtypes.add(newJString(tstring))
+    j.add("err", newJString(""))
+    j.add("cols", jcols)
+    j.add("rows", jrows)
+    j.add("types", jtypes)
     toUgly(res_string, j)
   except:
     let j = %*
@@ -166,7 +178,7 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
       }
     toUgly(res_string, j)
   result = keepString(res_string)
-  logging.debug("run: ", query, " ", params_json, " -> ", result)
+  # logging.debug("run: ", query, " ", params_json, " -> ", result)
 
 proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
   ## Convert a C string containing a JSON-encoded array of strings

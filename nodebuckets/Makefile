@@ -32,7 +32,7 @@ csrc/sqlite3.c: ../ccore/src/buckets/sqlite3/sqlite3.c
 	cp $^ $@
 
 test:
-	node test.js
+	tsc && node dist/test.js
 
 clean:
 	-rm -r csrc

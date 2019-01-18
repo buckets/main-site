@@ -29,7 +29,7 @@ test "P(bool)":
 
 test "runQuery SELECT no params":
   let db = openDB(":memory:")
-  let res = db.runQuery(sql"SELECT 1")
+  discard db.runQuery(sql"SELECT 1")
 
 test "runQuery INSERT":
   let db = openDB(":memory:")
@@ -40,7 +40,7 @@ test "runQuery INSERT":
 test "runQuery failure":
   let db = openDB(":memory:")
   doAssertRaises(DbError):
-    let res = db.runQuery(sql"SELECT slkdflskdjf")
+    discard db.runQuery(sql"SELECT slkdflskdjf")
 
 test "runQuery $param":
   let db = openDB(":memory:")
@@ -93,11 +93,12 @@ test "all $param all datatypes":
   let db = openDB(":memory:")
   let res = db.fetchAll(sql"SELECT $s, $i, $f, $n", "string", 5, 4.3, nil)
   check res.rows == @[@["string", "5", "4.3", ""]]
+  check res.types == @["Text", "Int", "Float", "Null"]
 
 test "update sequence":
   let db = openDB(":memory:")
   discard db.runQuery(sql"CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)")
-  let res = db.runQuery(sql"INSERT INTO foo (name) values ($name)", "some name")
+  discard db.runQuery(sql"INSERT INTO foo (name) values ($name)", "some name")
   let res2 = db.fetchAll(sql"SELECT id, name FROM foo")
   check res2.rows == @[@["1", "some name"]]
   discard db.runQuery(sql"UPDATE foo SET name = $another", "renamed name")
