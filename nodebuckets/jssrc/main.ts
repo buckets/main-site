@@ -6,12 +6,12 @@ interface BucketsCLib {
   // Keep this in sync with jstonimbinding.cpp
   // start():void; We don't want people calling start
   version():string;
-  register_logger(proc:(x:string)=>void):string;
-  stringpc(command:string, arg:string):string;
+  register_logger(proc:(x:string)=>void):void;
+  stringpc(command:string, arg:string):Buffer;
   openfile(filename:string):number;
-  db_all_json(db:number, query:string, params_json_array:string):string;
-  db_run_json(db:number, query:string, params_json_array:string):string;
-  db_execute_many_json(db:number, queries_json_array:string):string;
+  db_all_json(db:number, query:string, params_json_array:string):Buffer;
+  db_run_json(db:number, query:string, params_json_array:string):Buffer;
+  db_execute_many_json(db:number, queries_json_array:string):Buffer;
 }
 
 type SqliteDataType =
@@ -93,7 +93,7 @@ export function db_all<T>(bf_id:number, query:string, params:SqliteParams):T[] {
 
 export function db_run(bf_id:number, query:string, params:SqliteParams) {
   params = params || [];
-  let res = JSON.parse(bucketslib.db_run_json(bf_id, query, JSON.stringify(params)));
+  let res = JSON.parse(bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8'));
   if (res.err) {
     throw Error(res.err);
   } else {
@@ -102,7 +102,7 @@ export function db_run(bf_id:number, query:string, params:SqliteParams) {
 }
 
 export function db_executeMany(bf_id:number, queries:string[]) {
-  let err = bucketslib.db_execute_many_json(bf_id, JSON.stringify(queries));
+  let err = bucketslib.db_execute_many_json(bf_id, JSON.stringify(queries)).toString('utf8');
   if (err) {
     throw Error(err);
   }

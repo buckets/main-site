@@ -24,14 +24,14 @@ NAN_METHOD(JS_buckets_version) {
 NAN_METHOD(JS_buckets_stringpc) {
   String::Utf8Value v8command(info[0]->ToString());
   String::Utf8Value v8arg(info[1]->ToString());
+  char* retval = buckets_stringpc(
+    (char *)(*v8command),
+    (char *)(*v8arg),
+    v8arg.length()
+  );
+  unsigned int size = strlen(retval);
   info.GetReturnValue().Set(
-    Nan::New(
-      buckets_stringpc(
-        (char *)(*v8command),
-        (char *)(*v8arg),
-        v8arg.length()
-      )
-    ).ToLocalChecked()
+    Nan::CopyBuffer(retval, size).ToLocalChecked() 
   );
 }
 
@@ -76,14 +76,14 @@ NAN_METHOD(JS_buckets_db_all_json) {
   int bf_handle = Nan::To<int>(info[0]).FromJust();
   String::Utf8Value v8query(info[1]->ToString());
   String::Utf8Value v8params_json(info[2]->ToString());
+  char* retval = buckets_db_all_json(
+    bf_handle,
+    (char *)(*v8query),
+    (char *)(*v8params_json)
+  );
+  unsigned int size = strlen(retval);
   info.GetReturnValue().Set(
-    Nan::New(
-      buckets_db_all_json(
-        bf_handle,
-        (char *)(*v8query),
-        (char *)(*v8params_json)
-      )
-    ).ToLocalChecked() 
+    Nan::CopyBuffer(retval, size).ToLocalChecked() 
   );
 }
 
@@ -92,14 +92,14 @@ NAN_METHOD(JS_buckets_db_run_json) {
   int bf_handle = Nan::To<int>(info[0]).FromJust();
   String::Utf8Value v8query(info[1]->ToString());
   String::Utf8Value v8params_json(info[2]->ToString());
+  char* retval = buckets_db_run_json(
+    bf_handle,
+    (char *)(*v8query),
+    (char *)(*v8params_json)
+  );
+  unsigned int size = strlen(retval);
   info.GetReturnValue().Set(
-    Nan::New(
-      buckets_db_run_json(
-        bf_handle,
-        (char *)(*v8query),
-        (char *)(*v8params_json)
-      )
-    ).ToLocalChecked() 
+    Nan::CopyBuffer(retval, size).ToLocalChecked() 
   );
 }
 
@@ -107,13 +107,13 @@ NAN_METHOD(JS_buckets_db_run_json) {
 NAN_METHOD(JS_buckets_db_execute_many_json) {
   int bf_handle = Nan::To<int>(info[0]).FromJust();
   String::Utf8Value v8queries_json(info[1]->ToString());
+  char* retval = buckets_db_execute_many_json(
+    bf_handle,
+    (char *)(*v8queries_json)
+  );
+  unsigned int size = strlen(retval);
   info.GetReturnValue().Set(
-    Nan::New(
-      buckets_db_execute_many_json(
-        bf_handle,
-        (char *)(*v8queries_json)
-      )
-    ).ToLocalChecked() 
+    Nan::CopyBuffer(retval, size).ToLocalChecked() 
   );
 }
 

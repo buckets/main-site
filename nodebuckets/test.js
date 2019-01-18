@@ -32,7 +32,7 @@ dotest("openfile", () => {
 })
 
 dotest("db_all_json", () => {
-  let res = main.db_all_json(bf, "SELECT 1,2,3", "[]");
+  let res = main.db_all_json(bf, "SELECT 1,2,3", "[]").toString('utf8');
   console.log("got res");
   console.log(res);
 })

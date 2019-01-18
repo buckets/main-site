@@ -38,10 +38,8 @@ var LOG_FUNCTIONS:seq[LogFunc]
 method log*(logger: FunctionLogger, level: Level, args: varargs[string, `$`]) =
   if level >= logger.levelThreshold:
     let ln = substituteLog(logger.fmtStr, level, args)
-    GC_ref(ln)
     for fn in LOG_FUNCTIONS:
       fn(ln)
-    GC_unref(ln)
 
 #-----------------------------------
 
@@ -198,4 +196,3 @@ proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstr
   except:
     res_string = getCurrentExceptionMsg()
   result = keepString(res_string)
-  logging.debug("many: ", queries.repr, " -> ", res_string)
