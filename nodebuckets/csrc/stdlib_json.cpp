@@ -51,7 +51,6 @@ struct tyObject_CellSet_jG87P0AI9aZtss9ccTYBIISQ;
 struct tyObject_PageDesc_fublkgIY4LG3mT51LU2WHg;
 struct tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw;
 struct tyTuple_awOivLjlO76sGdHY7nQUjQ;
-struct tyTuple_jq7X5k7hWG0tdTZTDkiyGQ;
 struct TGenericSeq {
 NI len;
 NI reserved;
@@ -250,10 +249,6 @@ NI Field1;
 NimStringDesc* Field2;
 tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* Field3;
 };
-struct tyTuple_jq7X5k7hWG0tdTZTDkiyGQ {
-NimStringDesc* Field0;
-tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* Field1;
-};
 typedef NU8 tyEnum_ParserState_Na0rM2Zdr3RpxeNeXbvLrQ;
 struct tySequence_oLpBKXzW3hF9aCVMo5EymfQ : TGenericSeq {
   tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* data[SEQ_DECL_SIZE];
@@ -354,7 +349,6 @@ extern TFrame* framePtr_HRfVMH3jYeBJz6Q6X9b6Ptw;
 extern TFrame* framePtr_HRfVMH3jYeBJz6Q6X9b6Ptw;
 extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
 extern tyObject_GcHeap_1TRH1TZMaVZTnLNcIHuNFQ gch_IcYaEuuWivYAS86vFMTS3Q;
-TNimType NTI_jq7X5k7hWG0tdTZTDkiyGQ_;
 TNimNode* NimDT__df9bshXB7C9cTiWPIOtX3j1Q_kind[8];
 STRING_LITERAL(TM_9b9bytt1stv9cZ8uqII7HFgew_5, "str", 3);
 STRING_LITERAL(TM_9b9bytt1stv9cZ8uqII7HFgew_7, "[GCASSERT] ", 11);
@@ -1593,92 +1587,6 @@ appendString(result, ((NimStringDesc*) &TM_9b9bytt1stv9cZ8uqII7HFgew_53));
 	}
 	popFrame();
 }
-
-N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__9bR9b9aepApwIZEZZtX9cb7RFA)(tyTuple_jq7X5k7hWG0tdTZTDkiyGQ* keyVals, NI keyValsLen_0) {
-	tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* result;
-	nimfr_("%", "json.nim");
-{	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*)0;
-	nimln_(335, "json.nim");
-	{
-		if (!(keyValsLen_0 == ((NI) 0))) goto LA3_;
-{		result = newJArray_phgxr9cKlc0dmrJpCth52pw_3();
-		goto BeforeRet_;
-}	}
-	LA3_: ;
-	nimln_(336, "json.nim");
-	result = newJObject_phgxr9cKlc0dmrJpCth52pw_2();
-	{
-		NimStringDesc* key;
-		tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* val;
-		key = (NimStringDesc*)0;
-		val = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*)0;
-		nimln_(2302, "system.nim");
-		NI i = ((NI) 0);
-		{
-			nimln_(2303, "system.nim");
-			while (1) {
-				NI TM_9b9bytt1stv9cZ8uqII7HFgew_54;
-				if (!(i < keyValsLen_0)) goto LA7;
-				nimln_(337, "json.nim");
-				if ((NU)(i) >= (NU)(keyValsLen_0)) raiseIndexError2(i,keyValsLen_0-1);
-				key = keyVals[i].Field0;
-				nimln_(2304, "system.nim");
-				if ((NU)(i) >= (NU)(keyValsLen_0)) raiseIndexError2(i,keyValsLen_0-1);
-				val = keyVals[i].Field1;
-				nimln_(337, "json.nim");
-				if (!(((32 &(1U<<((NU)((*result).kind)&7U)))!=0))) raiseFieldError(((NimStringDesc*) &TM_9b9bytt1stv9cZ8uqII7HFgew_18));
-				X5BX5Deq__79bwPu2H8TyyZ9cDM1RrH17A((*result).fields, key, val);
-				nimln_(2305, "system.nim");
-				TM_9b9bytt1stv9cZ8uqII7HFgew_54 = addInt(i, ((NI) 1));
-				i = (NI)(TM_9b9bytt1stv9cZ8uqII7HFgew_54);
-			} LA7: ;
-		}
-	}
-	}BeforeRet_: ;
-	popFrame();
-	return result;
-}
-
-N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__8iXO9aRAijCPe58pujCBbuQ_3)(NimStringDesc* s) {
-	tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* result;
-	tyEnum_JsonNodeKind_RUngo7nCHe6O8aBGIcrhtg T1_;
-	NimStringDesc* T2_;
-	nimfr_("%", "json.nim");
-	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*)0;
-	nimln_(311, "json.nim");
-	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*) newObj((&NTI_zfzzuQ8txrdZAYK0WGWpHg_), sizeof(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q));
-	nimln_(312, "json.nim");
-	T1_ = (tyEnum_JsonNodeKind_RUngo7nCHe6O8aBGIcrhtg)0;
-	T1_ = ((tyEnum_JsonNodeKind_RUngo7nCHe6O8aBGIcrhtg) 4);
-	FieldDiscriminantCheck((NI)(NU)((*result).kind), (NI)(NU)(T1_), NimDT__df9bshXB7C9cTiWPIOtX3j1Q_kind, 8);
-	(*result).kind = T1_;
-	if (!(((16 &(1U<<((NU)((*result).kind)&7U)))!=0))) raiseFieldError(((NimStringDesc*) &TM_9b9bytt1stv9cZ8uqII7HFgew_5));
-	nimln_(313, "json.nim");
-	T2_ = (NimStringDesc*)0;
-	T2_ = (*result).str; (*result).str = copyStringRC1(s);
-	if (T2_) nimGCunrefNoCycle(T2_);
-	popFrame();
-	return result;
-}
-
-N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*, percent__z0g83xvrx4R10lOvgItZ9aQ_2)(NI64 n) {
-	tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q* result;
-	tyEnum_JsonNodeKind_RUngo7nCHe6O8aBGIcrhtg T1_;
-	nimfr_("%", "json.nim");
-	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*)0;
-	nimln_(317, "json.nim");
-	result = (tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q*) newObj((&NTI_zfzzuQ8txrdZAYK0WGWpHg_), sizeof(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q));
-	nimln_(318, "json.nim");
-	T1_ = (tyEnum_JsonNodeKind_RUngo7nCHe6O8aBGIcrhtg)0;
-	T1_ = ((tyEnum_JsonNodeKind_RUngo7nCHe6O8aBGIcrhtg) 2);
-	FieldDiscriminantCheck((NI)(NU)((*result).kind), (NI)(NU)(T1_), NimDT__df9bshXB7C9cTiWPIOtX3j1Q_kind, 8);
-	(*result).kind = T1_;
-	if (!(((4 &(1U<<((NU)((*result).kind)&7U)))!=0))) raiseFieldError(((NimStringDesc*) &TM_9b9bytt1stv9cZ8uqII7HFgew_15));
-	nimln_(319, "json.nim");
-	(*result).num = n;
-	popFrame();
-	return result;
-}
 N_LIB_PRIVATE N_NIMCALL(void, stdlib_jsonDatInit000)(void) {
 static TNimNode* TM_9b9bytt1stv9cZ8uqII7HFgew_2[7];
 NI TM_9b9bytt1stv9cZ8uqII7HFgew_4;
@@ -1690,8 +1598,7 @@ static char* NIM_CONST TM_9b9bytt1stv9cZ8uqII7HFgew_3[7] = {
 "JString", 
 "JObject", 
 "JArray"};
-static TNimNode* TM_9b9bytt1stv9cZ8uqII7HFgew_55[2];
-static TNimNode TM_9b9bytt1stv9cZ8uqII7HFgew_0[19];
+static TNimNode TM_9b9bytt1stv9cZ8uqII7HFgew_0[16];
 NTI_df9bshXB7C9cTiWPIOtX3j1Q_.size = sizeof(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q);
 NTI_df9bshXB7C9cTiWPIOtX3j1Q_.kind = 18;
 NTI_df9bshXB7C9cTiWPIOtX3j1Q_.base = 0;
@@ -1757,21 +1664,5 @@ NTI_zfzzuQ8txrdZAYK0WGWpHg_.kind = 22;
 NTI_zfzzuQ8txrdZAYK0WGWpHg_.base = (&NTI_df9bshXB7C9cTiWPIOtX3j1Q_);
 NTI_zfzzuQ8txrdZAYK0WGWpHg_.flags = 2;
 NTI_zfzzuQ8txrdZAYK0WGWpHg_.marker = Marker_tyRef_zfzzuQ8txrdZAYK0WGWpHg;
-NTI_jq7X5k7hWG0tdTZTDkiyGQ_.size = sizeof(tyTuple_jq7X5k7hWG0tdTZTDkiyGQ);
-NTI_jq7X5k7hWG0tdTZTDkiyGQ_.kind = 18;
-NTI_jq7X5k7hWG0tdTZTDkiyGQ_.base = 0;
-NTI_jq7X5k7hWG0tdTZTDkiyGQ_.flags = 2;
-TM_9b9bytt1stv9cZ8uqII7HFgew_55[0] = &TM_9b9bytt1stv9cZ8uqII7HFgew_0[17];
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[17].kind = 1;
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[17].offset = offsetof(tyTuple_jq7X5k7hWG0tdTZTDkiyGQ, Field0);
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[17].typ = (&NTI_77mFvmsOLKik79ci2hXkHEg_);
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[17].name = "Field0";
-TM_9b9bytt1stv9cZ8uqII7HFgew_55[1] = &TM_9b9bytt1stv9cZ8uqII7HFgew_0[18];
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[18].kind = 1;
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[18].offset = offsetof(tyTuple_jq7X5k7hWG0tdTZTDkiyGQ, Field1);
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[18].typ = (&NTI_zfzzuQ8txrdZAYK0WGWpHg_);
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[18].name = "Field1";
-TM_9b9bytt1stv9cZ8uqII7HFgew_0[16].len = 2; TM_9b9bytt1stv9cZ8uqII7HFgew_0[16].kind = 2; TM_9b9bytt1stv9cZ8uqII7HFgew_0[16].sons = &TM_9b9bytt1stv9cZ8uqII7HFgew_55[0];
-NTI_jq7X5k7hWG0tdTZTDkiyGQ_.node = &TM_9b9bytt1stv9cZ8uqII7HFgew_0[16];
 }
 

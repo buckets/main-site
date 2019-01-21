@@ -148,17 +148,17 @@ proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]
         result.cols.add($column_name(row, coli))
         case column_type(row, coli)
         of SQLITE_INTEGER:
-          result.types.add($Int)
+          result.types.add("Int")
         of SQLITE_NULL:
-          result.types.add($Null)
+          result.types.add("Null")
         of SQLITE_TEXT:
-          result.types.add($Text)
+          result.types.add("Text")
         of SQLITE_FLOAT:
-          result.types.add($Float)
+          result.types.add("Float")
         of SQLITE_BLOB:
-          result.types.add($Blob)
+          result.types.add("Blob")
         else:
-          result.types.add($Null)
+          result.types.add("Null")
     for coli in 0'i32 ..< L:
       res.add(row[coli])
     result.rows.add(res)
