@@ -815,7 +815,7 @@ braces@^2.3.1:
   dependencies:
     "@iffycan/events" "^1.0.1"
     "@iffycan/i18n" "^0.7.0"
-    bucketslib "file:../../../Library/Caches/Yarn/v4/npm-buckets-core-0.1.0-3f75dd72-6831-47c9-96a0-f0234c437540-1546397779612/node_modules/nodebuckets"
+    bucketslib "file:../../../Library/Caches/Yarn/v4/npm-buckets-core-0.1.0-99d7a1a9-f55e-4c29-8894-9dbab54316f0-1548112201608/node_modules/nodebuckets"
     crypto-js "^3.1.9-1"
     lodash.sortby "^4.7.0"
     mathjs "4.2.2"
@@ -824,6 +824,11 @@ braces@^2.3.1:
     path "^0.12.7"
     sha.js "^2.4.11"
     sqlite3 "^4.0.4"
+
+"bucketslib@file:../nodebuckets":
+  version "0.1.0"
+  dependencies:
+    node-addon-api "^1.6.2"
 
 buffer-alloc-unsafe@^1.1.0:
   version "1.1.0"
@@ -837,11 +842,6 @@ buffer-alloc@^1.2.0:
   dependencies:
     buffer-alloc-unsafe "^1.1.0"
     buffer-fill "^1.0.0"
-
-"bucketslib@file:../nodebuckets":
-  version "0.1.0"
-  dependencies:
-    nan "^2.11.1"
 
 buffer-equal-constant-time@1.0.1:
   version "1.0.1"
@@ -3465,11 +3465,6 @@ nan@~2.10.0:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
   integrity sha512-bAdJv7fBLhWC+/Bls0Oza+mvTaNQtP+1RyhhhvD95pgUJz6XM5IzgmxOkItJ9tkoCiplvAnXI1tNmmUD/eScyA==
 
-nan@^2.11.1:
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.12.1.tgz#7b1aa193e9aa86057e3c7bbd0ac448e770925552"
-  integrity sha512-JY7V6lRkStKcKTvHO5NVSQRv+RV+FIL5pvDoLiAtSL9pKlC5x9PKQcZDsq7m4FO4d57mkhC6Z+QhAh3Jdk5JFw==
-
 nanomatch@^1.2.9:
   version "1.2.9"
   resolved "https://registry.yarnpkg.com/nanomatch/-/nanomatch-1.2.9.tgz#879f7150cb2dab7a471259066c104eee6e0fa7c2"
@@ -3500,6 +3495,11 @@ nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
+
+node-addon-api@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-1.6.2.tgz#d8aad9781a5cfc4132cc2fecdbdd982534265217"
+  integrity sha512-479Bjw9nTE5DdBSZZWprFryHGjUaQC31y1wHo19We/k0BZlrmhqQitWoUL0cD8+scljCbIUL+E58oRDEakdGGA==
 
 node-fetch@^1.0.1:
   version "1.7.3"

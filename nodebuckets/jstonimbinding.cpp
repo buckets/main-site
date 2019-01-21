@@ -17,7 +17,6 @@ Value start(const CallbackInfo& info) {
 // buckets_version
 String version(const CallbackInfo& info) {
   Env env = info.Env();
-  NimMain();
   return String::New(env, buckets_version());
 }
 

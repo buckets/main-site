@@ -14,6 +14,8 @@ interface BucketsCLib {
   db_execute_many_json(db:number, queries_json_array:string):string;
 }
 
+bucketslib.start();
+
 type SqliteDataType =
   | "Null"
   | "Int"

@@ -44,6 +44,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // @ts-ignore
 var bucketslib = __importStar(require("../lib/bucketslib.node"));
+bucketslib.start();
 var Semaphore = /** @class */ (function () {
     function Semaphore(available) {
         if (available === void 0) { available = 1; }
