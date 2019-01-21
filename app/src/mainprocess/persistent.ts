@@ -24,6 +24,7 @@ export interface PersistentState {
     windows: Array<IOpenWindow>;
   }>;
   timezone: string;
+  bug_report_email: string;
 }
 
 export let PSTATE:PersistentState = {
@@ -36,6 +37,7 @@ export let PSTATE:PersistentState = {
   download_beta_versions: false,
   last_opened_windows: [],
   timezone: '',
+  bug_report_email: '',
 };
 
 function loadState():PersistentState {

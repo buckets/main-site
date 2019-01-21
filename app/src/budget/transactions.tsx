@@ -268,6 +268,7 @@ interface TransRowState {
   account_id: number;
   general_cat: GeneralCatType;
   cats: Category[];
+  negate: boolean;
   transfer_account_id: number;
 }
 class TransRow extends React.Component<TransRowProps, TransRowState> {
@@ -282,6 +283,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       account_id: null,
       general_cat: props.trans ? props.trans.general_cat : '',
       cats: props.categories ? props.categories : [],
+      negate: props.trans ? props.trans.amount <= 0 : true,
       transfer_account_id: null,
     }
     Object.assign(this.state, this.recomputeState(props));
@@ -297,9 +299,12 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
   recomputeState(props:TransRowProps):Partial<TransRowState> {
     if (props.trans) {
       // An existing transaction is being shown
+      const negate = props.trans.amount <= 0;
+      const amount = Math.abs(props.trans.amount);
       let state:Partial<TransRowState> = {
         editing: this.state.editing,
-        amount: props.trans.amount,
+        amount,
+        negate,
         memo: props.trans.memo,
         posted: parseLocalTime(props.trans.posted),
         account_id: props.trans.account_id,
@@ -355,9 +360,10 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
       .checkpoint(sss('Update Transaction'))
       const cats = this.state.cats;
       const general_cat = this.state.general_cat;
+      const sign = this.state.negate ? -1 : 1;
       const trans = await store.sub.accounts.updateTransaction(this.props.trans.id, {
         account_id: this.state.account_id,
-        amount: this.state.amount,
+        amount: Math.abs(this.state.amount) * sign,
         memo: this.state.memo,
         posted: this.state.posted,
       })
@@ -374,9 +380,11 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
 
           const cats = this.state.cats;
           const general_cat = this.state.general_cat;
+          const sign = this.state.negate ? -1 : 1;
+          const amount = Math.abs(this.state.amount) * sign;
           const trans = await store.sub.accounts.transact({
             account_id: this.state.account_id,
-            amount: this.state.amount,
+            amount,
             memo: this.state.memo,
             posted: this.state.posted,
           })
@@ -385,7 +393,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
             // Create a second, opposite transaction
             const xfer_trans = await store.sub.accounts.transact({
               account_id: this.state.transfer_account_id,
-              amount: -this.state.amount,
+              amount: -amount,
               memo: this.state.memo,
               posted: this.state.posted,
             })
@@ -402,6 +410,7 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
           this.setState({
             amount: 0,
             memo: '',
+            negate: true,
             general_cat: '',
             cats: [],
             transfer_account_id: null,
@@ -579,12 +588,29 @@ class TransRow extends React.Component<TransRowProps, TransRowState> {
               }}
             />
           </td>
-          <td className="right">
+          <td className="right nobr">
+            <button className="icon"
+              tabIndex={-1}
+              onClick={() => {
+                this.setState({
+                  negate: !this.state.negate,
+                })
+              }}>
+              <span className={cx("fa", {
+                "fa-plus": !this.state.negate,
+                "fa-minus": this.state.negate,
+              })} />
+            </button>
             <MoneyInput
               value={this.state.amount}
               onKeyDown={postOnEnter}
               onChange={(amount) => {
-                this.setState({amount: amount})
+                let negate = this.state.negate;
+                if (amount < 0) {
+                  amount = -amount;
+                  negate = !negate;
+                }
+                this.setState({amount, negate})
               }}
             />
           </td>

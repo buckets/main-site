@@ -90,17 +90,13 @@ export class AccountList extends React.Component<AccountListProps,any> {
       }
       return (<tr key={account.id} className="icon-hover-trigger">
           <td className="icon-button-wrap"><NoteMaker obj={account} /></td>
-          <td className="nobr"><ClickToEdit
-            value={account.name}
-            placeholder={sss('accounts.name_placeholder', 'no name')}
-            onChange={(val) => {
-              manager
-              .checkpoint(sss('Update Account Name'))
-              .sub.accounts.update(account.id, {name: val});  
-            }}
-          /> {badge}</td>
+          <td className="nobr"><Link
+            relative
+            to={`/${account.id}`}
+            className="nocolor"
+            >{account.name} {badge}</Link>
+          </td>
           <td className="right nobr"><Money value={balances[account.id]} />{import_balance_note}</td>
-          <td><Link relative to={`/${account.id}`} className="subtle"><span className="fa fa-ellipsis-h"/></Link></td>
         </tr>);
     })
     return (<table className="ledger full-width">

@@ -46,7 +46,7 @@
     <div class="padded">
       <div>
         <b data-translate>Your email address:</b> <div data-translate class="aside">(If you want a response)</div>
-        <div><input autofocus type="email" id="from_email" style="width: 100%"></div>
+        <div><input type="email" id="from_email" style="width: 100%"></div>
       </div>
       <div>
         <b data-translate>Optional message:</b>
@@ -112,6 +112,8 @@ const logfile_path = qs.logfile_path;
 
 if (qs.email) {
   message_el.focus();
+} else {
+  email_el.focus();
 }
 
 upload_button.addEventListener('change', (ev) => {

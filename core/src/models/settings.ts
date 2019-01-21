@@ -19,12 +19,14 @@ export interface ISettings {
   reports_timeback_number: number;
   reports_timeback_unit: 'month'|'year';
   money_symbol: string,
+  accounts_in_sidebar: boolean;
 }
 
 export const DEFAULTS:ISettings = {
   reports_timeback_number: 18,
   reports_timeback_unit: 'month',
   money_symbol: '',
+  accounts_in_sidebar: false,
 }
 
 export interface ISettingsObject extends IObject {
@@ -55,7 +57,6 @@ export class SettingsStore {
     const rows = await this.store.query<{key:keyof ISettings,value:any}>('SELECT key, value FROM settings', {})
     let ret:Partial<ISettings> = {};
     rows.forEach(row => {
-      console.log("row", row);
       let value;
       try {
         value = JSON.parse(row.value);

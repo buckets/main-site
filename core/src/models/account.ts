@@ -762,7 +762,7 @@ export class AccountStore {
     let sign = Math.sign(trans.amount);
     let sum = categories.reduce((sum, cat) => {
       if (Math.sign(cat.amount) !== sign) {
-        throw new SignMismatch(`Categories must match sign of transaction (${trans.amount}); invalid: ${cat.amount}`);
+        cat.amount *= -1;
       }
       if (cat.bucket_id === null) {
         throw new Failure(`You must choose a bucket.`);

@@ -74,6 +74,13 @@ a {
 a:hover {
   text-decoration: underline;
 }
+a.nocolor {
+  color: black;
+}
+a.nocolor:hover {
+  text-decoration: none;
+  color: var(--blue);
+}
 
 ol.spaced li {
   margin: 1rem 0;
@@ -112,9 +119,29 @@ ol.spaced li {
   max-width: 12rem;
   border-radius: 0;
 }
+.app .nav a.minor {
+  font-size: .9rem;
+  /*margin-left: 1rem;*/
+  padding: 0.2rem .5rem .2rem 1.5rem;
+}
+.app .nav .leftrightaligned {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.app .nav .leftrightaligned div:first-child {
+  text-align: start;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 70%;
+}
+.app .nav .leftrightaligned div:last-child {
+  text-align: end;
+}
 .app .nav a.sub {
-  font-size: 1rem;
-  padding-left: 2rem;
+  font-size: .9rem;
+  padding-left: 1.5rem;
 }
 .app .nav a:hover {
   background-color: rgba(0,0,0,0.5);
@@ -750,14 +777,14 @@ table.ledger .icon-button-wrap button.icon,
 .money-input {
   display: inline-flex;
   align-items: center;
+  position: relative;
 }
 .money-input.focused {
 }
-.money-input.computed {
+.money-input.computed input {
 }
 .money-input input {
-  max-width: 100px;
-  min-width: 50px;
+  width: 50px;
   border: 1px solid var(--lighter-grey);
   border-radius: 50px;
   padding: .1rem .4rem;
@@ -767,12 +794,20 @@ table.ledger .icon-button-wrap button.icon,
   background-color: var(--highlighter);
 }
 .money-input .computed-value {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+  background-color: white;
+  border-radius: 2px;
+  padding: 1px 2px;
 }
-.money-input .computed-value:before {
-  content: '=';
-  padding: 0 4px 0 7px;
-  opacity: 0.5;
-  font-weight: bold;
+.money-input.focused .computed-value {
+  background-color: white;
+  border: 1px solid var(--lighter-grey);
+  font-size: .8rem;
+  top: calc(-1rem - 3px);
+  right: -25%;
+  transform: rotateZ(5deg);
 }
 
 /* Transactions */

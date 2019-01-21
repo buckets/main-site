@@ -12,7 +12,6 @@ export { openSqlite, NodeSQLiteCursor, NodeSQLiteDatabase } from 'buckets-core/d
 // }
 // export class NodeSQLiteCursor implements ICursor {
 //   constructor(readonly db:sqlite3.Database) {
-
 //   }
 //   async run(query:string, params={}):Promise<AsyncRunResult> {
 //     return new Promise<AsyncRunResult>((resolve, reject) => {

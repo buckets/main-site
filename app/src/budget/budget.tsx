@@ -203,6 +203,22 @@ class Navbar extends React.Component<{
     if (isRegistered()) {
       trial_version = null;
     }
+
+    let account_links = [];
+    if (appstate.settings.accounts_in_sidebar) {
+      account_links = appstate.open_accounts.map(account => {
+        const balance = appstate.account_balances[account.id];
+        return <Link key={account.id} relative to={`/accounts/${account.id}`} exactMatchClass="selected" className="minor">
+          <div className="leftrightaligned">
+            <div>{account.name}</div>
+            <div><Money value={balance} nocolor round hideZeroCents /></div>
+          </div>
+        </Link>
+      })
+      // account_links = [
+      //   <Link relative to="/accounts" exactMatchClass="selected"><span>Checking</span></Link>
+      // ]
+    }
     
     let import_badge_count = (
       appstate.num_unknown_accounts
@@ -263,6 +279,7 @@ class Navbar extends React.Component<{
       <div className="nav">
         <div>
           <Link relative to="/accounts" exactMatchClass="selected"><span>{sss('Accounts')}</span></Link>
+          {account_links}
           <Route path="/accounts">
             <Link relative to="/closed" className="sub" exactMatchClass="selected" matchClass="selected-parent">{sss('Closed'/*! Label for list of closed accounts */)}</Link>
           </Route>
@@ -405,7 +422,7 @@ class Application extends React.Component<ApplicationProps, any> {
                     <inter-total>-</inter-total>
                     <total>
                       <name>{sss('Expenses')}</name>
-                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} symbol /></amount>
+                      <amount><Money className="negative" value={Math.abs(appstate.expenses)} symbol nocolor /></amount>
                     </total>
                     <inter-total>=</inter-total>
                     <total>

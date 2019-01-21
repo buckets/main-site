@@ -31,7 +31,7 @@ OVA_PATH="${ISO_DIR}/${OVA_FILENAME}"
 ZIP_PATH="${ISO_DIR}/${ZIP_FILENAME}"
 
 YARN_MSI_URL="https://yarnpkg.com/latest.msi"
-NODE_MSI_URL="https://nodejs.org/dist/v8.2.1/node-v8.2.1-x86.msi"
+NODE_MSI_URL="https://nodejs.org/dist/latest-v8.x/node-v8.14.0-x86.msi"
 NCAT_URL="http://nmap.org/dist/ncat-portable-5.59BETA1.zip"
 
 GUEST_ADDITIONS_ISO=${GUEST_ADDITIONS_ISO:-/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso}
@@ -208,6 +208,7 @@ do_build() {
     PROJECT_DIR=$(project_root_dir)
     echo "do_build $PROJECT_DIR"
     do_prepare_build "$PROJECT_DIR"
+    ensure_signedin
     echo | cmd 'c:\builder\win_build_launcher.bat build'
 }
 
@@ -226,6 +227,7 @@ do_publish() {
     fi
     PROJECT_DIR=$(project_root_dir)
     do_prepare_build "$PROJECT_DIR"
+    ensure_signedin
     echo | vboxmanage guestcontrol "$VMNAME" run \
         --username "$WIN_USER" --password "$WIN_PASS" \
         --putenv GH_TOKEN="$GH_TOKEN" \
@@ -265,35 +267,52 @@ admincmd() {
 }
 
 ensure_off() {
-    if ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | grep "powered off" > /dev/null; then
+    echo "Ensuring off..."
+    if ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | egrep "powered off|saved|aborted" > /dev/null; then
+        echo "Pressing power button..."
         vboxmanage controlvm "$VMNAME" acpipowerbutton
+
     fi
     i="0"
-    while ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | grep "powered off" > /dev/null; do
+    while ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | egrep "powered off|saved|aborted" > /dev/null; do
         let i="$i + 1"
-        if [ "$i" -eq 15 ]; then
+        if [ "$i" -eq 120 ]; then
+            echo "Unplugging power..."
             vboxmanage controlvm "$VMNAME" poweroff
         fi
         sleep 1
     done
+    echo "It's off"
 }
 
 ensure_on() {
+    echo "Ensuring on..."
     if ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; then
         vboxmanage startvm "$VMNAME" # --type headless
     fi
     while ! vboxmanage showvminfo "$VMNAME" | grep "running" >/dev/null; do
         sleep 1
     done
+    echo "It's on"
 }
 
 ensure_booted() {
+    echo "Ensuring booted..."
     ensure_on
 
     # wait for guest additions to be started
     while ! cmd echo hello 2>/dev/null | grep "hello" >/dev/null; do
         sleep 1
     done
+    echo "It's booted."
+}
+
+ensure_signedin() {
+    echo "Waiting for $WIN_USER to be signed in..."
+    while ! cmd query user | grep -i "$WIN_USER" >/dev/null; do
+        sleep 1
+    done
+    echo "$WIN_USER is signed in."
 }
 
 restore_to() (
@@ -398,6 +417,7 @@ ensure_shared_folder() {
     SHARE_NAME=$1
     HOST_DIR=$2
     DEV="${3:-x}"
+    echo "Ensuring shared folder present $SHARE_NAME $HOST_DIR $DEV"
     if [ -z "$SHARE_NAME" ] || [ -z "$HOST_DIR" ]; then
         echo "Error: Must provide SHARE_NAME HOST_DIR to ensure_shared_folder"
         exit 1
@@ -462,7 +482,7 @@ ensure_mount() {
 
 snapshot_ncat() {
     set -e
-    echo "Installing ncat"
+    echo "Start of ncat install"
     if [ ! -e "${RESOURCE_DIR}/ncat.exe" ]; then
         echo "No ncat.exe"
         ZIP_PATH="${RESOURCE_DIR}/ncat.zip"
@@ -487,6 +507,7 @@ snapshot_ncat() {
     cmd 'echo xcopy x:\tmp\ncat.exe c:\windows\system32\ >> c:\builder\bootstrap.bat'
     cmd 'type c:\builder\bootstrap.bat'
     admincmd 'c:\builder\bootstrap.bat'
+    echo "Done installing ncat"
 }
 
 snapshot_node() {
@@ -552,8 +573,11 @@ snapshot_buildtools() {
     # unshare folder
     cmd 'net use x: /delete'
     ensure_off
+    sleep 10
+    echo "Removing shared folder..."
     vboxmanage sharedfolder remove "$VMNAME" \
             --name "buildshare"
+    echo "Done making buildtools snapshot"
 }
 
 share_directory() {

@@ -2,7 +2,7 @@ import { test} from 'tap'
 import { getStore } from './testutil';
 
 import { isObj } from '../store';
-import { SumMismatch, SignMismatch } from './account';
+import { SumMismatch } from './account';
 import { Bucket, Transaction as BTrans } from './bucket';
 import { Transaction as ATrans } from './account';
 import { parseLocalTime } from '../time'
@@ -175,27 +175,29 @@ test('negative', async t => {
 test('negative sign mismatch', async t => {
   let { store, b1:bucket, trans } = await setup(-1000);
 
-  await t.rejects(() => {
-    return store.sub.accounts.categorize(trans.id, [
-      {
-        bucket_id: bucket.id,
-        amount: 1000,
-      },
-    ]);
-  }, SignMismatch, 'message', {});
+  await store.sub.accounts.categorize(trans.id, [
+    {
+      bucket_id: bucket.id,
+      amount: 1000,
+    },
+  ]);
+
+  let newb1 = await store.sub.buckets.get(bucket.id);
+  t.equal(newb1.balance, -1000);
 })
 
 test('positive sign mismatch', async t => {
   let { store, b1:bucket, trans } = await setup(1000);
 
-  await t.rejects(() => {
-    return store.sub.accounts.categorize(trans.id, [
-      {
-        bucket_id: bucket.id,
-        amount: -1000,
-      },
-    ]);
-  }, SignMismatch, 'message', {});
+  await store.sub.accounts.categorize(trans.id, [
+    {
+      bucket_id: bucket.id,
+      amount: -1000,
+    },
+  ]);
+
+  let newb1 = await store.sub.buckets.get(bucket.id);
+  t.equal(newb1.balance, 1000);
 })
 
 test('categorize as income', async t => {

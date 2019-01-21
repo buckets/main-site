@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { EventSource } from '@iffycan/events'
 import {isObj, IStore, IObjectEvent} from 'buckets-core/dist/store'
 import { Account, UnknownAccount, Transaction as ATrans, Category } from 'buckets-core/dist/models/account'
-import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow } from 'buckets-core/dist/models/bucket'
+import {Bucket, Group, Transaction as BTrans, BucketFlow, BucketFlowMap, emptyFlow, clearBucketWantCache } from 'buckets-core/dist/models/bucket'
 import { Connection } from 'buckets-core/dist/models/simplefin'
 import { isBetween, loadTS, parseLocalTime, localNow, makeLocalDate } from 'buckets-core/dist/time'
 import {Balances} from 'buckets-core/dist/models/balances'
@@ -524,6 +524,7 @@ export class StateManager {
     }
   }
   async refresh():Promise<any> {
+    clearBucketWantCache();
     await Promise.all([
       this.fetchSettings(),
       this.fetchAllAccounts(),

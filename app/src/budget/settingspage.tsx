@@ -42,6 +42,20 @@ export class SettingsPage extends React.Component<SettingsPageProps, {}> {
               />
             </td>
           </tr>
+          <tr>
+            <th>{sss('Accounts in side bar')}</th>
+            <td>
+              <input
+                type="checkbox"
+                checked={appstate.settings.accounts_in_sidebar}
+                onChange={(ev:any) => {
+                  manager.nocheckpoint.sub
+                  .settings.updateSettings({
+                    accounts_in_sidebar: ev.target.checked,
+                  })
+                }} />
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

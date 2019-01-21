@@ -62,8 +62,10 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
   render() {
     let { value, onChange, className, ...rest } = this.props;
     let computed_value_elem = null;
+    let has_computed = false;
     let computed_value = this.display2Cents(this.state.display);
     if (computed_value !== decimal2cents(this.state.display)) {
+      has_computed = true;
       computed_value_elem = (<Money
         className="computed-value"
         noanimate
@@ -74,12 +76,17 @@ export class MoneyInput extends React.Component<MoneyInputProps, {
       computed: computed_value_elem !== null,
     })
     let size = this.state.display.length+1;
+    let valueToShow = this.state.display;
+    if (!this.state.focused && has_computed) {
+      valueToShow = cents2decimal(computed_value);
+      computed_value_elem = null;
+    }
     return (
       <div className={outer_cls}>
         <input
           type="text"
           size={size}
-          value={this.state.display}
+          value={valueToShow}
           onChange={this.onDisplayChanged.bind(this)}
           onFocus={this.onFocus}
           onBlur={this.onBlur}
