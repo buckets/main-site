@@ -1,12 +1,13 @@
 /// <reference types="node" />
 interface BucketsCLib {
+    start(): void;
     version(): string;
     register_logger(proc: (x: string) => void): void;
     stringpc(command: string, arg: string): Buffer;
     openfile(filename: string): number;
-    db_all_json(db: number, query: string, params_json_array: string): Buffer;
-    db_run_json(db: number, query: string, params_json_array: string): Buffer;
-    db_execute_many_json(db: number, queries_json_array: string): Buffer;
+    db_all_json(db: number, query: string, params_json_array: string): string;
+    db_run_json(db: number, query: string, params_json_array: string): string;
+    db_execute_many_json(db: number, queries_json_array: string): string;
 }
 declare type SqliteDataType = "Null" | "Int" | "Float" | "Text" | "Bool" | "Blob";
 declare type SqliteParam = string | number | null | boolean;

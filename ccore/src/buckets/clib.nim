@@ -79,7 +79,7 @@ proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
 
 proc buckets_openfile*(filename:cstring):int {.exportc.} =
   ## Open a budget file
-  openBudgetFile($filename).id
+  openBudgetFile(cStringToString(filename)).id
 
 template jsonObjToParam(node:JsonNode):Param =
   case node.kind
@@ -123,11 +123,11 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
   ## Perform a query and return the result as a JSON string
   ##    params_json should be a JSON-encoded array/object
   clearOldStrings
-  echo &"buckets_db_all_json {query} {params_json}"
   var
     query = cStringToString(query)
     params_json = cStringToString(params_json)
-  var res_string:string = ""
+    res_string:string = ""
+  echo &"buckets_db_all_json {query} {params_json}"
   try:
     let db = budget_handle.getBudgetFile().db
     let params = db.json_to_params(query, params_json)
@@ -178,11 +178,11 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
   ## Perform a query and return any error/lastID as a JSON string.
   ##    params_json should be a JSON-encoded array/object
   clearOldStrings
-  echo &"buckets_db_run_json {query} {params_json}"
   var
     query = cStringToString(query)
     params_json = cStringToString(params_json)
-  var res_string:string
+    res_string: string
+  echo &"buckets_db_run_json {query} {params_json}"
   try:
     let
       db = budget_handle.getBudgetFile().db
@@ -217,9 +217,12 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
 proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstring {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
   clearOldStrings
+  var
+    queries_json = cStringToString(queries_json)
+    queries:seq[string]
+    res_string:string = ""
+  
   echo &"buckets_db_execute_many_json {queries_json}"
-  var queries:seq[string]
-  var res_string:string = ""
   try:
     queries = jsonStringToStringSeq(queries_json)
   except AssertionError:

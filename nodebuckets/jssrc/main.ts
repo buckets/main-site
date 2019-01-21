@@ -4,14 +4,14 @@ import * as bucketslib from '../lib/bucketslib.node';
 
 interface BucketsCLib {
   // Keep this in sync with jstonimbinding.cpp
-  // start():void; We don't want people calling start
+  start():void;
   version():string;
   register_logger(proc:(x:string)=>void):void;
   stringpc(command:string, arg:string):Buffer;
   openfile(filename:string):number;
-  db_all_json(db:number, query:string, params_json_array:string):Buffer;
-  db_run_json(db:number, query:string, params_json_array:string):Buffer;
-  db_execute_many_json(db:number, queries_json_array:string):Buffer;
+  db_all_json(db:number, query:string, params_json_array:string):string;
+  db_run_json(db:number, query:string, params_json_array:string):string;
+  db_execute_many_json(db:number, queries_json_array:string):string;
 }
 
 type SqliteDataType =
@@ -35,8 +35,6 @@ interface SqliteParamObj {
 type SqliteParams =
   | SqliteParam[]
   | SqliteParamObj
-
-bucketslib.start();
 
 class Semaphore {
   private pending:Array<Function> = [];
