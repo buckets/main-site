@@ -22,7 +22,7 @@ var
 
 proc upgradeSchema*(bf:Budgetfile) =
   ## Apply all database patches to this budget file
-  logging.debug "Upgrading schema ..."
+  logging.info "Upgrading schema ..."
   
   # See what patches have already been applied
   bf.db.exec(sql"""
@@ -45,7 +45,7 @@ proc upgradeSchema*(bf:Budgetfile) =
     if fullname in applied:
       logging.debug &"Patch {fullname} already applied."
       continue
-    logging.debug &"applying patch: {fullname}"
+    logging.info &"applying patch: {fullname}"
     bf.db.exec(sql"BEGIN")
     try:
       migration.fn(bf.db)
@@ -55,12 +55,8 @@ proc upgradeSchema*(bf:Budgetfile) =
       logging.error &"error applying patch {fullname}: {getCurrentExceptionMsg()}"
       bf.db.exec(sql"ROLLBACK")
       raise
-  logging.debug "Schema upgrade complete"
-  let allofthem = bf.db.fetchAll(sql"SELECT * from _schema_version")
-  logging.debug "Got all of them"
-  logging.debug allofthem.rows.len
-  logging.debug "All of them length: hi"
-  logging.debug allofthem.repr
+  logging.info "Schema upgrade complete"
+  # let allofthem = bf.db.fetchAll(sql"SELECT * from _schema_version")
 
 proc openBudgetFile*(filename:string) : BudgetFile =
   new(result)

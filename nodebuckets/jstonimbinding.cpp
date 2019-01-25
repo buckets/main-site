@@ -99,12 +99,12 @@ String db_execute_many_json(const CallbackInfo& info) {
   int bf_handle = info[0].As<Number>().Int64Value();
   std::string js_queries_json = info[1].As<Value>().ToString().Utf8Value();
   const char* queries_json = js_queries_json.c_str();
-  cout << "buckets_db_execute_many_json(" << bf_handle << ", " << queries_json << ")\n";
+  // cout << "buckets_db_execute_many_json(" << bf_handle << ", " << queries_json << ")\n";
   char* retval = buckets_db_execute_many_json(
     bf_handle,
     (char *)(queries_json)
   );
-  cout << "finished\n";
+  // cout << "finished\n";
   return String::New(env, retval);
 }
 // NAN_METHOD(db_execute_many_json) {

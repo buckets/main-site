@@ -25,7 +25,6 @@ export async function setupDatabase(store:SQLiteStore, opts:{
   noUndo?: boolean;
   openNewerSchemas?: boolean;
 }={}) {
-  console.log("setupDatabase");
   // upgrade database
   try {
     log.info('Doing database migrations');
@@ -38,8 +37,6 @@ export async function setupDatabase(store:SQLiteStore, opts:{
     throw err;
   }
 
-  console.log("ensure triggers are enabled");
-
   // ensure triggers are enabled
   try {
     await store.query('DELETE FROM x_trigger_disabled', {})
@@ -48,8 +45,6 @@ export async function setupDatabase(store:SQLiteStore, opts:{
     log.error(err.stack);
     throw err;
   }
-
-  console.log("addBucketsLicenseBucket");
 
   if (opts.addBucketsLicenseBucket) {
     try {
@@ -60,13 +55,10 @@ export async function setupDatabase(store:SQLiteStore, opts:{
     }
   }
   
-  console.log("start undo");
   if (!opts.noUndo) {
     // track undos
     await store.undo.start();  
   }
-
-  console.log("done with setup");
 }
 
 /**

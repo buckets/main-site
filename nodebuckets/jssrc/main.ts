@@ -84,7 +84,15 @@ export function db_all_arrays(bf_id:number, query:string, params:SqliteParams):P
 }> {
   params = params || [];
   return SEM.run(() => {
-    let res = JSON.parse(bucketslib.db_all_json(bf_id, query, JSON.stringify(params)));
+    let res:any;
+    let json_res:string = bucketslib.db_all_json(bf_id, query, JSON.stringify(params));
+    try {
+      res = JSON.parse(json_res);
+    } catch(err) {
+      console.log("Invalid JSON string:", json_res);
+      throw err;
+    }
+    
     if (res.err) {
       throw Error(res.err);
     } else {
@@ -135,7 +143,14 @@ export async function db_all<T>(bf_id:number, query:string, params:SqliteParams)
 export function db_run(bf_id:number, query:string, params:SqliteParams) {
   return SEM.run(() => {
     params = params || [];
-    let res = JSON.parse(bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8'));
+    let res:any;
+    let json_res = bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8');
+    try {
+      res = JSON.parse(json_res);
+    } catch(err) {
+      console.log("Invalid JSON string:", json_res);
+      throw err;
+    }
     if (res.err) {
       throw Error(res.err);
     } else {

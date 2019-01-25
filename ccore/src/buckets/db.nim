@@ -138,7 +138,6 @@ iterator queryRows(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]
 proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]): ref AllResult =
   ## Execute a multi-row-returning SQL statement.
   new(result)
-  echo "fetchall start"
   for row in db.queryRows(statement, params):
     var res:seq[string]
     # XXX do this outside of the loop by passing columns in to queryRows
@@ -162,13 +161,11 @@ proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]
     for coli in 0'i32 ..< L:
       res.add(row[coli])
     result.rows.add(res)
-  echo "fetchall done"
 
 proc runQuery*(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): ref RunResult =
   ## Execute an SQL statement.
   ## If there was an error running the statement, .err will be non-empty.
   ## If it was a successful INSERT statement, .lastID will be the id of the last inserted row
-  echo "runQuery start"
   new(result)
   assert(not db.isNil, "Database not connected.")
   var pstmt = db.prepareAndBindArgs(query, params)
@@ -176,13 +173,10 @@ proc runQuery*(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): r
     result.lastID = last_insert_rowid(db)
     if finalize(pstmt) != SQLITE_OK:
       dbError(db)
-  echo "runQuery done"
 
 proc executeMany*(db:DbConn, statements:openArray[string]) =
   ## Execute many SQL statements.
   ## Return any error as a string.
-  echo "executeMany start"
   for s in statements:
     db.exec(sql(s))
-  echo "executeMany done"
 

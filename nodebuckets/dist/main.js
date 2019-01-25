@@ -98,7 +98,15 @@ var SEM = new Semaphore(1);
 function db_all_arrays(bf_id, query, params) {
     params = params || [];
     return SEM.run(function () {
-        var res = JSON.parse(bucketslib.db_all_json(bf_id, query, JSON.stringify(params)));
+        var res;
+        var json_res = bucketslib.db_all_json(bf_id, query, JSON.stringify(params));
+        try {
+            res = JSON.parse(json_res);
+        }
+        catch (err) {
+            console.log("Invalid JSON string:", json_res);
+            throw err;
+        }
         if (res.err) {
             throw Error(res.err);
         }
@@ -159,7 +167,15 @@ exports.db_all = db_all;
 function db_run(bf_id, query, params) {
     return SEM.run(function () {
         params = params || [];
-        var res = JSON.parse(bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8'));
+        var res;
+        var json_res = bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8');
+        try {
+            res = JSON.parse(json_res);
+        }
+        catch (err) {
+            console.log("Invalid JSON string:", json_res);
+            throw err;
+        }
         if (res.err) {
             throw Error(res.err);
         }

@@ -11,8 +11,6 @@ import sequtils
 import json
 import logging
 
-echo "clib initialized"
-
 #-----------------------------------
 # String-returning helpers
 #-----------------------------------
@@ -127,41 +125,38 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
     query = cStringToString(query)
     params_json = cStringToString(params_json)
     res_string:string = ""
-  echo &"buckets_db_all_json {query} {params_json}"
+  # echo &"buckets_db_all_json {query} {params_json}"
   try:
     let db = budget_handle.getBudgetFile().db
     let params = db.json_to_params(query, params_json)
     let res = db.fetchAll(sql(query), params)
-    var j = newJObject()
+    # var j = %* {
+    #   "err": "",
+    #   "cols": res.cols,
+    #   "rows": res.rows,
+    #   "types": res.types,
+    # }
     
+    var j = newJObject()
     var jcols = newJArray()
     for col in res.cols:
-      echo "Adding col to json"
       jcols.add(newJString(col))
     var jrows = newJArray()
     for row in res.rows:
-      echo "Adding {row} row to json"
       var jrow = newJArray()
       for col in row:
-        echo "Adding {col} row col to json"
         jrow.add(newJString(col))
-      echo "Adding jrow to jrows"
       jrows.add(jrow)
     var jtypes = newJArray()
     for t in res.types:
-      echo "Adding {t} to json"
       jtypes.add(newJString(t))
-    echo "Setting err to empty"
     j.add("err", newJString(""))
-    echo "Setting cols to jcols"
     j.add("cols", jcols)
-    echo "Setting rows to jrows"
     j.add("rows", jrows)
-    echo "Setting types to jtypes"
     j.add("types", jtypes)
-    echo "Uglifying"
     toUgly(res_string, j)
   except:
+    echo "Error: ", getCurrentExceptionMsg()
     var j = newJObject()
     j.add("err", newJString(getCurrentExceptionMsg()))
     var cols = newJArray()
@@ -182,7 +177,7 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
     query = cStringToString(query)
     params_json = cStringToString(params_json)
     res_string: string
-  echo &"buckets_db_run_json {query} {params_json}"
+  # echo &"buckets_db_run_json {query} {params_json}"
   try:
     let
       db = budget_handle.getBudgetFile().db
@@ -193,6 +188,7 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
     j.add("lastID", newJInt(res.lastID))
     toUgly(res_string, j)
   except:
+    echo "Error: ", getCurrentExceptionMsg()
     var j = newJObject()
     j.add("err", newJString(getCurrentExceptionMsg()))
     j.add("lastID", newJInt(0))
@@ -222,10 +218,11 @@ proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstr
     queries:seq[string]
     res_string:string = ""
   
-  echo &"buckets_db_execute_many_json {queries_json}"
+  # echo &"buckets_db_execute_many_json {queries_json}"
   try:
     queries = jsonStringToStringSeq(queries_json)
   except AssertionError:
+    echo "Error: ", getCurrentExceptionMsg()
     result = keepString(getCurrentExceptionMsg())
     return
   
