@@ -7,21 +7,21 @@ import json
 
 test "buckets_db_all_json":
   let db = buckets_openfile(":memory:")
-  let rows = buckets_db_all_json(db, "SELECT 1 as foo, 2 as bar", "[]")
+  let rows = strres buckets_db_all_json(db, "SELECT 1 as foo, 2 as bar", "[]")
   check rows == """{"err":"","cols":["foo","bar"],"rows":[["1","2"]],"types":["Int","Int"]}"""
 
 test "everything":
-  check buckets_version() != ""
+  check strres(buckets_version()) != ""
   let db = buckets_openfile(":memory:")
-  echo buckets_db_all_json(db, "SELECT 1,2,3", "[]")
-  echo buckets_db_all_json(db, "SELECT 1,2,3", "{}")
-  echo buckets_db_all_json(db, "SELECT 1, sd'f", "[]")
-  discard buckets_db_execute_many_json(db, """[
+  echo strres buckets_db_all_json(db, "SELECT 1,2,3", "[]")
+  echo strres buckets_db_all_json(db, "SELECT 1,2,3", "{}")
+  echo strres buckets_db_all_json(db, "SELECT 1, sd'f", "[]")
+  discard strres buckets_db_execute_many_json(db, """[
     "CREATE TABLE customer (id INTEGER PRIMARY KEY, email TEXT)",
     "CREATE TABLE company (id INTEGER PRIMARY KEY, name TEXT)"
   ]""")
   echo "about to insert"
-  let res = parseJson($buckets_db_run_json(db, "INSERT INTO company (name) VALUES ('MartinCo')", "[]"))
+  let res = parseJson(strres buckets_db_run_json(db, "INSERT INTO company (name) VALUES ('MartinCo')", "[]"))
   check res["lastID"].getInt() == 1
 
 

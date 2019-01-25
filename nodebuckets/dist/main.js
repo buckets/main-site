@@ -95,19 +95,27 @@ var Semaphore = /** @class */ (function () {
     return Semaphore;
 }());
 var SEM = new Semaphore(1);
+/**
+ * Run a query and return all the results as arrays of arrays
+ *
+ * @param bf_id
+ * @param query
+ * @param params
+ */
 function db_all_arrays(bf_id, query, params) {
     params = params || [];
     return SEM.run(function () {
         var res;
-        var json_res = bucketslib.db_all_json(bf_id, query, JSON.stringify(params));
+        var json_res = bucketslib.db_all_json(bf_id, query, JSON.stringify(params)).toString('utf8');
         try {
             res = JSON.parse(json_res);
         }
         catch (err) {
-            console.log("Invalid JSON string:", json_res);
+            console.log("db_all_arrays Invalid JSON string:", json_res);
             throw err;
         }
         if (res.err) {
+            console.log("db_all_arrays got error result");
             throw Error(res.err);
         }
         else {
@@ -173,10 +181,11 @@ function db_run(bf_id, query, params) {
             res = JSON.parse(json_res);
         }
         catch (err) {
-            console.log("Invalid JSON string:", json_res);
+            console.log("db_run Invalid JSON string:", json_res);
             throw err;
         }
         if (res.err) {
+            console.log("db_run got error result");
             throw Error(res.err);
         }
         else {
@@ -187,9 +196,10 @@ function db_run(bf_id, query, params) {
 exports.db_run = db_run;
 function db_executeMany(bf_id, queries) {
     return SEM.run(function () {
-        var err = bucketslib.db_execute_many_json(bf_id, JSON.stringify(queries)).toString('utf8');
-        if (err) {
-            throw Error(err);
+        var err = bucketslib.db_execute_many_json(bf_id, JSON.stringify(queries));
+        if (err.length) {
+            console.log("db_executeMany got error result");
+            throw Error(err.toString('utf8'));
         }
     });
 }

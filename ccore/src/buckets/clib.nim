@@ -14,16 +14,16 @@ import logging
 #-----------------------------------
 # String-returning helpers
 #-----------------------------------
-var STRINGS_TO_CLEAR:seq[string]
-template clearOldStrings():untyped =
-  discard
-  # while STRINGS_TO_CLEAR.len > 0:
-  #   discard STRINGS_TO_CLEAR.pop()
+var
+  LAST_STRING:string
+  HAS_LAST_STRING:bool
 
-proc keepString(x:string):string = 
-  if x != "":
-    STRINGS_TO_CLEAR.add(x)
-  result = x
+proc setReturnString(x:string):csize =
+  if HAS_LAST_STRING:
+    raise newException(CatchableError, "Return string was not used/discarded")
+  LAST_STRING = x
+  HAS_LAST_STRING = true
+  return x.len.csize
 
 #-----------------------------------
 # Function-call logging
@@ -46,25 +46,43 @@ proc toDB*(budget_handle:int):DbConn =
   budget_handle.getBudgetFile().db
 
 proc cStringToString(x:cstring):string =
-  var res = newString(x.len)
-  copyMem(unsafeAddr(res[0]), x, x.len)
-  res
+  return $x
+  # let L = x.len
+  # result = newString(L)
+  # copyMem(unsafeAddr(result[0]), x, L)
+
+template strres*(x:untyped):untyped =
+  discard x
+  HAS_LAST_STRING = false
+  LAST_STRING
 
 #-----------------------------------
 # C-friendly named Nim functions
 #-----------------------------------
 
-proc buckets_version*():cstring {.exportc.} =
-  ## Return the current buckets lib version
-  clearOldStrings
-  PACKAGE_VERSION
+proc buckets_get_result_string*(p:pointer) {.exportc.} =
+  ## Write the last result string to a location in memory
+  assert HAS_LAST_STRING
+  if LAST_STRING.len > 0:
+    moveMem(p, LAST_STRING[0].addr, LAST_STRING.len)
+  HAS_LAST_STRING = false
 
-proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc.} =
-  ## String-based RPC interface
-  var fullarg:string
-  fullarg = newString(arglen)
-  copyMem(fullarg[0].unsafeAddr, arg, arglen)
-  result = stringRPC(cStringToString(command), fullarg)
+proc buckets_discard_result_string*() {.exportc.} =
+  ## Discard the last result string
+  assert HAS_LAST_STRING
+  LAST_STRING = ""
+  HAS_LAST_STRING = false
+
+proc buckets_version*():csize {.exportc.} =
+  ## Return the current buckets lib version
+  setReturnString(PACKAGE_VERSION)
+
+# proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc.} =
+#   ## String-based RPC interface
+#   var fullarg:string
+#   fullarg = newString(arglen)
+#   copyMem(fullarg[0].unsafeAddr, arg, arglen)
+#   result = stringRPC(cStringToString(command), fullarg)
 
 proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
   ## Register a function to receive logging events from Nim.
@@ -75,9 +93,9 @@ proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
     new(logger)
     addHandler(logger)
 
-proc buckets_openfile*(filename:cstring):int {.exportc.} =
+proc buckets_openfile*(filename:cstring):cint {.exportc.} =
   ## Open a budget file
-  openBudgetFile(cStringToString(filename)).id
+  openBudgetFile(cStringToString(filename)).id.cint
 
 template jsonObjToParam(node:JsonNode):Param =
   case node.kind
@@ -117,15 +135,19 @@ proc json_to_params*(db:DbConn, query:string, params_json:string):seq[Param] =
   else:
     raise newException(CatchableError, "Invalid argument type for db params")
 
-proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
+proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):csize {.exportc.} =
   ## Perform a query and return the result as a JSON string
   ##    params_json should be a JSON-encoded array/object
-  clearOldStrings
+  # echo "query: ", toHex(cast[int](query.unsafeAddr))
+  # echo repr(query.unsafeAddr)
+  # echo "param: ", toHex(cast[int](params_json.unsafeAddr))
+  # echo repr(params_json.unsafeAddr)
   var
-    query = cStringToString(query)
-    params_json = cStringToString(params_json)
-    res_string:string = ""
-  # echo &"buckets_db_all_json {query} {params_json}"
+    query = query.cStringToString
+    params_json = params_json.cStringToString
+    res_string:string
+  # echo "query: ", query
+  # echo "params_json: ", params_json
   try:
     let db = budget_handle.getBudgetFile().db
     let params = db.json_to_params(query, params_json)
@@ -154,9 +176,8 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
     j.add("cols", jcols)
     j.add("rows", jrows)
     j.add("types", jtypes)
-    toUgly(res_string, j)
+    res_string = $j
   except:
-    echo "Error: ", getCurrentExceptionMsg()
     var j = newJObject()
     j.add("err", newJString(getCurrentExceptionMsg()))
     var cols = newJArray()
@@ -165,14 +186,12 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
     j.add("cols", cols)
     j.add("rows", rows)
     j.add("types", types)
-    toUgly(res_string, j)
-  result = keepString(res_string)
-  # logging.debug("all: ", query, " ", params_json, " -> ", result)
+    res_string = $j
+  return setReturnString(res_string)
 
-proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):cstring {.exportc.} =
+proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):csize {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.
   ##    params_json should be a JSON-encoded array/object
-  clearOldStrings
   var
     query = cStringToString(query)
     params_json = cStringToString(params_json)
@@ -186,15 +205,14 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
     var j = newJObject()
     j.add("err", newJString(""))
     j.add("lastID", newJInt(res.lastID))
-    toUgly(res_string, j)
+    res_string = $j
   except:
     echo "Error: ", getCurrentExceptionMsg()
     var j = newJObject()
     j.add("err", newJString(getCurrentExceptionMsg()))
     j.add("lastID", newJInt(0))
-    toUgly(res_string, j)
-  result = keepString(res_string)
-  # logging.debug("run: ", query, " ", params_json, " -> ", result)
+    res_string = $j
+  setReturnString(res_string)
 
 proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
   ## Convert a C string containing a JSON-encoded array of strings
@@ -210,25 +228,21 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
   for item in node.items:
     result.add(item.getStr())
 
-proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):cstring {.exportc.} =
+proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):csize {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
-  clearOldStrings
   var
     queries_json = cStringToString(queries_json)
     queries:seq[string]
     res_string:string = ""
   
-  # echo &"buckets_db_execute_many_json {queries_json}"
   try:
     queries = jsonStringToStringSeq(queries_json)
   except AssertionError:
-    echo "Error: ", getCurrentExceptionMsg()
-    result = keepString(getCurrentExceptionMsg())
-    return
+    return setReturnString(getCurrentExceptionMsg())
   
   let db = budget_handle.getBudgetFile().db
   try:
     db.executeMany(queries)
   except:
     res_string = getCurrentExceptionMsg()
-  result = keepString(res_string)
+  return setReturnString(res_string)

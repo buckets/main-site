@@ -97,7 +97,7 @@ N_NOINLINE(void, raiseRangeError)(NI64 val);
 static N_INLINE(NI, subInt)(NI a, NI b);
 N_NOINLINE(void, raiseOverflow)(void);
 N_LIB_PRIVATE N_NIMCALL(void, fillBuffer_CbKzA44X2DxZAmasZ72O9ag)(tyObject_BaseLexer_MAw8rJZtJ279bVV3TWMtXSg& L);
-static N_INLINE(void, moveMem_E1xtACub5WcDa3vbrIXbwglexbase)(void* dest, void* source, NI size);
+static N_INLINE(void, moveMem_E1xtACub5WcDa3vbrIXbwgclib)(void* dest, void* source, NI size);
 static N_INLINE(NI, addInt)(NI a, NI b);
 N_LIB_PRIVATE N_NIMCALL(NI, readData_TYaWywfT8qLRVVdONIVhkw)(tyObject_StreamObj_THYguAi9bSgidczZ3ywEIMQ* s, void* buffer, NI bufLen);
 static N_INLINE(NI, divInt)(NI a, NI b);
@@ -190,7 +190,7 @@ static N_INLINE(NI, subInt)(NI a, NI b) {
 	return result;
 }
 
-static N_INLINE(void, moveMem_E1xtACub5WcDa3vbrIXbwglexbase)(void* dest, void* source, NI size) {
+static N_INLINE(void, moveMem_E1xtACub5WcDa3vbrIXbwgclib)(void* dest, void* source, NI size) {
 	void* T1_;
 	T1_ = (void*)0;
 	T1_ = memmove(dest, source, ((size_t) (size)));
@@ -309,7 +309,7 @@ N_LIB_PRIVATE N_NIMCALL(void, fillBuffer_CbKzA44X2DxZAmasZ72O9ag)(tyObject_BaseL
 {		nimln_(68, "lexbase.nim");
 		TM_k6p5NxDJat9aTyZxfZjCDJQ_11 = addInt(L.sentinel, ((NI) 1));
 		TM_k6p5NxDJat9aTyZxfZjCDJQ_12 = mulInt(toCopy, ((NI) 1));
-		moveMem_E1xtACub5WcDa3vbrIXbwglexbase(((void*) (L.buf)), ((void*) ((&L.buf[(NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_11)]))), ((NI)chckRange((NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_12), ((NI) 0), ((NI) IL64(9223372036854775807)))));
+		moveMem_E1xtACub5WcDa3vbrIXbwgclib(((void*) (L.buf)), ((void*) ((&L.buf[(NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_11)]))), ((NI)chckRange((NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_12), ((NI) 0), ((NI) IL64(9223372036854775807)))));
 }	}
 	LA11_: ;
 	nimln_(70, "lexbase.nim");
