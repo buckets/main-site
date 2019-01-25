@@ -1,7 +1,7 @@
-NIMFILES = $(shell find ../ccore -name '*.nim')
+NIMFILES = ../ccore/src/buckets/clib.nim
 NIMBASE = ~/lib/Nim/lib/nimbase.h
 RELEASE_TYPE = debug
-
+COMMON_BUILD_FLAGS = --header --nimcache:csrc --compileOnly --gc:markAndSweep
 
 .PHONY: clean release debug test all
 
@@ -10,29 +10,23 @@ all: dist/main.js lib/bucketslib.node
 dist/main.js: jssrc/main.ts
 	tsc
 
-lib/bucketslib.node: csrc/sqlite3.h csrc/sqlite3.c csrc/nimbase.h $(RELEASE_TYPE)
+dist/test.js: jssrc/test.ts
+
+lib/bucketslib.node: csrc/nimbase.h $(RELEASE_TYPE)
 	node-gyp rebuild
 
 release: $(NIMFILES)
-	nim cpp -d:release --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly ../ccore/src/buckets/clib.nim
+	nim cpp -d:release $(COMMON_BUILD_FLAGS) $^
 
 debug: $(NIMFILES)
-	nim cpp --checks:on -d:traceGC --header --nimcache:csrc --dynlibOverride:sqlite3 --compileOnly -d:useSysAssert -d:useGcAssert ../ccore/src/buckets/clib.nim
+	nim cpp --checks:on -d:traceGC --memTracker:on -d:memProfiler -d:lineDir -d:leakDetector -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
 
 csrc/nimbase.h: $(NIMBASE)
 	mkdir -p csrc
 	cp $^ $@
 
-csrc/sqlite3.h: ../ccore/src/buckets/sqlite3/sqlite3.h
-	mkdir -p csrc
-	cp $^ $@
-
-csrc/sqlite3.c: ../ccore/src/buckets/sqlite3/sqlite3.c
-	mkdir -p csrc
-	cp $^ $@
-
-test:
-	tsc && node dist/test.js
+test: dist/test.js
+	node dist/test.js
 
 clean:
 	-rm -r csrc

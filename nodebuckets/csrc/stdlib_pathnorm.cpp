@@ -49,10 +49,10 @@ static N_INLINE(void, nimFrame)(TFrame* s);
 N_LIB_PRIVATE N_NOINLINE(void, callDepthLimitReached_II46IjNZztN9bmbxUD8dt8g)(void);
 static N_INLINE(void, popFrame)(void);
 N_LIB_PRIVATE N_NIMCALL(tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ, next_3g6CLq5DkIFa31vj8kMyIA)(tyObject_PathIter_tllF14xUpDWpqG9ci5sg9bMg& it, NimStringDesc* x);
+N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 static N_INLINE(NI, subInt)(NI a, NI b);
 N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, isSlash_Ec1YiWJYh6Fepz9bQuZ9bcog)(NimStringDesc* x, tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ bounds);
 N_NIMCALL(NimStringDesc*, addChar)(NimStringDesc* s, NIM_CHAR c);
-N_NIMCALL(void, unsureAsgnRef)(void** dest, void* src);
 N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, isDotDot_Ec1YiWJYh6Fepz9bQuZ9bcog_2)(NimStringDesc* x, tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ bounds);
 static N_INLINE(NI, chckRange)(NI i, NI a, NI b);
 N_NOINLINE(void, raiseRangeError)(NI64 val);
@@ -166,6 +166,7 @@ N_LIB_PRIVATE N_NIMCALL(tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ, next_3g6CLq5DkIFa31vj8k
 	nimZeroMem((void*)(&result), sizeof(tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ));
 	nimln_(27, "pathnorm.nim");
 	it.prev = it.i;
+	memTrackerWrite((void*)(&it.prev), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 27);
 	nimln_(28, "pathnorm.nim");
 	{
 		NIM_BOOL T3_;
@@ -180,6 +181,7 @@ N_LIB_PRIVATE N_NIMCALL(tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ, next_3g6CLq5DkIFa31vj8k
 {		nimln_(30, "pathnorm.nim");
 		TM_DfU0iuayCGwHDN1Exp9cbKg_3 = addInt(it.i, ((NI) 1));
 		it.i = (NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_3);
+		memTrackerWrite((void*)(&it.i), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 }	}
 	goto LA1_;
 	LA5_: ;
@@ -200,6 +202,7 @@ N_LIB_PRIVATE N_NIMCALL(tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ, next_3g6CLq5DkIFa31vj8k
 				nimln_(32, "pathnorm.nim");
 				TM_DfU0iuayCGwHDN1Exp9cbKg_4 = addInt(it.i, ((NI) 1));
 				it.i = (NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_4);
+				memTrackerWrite((void*)(&it.i), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 			} LA9: ;
 		}
 	}
@@ -238,10 +241,12 @@ N_LIB_PRIVATE N_NIMCALL(tyTuple_1v9bKyksXWMsm0vNwmZ4EuQ, next_3g6CLq5DkIFa31vj8k
 			if (!T21_) goto LA20;
 			TM_DfU0iuayCGwHDN1Exp9cbKg_6 = addInt(it.i, ((NI) 1));
 			it.i = (NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_6);
+			memTrackerWrite((void*)(&it.i), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		} LA20: ;
 	}
 	nimln_(40, "pathnorm.nim");
 	it.notFirst = NIM_TRUE;
+	memTrackerWrite((void*)(&it.notFirst), 1, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 40);
 	popFrame();
 	return result;
 }
@@ -410,9 +415,11 @@ N_LIB_PRIVATE N_NIMCALL(void, addNormalizePath_j9aPeVT29bfQpS9cY51ZAjkug)(NimStr
 				LA15_: ;
 				if (!T14_) goto LA16_;
 {				nimln_(67, "pathnorm.nim");
-				unsureAsgnRef((void**) (&result), addChar(result, dirSep));
+				result = addChar(result, dirSep);
+				memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 67);
 				nimln_(68, "pathnorm.nim");
 				state = (NI)(state | ((NI) 1));
+				memTrackerWrite((void*)(&state), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 68);
 }			}
 			goto LA12_;
 			LA16_: ;
@@ -454,10 +461,12 @@ N_LIB_PRIVATE N_NIMCALL(void, addNormalizePath_j9aPeVT29bfQpS9cY51ZAjkug)(NimStr
 						if (!(((NI) 0) < d)) goto LA31_;
 {						nimln_(76, "pathnorm.nim");
 						TM_DfU0iuayCGwHDN1Exp9cbKg_12 = subInt(d, ((NI) 1));
-						unsureAsgnRef((void**) (&result), setLengthStr(result, ((NI)chckRange((NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_12), ((NI) 0), ((NI) IL64(9223372036854775807))))));
+						result = setLengthStr(result, ((NI)chckRange((NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_12), ((NI) 0), ((NI) IL64(9223372036854775807)))));
+						memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 76);
 						nimln_(77, "pathnorm.nim");
 						TM_DfU0iuayCGwHDN1Exp9cbKg_13 = subInt(state, ((NI) 2));
 						state = (NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_13);
+						memTrackerWrite((void*)(&state), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 77);
 }					}
 					LA31_: ;
 }				}
@@ -480,13 +489,15 @@ N_LIB_PRIVATE N_NIMCALL(void, addNormalizePath_j9aPeVT29bfQpS9cY51ZAjkug)(NimStr
 						LA37_: ;
 						if (!T36_) goto LA39_;
 {						nimln_(80, "pathnorm.nim");
-						unsureAsgnRef((void**) (&result), addChar(result, dirSep));
+						result = addChar(result, dirSep);
+						memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 80);
 }					}
 					LA39_: ;
 					nimln_(81, "pathnorm.nim");
 					T41_ = (NimStringDesc*)0;
 					T41_ = substr_TWXUwbnq0SWWvDLfr8LXYw(x, b.Field0, b.Field1);
-					unsureAsgnRef((void**) (&result), resizeString(result, (T41_ ? T41_->len : 0) + 0));
+					result = resizeString(result, (T41_ ? T41_->len : 0) + 0);
+					memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 81);
 appendString(result, T41_);
 				}
 				LA21_: ;
@@ -519,17 +530,20 @@ appendString(result, T41_);
 					LA51_: ;
 					if (!T50_) goto LA53_;
 {					nimln_(86, "pathnorm.nim");
-					unsureAsgnRef((void**) (&result), addChar(result, dirSep));
+					result = addChar(result, dirSep);
+					memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 86);
 }				}
 				LA53_: ;
 				nimln_(87, "pathnorm.nim");
 				T55_ = (NimStringDesc*)0;
 				T55_ = substr_TWXUwbnq0SWWvDLfr8LXYw(x, b.Field0, b.Field1);
-				unsureAsgnRef((void**) (&result), resizeString(result, (T55_ ? T55_->len : 0) + 0));
+				result = resizeString(result, (T55_ ? T55_->len : 0) + 0);
+				memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 87);
 appendString(result, T55_);
 				nimln_(88, "pathnorm.nim");
 				TM_DfU0iuayCGwHDN1Exp9cbKg_15 = addInt(state, ((NI) 2));
 				state = (NI)(TM_DfU0iuayCGwHDN1Exp9cbKg_15);
+				memTrackerWrite((void*)(&state), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 88);
 }			}
 			goto LA12_;
 			LA46_: ;
@@ -547,7 +561,8 @@ appendString(result, T55_);
 		LA59_: ;
 		if (!T58_) goto LA60_;
 {		nimln_(89, "pathnorm.nim");
-		unsureAsgnRef((void**) (&result), copyString(((NimStringDesc*) &TM_DfU0iuayCGwHDN1Exp9cbKg_16)));
+		result = copyString(((NimStringDesc*) &TM_DfU0iuayCGwHDN1Exp9cbKg_16));
+		memTrackerWrite((void*)(&result), 8, "/Users/matt/lib/Nim/lib/pure/pathnorm.nim", 89);
 }	}
 	LA60_: ;
 	popFrame();

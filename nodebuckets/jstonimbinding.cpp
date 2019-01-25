@@ -36,18 +36,17 @@ String version(const CallbackInfo& info) {
 // }
 
 // buckets_register_logger
-// FunctionReference r_log;
-// Env r_log_env = nullptr;
+FunctionReference r_log;
 void emitLogInJS(char* msg) {
-  std::string message_string(msg);
-  cout << "TEMP LOG: " << message_string << "\n";
-  // if (r_log != nullptr) {
-  //   r_log.Call(1, String::New(r_log_env, message_string));
-  // } 
+  if (r_log != nullptr) {
+    Env env = r_log.Env();
+    String message = String::New(env, msg);
+    std::vector<napi_value> args = {message}; 
+    r_log.Call(args);
+  } 
 }
 void register_logger(const CallbackInfo& info) {
-  // r_log = Persistent(info[0].As<Function>());
-  // r_log_env = info.Env();
+  r_log = Persistent(info[0].As<Function>());
   buckets_register_logger(emitLogInJS);
 }
 
