@@ -27,9 +27,9 @@ N_NIMCALL(void, buckets_get_result_string)(void* p);
 N_NIMCALL(void, buckets_discard_result_string)(void);
 N_NIMCALL(size_t, buckets_version)(void);
 N_NIMCALL(void, buckets_register_logger)(tyProc_5cp59bim9aJ4WupX5aVaD1Sg fn);
-N_NIMCALL(int, buckets_openfile)(NCSTRING filename);
-N_NIMCALL(size_t, buckets_db_all_json)(NI budget_handle, NCSTRING query, NCSTRING params_json);
-N_NIMCALL(size_t, buckets_db_run_json)(NI budget_handle, NCSTRING query, NCSTRING params_json);
-N_NIMCALL(size_t, buckets_db_execute_many_json)(NI budget_handle, NCSTRING queries_json);
+N_NIMCALL(int, buckets_openfile)(NCSTRING filename, int filenameL);
+N_NIMCALL(size_t, buckets_db_all_json)(NI budget_handle, NCSTRING query, int queryL, NCSTRING params_json, int params_jsonL);
+N_NIMCALL(size_t, buckets_db_run_json)(NI budget_handle, NCSTRING query, int queryL, NCSTRING params_json, int params_jsonL);
+N_NIMCALL(size_t, buckets_db_execute_many_json)(NI budget_handle, NCSTRING queries_json, int queries_jsonL);
 N_CDECL(void, NimMain)(void);
 #endif /* __clib__ */

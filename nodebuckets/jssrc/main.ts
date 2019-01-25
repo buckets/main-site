@@ -1,20 +1,19 @@
 // @ts-ignore
-import * as bucketslib from '../lib/bucketslib.node';
+import * as bucketsinternal from '../lib/bucketslib.node';
 
-
-interface BucketsCLib {
+interface BucketsInternal {
   // Keep this in sync with jstonimbinding.cpp
   start():void;
   version():Buffer;
   register_logger(proc:(x:string)=>void):void;
-  stringpc(command:string, arg:string):Buffer;
-  openfile(filename:string):number;
-  db_all_json(db:number, query:string, params_json_array:string):Buffer;
-  db_run_json(db:number, query:string, params_json_array:string):Buffer;
-  db_execute_many_json(db:number, queries_json_array:string):Buffer;
+  // stringpc(command:Buffer, arg:string):Buffer;
+  openfile(filename:Buffer):number;
+  db_all_json(db:number, query:Buffer, params_json_array:Buffer):Buffer;
+  db_run_json(db:number, query:Buffer, params_json_array:Buffer):Buffer;
+  db_execute_many_json(db:number, queries_json_array:Buffer):Buffer;
 }
 
-bucketslib.start();
+bucketsinternal.start();
 
 type SqliteDataType =
   | "Null"
@@ -43,6 +42,9 @@ class Semaphore {
 
   constructor(private available = 1) {
 
+  }
+  count():number {
+    return this.available;
   }
   acquire():Promise<null> {
     return new Promise<null>((resolve, reject) => {
@@ -77,6 +79,21 @@ class Semaphore {
 
 const SEM = new Semaphore(1);
 
+export function version():string {
+  return bucketsinternal.version().toString('utf8');
+}
+
+export function openfile(filename:string):number {
+  if (!SEM.count()) {
+    console.error("Attempting to call openfile while there is another function running");
+  }
+  return bucketsinternal.openfile(Buffer.from(filename));
+}
+
+export function registerLogger(proc:(x:string)=>void) {
+  bucketsinternal.register_logger(proc);
+}
+
 /**
  * Run a query and return all the results as arrays of arrays
  * 
@@ -84,7 +101,7 @@ const SEM = new Semaphore(1);
  * @param query 
  * @param params 
  */
-export function db_all_arrays(bf_id:number, query:string, params:SqliteParams):Promise<{
+export function db_all_arrays(bf_id:number, query:string, params?:SqliteParams):Promise<{
   rows: Array<Array<string>>,
   cols: Array<string>,
   types: Array<SqliteDataType>,
@@ -92,7 +109,11 @@ export function db_all_arrays(bf_id:number, query:string, params:SqliteParams):P
   params = params || [];
   return SEM.run(() => {
     let res:any;
-    let json_res:string = bucketslib.db_all_json(bf_id, query, JSON.stringify(params)).toString('utf8');
+    let json_res:string = bucketsinternal.db_all_json(
+      bf_id,
+      Buffer.from(query + '\0'),
+      Buffer.from(JSON.stringify(params || []) + '\0')
+    ).toString('utf8')
     try {
       res = JSON.parse(json_res);
     } catch(err) {
@@ -101,7 +122,7 @@ export function db_all_arrays(bf_id:number, query:string, params:SqliteParams):P
     }
     
     if (res.err) {
-      console.log("db_all_arrays got error result");
+      // console.log("db_all_arrays got error result");
       throw Error(res.err);
     } else {
       return {
@@ -113,7 +134,7 @@ export function db_all_arrays(bf_id:number, query:string, params:SqliteParams):P
   })
 }
 
-export async function db_all<T>(bf_id:number, query:string, params:SqliteParams):Promise<T[]> {
+export async function db_all<T>(bf_id:number, query:string, params?:SqliteParams):Promise<T[]> {
   let result = await db_all_arrays(bf_id, query, params);
   function convert(row:string[]) {
     let ret:any = {};
@@ -148,11 +169,15 @@ export async function db_all<T>(bf_id:number, query:string, params:SqliteParams)
   return result.rows.map<T>(convert);
 }
 
-export function db_run(bf_id:number, query:string, params:SqliteParams) {
+export function db_run(bf_id:number, query:string, params?:SqliteParams) {
   return SEM.run(() => {
     params = params || [];
     let res:any;
-    let json_res = bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8');
+    let json_res = bucketsinternal.db_run_json(
+      bf_id,
+      Buffer.from(query + '\0'),
+      Buffer.from(JSON.stringify(params) + '\0')
+    ).toString('utf8')
     try {
       res = JSON.parse(json_res);
     } catch(err) {
@@ -160,7 +185,7 @@ export function db_run(bf_id:number, query:string, params:SqliteParams) {
       throw err;
     }
     if (res.err) {
-      console.log("db_run got error result");
+      // console.log("db_run got error result");
       throw Error(res.err);
     } else {
       return res.lastID as number;
@@ -170,12 +195,15 @@ export function db_run(bf_id:number, query:string, params:SqliteParams) {
 
 export function db_executeMany(bf_id:number, queries:string[]) {
   return SEM.run(() => {
-    let err = bucketslib.db_execute_many_json(bf_id, JSON.stringify(queries));
+    let err = bucketsinternal.db_execute_many_json(
+      bf_id,
+      Buffer.from(JSON.stringify(queries) + '\0')
+    )
     if (err.length) {
-      console.log("db_executeMany got error result");
+      // console.log("db_executeMany got error result");
       throw Error(err.toString('utf8'));
     }
   })
 }
 
-export const main:BucketsCLib = bucketslib;
+export const internal:BucketsInternal = bucketsinternal;

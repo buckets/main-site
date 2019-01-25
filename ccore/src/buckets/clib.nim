@@ -45,11 +45,9 @@ method log*(logger: FunctionLogger, level: Level, args: varargs[string, `$`]) =
 proc toDB*(budget_handle:int):DbConn =
   budget_handle.getBudgetFile().db
 
-proc cStringToString(x:cstring):string =
-  return $x
-  # let L = x.len
-  # result = newString(L)
-  # copyMem(unsafeAddr(result[0]), x, L)
+proc cStringToString(x:cstring, n:cint):string =
+  result = newString(n)
+  copyMem(unsafeAddr(result[0]), x, n)
 
 template strres*(x:untyped):untyped =
   discard x
@@ -64,7 +62,7 @@ proc buckets_get_result_string*(p:pointer) {.exportc.} =
   ## Write the last result string to a location in memory
   assert HAS_LAST_STRING
   if LAST_STRING.len > 0:
-    moveMem(p, LAST_STRING[0].addr, LAST_STRING.len)
+    moveMem(p, LAST_STRING.cstring, LAST_STRING.len)
   HAS_LAST_STRING = false
 
 proc buckets_discard_result_string*() {.exportc.} =
@@ -93,9 +91,12 @@ proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
     new(logger)
     addHandler(logger)
 
-proc buckets_openfile*(filename:cstring):cint {.exportc.} =
+proc buckets_openfile*(filename:cstring, filenameL:cint):cint {.exportc.} =
   ## Open a budget file
-  openBudgetFile(cStringToString(filename)).id.cint
+  openBudgetFile(cStringToString(filename, filenameL)).id.cint
+
+template buckets_openfile*(filename:cstring):cint =
+  buckets_openfile(filename, filename.len.cint)
 
 template jsonObjToParam(node:JsonNode):Param =
   case node.kind
@@ -135,7 +136,7 @@ proc json_to_params*(db:DbConn, query:string, params_json:string):seq[Param] =
   else:
     raise newException(CatchableError, "Invalid argument type for db params")
 
-proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):csize {.exportc.} =
+proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_json:cstring, params_jsonL:cint):csize {.exportc.} =
   ## Perform a query and return the result as a JSON string
   ##    params_json should be a JSON-encoded array/object
   # echo "query: ", toHex(cast[int](query.unsafeAddr))
@@ -143,8 +144,8 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
   # echo "param: ", toHex(cast[int](params_json.unsafeAddr))
   # echo repr(params_json.unsafeAddr)
   var
-    query = query.cStringToString
-    params_json = params_json.cStringToString
+    query = cStringToString(query, queryL)
+    params_json = cStringToString(params_json, params_jsonL)
     res_string:string
   # echo "query: ", query
   # echo "params_json: ", params_json
@@ -189,12 +190,15 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring)
     res_string = $j
   return setReturnString(res_string)
 
-proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):csize {.exportc.} =
+template buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):csize =
+  buckets_db_all_json(budget_handle, query, query.len.cint, params_json, params_json.len.cint)
+
+proc buckets_db_run_json*(budget_handle:int, query:cstring, queryL:cint, params_json:cstring, params_jsonL:cint):csize {.exportc.} =
   ## Perform a query and return any error/lastID as a JSON string.
   ##    params_json should be a JSON-encoded array/object
   var
-    query = cStringToString(query)
-    params_json = cStringToString(params_json)
+    query = cStringToString(query, queryL)
+    params_json = cStringToString(params_json, params_jsonL)
     res_string: string
   # echo &"buckets_db_run_json {query} {params_json}"
   try:
@@ -214,7 +218,10 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring)
     res_string = $j
   setReturnString(res_string)
 
-proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
+template buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):csize =
+  buckets_db_run_json(budget_handle, query, query.len.cint, params_json, params_json.len.cint);
+
+proc jsonStringToStringSeq(jsonstring:cstring, jsonstringL:cint):seq[string] =
   ## Convert a C string containing a JSON-encoded array of strings
   ## into a sequence of strings.
   runnableExamples:
@@ -222,21 +229,21 @@ proc jsonStringToStringSeq(jsonstring:cstring):seq[string] =
     assert res == @["hi", "ho"]
   
   var
-    jsonstring = cStringToString(jsonstring)
+    jsonstring = cStringToString(jsonstring, jsonstringL)
   let node = parseJson(jsonstring)
   doAssert node.kind == JArray
   for item in node.items:
     result.add(item.getStr())
 
-proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):csize {.exportc.} =
+proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring, queries_jsonL:cint):csize {.exportc.} =
   ## Perform multiple queries and return an error as a string if there is one
   var
-    queries_json = cStringToString(queries_json)
+    queries_json = cStringToString(queries_json, queries_jsonL)
     queries:seq[string]
     res_string:string = ""
   
   try:
-    queries = jsonStringToStringSeq(queries_json)
+    queries = jsonStringToStringSeq(queries_json, queries_jsonL)
   except AssertionError:
     return setReturnString(getCurrentExceptionMsg())
   
@@ -246,3 +253,6 @@ proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):csiz
   except:
     res_string = getCurrentExceptionMsg()
   return setReturnString(res_string)
+
+template buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):csize =
+  buckets_db_execute_many_json(budget_handle, queries_json, queries_json.len.cint)

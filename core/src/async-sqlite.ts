@@ -8,7 +8,7 @@ import { AsyncRunResult, IAsyncSqlite, ICursor } from './dbstore'
 import * as bucketslib from 'bucketslib'
 
 export function openSqlite(filename:string) {
-  return new NodeSQLiteDatabase(bucketslib.main.openfile(filename));
+  return new NodeSQLiteDatabase(bucketslib.openfile(filename));
 }
 export class NodeSQLiteCursor implements ICursor {
   constructor(readonly db_id:number) {

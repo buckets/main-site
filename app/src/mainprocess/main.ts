@@ -21,7 +21,7 @@ import { PSTATE, updateState } from './persistent'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
 import * as bucketslib from 'bucketslib'
 
-bucketslib.main.register_logger((msg:string) => {
+bucketslib.registerLogger((msg:string) => {
   log.info(msg);
 });
 

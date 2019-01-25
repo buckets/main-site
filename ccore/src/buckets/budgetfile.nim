@@ -64,7 +64,11 @@ proc openBudgetFile*(filename:string) : BudgetFile =
   result.id = nextid
   inc(nextid)
   id2BudgetFile[result.id] = result
-  result.db = db_sqlite.open(filename, "", "", "")
+  try:
+    result.db = db_sqlite.open(filename, "", "", "")
+  except DbError:
+    echo "Failed opening: ", filename
+    raise
   result.filename = filename
   result.upgradeSchema()
   logging.debug "Done opening budget file"

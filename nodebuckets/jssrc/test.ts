@@ -1,6 +1,4 @@
-var bucketslib = require('./main');
-
-const { main, db_all, db_run, db_executeMany } = bucketslib;
+import * as bucketslib from './main'
 
 let test_counter = 0;
 async function dotest(name:string, func:Function) {
@@ -10,10 +8,12 @@ async function dotest(name:string, func:Function) {
   await func();
 }
 
+console.log("bucketslib", bucketslib);
+
 async function mainFunc() {
 
   await dotest("version", () => {
-    console.log("BucketsLib version:", main.version());
+    console.log("BucketsLib version:", bucketslib.version());
   })
 
   // dotest("stringpc", () => {
@@ -21,8 +21,8 @@ async function mainFunc() {
   //   console.log("unknownthing(''):", main.stringpc("unknownthing", ""));
   // })
 
-  await dotest("register_logger", () => {
-    main.register_logger((x:string) => {
+  await dotest("registerLogger", () => {
+    bucketslib.registerLogger((x:string) => {
       console.log(x);
     })
   })
@@ -30,22 +30,22 @@ async function mainFunc() {
   var bf:number;
 
   await dotest("openfile", () => {
-    bf = main.openfile(":memory:");
+    bf = bucketslib.openfile(":memory:");
   })
 
   await dotest("db_all_json", () => {
-    let res = main.db_all_json(bf, "SELECT 1,2,3", "[]").toString('utf8');
+    let res = bucketslib.internal.db_all_json(bf, Buffer.from("SELECT 1,2,3"), Buffer.from("[]")).toString('utf8');
     console.log("got res");
     console.log(res);
   })
 
   await dotest("db_all", async () => {
-    console.log("Nice interface:", await db_all(bf, "SELECT 1,2,3"));
+    console.log("Nice interface:", await bucketslib.db_all(bf, "SELECT 1,2,3"));
   })
 
   await dotest("db_all error", async () => {
     try {
-      await db_all(bf, "SELECT 1, sd'f");
+      await bucketslib.db_all(bf, "SELECT 1, sd'f");
       console.log("FAILED TO CATCH AN ERROR");
     } catch(err) {
       console.log("Expecting this error:", err);
@@ -54,14 +54,14 @@ async function mainFunc() {
   })
 
   await dotest("db_executeMany", async () => {
-    await db_executeMany(bf, [
+    await bucketslib.db_executeMany(bf, [
       "CREATE TABLE customer (id INTEGER PRIMARY KEY, email TEXT)",
       "CREATE TABLE company (id INTEGER PRIMARY KEY, name TEXT)",
     ])
   })
 
   await dotest("db_run", async () => {
-    var res = await db_run(bf, "INSERT INTO company (name) VALUES ('MartinCo')");
+    var res = await bucketslib.db_run(bf, "INSERT INTO company (name) VALUES ('MartinCo')");
     console.log('Insert result:', res);
   })
 

@@ -34,8 +34,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var bucketslib = require('./main');
-var main = bucketslib.main, db_all = bucketslib.db_all, db_run = bucketslib.db_run, db_executeMany = bucketslib.db_executeMany;
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var bucketslib = __importStar(require("./main"));
 var test_counter = 0;
 function dotest(name, func) {
     return __awaiter(this, void 0, void 0, function () {
@@ -53,6 +60,7 @@ function dotest(name, func) {
         });
     });
 }
+console.log("bucketslib", bucketslib);
 function mainFunc() {
     return __awaiter(this, void 0, void 0, function () {
         var bf;
@@ -60,7 +68,7 @@ function mainFunc() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, dotest("version", function () {
-                        console.log("BucketsLib version:", main.version());
+                        console.log("BucketsLib version:", bucketslib.version());
                     })
                     // dotest("stringpc", () => {
                     //   console.log("echo('something'):", main.stringpc("echo", "something"));
@@ -73,8 +81,8 @@ function mainFunc() {
                     //   console.log("echo('something'):", main.stringpc("echo", "something"));
                     //   console.log("unknownthing(''):", main.stringpc("unknownthing", ""));
                     // })
-                    return [4 /*yield*/, dotest("register_logger", function () {
-                            main.register_logger(function (x) {
+                    return [4 /*yield*/, dotest("registerLogger", function () {
+                            bucketslib.registerLogger(function (x) {
                                 console.log(x);
                             });
                         })];
@@ -85,12 +93,12 @@ function mainFunc() {
                     // })
                     _a.sent();
                     return [4 /*yield*/, dotest("openfile", function () {
-                            bf = main.openfile(":memory:");
+                            bf = bucketslib.openfile(":memory:");
                         })];
                 case 3:
                     _a.sent();
                     return [4 /*yield*/, dotest("db_all_json", function () {
-                            var res = main.db_all_json(bf, "SELECT 1,2,3", "[]").toString('utf8');
+                            var res = bucketslib.internal.db_all_json(bf, Buffer.from("SELECT 1,2,3"), Buffer.from("[]")).toString('utf8');
                             console.log("got res");
                             console.log(res);
                         })];
@@ -103,7 +111,7 @@ function mainFunc() {
                                     case 0:
                                         _b = (_a = console).log;
                                         _c = ["Nice interface:"];
-                                        return [4 /*yield*/, db_all(bf, "SELECT 1,2,3")];
+                                        return [4 /*yield*/, bucketslib.db_all(bf, "SELECT 1,2,3")];
                                     case 1:
                                         _b.apply(_a, _c.concat([_d.sent()]));
                                         return [2 /*return*/];
@@ -118,7 +126,7 @@ function mainFunc() {
                                 switch (_a.label) {
                                     case 0:
                                         _a.trys.push([0, 2, , 3]);
-                                        return [4 /*yield*/, db_all(bf, "SELECT 1, sd'f")];
+                                        return [4 /*yield*/, bucketslib.db_all(bf, "SELECT 1, sd'f")];
                                     case 1:
                                         _a.sent();
                                         console.log("FAILED TO CATCH AN ERROR");
@@ -137,7 +145,7 @@ function mainFunc() {
                     return [4 /*yield*/, dotest("db_executeMany", function () { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, db_executeMany(bf, [
+                                    case 0: return [4 /*yield*/, bucketslib.db_executeMany(bf, [
                                             "CREATE TABLE customer (id INTEGER PRIMARY KEY, email TEXT)",
                                             "CREATE TABLE company (id INTEGER PRIMARY KEY, name TEXT)",
                                         ])];
@@ -153,7 +161,7 @@ function mainFunc() {
                             var res;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, db_run(bf, "INSERT INTO company (name) VALUES ('MartinCo')")];
+                                    case 0: return [4 /*yield*/, bucketslib.db_run(bf, "INSERT INTO company (name) VALUES ('MartinCo')")];
                                     case 1:
                                         res = _a.sent();
                                         console.log('Insert result:', res);

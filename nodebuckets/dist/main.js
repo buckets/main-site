@@ -43,14 +43,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // @ts-ignore
-var bucketslib = __importStar(require("../lib/bucketslib.node"));
-bucketslib.start();
+var bucketsinternal = __importStar(require("../lib/bucketslib.node"));
+bucketsinternal.start();
 var Semaphore = /** @class */ (function () {
     function Semaphore(available) {
         if (available === void 0) { available = 1; }
         this.available = available;
         this.pending = [];
     }
+    Semaphore.prototype.count = function () {
+        return this.available;
+    };
     Semaphore.prototype.acquire = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -95,6 +98,21 @@ var Semaphore = /** @class */ (function () {
     return Semaphore;
 }());
 var SEM = new Semaphore(1);
+function version() {
+    return bucketsinternal.version().toString('utf8');
+}
+exports.version = version;
+function openfile(filename) {
+    if (!SEM.count()) {
+        console.error("Attempting to call openfile while there is another function running");
+    }
+    return bucketsinternal.openfile(Buffer.from(filename));
+}
+exports.openfile = openfile;
+function registerLogger(proc) {
+    bucketsinternal.register_logger(proc);
+}
+exports.registerLogger = registerLogger;
 /**
  * Run a query and return all the results as arrays of arrays
  *
@@ -106,7 +124,7 @@ function db_all_arrays(bf_id, query, params) {
     params = params || [];
     return SEM.run(function () {
         var res;
-        var json_res = bucketslib.db_all_json(bf_id, query, JSON.stringify(params)).toString('utf8');
+        var json_res = bucketsinternal.db_all_json(bf_id, Buffer.from(query + '\0'), Buffer.from(JSON.stringify(params || []) + '\0')).toString('utf8');
         try {
             res = JSON.parse(json_res);
         }
@@ -115,7 +133,7 @@ function db_all_arrays(bf_id, query, params) {
             throw err;
         }
         if (res.err) {
-            console.log("db_all_arrays got error result");
+            // console.log("db_all_arrays got error result");
             throw Error(res.err);
         }
         else {
@@ -176,7 +194,7 @@ function db_run(bf_id, query, params) {
     return SEM.run(function () {
         params = params || [];
         var res;
-        var json_res = bucketslib.db_run_json(bf_id, query, JSON.stringify(params)).toString('utf8');
+        var json_res = bucketsinternal.db_run_json(bf_id, Buffer.from(query + '\0'), Buffer.from(JSON.stringify(params) + '\0')).toString('utf8');
         try {
             res = JSON.parse(json_res);
         }
@@ -185,7 +203,7 @@ function db_run(bf_id, query, params) {
             throw err;
         }
         if (res.err) {
-            console.log("db_run got error result");
+            // console.log("db_run got error result");
             throw Error(res.err);
         }
         else {
@@ -196,12 +214,12 @@ function db_run(bf_id, query, params) {
 exports.db_run = db_run;
 function db_executeMany(bf_id, queries) {
     return SEM.run(function () {
-        var err = bucketslib.db_execute_many_json(bf_id, JSON.stringify(queries));
+        var err = bucketsinternal.db_execute_many_json(bf_id, Buffer.from(JSON.stringify(queries) + '\0'));
         if (err.length) {
-            console.log("db_executeMany got error result");
+            // console.log("db_executeMany got error result");
             throw Error(err.toString('utf8'));
         }
     });
 }
 exports.db_executeMany = db_executeMany;
-exports.main = bucketslib;
+exports.internal = bucketsinternal;

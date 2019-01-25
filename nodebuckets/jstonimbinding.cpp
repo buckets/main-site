@@ -5,6 +5,8 @@
 using namespace std;
 using namespace Napi;
 
+// Using buffers: https://community.risingstack.com/using-buffers-node-js-c-plus-plus/
+
 N_CDECL(void, NimMain)(void);
 
 // start
@@ -14,6 +16,8 @@ Value start(const CallbackInfo& info) {
   return env.Undefined();
 }
 
+// Return a Buffer containing the string from the most
+// recently completed operation.
 Buffer<char> stringResult(Env env, size_t len) {
   Buffer<char> ret = Buffer<char>::New(env, len);
   buckets_get_result_string(ret.Data());
@@ -59,11 +63,8 @@ void register_logger(const CallbackInfo& info) {
 // buckets_openfile
 Number openfile(const CallbackInfo& info) {
   Env env = info.Env();
-  std::string js_filename = info[0].As<Value>().ToString().Utf8Value();
-  const char* filename = js_filename.c_str();
-  int retval = buckets_openfile(
-    (char *)(filename)
-  );
+  Buffer<char> buf = info[0].As<Buffer<char>>();
+  int retval = buckets_openfile((char*)buf.Data(), buf.Length());
   return Number::New(env, retval);
 }
 
@@ -71,14 +72,16 @@ Number openfile(const CallbackInfo& info) {
 Buffer<char> db_all_json(const CallbackInfo& info) {
   Env env = info.Env();
   int bf_handle = info[0].As<Number>().Int64Value();
-  std::string js_query = info[1].As<Value>().ToString().Utf8Value();
-  const char* query = js_query.c_str();
-  std::string js_params_json = info[2].As<Value>().ToString().Utf8Value();
-  const char* params_json = js_params_json.c_str();
+  
+  Buffer<char> query_buf = info[1].As<Buffer<char>>();
+  Buffer<char> params_buf = info[2].As<Buffer<char>>();
+
   return stringResult(env, buckets_db_all_json(
     bf_handle,
-    (char *)(query),
-    (char *)(params_json)
+    (char *)(query_buf.Data()),
+    query_buf.Length(),
+    (char *)(params_buf.Data()),
+    params_buf.Length()
   ));
 }
 
@@ -86,14 +89,14 @@ Buffer<char> db_all_json(const CallbackInfo& info) {
 Buffer<char> db_run_json(const CallbackInfo& info) {
   Env env = info.Env();
   int bf_handle = info[0].As<Number>().Int64Value();
-  std::string js_query = info[1].As<Value>().ToString().Utf8Value();
-  const char* query = js_query.c_str();
-  std::string js_params_json = info[2].As<Value>().ToString().Utf8Value();
-  const char* params_json = js_params_json.c_str();
+  Buffer<char> query = info[1].As<Buffer<char>>();
+  Buffer<char> params_json = info[2].As<Buffer<char>>();
   return stringResult(env, buckets_db_run_json(
     bf_handle,
-    (char *)(query),
-    (char *)(params_json)
+    (char *)(query.Data()),
+    query.Length(),
+    (char *)(params_json.Data()),
+    params_json.Length()
   ));
 }
 
@@ -101,12 +104,11 @@ Buffer<char> db_run_json(const CallbackInfo& info) {
 Buffer<char> db_execute_many_json(const CallbackInfo& info) {
   Env env = info.Env();
   int bf_handle = info[0].As<Number>().Int64Value();
-  std::string js_queries_json = info[1].As<Value>().ToString().Utf8Value();
-  const char* queries_json = js_queries_json.c_str();
-  // cout << "buckets_db_execute_many_json(" << bf_handle << ", " << queries_json << ")\n";
+  Buffer<char> queries_json = info[1].As<Buffer<char>>();
   return stringResult(env, buckets_db_execute_many_json(
     bf_handle,
-    (char *)(queries_json)
+    (char *)(queries_json.Data()),
+    queries_json.Length()
   ));
 }
 

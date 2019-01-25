@@ -13,7 +13,7 @@ export class QuietLogger implements ILogger {
 setBaseLogger(new QuietLogger());
 
 import * as bucketslib from 'bucketslib'
-bucketslib.main.register_logger(x => {
+bucketslib.registerLogger(x => {
   // console.log(x);
 })
 
