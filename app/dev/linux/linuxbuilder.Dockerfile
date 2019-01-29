@@ -12,6 +12,8 @@ RUN yarn cache clean
 
 COPY ./cache/yarnmirror /proj/cache/yarnmirror
 
+COPY nodebuckets /build/nodebuckets
+
 RUN mkdir -p /build/core
 COPY core/package.json /build/core/
 COPY core/yarn.lock /build/core/
