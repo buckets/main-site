@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-09-13 17:00-0600\n"
+"POT-Creation-Date: 2019-01-29 09:11-0700\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -37,25 +37,35 @@ msgid ""
 "your own computer."
 msgstr ""
 
-#: src/_base.html:121
+#: src/_base.html:117
+msgid ""
+"Buckets is $29 for a limited time.  In March 2019, the price will "
+"increase to $49"
+msgstr ""
+
+#: src/_base.html:126
 msgid ""
 "Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
 "Haggard</a>"
 msgstr ""
 
-#: src/_base.html:129 src/gettingstarted.html:3 src/gettingstarted.html:9
+#: src/_base.html:130
+msgid "Donate"
+msgstr ""
+
+#: src/_base.html:134 src/gettingstarted.html:3 src/gettingstarted.html:9
 msgid "Getting Started"
 msgstr ""
 
-#: src/_base.html:130
+#: src/_base.html:135
 msgid "Pricing"
 msgstr ""
 
-#: src/_base.html:131
+#: src/_base.html:136
 msgid "Buy"
 msgstr ""
 
-#: src/_base.html:132
+#: src/_base.html:137
 msgid "Privacy"
 msgstr ""
 
@@ -121,144 +131,144 @@ msgid ""
 "think were in reach."
 msgstr ""
 
-#: src/index.html:156
+#: src/index.html:153
 msgid ""
 "Buckets makes budgeting <em>fast</em>, <em>simple</em> and "
 "<em>private.</em>"
 msgstr ""
 
-#: src/index.html:161
+#: src/index.html:158
 #, python-format
 msgid "Download Buckets v%(latest_version)s for"
 msgstr ""
 
-#: src/index.html:165
+#: src/index.html:162
 msgid "macOS"
 msgstr ""
 
-#: src/index.html:171
+#: src/index.html:168
 msgid "Windows"
 msgstr ""
 
-#: src/index.html:175
+#: src/index.html:172
 msgid ""
 "After the AppImage file has been downloaded, make it executable then "
 "double-click it to run."
 msgstr ""
 
-#: src/index.html:177
+#: src/index.html:174
 msgid "Linux"
 msgstr ""
 
-#: src/index.html:181
+#: src/index.html:178
 msgid "Other"
 msgstr ""
 
-#: src/index.html:195
+#: src/index.html:192
 msgid "Buy $29"
 msgstr ""
 
-#: src/index.html:199
+#: src/index.html:196
 msgid ""
 "Buckets gives you an <em>untimed, free trial</em> for as long as you need"
 " to decide if it works for you.  Really."
 msgstr ""
 
-#: src/index.html:203
+#: src/index.html:200
 msgid "Buckets is <em>private</em>."
 msgstr ""
 
-#: src/index.html:203
+#: src/index.html:200
 msgid "Your finances stay on your computer.  You control your data again!"
 msgstr ""
 
-#: src/index.html:207
+#: src/index.html:204
 msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
 msgstr ""
 
-#: src/index.html:207
+#: src/index.html:204
 msgid "You're saving money, not shackling yourself to another monthly service."
 msgstr ""
 
-#: src/index.html:207
+#: src/index.html:204
 msgid ""
 "A single license may be used on all your computers and all the computers "
 "of family members living in your home."
 msgstr ""
 
-#: src/index.html:211
+#: src/index.html:208
 msgid "Buckets has <em>amazing support.</em>"
 msgstr ""
 
-#: src/index.html:211
+#: src/index.html:208
 msgid "Want to try it?  Click the chat bubble and ask me anything."
 msgstr ""
 
-#: src/index.html:215
+#: src/index.html:212
 msgid ""
 "Buckets includes some free and novel methods to <em>sync with your "
 "bank.</em>"
 msgstr ""
 
-#: src/index.html:215
+#: src/index.html:212
 msgid ""
 "Record completely private macros, import files or sign up with SimpleFIN "
 "Bridge."
 msgstr ""
 
-#: src/index.html:219
+#: src/index.html:216
 msgid ""
 "Buckets includes some terrific <em>extras</em> such as really fast Amazon"
 " why-do-they-split-every-purchase-into-a-hundred-transactions "
 "reconciliation."
 msgstr ""
 
-#: src/index.html:225
+#: src/index.html:222
 #, python-format
 msgid ""
 "Buckets includes <em>helpful videos</em> to teach you how to budget like "
 "a master.  <a href=\"%(href)s\">Check them out!</a>"
 msgstr ""
 
-#: src/index.html:230
+#: src/index.html:227
 msgid "Thanks"
 msgstr ""
 
-#: src/index.html:240
+#: src/index.html:237
 msgid "Buckets is <em>multilingual</em>."
 msgstr ""
 
-#: src/index.html:240
+#: src/index.html:237
 msgid "Want to add your language?"
 msgstr ""
 
-#: src/index.html:255
+#: src/index.html:252
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
 "haul."
 msgstr ""
 
-#: src/index.html:255
+#: src/index.html:252
 msgid "Read more."
 msgstr ""
 
-#: src/index.html:259
+#: src/index.html:256
 msgid "<a href=\"#download\">Download it now</a> for free!"
 msgstr ""
 
-#: src/index.html:304
+#: src/index.html:301
 msgid "Subscribe to the Monthly Newsletter"
 msgstr ""
 
-#: src/index.html:306
+#: src/index.html:303
 msgid "Email Address"
 msgstr ""
 
-#: src/index.html:310
+#: src/index.html:307
 msgid "First Name"
 msgstr ""
 
-#: src/index.html:318
+#: src/index.html:315
 msgid "Subscribe"
 msgstr ""
 
