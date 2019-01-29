@@ -7,7 +7,10 @@ COMMON_BUILD_FLAGS = --header --nimcache:csrc --compileOnly --gc:markAndSweep
 
 all: dist/main.js lib/bucketslib.node
 
-dist/main.js: jssrc/main.ts
+node_modules:
+	npm i --ignore-scripts
+
+dist/main.js: jssrc/main.ts node_modules
 	tsc
 
 dist/test.js: jssrc/test.ts
