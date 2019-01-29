@@ -89,6 +89,11 @@
     margin-top: 1.5rem;
     smargin-bottom: 1.5rem;
   }
+  .notice {
+    background-color: rgba(241, 196, 15, 0.2);
+    padding: 1rem;
+    text-align: center;
+  }
   footer {
     display: flex;
     border: 1px solid lightgrey;
@@ -108,9 +113,9 @@
 <body>
   {% include '_navbar.html' %}
   {% block header %}
-  <!-- <div class="hero mini">
-    <a href="/{{ lang }}/index.html"><img src="/static/img/logo.svg" border="0"/></a>
-  </div> -->
+  <div class="notice">
+    {% trans %}Buckets is $29 for a limited time.  In March 2019, the price will increase to $49{% endtrans %}
+  </div>
   {% endblock %}
 
   {% block content %}{% endblock %}
