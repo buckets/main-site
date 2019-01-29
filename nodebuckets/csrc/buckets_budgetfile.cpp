@@ -152,7 +152,6 @@ static N_INLINE(void, copyMem_E1xtACub5WcDa3vbrIXbwgsystem)(void* dest, void* so
 static N_INLINE(void, nimCopyMem)(void* dest, void* source, NI size);
 N_NIMCALL(NimStringDesc*, resizeString)(NimStringDesc* dest, NI addlen);
 N_NIMCALL(NimStringDesc*, copyString)(NimStringDesc* src);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 static N_INLINE(NI, addInt)(NI a, NI b);
 N_NOINLINE(void, raiseOverflow)(void);
 N_LIB_PRIVATE N_NIMCALL(void, X5BX5Deq__cWlFtzNs7sAIHXtL02SHCg)(tyObject_Table_VhiYQVROvZwCBgplqpTfWg& t, NI key, tyObject_BudgetFilecolonObjectType__yi1kAYh8kb3f1o4vS0ZTBQ* val);
@@ -533,7 +532,6 @@ N_LIB_PRIVATE N_NIMCALL(void, upgradeSchema_LH14cll3kWhgg7HfQbZIzw)(tyObject_Bud
 					applied = (tySequence_sM4lkSb7zS6F7OVMvW9cffQ*) incrSeqV3(applied, (&NTI_sM4lkSb7zS6F7OVMvW9cffQ_));
 					T13_ = applied->len++;
 					applied->data[T13_] = copyString(T12_);
-					memTrackerWrite((void*)(&applied->data[T13_]), 8, "/Users/matt/m/buckets.git/ccore/src/buckets/budgetfile.nim", 36);
 				} LA10: ;
 			}
 		}
@@ -786,11 +784,9 @@ appendString(fmtRes, filename);
 	LA3_: ;
 	nimln_(64, "budgetfile.nim");
 	(*result).id = nextid_qcNG8J33Ctn5H8ycDMTLpA;
-	memTrackerWrite((void*)(&(*result).id), 8, "/Users/matt/m/buckets.git/ccore/src/buckets/budgetfile.nim", 64);
 	nimln_(65, "budgetfile.nim");
 	TM_Q8GDWOFB5uWKFMQFSo1oVw_5 = addInt(nextid_qcNG8J33Ctn5H8ycDMTLpA, ((NI) 1));
 	nextid_qcNG8J33Ctn5H8ycDMTLpA = (NI)(TM_Q8GDWOFB5uWKFMQFSo1oVw_5);
-	memTrackerWrite((void*)(&nextid_qcNG8J33Ctn5H8ycDMTLpA), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 	nimln_(66, "budgetfile.nim");
 	X5BX5Deq__cWlFtzNs7sAIHXtL02SHCg(id2BudgetFile_tTZwLExyJdLAlwEEzldPEw, (*result).id, result);
 	nimln_(67, "budgetfile.nim");
@@ -811,7 +807,6 @@ appendString(fmtRes, filename);
 	}
 	nimln_(72, "budgetfile.nim");
 	(*result).filename = copyString(filename);
-	memTrackerWrite((void*)(&(*result).filename), 8, "/Users/matt/m/buckets.git/ccore/src/buckets/budgetfile.nim", 72);
 	nimln_(73, "budgetfile.nim");
 	upgradeSchema_LH14cll3kWhgg7HfQbZIzw(result);
 	nimln_(74, "budgetfile.nim");

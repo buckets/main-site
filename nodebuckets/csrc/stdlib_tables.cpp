@@ -161,7 +161,6 @@ N_NOINLINE(void, chckNil)(void* p);
 N_NIMCALL(void, genericReset)(void* dest, TNimType* mt);
 N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, isPowerOfTwo_M0Db9b9cHxuUgw2ZF0P8utPg)(NI x);
 N_LIB_PRIVATE N_NIMCALL(void, failedAssertImpl_aDmpBTs9cPuXp0Mp9cfiNeyA)(NimStringDesc* msg);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 static N_INLINE(NI, chckRange)(NI i, NI a, NI b);
 N_NOINLINE(void, raiseRangeError)(NI64 val);
 N_NIMCALL(void*, newSeq)(TNimType* typ, NI len);
@@ -301,10 +300,8 @@ N_LIB_PRIVATE N_NIMCALL(void, initTable_jqzpDgYBM9aUAc5X3WbaZOA)(NI initialSize,
 	LA4_: ;
 	nimln_(351, "tables.nim");
 	(*Result).counter = ((NI) 0);
-	memTrackerWrite((void*)(&(*Result).counter), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 351);
 	nimln_(352, "tables.nim");
 	(*Result).data = (tySequence_hC9cYWgGj63WaE3PXFdHUGw*) newSeq((&NTI_hC9cYWgGj63WaE3PXFdHUGw_), ((NI)chckRange(initialSize, ((NI) 0), ((NI) IL64(9223372036854775807)))));
-	memTrackerWrite((void*)(&(*Result).data), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 352);
 	popFrame();
 }
 
@@ -389,14 +386,12 @@ static N_INLINE(NI, rawGet_6m20R69aPQTKuA2PIIwjOuAtables)(tyObject_Table_VhiYQVR
 {	result = (NI)0;
 	nimln_(43, "tableimpl.nim");
 	hc = hash_M6zZEYz39abIOUmj0QsNREgtables(key);
-	memTrackerWrite((void*)(&hc), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 53);
 	nimln_(53, "tableimpl.nim");
 	{
 		nimln_(44, "tableimpl.nim");
 		if (!(hc == ((NI) 0))) goto LA3_;
 {		nimln_(45, "tableimpl.nim");
 		hc = ((NI) 314159265);
-		memTrackerWrite((void*)(&hc), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 45);
 }	}
 	LA3_: ;
 	nimln_(31, "tableimpl.nim");
@@ -473,15 +468,12 @@ N_LIB_PRIVATE N_NIMCALL(void, rawInsert_yE3hTzbsVzRHENT6kYefjw)(tyObject_Table_V
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(64, "tableimpl.nim");
 	data->data[h].Field1 = key;
-	memTrackerWrite((void*)(&data->data[h].Field1), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 64);
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(65, "tableimpl.nim");
 	data->data[h].Field2 = val;
-	memTrackerWrite((void*)(&data->data[h].Field2), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 65);
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(66, "tableimpl.nim");
 	data->data[h].Field0 = hc;
-	memTrackerWrite((void*)(&data->data[h].Field0), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 66);
 	popFrame();
 }
 
@@ -500,7 +492,6 @@ N_LIB_PRIVATE N_NIMCALL(void, enlarge_w6UG5Ca4NRlOQzJwuygltA)(tyObject_Table_Vhi
 	T2_ = (tySequence_hC9cYWgGj63WaE3PXFdHUGw*)0;
 	T2_ = t.data;
 	t.data = n;
-	memTrackerWrite((void*)(&t.data), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 313);
 	n = T2_;
 	{
 		NI i;
@@ -618,7 +609,6 @@ N_LIB_PRIVATE N_NIMCALL(void, X5BX5Deq__cWlFtzNs7sAIHXtL02SHCg)(tyObject_Table_V
 		if (!(((NI) 0) <= index)) goto LA3_;
 {		if ((NU)(index) >= (NU)(t.data ? t.data->len : 0)) raiseIndexError2(index,(t.data ? t.data->len : 0)-1);
 		t.data->data[index].Field2 = val;
-		memTrackerWrite((void*)(&t.data->data[index].Field2), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 99);
 }	}
 	goto LA1_;
 	LA3_: ;
@@ -644,7 +634,6 @@ N_LIB_PRIVATE N_NIMCALL(void, X5BX5Deq__cWlFtzNs7sAIHXtL02SHCg)(tyObject_Table_V
 		nimln_(100, "tableimpl.nim");
 		TM_4SoG2KRQy3oMm9aUzSLtGrA_15 = addInt(t.counter, ((NI) 1));
 		t.counter = (NI)(TM_4SoG2KRQy3oMm9aUzSLtGrA_15);
-		memTrackerWrite((void*)(&t.counter), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 	}
 	LA1_: ;
 	popFrame();
@@ -703,10 +692,8 @@ N_LIB_PRIVATE N_NIMCALL(tyObject_BudgetFilecolonObjectType__yi1kAYh8kb3f1o4vS0ZT
 appendString(T6_, ((NimStringDesc*) &TM_4SoG2KRQy3oMm9aUzSLtGrA_16));
 appendString(T6_, T7_);
 		(*e).message = T6_;
-		memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 188);
 		nimln_(2984, "system.nim");
 		(*e).parent = NIM_NIL;
-		memTrackerWrite((void*)(&(*e).parent), 8, "/Users/matt/lib/Nim/lib/system.nim", 2984);
 		nimln_(163, "tables.nim");
 		raiseExceptionEx((Exception*)e, "KeyError", "[]", "../../../../../lib/Nim/lib/pure/collections/tables.nim", 163);
 	}
@@ -740,16 +727,12 @@ N_LIB_PRIVATE N_NIMCALL(void, initOrderedTable_fiyAoB3KBEd8q02UaahGaw)(NI initia
 	LA4_: ;
 	nimln_(667, "tables.nim");
 	(*Result).counter = ((NI) 0);
-	memTrackerWrite((void*)(&(*Result).counter), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 667);
 	nimln_(668, "tables.nim");
 	(*Result).first = ((NI) -1);
-	memTrackerWrite((void*)(&(*Result).first), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 668);
 	nimln_(669, "tables.nim");
 	(*Result).last = ((NI) -1);
-	memTrackerWrite((void*)(&(*Result).last), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 669);
 	nimln_(670, "tables.nim");
 	(*Result).data = (tySequence_MlAD6nAPq9bHKla9cWiIZP0g*) newSeq((&NTI_MlAD6nAPq9bHKla9cWiIZP0g_), ((NI)chckRange(initialSize, ((NI) 0), ((NI) IL64(9223372036854775807)))));
-	memTrackerWrite((void*)(&(*Result).data), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 670);
 	popFrame();
 }
 
@@ -806,14 +789,12 @@ N_LIB_PRIVATE N_NIMCALL(NI, rawGet_RlRJm9aeypbITbYPmGVBpmg)(tyObject_OrderedTabl
 {	result = (NI)0;
 	nimln_(43, "tableimpl.nim");
 	hc = hash_uBstFm5SYVQeOL3j9c9bc58A(key);
-	memTrackerWrite((void*)(&hc), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 53);
 	nimln_(53, "tableimpl.nim");
 	{
 		nimln_(44, "tableimpl.nim");
 		if (!(hc == ((NI) 0))) goto LA3_;
 {		nimln_(45, "tableimpl.nim");
 		hc = ((NI) 314159265);
-		memTrackerWrite((void*)(&hc), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 45);
 }	}
 	LA3_: ;
 	nimln_(31, "tableimpl.nim");
@@ -862,24 +843,19 @@ N_LIB_PRIVATE N_NIMCALL(void, rawInsert_wHzW7E4SNJAr7GY5xV9aKTQ)(tyObject_Ordere
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(64, "tableimpl.nim");
 	data->data[h].Field2 = copyString(key);
-	memTrackerWrite((void*)(&data->data[h].Field2), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 64);
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(65, "tableimpl.nim");
 	data->data[h].Field3 = val;
-	memTrackerWrite((void*)(&data->data[h].Field3), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 65);
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(66, "tableimpl.nim");
 	data->data[h].Field0 = hc;
-	memTrackerWrite((void*)(&data->data[h].Field0), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 66);
 	if ((NU)(h) >= (NU)(data ? data->len : 0)) raiseIndexError2(h,(data ? data->len : 0)-1);
 	nimln_(620, "tables.nim");
 	data->data[h].Field1 = ((NI) -1);
-	memTrackerWrite((void*)(&data->data[h].Field1), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 620);
 	nimln_(621, "tables.nim");
 	{
 		if (!(t.first < ((NI) 0))) goto LA3_;
 {		t.first = h;
-		memTrackerWrite((void*)(&t.first), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 621);
 }	}
 	LA3_: ;
 	nimln_(622, "tables.nim");
@@ -887,12 +863,10 @@ N_LIB_PRIVATE N_NIMCALL(void, rawInsert_wHzW7E4SNJAr7GY5xV9aKTQ)(tyObject_Ordere
 		if (!(((NI) 0) <= t.last)) goto LA7_;
 {		if ((NU)(t.last) >= (NU)(data ? data->len : 0)) raiseIndexError2(t.last,(data ? data->len : 0)-1);
 		data->data[t.last].Field1 = h;
-		memTrackerWrite((void*)(&data->data[t.last].Field1), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 622);
 }	}
 	LA7_: ;
 	nimln_(623, "tables.nim");
 	t.last = h;
-	memTrackerWrite((void*)(&t.last), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 623);
 	popFrame();
 }
 
@@ -911,15 +885,12 @@ N_LIB_PRIVATE N_NIMCALL(void, enlarge_WxcpUIMurkKssglWin5tGw)(tyObject_OrderedTa
 	NI h = t.first;
 	nimln_(629, "tables.nim");
 	t.first = ((NI) -1);
-	memTrackerWrite((void*)(&t.first), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 629);
 	nimln_(630, "tables.nim");
 	t.last = ((NI) -1);
-	memTrackerWrite((void*)(&t.last), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 630);
 	nimln_(631, "tables.nim");
 	T2_ = (tySequence_MlAD6nAPq9bHKla9cWiIZP0g*)0;
 	T2_ = t.data;
 	t.data = n;
-	memTrackerWrite((void*)(&t.data), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 631);
 	n = T2_;
 	{
 		nimln_(632, "tables.nim");
@@ -1025,7 +996,6 @@ N_LIB_PRIVATE N_NIMCALL(void, X5BX5Deq__79bwPu2H8TyyZ9cDM1RrH17A)(tyObject_Order
 		if (!(((NI) 0) <= index)) goto LA3_;
 {		if ((NU)(index) >= (NU)(t.data ? t.data->len : 0)) raiseIndexError2(index,(t.data ? t.data->len : 0)-1);
 		t.data->data[index].Field3 = val;
-		memTrackerWrite((void*)(&t.data->data[index].Field3), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 99);
 }	}
 	goto LA1_;
 	LA3_: ;
@@ -1051,7 +1021,6 @@ N_LIB_PRIVATE N_NIMCALL(void, X5BX5Deq__79bwPu2H8TyyZ9cDM1RrH17A)(tyObject_Order
 		nimln_(100, "tableimpl.nim");
 		TM_4SoG2KRQy3oMm9aUzSLtGrA_24 = addInt(t.counter, ((NI) 1));
 		t.counter = (NI)(TM_4SoG2KRQy3oMm9aUzSLtGrA_24);
-		memTrackerWrite((void*)(&t.counter), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 	}
 	LA1_: ;
 	popFrame();
@@ -1080,14 +1049,12 @@ static N_INLINE(NI, rawGet_0a0hytiKUsK9cgzQb059c9coAtables)(tyObject_OrderedTabl
 {	result = (NI)0;
 	nimln_(43, "tableimpl.nim");
 	hc = hash_uBstFm5SYVQeOL3j9c9bc58A(key);
-	memTrackerWrite((void*)(&hc), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 53);
 	nimln_(53, "tableimpl.nim");
 	{
 		nimln_(44, "tableimpl.nim");
 		if (!(hc == ((NI) 0))) goto LA3_;
 {		nimln_(45, "tableimpl.nim");
 		hc = ((NI) 314159265);
-		memTrackerWrite((void*)(&hc), 8, "/Users/matt/lib/Nim/lib/pure/collections/tableimpl.nim", 45);
 }	}
 	LA3_: ;
 	nimln_(31, "tableimpl.nim");
@@ -1162,10 +1129,8 @@ N_LIB_PRIVATE N_NIMCALL(tyObject_JsonNodeObj_df9bshXB7C9cTiWPIOtX3j1Q**, X5BX5D_
 appendString(T6_, ((NimStringDesc*) &TM_4SoG2KRQy3oMm9aUzSLtGrA_16));
 appendString(T6_, key);
 		(*e).message = T6_;
-		memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/collections/tables.nim", 588);
 		nimln_(2984, "system.nim");
 		(*e).parent = NIM_NIL;
-		memTrackerWrite((void*)(&(*e).parent), 8, "/Users/matt/lib/Nim/lib/system.nim", 2984);
 		nimln_(163, "tables.nim");
 		raiseExceptionEx((Exception*)e, "KeyError", "[]", "../../../../../lib/Nim/lib/pure/collections/tables.nim", 163);
 	}

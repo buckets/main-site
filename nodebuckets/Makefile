@@ -19,7 +19,7 @@ release: $(NIMFILES)
 	nim cpp -d:release $(COMMON_BUILD_FLAGS) $^
 
 debug: $(NIMFILES)
-	nim cpp --checks:on -d:traceGC --memTracker:on -d:memProfiler -d:lineDir -d:leakDetector -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
+	nim cpp --checks:on  -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
 
 csrc/nimbase.h: $(NIMBASE)
 	mkdir -p csrc

@@ -87,7 +87,6 @@ N_NIMCALL(void, nimGCvisit)(void* d, NI op);
 static N_NIMCALL(void, Marker_tyRef_Z9cj1NxLXx79cYy9c4gbj6CAA)(void* p, NI op);
 N_NIMCALL(void*, newObj)(TNimType* typ, NI size);
 N_NIMCALL(NimStringDesc*, copyString)(NimStringDesc* src);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_LIB_PRIVATE N_NIMCALL(void, ssClose_QCxhJhdbGUiB08yc0fBeLg)(tyObject_StreamObj_THYguAi9bSgidczZ3ywEIMQ* s);
 N_NIMCALL(void, chckObj)(TNimType* obj, TNimType* subclass);
 N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, ssAtEnd_Aq3rxetdTkDpVSXU7JqLPQ)(tyObject_StreamObj_THYguAi9bSgidczZ3ywEIMQ* s);
@@ -190,7 +189,6 @@ N_LIB_PRIVATE N_NIMCALL(void, ssClose_QCxhJhdbGUiB08yc0fBeLg)(tyObject_StreamObj
 	tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw* s_2 = ((tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw*) (s));
 	nimln_(381, "streams.nim");
 	(*s_2).data = ((NimStringDesc*) NIM_NIL);
-	memTrackerWrite((void*)(&(*s_2).data), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 381);
 	popFrame();
 }
 
@@ -216,7 +214,6 @@ N_LIB_PRIVATE N_NIMCALL(void, ssSetPosition_KgEn9bmq40bvWqBEE7YUgvQ)(tyObject_St
 	tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw* s_2 = ((tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw*) (s));
 	nimln_(346, "streams.nim");
 	(*s_2).pos = clamp_RrNgT2340KObgDMnZWSK5A(pos, ((NI) 0), ((*s_2).data ? (*s_2).data->len : 0));
-	memTrackerWrite((void*)(&(*s_2).pos), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 346);
 	popFrame();
 }
 
@@ -330,7 +327,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, ssReadData_VwkmV0rE82KHQOm1pQyMKg)(tyObject_StreamOb
 		nimln_(357, "streams.nim");
 		TM_Ue7tnBcsL67VCiRfvt8q0A_5 = addInt((*s_2).pos, result);
 		(*s_2).pos = (NI)(TM_Ue7tnBcsL67VCiRfvt8q0A_5);
-		memTrackerWrite((void*)(&(*s_2).pos), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 357);
 }	}
 	goto LA1_;
 	LA3_: ;
@@ -394,7 +390,6 @@ N_LIB_PRIVATE N_NIMCALL(void, ssWriteData_OOEfFmc9bLLbcXoH1cApdvA)(tyObject_Stre
 {		nimln_(374, "streams.nim");
 		TM_Ue7tnBcsL67VCiRfvt8q0A_8 = addInt((*s_2).pos, bufLen);
 		(*s_2).data = setLengthStr((*s_2).data, ((NI)chckRange((NI)(TM_Ue7tnBcsL67VCiRfvt8q0A_8), ((NI) 0), ((NI) IL64(9223372036854775807)))));
-		memTrackerWrite((void*)(&(*s_2).data), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 374);
 }	}
 	LA7_: ;
 	nimln_(375, "streams.nim");
@@ -403,7 +398,6 @@ N_LIB_PRIVATE N_NIMCALL(void, ssWriteData_OOEfFmc9bLLbcXoH1cApdvA)(tyObject_Stre
 	nimln_(376, "streams.nim");
 	TM_Ue7tnBcsL67VCiRfvt8q0A_9 = addInt((*s_2).pos, bufLen);
 	(*s_2).pos = (NI)(TM_Ue7tnBcsL67VCiRfvt8q0A_9);
-	memTrackerWrite((void*)(&(*s_2).pos), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 376);
 	}BeforeRet_: ;
 	popFrame();
 }
@@ -417,31 +411,22 @@ N_LIB_PRIVATE N_NIMCALL(tyObject_StringStreamObj_Olau5FPRehZBBEB77FHnfw*, newStr
 	(*result).m_type = (&NTI_Olau5FPRehZBBEB77FHnfw_);
 	nimln_(388, "streams.nim");
 	(*result).data = copyString(s);
-	memTrackerWrite((void*)(&(*result).data), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 388);
 	nimln_(389, "streams.nim");
 	(*result).pos = ((NI) 0);
-	memTrackerWrite((void*)(&(*result).pos), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 389);
 	nimln_(390, "streams.nim");
 	(*result).closeImpl = ssClose_QCxhJhdbGUiB08yc0fBeLg;
-	memTrackerWrite((void*)(&(*result).closeImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 390);
 	nimln_(391, "streams.nim");
 	(*result).atEndImpl = ssAtEnd_Aq3rxetdTkDpVSXU7JqLPQ;
-	memTrackerWrite((void*)(&(*result).atEndImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 391);
 	nimln_(392, "streams.nim");
 	(*result).setPositionImpl = ssSetPosition_KgEn9bmq40bvWqBEE7YUgvQ;
-	memTrackerWrite((void*)(&(*result).setPositionImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 392);
 	nimln_(393, "streams.nim");
 	(*result).getPositionImpl = ssGetPosition_Om0Yjh3VW2JrNe1mVaOhXA;
-	memTrackerWrite((void*)(&(*result).getPositionImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 393);
 	nimln_(394, "streams.nim");
 	(*result).readDataImpl = ssReadData_VwkmV0rE82KHQOm1pQyMKg;
-	memTrackerWrite((void*)(&(*result).readDataImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 394);
 	nimln_(395, "streams.nim");
 	(*result).peekDataImpl = ssPeekData_VwkmV0rE82KHQOm1pQyMKg_2;
-	memTrackerWrite((void*)(&(*result).peekDataImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 395);
 	nimln_(396, "streams.nim");
 	(*result).writeDataImpl = ssWriteData_OOEfFmc9bLLbcXoH1cApdvA;
-	memTrackerWrite((void*)(&(*result).writeDataImpl), 8, "/Users/matt/lib/Nim/lib/pure/streams.nim", 396);
 	popFrame();
 	return result;
 }

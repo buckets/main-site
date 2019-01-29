@@ -174,7 +174,6 @@ N_NIMCALL(NimStringDesc*, nimIntToStr)(NI x);
 N_LIB_PRIVATE N_NIMCALL(void, nosmoveFile)(NimStringDesc* source, NimStringDesc* dest);
 N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, slash__BsTQv9c9anbxt9bKmR0aN1elQ)(NimStringDesc* head, NimStringDesc* tail);
 static N_INLINE(NI, subInt)(NI a, NI b);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_LIB_PRIVATE N_NIMCALL(FILE*, open_hqzpWQbdA2B8l9a6wwNoP4g)(NimStringDesc* filename, tyEnum_FileMode_fVUBHvW79bXUw1j55Oo9avSQ mode, NI bufSize);
 N_NIMCALL(TGenericSeq*, incrSeqV3)(TGenericSeq* s, TNimType* typ);
 N_LIB_PRIVATE N_NIMCALL(void, log_3UB9b0flreHbZSduHV9cBGOA)(tyObject_LoggercolonObjectType__9bhietBQiofDPLK3sBa0qPQ* logger, tyEnum_Level_pW4mH4lipH6u2NKDGEWdGg level, NimStringDesc** args, NI argsLen_0);
@@ -849,10 +848,8 @@ N_LIB_PRIVATE N_NIMCALL(void, log_rG6osqE0luZSJUlLifxyVg)(tyObject_RollingFileLo
 			nimln_(272, "logging.nim");
 			TM_7EbqAVTAsJVrNKIE9b0UU9bA_34 = addInt((*logger).logFiles, ((NI) 1));
 			(*logger).logFiles = (NI)(TM_7EbqAVTAsJVrNKIE9b0UU9bA_34);
-			memTrackerWrite((void*)(&(*logger).logFiles), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 			nimln_(273, "logging.nim");
 			(*logger).curLine = ((NI) 0);
-			memTrackerWrite((void*)(&(*logger).curLine), 8, "/Users/matt/lib/Nim/lib/pure/logging.nim", 273);
 			nimln_(274, "logging.nim");
 			(*logger).file = open_hqzpWQbdA2B8l9a6wwNoP4g((*logger).baseName, (*logger).baseMode, (*logger).bufSize);
 }		}
@@ -870,7 +867,6 @@ N_LIB_PRIVATE N_NIMCALL(void, log_rG6osqE0luZSJUlLifxyVg)(tyObject_RollingFileLo
 		nimln_(278, "logging.nim");
 		TM_7EbqAVTAsJVrNKIE9b0UU9bA_35 = addInt((*logger).curLine, ((NI) 1));
 		(*logger).curLine = (NI)(TM_7EbqAVTAsJVrNKIE9b0UU9bA_35);
-		memTrackerWrite((void*)(&(*logger).curLine), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 }	}
 	LA5_: ;
 	popFrame();
@@ -883,7 +879,6 @@ N_LIB_PRIVATE N_NIMCALL(void, addHandler_JMzV3oNQoqgx3BNo3w87bg)(tyObject_Logger
 	handlers_OpA9asfHAsjfRTcLDwhkNfA = (tySequence_ZE4llUwluRK7Sqp4MtXogQ*) incrSeqV3(handlers_OpA9asfHAsjfRTcLDwhkNfA, (&NTI_ZE4llUwluRK7Sqp4MtXogQ_));
 	T1_ = handlers_OpA9asfHAsjfRTcLDwhkNfA->len++;
 	handlers_OpA9asfHAsjfRTcLDwhkNfA->data[T1_] = handler;
-	memTrackerWrite((void*)(&handlers_OpA9asfHAsjfRTcLDwhkNfA->data[T1_]), 8, "/Users/matt/lib/Nim/lib/pure/logging.nim", 343);
 	popFrame();
 }
 

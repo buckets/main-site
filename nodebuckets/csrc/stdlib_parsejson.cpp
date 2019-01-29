@@ -129,7 +129,6 @@ struct tySequence_uB9b75OUPRENsBAu4AnoePA : TGenericSeq {
 static N_NIMCALL(void, Marker_tySequence_Ih0V9cYug0VPJyBBGvgEH7Q)(void* p, NI op);
 N_LIB_PRIVATE N_NIMCALL(void, open_0F9asrCjxjKO6tNQQ4Cv3Jg)(tyObject_BaseLexer_MAw8rJZtJ279bVV3TWMtXSg& L, tyObject_StreamObj_THYguAi9bSgidczZ3ywEIMQ* input, NI bufLen, tySet_tyChar_nmiMWKVIe46vacnhAFrQvw refillChars);
 N_NIMCALL(NimStringDesc*, copyString)(NimStringDesc* src);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_NIMCALL(void, genericSeqAssign)(void* dest, void* src, TNimType* mt);
 static N_INLINE(void, nimFrame)(TFrame* s);
 N_LIB_PRIVATE N_NOINLINE(void, callDepthLimitReached_II46IjNZztN9bmbxUD8dt8g)(void);
@@ -281,19 +280,14 @@ N_LIB_PRIVATE N_NIMCALL(void, open_mL4QrKRcNX0dd8pNuLu1ng)(tyObject_JsonParser_K
 	open_0F9asrCjxjKO6tNQQ4Cv3Jg(my, input, ((NI) 8192), TM_nIinruGrC8EPIfjL3PuTvA_15);
 	nimln_(111, "parsejson.nim");
 	my.filename = copyString(filename);
-	memTrackerWrite((void*)(&my.filename), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 111);
 	nimln_(112, "parsejson.nim");
 	genericSeqAssign((&my.state), TM_nIinruGrC8EPIfjL3PuTvA_16, (&NTI_Ih0V9cYug0VPJyBBGvgEH7Q_));
-	memTrackerWrite((void*)(&my.state), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 112);
 	nimln_(113, "parsejson.nim");
 	my.kind = ((tyEnum_JsonEventKind_0zjE9c54eTrq224F5wMcaFA) 0);
-	memTrackerWrite((void*)(&my.kind), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 113);
 	nimln_(114, "parsejson.nim");
 	my.a = ((NimStringDesc*) NIM_NIL);
-	memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 114);
 	nimln_(115, "parsejson.nim");
 	my.rawStringLiterals = rawStringLiterals;
-	memTrackerWrite((void*)(&my.rawStringLiterals), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 115);
 	popFrame();
 }
 
@@ -402,7 +396,6 @@ N_LIB_PRIVATE N_NIMCALL(void, skip_i8RUJSgirdl3NHd9av25mAQ)(tyObject_JsonParser_
 							{
 								nimln_(298, "parsejson.nim");
 								my.err = ((tyEnum_JsonError_G9cw5MrJXJrcpID5JXaplew) 8);
-								memTrackerWrite((void*)(&my.err), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 298);
 								nimln_(299, "parsejson.nim");
 								goto LA17;
 							}
@@ -499,7 +492,6 @@ N_LIB_PRIVATE N_NIMCALL(void, skip_i8RUJSgirdl3NHd9av25mAQ)(tyObject_JsonParser_
 	} LA1: ;
 	nimln_(325, "parsejson.nim");
 	my.bufpos = pos;
-	memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 325);
 	popFrame();
 }
 
@@ -534,7 +526,6 @@ N_LIB_PRIVATE N_NIMCALL(void, parseNumber_gkjThV6kuNpnJQCiArDIjA)(tyObject_JsonP
 		if (!((NU8)(buf[pos]) == (NU8)(45))) goto LA3_;
 {		nimln_(331, "parsejson.nim");
 		my.a = addChar(my.a, 45);
-		memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 331);
 		nimln_(332, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_27 = addInt(pos, ((NI) 1));
 		pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_27);
@@ -546,7 +537,6 @@ N_LIB_PRIVATE N_NIMCALL(void, parseNumber_gkjThV6kuNpnJQCiArDIjA)(tyObject_JsonP
 		if (!((NU8)(buf[pos]) == (NU8)(46))) goto LA7_;
 {		nimln_(334, "parsejson.nim");
 		my.a = resizeString(my.a, 2);
-		memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 334);
 appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 		nimln_(335, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_29 = addInt(pos, ((NI) 1));
@@ -562,7 +552,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 				if (!(((NU8)(buf[pos])) >= ((NU8)(48)) && ((NU8)(buf[pos])) <= ((NU8)(57)))) goto LA11;
 				nimln_(338, "parsejson.nim");
 				my.a = addChar(my.a, buf[pos]);
-				memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 338);
 				nimln_(339, "parsejson.nim");
 				TM_nIinruGrC8EPIfjL3PuTvA_30 = addInt(pos, ((NI) 1));
 				pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_30);
@@ -574,7 +563,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 			if (!((NU8)(buf[pos]) == (NU8)(46))) goto LA14_;
 {			nimln_(341, "parsejson.nim");
 			my.a = addChar(my.a, 46);
-			memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 341);
 			nimln_(342, "parsejson.nim");
 			TM_nIinruGrC8EPIfjL3PuTvA_31 = addInt(pos, ((NI) 1));
 			pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_31);
@@ -589,7 +577,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 			if (!(((NU8)(buf[pos])) >= ((NU8)(48)) && ((NU8)(buf[pos])) <= ((NU8)(57)))) goto LA17;
 			nimln_(345, "parsejson.nim");
 			my.a = addChar(my.a, buf[pos]);
-			memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 345);
 			nimln_(346, "parsejson.nim");
 			TM_nIinruGrC8EPIfjL3PuTvA_32 = addInt(pos, ((NI) 1));
 			pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_32);
@@ -601,7 +588,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 		if (!(((NU8)(buf[pos])) == ((NU8)(69)) || ((NU8)(buf[pos])) == ((NU8)(101)))) goto LA20_;
 {		nimln_(348, "parsejson.nim");
 		my.a = addChar(my.a, buf[pos]);
-		memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 348);
 		nimln_(349, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_33 = addInt(pos, ((NI) 1));
 		pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_33);
@@ -611,7 +597,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 			if (!(((NU8)(buf[pos])) == ((NU8)(43)) || ((NU8)(buf[pos])) == ((NU8)(45)))) goto LA24_;
 {			nimln_(351, "parsejson.nim");
 			my.a = addChar(my.a, buf[pos]);
-			memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 351);
 			nimln_(352, "parsejson.nim");
 			TM_nIinruGrC8EPIfjL3PuTvA_34 = addInt(pos, ((NI) 1));
 			pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_34);
@@ -624,7 +609,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 				if (!(((NU8)(buf[pos])) >= ((NU8)(48)) && ((NU8)(buf[pos])) <= ((NU8)(57)))) goto LA27;
 				nimln_(354, "parsejson.nim");
 				my.a = addChar(my.a, buf[pos]);
-				memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 354);
 				nimln_(355, "parsejson.nim");
 				TM_nIinruGrC8EPIfjL3PuTvA_35 = addInt(pos, ((NI) 1));
 				pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_35);
@@ -634,7 +618,6 @@ appendString(my.a, ((NimStringDesc*) &TM_nIinruGrC8EPIfjL3PuTvA_28));
 	LA20_: ;
 	nimln_(356, "parsejson.nim");
 	my.bufpos = pos;
-	memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 356);
 	popFrame();
 }
 
@@ -672,7 +655,6 @@ N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, handleHexChar_N8FiALvJ1sTuXxY5sVUS8Q)(NIM_CHAR
 		nimln_(168, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_48 = subInt(((NU8)(c)), ((NI) 48));
 		x = (NI)((NI)((NU64)(x) << (NU64)(((NI) 4))) | (NI)(TM_nIinruGrC8EPIfjL3PuTvA_48));
-		memTrackerWrite((void*)(&x), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 168);
 	}
 	break;
 	case 97 ... 102:
@@ -683,7 +665,6 @@ N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, handleHexChar_N8FiALvJ1sTuXxY5sVUS8Q)(NIM_CHAR
 		TM_nIinruGrC8EPIfjL3PuTvA_49 = subInt(((NU8)(c)), ((NI) 97));
 		TM_nIinruGrC8EPIfjL3PuTvA_50 = addInt((NI)(TM_nIinruGrC8EPIfjL3PuTvA_49), ((NI) 10));
 		x = (NI)((NI)((NU64)(x) << (NU64)(((NI) 4))) | (NI)(TM_nIinruGrC8EPIfjL3PuTvA_50));
-		memTrackerWrite((void*)(&x), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 169);
 	}
 	break;
 	case 65 ... 70:
@@ -694,7 +675,6 @@ N_LIB_PRIVATE N_NIMCALL(NIM_BOOL, handleHexChar_N8FiALvJ1sTuXxY5sVUS8Q)(NIM_CHAR
 		TM_nIinruGrC8EPIfjL3PuTvA_51 = subInt(((NU8)(c)), ((NI) 65));
 		TM_nIinruGrC8EPIfjL3PuTvA_52 = addInt((NI)(TM_nIinruGrC8EPIfjL3PuTvA_51), ((NI) 10));
 		x = (NI)((NI)((NU64)(x) << (NU64)(((NI) 4))) | (NI)(TM_nIinruGrC8EPIfjL3PuTvA_52));
-		memTrackerWrite((void*)(&x), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 170);
 	}
 	break;
 	default:
@@ -733,7 +713,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, parseEscapedUTF16_si9aq2KUGPsh22mT8fLpg1Q)(NCSTRING 
 {					nimln_(178, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_53 = addInt(pos, ((NI) 1));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_53);
-					memTrackerWrite((void*)(&pos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 }				}
 				goto LA4_;
 				LA6_: ;
@@ -795,7 +774,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 		if (!my.rawStringLiterals) goto LA3_;
 {		nimln_(187, "parsejson.nim");
 		my.a = addChar(my.a, 34);
-		memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 187);
 }	}
 	LA3_: ;
 	{
@@ -807,7 +785,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 			{
 				nimln_(191, "parsejson.nim");
 				my.err = ((tyEnum_JsonError_G9cw5MrJXJrcpID5JXaplew) 7);
-				memTrackerWrite((void*)(&my.err), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 191);
 				nimln_(192, "parsejson.nim");
 				result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 0);
 				nimln_(193, "parsejson.nim");
@@ -822,7 +799,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					if (!my.rawStringLiterals) goto LA11_;
 {					nimln_(196, "parsejson.nim");
 					my.a = addChar(my.a, 34);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 196);
 }				}
 				LA11_: ;
 				nimln_(197, "parsejson.nim");
@@ -840,7 +816,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					if (!my.rawStringLiterals) goto LA16_;
 {					nimln_(201, "parsejson.nim");
 					my.a = addChar(my.a, 92);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 201);
 }				}
 				LA16_: ;
 				nimln_(202, "parsejson.nim");
@@ -856,7 +831,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					nimln_(204, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_40 = addInt(pos, ((NI) 1));
 					my.a = addChar(my.a, buf[(NI)(TM_nIinruGrC8EPIfjL3PuTvA_40)]);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 204);
 					nimln_(205, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_41 = addInt(pos, ((NI) 2));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_41);
@@ -867,7 +841,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					NI TM_nIinruGrC8EPIfjL3PuTvA_42;
 					nimln_(207, "parsejson.nim");
 					my.a = addChar(my.a, 8);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 207);
 					nimln_(208, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_42 = addInt(pos, ((NI) 2));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_42);
@@ -878,7 +851,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					NI TM_nIinruGrC8EPIfjL3PuTvA_43;
 					nimln_(210, "parsejson.nim");
 					my.a = addChar(my.a, 12);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 210);
 					nimln_(211, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_43 = addInt(pos, ((NI) 2));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_43);
@@ -889,7 +861,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					NI TM_nIinruGrC8EPIfjL3PuTvA_44;
 					nimln_(213, "parsejson.nim");
 					my.a = addChar(my.a, 10);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 213);
 					nimln_(214, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_44 = addInt(pos, ((NI) 2));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_44);
@@ -900,7 +871,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					NI TM_nIinruGrC8EPIfjL3PuTvA_45;
 					nimln_(216, "parsejson.nim");
 					my.a = addChar(my.a, 13);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 216);
 					nimln_(217, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_45 = addInt(pos, ((NI) 2));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_45);
@@ -911,7 +881,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 					NI TM_nIinruGrC8EPIfjL3PuTvA_46;
 					nimln_(219, "parsejson.nim");
 					my.a = addChar(my.a, 9);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 219);
 					nimln_(220, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_46 = addInt(pos, ((NI) 2));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_46);
@@ -925,7 +894,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 						if (!my.rawStringLiterals) goto LA27_;
 {						nimln_(223, "parsejson.nim");
 						my.a = addChar(my.a, 117);
-						memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 223);
 }					}
 					LA27_: ;
 					nimln_(224, "parsejson.nim");
@@ -940,7 +908,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 						if (!(r < ((NI) 0))) goto LA31_;
 {						nimln_(228, "parsejson.nim");
 						my.err = ((tyEnum_JsonError_G9cw5MrJXJrcpID5JXaplew) 1);
-						memTrackerWrite((void*)(&my.err), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 228);
 						nimln_(229, "parsejson.nim");
 						goto LA5;
 }					}
@@ -966,7 +933,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 							if (!T39_) goto LA41_;
 {							nimln_(233, "parsejson.nim");
 							my.err = ((tyEnum_JsonError_G9cw5MrJXJrcpID5JXaplew) 1);
-							memTrackerWrite((void*)(&my.err), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 233);
 							nimln_(234, "parsejson.nim");
 							goto LA5;
 }						}
@@ -999,7 +965,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 						{
 							nimln_(240, "parsejson.nim");
 							my.err = ((tyEnum_JsonError_G9cw5MrJXJrcpID5JXaplew) 1);
-							memTrackerWrite((void*)(&my.err), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 240);
 							nimln_(241, "parsejson.nim");
 							goto LA5;
 						}
@@ -1031,7 +996,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 										if (!(((NU8)(buf[pos2])) >= ((NU8)(48)) && ((NU8)(buf[pos2])) <= ((NU8)(57)) || ((NU8)(buf[pos2])) >= ((NU8)(65)) && ((NU8)(buf[pos2])) <= ((NU8)(70)) || ((NU8)(buf[pos2])) >= ((NU8)(97)) && ((NU8)(buf[pos2])) <= ((NU8)(102)))) goto LA59_;
 {										nimln_(246, "parsejson.nim");
 										my.a = addChar(my.a, buf[pos2]);
-										memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 246);
 										nimln_(247, "parsejson.nim");
 										TM_nIinruGrC8EPIfjL3PuTvA_61 = addInt(pos2, ((NI) 1));
 										pos2 = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_61);
@@ -1058,7 +1022,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, parseString_8Kxe
 						T63_ = (NimStringDesc*)0;
 						T63_ = nuctoUTF8(((NI32)chckRange(r, ((NI32) (-2147483647 -1)), ((NI32) 2147483647))));
 						my.a = resizeString(my.a, (T63_ ? T63_->len : 0) + 0);
-						memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 251);
 appendString(my.a, T63_);
 					}
 					LA50_: ;
@@ -1069,7 +1032,6 @@ appendString(my.a, T63_);
 					NI TM_nIinruGrC8EPIfjL3PuTvA_63;
 					nimln_(254, "parsejson.nim");
 					my.a = addChar(my.a, buf[pos]);
-					memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 254);
 					nimln_(255, "parsejson.nim");
 					TM_nIinruGrC8EPIfjL3PuTvA_63 = addInt(pos, ((NI) 1));
 					pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_63);
@@ -1086,7 +1048,6 @@ appendString(my.a, T63_);
 				buf = my.buf;
 				nimln_(259, "parsejson.nim");
 				my.a = addChar(my.a, 13);
-				memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 259);
 			}
 			break;
 			case 10:
@@ -1097,7 +1058,6 @@ appendString(my.a, T63_);
 				buf = my.buf;
 				nimln_(263, "parsejson.nim");
 				my.a = addChar(my.a, 10);
-				memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 263);
 			}
 			break;
 			default:
@@ -1105,7 +1065,6 @@ appendString(my.a, T63_);
 				NI TM_nIinruGrC8EPIfjL3PuTvA_64;
 				nimln_(265, "parsejson.nim");
 				my.a = addChar(my.a, buf[pos]);
-				memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 265);
 				nimln_(266, "parsejson.nim");
 				TM_nIinruGrC8EPIfjL3PuTvA_64 = addInt(pos, ((NI) 1));
 				pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_64);
@@ -1116,7 +1075,6 @@ appendString(my.a, T63_);
 	} LA5: ;
 	nimln_(267, "parsejson.nim");
 	my.bufpos = pos;
-	memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 267);
 	popFrame();
 	return result;
 }
@@ -1137,7 +1095,6 @@ N_LIB_PRIVATE N_NIMCALL(void, parseName_gkjThV6kuNpnJQCiArDIjA_2)(tyObject_JsonP
 				if (!(((NU8)(buf[pos])) >= ((NU8)(97)) && ((NU8)(buf[pos])) <= ((NU8)(122)) || ((NU8)(buf[pos])) >= ((NU8)(65)) && ((NU8)(buf[pos])) <= ((NU8)(90)) || ((NU8)(buf[pos])) >= ((NU8)(48)) && ((NU8)(buf[pos])) <= ((NU8)(57)) || ((NU8)(buf[pos])) == ((NU8)(95)))) goto LA6;
 				nimln_(363, "parsejson.nim");
 				my.a = addChar(my.a, buf[pos]);
-				memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 363);
 				nimln_(364, "parsejson.nim");
 				TM_nIinruGrC8EPIfjL3PuTvA_71 = addInt(pos, ((NI) 1));
 				pos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_71);
@@ -1147,7 +1104,6 @@ N_LIB_PRIVATE N_NIMCALL(void, parseName_gkjThV6kuNpnJQCiArDIjA_2)(tyObject_JsonP
 	LA3_: ;
 	nimln_(365, "parsejson.nim");
 	my.bufpos = pos;
-	memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 365);
 	popFrame();
 }
 
@@ -1202,7 +1158,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 	result = (tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw)0;
 	nimln_(368, "parsejson.nim");
 	my.a = setLengthStr(my.a, ((NI) 0));
-	memTrackerWrite((void*)(&my.a), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 368);
 	nimln_(369, "parsejson.nim");
 	skip_i8RUJSgirdl3NHd9av25mAQ(my);
 	nimln_(370, "parsejson.nim");
@@ -1240,7 +1195,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(380, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_65 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_65);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(381, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 10);
 	}
@@ -1251,7 +1205,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(383, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_66 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_66);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(384, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 8);
 	}
@@ -1262,7 +1215,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(386, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_67 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_67);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(387, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 11);
 	}
@@ -1273,7 +1225,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(389, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_68 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_68);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(390, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 9);
 	}
@@ -1284,7 +1235,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(392, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_69 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_69);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(393, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 13);
 	}
@@ -1295,7 +1245,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(395, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_70 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_70);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(396, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 12);
 	}
@@ -1349,7 +1298,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 		nimln_(407, "parsejson.nim");
 		TM_nIinruGrC8EPIfjL3PuTvA_75 = addInt(my.bufpos, ((NI) 1));
 		my.bufpos = (NI)(TM_nIinruGrC8EPIfjL3PuTvA_75);
-		memTrackerWrite((void*)(&my.bufpos), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 		nimln_(408, "parsejson.nim");
 		result = ((tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw) 0);
 	}
@@ -1357,7 +1305,6 @@ N_LIB_PRIVATE N_NIMCALL(tyEnum_TokKind_Q9c4KaNqJU4PbXaGht0C7iw, getTok_8Kxe4bFos
 	}
 	nimln_(409, "parsejson.nim");
 	my.tok = result;
-	memTrackerWrite((void*)(&my.tok), 1, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 409);
 	popFrame();
 	return result;
 }
@@ -1438,10 +1385,8 @@ N_LIB_PRIVATE N_NOINLINE(void, raiseParseErr_xOEBzQ9aFzD8i9aTrXTVac4A)(tyObject_
 	(*e).m_type = (&NTI_XTejXaID1NT7KS9byQm3Jxg_);
 	nimln_(531, "parsejson.nim");
 	(*e).message = errorMsgExpected_himQx4HUb39afE9a2KbFGOeA(p, msg);
-	memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/parsejson.nim", 531);
 	nimln_(2984, "system.nim");
 	(*e).parent = NIM_NIL;
-	memTrackerWrite((void*)(&(*e).parent), 8, "/Users/matt/lib/Nim/lib/system.nim", 2984);
 	nimln_(531, "parsejson.nim");
 	raiseExceptionEx((Exception*)e, "JsonParsingError", "raiseParseErr", "../../../../../lib/Nim/lib/pure/parsejson.nim", 531);
 	popFrame();

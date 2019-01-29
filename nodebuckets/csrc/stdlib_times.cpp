@@ -172,7 +172,6 @@ N_LIB_PRIVATE N_NIMCALL(tyTuple_XjuGlLf9cyYx66ViXrBCvPQ, fromEpochDay_mJEaQzDB47
 N_NIMCALL(NI64, chckRange64)(NI64 i, NI64 a, NI64 b);
 N_NOINLINE(void, chckNil)(void* p);
 N_NIMCALL(void, genericReset)(void* dest, TNimType* mt);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_LIB_PRIVATE N_NIMCALL(tyEnum_WeekDay_SVfemTA9aCOyua2TJYa6yBg, getDayOfWeek_NgjKhNpZaAlscp2jmCchuA)(NI monthday, tyEnum_Month_JS0JuFvCBbC2GL3xXBnPQw month, NI year);
 static N_INLINE(void, assertValidDate_oFHP8g45fJYczB5bgKWFQQtimes)(NI monthday, tyEnum_Month_JS0JuFvCBbC2GL3xXBnPQw month, NI year);
 N_LIB_PRIVATE N_NIMCALL(NI, getDaysInMonth_Du19c9a9bSALs8RVBtDxc7Zjg)(tyEnum_Month_JS0JuFvCBbC2GL3xXBnPQw month, NI year);
@@ -1220,31 +1219,19 @@ N_LIB_PRIVATE N_NIMCALL(void, initDateTime_9cjTDoh0YFNVFpY3GfapxqQ)(tyObject_Zon
 	genericReset((void*)Result, (&NTI_d9cK9cyKZPJJxFXUmx8dSpPw_));
 	(*Result).m_type = (&NTI_d9cK9cyKZPJJxFXUmx8dSpPw_);
 	(*Result).year = y;
-	memTrackerWrite((void*)(&(*Result).year), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 879);
 	(*Result).month = m;
-	memTrackerWrite((void*)(&(*Result).month), 1, "/Users/matt/lib/Nim/lib/pure/times.nim", 880);
 	(*Result).monthday = d;
-	memTrackerWrite((void*)(&(*Result).monthday), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 881);
 	(*Result).hour = ((NI)chckRange64(hour, ((NI) 0), ((NI) 23)));
-	memTrackerWrite((void*)(&(*Result).hour), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 882);
 	(*Result).minute = ((NI)chckRange64(minute, ((NI) 0), ((NI) 59)));
-	memTrackerWrite((void*)(&(*Result).minute), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 883);
 	(*Result).second = ((NI)chckRange64(second, ((NI) 0), ((NI) 60)));
-	memTrackerWrite((void*)(&(*Result).second), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 884);
 	(*Result).nanosecond = (*zt).time.nanosecond;
-	memTrackerWrite((void*)(&(*Result).nanosecond), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 885);
 	nimln_(886, "times.nim");
 	(*Result).weekday = getDayOfWeek_NgjKhNpZaAlscp2jmCchuA(d, m, y);
-	memTrackerWrite((void*)(&(*Result).weekday), 1, "/Users/matt/lib/Nim/lib/pure/times.nim", 886);
 	nimln_(887, "times.nim");
 	(*Result).yearday = getDayOfYear_MH9agrbA2S9bCWbHnQW6iSgg(d, m, y);
-	memTrackerWrite((void*)(&(*Result).yearday), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 887);
 	(*Result).isDst = (*zt).isDst;
-	memTrackerWrite((void*)(&(*Result).isDst), 1, "/Users/matt/lib/Nim/lib/pure/times.nim", 888);
 	(*Result).timezone = zone;
-	memTrackerWrite((void*)(&(*Result).timezone), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 889);
 	(*Result).utcOffset = (*zt).utcOffset;
-	memTrackerWrite((void*)(&(*Result).utcOffset), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 890);
 	popFrame();
 }
 
@@ -1277,13 +1264,10 @@ N_LIB_PRIVATE N_NIMCALL(tyObject_TimezonecolonObjectType__F8OvqlxXyGXRSiK9c1fCDV
 	T1_ = (tyObject_TimezonecolonObjectType__F8OvqlxXyGXRSiK9c1fCDVw*)0;
 	T1_ = (tyObject_TimezonecolonObjectType__F8OvqlxXyGXRSiK9c1fCDVw*) newObj((&NTI_9a5v4OQPlGqsA25ioN8hFYA_), sizeof(tyObject_TimezonecolonObjectType__F8OvqlxXyGXRSiK9c1fCDVw));
 	(*T1_).name = copyString(name);
-	memTrackerWrite((void*)(&(*T1_).name), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 916);
 	(*T1_).zonedTimeFromTimeImpl.ClE_0 = zonedTimeFromTimeImpl.ClE_0;
 	(*T1_).zonedTimeFromTimeImpl.ClP_0 = zonedTimeFromTimeImpl.ClP_0;
-	memTrackerWrite((void*)(&(*T1_).zonedTimeFromTimeImpl), 16, "/Users/matt/lib/Nim/lib/pure/times.nim", 917);
 	(*T1_).zonedTimeFromAdjTimeImpl.ClE_0 = zonedTimeFromAdjTimeImpl.ClE_0;
 	(*T1_).zonedTimeFromAdjTimeImpl.ClP_0 = zonedTimeFromAdjTimeImpl.ClP_0;
-	memTrackerWrite((void*)(&(*T1_).zonedTimeFromAdjTimeImpl), 16, "/Users/matt/lib/Nim/lib/pure/times.nim", 918);
 	result = T1_;
 	popFrame();
 	return result;
@@ -1489,7 +1473,6 @@ N_LIB_PRIVATE N_NIMCALL(tyObject_TimezonecolonObjectType__F8OvqlxXyGXRSiK9c1fCDV
 		nimZeroMem((void*)(&T6_), sizeof(tyProc_bs1dgeTxHIjPGTR9axkkHbg));
 		T6_.ClP_0 = ((TM_6NbDwwj5FY059b1gz2AsAZQ_133) (localZonedTimeFromAdjTime_09bwaQmOse9czkLeY30l6MIA)); T6_.ClE_0 = NIM_NIL;
 		localInstance_cLtN9cK9bCe6IPhJ3UFNLNKA = newTimezone_tF9bfmgadDtneoj4dZjS8QQ(((NimStringDesc*) &TM_6NbDwwj5FY059b1gz2AsAZQ_116), T5_, T6_);
-		memTrackerWrite((void*)(&localInstance_cLtN9cK9bCe6IPhJ3UFNLNKA), 8, "/Users/matt/lib/Nim/lib/pure/times.nim", 1089);
 }	}
 	LA3_: ;
 	nimln_(1090, "times.nim");

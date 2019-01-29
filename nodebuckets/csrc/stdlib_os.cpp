@@ -125,7 +125,6 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nosexpandFilename)(NimStringDesc* filena
 N_LIB_PRIVATE N_NOINLINE(void, raiseOSError_K9a7YBjj81Bse0N0Fg7MFIA)(NI32 errorCode, NimStringDesc* additionalInfo);
 N_NIMCALL(void, popCurrentExceptionEx)(NU id);
 N_NIMCALL(void*, newObj)(TNimType* typ, NI size);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, osErrorMsg_9cO757MdTrYxfurMy5qIoAg)(NI32 errorCode);
 N_NIMCALL(NimStringDesc*, cstrToNimstr)(NCSTRING str);
 static N_INLINE(void, nimFrame)(TFrame* s);
@@ -363,10 +362,8 @@ N_LIB_PRIVATE N_NOINLINE(void, raiseOSError_K9a7YBjj81Bse0N0Fg7MFIA)(NI32 errorC
 	(*e).m_type = (&NTI_BeJgrOdDsczOwEWOZbRfKA_);
 	nimln_(59, "oserr.nim");
 	(*e).errorCode = errorCode;
-	memTrackerWrite((void*)(&(*e).errorCode), 4, "/Users/matt/lib/Nim/lib/pure/includes/oserr.nim", 59);
 	nimln_(60, "oserr.nim");
 	(*e).message = osErrorMsg_9cO757MdTrYxfurMy5qIoAg(errorCode);
-	memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/includes/oserr.nim", 60);
 	nimln_(61, "oserr.nim");
 	{
 		if (!(((NI) 0) < (additionalInfo ? additionalInfo->len : 0))) goto LA3_;
@@ -379,12 +376,10 @@ N_LIB_PRIVATE N_NOINLINE(void, raiseOSError_K9a7YBjj81Bse0N0Fg7MFIA)(NI32 errorC
 			T7_ = X5BX5D__OfW9cXEAVaB9aahBBWfdc49cgos((*e).message, ((NI) 1));
 			if (!!(((NU8)(T7_) == (NU8)(10)))) goto LA8_;
 {			(*e).message = addChar((*e).message, 10);
-			memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/includes/oserr.nim", 62);
 }		}
 		LA8_: ;
 		nimln_(63, "oserr.nim");
 		(*e).message = resizeString((*e).message, 17);
-		memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/includes/oserr.nim", 63);
 appendString((*e).message, ((NimStringDesc*) &TM_yu6cxgKBBXbNsTkT9cyMd4g_4));
 		nimln_(64, "oserr.nim");
 		addQuoted_KHwyPEV6PV8Q9aS88ENydhw((*e).message, additionalInfo);
@@ -395,7 +390,6 @@ appendString((*e).message, ((NimStringDesc*) &TM_yu6cxgKBBXbNsTkT9cyMd4g_4));
 		if (!(((*e).message ? (*e).message->len : 0) == 0)) goto LA12_;
 {		nimln_(66, "oserr.nim");
 		(*e).message = copyString(((NimStringDesc*) &TM_yu6cxgKBBXbNsTkT9cyMd4g_5));
-		memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/includes/oserr.nim", 66);
 }	}
 	LA12_: ;
 	nimln_(67, "oserr.nim");
@@ -517,7 +511,6 @@ static N_INLINE(NimStringDesc*, X5BX5D__Brb7SpQA2we9cGg9aIIKDB4gos)(NimStringDes
 				TM_yu6cxgKBBXbNsTkT9cyMd4g_11 = addInt(i, a);
 				if ((NU)((NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_11)) >= (NU)(s ? s->len : 0)) raiseIndexError2((NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_11),(s ? s->len : 0)-1);
 				result->data[i] = s->data[(NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_11)];
-				memTrackerWrite((void*)(&result->data[i]), 1, "/Users/matt/lib/Nim/lib/system.nim", 3759);
 				nimln_(3719, "system.nim");
 				TM_yu6cxgKBBXbNsTkT9cyMd4g_12 = addInt(i_2, ((NI) 1));
 				i_2 = (NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_12);
@@ -559,12 +552,8 @@ N_LIB_PRIVATE N_NIMCALL(void, nossplitFile)(NimStringDesc* path, tyTuple_7q7q3E6
 		if (!((path ? path->len : 0) == ((NI) 0))) goto LA3_;
 {		nimln_(355, "os.nim");
 		(*Result).Field0 = copyString(TM_yu6cxgKBBXbNsTkT9cyMd4g_7.Field0);
-		memTrackerWrite((void*)(&(*Result).Field0), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 355);
 		(*Result).Field1 = copyString(TM_yu6cxgKBBXbNsTkT9cyMd4g_7.Field1);
-		memTrackerWrite((void*)(&(*Result).Field1), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 355);
 		(*Result).Field2 = copyString(TM_yu6cxgKBBXbNsTkT9cyMd4g_7.Field2);
-		memTrackerWrite((void*)(&(*Result).Field2), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 355);
-		memTrackerWrite((void*)Result, 24, "/Users/matt/lib/Nim/lib/pure/os.nim", 355);
 }	}
 	goto LA1_;
 	LA3_: ;
@@ -580,22 +569,16 @@ N_LIB_PRIVATE N_NIMCALL(void, nossplitFile)(NimStringDesc* path, tyTuple_7q7q3E6
 {			nimln_(359, "os.nim");
 			if ((NU)(((NI) 0)) >= (NU)(path ? path->len : 0)) raiseIndexError2(((NI) 0),(path ? path->len : 0)-1);
 			(*Result).Field0 = nimCharToStr(path->data[((NI) 0)]);
-			memTrackerWrite((void*)(&(*Result).Field0), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 359);
 			(*Result).Field1 = ((NimStringDesc*) NIM_NIL);
-			memTrackerWrite((void*)(&(*Result).Field1), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 359);
 			(*Result).Field2 = ((NimStringDesc*) NIM_NIL);
-			memTrackerWrite((void*)(&(*Result).Field2), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 359);
 }		}
 		goto LA9_;
 		LA11_: ;
 		{
 			nimln_(361, "os.nim");
 			(*Result).Field0 = X5BX5D__Brb7SpQA2we9cGg9aIIKDB4gos(path, dotdot__eU55RNB9cNR2VhrR9bsjoASgos(((NI) 0), ((NI) 2)));
-			memTrackerWrite((void*)(&(*Result).Field0), 8, "/Users/matt/lib/Nim/lib/system.nim", 3712);
 			(*Result).Field1 = ((NimStringDesc*) NIM_NIL);
-			memTrackerWrite((void*)(&(*Result).Field1), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 361);
 			(*Result).Field2 = ((NimStringDesc*) NIM_NIL);
-			memTrackerWrite((void*)(&(*Result).Field2), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 361);
 		}
 		LA9_: ;
 }	}
@@ -684,7 +667,6 @@ N_LIB_PRIVATE N_NIMCALL(void, nossplitFile)(NimStringDesc* path, tyTuple_7q7q3E6
 {			nimln_(373, "os.nim");
 			TM_yu6cxgKBBXbNsTkT9cyMd4g_17 = subInt(sepPos, ((NI) 1));
 			(*Result).Field0 = substr_TWXUwbnq0SWWvDLfr8LXYw(path, ((NI) 0), (NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_17));
-			memTrackerWrite((void*)(&(*Result).Field0), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 373);
 }		}
 		goto LA33_;
 		LA35_: ;
@@ -695,7 +677,6 @@ N_LIB_PRIVATE N_NIMCALL(void, nossplitFile)(NimStringDesc* path, tyTuple_7q7q3E6
 {			nimln_(376, "os.nim");
 			if ((NU)(((NI) 0)) >= (NU)(path ? path->len : 0)) raiseIndexError2(((NI) 0),(path ? path->len : 0)-1);
 			(*Result).Field0 = nimCharToStr(path->data[((NI) 0)]);
-			memTrackerWrite((void*)(&(*Result).Field0), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 376);
 }		}
 		goto LA33_;
 		LA38_: ;
@@ -704,10 +685,8 @@ N_LIB_PRIVATE N_NIMCALL(void, nossplitFile)(NimStringDesc* path, tyTuple_7q7q3E6
 		TM_yu6cxgKBBXbNsTkT9cyMd4g_18 = addInt(sepPos, ((NI) 1));
 		TM_yu6cxgKBBXbNsTkT9cyMd4g_19 = subInt(dotPos, ((NI) 1));
 		(*Result).Field1 = substr_TWXUwbnq0SWWvDLfr8LXYw(path, (NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_18), (NI)(TM_yu6cxgKBBXbNsTkT9cyMd4g_19));
-		memTrackerWrite((void*)(&(*Result).Field1), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 378);
 		nimln_(379, "os.nim");
 		(*Result).Field2 = substr_9bUFQ4OV1temcDF0GZp317g(path, dotPos);
-		memTrackerWrite((void*)(&(*Result).Field2), 8, "/Users/matt/lib/Nim/lib/pure/os.nim", 379);
 	}
 	LA1_: ;
 	popFrame();

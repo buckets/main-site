@@ -124,7 +124,6 @@ N_NIMCALL(void, popCurrentExceptionEx)(NU id);
 N_NIMCALL(void*, newObj)(TNimType* typ, NI size);
 extern "C" N_CDECL(NCSTRING, sqlite3_errmsg)(tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA* para1);
 N_NIMCALL(NimStringDesc*, cstrToNimstr)(NCSTRING str);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_NIMCALL(void, raiseExceptionEx)(Exception* e, NCSTRING ename, NCSTRING procname, NCSTRING filename, NI line);
 extern "C" N_CDECL(NI32, sqlite3_open)(NCSTRING filename, tyObject_Sqlite3_xRZkbCqVWSKf8kX4o9cbKXA*& ppDb);
 extern TFrame* framePtr_HRfVMH3jYeBJz6Q6X9b6Ptw;
@@ -425,7 +424,6 @@ N_LIB_PRIVATE N_NIMCALL(void, dbError_yRzNipQFOsKqLVySy7Je9bw)(tyObject_Sqlite3_
 	T1_ = (NCSTRING)0;
 	T1_ = sqlite3_errmsg(db);
 	(*e).message = cstrToNimstr(T1_);
-	memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/impure/db_sqlite.nim", 102);
 	nimln_(103, "db_sqlite.nim");
 	raiseExceptionEx((Exception*)e, "DbError", "dbError", "../../../../../lib/Nim/lib/impure/db_sqlite.nim", 103);
 	popFrame();

@@ -31,7 +31,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ)(NimStringDesc* 
 N_NOINLINE(void, raiseIndexError2)(NI i, NI n);
 static N_INLINE(NI, addInt)(NI a, NI b);
 N_NOINLINE(void, raiseOverflow)(void);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_NIMCALL(NI64, mulInt64)(NI64 a, NI64 b);
 static N_INLINE(NI, subInt)(NI a, NI b);
 static N_INLINE(NI64, subInt64)(NI64 a, NI64 b);
@@ -185,7 +184,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ)(NimStringDesc* 
 		if (!T14_) goto LA16_;
 {		nimln_(257, "parseutils.nim");
 		b = IL64(0);
-		memTrackerWrite((void*)(&b), 8, "/Users/matt/lib/Nim/lib/pure/parseutils.nim", 257);
 		{
 			nimln_(258, "parseutils.nim");
 			while (1) {
@@ -207,7 +205,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ)(NimStringDesc* 
 				TM_vI9aZNKIcImom6dDyKXW1ZA_5 = subInt(((NU8)(s->data[i])), ((NI) 48));
 				TM_vI9aZNKIcImom6dDyKXW1ZA_6 = subInt64((NI64)(TM_vI9aZNKIcImom6dDyKXW1ZA_4), ((NI64) ((NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_5))));
 				b = (NI64)(TM_vI9aZNKIcImom6dDyKXW1ZA_6);
-				memTrackerWrite((void*)(&b), 8, "/Users/matt/lib/Nim/lib/pure/parseutils.nim", 259);
 				nimln_(260, "parseutils.nim");
 				TM_vI9aZNKIcImom6dDyKXW1ZA_7 = addInt(i, ((NI) 1));
 				i = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_7);
@@ -232,7 +229,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ)(NimStringDesc* 
 		nimln_(262, "parseutils.nim");
 		TM_vI9aZNKIcImom6dDyKXW1ZA_9 = mulInt64(b, sign);
 		b = (NI64)(TM_vI9aZNKIcImom6dDyKXW1ZA_9);
-		memTrackerWrite((void*)(&b), 8, "/Users/matt/lib/Nim/lib/pure/parseutils.nim", 262);
 		nimln_(263, "parseutils.nim");
 		TM_vI9aZNKIcImom6dDyKXW1ZA_10 = subInt(i, start);
 		result = (NI)(TM_vI9aZNKIcImom6dDyKXW1ZA_10);
@@ -252,7 +248,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, npuParseBiggestInt)(NimStringDesc* s, NI64& number, 
 	result = rawParseInt_ZzngwN3GXlI9aVYNxHLGOXQ(s, res, start);
 	nimln_(275, "parseutils.nim");
 	number = res;
-	memTrackerWrite((void*)(&number), 8, "/Users/matt/lib/Nim/lib/pure/parseutils.nim", 275);
 	popFrame();
 	return result;
 }
@@ -271,7 +266,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, npuParseFloat)(NimStringDesc* s, NF& number, NI star
 		if (!!((result == ((NI) 0)))) goto LA3_;
 {		nimln_(374, "parseutils.nim");
 		number = bf;
-		memTrackerWrite((void*)(&number), 8, "/Users/matt/lib/Nim/lib/pure/parseutils.nim", 374);
 }	}
 	LA3_: ;
 	popFrame();

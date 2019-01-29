@@ -31,7 +31,6 @@ N_NIMCALL(NimStringDesc*, setLengthStr)(NimStringDesc* s, NI newLen);
 N_NOINLINE(void, raiseIndexError2)(NI i, NI n);
 static N_INLINE(NI, chckRange)(NI i, NI a, NI b);
 N_NOINLINE(void, raiseRangeError)(NI64 val);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 static N_INLINE(void, nimFrame)(TFrame* s);
 N_LIB_PRIVATE N_NOINLINE(void, callDepthLimitReached_II46IjNZztN9bmbxUD8dt8g)(void);
 static N_INLINE(void, popFrame)(void);
@@ -110,7 +109,6 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nuctoUTF8)(NI32 c) {
 		if ((NU)(((NI) 0)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 0),(result ? result->len : 0)-1);
 		nimln_(188, "unicode.nim");
 		result->data[((NI) 0)] = ((NIM_CHAR) (((NI)chckRange(i, ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 0)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 188);
 }	}
 	goto LA1_;
 	LA3_: ;
@@ -122,11 +120,9 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nuctoUTF8)(NI32 c) {
 		if ((NU)(((NI) 0)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 0),(result ? result->len : 0)-1);
 		nimln_(192, "unicode.nim");
 		result->data[((NI) 0)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 6))) | ((NI32) 192)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 0)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 192);
 		if ((NU)(((NI) 1)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 1),(result ? result->len : 0)-1);
 		nimln_(193, "unicode.nim");
 		result->data[((NI) 1)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)(i & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 1)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 193);
 }	}
 	goto LA1_;
 	LA6_: ;
@@ -138,15 +134,12 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nuctoUTF8)(NI32 c) {
 		if ((NU)(((NI) 0)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 0),(result ? result->len : 0)-1);
 		nimln_(197, "unicode.nim");
 		result->data[((NI) 0)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 12))) | ((NI32) 224)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 0)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 197);
 		if ((NU)(((NI) 1)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 1),(result ? result->len : 0)-1);
 		nimln_(198, "unicode.nim");
 		result->data[((NI) 1)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 6))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 1)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 198);
 		if ((NU)(((NI) 2)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 2),(result ? result->len : 0)-1);
 		nimln_(199, "unicode.nim");
 		result->data[((NI) 2)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)(i & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 2)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 199);
 }	}
 	goto LA1_;
 	LA9_: ;
@@ -158,19 +151,15 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nuctoUTF8)(NI32 c) {
 		if ((NU)(((NI) 0)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 0),(result ? result->len : 0)-1);
 		nimln_(203, "unicode.nim");
 		result->data[((NI) 0)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 18))) | ((NI32) 240)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 0)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 203);
 		if ((NU)(((NI) 1)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 1),(result ? result->len : 0)-1);
 		nimln_(204, "unicode.nim");
 		result->data[((NI) 1)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 12))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 1)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 204);
 		if ((NU)(((NI) 2)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 2),(result ? result->len : 0)-1);
 		nimln_(205, "unicode.nim");
 		result->data[((NI) 2)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 6))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 2)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 205);
 		if ((NU)(((NI) 3)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 3),(result ? result->len : 0)-1);
 		nimln_(206, "unicode.nim");
 		result->data[((NI) 3)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)(i & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 3)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 206);
 }	}
 	goto LA1_;
 	LA12_: ;
@@ -182,23 +171,18 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nuctoUTF8)(NI32 c) {
 		if ((NU)(((NI) 0)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 0),(result ? result->len : 0)-1);
 		nimln_(210, "unicode.nim");
 		result->data[((NI) 0)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 24))) | ((NI32) 248)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 0)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 210);
 		if ((NU)(((NI) 1)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 1),(result ? result->len : 0)-1);
 		nimln_(211, "unicode.nim");
 		result->data[((NI) 1)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 18))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 1)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 211);
 		if ((NU)(((NI) 2)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 2),(result ? result->len : 0)-1);
 		nimln_(212, "unicode.nim");
 		result->data[((NI) 2)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 12))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 2)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 212);
 		if ((NU)(((NI) 3)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 3),(result ? result->len : 0)-1);
 		nimln_(213, "unicode.nim");
 		result->data[((NI) 3)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 6))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 3)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 213);
 		if ((NU)(((NI) 4)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 4),(result ? result->len : 0)-1);
 		nimln_(214, "unicode.nim");
 		result->data[((NI) 4)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)(i & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 4)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 214);
 }	}
 	goto LA1_;
 	LA15_: ;
@@ -210,27 +194,21 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nuctoUTF8)(NI32 c) {
 		if ((NU)(((NI) 0)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 0),(result ? result->len : 0)-1);
 		nimln_(218, "unicode.nim");
 		result->data[((NI) 0)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 30))) | ((NI32) 252)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 0)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 218);
 		if ((NU)(((NI) 1)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 1),(result ? result->len : 0)-1);
 		nimln_(219, "unicode.nim");
 		result->data[((NI) 1)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 24))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 1)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 219);
 		if ((NU)(((NI) 2)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 2),(result ? result->len : 0)-1);
 		nimln_(220, "unicode.nim");
 		result->data[((NI) 2)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 18))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 2)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 220);
 		if ((NU)(((NI) 3)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 3),(result ? result->len : 0)-1);
 		nimln_(221, "unicode.nim");
 		result->data[((NI) 3)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 12))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 3)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 221);
 		if ((NU)(((NI) 4)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 4),(result ? result->len : 0)-1);
 		nimln_(222, "unicode.nim");
 		result->data[((NI) 4)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)((NI32)((NU32)(i) >> (NU64)(((NI) 6))) & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 4)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 222);
 		if ((NU)(((NI) 5)) >= (NU)(result ? result->len : 0)) raiseIndexError2(((NI) 5),(result ? result->len : 0)-1);
 		nimln_(223, "unicode.nim");
 		result->data[((NI) 5)] = ((NIM_CHAR) (((NI)chckRange((NI32)((NI32)(i & ((NI32) 63)) | ((NI32) 128)), ((NI) 0), ((NI) 255)))));
-		memTrackerWrite((void*)(&result->data[((NI) 5)]), 1, "/Users/matt/lib/Nim/lib/pure/unicode.nim", 223);
 }	}
 	goto LA1_;
 	LA18_: ;

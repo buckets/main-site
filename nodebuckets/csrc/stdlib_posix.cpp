@@ -18,7 +18,6 @@
 #undef far
 #undef powerpc
 #undef unix
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 static N_INLINE(void, nimFrame)(TFrame* s);
 N_LIB_PRIVATE N_NOINLINE(void, callDepthLimitReached_II46IjNZztN9bmbxUD8dt8g)(void);
 static N_INLINE(void, popFrame)(void);
@@ -63,7 +62,6 @@ N_LIB_PRIVATE N_NIMCALL(void, stdlib_posixInit000)(void) {
 	nimfr_("posix", "posix.nim");
 	nimln_(544, "posix_other.nim");
 	MAP_POPULATE_VA0iC4AP6fJAacff09cx89ag = ((int) 0);
-	memTrackerWrite((void*)(&MAP_POPULATE_VA0iC4AP6fJAacff09cx89ag), 4, "/Users/matt/lib/Nim/lib/posix/posix_other.nim", 544);
 	popFrame();
 }
 

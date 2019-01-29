@@ -104,7 +104,6 @@ static N_INLINE(void, nimCopyMem)(void* dest, void* source, NI size);
 N_NIMCALL(NimStringDesc*, rawNewString)(NI space);
 N_NIMCALL(NimStringDesc*, mnewString)(NI len);
 N_NIMCALL(NimStringDesc*, mnewString)(NI len);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 N_NIMCALL(NimStringDesc*, copyString)(NimStringDesc* src);
 N_LIB_PRIVATE N_NIMCALL(NI, nsuFindCharSet)(NimStringDesc* s, tySet_tyChar_nmiMWKVIe46vacnhAFrQvw chars, NI start, NI last);
 N_LIB_PRIVATE N_NIMCALL(NI, npuParseBiggestInt)(NimStringDesc* s, NI64& number, NI start);
@@ -312,7 +311,6 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nsuAlignString)(NimStringDesc* s, NI cou
 					if (!(res <= colontmp_)) goto LA7;
 					i = res;
 					result->data[i] = padding;
-					memTrackerWrite((void*)(&result->data[i]), 1, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 1149);
 					res += ((NI) 1);
 				} LA7: ;
 			}
@@ -329,7 +327,6 @@ N_LIB_PRIVATE N_NIMCALL(NimStringDesc*, nsuAlignString)(NimStringDesc* s, NI cou
 					if (!(res_2 <= colontmp__2)) goto LA10;
 					i_2 = res_2;
 					result->data[i_2] = s->data[(NI)(i_2 - spaces)];
-					memTrackerWrite((void*)(&result->data[i_2]), 1, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 1150);
 					res_2 += ((NI) 1);
 				} LA10: ;
 			}
@@ -428,9 +425,7 @@ N_LIB_PRIVATE N_NIMCALL(NI64, nsuParseBiggestInt)(NimStringDesc* s) {
 appendString(T7_, ((NimStringDesc*) &TM_JGc9b9bh2D3nTdUR7TGyq8aA_3));
 appendString(T7_, s);
 		(*e).message = T7_;
-		memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 961);
 		(*e).parent = NIM_NIL;
-		memTrackerWrite((void*)(&(*e).parent), 8, "/Users/matt/lib/Nim/lib/system.nim", 2984);
 		raiseExceptionEx((Exception*)e, "ValueError", "parseBiggestInt", "../../../../../lib/Nim/lib/pure/strutils.nim", 961);
 }	}
 	LA5_: ;
@@ -462,9 +457,7 @@ N_LIB_PRIVATE N_NIMCALL(NF, nsuParseFloat)(NimStringDesc* s) {
 appendString(T7_, ((NimStringDesc*) &TM_JGc9b9bh2D3nTdUR7TGyq8aA_4));
 appendString(T7_, s);
 		(*e).message = T7_;
-		memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 991);
 		(*e).parent = NIM_NIL;
-		memTrackerWrite((void*)(&(*e).parent), 8, "/Users/matt/lib/Nim/lib/system.nim", 2984);
 		raiseExceptionEx((Exception*)e, "ValueError", "parseFloat", "../../../../../lib/Nim/lib/pure/strutils.nim", 991);
 }	}
 	LA5_: ;
@@ -480,9 +473,7 @@ N_LIB_PRIVATE N_NOINLINE(void, invalidFormatString_61EJWW6vRISEo9a8gt0tusw)(void
 	new (e) tyObject_ValueError_yoNlBGx0D2tRizIdhQuENw;
 	(*e).m_type = (&NTI_yoNlBGx0D2tRizIdhQuENw_);
 	(*e).message = copyString(((NimStringDesc*) &TM_JGc9b9bh2D3nTdUR7TGyq8aA_5));
-	memTrackerWrite((void*)(&(*e).message), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2298);
 	(*e).parent = NIM_NIL;
-	memTrackerWrite((void*)(&(*e).parent), 8, "/Users/matt/lib/Nim/lib/system.nim", 2984);
 	raiseExceptionEx((Exception*)e, "ValueError", "invalidFormatString", "../../../../../lib/Nim/lib/pure/strutils.nim", 2298);
 	popFrame();
 }
@@ -632,7 +623,6 @@ N_LIB_PRIVATE N_NIMCALL(void, nsuAddf)(NimStringDesc*& s, NimStringDesc* formats
 }					}
 					LA12_: ;
 					s = resizeString(s, (a[num] ? a[num]->len : 0) + 0);
-					memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2311);
 appendString(s, a[num]);
 					i += ((NI) 2);
 					num += ((NI) 1);
@@ -641,7 +631,6 @@ appendString(s, a[num]);
 				case 36:
 				{
 					s = addChar(s, 36);
-					memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2315);
 					i += ((NI) 2);
 				}
 				break;
@@ -694,7 +683,6 @@ appendString(s, a[num]);
 }					}
 					LA34_: ;
 					s = resizeString(s, (a[idx] ? a[idx]->len : 0) + 0);
-					memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2327);
 appendString(s, a[idx]);
 				}
 				break;
@@ -763,7 +751,6 @@ appendString(s, a[idx]);
 }						}
 						LA68_: ;
 						s = resizeString(s, (a[idx_2] ? a[idx_2]->len : 0) + 0);
-						memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2344);
 appendString(s, a[idx_2]);
 }					}
 					goto LA54_;
@@ -779,7 +766,6 @@ appendString(s, a[idx_2]);
 							LA74_: ;
 							if (!T73_) goto LA75_;
 {							s = resizeString(s, (a[(NI)(x + ((NI) 1))] ? a[(NI)(x + ((NI) 1))]->len : 0) + 0);
-							memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2347);
 appendString(s, a[(NI)(x + ((NI) 1))]);
 }						}
 						goto LA71_;
@@ -821,7 +807,6 @@ appendString(s, a[(NI)(x + ((NI) 1))]);
 						LA86_: ;
 						if (!T85_) goto LA87_;
 {						s = resizeString(s, (a[(NI)(x_2 + ((NI) 1))] ? a[(NI)(x_2 + ((NI) 1))]->len : 0) + 0);
-						memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2354);
 appendString(s, a[(NI)(x_2 + ((NI) 1))]);
 }					}
 					goto LA83_;
@@ -844,7 +829,6 @@ appendString(s, a[(NI)(x_2 + ((NI) 1))]);
 			LA7_: ;
 			{
 				s = addChar(s, formatstr->data[i]);
-				memTrackerWrite((void*)(&s), 8, "/Users/matt/lib/Nim/lib/pure/strutils.nim", 2360);
 				i += ((NI) 1);
 			}
 			LA3_: ;

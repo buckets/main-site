@@ -88,7 +88,6 @@ tyProc_ki6p1QyfOkJLQJ9aw5NI0AQ writeDataImpl;
 tyProc_JQrsH08b4uPTH9cyFPlVOZg flushImpl;
 };
 N_LIB_PRIVATE N_NIMCALL(void, failedAssertImpl_aDmpBTs9cPuXp0Mp9cfiNeyA)(NimStringDesc* msg);
-N_NIMCALL(void, memTrackerWrite)(void* address, NI size, NCSTRING file, NI line);
 static N_INLINE(void, nimCopyMem)(void* dest, void* source, NI size);
 N_LIB_PRIVATE N_NOCONV(void*, alloc_sVm4rDImKK2ZDdylByayiA)(NI size);
 N_NIMCALL(NI, mulInt)(NI a, NI b);
@@ -331,10 +330,8 @@ N_LIB_PRIVATE N_NIMCALL(void, fillBuffer_CbKzA44X2DxZAmasZ72O9ag)(tyObject_BaseL
 		if (!(charsRead < (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_17))) goto LA16_;
 {		nimln_(73, "lexbase.nim");
 		L.buf[s] = 0;
-		memTrackerWrite((void*)(&L.buf[s]), 1, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 73);
 		nimln_(74, "lexbase.nim");
 		L.sentinel = s;
-		memTrackerWrite((void*)(&L.sentinel), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 74);
 }	}
 	goto LA14_;
 	LA16_: ;
@@ -374,7 +371,6 @@ N_LIB_PRIVATE N_NIMCALL(void, fillBuffer_CbKzA44X2DxZAmasZ72O9ag)(tyObject_BaseL
 					if (!(((NI) 0) <= s)) goto LA31_;
 {					nimln_(83, "lexbase.nim");
 					L.sentinel = s;
-					memTrackerWrite((void*)(&L.sentinel), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 83);
 					nimln_(84, "lexbase.nim");
 					goto LA19;
 }				}
@@ -393,13 +389,11 @@ N_LIB_PRIVATE N_NIMCALL(void, fillBuffer_CbKzA44X2DxZAmasZ72O9ag)(tyObject_BaseL
 					nimln_(89, "lexbase.nim");
 					TM_k6p5NxDJat9aTyZxfZjCDJQ_21 = mulInt(L.bufLen, ((NI) 2));
 					L.bufLen = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_21);
-					memTrackerWrite((void*)(&L.bufLen), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 89);
 					nimln_(93, "lexbase.nim");
 					TM_k6p5NxDJat9aTyZxfZjCDJQ_22 = mulInt(L.bufLen, ((NI) 1));
 					T34_ = (void*)0;
 					T34_ = realloc_y4TzCoc3hQhz9cedxS9cbemA(((void*) (L.buf)), ((NI)chckRange((NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_22), ((NI) 0), ((NI) IL64(9223372036854775807)))));
 					L.buf = ((NCSTRING) (T34_));
-					memTrackerWrite((void*)(&L.buf), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 93);
 					nimln_(94, "lexbase.nim");
 					{
 						NI TM_k6p5NxDJat9aTyZxfZjCDJQ_23;
@@ -424,11 +418,9 @@ N_LIB_PRIVATE N_NIMCALL(void, fillBuffer_CbKzA44X2DxZAmasZ72O9ag)(tyObject_BaseL
 {						nimln_(98, "lexbase.nim");
 						TM_k6p5NxDJat9aTyZxfZjCDJQ_27 = addInt(oldBufLen, charsRead);
 						L.buf[(NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_27)] = 0;
-						memTrackerWrite((void*)(&L.buf[(NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_27)]), 1, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 98);
 						nimln_(99, "lexbase.nim");
 						TM_k6p5NxDJat9aTyZxfZjCDJQ_28 = addInt(oldBufLen, charsRead);
 						L.sentinel = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_28);
-						memTrackerWrite((void*)(&L.sentinel), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 99);
 						nimln_(100, "lexbase.nim");
 						goto LA19;
 }					}
@@ -467,11 +459,9 @@ N_LIB_PRIVATE N_NIMCALL(void, skipUtf8Bom_C48Lrx2vPoZzafxipbCXsQ)(tyObject_BaseL
 {		nimln_(140, "lexbase.nim");
 		TM_k6p5NxDJat9aTyZxfZjCDJQ_30 = addInt(L.bufpos, ((NI) 3));
 		L.bufpos = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_30);
-		memTrackerWrite((void*)(&L.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 140);
 		nimln_(141, "lexbase.nim");
 		TM_k6p5NxDJat9aTyZxfZjCDJQ_31 = addInt(L.lineStart, ((NI) 3));
 		L.lineStart = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_31);
-		memTrackerWrite((void*)(&L.lineStart), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 141);
 }	}
 	LA7_: ;
 	popFrame();
@@ -496,35 +486,26 @@ N_LIB_PRIVATE N_NIMCALL(void, open_0F9asrCjxjKO6tNQQ4Cv3Jg)(tyObject_BaseLexer_M
 	LA7_: ;
 	nimln_(148, "lexbase.nim");
 	L.input = input;
-	memTrackerWrite((void*)(&L.input), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 148);
 	nimln_(149, "lexbase.nim");
 	L.bufpos = ((NI) 0);
-	memTrackerWrite((void*)(&L.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 149);
 	nimln_(150, "lexbase.nim");
 	L.offsetBase = ((NI) 0);
-	memTrackerWrite((void*)(&L.offsetBase), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 150);
 	nimln_(151, "lexbase.nim");
 	L.bufLen = bufLen;
-	memTrackerWrite((void*)(&L.bufLen), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 151);
 	nimln_(152, "lexbase.nim");
 	nimCopyMem((void*)L.refillChars, (NIM_CONST void*)refillChars, 32);
-	memTrackerWrite((void*)L.refillChars, 32, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 152);
 	nimln_(156, "lexbase.nim");
 	TM_k6p5NxDJat9aTyZxfZjCDJQ_5 = mulInt(bufLen, ((NI) 1));
 	T9_ = (void*)0;
 	T9_ = alloc_sVm4rDImKK2ZDdylByayiA(((NI)chckRange((NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_5), ((NI) 0), ((NI) IL64(9223372036854775807)))));
 	L.buf = ((NCSTRING) (T9_));
-	memTrackerWrite((void*)(&L.buf), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 156);
 	nimln_(157, "lexbase.nim");
 	TM_k6p5NxDJat9aTyZxfZjCDJQ_6 = subInt(bufLen, ((NI) 1));
 	L.sentinel = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_6);
-	memTrackerWrite((void*)(&L.sentinel), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 157);
 	nimln_(158, "lexbase.nim");
 	L.lineStart = ((NI) 0);
-	memTrackerWrite((void*)(&L.lineStart), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 158);
 	nimln_(159, "lexbase.nim");
 	L.lineNumber = ((NI) 1);
-	memTrackerWrite((void*)(&L.lineNumber), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 159);
 	nimln_(160, "lexbase.nim");
 	fillBuffer_CbKzA44X2DxZAmasZ72O9ag(L);
 	nimln_(161, "lexbase.nim");
@@ -559,10 +540,8 @@ N_LIB_PRIVATE N_NIMCALL(NI, fillBaseLexer_06CFAwuLiai9b5aILbOFkBQ_2)(tyObject_Ba
 		nimln_(109, "lexbase.nim");
 		TM_k6p5NxDJat9aTyZxfZjCDJQ_36 = addInt(L.offsetBase, pos);
 		L.offsetBase = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_36);
-		memTrackerWrite((void*)(&L.offsetBase), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 109);
 		nimln_(110, "lexbase.nim");
 		L.bufpos = ((NI) 0);
-		memTrackerWrite((void*)(&L.bufpos), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 110);
 		nimln_(111, "lexbase.nim");
 		result = ((NI) 0);
 	}
@@ -585,7 +564,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, handleCR_06CFAwuLiai9b5aILbOFkBQ)(tyObject_BaseLexer
 	nimln_(118, "lexbase.nim");
 	TM_k6p5NxDJat9aTyZxfZjCDJQ_33 = addInt(L.lineNumber, ((NI) 1));
 	L.lineNumber = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_33);
-	memTrackerWrite((void*)(&L.lineNumber), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 	nimln_(119, "lexbase.nim");
 	result = fillBaseLexer_06CFAwuLiai9b5aILbOFkBQ_2(L, pos);
 	nimln_(120, "lexbase.nim");
@@ -597,7 +575,6 @@ N_LIB_PRIVATE N_NIMCALL(NI, handleCR_06CFAwuLiai9b5aILbOFkBQ)(tyObject_BaseLexer
 	LA7_: ;
 	nimln_(122, "lexbase.nim");
 	L.lineStart = result;
-	memTrackerWrite((void*)(&L.lineStart), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 122);
 	popFrame();
 	return result;
 }
@@ -616,12 +593,10 @@ N_LIB_PRIVATE N_NIMCALL(NI, handleLF_06CFAwuLiai9b5aILbOFkBQ_3)(tyObject_BaseLex
 	nimln_(129, "lexbase.nim");
 	TM_k6p5NxDJat9aTyZxfZjCDJQ_38 = addInt(L.lineNumber, ((NI) 1));
 	L.lineNumber = (NI)(TM_k6p5NxDJat9aTyZxfZjCDJQ_38);
-	memTrackerWrite((void*)(&L.lineNumber), 8, "/Users/matt/lib/Nim/lib/system.nim", 740);
 	nimln_(130, "lexbase.nim");
 	result = fillBaseLexer_06CFAwuLiai9b5aILbOFkBQ_2(L, pos);
 	nimln_(131, "lexbase.nim");
 	L.lineStart = result;
-	memTrackerWrite((void*)(&L.lineStart), 8, "/Users/matt/lib/Nim/lib/pure/lexbase.nim", 131);
 	popFrame();
 	return result;
 }
