@@ -21,9 +21,13 @@ lib/bucketslib.node: csrc/nimbase.h $(RELEASE_TYPE)
 
 release: $(NIMFILES)
 	nim cpp -o:$(CLIB_NAME) -d:release $(COMMON_BUILD_FLAGS) $^
+	-rm csrc/*.o
+	-rm csrc/*.cpp
 
 debug: $(NIMFILES)
 	nim cpp -o:$(CLIB_NAME) --checks:on -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
+	-rm csrc/*.o
+	-rm csrc/*.cpp
 
 csrc/nimbase.h: $(NIMBASE)
 	mkdir -p csrc
