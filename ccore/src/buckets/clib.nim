@@ -171,8 +171,10 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_
     j.add("cols", jcols)
     j.add("rows", jrows)
     j.add("types", jtypes)
-    res_string.toUgly(j)
-    # res_string = $j
+    # let i = cast[int](j)
+    # stdout.write(cast[int](j), "\n")
+    # res_string.toUgly(j)
+    res_string = $j
   except:
     var j = newJObject()
     j.add("err", newJString(getStackTrace() & getCurrentExceptionMsg()))
@@ -182,7 +184,8 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_
     j.add("cols", cols)
     j.add("rows", rows)
     j.add("types", types)
-    res_string.toUgly(j)
+    # res_string.toUgly(j)
+    res_string = $j
   return setReturnString(res_string)
 
 template buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):csize =
@@ -206,13 +209,13 @@ proc buckets_db_run_json*(budget_handle:int, query:cstring, queryL:cint, params_
     var j = newJObject()
     j.add("err", newJString(""))
     j.add("lastID", newJInt(res.lastID))
-    res_string.toUgly(j)
+    res_string = $j
   except:
     echo "Error: ", getCurrentExceptionMsg()
     var j = newJObject()
     j.add("err", newJString(getStackTrace() & getCurrentExceptionMsg()))
     j.add("lastID", newJInt(0))
-    res_string.toUgly(j)
+    res_string = $j
   setReturnString(res_string)
 
 template buckets_db_run_json*(budget_handle:int, query:cstring, params_json:cstring):csize =
