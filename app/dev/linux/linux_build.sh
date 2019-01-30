@@ -26,10 +26,6 @@ docker build --file app/dev/linux/linuxbuilder.Dockerfile -t $TAG .
 echo
 echo "RUNNING electron build..."
 docker run -i \
-    -v "$(pwd)/cache":/proj/cache \
-    -v "$(pwd)/core":/proj/core \
-    -v "$(pwd)/app":/proj/app \
-    -v "$(pwd)/ccore":/proj/ccore \
-    -v "$(pwd)/nodebuckets":/proj/nodebuckets \
+    -v "$(pwd)":/proj \
     $ARGS $TAG
 

@@ -7,6 +7,7 @@ set -xe
 yarn --version
 node --version
 npm --version
+nim --version
 
 export ELECTRON_BUILDER_CACHE="/proj/cache/electron-cache"
 export ELECTRON_CACHE="/proj/cache/electron-cache"
@@ -20,12 +21,11 @@ rsync -vrut \
     --exclude "cache" \
     /proj/* /build/
 export PATH="./node_modules/.bin/:${PATH}"
-cd /build/core
-yarn --ignore-scripts
-tsc
-cd /build/app
-yarn --ignore-scripts
-tsc
+
+cd /build/
+make clean
+make test
+make
 
 ARGS=""
 if [ ! -z "$GH_TOKEN" ]; then
