@@ -29,5 +29,7 @@ docker run -i \
     -v "$(pwd)/cache":/proj/cache \
     -v "$(pwd)/core":/proj/core \
     -v "$(pwd)/app":/proj/app \
+    -v "$(pwd)/ccore":/proj/ccore \
+    -v "$(pwd)/nodebuckets":/proj/nodebuckets \
     $ARGS $TAG
 
