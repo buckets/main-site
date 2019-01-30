@@ -11,7 +11,7 @@ APP_NODELIB = app/node_modules/bucketslib/lib/bucketslib.node
 APP_TS_FILES = $(shell find app/src/ -type f -name '*.ts')
 APP_JS_FILES = $(patsubst app/src/%.ts, app/src/%.js, $(APP_TS_FILES))
 
-.PHONY: all test clean core core-test app-test ccore-test nb-test
+.PHONY: all test deepclean clean core core-test app-test ccore-test nb-test
 
 all: $(APP_NODELIB) $(APP_JS_FILES)
 
@@ -22,6 +22,13 @@ clean:
 	-cd core && rm -r dist
 	-rm -rf core/node_modules/bucketslib 
 	-rm -rf app/node_modules/bucketslib
+
+deepclean: clean
+	-rm -rf core/node_modules
+	-cd core && yarn --ignore-scripts
+	-rm -rf app/node_modules
+	-cd app && yarn --ignore-scripts
+	-rm -rf nodebuckets/node_modules
 
 ccore-test:
 	cd ccore && nimble test
