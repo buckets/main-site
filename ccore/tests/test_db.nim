@@ -104,3 +104,8 @@ test "update sequence":
   discard db.runQuery(sql"UPDATE foo SET name = $another", "renamed name")
   let res3 = db.fetchAll(sql"SELECT id, name FROM foo")
   check res3.rows == @[@["1", "renamed name"]]
+
+test "SQLite version":
+  let db = openDB(":memory:")
+  let res = db.fetchAll(sql"SELECT sqlite_version()")
+  check res.rows[0][0] == "3.26.0"
