@@ -1,7 +1,8 @@
 NIMFILES = ../ccore/src/buckets/clib.nim
 NIMBASE = ~/lib/Nim/lib/nimbase.h
 RELEASE_TYPE = debug
-COMMON_BUILD_FLAGS = --header --nimcache:csrc --compileOnly --gc:markAndSweep
+COMMON_BUILD_FLAGS = --app:staticlib --header --nimcache:csrc --gc:markAndSweep
+CLIB_NAME = clib/libbuckets.a
 
 .PHONY: clean release debug test all
 
@@ -19,10 +20,10 @@ lib/bucketslib.node: csrc/nimbase.h $(RELEASE_TYPE)
 	node-gyp rebuild
 
 release: $(NIMFILES)
-	nim cpp -d:release $(COMMON_BUILD_FLAGS) $^
+	nim cpp -o:$(CLIB_NAME) -d:release $(COMMON_BUILD_FLAGS) $^
 
 debug: $(NIMFILES)
-	nim cpp --checks:on  -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
+	nim cpp -o:$(CLIB_NAME) --checks:on -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
 
 csrc/nimbase.h: $(NIMBASE)
 	mkdir -p csrc
@@ -33,6 +34,7 @@ test: dist/test.js
 
 clean:
 	-rm -r csrc
+	-rm -r clib
 	-rm -r build
 	-rm -r lib
 	-rm -r dist

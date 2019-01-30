@@ -4,7 +4,7 @@
       "target_name": "bucketslib",
       # "type": "<(library)",
       "sources": [
-        "<!@(node -p \"require('fs').readdirSync('./csrc').map(f=>'csrc/'+f).join(' ')\")",
+        # "<!@(node -p \"require('fs').readdirSync('./csrc').map(f=>'csrc/'+f).join(' ')\")",
         "jstonimbinding.cpp",
         # "csrc/libbuckets.a",
         # "<(module_root_dir)/lib/libbuckets.a",
@@ -13,6 +13,10 @@
           "<!@(node -p \"require('node-addon-api').include\")",
           # "<(module_root_dir)/csrc",
           "csrc",
+      ],
+      "libraries": [
+        # "./clib.a",
+        "<(module_root_dir)/clib/libbuckets.a"
       ],
       'dependencies': [
         "<!(node -p \"require('node-addon-api').gyp\")"

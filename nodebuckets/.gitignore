@@ -5,3 +5,5 @@ csrc/*.sha1
 build/
 lib
 csrc/buckets_buckets.cpp csrc/buckets_budgetfile.cpp csrc/buckets_clib.cpp csrc/buckets_db.cpp csrc/buckets_dbschema.cpp csrc/stdlib_db_common.cpp csrc/stdlib_db_sqlite.cpp csrc/stdlib_hashes.cpp csrc/stdlib_json.cpp csrc/stdlib_lexbase.cpp csrc/stdlib_logging.cpp csrc/stdlib_math.cpp csrc/stdlib_os.cpp csrc/stdlib_parsejson.cpp csrc/stdlib_parseutils.cpp csrc/stdlib_pathnorm.cpp csrc/stdlib_posix.cpp csrc/stdlib_sqlite3.cpp csrc/stdlib_streams.cpp csrc/stdlib_strutils.cpp csrc/stdlib_system.cpp csrc/stdlib_tables.cpp csrc/stdlib_times.cpp csrc/stdlib_unicode.cpp
+csrc
+clib
