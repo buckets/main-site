@@ -12,7 +12,7 @@ N_CDECL(void, NimMain)(void);
 // start
 Value start(const CallbackInfo& info) {
   Env env = info.Env();
-  NimMain();
+  // NimMain();
   return env.Undefined();
 }
 
@@ -113,6 +113,7 @@ Buffer<char> db_execute_many_json(const CallbackInfo& info) {
 }
 
 Object Init(Env env, Object exports) {
+  NimMain();
   exports["start"] = Function::New(env, start);
   exports["version"] = Function::New(env, version);
   exports["register_logger"] = Function::New(env, register_logger);

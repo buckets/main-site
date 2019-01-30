@@ -63,7 +63,7 @@ function dotest(name, func) {
 console.log("bucketslib", bucketslib);
 function mainFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var bf;
+        var bf, expected_sqlite_version;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -170,6 +170,24 @@ function mainFunc() {
                             });
                         }); })];
                 case 8:
+                    _a.sent();
+                    expected_sqlite_version = "3.26.0";
+                    return [4 /*yield*/, dotest("SQLite version " + expected_sqlite_version, function () { return __awaiter(_this, void 0, void 0, function () {
+                            var res, actual;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, bucketslib.db_all(bf, "SELECT sqlite_version() as v")];
+                                    case 1:
+                                        res = _a.sent();
+                                        actual = res[0].v;
+                                        if (actual !== expected_sqlite_version) {
+                                            throw new Error("Expected SQLite version to be " + expected_sqlite_version + " not " + actual);
+                                        }
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); })];
+                case 9:
                     _a.sent();
                     console.log("SUCCESS!");
                     return [2 /*return*/];

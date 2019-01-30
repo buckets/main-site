@@ -65,6 +65,16 @@ async function mainFunc() {
     console.log('Insert result:', res);
   })
 
+  const expected_sqlite_version = "3.26.0";
+
+  await dotest(`SQLite version ${expected_sqlite_version}`, async () => {
+    const res = await bucketslib.db_all<{v:string}>(bf, "SELECT sqlite_version() as v");
+    const actual = res[0].v;
+    if (actual !== expected_sqlite_version) {
+      throw new Error(`Expected SQLite version to be ${expected_sqlite_version} not ${actual}`);
+    }
+  })
+
   console.log("SUCCESS!");
 }
 

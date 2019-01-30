@@ -171,6 +171,9 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_
     j.add("cols", jcols)
     j.add("rows", jrows)
     j.add("types", jtypes)
+    # let i = cast[int](j)
+    # stdout.write(cast[int](j), "\n")
+    # res_string.toUgly(j)
     res_string = $j
   except:
     var j = newJObject()
@@ -181,6 +184,7 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_
     j.add("cols", cols)
     j.add("rows", rows)
     j.add("types", types)
+    # res_string.toUgly(j)
     res_string = $j
   return setReturnString(res_string)
 
