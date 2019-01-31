@@ -1,4 +1,5 @@
 import { config } from '@iffycan/i18n'
+import * as bucketslib from 'bucketslib'
 
 let BASE_LOGGER:ILogger = console;
 
@@ -36,4 +37,8 @@ export class PrefixLogger implements IPrefixLogger {
   error(...args) {
     return this.logger.error(this.prefix, ...args);
   }
+}
+
+export function registerBucketslibLogger(func:(msg:string)=>void) {
+  bucketslib.registerLogger(func);
 }

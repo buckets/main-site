@@ -19,9 +19,9 @@ import { PrefixLogger } from '../logging'
 import { PSTATE, updateState } from './persistent'
 // import { doesPathExist, isPathExecutable, getNiceStat } from '../util'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
-import * as bucketslib from 'bucketslib'
+import { registerBucketslibLogger } from 'buckets-core/dist/logging'
 
-bucketslib.registerLogger((msg:string) => {
+registerBucketslibLogger((msg:string) => {
   log.info(msg);
 });
 
