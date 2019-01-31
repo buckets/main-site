@@ -1,3 +1,5 @@
+ ☐ Linux can't find module "bucketslib" (maybe mac can't either?) mainprocess/main.js:29 line3 line9 line 230
+
 Traceback (most recent call last)
 clib.nim(207)            buckets_db_run_json
 clib.nim(119)            json_to_params

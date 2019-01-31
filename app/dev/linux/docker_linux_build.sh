@@ -32,6 +32,7 @@ if [ ! -z "$GH_TOKEN" ]; then
     ARGS="-p always"
 fi
 
-build --linux $ARGS
+cd /build/app/
+electron-builder --linux $ARGS
 
 rsync -vrut "/build/app/dist/" "/proj/app/dist/"
