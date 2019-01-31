@@ -11,6 +11,8 @@ import sequtils
 import json
 import logging
 
+{.passC: "-fPIC" .}
+
 #-----------------------------------
 # String-returning helpers
 #-----------------------------------

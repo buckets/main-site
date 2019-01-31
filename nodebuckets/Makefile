@@ -1,5 +1,4 @@
 NIMFILES = ../ccore/src/buckets/clib.nim
-NIMBASE = ~/lib/Nim/lib/nimbase.h
 RELEASE_TYPE = debug
 COMMON_BUILD_FLAGS = --app:staticlib --header --nimcache:csrc --gc:markAndSweep
 CLIB_NAME = clib/libbuckets.a
@@ -29,7 +28,7 @@ debug: $(NIMFILES)
 	-rm csrc/*.o
 	-rm csrc/*.cpp
 
-csrc/nimbase.h: $(NIMBASE)
+csrc/nimbase.h: nimbase.h
 	mkdir -p csrc
 	cp $^ $@
 

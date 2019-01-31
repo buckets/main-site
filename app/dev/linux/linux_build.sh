@@ -25,7 +25,7 @@ docker build --file app/dev/linux/linuxbuilder.Dockerfile -t $TAG .
 
 echo
 echo "RUNNING electron build..."
-docker run -i \
+docker run --rm -i \
     -v "$(pwd)":/proj \
     $ARGS $TAG
 

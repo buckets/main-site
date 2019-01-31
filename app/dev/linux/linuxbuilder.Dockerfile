@@ -20,7 +20,7 @@ ENV PATH="${PATH}:node_modules/.bin"
 #-----------------------------------
 # configure npm and yarn
 #-----------------------------------
-RUN npm i -g npm@^4
+# RUN npm i -g npm@^4
 RUN npm i -g node-gyp
 RUN yarn config set yarn-offline-mirror /proj/cache/yarnmirror
 RUN yarn cache clean
