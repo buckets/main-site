@@ -13,10 +13,10 @@
           "<!@(node -p \"require('node-addon-api').include\")",
           # "<(module_root_dir)/csrc",
           "csrc",
+          "inc",
       ],
       "libraries": [
-        # "./clib.a",
-        "<(module_root_dir)/clib/libbuckets.a"
+        "<(module_root_dir)/clib/<(OS)/libbuckets.a"
       ],
       'dependencies': [
         "<!(node -p \"require('node-addon-api').gyp\")"

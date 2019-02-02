@@ -31,7 +31,7 @@ OVA_PATH="${ISO_DIR}/${OVA_FILENAME}"
 ZIP_PATH="${ISO_DIR}/${ZIP_FILENAME}"
 
 YARN_MSI_URL="https://yarnpkg.com/latest.msi"
-NODE_MSI_URL="https://nodejs.org/dist/latest-v8.x/node-v8.14.0-x86.msi"
+NODE_MSI_URL="https://nodejs.org/dist/v11.8.0/node-v11.8.0-x86.msi"
 NCAT_URL="http://nmap.org/dist/ncat-portable-5.59BETA1.zip"
 
 GUEST_ADDITIONS_ISO=${GUEST_ADDITIONS_ISO:-/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso}
@@ -192,7 +192,16 @@ do_prepare_build() {
             rm "${PROJECT_DIR}/csc_key_password.txt"
         }
         trap finish EXIT
+    else
+        echo "WARNING: no code signing (CSC_LINK and CSC_KEY_PASSWORD should be set)"
     fi
+
+    # build buckets.lib
+    echo "Building buckets.lib ..."
+    pushd "${PROJECT_DIR}/nodebuckets"
+    make clib/win/buckets.lib OS=win
+    popd
+    echo "Built buckets.lib"
 
     # build winbuild.ts
     echo "Building winbuild.ts ..."
@@ -209,7 +218,38 @@ do_build() {
     echo "do_build $PROJECT_DIR"
     do_prepare_build "$PROJECT_DIR"
     ensure_signedin
+    echo "running win_build_launcher.bat"
     echo | cmd 'c:\builder\win_build_launcher.bat build'
+}
+
+do_testsetup() {
+    ensure_on
+    ensure_signedin
+    ensure_shared_folder buildshare "$THISDIR"
+    ensure_mount buildshare x
+}
+
+do_test() {
+    PROJECT_DIR=$(project_root_dir)
+    # build setupwin.exe
+    echo "Building setupwin.exe ..."
+    pushd "${PROJECT_DIR}/app/dev/win/"
+    make setupwin.exe
+    popd
+    echo "built setupwin.exe"
+
+    set -x
+    cmd 'c:\builder\bootstrap.bat'
+
+    [ -f /tmp/bucketsbuild.log ] && rm /tmp/bucketsbuild.log
+    while true; do
+        admincmd 'c:\builder\setupwin.exe' | tee -a /tmp/bucketsbuild.log
+        if grep "THE CHICKEN IS IN THE POT" /tmp/bucketsbuild.log; then
+            break
+        fi
+    done
+    set +x
+    echo
 }
 
 do_rebuild() {
@@ -274,9 +314,15 @@ ensure_off() {
 
     fi
     i="0"
+    MAX_SECONDS=120
+    echo "Waiting at most ${MAX_SECONDS}"
     while ! vboxmanage showvminfo "$VMNAME" 2>/dev/null | egrep "powered off|saved|aborted" > /dev/null; do
         let i="$i + 1"
-        if [ "$i" -eq 120 ]; then
+        if [ "$i" -eq 20 ] || [ "$i" -eq 40 ] || [ "$i" -eq 60 ]; then
+            echo "Pressing power button (again) ..."
+            vboxmanage controlvm "$VMNAME" acpipowerbutton
+        fi
+        if [ "$i" -eq "$MAX_SECONDS" ]; then
             echo "Unplugging power..."
             vboxmanage controlvm "$VMNAME" poweroff
         fi
@@ -364,7 +410,7 @@ snapshot_guestadditions() {
     echo "3. Devices > Insert Guest Additions CD image..."
     echo "4. Eventually run the .exe on the CD and click through the installer."
     echo "5. Reboot when prompted by the installer"
-    echo "6. Wait for this script to detect changes and take control again"
+    echo "6. Wait for this script to detect changes (after the reboot) and take control again"
     ensure_booted
 }
 
@@ -389,7 +435,7 @@ snapshot_admin() {
     echo "   User: ${WIN_USER}"
     echo "   Pass: ${WIN_PASS}"
     echo "2. Right click Windows Icon (bottom left)"
-    echo "3. Click 'Computer Management'"
+    echo "3. Type 'Computer Management' (press Enter)"
     echo "4. Expand 'Local Users and Groups'"
     echo "5. Click 'Users' folder"
     echo "6. Right click 'Administrator'"
@@ -579,6 +625,20 @@ snapshot_buildtools() {
             --name "buildshare"
     echo "Done making buildtools snapshot"
 }
+
+snapshot_nim() {
+    echo
+    echo "Installing Nim..."
+
+    # build setupwin.exe
+    echo "Building setupwin.exe ..."
+    make setupwin.exe
+    exit 1
+    echo "Built setupwin.exe"
+
+    echo "Done making nim snapshot"
+}
+
 
 share_directory() {
     HOST_DIR=$1

@@ -3,9 +3,10 @@ import * as fs from 'fs'
 
 let ENV = Object.assign({}, process.env, {
   PYTHON: 'C:\\Users\\IEUser\\.windows-build-tools\\python27\\python.exe',
-  PATH: `.\\node_modules\\.bin\\;${process.env.PATH};${process.env.APPDATA}\\npm\\node_modules\\.bin\\;C:\\Users\\IEUser\\.windows-build-tools\\python27`,
+  PATH: `.\\node_modules\\.bin\\;${process.env.PATH};${process.env.APPDATA}\\npm\\;C:\\Users\\IEUser\\.windows-build-tools\\python27`,
   ELECTRON_BUILDER_CACHE: 'Y:\\cache\\electron-cache',
   ELECTRON_CACHE: 'Y:\\cache\\electron-cache',
+  VCTargetsPath: 'C:\\Program Files (x86)\\MSBuild\\Microsoft.cpp\\v4.0\\v140',
 })
 ENV.Path = ENV.PATH;
 let CWD:string;
@@ -41,6 +42,7 @@ async function run(args:string[], opts:{
   env?:object,
   cwd?:string,
   failok?:boolean,
+  hideoutput?:boolean
 }={}) {
   PNUM++;
   let still_alive_timer;
@@ -59,16 +61,20 @@ async function run(args:string[], opts:{
         console.log(`(${PNUM}) ${(new Date()).toISOString()} still alive... pid=${p.pid}`)
       }, 30 * 1000)
 
-      let output = new Buffer('');
+      let output = Buffer.from('');
       p.stdout.on('data', (data:Buffer) => {
         output = Buffer.concat([output, data])
         stdout.write(data.toString());
-        process.stdout.write(data.toString());
+        if (!opts.hideoutput) {
+          process.stdout.write(data.toString());
+        }
       })
       p.stderr.on('data', (data:Buffer) => {
         output = Buffer.concat([output, data])
         stderr.write(data.toString());
-        process.stderr.write(data.toString());
+        if (!opts.hideoutput) {
+          process.stderr.write(data.toString());
+        }
       })
       p.on('exit', (code, signal) => {
         const end = Date.now();
@@ -97,7 +103,11 @@ async function run(args:string[], opts:{
 // doInstallBuildTools
 //----------------------------------------------------------
 async function doInstallBuildTools() {
-  await run(['npm', 'install', '--global', '--production', 'windows-build-tools'])
+  await run(['npm', 'install', '--global', '--production', 'windows-build-tools', '--vs2015'], {
+    hideoutput: true,
+  })
+  await run(['yarn', 'global', 'add', 'windows-build-tools', '--vs2015'])
+  await run(['npm', 'config', 'list'])
   await run(['md', 'C:\\Users\\IEUser\\.windows-build-tools'])
   await run(['xcopy', 'C:\\Users\\Administrator\\.windows-build-tools', 'C:\\Users\\IEUser\\.windows-build-tools', '/s', '/f'])
 }
@@ -141,6 +151,7 @@ async function doBuild(result:'publish'|'dev'|'build') {
   
   await run(['npm', 'config', 'set', 'msvs_version', '2015', '--global'])
   await run(['npm', 'install', '-g', 'node-gyp'])
+  await run(['yarn', 'global', 'add', 'node-gyp'])
 
   console.log('')
   console.log('---------------------------------------------')
@@ -152,10 +163,22 @@ async function doBuild(result:'publish'|'dev'|'build') {
 
   console.log('')
   console.log('---------------------------------------------')
+  console.log('compile nodebuckets')
+  console.log('---------------------------------------------')
+  CWD = 'C:\\proj\\nodebuckets'
+  await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['yarn', '--non-interactive', "--ignore-scripts"])
+  await run(['yarn', '--non-interactive'])
+  await run(['tsc', '--version'])
+  await run(['tsc'])
+
+  console.log('')
+  console.log('---------------------------------------------')
   console.log('compile core')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\core'
   await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['yarn', '--non-interactive', "--ignore-scripts"])
   await run(['yarn', '--non-interactive'])
   await run(['tsc', '--version'])
   await run(['yarn', 'compile'])
@@ -166,6 +189,7 @@ async function doBuild(result:'publish'|'dev'|'build') {
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\app'
   await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  await run(['yarn', '--non-interactive', "--ignore-scripts"])
   await run(['yarn', '--non-interactive'])
   await run(['tsc', '--version'])
   await run(['yarn', 'compile'])
@@ -212,7 +236,7 @@ async function main() {
       }
       case 'installnodegyp': {
         doInstallNodeGYP();
-        break
+        break;
       }
       case 'build': {
         const subcommand = process.argv[3] || 'build';

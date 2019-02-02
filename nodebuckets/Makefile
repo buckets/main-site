@@ -1,9 +1,30 @@
 NIMFILES = ../ccore/src/buckets/clib.nim
 RELEASE_TYPE = debug
-COMMON_BUILD_FLAGS = --app:staticlib --header --nimcache:csrc --gc:markAndSweep
-CLIB_NAME = clib/libbuckets.a
+NIM_C = cpp
+BUILD_FLAGS = --app:staticlib --header --nimcache:csrc --gc:markAndSweep
 
-.PHONY: clean release debug test all
+ifdef OS
+	OSNAME = win
+	BUILD_FLAGS += -d:mingw --cpu:amd64
+	NIM_C = c
+	CLIB_NAME = clib/$(OSNAME)/buckets.lib
+else
+	ifeq ($(shell uname), Linux)
+		OSNAME = linux
+	else
+		OSNAME = mac
+	endif
+	CLIB_NAME = clib/$(OSNAME)/libbuckets.a
+endif
+
+ifeq ($(RELEASE_TYPE), debug)
+	BUILD_FLAGS += --checks:on -d:useSysAssert -d:useGcAssert
+else
+	BUILD_FLAGS += -d:release
+endif
+
+
+.PHONY: clean test all
 
 all: dist/main.js lib/bucketslib.node
 
@@ -15,22 +36,14 @@ dist/main.js: jssrc/main.ts node_modules
 
 dist/test.js: jssrc/test.ts
 
-lib/bucketslib.node: csrc/nimbase.h $(RELEASE_TYPE)
+lib/bucketslib.node: $(CLIB_NAME)
 	node-gyp rebuild
 
-release: $(NIMFILES)
-	nim cpp -o:$(CLIB_NAME) -d:release $(COMMON_BUILD_FLAGS) $^
+$(CLIB_NAME): $(NIMFILES)
+	nim $(NIM_C) -o:$(CLIB_NAME) $(BUILD_FLAGS) $^
 	-rm csrc/*.o
 	-rm csrc/*.cpp
-
-debug: $(NIMFILES)
-	nim cpp -o:$(CLIB_NAME) --checks:on -d:useSysAssert -d:useGcAssert $(COMMON_BUILD_FLAGS) $^
-	-rm csrc/*.o
-	-rm csrc/*.cpp
-
-csrc/nimbase.h: nimbase.h
-	mkdir -p csrc
-	cp $^ $@
+	-rm csrc/*.c
 
 test: dist/test.js
 	node dist/test.js

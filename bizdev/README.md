@@ -11,6 +11,8 @@ To get the income data from Stripe and Paypal into the Google Drive spreadsheet:
    2. Change "All transactions" to "Payments received"
    3. Change the date to the previous month
    4. Click "Download"
+   5. Change "Transaction type" to "Completed payments"
+   6. Click "Create Report"
 
 4. Run `./convert-payment-csv.py ~/Desktop/payments*.csv ~/Desktop/Download.CSV`
 5. Copy and paste the output into the buckets > Buckets Finances spreadsheet.
