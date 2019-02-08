@@ -1,8 +1,6 @@
-## This script is meant to be run repeatedly until you see the string
-##  THE CHICKEN IS IN THE POT
-## Because several steps update that PATH and I can't figure out
-## in Windows how to do the equivalent of `source .bashrc`
-##
+when not defined(windows):
+  {.fatal: "Windows only".}
+
 import sequtils
 import strformat
 import strutils
@@ -10,6 +8,15 @@ import osproc
 import os
 import streams
 import strtabs
+import windows/registry
+
+const expected_sha = "a58f5b6023744da9f44e6ab8b1c748002b2bbcc0"
+# const gitSetupExe = slurp("tmp/Git-2.20.1-64-bit.exe")
+const nimInstaller = slurp("tmp/nim-0.19.2_x32.zip")
+const mingwZip = slurp("tmp/mingw32-6.3.0.7z")
+# const nimSourceZip = slurp("tmp/nim-goodversion.zip")
+
+var penv: StringTableRef
 
 template withDir(dir:string, body:untyped):untyped =
   var firstDir = getCurrentDir()
@@ -17,15 +24,32 @@ template withDir(dir:string, body:untyped):untyped =
   body
   setCurrentDir(firstDir)
 
-var penv:StringTableRef = nil
+# from Nim/tools/finish.nim
+proc tryGetUnicodeValue(path, key: string; handle: HKEY): string =
+  try:
+    result = getUnicodeValue(path, key, handle)
+  except:
+    result = ""
 
-# const gitSetupExe = slurp("tmp/Git-2.20.1-64-bit.exe")
-const nimInstaller = slurp("tmp/nim-0.19.2_x32.zip")
-const mingwZip = slurp("tmp/mingw32-6.3.0.7z")
-# const nimSourceZip = slurp("tmp/nim-goodversion.zip")
+proc addToPathEnv*(e: string) =
+  echo "Adding to PATH: ", e
+  var p = tryGetUnicodeValue(r"Environment", "Path", HKEY_CURRENT_USER)
+  let x = if e.contains(Whitespace): "\"" & e & "\"" else: e
+  if p.len > 0:
+    p.add ";"
+    p.add x
+  else:
+    p = x
+  echo "PATH = ", p
+  setUnicodeValue(r"Environment", "Path", p, HKEY_CURRENT_USER)
+
+proc refreshPath() =
+  penv["Path"] = tryGetUnicodeValue(r"Environment", "Path", HKEY_CURRENT_USER)
+  echo "Path = ", penv["Path"]
 
 proc run(args:seq[string]): int =
   echo "> ", args.join(" ")
+  refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
     env = penv,
@@ -35,8 +59,10 @@ proc run(args:seq[string]): int =
 
 proc runYes(args:seq[string]) =
   echo "yes > ", args.join(" ")
+  refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
+    env = penv,
     options = { poStdErrToStdOut, poUsePath, poEvalCommand })
   var outp = outputStream(p)
   var inp = inputStream(p)
@@ -52,6 +78,7 @@ proc runYes(args:seq[string]) =
 
 proc runOutput(args:seq[string]): TaintedString =
   echo "capture > ", args.join(" ")
+  refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
     env = penv,
@@ -70,6 +97,7 @@ proc runOutput(args:seq[string]): TaintedString =
 
 proc runNoOutput(args:seq[string]): int =
   echo "silent > ", args.join(" ")
+  refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
     env = penv,
@@ -83,25 +111,6 @@ proc runNoOutput(args:seq[string]): int =
       result = peekExitCode(p)
       if result != -1: break
   close(p)
-
-# proc refreshPath() =
-#   # https://superuser.com/questions/390833/how-can-i-refresh-my-path-variable-from-the-registry-without-a-reboot-logoff
-#   # echo "\LSTART PATH:"
-#   # discard run(@["cmd", "/c", "echo", "%PATH%"])
-#   let syspath = runOutput(@["reg", "query", "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", "/v", "Path"])
-#   let userpath = runOutput(@["reg", "query", "HKCU\\Environment", "/v", "Path"])
-#   # echo syspath.repr
-#   # echo userpath.repr
-#   let syspath_part = syspath.split("    ")[^1].strip()
-#   let userpath_part = userpath.split("    ")[^1].strip()
-#   # echo "parts: ", parts.repr
-#   let full_path = userpath_part & ";" & syspath_part
-#   # echo "full path: ", full_path
-#   echo "new Path: ", full_path
-#   penv["Path"] = full_path
-#   # discard run(@["cmd", "/c", "setx", "PATH", full_path])
-#   # echo "\LEND PATH:"
-#   # discard runNoOutput(@["cmd", "/c", "echo", "%PATH%"])
 
 proc ensure_choco() =
   try:
@@ -122,9 +131,7 @@ proc ensure_choco() =
     echo "Installed chocolatey!"
 
 proc display_env() =
-  penv = newStringTable()
   for k,v in envPairs():
-    penv[k] = v
     echo k, "=", v
 
 proc ensure_7zip() =
@@ -162,6 +169,7 @@ proc ensure_gcc() =
       discard runNoOutput(@[
         "7z", "e", "-y", "mingw.7z"
       ])
+      addToPathEnv("C:"/"mingw")
       discard run(@["setx", "path", "%path%;C:\\mingw"])
       # discard run(@["dir"])
     # discard runNoOutput(@["choco", "install", "mingw", "-yfd"])
@@ -169,7 +177,7 @@ proc ensure_gcc() =
 
 proc ensure_prenim() =
   try:
-    let output = runOutput(@["nim", "--version"])
+    let output = runOutput(@["gcc", "--version"])
     echo output
   except:
     createDir("C:\\niminstaller")
@@ -183,33 +191,45 @@ proc ensure_prenim() =
         "nim.zip",
         "unzipped",
       ])
-    withDir("C:\\niminstaller\\unzipped\\nim-0.19.2"):
+    if dirExists("C:"/"basenim"):
+      removeDir("C:"/"basenim")
+    moveDir("C:"/"niminstaller"/"unzipped"/"nim-0.19.2",
+            "C:"/"basenim")
+    withDir("C:"/"basenim"):
       runYes(@["finish.exe"])
+    addToPathEnv("C:"/"basenim"/"dist"/"mingw32"/"bin")
+    # discard run(@["setx", "PATH", "%PATH%;C:\\basenim\\dist\\mingw32\\bin", "/m"])
     echo "Installed bootstrap Nim!"
 
 proc ensure_nim() =
   try:
     let output = runOutput(@["nim", "--version"])
     echo output
-    if not("a58f5b6023744da9f44e6ab8b1c748002b2bbcc0" in output):
+    if not(expected_sha in output):
       raise newException(CatchableError, "Wrong version of nim installed")
   except:
-    if dirExists("C:\\nim"):
-      removeDir("C:\\nim")
-    discard run(@["git", "clone", "https://github.com/nim-lang/Nim.git", "C:\\nim"])
-    withDir("C:\\nim"):
-      discard run(@["git", "checkout", "a58f5b6023744da9f44e6ab8b1c748002b2bbcc0"])
+    if dirExists("C:"/"nim"):
+      removeDir("C:"/"nim")
+    discard run(@["git", "clone", "https://github.com/nim-lang/Nim.git", "C:"/"nim"])
+    withDir("C:"/"nim"):
+      discard run(@["git", "checkout", expected_sha])
       discard run(@["git", "clone", "--depth", "1", "https://github.com/nim-lang/csources.git"])
     
-      withDir("C:\\nim\\csources"):
-        discard runNoOutput(@["build64.bat"])
-      discard runNoOutput(@["bin\\nim", "c", "koch"])
+      withDir("C:"/"nim"/"csources"):
+        discard run(@["build64.bat"])
+      discard runNoOutput(@["bin"/"nim", "c", "koch"])
       discard runNoOutput(@["koch", "boot", "-d:release"])
       discard runNoOutput(@["koch", "tools"])
-    discard run(@["setx", "path", "%path%;C:\\nim\\bin;%userprofile%\\.nimble\\bin"])
+    addToPathEnv("C:"/"nim"/"bin")
+    addToPathEnv(getEnv("USERPROFILE")/".nimble"/"bin")
+    # discard run(@["setx", "PATH", "%PATH%;C:\\nim\\bin;%USERPROFILE%\\.nimble\\bin", "/m"])
     echo "Installed Nim!"
 
 if isMainModule:
+  penv = newStringTable()
+  for k,v in envPairs():
+    penv[k] = v
+
   case paramStr(1)
   of "env":
     display_env()

@@ -240,9 +240,9 @@ do_test() {
     echo "built setupwin.exe"
 
     cmd 'c:\builder\bootstrap.bat'
-    for step in choco git 7zip gcc nim; do
+    for step in choco git prenim nim; do
         echo
-        echo "--- Ensuring $step is installed..."
+        echo "... Doing $step step ..."
         set -e
         admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
         set +e
