@@ -13,8 +13,11 @@ import windows/registry
 const expected_sha = "a58f5b6023744da9f44e6ab8b1c748002b2bbcc0"
 # const gitSetupExe = slurp("tmp/Git-2.20.1-64-bit.exe")
 const nimInstaller = slurp("tmp/nim-0.19.2_x32.zip")
-const mingwZip = slurp("tmp/mingw32-6.3.0.7z")
+# const mingwZip = slurp("tmp/mingw32-6.3.0.7z")
 # const nimSourceZip = slurp("tmp/nim-goodversion.zip")
+
+const HKLM_ENV = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+const HKCU_ENV = r"Environment"
 
 var penv: StringTableRef
 
@@ -33,26 +36,25 @@ proc tryGetUnicodeValue(path, key: string; handle: HKEY): string =
 
 proc addToPathEnv*(e: string) =
   echo "Adding to PATH: ", e
-  var p = tryGetUnicodeValue(r"Environment", "Path", HKEY_CURRENT_USER)
+  var p = tryGetUnicodeValue(HKLM_ENV, "Path", HKEY_LOCAL_MACHINE)
   let x = if e.contains(Whitespace): "\"" & e & "\"" else: e
   if p.len > 0:
     p.add ";"
     p.add x
   else:
     p = x
-  echo "PATH = ", p
-  setUnicodeValue(r"Environment", "Path", p, HKEY_CURRENT_USER)
+  setUnicodeValue(HKLM_ENV, "Path", p, HKEY_LOCAL_MACHINE)
 
 proc refreshPath() =
-  penv["Path"] = tryGetUnicodeValue(r"Environment", "Path", HKEY_CURRENT_USER)
-  echo "Path = ", penv["Path"]
+  penv["Path"] = tryGetUnicodeValue(r"Environment", "Path", HKEY_CURRENT_USER) & ";" & tryGetUnicodeValue(r"Environment", "Path", HKEY_LOCAL_MACHINE)
+  # echo "Path = ", penv["Path"]
 
 proc run(args:seq[string]): int =
   echo "> ", args.join(" ")
   refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
-    env = penv,
+    #env = penv,
     options = { poStdErrToStdOut, poParentStreams, poUsePath })
   result = p.waitForExit
   close(p)
@@ -62,7 +64,7 @@ proc runYes(args:seq[string]) =
   refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
-    env = penv,
+    #env = penv,
     options = { poStdErrToStdOut, poUsePath, poEvalCommand })
   var outp = outputStream(p)
   var inp = inputStream(p)
@@ -81,7 +83,7 @@ proc runOutput(args:seq[string]): TaintedString =
   refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
-    env = penv,
+    #env = penv,
     options = { poStdErrToStdOut, poUsePath })
   var outp = outputStream(p)
   result = TaintedString""
@@ -100,7 +102,7 @@ proc runNoOutput(args:seq[string]): int =
   refreshPath()
   var p = startProcess(args[0],
     args = args[1..^1],
-    env = penv,
+    #env = penv,
     options = { poStdErrToStdOut })
   var outp = outputStream(p)
   var line = newStringOfCap(120).TaintedString
@@ -153,27 +155,27 @@ proc ensure_git() =
     discard runNoOutput(@["choco", "install", "git.install", "-yfd"])
     echo "Installed git!"
 
-proc ensure_gcc() =
-  try:
-    let output = runOutput(@["gcc", "--version"])
-    echo output
-    if not("Copyright" in output):
-      raise newException(CatchableError, "gcc not present")
-  except:
-    echo "Installing gcc ..."
-    if dirExists("C:\\mingw"):
-      removeDir("C:\\mingw")
-    createDir("C:\\mingw")
-    withDir("C:\\mingw"):
-      writeFile("mingw.7z", mingwZip)
-      discard runNoOutput(@[
-        "7z", "e", "-y", "mingw.7z"
-      ])
-      addToPathEnv("C:"/"mingw")
-      discard run(@["setx", "path", "%path%;C:\\mingw"])
-      # discard run(@["dir"])
-    # discard runNoOutput(@["choco", "install", "mingw", "-yfd"])
-    echo "Installed gcc!"
+# proc ensure_gcc() =
+#   try:
+#     let output = runOutput(@["gcc", "--version"])
+#     echo output
+#     if not("Copyright" in output):
+#       raise newException(CatchableError, "gcc not present")
+#   except:
+#     echo "Installing gcc ..."
+#     if dirExists("C:\\mingw"):
+#       removeDir("C:\\mingw")
+#     createDir("C:\\mingw")
+#     withDir("C:\\mingw"):
+#       writeFile("mingw.7z", mingwZip)
+#       discard runNoOutput(@[
+#         "7z", "e", "-y", "mingw.7z"
+#       ])
+#       addToPathEnv("C:"/"mingw")
+#       discard run(@["setx", "path", "%path%;C:\\mingw"])
+#       # discard run(@["dir"])
+#     # discard runNoOutput(@["choco", "install", "mingw", "-yfd"])
+#     echo "Installed gcc!"
 
 proc ensure_prenim() =
   try:
@@ -216,7 +218,7 @@ proc ensure_nim() =
       discard run(@["git", "clone", "--depth", "1", "https://github.com/nim-lang/csources.git"])
     
       withDir("C:"/"nim"/"csources"):
-        discard run(@["build64.bat"])
+        discard run(@["build.bat"])
       discard runNoOutput(@["bin"/"nim", "c", "koch"])
       discard runNoOutput(@["koch", "boot", "-d:release"])
       discard runNoOutput(@["koch", "tools"])
@@ -229,6 +231,7 @@ if isMainModule:
   penv = newStringTable()
   for k,v in envPairs():
     penv[k] = v
+  echo "Initial Path: ", getEnv("Path")
 
   case paramStr(1)
   of "env":
@@ -239,8 +242,8 @@ if isMainModule:
     ensure_7zip()
   of "git":
     ensure_git()
-  of "gcc":
-    ensure_gcc()
+  # of "gcc":
+  #   ensure_gcc()
   of "prenim":
     ensure_prenim()
   of "nim":
