@@ -117,6 +117,7 @@ do_create() {
     ensure_snapshot ncat admin
     ensure_snapshot node ncat
     ensure_snapshot buildtools node
+    ensure_snapshot nim buildtools
 }
 
 do_cmd() {
@@ -174,7 +175,7 @@ do_up() {
 }
 
 do_restore() {
-    restore_to "${1:-buildtools}"
+    restore_to "${1:-nim}"
 }
 
 do_prepare_build() {
@@ -238,17 +239,30 @@ do_test() {
     popd
     echo "built setupwin.exe"
 
-    set -x
     cmd 'c:\builder\bootstrap.bat'
-
-    [ -f /tmp/bucketsbuild.log ] && rm /tmp/bucketsbuild.log
-    while true; do
-        admincmd 'c:\builder\setupwin.exe' | tee -a /tmp/bucketsbuild.log
-        if grep "THE CHICKEN IS IN THE POT" /tmp/bucketsbuild.log; then
-            break
-        fi
+    for step in choco git 7zip gcc nim; do
+        echo
+        echo "--- Ensuring $step is installed..."
+        set -e
+        admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
+        set +e
     done
-    set +x
+    
+    # while true; do
+    #     admincmd 'c:\builder\setupwin.exe' | tee -a /tmp/bucketsbuild.log
+    #     if ! tail -n1 /tmp/bucketsbuild.log | grep "RUN AGAIN" ; then
+    #         echo "Running again"
+    #         continue
+    #     fi
+    #     if grep "THE CHICKEN IS IN THE POT" /tmp/bucketsbuild.log; then
+    #         echo "Finished"
+    #         break
+    #     else
+    #         tail /tmp/bucketsbuild.log
+    #         echo "Failed"
+    #         exit 1
+    #     fi
+    # done
     echo
 }
 
@@ -630,12 +644,21 @@ snapshot_nim() {
     echo
     echo "Installing Nim..."
 
-    # build setupwin.exe
-    echo "Building setupwin.exe ..."
-    make setupwin.exe
-    exit 1
-    echo "Built setupwin.exe"
+    PROJECT_DIR=$(project_root_dir)
 
+    echo "Building setupwin.exe ..."
+    pushd "${PROJECT_DIR}/app/dev/win/"
+    make setupwin.exe
+    popd
+    echo "built setupwin.exe"
+
+    echo "Installing other packages (including Nim) ..."
+    cmd 'c:\builder\bootstrap.bat'
+    for step in choco git prenim nim; do
+        echo "--- Ensuring $step is installed..."
+        admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
+    done
+    
     echo "Done making nim snapshot"
 }
 
