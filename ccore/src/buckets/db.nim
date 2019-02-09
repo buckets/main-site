@@ -1,16 +1,33 @@
 {.compile: "./sqlite3/sqlite3.c" .}
+# {.passC: "-D SQLITE_ENABLE_JSON1" .}
+# {.passC: "-D SQLITE_THREADSAFE=0" .}
+# {.passC: "-D SQLITE_DEFAULT_MEMSTATUS=0" .}
+# {.passC: "-D SQLITE_DEFAULT_WAL_SYNCHRONOUS=1" .}
+# {.passC: "-D SQLITE_LIKE_DOESNT_MATCH_BLOBS" .}
+# {.passC: "-D SQLITE_MAX_EXPR_DEPTH=0" .}
+# # {.passC: "-D SQLITE_OMIT_DECLTYPE" .}
+# {.passC: "-D SQLITE_OMIT_DEPRECATED" .}
+# {.passC: "-D SQLITE_OMIT_PROGRESS_CALLBACK" .}
+# {.passC: "-D SQLITE_OMIT_SHARED_CACHE" .}
+# {.passC: "-D SQLITE_USE_ALLOCA" .}
+# {.passC: "-D SQLITE_ENABLE_COLUMN_METADATA" .}
+
+{.passC: "-D SQLITE_ENABLE_DBSTAT_VTAB" .}
+{.passC: "-D SQLITE_ENABLE_FTS3" .}
+{.passC: "-D SQLITE_ENABLE_FTS5" .}
 {.passC: "-D SQLITE_ENABLE_JSON1" .}
+{.passC: "-D SQLITE_ENABLE_RTREE" .}
+{.passC: "-D SQLITE_ENABLE_STMTVTAB" .}
+{.passC: "-D SQLITE_ENABLE_UNKNOWN_SQL_FUNCTION" .}
 {.passC: "-D SQLITE_THREADSAFE=0" .}
-{.passC: "-D SQLITE_DEFAULT_MEMSTATUS=0" .}
-{.passC: "-D SQLITE_DEFAULT_WAL_SYNCHRONOUS=1" .}
-{.passC: "-D SQLITE_LIKE_DOESNT_MATCH_BLOBS" .}
-{.passC: "-D SQLITE_MAX_EXPR_DEPTH=0" .}
-# {.passC: "-D SQLITE_OMIT_DECLTYPE" .}
-{.passC: "-D SQLITE_OMIT_DEPRECATED" .}
-{.passC: "-D SQLITE_OMIT_PROGRESS_CALLBACK" .}
-{.passC: "-D SQLITE_OMIT_SHARED_CACHE" .}
-{.passC: "-D SQLITE_USE_ALLOCA" .}
 {.passC: "-D SQLITE_ENABLE_COLUMN_METADATA" .}
+
+# {.passC: "-D SQLITE_THREADSAFE=1" .}
+# {.passC: "-D SQLITE_ENABLE_FTS3" .}
+# {.passC: "-D SQLITE_ENABLE_FTS4" .}
+# {.passC: "-D SQLITE_ENABLE_FTS5" .}
+# {.passC: "-D SQLITE_ENABLE_JSON1" .}
+# {.passC: "-D SQLITE_ENABLE_RTREE" .}
 
 import logging
 import sqlite3
