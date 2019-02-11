@@ -2,8 +2,7 @@ import nake
 import sequtils
 
 task "all", "Compile everything":
-  echo "NOT IMPLEMENTED YET"
-  quit(1)
+  runTask "app-js"
 
 task "clean", "Delete most intermediate files":
   withDir("nodebuckets"):
@@ -44,12 +43,12 @@ task "ccore-test", "Run ccore tests":
 const
   NB_LIB = "nodebuckets"/"lib"/"bucketslib.node"
 
-task "nb-compile", "Generate nodebuckets/ library":
+task "nb-lib", "Generate nodebuckets/ library":
   withDir("nodebuckets"):
     direShell "make"
 
 task "nb-test", "Run nodebuckets/ tests":
-  runTask "nb-compile"
+  runTask "nb-lib"
   withDir("nodebuckets"):
     direShell "make", "test"
 
@@ -59,13 +58,15 @@ task "nb-test", "Run nodebuckets/ tests":
 const
   CORE_NB_LIB = "core"/"node_modules"/"bucketslib"/"lib"/"bucketslib.node"
 
-task "core-compile", "Generate core/ library artifacts":
-  runTask "nb-compile"
-  if @[CORE_NB_LIB].needsRefresh(NB_LIB):
+task "core-lib", "Refresh core/ nodebuckets library":
+  runTask "nb-lib"
+  if CORE_NB_LIB.needsRefresh(NB_LIB):
     withDir("core"):
       removeDir("node_modules/bucketslib")
       direShell "yarn", "add", "file:../nodebuckets"
-    
+
+task "core-js", "Generate core/ JS files":
+  runTask "core-lib"
   let
     core_ts_files = toSeq(walkDirRec("core"/"src")).filterIt(it.endsWith(".ts"))
     core_js_files = core_ts_files.mapIt(it.replace(".ts", ".js").replace("src"/"", "dist"/""))
@@ -75,10 +76,34 @@ task "core-compile", "Generate core/ library artifacts":
       direShell "tsc"
 
 task "core-test", "Run core/ tests":
-  runTask "core-compile"
+  runTask "core-js"
   withDir("core"):
     direShell "yarn", "test"
 
 #------------------------------------------------------------
 # app/
 #------------------------------------------------------------
+const
+  APP_NB_LIB = "app"/"node_modules"/"bucketslib"/"lib"/"bucketslib.node"
+
+task "app-lib", "Refresh app/ nodebuckets library":
+  runTask "core-js"
+  if APP_NB_LIB.needsRefresh(CORE_NB_LIB):
+    withDir("app"):
+      removeDir("node_modules"/"bucketslib")
+      direShell "yarn", "add", "file:../core"
+
+task "app-js", "Generate app/ JS files":
+  runTask "app-lib"
+  let
+    ts_files = toSeq(walkDirRec("app"/"src")).filterIt(it.endsWith(".ts") or it.endsWith(".tsx"))
+    js_files = ts_files.mapIt(it.replace(".tsx", ".js").replace(".ts", ".js"))
+
+  if js_files.needsRefresh(ts_files):
+    withDir("app"):
+      direShell "tsc"
+
+task "app-test", "Run app/ tests":
+  runTask "app-js"
+  withDir("app"):
+    direShell "yarn", "test"
