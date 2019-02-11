@@ -44,8 +44,11 @@ const
   NB_LIB = "nodebuckets"/"lib"/"bucketslib.node"
 
 task "nb-lib", "Generate nodebuckets/ library":
-  withDir("nodebuckets"):
-    direShell "make"
+  let
+    ccore_nim_files = toSeq(walkDirRec("ccore"/"src")).filterIt(it.endsWith(".nim"))
+  if NB_LIB.needsRefresh(ccore_nim_files):
+    withDir("nodebuckets"):
+      direShell "make"
 
 task "nb-test", "Run nodebuckets/ tests":
   runTask "nb-lib"
@@ -105,5 +108,6 @@ task "app-js", "Generate app/ JS files":
 
 task "app-test", "Run app/ tests":
   runTask "app-js"
+  
   withDir("app"):
     direShell "yarn", "test"
