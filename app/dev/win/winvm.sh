@@ -240,29 +240,13 @@ do_test() {
     echo "built setupwin.exe"
 
     cmd 'c:\builder\bootstrap.bat'
-    for step in choco git prenim nim; do
+    for step in git gcc nim nake; do
         echo
         echo "... Doing $step step ..."
         set -e
         admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
         set +e
     done
-    
-    # while true; do
-    #     admincmd 'c:\builder\setupwin.exe' | tee -a /tmp/bucketsbuild.log
-    #     if ! tail -n1 /tmp/bucketsbuild.log | grep "RUN AGAIN" ; then
-    #         echo "Running again"
-    #         continue
-    #     fi
-    #     if grep "THE CHICKEN IS IN THE POT" /tmp/bucketsbuild.log; then
-    #         echo "Finished"
-    #         break
-    #     else
-    #         tail /tmp/bucketsbuild.log
-    #         echo "Failed"
-    #         exit 1
-    #     fi
-    # done
     echo
 }
 
@@ -643,23 +627,31 @@ snapshot_buildtools() {
 snapshot_nim() {
     echo
     echo "Installing Nim..."
+    
+    ensure_signedin
+    ensure_shared_folder buildshare "$THISDIR"
+    ensure_mount buildshare x
 
     PROJECT_DIR=$(project_root_dir)
-
+    # build setupwin.exe
     echo "Building setupwin.exe ..."
     pushd "${PROJECT_DIR}/app/dev/win/"
     make setupwin.exe
     popd
     echo "built setupwin.exe"
 
-    echo "Installing other packages (including Nim) ..."
     cmd 'c:\builder\bootstrap.bat'
-    for step in choco git prenim nim; do
-        echo "--- Ensuring $step is installed..."
+    for step in git gcc nim nake; do
+        echo
+        echo "... Doing $step step ..."
+        set -e
         admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
+        set +e
     done
+    echo
     
     echo "Done making nim snapshot"
+    echo "cleaning up..."
 }
 
 

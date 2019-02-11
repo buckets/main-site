@@ -163,6 +163,14 @@ async function doBuild(result:'publish'|'dev'|'build') {
 
   console.log('')
   console.log('---------------------------------------------')
+  console.log('compile ccore')
+  console.log('---------------------------------------------')
+  CWD = 'C:\\proj\\ccore'
+  // await run([""])
+  MATT, do this now
+
+  console.log('')
+  console.log('---------------------------------------------')
   console.log('compile nodebuckets')
   console.log('---------------------------------------------')
   CWD = 'C:\\proj\\nodebuckets'
