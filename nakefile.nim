@@ -6,7 +6,7 @@ task "all", "Compile everything":
 
 task "clean", "Delete most intermediate files":
   withDir("nodebuckets"):
-    shell "make", "clean"
+    shell "nake", "clean"
   withDir("core"):
     removeDir("dist")
     removeDir("node_modules"/"bucketslib")
@@ -48,12 +48,12 @@ task "nb-lib", "Generate nodebuckets/ library":
     ccore_nim_files = toSeq(walkDirRec("ccore"/"src")).filterIt(it.endsWith(".nim"))
   if NB_LIB.needsRefresh(ccore_nim_files):
     withDir("nodebuckets"):
-      direShell "make"
+      direShell "nake"
 
 task "nb-test", "Run nodebuckets/ tests":
   runTask "nb-lib"
   withDir("nodebuckets"):
-    direShell "make", "test"
+    direShell "nake", "test"
 
 #------------------------------------------------------------
 # core/
@@ -71,10 +71,10 @@ task "core-lib", "Refresh core/ nodebuckets library":
 task "core-js", "Generate core/ JS files":
   runTask "core-lib"
   let
-    core_ts_files = toSeq(walkDirRec("core"/"src")).filterIt(it.endsWith(".ts"))
-    core_js_files = core_ts_files.mapIt(it.replace(".ts", ".js").replace("src"/"", "dist"/""))
+    ts_files = toSeq(walkDirRec("core"/"src")).filterIt(it.endsWith(".ts"))
+    js_files = ts_files.mapIt(it.replace(".ts", ".js").replace("src"/"", "dist"/""))
 
-  if core_js_files.needsRefresh(core_ts_files):
+  if js_files.needsRefresh(ts_files):
     withDir("core"):
       direShell "tsc"
 
