@@ -142,7 +142,7 @@
     "electron": "^3.0.10",
     "electron-builder": "^20.38.2",
     "http-server": "^0.10.0",
-    "tap": "^12.5.0",
+    "tap": "^12.5.2",
     "ts-node": "3.0.6",
     "typescript": "^3.2.1",
     "watch": "^1.0.2"

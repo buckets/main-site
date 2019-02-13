@@ -5,11 +5,13 @@
 import ./db
 import ./budgetfile
 import ../buckets
+import ./util
 import strformat
 import strutils
 import sequtils
 import json
 import logging
+
 
 {.passC: "-fPIC" .}
 
@@ -25,6 +27,7 @@ proc setReturnString(x:string):csize =
     raise newException(CatchableError, "Return string was not used/discarded")
   LAST_STRING = x
   HAS_LAST_STRING = true
+  # echo "RETURN STRING: ", LAST_STRING
   return x.len.csize
 
 #-----------------------------------
@@ -46,10 +49,6 @@ method log*(logger: FunctionLogger, level: Level, args: varargs[string, `$`]) =
 
 proc toDB*(budget_handle:int):DbConn =
   budget_handle.getBudgetFile().db
-
-proc cStringToString(x:cstring, n:cint):string =
-  result = newString(n)
-  copyMem(unsafeAddr(result[0]), x, n)
 
 template strres*(x:untyped):untyped =
   discard x
@@ -161,11 +160,41 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_
     for col in res.cols:
       jcols.add(newJString(col))
     var jrows = newJArray()
+    # echo "hi", query.repr
+    var i = 0
     for row in res.rows:
+      # if query.startsWith("pragma table_info(bucket)"):
+      #   echo "row: ", row.repr
       var jrow = newJArray()
+      var c = 0
       for col in row:
+        if col.startsWith("\0\0"):
+          echo "STARTS WITH NULL"
+          # dumpMem(res.unsafeAddr, 512)
+          # echo toHex(cast[int](res.rows[5].unsafeAddr))
+          echo "res.rows[5][0]: ", res.rows[5][0].repr
+          echo cast[byte](cstring(res.rows[5][0])[0])
+          # echo "          addr: ", toHex(cast[int](res.rows[5][0].unsafeAddr))
+          # echo "     jrow.addr: ", toHex(cast[int](jrow.addr))
+          # echo "    jrows.addr: ", toHex(cast[int](jrows.addr))
+          # dumpMem(cstring(res.rows[5][0]), 128)
+          # dumpMem(res.rows[5][0].unsafeAddr, 32)
+          # echo "res.rows[4]: ", res.rows[4].repr
+          # echo "res.rows[3]: ", res.rows[3].repr
+          # dumpMem(res.rows[5].unsafeAddr, 32)
+          # dumpMem(res.rows[5].unsafeAddr, 256)
+          # echo "res.rows[5]: ", res.rows[5].repr
+          # echo "res.rows[6]: ", res.rows[6].repr
+          # echo "res.rows[7]: ", res.rows[7].repr
+          # echo "res.rows[8]: ", res.rows[8].repr
+          # echo "res.rows[9]: ", res.rows[9].repr
+          # echo "res.rows: ", res.rows.repr
         jrow.add(newJString(col))
+        c.inc()
       jrows.add(jrow)
+      # if query.startsWith("pragma table_info(bucket)"):
+      # echo "jrow"
+      i.inc()
     var jtypes = newJArray()
     for t in res.types:
       jtypes.add(newJString(t))

@@ -3,7 +3,7 @@ import os
 import strformat
 import buckets/db
 
-import ./util
+import ./testutils
 
 proc openDB(name:string):DbConn =
   open(name, "", "", "")

@@ -3,7 +3,7 @@ import os
 import strformat
 import buckets
 
-import ./util
+import ./testutils
 
 test "new file":
   let filename = tmpDir()/"newfile.buckets"

@@ -19,7 +19,7 @@
 {.passC: "-D SQLITE_ENABLE_RTREE" .}
 {.passC: "-D SQLITE_ENABLE_STMTVTAB" .}
 {.passC: "-D SQLITE_ENABLE_UNKNOWN_SQL_FUNCTION" .}
-{.passC: "-D SQLITE_THREADSAFE=0" .}
+{.passC: "-D SQLITE_THREADSAFE=2" .}
 {.passC: "-D SQLITE_ENABLE_COLUMN_METADATA" .}
 
 # {.passC: "-D SQLITE_THREADSAFE=1" .}
@@ -28,6 +28,8 @@
 # {.passC: "-D SQLITE_ENABLE_FTS5" .}
 # {.passC: "-D SQLITE_ENABLE_JSON1" .}
 # {.passC: "-D SQLITE_ENABLE_RTREE" .}
+
+import ./util
 
 import logging
 import sqlite3
@@ -176,7 +178,8 @@ proc fetchAll*(db:DbConn, statement:SqlQuery, params: varargs[Param, `newParam`]
         else:
           result.types.add("Null")
     for coli in 0'i32 ..< L:
-      res.add(row[coli])
+      let val = column_text(row, coli)
+      res.add(cStringToString(val, val.len.cint))
     result.rows.add(res)
 
 proc runQuery*(db:DbConn, query:SqlQuery, params: varargs[Param, `newParam`]): ref RunResult =

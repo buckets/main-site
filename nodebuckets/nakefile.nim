@@ -72,7 +72,6 @@ task "nodelib", "Build the .node file":
 task "staticlib", "Build the static lib":
   let nim_src = toSeq(walkDirRec(".."/"ccore"/"src")).filterIt(it.endsWith(".nim"))
 
-  var build_flags:seq[string] = @["--app:staticlib", "--header", "--nimcache:csrc", "--gc:markAndSweep"]
   case mode
   of Release:
     echo "========= RELEASE build"

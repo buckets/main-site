@@ -129,6 +129,9 @@ function db_all_arrays(bf_id, query, params) {
             res = JSON.parse(json_res);
         }
         catch (err) {
+            console.log("ERROR");
+            console.log("On query:", JSON.stringify(query));
+            console.log("Params:", JSON.stringify(params));
             console.log("db_all_arrays Invalid JSON string:", json_res);
             throw err;
         }

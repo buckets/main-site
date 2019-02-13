@@ -42,13 +42,17 @@ task "ccore-test", "Run ccore tests":
 #------------------------------------------------------------
 const
   NB_LIB = "nodebuckets"/"lib"/"bucketslib.node"
+  NB_JS = toSeq(walkDirRec("nodebuckets"/"dist"))
 
 task "nb-lib", "Generate nodebuckets/ library":
-  let
-    ccore_nim_files = toSeq(walkDirRec("ccore"/"src")).filterIt(it.endsWith(".nim"))
-  if NB_LIB.needsRefresh(ccore_nim_files):
-    withDir("nodebuckets"):
-      direShell "nake"
+  # let
+  #   ccore_nim_files = toSeq(walkDirRec("ccore"/"src")).filterIt(it.endsWith(".nim"))
+  # if NB_LIB.needsRefresh(ccore_nim_files):
+  withDir("nodebuckets"):
+    direShell "nake"
+  # let
+  #   ts_files = toSeq(walkDirRec("nodebuckets"/"src")).filterIt(it.endsWith(".ts"))
+  #   js_files = ts_files.mapIt(it.replace(".ts", ".js").replace("src"/"", "dist"/""))
 
 task "nb-test", "Run nodebuckets/ tests":
   runTask "nb-lib"
@@ -63,7 +67,7 @@ const
 
 task "core-lib", "Refresh core/ nodebuckets library":
   runTask "nb-lib"
-  if CORE_NB_LIB.needsRefresh(NB_LIB):
+  if CORE_NB_LIB.needsRefresh(NB_LIB) or CORE_NB_LIB.needsRefresh(NB_JS):
     withDir("core"):
       removeDir("node_modules/bucketslib")
       direShell "yarn", "add", "file:../nodebuckets"
