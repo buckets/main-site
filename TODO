@@ -13,3 +13,9 @@ SIGSEGV: Illegal storage access. (Attempt to read from nil?)
 
  Traceback (most recent call last)
  clib.nim(250)            buckets_db_execute_many_json index out of bounds: (i:0) <= (n:-1)
+
+ ☐ Branch tofix-error1
+
+ db_all_arrays Invalid JSON string: {"err":"","cols":["cid","name","type","notnull","dflt_value","pk"],"rows":[["0","id","INTEGER","0","",null],,,["3","notes","TEXT","0","''","0"],["4","balance","INTEGER","0","0","0"],["5","kicked","TINYINT","0","0","0"],["6","group_id","INTEGER","0","NULL","0"],["7","ranking","TEXT","0","''","0"],["8","kind","TEXT","0","''","0"],["9","goal","INTEGER","0","","0"],["10","end_date","DATE","0","","0"],["11","deposit","INTEGER","0","","0"],["\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000"],[]],"types":["Int","Text","Text","Int","Null","Int"]}
+# Subtest: deleteTransactions linked bucket transactions
+    not ok 1 - Unexpected token , in JSON at position 108

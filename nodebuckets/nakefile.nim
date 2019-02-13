@@ -6,7 +6,7 @@ type
     Release,
     Debug,
 var
-  mode:BuildMode = Debug
+  mode:BuildMode = Release
 
 var
   build_flags:seq[string] = @["--app:staticlib", "--header", "--nimcache:csrc", "--gc:markAndSweep"]
@@ -75,8 +75,10 @@ task "staticlib", "Build the static lib":
   var build_flags:seq[string] = @["--app:staticlib", "--header", "--nimcache:csrc", "--gc:markAndSweep"]
   case mode
   of Release:
+    echo "========= RELEASE build"
     build_flags.add("-d:release")
   of Debug:
+    echo "========= DEBUG build"
     build_flags.add(@["--checks:on", "-d:useSysAssert", "-d:useGcAssert"])
   
   if libname.needsRefresh(nim_src):
