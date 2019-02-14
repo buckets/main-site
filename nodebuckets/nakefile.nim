@@ -9,7 +9,7 @@ var
   mode:BuildMode = Release
 
 var
-  build_flags:seq[string] = @["--app:staticlib", "--header", "--nimcache:csrc", "--gc:markAndSweep"]
+  build_flags:seq[string] = @["--app:staticlib", "--header", "--nimcache:csrc", "--gc:regions"]
   compiler:string
   osname:string
   libname:string
