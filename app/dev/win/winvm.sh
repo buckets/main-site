@@ -180,7 +180,9 @@ do_restore() {
 
 do_prepare_build() {
     PROJECT_DIR=$(project_root_dir)
+    echo "-----------------------------"
     echo "do_prepare_build $PROJECT_DIR"
+    echo "-----------------------------"
 
     # code signing stuff
     if [ ! -z "$CSC_LINK" ] && [ ! -z "$CSC_KEY_PASSWORD" ]; then
@@ -197,12 +199,12 @@ do_prepare_build() {
         echo "WARNING: no code signing (CSC_LINK and CSC_KEY_PASSWORD should be set)"
     fi
 
-    # build buckets.lib
-    echo "Building buckets.lib ..."
-    pushd "${PROJECT_DIR}/nodebuckets"
-    make clib/win/buckets.lib OS=win
-    popd
-    echo "Built buckets.lib"
+    # # build buckets.lib
+    # echo "Building buckets.lib ..."
+    # pushd "${PROJECT_DIR}/nodebuckets"
+    # make clib/win/buckets.lib OS=win
+    # popd
+    # echo "Built buckets.lib"
 
     # build winbuild.ts
     echo "Building winbuild.ts ..."
@@ -215,6 +217,9 @@ do_prepare_build() {
 }
 
 do_build() {
+    echo "-----------------------------"
+    echo "do_build"
+    echo "-----------------------------"
     PROJECT_DIR=$(project_root_dir)
     echo "do_build $PROJECT_DIR"
     do_prepare_build "$PROJECT_DIR"
@@ -223,32 +228,32 @@ do_build() {
     echo | cmd 'c:\builder\win_build_launcher.bat build'
 }
 
-do_testsetup() {
-    ensure_on
-    ensure_signedin
-    ensure_shared_folder buildshare "$THISDIR"
-    ensure_mount buildshare x
-}
+# do_testsetup() {
+#     ensure_on
+#     ensure_signedin
+#     ensure_shared_folder buildshare "$THISDIR"
+#     ensure_mount buildshare x
+# }
 
-do_test() {
-    PROJECT_DIR=$(project_root_dir)
-    # build setupwin.exe
-    echo "Building setupwin.exe ..."
-    pushd "${PROJECT_DIR}/app/dev/win/"
-    make setupwin.exe
-    popd
-    echo "built setupwin.exe"
+# do_test() {
+#     PROJECT_DIR=$(project_root_dir)
+#     # build setupwin.exe
+#     echo "Building setupwin.exe ..."
+#     pushd "${PROJECT_DIR}/app/dev/win/"
+#     make setupwin.exe
+#     popd
+#     echo "built setupwin.exe"
 
-    cmd 'c:\builder\bootstrap.bat'
-    for step in git gcc nim nake; do
-        echo
-        echo "... Doing $step step ..."
-        set -e
-        admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
-        set +e
-    done
-    echo
-}
+#     cmd 'c:\builder\bootstrap.bat'
+#     for step in git gcc nim nake; do
+#         echo
+#         echo "... Doing $step step ..."
+#         set -e
+#         admincmd "c:\builder\setupwin.exe $step" | tee -a /tmp/bucketsbuild.log
+#         set +e
+#     done
+#     echo
+# }
 
 do_rebuild() {
     echo "do_rebuild"
@@ -352,6 +357,9 @@ ensure_booted() {
 }
 
 ensure_signedin() {
+    echo "-------------------------"
+    echo "ensure_signedin"
+    echo "-------------------------"
     echo "Waiting for $WIN_USER to be signed in..."
     while ! cmd query user | grep -i "$WIN_USER" >/dev/null; do
         sleep 1

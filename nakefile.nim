@@ -1,5 +1,38 @@
 import nake
+import times
 import sequtils
+
+proc needsRefresh(targets: seq[string], src: varargs[string]): bool {.raises: [OSError].} =
+  ## Returns true if any ``src`` is newer than the oldest ``targets``.
+  ##
+  ## .. code-block:: nimrod
+  ##   import nake, os
+  ##
+  ##   let
+  ##     src = @["prog.nim", "prog2.nim"]
+  ##     dst = @["prog.out", "prog_stats.txt"]
+  ##   if dst.needsRefresh(src):
+  ##      echo "Refreshing ..."
+  ##      # do something to generate the outputs
+  ##   else:
+  ##      echo "All done!"
+  assert len(targets) > 0, "Pass some targets to check"
+  assert len(src) > 0, "Pass some source files to check"
+  var minTargetTime: float = -1
+  for target in targets:
+    try:
+      let targetTime = toSeconds(getLastModificationTime(target))
+      if minTargetTime == -1:
+        minTargetTime = targetTime
+      elif targetTime < minTargetTime:
+        minTargetTime = targetTime
+    except OSError:
+      return true
+
+  for s in src:
+    let srcTime = toSeconds(getLastModificationTime(s))
+    if srcTime > minTargetTime:
+      return true
 
 task "all", "Compile everything":
   runTask "app-js"
@@ -92,6 +125,9 @@ task "core-test", "Run core/ tests":
 #------------------------------------------------------------
 const
   APP_NB_LIB = "app"/"node_modules"/"bucketslib"/"lib"/"bucketslib.node"
+
+task "app", "Build everything needed for app to run":
+  runTask "app-js"
 
 task "app-lib", "Refresh app/ nodebuckets library":
   runTask "core-js"

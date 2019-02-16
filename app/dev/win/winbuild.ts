@@ -163,44 +163,45 @@ async function doBuild(result:'publish'|'dev'|'build') {
 
   console.log('')
   console.log('---------------------------------------------')
-  console.log('compile ccore')
+  console.log('compile everything')
   console.log('---------------------------------------------')
-  CWD = 'C:\\proj\\ccore'
+  CWD = 'C:\\proj'
+  await run(['nake', 'deepclean'])
+  await run(['nake', 'app'])
   // await run([""])
-  MATT, do this now
 
-  console.log('')
-  console.log('---------------------------------------------')
-  console.log('compile nodebuckets')
-  console.log('---------------------------------------------')
-  CWD = 'C:\\proj\\nodebuckets'
-  await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
-  await run(['yarn', '--non-interactive', "--ignore-scripts"])
-  await run(['yarn', '--non-interactive'])
-  await run(['tsc', '--version'])
-  await run(['tsc'])
+  // console.log('')
+  // console.log('---------------------------------------------')
+  // console.log('compile nodebuckets')
+  // console.log('---------------------------------------------')
+  // CWD = 'C:\\proj\\nodebuckets'
+  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  // await run(['yarn', '--non-interactive', "--ignore-scripts"])
+  // await run(['yarn', '--non-interactive'])
+  // await run(['tsc', '--version'])
+  // await run(['tsc'])
 
-  console.log('')
-  console.log('---------------------------------------------')
-  console.log('compile core')
-  console.log('---------------------------------------------')
-  CWD = 'C:\\proj\\core'
-  await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
-  await run(['yarn', '--non-interactive', "--ignore-scripts"])
-  await run(['yarn', '--non-interactive'])
-  await run(['tsc', '--version'])
-  await run(['yarn', 'compile'])
+  // console.log('')
+  // console.log('---------------------------------------------')
+  // console.log('compile core')
+  // console.log('---------------------------------------------')
+  // CWD = 'C:\\proj\\core'
+  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  // await run(['yarn', '--non-interactive', "--ignore-scripts"])
+  // await run(['yarn', '--non-interactive'])
+  // await run(['tsc', '--version'])
+  // await run(['yarn', 'compile'])
 
-  console.log('')
-  console.log('---------------------------------------------')
-  console.log('compile app code')
-  console.log('---------------------------------------------')
-  CWD = 'C:\\proj\\app'
-  await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
-  await run(['yarn', '--non-interactive', "--ignore-scripts"])
-  await run(['yarn', '--non-interactive'])
-  await run(['tsc', '--version'])
-  await run(['yarn', 'compile'])
+  // console.log('')
+  // console.log('---------------------------------------------')
+  // console.log('compile app code')
+  // console.log('---------------------------------------------')
+  // CWD = 'C:\\proj\\app'
+  // await run(['rmdir', '/S', '/Q', 'node_modules'], {failok: true})
+  // await run(['yarn', '--non-interactive', "--ignore-scripts"])
+  // await run(['yarn', '--non-interactive'])
+  // await run(['tsc', '--version'])
+  // await run(['yarn', 'compile'])
 
   console.log('')
   console.log('---------------------------------------------')
