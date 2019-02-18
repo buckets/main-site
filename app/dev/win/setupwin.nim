@@ -199,6 +199,14 @@ proc ensure_nake() =
     echo "Installing nake ..."
     discard run(@["nimble", "install", "-y", "nake"])
     echo "Installed nake!"
+    > nimble install -y nake
+    Prompt: No local packages.json found, download it from internet? -> [forced yes]
+Downloading Official package list
+    Success Package list downloaded.
+Downloading https://github.com/fowlmouth/nake using git
+       Tip: 2 messages have been suppressed, use --verbose to show them.
+     Error: 'git' not in PATH.
+Installed nake!
 
 # proc ensure_prenim() =
 #   try:
