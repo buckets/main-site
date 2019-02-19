@@ -310,15 +310,22 @@ task "ready", "Make sure the VM is ready to receive actions":
 task "snap-nim", "Install Nim tools on vm":
   let snapshots = vm.snapshots()
   if not ("nim" in snapshots):
-    withLogPrefix("snap-nim"):
+    withLogPrefix("[snap-nim]"):
       runTask "setupwin.exe"
       vm.ensure_signedin(win_user)
       ensure_project_mount()
-      vm.gaCmd("mkdir", "c:\\\\builder")
-      vm.gaCmd("xcopy", "y:\\\\app\\\\dev\\\\win\\\\setupwin.exe", "c:\\\\builder\\\\", "/f", "/Y")
-      for step in ["git", "gcc", "nim", "nake"]:
+      vm.gaCmd("mkdir", r"c:\\builder")
+      vm.gaCmd("xcopy", r"y:\\app\\dev\\win\\setupwin.exe", r"c:\\builder\\", "/f", "/Y")
+      vm.gaCmd("set")
+      vm.gaCmd("where", "git")
+      echo "PATH = "
+      vm.gaCmd("echo", "%PATH%")
+      for step in ["git", "gcc"]:
         log "Running step: ", step
-        vm.gaAdminCmd("c:\\\\builder\\\\setupwin.exe", step)
+        vm.gaAdminCmd(r"c:\\builder\\setupwin.exe", step)
+      for step in ["nim", "nake"]:
+        log "Running step: ", step
+        vm.gaCmd(r"c:\\builder\\setupwin.exe", step)
 
 task "create", "Make sure the VM is created":
   runTask "snap-nim"
@@ -353,5 +360,5 @@ task "build", "Build the electron app":
   runTask "prep-build"
   withLogPrefix("[build]"):
     vm.ensure_signedin(win_user)
-    vm.gaCmd("y:\\\\app\\\\dev\\\\win\\\\winbuild.exe", "build")
+    vm.gaCmd(r"y:\\app\\dev\\win\\winbuild.exe", "build")
     log "done?"

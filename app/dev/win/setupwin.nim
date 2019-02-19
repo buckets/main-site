@@ -19,7 +19,7 @@ const dllZip = slurp("tmp/dlls.zip")
 # const nimSourceZip = slurp("tmp/nim-goodversion.zip")
 
 const HKLM_ENV = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-# const HKCU_ENV = r"Environment"
+const HKCU_ENV = r"Environment"
 
 var penv: StringTableRef
 
@@ -36,16 +36,21 @@ proc tryGetUnicodeValue(path, key: string; handle: HKEY): string =
   except:
     result = ""
 
-proc addToPathEnv*(e: string) =
-  echo "Adding to PATH: ", e
-  var p = tryGetUnicodeValue(HKLM_ENV, "Path", HKEY_LOCAL_MACHINE)
+proc addToPathEnv*(e: string, regkey: HKEY) =
+  echo "Adding to PATH: ", e, regkey
+  var key = if regkey == HKEY_LOCAL_MACHINE: HKLM_ENV else: HKCU_ENV
+  var p = tryGetUnicodeValue(key, "Path", regkey)
   let x = if e.contains(Whitespace): "\"" & e & "\"" else: e
   if p.len > 0:
     p.add ";"
     p.add x
   else:
     p = x
-  setUnicodeValue(HKLM_ENV, "Path", p, HKEY_LOCAL_MACHINE)
+  setUnicodeValue(key, "Path", p, regkey)
+
+proc addToPathEnv*(e: string) =
+  addToPathEnv(e, HKEY_LOCAL_MACHINE)
+  addToPathEnv(e, HKEY_CURRENT_USER)
 
 proc refreshPath() =
   penv["Path"] = tryGetUnicodeValue(r"Environment", "Path", HKEY_CURRENT_USER) & ";" & tryGetUnicodeValue(r"Environment", "Path", HKEY_LOCAL_MACHINE)
@@ -197,16 +202,8 @@ proc ensure_nake() =
       raise newException(CatchableError, "nake not present")
   except:
     echo "Installing nake ..."
-    discard run(@["nimble", "install", "-y", "nake"])
+    discard run(@["nimble", "install", "-y", "nake"], dftEnv = true)
     echo "Installed nake!"
-    > nimble install -y nake
-    Prompt: No local packages.json found, download it from internet? -> [forced yes]
-Downloading Official package list
-    Success Package list downloaded.
-Downloading https://github.com/fowlmouth/nake using git
-       Tip: 2 messages have been suppressed, use --verbose to show them.
-     Error: 'git' not in PATH.
-Installed nake!
 
 # proc ensure_prenim() =
 #   try:
