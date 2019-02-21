@@ -1,5 +1,6 @@
 import nake
 import sequtils
+import times
 
 type
   BuildMode = enum
@@ -17,7 +18,7 @@ var
 when defined(windows):
   osname = "win"
   compiler = "c"
-  build_flags.add(@["-d:mingw", "--cpu:amd64"])
+  build_flags.add(@["-d:mingw", "--cpu:i386"])
   libname = "clib"/"win"/"buckets.lib"
 elif defined(macosx):
   osname = "mac"
@@ -27,6 +28,38 @@ else:
   osname = "linux"
   compiler = "cpp"
   libname = "clib"/"linux"/"libbuckets.a"
+
+proc olderThan(targets: seq[string], src: varargs[string]): bool {.raises: [OSError].} =
+  ## Returns true if any ``src`` is newer than the oldest ``targets``.
+  ##
+  ## .. code-block:: nimrod
+  ##   import nake, os
+  ##
+  ##   let
+  ##     src = @["prog.nim", "prog2.nim"]
+  ##     dst = @["prog.out", "prog_stats.txt"]
+  ##   if dst.olderThan(src):
+  ##      echo "Refreshing ..."
+  ##      # do something to generate the outputs
+  ##   else:
+  ##      echo "All done!"
+  assert len(targets) > 0, "Pass some targets to check"
+  assert len(src) > 0, "Pass some source files to check"
+  var minTargetTime: float = -1
+  for target in targets:
+    try:
+      let targetTime = toSeconds(getLastModificationTime(target))
+      if minTargetTime == -1:
+        minTargetTime = targetTime
+      elif targetTime < minTargetTime:
+        minTargetTime = targetTime
+    except OSError:
+      return true
+
+  for s in src:
+    let srcTime = toSeconds(getLastModificationTime(s))
+    if srcTime > minTargetTime:
+      return true
 
 proc build() =
   runTask "node_modules"
@@ -93,5 +126,5 @@ task "js", "Build JS files":
   let
     ts_files = toSeq(walkDirRec("jssrc")).filterIt(it.endsWith(".ts"))
     js_files = ts_files.mapIt(it.replace(".ts", ".js").replace("jssrc"/"", "dist"/""))
-  if js_files.needsRefresh(ts_files):
+  if js_files.olderThan(ts_files):
     direShell "tsc"

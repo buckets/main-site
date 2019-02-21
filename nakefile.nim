@@ -2,7 +2,7 @@ import nake
 import times
 import sequtils
 
-proc needsRefresh(targets: seq[string], src: varargs[string]): bool {.raises: [OSError].} =
+proc olderThan(targets: seq[string], src: varargs[string]): bool {.raises: [OSError].} =
   ## Returns true if any ``src`` is newer than the oldest ``targets``.
   ##
   ## .. code-block:: nimrod
@@ -11,7 +11,7 @@ proc needsRefresh(targets: seq[string], src: varargs[string]): bool {.raises: [O
   ##   let
   ##     src = @["prog.nim", "prog2.nim"]
   ##     dst = @["prog.out", "prog_stats.txt"]
-  ##   if dst.needsRefresh(src):
+  ##   if dst.olderThan(src):
   ##      echo "Refreshing ..."
   ##      # do something to generate the outputs
   ##   else:
@@ -111,7 +111,7 @@ task "core-js", "Generate core/ JS files":
     ts_files = toSeq(walkDirRec("core"/"src")).filterIt(it.endsWith(".ts"))
     js_files = ts_files.mapIt(it.replace(".ts", ".js").replace("src"/"", "dist"/""))
 
-  if js_files.needsRefresh(ts_files):
+  if js_files.olderThan(ts_files):
     withDir("core"):
       direShell "tsc"
 
@@ -142,7 +142,7 @@ task "app-js", "Generate app/ JS files":
     ts_files = toSeq(walkDirRec("app"/"src")).filterIt(it.endsWith(".ts") or it.endsWith(".tsx"))
     js_files = ts_files.mapIt(it.replace(".tsx", ".js").replace(".ts", ".js"))
 
-  if js_files.needsRefresh(ts_files):
+  if js_files.olderThan(ts_files):
     withDir("app"):
       direShell "tsc"
 

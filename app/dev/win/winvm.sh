@@ -117,7 +117,6 @@ do_create() {
     ensure_snapshot ncat admin
     ensure_snapshot node ncat
     ensure_snapshot buildtools node
-    ensure_snapshot nim buildtools
 }
 
 do_cmd() {
@@ -435,6 +434,12 @@ snapshot_admin() {
     echo "6. Click 'Apply'"
     echo "7. Enter password: ${WIN_PASS} and click 'OK'"
     echo "8. Click 'OK'"
+    echo
+    echo "Please disable UAC"
+    echo "1. Click the start orb"
+    echo "2. Type: UAC (then press enter)"
+    echo "3. Drag the slider all the way to the bottom"
+    echo "4. Click OK and confirm"
     echo
     echo "Please set the Administrator's password to '${ADMIN_PASS}' using the GUI"
     echo "1. Sign in w/ (if you haven't yet)"

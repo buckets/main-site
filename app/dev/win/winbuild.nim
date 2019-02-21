@@ -2,9 +2,12 @@ import strutils
 import os
 import nake
 
+const share = r"\\vboxsrv\project"
+
 type
   BuildType = enum
     Build,
+    CleanBuild,
     Publish,
 
 template loggedDireShell(args:varargs[string, `$`]):untyped =
@@ -13,7 +16,7 @@ template loggedDireShell(args:varargs[string, `$`]):untyped =
 
 template section(x:string):untyped =
   echo "--------------------------------------------------"
-  echo x
+  echo "  " & x
   echo "--------------------------------------------------"
 
 proc do_build(btype:BuildType) =
@@ -24,24 +27,34 @@ proc do_build(btype:BuildType) =
   removeDir("C:"/"proj"/"core"/"src")
   removeDir("C:"/"proj"/"core"/"migrations")
   removeDir("C:"/"proj"/"app"/"src")
-  direShell "xcopy", "y:"/"", "c:"/"proj", "/f", "/I", "/s", "/Y", "/EXCLUDE:" & "Y:"/"app"/"dev"/"win"/"copyexclude.txt"
+  createDir("C:"/"tmp")
+  echo "share: ", share
+  let copyexcludefile = r"\"&share/"app"/"dev"/"win"/"copyexclude.txt"
+  direShell "xcopy", share&"\\", "c:"/"proj", "/f", "/I", "/s", "/Y", "/EXCLUDE:"&copyexcludefile
 
-  section "node-gyp"
+  # section "node-gyp"
   loggedDireShell "npm", "config", "set", "msvs_version", "2015", "--global"
-  loggedDireShell "npm", "install", "-g", "node-gyp"
-  loggedDireShell "yarn", "global", "add", "node-gyp"
+  loggedDireShell "yarn", "config", "set", "msvs_version", "2015", "--global"
+  loggedDireShell "npm", "config", "set", "msvs_version", "2015"
+  loggedDireShell "yarn", "config", "set", "msvs_version", "2015"
+  # echo "Env"
+  # loggedDireShell "set"
+  # loggedDireShell "npm", "install", "-g", "node-gyp"
+  # loggedDireShell "yarn", "global", "add", "node-gyp"
 
   section "yarn mirror"
-  loggedDireShell "yarn", "config", "set", "yarn-offline-mirror", "y:"/"cache"/"yarnmirror"
+  loggedDireShell "yarn", "config", "set", "yarn-offline-mirror", r"\"&share/"cache"/"yarnmirror"
   loggedDireShell "yarn", "config", "set", "yarn-offline-mirror-pruning", "false"
+  loggedDireShell "npm", "config", "list"
   loggedDireShell "yarn", "config", "list"
 
-  section "nake"
-  loggedDireShell "nimble", "install", "-y", "nake"
+  # section "nake"
+  # loggedDireShell "nimble", "install", "-y", "nake"
 
   section "compile everything"
   withDir("C:"/"proj"):
-    loggedDireShell "nake", "deepclean"
+    if btype == CleanBuild:
+      loggedDireShell "nake", "deepclean"
     loggedDireShell "nake", "app"
   echo "done doing build"
 

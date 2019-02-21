@@ -1,7 +1,7 @@
 .PHONY: clean
 
 setupwin.exe: setupwin.nim tmp/mingw32.zip tmp/Git32.exe tmp/dlls.zip
-	nim c -d:mingw --cpu:amd64 -o:$@ setupwin.nim
+	nim c -d:mingw --cpu:i386 -o:$@ setupwin.nim
 
 tmp/mingw32.zip:
 	[ -f tmp/mingw32.7z ] || curl -o tmp/mingw32.7z "https://nim-lang.org/download/mingw32-6.3.0.7z"

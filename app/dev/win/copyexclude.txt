@@ -1,8 +1,12 @@
-node_modules\
 .dmg
 .git\
+bizdev\
+cache\
 dist\
 docs\
 iconwork\
-bizdev\
-cache\
+mobile\
+node_modules\
+staticweb\
+web\
+yarnmirror\

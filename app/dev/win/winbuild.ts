@@ -102,24 +102,24 @@ async function run(args:string[], opts:{
 //----------------------------------------------------------
 // doInstallBuildTools
 //----------------------------------------------------------
-async function doInstallBuildTools() {
-  await run(['npm', 'install', '--global', '--production', 'windows-build-tools', '--vs2015'], {
-    hideoutput: true,
-  })
-  await run(['yarn', 'global', 'add', 'windows-build-tools', '--vs2015'])
-  await run(['npm', 'config', 'list'])
-  await run(['md', 'C:\\Users\\IEUser\\.windows-build-tools'])
-  await run(['xcopy', 'C:\\Users\\Administrator\\.windows-build-tools', 'C:\\Users\\IEUser\\.windows-build-tools', '/s', '/f'])
-}
+// async function doInstallBuildTools() {
+//   await run(['npm', 'install', '--global', '--production', 'windows-build-tools', '--vs2015'], {
+//     hideoutput: true,
+//   })
+//   await run(['yarn', 'global', 'add', 'windows-build-tools', '--vs2015'])
+//   await run(['npm', 'config', 'list'])
+//   await run(['md', 'C:\\Users\\IEUser\\.windows-build-tools'])
+//   await run(['xcopy', 'C:\\Users\\Administrator\\.windows-build-tools', 'C:\\Users\\IEUser\\.windows-build-tools', '/s', '/f'])
+// }
 
 //----------------------------------------------------------
 // doInstallNodeGYP
 //----------------------------------------------------------
-async function doInstallNodeGYP() {
-  await run(['npm', 'config', 'set', 'msvs_version', '2015'])
-  await run(['npm', 'config', 'set', 'python', 'C:\\Users\\IEUser\\.windows-build-tools\\python27\\python.exe'])
-  await run(['npm', 'install', '-g', 'node-gyp'])
-}
+// async function doInstallNodeGYP() {
+//   await run(['npm', 'config', 'set', 'msvs_version', '2015'])
+//   await run(['npm', 'config', 'set', 'python', 'C:\\Users\\IEUser\\.windows-build-tools\\python27\\python.exe'])
+//   await run(['npm', 'install', '-g', 'node-gyp'])
+// }
 
 //----------------------------------------------------------
 // doBuild
@@ -239,14 +239,14 @@ async function main() {
   console.log('command', command);
   try {
     switch (command) {
-      case 'installbuildtools': {
-        doInstallBuildTools();
-        break;
-      }
-      case 'installnodegyp': {
-        doInstallNodeGYP();
-        break;
-      }
+      // case 'installbuildtools': {
+      //   doInstallBuildTools();
+      //   break;
+      // }
+      // case 'installnodegyp': {
+      //   doInstallNodeGYP();
+      //   break;
+      // }
       case 'build': {
         const subcommand = process.argv[3] || 'build';
         if (subcommand === 'publish'

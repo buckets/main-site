@@ -10,8 +10,19 @@
           "csrc",
           "inc",
       ],
-      "libraries": [
-        "<(module_root_dir)/clib/<(OS)/libbuckets.a"
+      "conditions": [
+        ['OS=="win"',
+          {
+            'libraries': [
+              "<(module_root_dir)/clib/<(OS)/buckets.lib",
+            ]
+          },
+          {
+            'libraries': [
+              "<(module_root_dir)/clib/<(OS)/libbuckets.a"
+            ],
+          },
+        ]
       ],
       'dependencies': [
         "<!(node -p \"require('node-addon-api').gyp\")"
