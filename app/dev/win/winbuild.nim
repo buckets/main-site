@@ -51,6 +51,11 @@ proc do_build(btype:BuildType) =
   # section "nake"
   # loggedDireShell "nimble", "install", "-y", "nake"
 
+  section "env"
+  loggedDireShell "set"
+  echo "path: "
+  echo getEnv("Path").split(";").join("\L")
+
   section "compile everything"
   withDir("C:"/"proj"):
     if btype == CleanBuild:
@@ -62,6 +67,6 @@ proc do_build(btype:BuildType) =
 
 if isMainModule:
   var btype = Build
-  if paramCount() >= 2:
+  if paramCount() >= 1:
     btype = parseEnum[BuildType](paramStr(1), Build)
   do_build(btype)

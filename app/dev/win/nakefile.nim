@@ -551,13 +551,10 @@ task "build-app", "Build the electron app":
   runTask "prep-build"
   withLogPrefix("[build-app]"):
     vm.ensure_signedin(win_user)
-    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "cleanbuild")
+    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "CleanBuild")
 
 task "rebuild-app", "Build the electron app without cleaning first":
   runTask "prep-build"
   withLogPrefix("[build-app]"):
     vm.ensure_signedin(win_user)
-    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "build")
-
-# MATT ADD THIS TO THE USER SETUP STEPS: https://www.top-password.com/blog/tag/disable-uac-from-command-line/
-
+    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Build")

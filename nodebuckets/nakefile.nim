@@ -17,8 +17,8 @@ var
 
 when defined(windows):
   osname = "win"
-  compiler = "c"
-  build_flags.add(@["-d:mingw", "--cpu:i386"])
+  compiler = "cpp"
+  build_flags.add(@["-d:mingw", "--cpu:i386", "--cc:vcc", "--verbosity:2"])
   libname = "clib"/"win"/"buckets.lib"
 elif defined(macosx):
   osname = "mac"
@@ -100,7 +100,10 @@ task "nodelib", "Build the .node file":
   runTask "staticlib"
   let target = "lib"/"bucketslib.node"
   if target.needsRefresh(@[libname, "binding.gyp", "jstonimbinding.cpp"]):
-    direShell "node-gyp", "rebuild"
+    when defined(windows):
+      direShell "node-gyp", "clean", "configure", "rebuild", "--arch=ia32", "--verbose"
+    else:
+      direShell "node-gyp", "clean", "configure", "rebuild", "--verbose"
 
 task "staticlib", "Build the static lib":
   let nim_src = toSeq(walkDirRec(".."/"ccore"/"src")).filterIt(it.endsWith(".nim"))

@@ -7,23 +7,25 @@
       ],
       "include_dirs": [
           "<!@(node -p \"require('node-addon-api').include\")",
-          "csrc",
-          "inc",
+          "<(module_root_dir)/csrc",
+          "<(module_root_dir)/inc",
       ],
-      "conditions": [
-        ['OS=="win"',
-          {
-            'libraries': [
-              "<(module_root_dir)/clib/<(OS)/buckets.lib",
-            ]
-          },
-          {
-            'libraries': [
-              "<(module_root_dir)/clib/<(OS)/libbuckets.a"
-            ],
-          },
-        ]
-      ],
+      "link_settings": {
+        "conditions": [
+          ['OS=="win"',
+            {
+              'libraries': [
+                "<(module_root_dir)\\clib\\<(OS)\\buckets.lib",
+              ]
+            },
+            {
+              'libraries': [
+                "<(module_root_dir)/clib/<(OS)/libbuckets.a"
+              ],
+            },
+          ]
+        ],
+      },
       'dependencies': [
         "<!(node -p \"require('node-addon-api').gyp\")"
       ],
@@ -39,8 +41,33 @@
         'CLANG_CXX_LIBRARY': 'libc++',
         'MACOSX_DEPLOYMENT_TARGET': '10.7',
       },
+      "msbuild_settings": {
+        "Link": {
+          "ImageHasSafeExceptionHandlers": "false"
+        }
+      },
+      "conditions": [
+        ['OS=="win"',
+          {
+            'cflags': [ "-m32" ],
+            'ldflags': [ "-m elf_i386" ],
+            'cflags_cc': [ "-fPIC -m32" ],
+          },
+        ]
+      ],
       'msvs_settings': {
-        'VCCLCompilerTool': { 'ExceptionHandling': 1 },
+        'VCCLCompilerTool': {
+          'ExceptionHandling': 1,
+          'RuntimeLibrary': 0,
+         },
+        # "VCLinkerTool": {
+        #   "LinkIncremental": 1,
+        #   "AdditionalLibraryDirectories": [
+        #     "<(module_root_dir)\\clib\\<(OS)",
+        #     "<(module_root_dir)\\csrc",
+        #     "<(module_root_dir)\\inc",
+        #   ]
+        # }
       },
     },
     {
@@ -50,7 +77,7 @@
       "copies": [
         {
           "files": ["<(PRODUCT_DIR)/bucketslib.node"],
-          "destination": "lib/",
+          "destination": "<(module_root_dir)/lib/",
         }
       ]
     }

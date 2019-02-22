@@ -1,6 +1,6 @@
 // When you edit/update methods in this file, update the type declaration in jssrc/main.ts accordingly.
 #include "napi.h"
-#include <clib.h>
+#include "clib.h"
 #include <iostream>
 using namespace std;
 using namespace Napi;

@@ -12,7 +12,15 @@ import sequtils
 import json
 import logging
 
-{.passC: "-fPIC" .}
+when not defined(windows):
+  {.passC: "-fPIC" .}
+
+# when defined(windows):
+#   {.emit: """
+# #if defined(__cplusplus) || defined(_MSC_VER)
+# extern "C" {
+# #endif
+#   """.}
 
 #-----------------------------------
 # String-returning helpers
@@ -58,31 +66,31 @@ template strres*(x:untyped):untyped =
 # C-friendly named Nim functions
 #-----------------------------------
 
-proc buckets_get_result_string*(p:pointer) {.exportc.} =
+proc buckets_get_result_string*(p:pointer) {.exportc,cdecl.} =
   ## Write the last result string to a location in memory
   assert HAS_LAST_STRING
   if LAST_STRING.len > 0:
     moveMem(p, LAST_STRING.cstring, LAST_STRING.len)
   HAS_LAST_STRING = false
 
-proc buckets_discard_result_string*() {.exportc.} =
+proc buckets_discard_result_string*() {.exportc,cdecl.} =
   ## Discard the last result string
   assert HAS_LAST_STRING
   LAST_STRING = ""
   HAS_LAST_STRING = false
 
-proc buckets_version*():csize {.exportc.} =
+proc buckets_version*():csize {.exportc,cdecl.} =
   ## Return the current buckets lib version
   return setReturnString(PACKAGE_VERSION)
 
-# proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc.} =
+# proc buckets_stringpc*(command:cstring, arg:cstring, arglen:int):cstring {.exportc,cdecl.} =
 #   ## String-based RPC interface
 #   var fullarg:string
 #   fullarg = newString(arglen)
 #   copyMem(fullarg[0].unsafeAddr, arg, arglen)
 #   result = stringRPC(cStringToString(command), fullarg)
 
-proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
+proc buckets_register_logger*(fn:LogFunc) {.exportc,cdecl.} =
   ## Register a function to receive logging events from Nim.
   ## The function will be called with strings to be logged.
   LOG_FUNCTIONS.add(fn)
@@ -91,7 +99,7 @@ proc buckets_register_logger*(fn:LogFunc) {.exportc.} =
     new(logger)
     addHandler(logger)
 
-proc buckets_openfile*(filename:cstring, filenameL:cint):cint {.exportc.} =
+proc buckets_openfile*(filename:cstring, filenameL:cint):cint {.exportc,cdecl.} =
   ## Open a budget file
   return openBudgetFile(cStringToString(filename, filenameL)).id.cint
 
@@ -136,7 +144,7 @@ proc json_to_params*(db:DbConn, query:string, params_json:string):seq[Param] =
   else:
     raise newException(CatchableError, "Invalid argument type for db params")
 
-proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_json:cstring, params_jsonL:cint):csize {.exportc.} =
+proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_json:cstring, params_jsonL:cint):csize {.exportc,cdecl.} =
   ## Perform a query and return the result as a JSON string
   ##    params_json should be a JSON-encoded array/object
   var
@@ -221,7 +229,7 @@ proc buckets_db_all_json*(budget_handle:int, query:cstring, queryL:cint, params_
 template buckets_db_all_json*(budget_handle:int, query:cstring, params_json:cstring):csize =
   buckets_db_all_json(budget_handle, query, query.len.cint, params_json, params_json.len.cint)
 
-proc buckets_db_run_json*(budget_handle:int, query:cstring, queryL:cint, params_json:cstring, params_jsonL:cint):csize {.exportc.} =
+proc buckets_db_run_json*(budget_handle:int, query:cstring, queryL:cint, params_json:cstring, params_jsonL:cint):csize {.exportc,cdecl.} =
   ## Perform a query and return any error/lastID as a JSON string.
   ##    params_json should be a JSON-encoded array/object
   var
@@ -263,7 +271,7 @@ proc jsonStringToStringSeq(jsonstring:string):seq[string] =
   for item in node.items:
     result.add(item.getStr())
 
-proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring, queries_jsonL:cint):csize {.exportc.} =
+proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring, queries_jsonL:cint):csize {.exportc,cdecl.} =
   ## Perform multiple queries and return an error as a string if there is one
   var
     queries_json = cStringToString(queries_json, queries_jsonL)
@@ -284,3 +292,12 @@ proc buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring, quer
 
 template buckets_db_execute_many_json*(budget_handle:int, queries_json:cstring):csize =
   buckets_db_execute_many_json(budget_handle, queries_json, queries_json.len.cint)
+
+
+
+# when defined(windows):
+#   {.emit: """
+# #if defined(__cplusplus) || defined(_MSC_VER)
+# }
+# #endif
+#   """.}

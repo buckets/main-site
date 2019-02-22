@@ -44,7 +44,8 @@ proc addToPathEnv*(e: string, regkey: HKEY) =
     raise newException(CatchableError, "Trying to add a bad PATH: " & e)
   var key = if regkey == HKEY_LOCAL_MACHINE: HKLM_ENV else: HKCU_ENV
   var p = tryGetUnicodeValue(key, "Path", regkey)
-  let x = if e.contains(Whitespace): "\"" & e & "\"" else: e
+  # let x = if e.contains(Whitespace): "\"" & e & "\"" else: e
+  let x = e
   if p.len > 0:
     p.add ";"
     p.add x
@@ -324,10 +325,18 @@ proc ensure_env() =
   discard run(@[findExe"yarn", "config", "set", "msvs_version", "2015", "--global"], dftEnv = true)
   discard run(@[findExe"npm", "config", "set", "msvs_version", "2015"], dftEnv = true)
   discard run(@[findExe"yarn", "config", "set", "msvs_version", "2015"], dftEnv = true)
+  addToPathEnv("C:"/"Program Files (x86)"/"Microsoft Visual Studio 14.0"/"VC"/"bin")
+  addToPathEnv("C:"/"Program Files (x86)"/"Microsoft Visual Studio 14.0"/"bin")
+  addToPathEnv("C:"/"Program Files (x86)"/"MSBuild"/"14.0"/"bin")
   discard run(@["setx", "PYTHON", "C:"/"Users"/"IEUser"/".windows-build-tools"/"python27"/"python.exe"])
   discard run(@["setx", "VCTargetsPath", "C:"/"Program Files (x86)"/"MSBuild"/"Microsoft.cpp"/"v4.0"/"v140"])
   discard run(@["setx", "ELECTRON_BUILDER_CACHE", "\\" & r"\vboxsrv\project"/"cache"/"electron-cache"])
   discard run(@["setx", "ELECTRON_CACHE", "\\" & r"\vboxsrv\project"/"cache"/"electron-cache"])
+  let config_dir = "C:"/"Users"/"IEUser"/"nim"
+#   createDir(config_dir)
+#   writeFile(config_dir/"nim.cfg", """
+# vcc.linkerexe = ""C:"/"Program Files (x86)"/"Microsoft Visual Studio 14.0"/"VC"/"bin"
+#   """)
 # proc ensure_prenim() =
 #   try:
 #     let output = runOutput(@["gcc", "--version"])
