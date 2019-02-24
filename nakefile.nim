@@ -129,7 +129,12 @@ const
 task "build-desktop", "Build a dev version of the app":
   runTask "desktop-js"
   withDir("app"):
-    direShell "build", "--win", "--x64", "--ia32"
+    when defined(windows):
+      direShell "build", "--win", "--x64", "--ia32"
+    elif defined(macosx):
+      direShell "build", "--mac"
+    else:
+      direShell "build", "--linux"
 
 task "app-lib", "Refresh app/ nodebuckets library":
   runTask "core-js"

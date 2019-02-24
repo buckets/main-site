@@ -18,7 +18,7 @@ var
 when defined(windows):
   osname = "win"
   compiler = "cpp"
-  build_flags.add(@["--compileOnly", "-d:mingw", "--cpu:i386", "--cc:vcc", "--verbosity:2"])
+  build_flags.add(@["--compileOnly", "--cpu:amd64", "--cc:vcc", "--verbosity:2"])
   libname = "clib"/"win"/"buckets.dll"
 elif defined(macosx):
   osname = "mac"
@@ -103,7 +103,7 @@ task "nodelib", "Build the .node file":
   let target = "lib"/"bucketslib.node"
   if target.needsRefresh(@[libname, "binding.gyp", "jstonimbinding.cpp"]):
     when defined(windows):
-      direShell "node-gyp", "clean", "configure", "rebuild", "--arch=ia32", "--verbose"
+      direShell "node-gyp", "clean", "configure", "rebuild", "--verbose"
     else:
       direShell "node-gyp", "clean", "configure", "rebuild", "--verbose"
 

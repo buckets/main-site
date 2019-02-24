@@ -13,7 +13,7 @@ import windows/registry
 const expected_sha = "a58f5b6023744da9f44e6ab8b1c748002b2bbcc0"
 # const gitSetupExe = slurp("tmp/Git-2.20.1-64-bit.exe")
 # const nimInstaller = slurp("tmp/nim-0.19.2_x32.zip")
-const mingwZip = slurp("tmp/mingw32.zip")
+const mingwZip = slurp("tmp/mingw64.zip")
 const gitExe = slurp("tmp/Git32.exe")
 const dllZip = slurp("tmp/dlls.zip")
 const nodemsi = slurp("tmp/node.msi")
@@ -268,10 +268,10 @@ proc ensure_gcc() =
       "powershell",
       "Expand-Archive",
       "C:"/"tmp"/"mingw.zip",
-      "C:"/"mingw32",
+      "C:"/"mingw64",
     ])
     removeFile("C:"/"tmp"/"mingw.zip")
-    addToPathEnv("C:"/"mingw32"/"mingw32"/"bin")
+    addToPathEnv("C:"/"mingw64"/"mingw64"/"bin")
     echo "Installed gcc!"
 
 proc ensure_nake() =
@@ -359,8 +359,8 @@ proc ensure_env() =
 #             "C:"/"basenim")
 #     withDir("C:"/"basenim"):
 #       runYes(@["finish.exe"])
-#     addToPathEnv("C:"/"basenim"/"dist"/"mingw32"/"bin")
-#     # discard run(@["setx", "PATH", "%PATH%;C:\\basenim\\dist\\mingw32\\bin", "/m"])
+#     addToPathEnv("C:"/"basenim"/"dist"/"mingw64"/"bin")
+#     # discard run(@["setx", "PATH", "%PATH%;C:\\basenim\\dist\\mingw64\\bin", "/m"])
 #     echo "Installed bootstrap Nim!"
 
 proc ensure_nim() =

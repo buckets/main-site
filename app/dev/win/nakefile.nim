@@ -340,9 +340,23 @@ task "vs-installer", "Fetch VS Installer":
     log &"Fetching {dst} ..."
     direShell "curl", "-L", VS_INSTALLER_URL, "-o", dst
 
+task "mingw-installer", "Fetch mingw64 installer":
+  let dst = "tmp"/"mingw64.zip"
+  if not fileExists(dst):
+    log &"Fetching {dst} ..."
+    direShell "curl", "-o", "tmp"/"mingw64.7z", "https://nim-lang.org/download/mingw64-6.3.0.7z"
+    withDir("tmp"):
+      direShell "7z", "x", "mingw64.7z"
+      direShell "zip", "-r", "mingw64.zip", "mingw64"
+      direShell "rm", "mingw64.7z"
+      removeDir("mingw64")
+
 task "setupwin.exe", "Build setupwin.exe":
   runTask "node.msi"
   runTask "yarn.msi"
+  runTask "vs-installer"
+  runTask "python.msi"
+  runTask "mingw-installer"
   withLogPrefix("[setupwin.exe]"):
     let deps = @[
       "setupwin.nim",
@@ -470,8 +484,6 @@ task "snap-buildtools", "Install build tools on vm":
   let snapshots = vm.snapshots()
   if not ("buildtools" in snapshots):
     withLogPrefix("[snap-buildtools]"):
-      runTask "python.msi"
-      runTask "vs-installer"  
       runTask "setupwin.exe"
       ensure_project_mount()
       vm.ensure_signedin(win_user)
