@@ -10,7 +10,7 @@ var
   mode:BuildMode = Release
 
 var
-  build_flags:seq[string] = @["--app:staticlib", "--header", "--nimcache:csrc", "--gc:regions"]
+  build_flags:seq[string] = @["--header", "--nimcache:csrc", "--gc:regions"]
   compiler:string
   osname:string
   libname:string
@@ -18,15 +18,17 @@ var
 when defined(windows):
   osname = "win"
   compiler = "cpp"
-  build_flags.add(@["-d:mingw", "--cpu:i386", "--cc:vcc", "--verbosity:2"])
-  libname = "clib"/"win"/"buckets.lib"
+  build_flags.add(@["--compileOnly", "-d:mingw", "--cpu:i386", "--cc:vcc", "--verbosity:2"])
+  libname = "clib"/"win"/"buckets.dll"
 elif defined(macosx):
   osname = "mac"
   compiler = "cpp"
+  build_flags.add(["--app:staticlib"])
   libname = "clib"/"mac"/"libbuckets.a"
 else:
   osname = "linux"
   compiler = "cpp"
+  build_flags.add(["--app:staticlib"])
   libname = "clib"/"linux"/"libbuckets.a"
 
 proc olderThan(targets: seq[string], src: varargs[string]): bool {.raises: [OSError].} =
@@ -121,9 +123,10 @@ task "staticlib", "Build the static lib":
     args.add(build_flags)
     args.add(".."/"ccore"/"src"/"buckets"/"clib.nim")
     direShell args
-    let todelete = toSeq(walkDirRec("csrc")).filterIt(it.endsWith(".o") or it.endsWith(".cpp") or it.endsWith(".c"))
-    for filename in todelete:
-      removeFile(filename)
+    when not defined(windows):
+      let todelete = toSeq(walkDirRec("csrc")).filterIt(it.endsWith(".o") or it.endsWith(".cpp") or it.endsWith(".c"))
+      for filename in todelete:
+        removeFile(filename)
 
 task "js", "Build JS files":
   let

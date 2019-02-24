@@ -8,6 +8,7 @@ type
   BuildType = enum
     Build,
     CleanBuild,
+    DeepCleanBuild,
     Publish,
 
 template loggedDireShell(args:varargs[string, `$`]):untyped =
@@ -58,9 +59,11 @@ proc do_build(btype:BuildType) =
 
   section "compile everything"
   withDir("C:"/"proj"):
-    if btype == CleanBuild:
+    if btype == DeepCleanBuild:
       loggedDireShell "nake", "deepclean"
-    loggedDireShell "nake", "app"
+    elif btype == CleanBuild:
+      loggedDireShell "nake", "clean"
+    loggedDireShell "nake", "build-desktop"
   echo "done doing build"
 
 

@@ -35,7 +35,7 @@ proc olderThan(targets: seq[string], src: varargs[string]): bool {.raises: [OSEr
       return true
 
 task "all", "Compile everything":
-  runTask "app-js"
+  runTask "desktop-js"
 
 task "clean", "Delete most intermediate files":
   withDir("nodebuckets"):
@@ -61,7 +61,7 @@ task "test", "Run all tests":
   runTask "ccore-test"
   runTask "nb-test"
   runTask "core-test"
-  runTask "app-test"
+  runTask "desktop-test"
 
 #------------------------------------------------------------
 # ccore/
@@ -126,8 +126,10 @@ task "core-test", "Run core/ tests":
 const
   APP_NB_LIB = "app"/"node_modules"/"bucketslib"/"lib"/"bucketslib.node"
 
-task "app", "Build everything needed for app to run":
-  runTask "app-js"
+task "build-desktop", "Build a dev version of the app":
+  runTask "desktop-js"
+  withDir("app"):
+    direShell "build", "--win", "--x64", "--ia32"
 
 task "app-lib", "Refresh app/ nodebuckets library":
   runTask "core-js"
@@ -136,7 +138,7 @@ task "app-lib", "Refresh app/ nodebuckets library":
       removeDir("node_modules"/"bucketslib")
       direShell "yarn", "add", "file:../core"
 
-task "app-js", "Generate app/ JS files":
+task "desktop-js", "Generate app/ JS files":
   runTask "app-lib"
   let
     ts_files = toSeq(walkDirRec("app"/"src")).filterIt(it.endsWith(".ts") or it.endsWith(".tsx"))
@@ -146,8 +148,8 @@ task "app-js", "Generate app/ JS files":
     withDir("app"):
       direShell "tsc"
 
-task "app-test", "Run app/ tests":
-  runTask "app-js"
+task "desktop-test", "Run app/ tests":
+  runTask "desktop-js"
   
   withDir("app"):
     direShell "yarn", "test"

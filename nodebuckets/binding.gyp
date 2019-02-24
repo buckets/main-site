@@ -2,30 +2,29 @@
   "targets": [
     {
       "target_name": "bucketslib",
-      "sources": [
-        "jstonimbinding.cpp",
+      "conditions": [
+        ['OS=="win"',
+          {
+            "sources": [
+              "<!@(node -p \"require('fs').readdirSync('./csrc').map(f=>'csrc/'+f).join(' ')\")",
+              "<(module_root_dir)/jstonimbinding.cpp",
+            ],
+          },
+          {
+            "sources": [
+              "<(module_root_dir)/jstonimbinding.cpp",
+            ],
+            "link_settings": {
+              "libraries": "<(module_root_dir)/clib/<(OS)/libbuckets.a",
+            }
+          }
+        ]
       ],
       "include_dirs": [
           "<!@(node -p \"require('node-addon-api').include\")",
           "<(module_root_dir)/csrc",
           "<(module_root_dir)/inc",
       ],
-      "link_settings": {
-        "conditions": [
-          ['OS=="win"',
-            {
-              'libraries': [
-                "<(module_root_dir)\\clib\\<(OS)\\buckets.lib",
-              ]
-            },
-            {
-              'libraries': [
-                "<(module_root_dir)/clib/<(OS)/libbuckets.a"
-              ],
-            },
-          ]
-        ],
-      },
       'dependencies': [
         "<!(node -p \"require('node-addon-api').gyp\")"
       ],
@@ -58,7 +57,7 @@
       'msvs_settings': {
         'VCCLCompilerTool': {
           'ExceptionHandling': 1,
-          'RuntimeLibrary': 0,
+          # 'RuntimeLibrary': 0,
          },
         # "VCLinkerTool": {
         #   "LinkIncremental": 1,
