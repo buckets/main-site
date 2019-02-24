@@ -10,30 +10,31 @@
           "<(module_root_dir)/csrc",
           "<(module_root_dir)/inc",
       ],
-      "link_settings": {
-        "conditions": [
-          ['OS=="win"',
-            {
+      "conditions": [
+        [
+          'OS=="win"',
+          {
+            "sources": [
+              "<!@(node -p \"require('fs').readdirSync('./csrc').map(f=>'csrc/'+f).join(' ')\")",
+            ],
+            "link_settings": {
               'libraries': [
                 "<(module_root_dir)\\clib\\<(OS)\\buckets.lib",
               ]
-            },
-            {
+            }
+          },
+          {
+            "link_settings": {
               'libraries': [
                 "<(module_root_dir)/clib/<(OS)/libbuckets.a"
               ],
-            },
-          ]
-        ],
-      },
+            }
+          },
+        ]
+      ],
       'dependencies': [
         "<!(node -p \"require('node-addon-api').gyp\")"
       ],
-      # "link_settings": {
-      #   "libraries": [
-      #     "<(module_root_dir)/lib/libbuckets.a",
-      #   ],
-      # },
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'xcode_settings': {
@@ -46,19 +47,19 @@
           "ImageHasSafeExceptionHandlers": "false"
         }
       },
-      "conditions": [
-        ['OS=="win"',
-          {
-            'cflags': [ "-m32" ],
-            'ldflags': [ "-m elf_i386" ],
-            'cflags_cc': [ "-fPIC -m32" ],
-          },
-        ]
-      ],
+      # "conditions": [
+      #   ['OS=="win"',
+      #     {
+      #       'cflags': [ "-m32" ],
+      #       'ldflags': [ "-m elf_i386" ],
+      #       'cflags_cc': [ "-fPIC -m32" ],
+      #     },
+      #   ]
+      # ],
       'msvs_settings': {
         'VCCLCompilerTool': {
           'ExceptionHandling': 1,
-          'RuntimeLibrary': 0,
+          # 'RuntimeLibrary': 0,
          },
         # "VCLinkerTool": {
         #   "LinkIncremental": 1,
