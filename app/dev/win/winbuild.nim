@@ -1,6 +1,6 @@
 import strutils
 import os
-import nake
+import nakelib
 
 const share = r"\\vboxsrv\project"
 

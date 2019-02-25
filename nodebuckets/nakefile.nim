@@ -10,7 +10,7 @@ var
   mode:BuildMode = Release
 
 var
-  build_flags:seq[string] = @["--header", "--nimcache:csrc", "--gc:regions"]
+  build_flags:seq[string] = @["--header", "--gc:regions"]
   compiler:string
   osname:string
   libname:string
@@ -18,7 +18,7 @@ var
 when defined(windows):
   osname = "win"
   compiler = "cpp"
-  build_flags.add(@["--compileOnly", "--cpu:amd64", "--cc:vcc", "--verbosity:2"])
+  build_flags.add(@["--compileOnly", "--cc:vcc", "--verbosity:2"])
   libname = "clib"/"win"/"buckets.dll"
 elif defined(macosx):
   osname = "mac"
@@ -103,7 +103,8 @@ task "nodelib", "Build the .node file":
   let target = "lib"/"bucketslib.node"
   if target.needsRefresh(@[libname, "binding.gyp", "jstonimbinding.cpp"]):
     when defined(windows):
-      direShell "node-gyp", "clean", "configure", "rebuild", "--verbose"
+      direShell "node-gyp", "clean", "configure", "rebuild", "--arch=ia32", "--verbose"
+      direShell "node-gyp", "clean", "configure", "rebuild", "--arch=x64", "--verbose"
     else:
       direShell "node-gyp", "clean", "configure", "rebuild", "--verbose"
 
@@ -121,9 +122,24 @@ task "staticlib", "Build the static lib":
   if libname.needsRefresh(nim_src):
     var args = @[nimExe, compiler, "-o:"&libname]
     args.add(build_flags)
-    args.add(".."/"ccore"/"src"/"buckets"/"clib.nim")
-    direShell args
-    when not defined(windows):
+    when defined(windows):
+      # 64bit
+      var args64 = args
+      args64.add("--cpu:amd64")
+      args64.add("--nimcache:csrc64")
+      args64.add(".."/"ccore"/"src"/"buckets"/"clib.nim")
+      echo "64 bit args: ", args64
+      direShell args64
+      var args32 = args
+      args32.add("--cpu:i386")
+      args32.add("--nimcache:csrc32")
+      args32.add(".."/"ccore"/"src"/"buckets"/"clib.nim")
+      echo "32 bit args: ", args32
+      direShell args32
+    else:
+      args.add("--nimcache:csrc")
+      args.add(".."/"ccore"/"src"/"buckets"/"clib.nim")
+      direShell args
       let todelete = toSeq(walkDirRec("csrc")).filterIt(it.endsWith(".o") or it.endsWith(".cpp") or it.endsWith(".c"))
       for filename in todelete:
         removeFile(filename)
