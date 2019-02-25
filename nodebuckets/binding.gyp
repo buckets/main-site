@@ -7,28 +7,40 @@
       ],
       "include_dirs": [
           "<!@(node -p \"require('node-addon-api').include\")",
-          "<(module_root_dir)/csrc",
+          # "<(module_root_dir)/csrc",
           "<(module_root_dir)/inc",
       ],
       "conditions": [
         [
-          'OS=="win"',
+          'OS=="win" and target_arch == "ia32"',
           {
             "sources": [
-              "<!@(node -p \"require('fs').readdirSync('./csrc').map(f=>'csrc/'+f).join(' ')\")",
+              "<!@(node -p \"require('fs').readdirSync('./csrc32').map(f=>'csrc32/'+f).join(' ')\")",
             ],
-            "link_settings": {
-              'libraries': [
-                "<(module_root_dir)\\clib\\<(OS)\\buckets.lib",
-              ]
-            }
+            "include_dirs": [
+              "<(module_root_dir)/csrc32",
+            ],
+            'cflags_cc': [ "-fPIC" ],
+          },
+          'OS=="win" and target_arch == "x64"',
+          {
+            "sources": [
+              "<!@(node -p \"require('fs').readdirSync('./csrc64').map(f=>'csrc64/'+f).join(' ')\")",
+            ],
+            "include_dirs": [
+              "<(module_root_dir)/csrc64",
+            ],
+            'cflags_cc': [ "-fPIC" ],
           },
           {
             "link_settings": {
               'libraries': [
                 "<(module_root_dir)/clib/<(OS)/libbuckets.a"
               ],
-            }
+            },
+            "include_dirs": [
+              "<(module_root_dir)/csrc",
+            ],
           },
         ]
       ],

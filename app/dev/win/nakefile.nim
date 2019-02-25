@@ -9,7 +9,7 @@ import terminal
 
 const
   YARN_MSI_URL = "https://yarnpkg.com/latest.msi"
-  NODE_MSI_URL = "https://nodejs.org/dist/v11.8.0/node-v11.8.0-x86.msi"
+  NODE_MSI_URL = "https://nodejs.org/dist/v11.8.0/node-v11.8.0-x64.msi"
   PYTHON_MSI_URL = "https://www.python.org/ftp/python/2.7.15/python-2.7.15.msi"
   VS_INSTALLER_URL = "https://download.microsoft.com/download/5/f/7/5f7acaeb-8363-451f-9425-68a90f98b238/visualcppbuildtools_full.exe"
 
@@ -70,6 +70,21 @@ template log(x:varargs[untyped]) =
   for i in log_prefix:
     stdout.write(i & " ")
   echo x
+
+template withSigningCerts(body:untyped):untyped =
+  try:
+    let
+      csc_link = getEnv("CSC_LINK", "")
+      csc_key_password = getEnv("CSC_KEY_PASSWORD", "")
+    if csc_link != "" and csc_key_password != "":
+      log "Preparing code signing certificate ..."
+      writeFile(project_dir/"csc_link.p12", csc_link.encode())
+      writeFile(project_dir/"csc_key_password.txt", csc_key_password)
+    body
+  finally:
+    log "Removing code signing certificate ..."
+    removeFile(project_dir/"csc_link.p12")
+    removeFile(project_dir/"csc_key_password.txt")
 
 #--------------------------------------------------------
 # output commands
@@ -340,9 +355,23 @@ task "vs-installer", "Fetch VS Installer":
     log &"Fetching {dst} ..."
     direShell "curl", "-L", VS_INSTALLER_URL, "-o", dst
 
+task "mingw-installer", "Fetch mingw64 installer":
+  let dst = "tmp"/"mingw64.zip"
+  if not fileExists(dst):
+    log &"Fetching {dst} ..."
+    direShell "curl", "-o", "tmp"/"mingw64.7z", "https://nim-lang.org/download/mingw64-6.3.0.7z"
+    withDir("tmp"):
+      direShell "7z", "x", "mingw64.7z"
+      direShell "zip", "-r", "mingw64.zip", "mingw64"
+      direShell "rm", "mingw64.7z"
+      removeDir("mingw64")
+
 task "setupwin.exe", "Build setupwin.exe":
   runTask "node.msi"
   runTask "yarn.msi"
+  runTask "vs-installer"
+  runTask "python.msi"
+  runTask "mingw-installer"
   withLogPrefix("[setupwin.exe]"):
     let deps = @[
       "setupwin.nim",
@@ -470,8 +499,6 @@ task "snap-buildtools", "Install build tools on vm":
   let snapshots = vm.snapshots()
   if not ("buildtools" in snapshots):
     withLogPrefix("[snap-buildtools]"):
-      runTask "python.msi"
-      runTask "vs-installer"  
       runTask "setupwin.exe"
       ensure_project_mount()
       vm.ensure_signedin(win_user)
@@ -530,31 +557,18 @@ task "test", "Test":
 task "prep-build", "Prepare for building":
   withLogPrefix("[prep-build]"):
     runTask "create"
-    try:
-      let
-        csc_link = getEnv("CSC_LINK", "")
-        csc_key_password = getEnv("CSC_KEY_PASSWORD", "")
-      if csc_link != "" and csc_key_password != "":
-        log "Preparing code signing certificate ..."
-        writeFile(project_dir/"csc_link.p12", csc_link.encode())
-        writeFile(project_dir/"csc_key_password.txt", csc_key_password)
-      runTask "winbuild.exe"
-
-      vm.ensure_signedin(win_user)
-      ensure_project_mount()
-    finally:
-      log "Removing code signing certificate ..."
-      removeFile(project_dir/"csc_link.p12")
-      removeFile(project_dir/"csc_key_password.txt")
+    runTask "winbuild.exe"
 
 task "build-app", "Build the electron app":
   runTask "prep-build"
   withLogPrefix("[build-app]"):
-    vm.ensure_signedin(win_user)
-    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "CleanBuild")
+    withSigningCerts:
+      vm.ensure_signedin(win_user)
+      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "CleanBuild")
 
 task "rebuild-app", "Build the electron app without cleaning first":
   runTask "prep-build"
   withLogPrefix("[build-app]"):
-    vm.ensure_signedin(win_user)
-    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Build")
+    withSigningCerts:
+      vm.ensure_signedin(win_user)
+      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Build")

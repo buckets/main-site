@@ -13,7 +13,7 @@ import windows/registry
 const expected_sha = "a58f5b6023744da9f44e6ab8b1c748002b2bbcc0"
 # const gitSetupExe = slurp("tmp/Git-2.20.1-64-bit.exe")
 # const nimInstaller = slurp("tmp/nim-0.19.2_x32.zip")
-const mingwZip = slurp("tmp/mingw32.zip")
+const mingwZip = slurp("tmp/mingw64.zip")
 const gitExe = slurp("tmp/Git32.exe")
 const dllZip = slurp("tmp/dlls.zip")
 const nodemsi = slurp("tmp/node.msi")
@@ -83,24 +83,6 @@ proc run(args:seq[string], dftEnv:bool = false, stdintext:string = ""): int =
   result = p.waitForExit
   close(p)
 
-# proc runYes(args:seq[string]) =
-#   echo "yes > ", args.join(" ")
-#   refreshPath()
-#   var p = startProcess(args[0],
-#     args = args[1..^1],
-#     env = penv,
-#     options = { poStdErrToStdOut, poUsePath, poEvalCommand })
-#   var outp = outputStream(p)
-#   var inp = inputStream(p)
-#   inp.write("y\r\Ly\r\Ly\r\Ly\r\Ly\r\Ly\r\L")
-#   var line = newStringOfCap(200).TaintedString
-#   while true:
-#     if outp.readLine(line):
-#       echo line
-#     else:
-#       if peekExitCode(p) != -1:
-#         break
-#   close(p)
 
 proc runOutput(args:seq[string], dftEnv:bool = false): TaintedString =
   echo "capture > ", args.join(" ")
@@ -199,47 +181,9 @@ proc ensure_buildtools() =
     let installeropt = "--offline-installers=\"\\\\vboxsrv\\project\\app\\dev\\win\\tmp\""
     writeFile("installbuildtools.bat", @[
       "@echo on",
-      # r"set APPDATA=C:\Users\IEUser\AppData\Roaming",
-      # r"call npm config set prefix C:\Users\IEUser\AppData\Roaming\npm",
-      # r"set USERNAME=IEUser",
-      # r"set USERPROFILE=C:\Users\IEUser",
-      # "echo USERNAME = %USERNAME%",
-      # "echo USERPROFILE = %USERPROFILE%",
-      # "echo APPDATA = %APPDATA%",
       &"call npm install --global --production windows-build-tools --vs2015 {installeropt}",
-      # &"call yarn global add windows-build-tools --vs2015 {installeropt}",
-      # r"md C:\Users\IEUser\.windows-build-tools",
-      # r"xcopy C:\Users\Administrator\.windows-build-tools C:\Users\IEUser\.windows-build-tools /s /f",
-      # r"call npm config set msvs_version 2015 --global",
-      # r"call yarn config set msvs_version 2015 --global",
       ].join("\r\L"))
     discard run(@["psexec", "-h", "-u", "IEUser", "-p", "Passw0rd!", "C:"/"tmp"/"installbuildtools.bat"])
-  # discard run(@["cmdkey", r"/add:MSEDGEWIN10", r"/user:MSEDGEWIN10\Administrator", "/pass:admin"])
-  # discard run(@["cmdkey", r"/add:Domain:interactive=MSEDGEWIN10\Administrator", r"/user:MSEDGEWIN10\Administrator", "/pass:admin"])
-  # discard run(@["cmdkey", "/list"])
-  
-  # echo "Running echo with runas"
-  # discard run(@["runas", "/savecred", "/user:Administrator", "cmd /c \"echo hello\""])
-  # discard run(@["cmdkey", "/list"])
-  
-
-  # Installing as a non admin https://www.npmjs.com/package/windows-build-tools#installing-as-a-non-administrator
-  # penv["APPDATA"] = "C:"/"Users"/"IEUser"/"AppData"/"Roaming"
-  # discard run(@[npm, "config", "set", "prefix", "C:"/"Users"/"IEUser"/"AppData"/"Roaming"/"npm"])
-  # penv["USERNAME"] = "IEUser"
-  # penv["USERPROFILE"] = "C:"/"Users"/"IEUser"
-  # refreshPath()
-  # echo "penv path: ", penv["Path"]
-  # echo "Set penv to:"
-  # echo $penv
-
-  # discard run(@["runas", "/savecred", "/user:Administrator", "npm --vs2015 install --global --production windows-build-tools"], dftEnv = true)
-  # discard run(@["runas", "/savecred", "/user:Administrator","yarn global add windows-build-tools --vs2015"], dftEnv = true)
-  # discard run(@[npm, "config", "list"])
-  # # discard run(@[findExe("mkdir"), "C:"/"Users"/"IEUser"/".windows-build-tools"], dftEnv = true)
-  # # echo "USERPROFILE=", runOutput(@[findExe"echo", "%USERPROFILE%"])
-  # # discard run(@[findExe("xcopy"), "C:"/"Users"/"Administrator"/".windows-build-tools", "C:"/"Users"/"IEUser"/".windows-build-tools", "/s", "/f"], dftEnv = true)
-  # echo "Maybe installed buildtools?"
 
 proc ensure_gitFromLocal() =
   try:
@@ -268,10 +212,10 @@ proc ensure_gcc() =
       "powershell",
       "Expand-Archive",
       "C:"/"tmp"/"mingw.zip",
-      "C:"/"mingw32",
+      "C:"/"mingw64",
     ])
     removeFile("C:"/"tmp"/"mingw.zip")
-    addToPathEnv("C:"/"mingw32"/"mingw32"/"bin")
+    addToPathEnv("C:"/"mingw64"/"mingw64"/"bin")
     echo "Installed gcc!"
 
 proc ensure_nake() =
@@ -316,8 +260,6 @@ proc ensure_nodegyp() =
     addToPathEnv(yarn_global_bin)
     addToPathEnv(yarn_bin)
     addToPathEnv("."/"node_modules"/".bin"/"")
-    # addToPathEnv(r"C:\Program Files (x86)\Yarn\bin\")
-    # addToPathEnv(r"C:\Users\IEUser\AppData\Roaming\npm")
     echo "Installed node-gyp!"
 
 proc ensure_env() =
@@ -332,36 +274,6 @@ proc ensure_env() =
   discard run(@["setx", "VCTargetsPath", "C:"/"Program Files (x86)"/"MSBuild"/"Microsoft.cpp"/"v4.0"/"v140"])
   discard run(@["setx", "ELECTRON_BUILDER_CACHE", "\\" & r"\vboxsrv\project"/"cache"/"electron-cache"])
   discard run(@["setx", "ELECTRON_CACHE", "\\" & r"\vboxsrv\project"/"cache"/"electron-cache"])
-  let config_dir = "C:"/"Users"/"IEUser"/"nim"
-#   createDir(config_dir)
-#   writeFile(config_dir/"nim.cfg", """
-# vcc.linkerexe = ""C:"/"Program Files (x86)"/"Microsoft Visual Studio 14.0"/"VC"/"bin"
-#   """)
-# proc ensure_prenim() =
-#   try:
-#     let output = runOutput(@["gcc", "--version"])
-#     echo output
-#   except:
-#     createDir("C:\\niminstaller")
-#     withDir("C:\\niminstaller"):
-#       writeFile("nim.zip", nimInstaller)
-#       if dirExists("unzipped"):
-#         removeDir("unzipped")
-#       discard run(@[
-#         "powershell",
-#         "Expand-Archive",
-#         "nim.zip",
-#         "unzipped",
-#       ])
-#     if dirExists("C:"/"basenim"):
-#       removeDir("C:"/"basenim")
-#     moveDir("C:"/"niminstaller"/"unzipped"/"nim-0.19.2",
-#             "C:"/"basenim")
-#     withDir("C:"/"basenim"):
-#       runYes(@["finish.exe"])
-#     addToPathEnv("C:"/"basenim"/"dist"/"mingw32"/"bin")
-#     # discard run(@["setx", "PATH", "%PATH%;C:\\basenim\\dist\\mingw32\\bin", "/m"])
-#     echo "Installed bootstrap Nim!"
 
 proc ensure_nim() =
   try:
@@ -382,7 +294,7 @@ proc ensure_nim() =
         discard run(@["git", "clone", "--depth", "1", "https://github.com/nim-lang/csources.git"])
       if not fileExists("bin"/"nim.exe"):
         withDir("C:"/"nim"/"csources"):
-          discard run(@["build.bat"], dftEnv = true)
+          discard run(@["build64.bat"], dftEnv = true)
       discard run(@["bin"/"nim", "c", "koch"], dftEnv = true)
       discard run(@["koch.exe", "boot", "-d:release"], dftEnv = true)
       discard run(@["koch.exe", "tools"], dftEnv = true)
