@@ -32,7 +32,7 @@
     "@types/mathjs": "^0.0.39",
     "@types/node": "^10.3.1",
     "cross-env": "^5.1.4",
-    "tap": "^12.5.2",
+    "tap": "^12.5.3",
     "tmatch": "^4.0.0",
     "typescript": "^3.2.1"
   }

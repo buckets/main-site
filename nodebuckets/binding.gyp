@@ -32,6 +32,18 @@
             ],
             'cflags_cc': [ "-fPIC" ],
           },
+          # 'OS=="linux"',
+          # {
+          #   "link_settings": {
+          #     'libraries': [
+          #       "<(module_root_dir)/clib/<(OS)/libbuckets.a"
+          #       "libpthread",
+          #     ],
+          #   },
+          #   "include_dirs": [
+          #     "<(module_root_dir)/csrc",
+          #   ],
+          # },
           {
             "link_settings": {
               'libraries': [

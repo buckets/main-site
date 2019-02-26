@@ -572,3 +572,17 @@ task "rebuild-app", "Build the electron app without cleaning first":
     withSigningCerts:
       vm.ensure_signedin(win_user)
       vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Build")
+
+task "publish", "Publish electron app":
+  runTask "prep-build"
+  withLogPrefix("[publish]"):
+    withSigningCerts:
+      vm.ensure_signedin(win_user)
+      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Publish")
+
+task "publish-beta", "Publish electron app":
+  runTask "prep-build"
+  withLogPrefix("[publish-beta]"):
+    withSigningCerts:
+      vm.ensure_signedin(win_user)
+      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "PublishBeta")

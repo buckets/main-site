@@ -49,71 +49,6 @@
     "triplesec": "3.0.26",
     "uuid": "^3.0.1"
   },
-  "build": {
-    "appId": "com.github.buckets.application",
-    "mac": {
-      "category": "public.app-category.finance",
-      "target": [
-        "zip",
-        "dmg"
-      ]
-    },
-    "win": {
-      "rfc3161TimeStampServer": "http://sha256timestamp.ws.symantec.com/sha256/timestamp"
-    },
-    "dmg": {
-      "icon": "build/dmg.icns"
-    },
-    "nsis": {
-      "perMachine": true
-    },
-    "linux": {
-      "category": "Finance",
-      "target": [
-        "tar.gz",
-        "deb",
-        "AppImage"
-      ]
-    },
-    "fileAssociations": [
-      {
-        "ext": "buckets",
-        "role": "Editor",
-        "icon": "build/doc.icns"
-      }
-    ],
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "buckets",
-        "repo": "application"
-      }
-    ],
-    "files": [
-      "!**/*.c",
-      "!**/*.cpp",
-      "!**/*.h",
-      "!**/*.ts",
-      "!**/*.tsx",
-      "!*.sh",
-      "!.dockerignore",
-      "!.nyc_output",
-      "!.taprc",
-      "!buckets.sublime-*",
-      "!coverage${/*}",
-      "!dev${/*}",
-      "!devdocs${/*}",
-      "!mocha.opts",
-      "!node_modules/buckets-core/node_modules/bucketslib/build",
-      "!node_modules/buckets-core/node_modules/bucketslib/csrc",
-      "!nodesrc${/*}",
-      "!README.md",
-      "!test${/*}",
-      "!TODO",
-      "!tsconfig.json",
-      "!watchtest.js"
-    ]
-  },
   "devDependencies": {
     "@types/bluebird": "^3.5.5",
     "@types/chai": "^4.0.0",
@@ -142,7 +77,7 @@
     "electron": "^3.0.10",
     "electron-builder": "^20.38.2",
     "http-server": "^0.10.0",
-    "tap": "^12.5.2",
+    "tap": "^12.5.3",
     "ts-node": "3.0.6",
     "typescript": "^3.2.1",
     "watch": "^1.0.2"

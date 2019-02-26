@@ -14,8 +14,9 @@ RUN git clone https://github.com/nim-lang/Nim.git /nim
 WORKDIR /nim
 RUN git checkout a58f5b6023744da9f44e6ab8b1c748002b2bbcc0
 RUN sh build_all.sh
-ENV PATH="${PATH}:/nim/bin"
-ENV PATH="${PATH}:node_modules/.bin"
+ENV PATH="${PATH}:/nim/bin:/root/.nimble/bin"
+RUN nimble install nake -y
+
 
 #-----------------------------------
 # configure npm and yarn
@@ -24,6 +25,7 @@ ENV PATH="${PATH}:node_modules/.bin"
 RUN npm i -g node-gyp
 RUN yarn config set yarn-offline-mirror /proj/cache/yarnmirror
 RUN yarn cache clean
+ENV PATH="${PATH}:node_modules/.bin"
 
 
 

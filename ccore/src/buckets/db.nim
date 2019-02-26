@@ -22,6 +22,10 @@
 {.passC: "-D SQLITE_THREADSAFE=2" .}
 {.passC: "-D SQLITE_ENABLE_COLUMN_METADATA" .}
 
+when defined(linux):
+  {.passC: "-lpthread" .}
+  {.passL: "-lpthread" .}
+
 # {.passC: "-D SQLITE_THREADSAFE=1" .}
 # {.passC: "-D SQLITE_ENABLE_FTS3" .}
 # {.passC: "-D SQLITE_ENABLE_FTS4" .}

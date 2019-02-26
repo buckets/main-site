@@ -8,7 +8,11 @@ CMD="$1"
 ARGS=""
 
 if [ "$CMD" == "publish" ]; then
-    ARGS="--env GH_TOKEN=$GH_TOKEN"
+    ARGS="--env GH_TOKEN=$GH_TOKEN --env ACTION=publish"
+elif [ "$CMD" == "publish-beta" ]; then
+    ARGS="--env GH_TOKEN=$GH_TOKEN --env ACTION=publish-beta"
+else
+    ARGS="--env ACTION=build"
 fi
 
 docker-clean -i -c
