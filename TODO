@@ -1,21 +1,4 @@
- ☐ Linux can't find module "bucketslib" (maybe mac can't either?) mainprocess/main.js:29 line3 line9 line 230
-
-Traceback (most recent call last)
-clib.nim(207)            buckets_db_run_json
-clib.nim(119)            json_to_params
-json.nim(835)            parseJson
-json.nim(828)            parseJson
-parsejson.nim(119)       close
-lexbase.nim(50)          close
-streams.nim(66)          close
-SIGSEGV: Illegal storage access. (Attempt to read from nil?)
-
-
- Traceback (most recent call last)
- clib.nim(250)            buckets_db_execute_many_json index out of bounds: (i:0) <= (n:-1)
-
- ☐ Branch tofix-error1
-
- db_all_arrays Invalid JSON string: {"err":"","cols":["cid","name","type","notnull","dflt_value","pk"],"rows":[["0","id","INTEGER","0","",null],,,["3","notes","TEXT","0","''","0"],["4","balance","INTEGER","0","0","0"],["5","kicked","TINYINT","0","0","0"],["6","group_id","INTEGER","0","NULL","0"],["7","ranking","TEXT","0","''","0"],["8","kind","TEXT","0","''","0"],["9","goal","INTEGER","0","","0"],["10","end_date","DATE","0","","0"],["11","deposit","INTEGER","0","","0"],["\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000","\u0000\u0000\u0000\u0000"],[]],"types":["Int","Text","Text","Int","Null","Int"]}
-# Subtest: deleteTransactions linked bucket transactions
-    not ok 1 - Unexpected token , in JSON at position 108
+ ☐ macOS signing on beta
+ ☐ windows publish beta
+ ☐ linux publish beta
+ 

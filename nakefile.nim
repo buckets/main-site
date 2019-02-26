@@ -35,6 +35,8 @@ proc olderThan(targets: seq[string], src: varargs[string]): bool {.raises: [OSEr
     if srcTime > minTargetTime:
       return true
 
+let PROJECT_ROOT = currentSourcePath().parentDir()
+
 task "all", "Compile everything":
   runTask "desktop-js"
 
@@ -178,7 +180,7 @@ template assertGitHubToken():untyped =
 
 task "build-desktop", "Build Buckets for the current OS":
   runTask "desktop-js"
-  withDir("app"):
+  withDir(PROJECT_ROOT/"app"):
     when defined(windows):
       direShell "build", "--config", electronConfigFile, "--win", "--x64", "--ia32"
     elif defined(macosx):
@@ -194,92 +196,54 @@ task "build-desktop-beta", "Build Buckets Beta for the current OS":
 #-------------------------------------------------------
 # desktop publishing
 #-------------------------------------------------------
-task "publish-desktop-mac", "Publish macOS Buckets":
-  assertGitHubToken()
-  withDir("app"):
-    echo "building for mac..."
-    direShell "node_modules"/".bin"/"build", "--mac", "-p", "always", "--config", electronConfigFile
-  
-  # Assert that the build worked
-  let
-    name = appName()
-    v = currentDesktopVersion()
-  withDir("app"/"dist"):
-    assert fileExists(&"{name}-{v}.dmg")
-    assert fileExists(&"{name}-{v}-mac.zip")
-
-task "publish-desktop-mac-beta", "Publish macOS Buckets Beta":
-  doBeta()
-  runTask "publish-desktop-mac"
-
-task "publish-desktop-linux", "Publish Linux Buckets":
-  assertGitHubToken()
-  when defined(linux) or defined(macosx):
-    when defined(linux):
-      echo "on linux XXX"
-    elif defined(macosx):
-      withDir("app"):
-        let cmd = if BUILD_BETA: "publish-beta" else: "publish"
-        direShell "dev"/"linux"/"linux_build.sh", cmd
-    # Assert that the build worked
-    let
-      name = appName()
-      v = currentDesktopVersion()
-    withDir("app"/"dist"):
-      assert fileExists(&"{name}_{v}_amd64.deb")
-      assert fileExists(&"{name}-{v}.tar.gz")
-      assert fileExists(&"{name} {v}.AppImage")
-  else:
-    raise newException(CatchableError, "Unsupported platform for building Linux app")
-
-task "publish-desktop-linux-beta", "Publish Linux Buckets Beta":
-  doBeta()
-  runTask "publish-desktop-linux"
-
-task "publish-desktop-windows", "Publish Windows Buckets":
-  assertGitHubToken()
-  when defined(windows) or defined(macosx):
-    when defined(windows):
-      echo "on windows XXX"
-    elif defined(macosx):
-      assert existsEnv("CSC_LINK"), "Define CSC_LINK"
-      assert existsEnv("CSC_KEY_PASSWORD"), "Define CSC_KEY_PASSWORD"
-      withDir("app"/"dev"/"win"):
-        let cmd = if BUILD_BETA: "publish-beta" else: "publish"
-        direShell "nake", cmd
-    # Assert that the build worked
-    let
-      name = appName()
-      v = currentDesktopVersion()
-    withDir("app"/"dist"):
-      assert fileExists(&"{name} Setup {v}.exe")
-  else:
-    raise newException(CatchableError, "Unsupported platform for building Windows app")
-
-task "publish-desktop-windows-beta", "Publish Windows Buckets Beta":
-  doBeta()
-  runTask "publish-desktop-windows"
-
 task "publish-desktop", "Publish Buckets for the current OS":
-  when defined(windows):
-    runTask "publish-desktop-windows"
-  elif defined(macosx):
-    runTask "publish-desktop-mac"
-  elif defined(linux):
-    runTask "publish-desktop-linux"
+  assertGitHubToken()
+  runTask "desktop-js"
+  withDir(PROJECT_ROOT/"app"):
+    when defined(windows):
+      direShell "build", "--config", electronConfigFile, "--win", "--x64", "--ia32", "-p", "always"
+    elif defined(macosx):
+      direShell "build", "--config", electronConfigFile, "--mac", "-p", "always"
+    else:
+      direShell "build", "--config", electronConfigFile, "--linux", "-p", "always"
 
 task "publish-desktop-beta", "Publish Buckets Beta for the current OS":
   doBeta()
   runTask "publish-desktop"
 
 when defined(macosx):
-  task "publish-all-desktop", "Publish Buckets (all operating systems)":
-    runTask "publish-desktop-mac"
+  task "publish-desktop-linux", "Publish Linux Buckets":
+    withDir(PROJECT_ROOT/"app"):
+      let cmd = if BUILD_BETA: "publish-beta" else: "publish"
+      direShell "dev"/"linux"/"linux_build.sh", cmd
+
+when defined(macosx):
+  task "publish-desktop-linux-beta", "Publish Linux Buckets Beta":
+    doBeta()
+    runTask "publish-desktop-linux"
+
+when defined(macosx):
+  task "publish-desktop-windows", "Publish Windows Buckets":
+    assertGitHubToken()
+    assert existsEnv("CSC_LINK"), "Define CSC_LINK"
+    assert existsEnv("CSC_KEY_PASSWORD"), "Define CSC_KEY_PASSWORD"
+    withDir(PROJECT_ROOT/"app"/"dev"/"win"):
+      let cmd = if BUILD_BETA: "publish-beta" else: "publish"
+      direShell "nake", cmd
+
+when defined(macosx):
+  task "publish-desktop-windows-beta", "Publish Windows Buckets Beta":
+    doBeta()
+    runTask "publish-desktop-windows"
+
+when defined(macosx):
+  task "publish-desktop-all", "Publish Buckets (all operating systems)":
+    runTask "publish-desktop"
     runTask "publish-desktop-linux"
     runTask "publish-desktop-windows"
 
 when defined(macosx):
-  task "publish-all-desktop-beta", "Publish Buckets Beta (all operating systems)":
+  task "publish-desktop-beta-all", "Publish Buckets Beta (all operating systems)":
     doBeta()
-    runTask "publish-all-desktop"
+    runTask "publish-desktop-all"
     

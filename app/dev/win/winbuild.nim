@@ -68,9 +68,9 @@ proc do_build(btype:BuildType) =
     of DeepCleanBuild, CleanBuild, Build:
       loggedDireShell "nake", "build-desktop"
     of Publish:
-      loggedDireShell "nake", "publish-desktop-windows"
+      loggedDireShell "nake", "publish-desktop"
     of PublishBeta:
-      loggedDireShell "nake", "publish-desktop-windows-beta"
+      loggedDireShell "nake", "publish-desktop-beta"
   echo "done doing build"
 
 

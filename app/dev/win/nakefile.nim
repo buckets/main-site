@@ -5,6 +5,7 @@ import re
 import strutils
 import strformat
 import base64
+import tables
 import terminal
 
 const
@@ -97,17 +98,27 @@ proc getOutput(cmd: varargs[string, `$`]): string =
 # helpers
 #--------------------------------------------------------
 
-proc gaCmdArgs(vm:VirtualMachine, args:varargs[string, `$`]):seq[string] =
+proc gaCmdArgs(vm:VirtualMachine, env:Table[string,string], args:varargs[string, `$`]):seq[string] =
   result = @["vboxmanage", "guestcontrol", vm, "run",
   "--username", win_user, "--password", win_pass,
-  "--unquoted-args", "--", "cmd.exe", "/c"]
+  "--unquoted-args"]
+  for key,val in env.pairs():
+    result.add(["--putenv", &"{key}={val}"])
+  result.add(["--", "cmd.exe", "/c"])
   result.add(args)
 
-proc gaCmd(vm:VirtualMachine, args:varargs[string, `$`]) =
+proc gaCmdArgs(vm:VirtualMachine, args:varargs[string, `$`]):seq[string] =
+  result = vm.gaCmdArgs(initTable[string,string](2), args = args)
+
+proc gaCmd(vm:VirtualMachine, env:Table[string,string], args:varargs[string, `$`]) =
+  ## Execute a guest additions command with environment variables
   ## Execute a guest additions command
-  let all_args = vm.gaCmdArgs(args)
+  let all_args = vm.gaCmdArgs(env, args = args)
   echo "VM IEUser> " & args.join(" ")
   shell(all_args)
+
+proc gaCmd(vm:VirtualMachine, args:varargs[string, `$`]) =
+  vm.gaCmd(initTable[string,string](2), args = args)
 
 proc gaDireCmd(vm:VirtualMachine, args:varargs[string, `$`]) =
   ## Execute a guest additions command
@@ -563,6 +574,7 @@ task "build-app", "Build the electron app":
   runTask "prep-build"
   withLogPrefix("[build-app]"):
     withSigningCerts:
+      ensure_project_mount()
       vm.ensure_signedin(win_user)
       vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "CleanBuild")
 
@@ -570,6 +582,7 @@ task "rebuild-app", "Build the electron app without cleaning first":
   runTask "prep-build"
   withLogPrefix("[build-app]"):
     withSigningCerts:
+      ensure_project_mount()
       vm.ensure_signedin(win_user)
       vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Build")
 
@@ -577,12 +590,14 @@ task "publish", "Publish electron app":
   runTask "prep-build"
   withLogPrefix("[publish]"):
     withSigningCerts:
+      ensure_project_mount()
       vm.ensure_signedin(win_user)
-      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Publish")
+      vm.gaCmd({"GH_TOKEN": getEnv("GH_TOKEN","")}.toTable(), r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Publish")
 
 task "publish-beta", "Publish electron app":
   runTask "prep-build"
   withLogPrefix("[publish-beta]"):
     withSigningCerts:
+      ensure_project_mount()
       vm.ensure_signedin(win_user)
-      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "PublishBeta")
+      vm.gaCmd({"GH_TOKEN": getEnv("GH_TOKEN","")}.toTable(), r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "PublishBeta")
