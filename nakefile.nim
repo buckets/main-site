@@ -136,7 +136,7 @@ task "build-desktop", "Build a dev version of the app":
     else:
       direShell "build", "--linux"
 
-task "app-lib", "Refresh app/ nodebuckets library":
+task "desktop-lib", "Refresh app/ nodebuckets library":
   runTask "core-js"
   if APP_NB_LIB.needsRefresh(CORE_NB_LIB):
     withDir("app"):
@@ -144,7 +144,7 @@ task "app-lib", "Refresh app/ nodebuckets library":
       direShell "yarn", "add", "file:../core"
 
 task "desktop-js", "Generate app/ JS files":
-  runTask "app-lib"
+  runTask "desktop-lib"
   let
     ts_files = toSeq(walkDirRec("app"/"src")).filterIt(it.endsWith(".ts") or it.endsWith(".tsx"))
     js_files = ts_files.mapIt(it.replace(".tsx", ".js").replace(".ts", ".js"))

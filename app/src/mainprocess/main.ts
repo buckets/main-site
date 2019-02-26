@@ -21,10 +21,6 @@ import { PSTATE, updateState } from './persistent'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
 import { registerBucketslibLogger } from 'buckets-core/dist/logging'
 
-registerBucketslibLogger((msg:string) => {
-  log.info(msg);
-});
-
 //----------------------------------------------------------
 // For deprecated triplesec encryption
 //----------------------------------------------------------
@@ -38,6 +34,12 @@ electron_log.transports.file.level = 'silly';
 electron_log.transports.file.maxSize = 5 * 1024 * 1024;
 
 const log = new PrefixLogger('(main)')
+const corelog = new PrefixLogger('(core)')
+
+registerBucketslibLogger((msg:string) => {
+  corelog.info(msg);
+});
+
 
 setTimezone(PSTATE.timezone || moment.tz.guess())
 

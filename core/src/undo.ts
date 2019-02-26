@@ -111,11 +111,12 @@ export class UndoTracker {
       'x_trigger_disabled',
     ])
     const all_tables = await this.store.query<{name:string}>(`SELECT name FROM sqlite_master WHERE type='table'`, {});
-    const sqls = await Promise.all(all_tables
+    const sql_arrays = await Promise.all(all_tables
     .map(x => x.name)
     .filter(table_name => !exclude_tables.has(table_name))
     .map(table_name => this.enableTableSQL(table_name)))
 
+    const sqls = [].concat(...sql_arrays);
     try {
       await this.store.db.executeMany(sqls)
     } catch(err) {
@@ -146,7 +147,7 @@ export class UndoTracker {
   async enableTableSQL(table_name:string) {
     const columns = Array.from(await this.store.query<SQLiteTableInfoRow>(`pragma table_info(${table_name})`, {}));
 
-    return `
+    return [`
       -- INSERT
       CREATE TEMP TRIGGER x_${table_name}_insert
       AFTER INSERT ON ${table_name}
@@ -157,9 +158,8 @@ export class UndoTracker {
             NEW.id,
             (SELECT direction FROM undo_status),
             'DELETE FROM ${table_name} WHERE rowid=' || NEW.rowid);
-      END;
-
-      -- UPDATE
+      END`,
+      `-- UPDATE
       CREATE TEMP TRIGGER x_${table_name}_update
       AFTER UPDATE ON ${table_name}
       BEGIN
@@ -171,9 +171,8 @@ export class UndoTracker {
             'UPDATE ${table_name} SET ${columns.map(col => {
             return `${col.name}='||quote(old.${col.name})||'`;
           }).join(',')} WHERE rowid='||old.rowid);
-      END;
-
-      -- DELETE
+      END`,
+      `-- DELETE
       CREATE TEMP TRIGGER x_${table_name}_delete
       BEFORE DELETE ON ${table_name}
       BEGIN
@@ -183,8 +182,8 @@ export class UndoTracker {
             OLD.id,
             (SELECT direction FROM undo_status),
             'INSERT INTO ${table_name} (rowid,${columns.map(col => col.name).join(',')}) VALUES ('||old.rowid||',${columns.map(col => `'||quote(old.${col.name})||'`).join(',')})');
-      END;
-    `
+      END`,
+    ]
   }
 
   /**
