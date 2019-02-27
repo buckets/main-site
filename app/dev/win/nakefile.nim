@@ -75,8 +75,8 @@ template log(x:varargs[untyped]) =
 template withSigningCerts(body:untyped):untyped =
   try:
     let
-      csc_link = getEnv("CSC_LINK", "")
-      csc_key_password = getEnv("CSC_KEY_PASSWORD", "")
+      csc_link = getEnv("WIN_CSC_LINK", "")
+      csc_key_password = getEnv("WIN_CSC_KEY_PASSWORD", "")
     if csc_link != "" and csc_key_password != "":
       log "Preparing code signing certificate ..."
       writeFile(project_dir/"csc_link.p12", csc_link.encode())

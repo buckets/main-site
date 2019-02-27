@@ -14,16 +14,9 @@ V="$(cat package.json | grep version | cut -d '"' -f4)"
 tsc
 
 # macOS
-ORIG_CSC_LINK="$CSC_LINK"
-ORIG_CSC_KEY_PASSWORD="$CSC_KEY_PASSWORD"
 if [ -z "$SKIP_MAC" ]; then
-    unset CSC_LINK
-    unset CSC_KEY_PASSWORD
     node_modules/.bin/build --mac -p always
 fi
-
-export CSC_LINK="$ORIG_CSC_LINK"
-export CSC_KEY_PASSWORD="$ORIG_CSC_KEY_PASSWORD"
 
 # linux
 if [ -z "$SKIP_LINUX" ]; then

@@ -127,8 +127,8 @@ async function run(args:string[], opts:{
 async function doBuild(result:'publish'|'dev'|'build') {
   console.log('Starting doBuild', result);
   Object.assign(ENV, {
-    CSC_LINK: 'Y:\\csc_link.p12',
-    CSC_KEY_PASSWORD: fs.readFileSync('Y:\\csc_key_password.txt'),
+    WIN_CSC_LINK: 'Y:\\csc_link.p12',
+    WIN_CSC_KEY_PASSWORD: fs.readFileSync('Y:\\csc_key_password.txt'),
   })
 
   // Get files and env vars into place

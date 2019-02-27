@@ -184,10 +184,10 @@ do_prepare_build() {
     echo "-----------------------------"
 
     # code signing stuff
-    if [ ! -z "$CSC_LINK" ] && [ ! -z "$CSC_KEY_PASSWORD" ]; then
+    if [ ! -z "$WIN_CSC_LINK" ] && [ ! -z "$WIN_CSC_KEY_PASSWORD" ]; then
         echo "Preparing code signing certificate..."
-        echo "$CSC_LINK" | base64 --decode --input - --output "${PROJECT_DIR}/csc_link.p12"
-        echo -n "$CSC_KEY_PASSWORD" > "${PROJECT_DIR}/csc_key_password.txt"
+        echo "$WIN_CSC_LINK" | base64 --decode --input - --output "${PROJECT_DIR}/csc_link.p12"
+        echo -n "$WIN_CSC_KEY_PASSWORD" > "${PROJECT_DIR}/csc_key_password.txt"
         function finish {
             echo "Removing code signing certificate..."
             rm "${PROJECT_DIR}/csc_link.p12"
@@ -195,7 +195,7 @@ do_prepare_build() {
         }
         trap finish EXIT
     else
-        echo "WARNING: no code signing (CSC_LINK and CSC_KEY_PASSWORD should be set)"
+        echo "WARNING: no code signing (WIN_CSC_LINK and WIN_CSC_KEY_PASSWORD should be set)"
     fi
 
     # # build buckets.lib

@@ -50,6 +50,10 @@ Other use:
 5. Get from GitHub with `dev/import_translations.sh`
 
 
+# To get the WIN_CSC_LINK
+
+XXX ....
+
 # Releasing a new version
 
 Add change snippets to `changes/{fix,break,new,feature,refactor,info,doc}-description.md` as you work then you can do the following:
