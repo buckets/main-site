@@ -1,6 +1,7 @@
  ✔ windows code signing @done (19-02-28 10:00)
  ☐ linux publish beta
- ☐ Remove beta preference in Preferences
+ ✔ Remove beta preference in Preferences @done (19-02-28 12:13)
+ ☐ Update release process to take beta into account
  ✔ Use electron's appName everywhere @done (19-02-28 11:57)
    ✔ src/wwwroot/misc/wizard.html @done (19-02-28 11:57)
    ✔ src/wwwroot/misc/updates.tsx @done (19-02-28 11:57)

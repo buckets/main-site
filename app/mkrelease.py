@@ -154,11 +154,12 @@ class StepTracker(object):
             raise
 
 @click.command()
+@click.option('--not-beta', is_flag=True)
 @click.option('--resume', help="Step to resume on")
 @click.option('--skip-mac', is_flag=True)
 @click.option('--skip-linux', is_flag=True)
 @click.option('--skip-win', is_flag=True)
-def doit(skip_mac, skip_linux, skip_win, resume):
+def doit(skip_mac, skip_linux, skip_win, not_beta, resume):
     step = StepTracker(starton=resume)
     with step.do():
 
