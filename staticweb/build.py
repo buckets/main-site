@@ -23,6 +23,7 @@ def getLatestReleaseVersion():
             print r.text
             print r.headers
             print e
+            _latest_version = ""
             # raise e
         print 'Latest version', _latest_version
     return _latest_version
@@ -39,6 +40,7 @@ def getBetaReleaseVersion():
             print r.text
             print r.headers
             print e
+            _beta_version = ""
             # raise e
         print 'Beta version', _beta_version
     return _beta_version    
