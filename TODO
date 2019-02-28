@@ -2,6 +2,9 @@
  ☐ linux publish beta
  ☐ Remove beta preference in Preferences
  ☐ Use electron's appName everywhere
+   ☐ src/wwwroot/misc/wizard.html
+   ☐ src/wwwroot/misc/updates.tsx
+   ✔ src/mainprocess/files.ts @done (19-02-28 10:14)
  ☐ Check for misuses of executeMany
  ✔ Rename it to "Buckets Beta" in the package.json @done (19-02-28 00:58)
  ☐ Verify that each button on the new download page works

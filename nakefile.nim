@@ -165,35 +165,33 @@ template doBeta() =
 template electronConfigFile():string =
   if BUILD_BETA: "config_beta.js" else: "config_common.js"
 
-# template appName():string =
-#   if BUILD_BETA: "Buckets Beta" else: "Buckets"
-
-template packageName():string =
+template appName():string =
   if BUILD_BETA: "BucketsBeta" else: "Buckets"
+
+template productName():string =
+  if BUILD_BETA: "Buckets Beta" else: "Buckets"
 
 template withPackageName(body:untyped):untyped =
   let old_file = readFile(PROJECT_ROOT/"app"/"package.json")
   try:
     let old_lines = old_file.splitLines()
     var
-      replaced = false
       new_lines:seq[string]
     for line in old_lines:
       # we'll assume the name comes first
-      if replaced:
-        new_lines.add(line)
+      if line.startsWith("  \"name\":"):
+        echo &"Setting package.json name to '{appName()}'"
+        new_lines.add(line.replace("\"Buckets\"", &"\"{appName()}\""))
+      elif line.startsWith("  \"productName\":"):
+        echo &"Setting package.json productName to '{productName()}'"
+        new_lines.add(line.replace("\"Buckets\"", &"\"{productName()}\""))
       else:
-        if "\"name\":" in line:
-          new_lines.add(line.replace("\"Buckets\"", &"\"{packageName()}\""))
-          replaced = true
-        else:
-          new_lines.add(line)
-    echo &"Setting package.json name to '{packageName()}'"
+        new_lines.add(line)
+    
     writeFile(PROJECT_ROOT/"app"/"package.json", new_lines.join("\L"))
-    assert replaced, "Should have replaced the app name."
     body
   finally:
-    echo "Restoring package.json name"
+    echo "Restoring package.json name,productName"
     writeFile(PROJECT_ROOT/"app"/"package.json", old_file)
 
 proc currentDesktopVersion():string =

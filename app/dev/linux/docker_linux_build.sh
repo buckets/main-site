@@ -38,23 +38,4 @@ nake clean
 nake test
 nake $ACTION
 
-case $ACTION in
-    build)
-        nake build-desktop
-        ;;
-    build-beta)
-        nake build-desktop-beta
-        ;;
-    publish)
-        nake publish-desktop
-        ;;
-    publish-beta)
-        nake publish-desktop-beta
-        ;;
-    *)
-        echo "UNKNOWN ACTION: $ACTION"
-        exit 1
-        ;;
-esac
-
 rsync -vrut "/build/app/dist/" "/proj/app/dist/"
