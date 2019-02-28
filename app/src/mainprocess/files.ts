@@ -26,7 +26,6 @@ import { openPreferences } from './prefs'
 import { isRegistered } from './drm'
 
 const log = new PrefixLogger('(files)')
-const appName = app.getName();
 
 export interface IOpenWindow {
   path: string,
@@ -354,7 +353,7 @@ export class BudgetFile implements IBudgetFile {
       width: 1200,
       height: 900,
       show: false,
-      title: `${appName} - ${parsed.name}`,
+      title: `${app.getName()} - ${parsed.name}`,
     }
     options = Object.assign(options, args.options || {})
     let win = new BrowserWindow(options);

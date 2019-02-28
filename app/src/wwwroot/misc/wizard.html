@@ -206,6 +206,8 @@
   const { getRecentFiles } = req('./src/mainprocess/persistent')
   const { newBudgetFileDialog, openBudgetFileDialog, openBudgetFile } = req('./src/mainprocess/files')
 
+  document.title = remote.app.getName();
+
   document.getElementById('close-button').addEventListener('click', () => {
     remote.getCurrentWindow().close();
   }, false)

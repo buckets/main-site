@@ -95,7 +95,7 @@ class UpdateApp extends React.Component<{status:IUpdateStatus}, any> {
       </div>
     }
     return <div className="update-app padded">
-      <div className="title">Buckets {current_version}</div>
+      <div className="title">{remote.app.getName()} {current_version}</div>
       {error_el}
       {guts}
     </div>
