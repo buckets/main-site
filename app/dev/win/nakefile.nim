@@ -570,17 +570,25 @@ task "prep-build", "Prepare for building":
     runTask "create"
     runTask "winbuild.exe"
 
-task "build-app", "Build the electron app":
+task "build", "Build the electron app":
   runTask "prep-build"
-  withLogPrefix("[build-app]"):
+  withLogPrefix("[build]"):
     withSigningCerts:
       ensure_project_mount()
       vm.ensure_signedin(win_user)
       vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "CleanBuild")
 
-task "rebuild-app", "Build the electron app without cleaning first":
+task "build-beta", "Build Buckets Beta":
   runTask "prep-build"
-  withLogPrefix("[build-app]"):
+  withLogPrefix("[build-beta]"):
+    withSigningCerts:
+      ensure_project_mount()
+      vm.ensure_signedin(win_user)
+      vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "BuildBeta")
+
+task "rebuild", "Build the electron app without cleaning first":
+  runTask "prep-build"
+  withLogPrefix("[build]"):
     withSigningCerts:
       ensure_project_mount()
       vm.ensure_signedin(win_user)

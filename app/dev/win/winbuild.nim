@@ -7,6 +7,7 @@ const share = r"\\vboxsrv\project"
 type
   BuildType = enum
     Build,
+    BuildBeta,
     CleanBuild,
     DeepCleanBuild,
     Publish,
@@ -67,6 +68,8 @@ proc do_build(btype:BuildType) =
     case btype
     of DeepCleanBuild, CleanBuild, Build:
       loggedDireShell "nake", "build-desktop"
+    of BuildBeta:
+      loggedDireShell "nake", "build-desktop-beta"
     of Publish:
       loggedDireShell "nake", "publish-desktop"
     of PublishBeta:

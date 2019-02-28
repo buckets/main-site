@@ -1,4 +1,8 @@
- ☐ macOS signing on beta
- ☐ windows publish beta
+ ✔ windows code signing @done (19-02-28 10:00)
  ☐ linux publish beta
- 
+ ☐ Remove beta preference in Preferences
+ ☐ Use electron's appName everywhere
+ ☐ Check for misuses of executeMany
+ ✔ Rename it to "Buckets Beta" in the package.json @done (19-02-28 00:58)
+ ☐ Verify that each button on the new download page works
+ ☐ Verify that each button on the index page works

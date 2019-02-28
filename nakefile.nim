@@ -165,8 +165,36 @@ template doBeta() =
 template electronConfigFile():string =
   if BUILD_BETA: "config_beta.js" else: "config_common.js"
 
-template appName():string =
-  if BUILD_BETA: "Buckets Beta" else: "Buckets"
+# template appName():string =
+#   if BUILD_BETA: "Buckets Beta" else: "Buckets"
+
+template packageName():string =
+  if BUILD_BETA: "BucketsBeta" else: "Buckets"
+
+template withPackageName(body:untyped):untyped =
+  let old_file = readFile(PROJECT_ROOT/"app"/"package.json")
+  try:
+    let old_lines = old_file.splitLines()
+    var
+      replaced = false
+      new_lines:seq[string]
+    for line in old_lines:
+      # we'll assume the name comes first
+      if replaced:
+        new_lines.add(line)
+      else:
+        if "\"name\":" in line:
+          new_lines.add(line.replace("\"Buckets\"", &"\"{packageName()}\""))
+          replaced = true
+        else:
+          new_lines.add(line)
+    echo &"Setting package.json name to '{packageName()}'"
+    writeFile(PROJECT_ROOT/"app"/"package.json", new_lines.join("\L"))
+    assert replaced, "Should have replaced the app name."
+    body
+  finally:
+    echo "Restoring package.json name"
+    writeFile(PROJECT_ROOT/"app"/"package.json", old_file)
 
 proc currentDesktopVersion():string =
   for line in readFile("app"/"package.json").splitLines():
@@ -180,13 +208,14 @@ template assertGitHubToken():untyped =
 
 task "build-desktop", "Build Buckets for the current OS":
   runTask "desktop-js"
-  withDir(PROJECT_ROOT/"app"):
-    when defined(windows):
-      direShell "build", "--config", electronConfigFile, "--win", "--x64", "--ia32"
-    elif defined(macosx):
-      direShell "build", "--config", electronConfigFile, "--mac"
-    else:
-      direShell "build", "--config", electronConfigFile, "--linux"
+  withPackageName:
+    withDir(PROJECT_ROOT/"app"):
+      when defined(windows):
+        direShell "build", "--config", electronConfigFile, "--win", "--x64", "--ia32"
+      elif defined(macosx):
+        direShell "build", "--config", electronConfigFile, "--mac"
+      else:
+        direShell "build", "--config", electronConfigFile, "--linux"
 
 task "build-desktop-beta", "Build Buckets Beta for the current OS":
   doBeta()
@@ -199,39 +228,53 @@ task "build-desktop-beta", "Build Buckets Beta for the current OS":
 task "publish-desktop", "Publish Buckets for the current OS":
   assertGitHubToken()
   runTask "desktop-js"
-  withDir(PROJECT_ROOT/"app"):
-    when defined(windows):
-      direShell "build", "--config", electronConfigFile, "--win", "--x64", "--ia32", "-p", "always"
-    elif defined(macosx):
-      direShell "build", "--config", electronConfigFile, "--mac", "-p", "always"
-    else:
-      direShell "build", "--config", electronConfigFile, "--linux", "-p", "always"
+  withPackageName:
+    withDir(PROJECT_ROOT/"app"):
+      when defined(windows):
+        direShell "build", "--config", electronConfigFile, "--win", "--x64", "--ia32", "-p", "always"
+      elif defined(macosx):
+        direShell "build", "--config", electronConfigFile, "--mac", "-p", "always"
+      else:
+        direShell "build", "--config", electronConfigFile, "--linux", "-p", "always"
 
 task "publish-desktop-beta", "Publish Buckets Beta for the current OS":
   doBeta()
   runTask "publish-desktop"
 
 when defined(macosx):
+  task "build-desktop-linux", "Build Linux Buckets":
+    withDir(PROJECT_ROOT/"app"):
+      let cmd = if BUILD_BETA: "build-desktop-beta" else: "build-desktop"
+      direShell "dev"/"linux"/"linux_build.sh", cmd
+  task "build-desktop-linux-beta", "Build Linux Buckets Beta":
+    doBeta()
+    runTask "build-desktop-linux"
   task "publish-desktop-linux", "Publish Linux Buckets":
     withDir(PROJECT_ROOT/"app"):
-      let cmd = if BUILD_BETA: "publish-beta" else: "publish"
+      let cmd = if BUILD_BETA: "publish-desktop-beta" else: "publish-desktop"
       direShell "dev"/"linux"/"linux_build.sh", cmd
-
-when defined(macosx):
   task "publish-desktop-linux-beta", "Publish Linux Buckets Beta":
     doBeta()
     runTask "publish-desktop-linux"
 
 when defined(macosx):
+  task "build-desktop-windows", "Build Windows Buckets":
+    assert existsEnv("WIN_CSC_LINK"), "Define WIN_CSC_LINK"
+    assert existsEnv("WIN_CSC_KEY_PASSWORD"), "Define WIN_CSC_KEY_PASSWORD"
+    withDir(PROJECT_ROOT/"app"/"dev"/"win"):
+      let cmd = if BUILD_BETA: "build-beta" else: "build"
+      direShell "nake", cmd
+  task "build-desktop-windows-beta", "Build Windows Buckets Beta":
+    doBeta()
+    runTask "build-desktop-windows"
+
   task "publish-desktop-windows", "Publish Windows Buckets":
     assertGitHubToken()
-    assert existsEnv("CSC_LINK"), "Define CSC_LINK"
-    assert existsEnv("CSC_KEY_PASSWORD"), "Define CSC_KEY_PASSWORD"
+    assert existsEnv("WIN_CSC_LINK"), "Define WIN_CSC_LINK"
+    assert existsEnv("WIN_CSC_KEY_PASSWORD"), "Define WIN_CSC_KEY_PASSWORD"
     withDir(PROJECT_ROOT/"app"/"dev"/"win"):
       let cmd = if BUILD_BETA: "publish-beta" else: "publish"
       direShell "nake", cmd
-
-when defined(macosx):
   task "publish-desktop-windows-beta", "Publish Windows Buckets Beta":
     doBeta()
     runTask "publish-desktop-windows"

@@ -36,29 +36,25 @@ export PATH="./node_modules/.bin/:${PATH}"
 cd /build/
 nake clean
 nake test
-
-ARGS=""
+nake $ACTION
 
 case $ACTION in
     build)
-        ARGS="--config config_common.js"
+        nake build-desktop
         ;;
     build-beta)
-        ARGS="--config config_beta.js"
+        nake build-desktop-beta
         ;;
     publish)
-        ARGS="--config config_common.js -p always"
+        nake publish-desktop
         ;;
     publish-beta)
-        ARGS="--config config_beta.js -p always"
+        nake publish-desktop-beta
         ;;
     *)
         echo "UNKNOWN ACTION: $ACTION"
         exit 1
         ;;
 esac
-
-cd /build/app/
-electron-builder --linux $ARGS
 
 rsync -vrut "/build/app/dist/" "/proj/app/dist/"

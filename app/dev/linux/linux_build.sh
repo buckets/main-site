@@ -5,16 +5,6 @@ set -xe
 
 CMD="$1"
 
-ARGS=""
-
-if [ "$CMD" == "publish" ]; then
-    ARGS="--env GH_TOKEN=$GH_TOKEN --env ACTION=publish"
-elif [ "$CMD" == "publish-beta" ]; then
-    ARGS="--env GH_TOKEN=$GH_TOKEN --env ACTION=publish-beta"
-else
-    ARGS="--env ACTION=build"
-fi
-
 docker-clean -i -c
 
 # go to the root of the project
@@ -31,5 +21,7 @@ echo
 echo "RUNNING electron build..."
 docker run --rm -i \
     -v "$(pwd)":/proj \
-    $ARGS $TAG
+    --env "GH_TOKEN=$GH_TOKEN" \
+    --env "ACTION=$CMD" \
+    $TAG
 
