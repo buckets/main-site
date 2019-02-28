@@ -157,7 +157,6 @@
       </div>
     
       <div class="download-section">
-        <a name="download"></a>
         <span class="fa fa-download"></span> {% trans %}Download Buckets v{{ latest_version }} for{% endtrans %}
         <div>
           <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}.dmg{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
@@ -178,7 +177,7 @@
           </a>
         </div>
         <div>
-          <a class="download" style="line-height: 2rem; text-decoration: none;" href="https://github.com/buckets/application/releases/latest">{% trans %}Other{% endtrans %}</a>
+          <a class="download" style="line-height: 2rem; text-decoration: none;" href="/{{ lang }}/download.html">{% trans %}Beta &amp; other downloads{% endtrans %}</a>
         </div>
       </div>  
 
@@ -256,7 +255,7 @@
     </div>
 
     <div class="callout para">
-      {% trans %}<a href="#download">Download it now</a> for free!{% endtrans %}
+      {% trans %}<a href="/{{ lang }}/download.html">Download it now</a> for free!{% endtrans %}
     </div>
 
     <div class="callout para">

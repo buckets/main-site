@@ -16,15 +16,32 @@ def getLatestReleaseVersion():
     global _latest_version
     if _latest_version is None:
         url = 'https://api.github.com/repos/buckets/application/releases/latest'
-        r = requests.get(url, timeout=5)
         try:
+            r = requests.get(url, timeout=5)
             _latest_version = r.json()['tag_name'].strip('v')
         except Exception as e:
             print r.text
             print r.headers
-            raise e
+            print e
+            # raise e
         print 'Latest version', _latest_version
     return _latest_version
+
+_beta_version = None
+def getBetaReleaseVersion():
+    global _beta_version
+    if _beta_version is None:
+        url = 'https://api.github.com/repos/buckets/desktop-beta/releases/latest'
+        try:
+            r = requests.get(url, timeout=5)
+            _beta_version = r.json()['tag_name'].strip('v')
+        except Exception as e:
+            print r.text
+            print r.headers
+            print e
+            # raise e
+        print 'Beta version', _beta_version
+    return _beta_version    
 
 def list_locales(translation_dir):
     # copied largely from https://github.com/python-babel/flask-babel/blob/master/flask_babel/__init__.py
@@ -53,6 +70,7 @@ def renderFile(template_root, template_name, translation_dir, locale, config):
         'this_url': template_name,
         'config': config,
         'latest_version': getLatestReleaseVersion(),
+        'beta_version': getBetaReleaseVersion(),
         'current_locale': locale,
     }
     tmpl = env.get_template(template_name)
