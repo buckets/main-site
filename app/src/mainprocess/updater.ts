@@ -14,7 +14,7 @@ let win:Electron.BrowserWindow;
 
 export function checkForUpdates() {
   autoUpdater.autoDownload = false;
-  autoUpdater.allowPrerelease = PSTATE.download_beta_versions;
+  autoUpdater.allowPrerelease = false;
   autoUpdater.on('checking-for-update', () => {
     log.info('checking for updates...');
     setUpdateWindowStatus({
@@ -189,14 +189,10 @@ export async function linux_checkForUpdates() {
     })
   });
   let new_version;
-  if (PSTATE.download_beta_versions) {
-    new_version = releases[0].tag_name;
-  } else {
-    for (const release of releases) {
-      if (!release.prerelease) {
-        new_version = release.tag_name;
-        break;
-      }
+  for (const release of releases) {
+    if (!release.prerelease) {
+      new_version = release.tag_name;
+      break;
     }
   }
   let current_version = `v${app.getVersion()}`;
