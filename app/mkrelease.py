@@ -8,7 +8,6 @@ import subprocess
 import json
 import pipes
 import io
-import requests
 import click
 import webbrowser
 from contextlib import contextmanager
@@ -16,7 +15,8 @@ from dev.github import GitHubClient
 
 GH_TOKEN = os.environ['GH_TOKEN']
 GH_USER = os.environ.get('GH_USERNAME', 'iffy')
-github = GitHubClient(GH_USER, GH_TOKEN, 'buckets', 'application')
+ghstable = GitHubClient(GH_USER, GH_TOKEN, 'buckets', 'application')
+ghbeta = GitHubClient(GH_USER, GH_TOKEN, 'buckets', 'desktop-beta')
 
 
 def prompt(text, default=None, validate=lambda x:x, required=True):
@@ -66,15 +66,6 @@ def updatePackageVersion(version):
 
     with io.open('package.json', 'w') as fh:
         fh.write(''.join(lines))
-
-def getLatestReleaseVersion():
-    r = requests.get('https://api.github.com/repos/buckets/application/releases',
-        auth=(GH_USER, GH_TOKEN))
-    releases = r.json()
-    for release in releases:
-        if release['draft']:
-            continue
-        return release['name']
 
 def getTopChangelogVersion():
     with io.open('CHANGELOG.md', 'r') as fh:
@@ -154,12 +145,11 @@ class StepTracker(object):
             raise
 
 @click.command()
-@click.option('--not-beta', is_flag=True)
 @click.option('--resume', help="Step to resume on")
 @click.option('--skip-mac', is_flag=True)
 @click.option('--skip-linux', is_flag=True)
 @click.option('--skip-win', is_flag=True)
-def doit(skip_mac, skip_linux, skip_win, not_beta, resume):
+def doit(skip_mac, skip_linux, skip_win, resume):
     step = StepTracker(starton=resume)
     with step.do():
 
@@ -197,7 +187,7 @@ def doit(skip_mac, skip_linux, skip_win, not_beta, resume):
             guess_target_version = package_version
             if guess_target_version.count('-'):
                 guess_target_version = guess_target_version.split('-')[0]
-            latest_version = getLatestReleaseVersion()
+            latest_version = ghbeta.getLatestReleaseVersion()
             print('package.json version:', package_version)
             print('Latest released version on GitHub:', latest_version)
             target_version = prompt('Version to release?',
@@ -218,7 +208,7 @@ def doit(skip_mac, skip_linux, skip_win, not_beta, resume):
             if skip_linux:
                 env['SKIP_LINUX'] = 'yes'
             print('Building and uploading to GitHub...')
-            subprocess.check_call(['./publish.sh'], env=env)
+            subprocess.check_call(['nake', 'publish-desktop-beta-all'], env=env, cwd=os.path.join(os.path.dirname(__file__), '..'))
             print('[X] Done uploading to GitHub.')
 
         if step("release notes"):
@@ -240,8 +230,8 @@ def doit(skip_mac, skip_linux, skip_win, not_beta, resume):
                 abort()
 
         if step("publish release notes"):
-            print('Go to https://github.com/buckets/application/releases to publish the draft')
-            webbrowser.open('https://github.com/buckets/application/releases')
+            print('Go to https://github.com/buckets/desktop-beta/releases to publish the draft')
+            webbrowser.open('https://github.com/buckets/desktop-beta/releases')
             if not yesno('Have you clicked the Publish button on GitHub?'):
                 abort()
 
@@ -270,8 +260,8 @@ def doit(skip_mac, skip_linux, skip_win, not_beta, resume):
             if issue_numbers:
                 if yesno('Close GitHub issues? ({0})?'.format(','.join(issue_numbers)), default=True):
                     for issue_number in issue_numbers:
-                        github.commentOnIssue(issue_number, 'Included in v{0} release (AUTOMATED COMMENT)'.format(release_version))
-                        github.closeIssue(issue_number)
+                        ghstable.commentOnIssue(issue_number, 'Included in v{0} release (AUTOMATED COMMENT)'.format(release_version))
+                        ghstable.closeIssue(issue_number)
 
         if step("publish CHANGELOG.md"):
             release_version = getTopChangelogVersion()
