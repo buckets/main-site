@@ -58,7 +58,7 @@ export const DEFAULTS:IMessages = {
     // accounts.tsx:50
     // accounts.tsx:105
     // buckets.tsx:1328
-    // importpage.tsx:455
+    // importpage.tsx:457
     // searchpage.tsx:119
     // searchpage.tsx:143
     // transactions.tsx:227
@@ -227,13 +227,6 @@ export const DEFAULTS:IMessages = {
     h: "hHHAAGXs0oscbD5jkMQSQUQ5sLsgo/sPaBumUBAq+CA=",
     // buckets.tsx:1214
   },
-  "Beta Updates": {
-    /* Label for checkbox indicating if users want to receive Beta version of Buckets before wide release */
-    val: "Beta Updates",
-    translated: false,
-    h: "xyGKwUoes8hYiGBWy9KIoxkU/BREGx8pGiKIUb6hsEc=",
-    // preferences.tsx:125
-  },
   "Birthdays": {
     val: "Birthdays",
     translated: false,
@@ -304,8 +297,8 @@ export const DEFAULTS:IMessages = {
     val: "Buckets License",
     translated: false,
     h: "sym++hSpJ7LeHTQAaiYRAK41eYIw9pfMFO2EbYTHGxo=",
-    // dbsetup.ts:77
-    // dbsetup.ts:111
+    // dbsetup.ts:63
+    // dbsetup.ts:97
   },
   "Budget": {
     val: "Budget",
@@ -515,7 +508,7 @@ export const DEFAULTS:IMessages = {
     val: "Connect",
     translated: false,
     h: "pCLQy6ZAsZnJ3ff5r+iD+O2vHQhIJEEUHUhiY1NrMP0=",
-    // importpage.tsx:233
+    // importpage.tsx:235
   },
   "Connect to bank": {
     val: "Connect to bank",
@@ -533,7 +526,7 @@ export const DEFAULTS:IMessages = {
     val: "Connection saved!",
     translated: false,
     h: "wAgyeIQsbaI/kFPgBf8sWlKK1mf/VcP7BjHpC9TNYuc=",
-    // importpage.tsx:310
+    // importpage.tsx:312
   },
   "Copy": {
     val: "Copy",
@@ -564,7 +557,7 @@ export const DEFAULTS:IMessages = {
     val: "Create Macro",
     translated: false,
     h: "F6PDykaoACWoqQ+oKUyJyhERAe1FjT6A3OkxL+S5l8k=",
-    // importpage.tsx:295
+    // importpage.tsx:297
   },
   "Create Template": {
     val: "Create Template",
@@ -588,13 +581,13 @@ export const DEFAULTS:IMessages = {
     val: "Create macro",
     translated: false,
     h: "9xZZAswDH8zePPUhfsaSEDJ21GU1yhILKhDWtvnUlr0=",
-    // importpage.tsx:212
+    // importpage.tsx:214
   },
   "Create new account": {
     val: "Create new account",
     translated: false,
     h: "SmoVFbeAWSO4cW1YQJbuDJQz8kenVz5++WTJEkS6Vos=",
-    // importpage.tsx:491
+    // importpage.tsx:493
     // csvimport.tsx:732
   },
   "Currency symbol": {
@@ -644,7 +637,7 @@ export const DEFAULTS:IMessages = {
     val: "Delete Connection",
     translated: false,
     h: "o6bxlUpjZFFTleiRLA4ykeB3yEHsAiXW9usUdJ9jh1g=",
-    // importpage.tsx:416
+    // importpage.tsx:418
   },
   "Delete Group": {
     val: "Delete Group",
@@ -656,7 +649,7 @@ export const DEFAULTS:IMessages = {
     val: "Delete Macro",
     translated: false,
     h: "Qb7shd6fRLybaDzPvdr0Z4VfVek/fHVV556kEcNZrH8=",
-    // importpage.tsx:390
+    // importpage.tsx:392
   },
   "Delete Transactions": {
     val: "Delete Transactions",
@@ -675,7 +668,7 @@ export const DEFAULTS:IMessages = {
     val: "Description",
     translated: false,
     h: "bg0ZDIR+z+PEkinc/ZyqkERMsVZcFFm3NhQoIqZH+WM=",
-    // importpage.tsx:454
+    // importpage.tsx:456
   },
   "Diapers": {
     val: "Diapers",
@@ -687,7 +680,7 @@ export const DEFAULTS:IMessages = {
     val: "Disable Macro",
     translated: false,
     h: "k0HEkS8+oirJJHylM2fcT1D1/IqnGFVX3cGlU3d3G50=",
-    // importpage.tsx:356
+    // importpage.tsx:358
   },
   "Done": {
     val: "Done",
@@ -699,7 +692,7 @@ export const DEFAULTS:IMessages = {
     val: "Download",
     translated: false,
     h: "QVM3NKWnuJ19cWUaN3y9fVCbkiQTygWbOYuFMklAwNc=",
-    // updater.ts:207
+    // updater.ts:203
   },
   "Download Update": {
     val: "Download Update",
@@ -749,13 +742,7 @@ export const DEFAULTS:IMessages = {
     val: "Enable Macro",
     translated: false,
     h: "9SWFr96CNVD21JQ30lw4cj1JCAZ44RNlKkDzQJ/RyuE=",
-    // importpage.tsx:356
-  },
-  "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)": {
-    val: "Enable to get new versions of Buckets before everyone else.  There might be more bugs :)",
-    translated: false,
-    h: "sC2MA2Tqphkt5iblpZFWToDQhdF9U2nk8FpwTxH3Ta8=",
-    // preferences.tsx:138
+    // importpage.tsx:358
   },
   "Ending Balance": {
     val: "Ending Balance",
@@ -785,8 +772,8 @@ export const DEFAULTS:IMessages = {
     val: "Error",
     translated: false,
     h: "/ErBlknw7o83xx0uIDCjdDA4u5bAwnNZuhFd2GV1Zcw=",
-    // errors.ts:124
-    // errors.ts:142
+    // errors.ts:129
+    // errors.ts:147
   },
   "Error fetching data": {
     val: "Error fetching data",
@@ -1016,7 +1003,7 @@ export const DEFAULTS:IMessages = {
     val: "ID",
     translated: false,
     h: "ge86Jcy26vcv5uPFI29MfLOxHh8ctACck6nRdrl9aM4=",
-    // importpage.tsx:428
+    // importpage.tsx:430
   },
   "Identify the data each column contains using the drop downs below.": {
     val: "Identify the data each column contains using the drop downs below.",
@@ -1221,7 +1208,7 @@ export const DEFAULTS:IMessages = {
     val: "Last used",
     translated: false,
     h: "G5a6Jdor9jRT/Wtcg9SfXQsvqL7VFvnVD2+gq7yT1Jg=",
-    // importpage.tsx:429
+    // importpage.tsx:431
   },
   "Later": {
     /* Button label for purchasing a license later */
@@ -1229,7 +1216,7 @@ export const DEFAULTS:IMessages = {
     translated: false,
     h: "wZUl6R8m08S1l0zLg0xgDG2XE1sodemTuRDbalIB4VM=",
     // drm.ts:104
-    // updater.ts:206
+    // updater.ts:202
   },
   "Learn More": {
     val: "Learn More",
@@ -1247,7 +1234,7 @@ export const DEFAULTS:IMessages = {
     val: "Link Account",
     translated: false,
     h: "Kq3pmMt0lHo1Or0xDzOxrUYLyhXtTVmVmcm/qGByIuk=",
-    // importpage.tsx:501
+    // importpage.tsx:503
   },
   "Macros": {
     val: "Macros",
@@ -1355,7 +1342,7 @@ export const DEFAULTS:IMessages = {
     val: "Name",
     translated: false,
     h: "bMXfNfAzjiMOnmM+rZmR8I9iyrRaMmSXja7cZ0eGcwU=",
-    // importpage.tsx:326
+    // importpage.tsx:328
   },
   "Natural gas/propane/oil": {
     val: "Natural gas/propane/oil",
@@ -1533,7 +1520,7 @@ export const DEFAULTS:IMessages = {
     val: "OK",
     translated: false,
     h: "mMSSK7ZBxlx6MLe8r98jC5sAtmk2McVhRqslsnhu5KM=",
-    // errors.ts:144
+    // errors.ts:149
   },
   "Off Budget Accounts": {
     val: "Off Budget Accounts",
@@ -1554,7 +1541,7 @@ export const DEFAULTS:IMessages = {
     val: "On",
     translated: false,
     h: "nMAfqtecKNqqRD1YLNX1F32SXJy1exEgm1QvpnZLBQQ=",
-    // importpage.tsx:325
+    // importpage.tsx:327
   },
   "Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.": {
     val: "Only select a column for Unique ID if you are sure it contains bank-assigned, unique transaction IDs.  Most CSVs will not have this field.",
@@ -2156,7 +2143,7 @@ export const DEFAULTS:IMessages = {
     val: "Test Toast",
     translated: false,
     h: "5SbiliirLaAKLdgRThX+cO2RwGuC87t3Z1O0xT2WsAE=",
-    // importpage.tsx:189
+    // importpage.tsx:191
   },
   "Thank you for the feedback!": {
     val: "Thank you for the feedback!",
@@ -2168,7 +2155,7 @@ export const DEFAULTS:IMessages = {
     val: "There has been an error.",
     translated: false,
     h: "viN5uLRSpgzhvoD9KO9g1cr7ihLQ0Men9LiUpy9RcwE=",
-    // errors.ts:125
+    // errors.ts:130
   },
   "There was an error.  Maybe try again?": {
     val: "There was an error.  Maybe try again?",
@@ -2372,7 +2359,7 @@ export const DEFAULTS:IMessages = {
     val: "Update Available",
     translated: false,
     h: "FKOD6i3t69T8rvTwVJ5VSnLfkQPBcceuuk2X4ZsNKMY=",
-    // updater.ts:204
+    // updater.ts:200
   },
   "Update Bucket Name": {
     val: "Update Bucket Name",
@@ -2409,7 +2396,7 @@ export const DEFAULTS:IMessages = {
     val: "Update Macro Name",
     translated: false,
     h: "61srDLhVLo6bOo+SbnJ0rMbhNhXXRxEjgP3/nFafMKI=",
-    // importpage.tsx:367
+    // importpage.tsx:369
   },
   "Update Monthly Deposit": {
     val: "Update Monthly Deposit",
@@ -2511,7 +2498,7 @@ export const DEFAULTS:IMessages = {
     val: "When \"On\" this macro will be run during a normal sync.",
     translated: false,
     h: "HnJ7qVSPXxIg3/lygw1Ln/VvBMBs8roJwXlCpP2KnMw=",
-    // importpage.tsx:325
+    // importpage.tsx:327
   },
   "Window": {
     val: "Window",
@@ -2684,19 +2671,19 @@ export const DEFAULTS:IMessages = {
     val: "Ignore",
     translated: false,
     h: "K8sAh2XND1/tJOuX9xTLmr1fQjUOB70cfc9GwI62fEs=",
-    // errors.ts:128
+    // errors.ts:133
   },
   "action.link-account": {
     val: "Link",
     translated: false,
     h: "unfAYQpjuyuTjjRCodr+S+jNjRmz3nahjZ91u/j5HfE=",
-    // importpage.tsx:496
+    // importpage.tsx:498
   },
   "action.report bug": {
     val: "Report Bug",
     translated: false,
     h: "RxuE9Dh0Dadda2PtjUPD0dQ7b8aQok84Ytvw31ABBRU=",
-    // errors.ts:127
+    // errors.ts:132
   },
   "bucket.detailslabel": {
     val: "Details",
@@ -2851,7 +2838,7 @@ export const DEFAULTS:IMessages = {
     val: "If this error keeps happening or doesn't make sense, please report a bug or chat with us.",
     translated: false,
     h: "10Kk29tlHpBnhcTf7RRMfq1OZPGZgvPPguRlInaLNoY=",
-    // errors.ts:126
+    // errors.ts:131
   },
   "export.why": {
     val: "Perhaps what you're doing with exported data could be built into Buckets.  Mind sending a note?",
@@ -3113,7 +3100,7 @@ Would you like to purchase a license now?`,
     val: (newv:string) => `Version ${newv} available.`,
     translated: false,
     h: "YCoofx1v0tRUHkHfhFnm6bV2xXfnsNT6QAyXqgkUa9c=",
-    // updater.ts:205
+    // updater.ts:201
     // updates.tsx:59
   },
 }
