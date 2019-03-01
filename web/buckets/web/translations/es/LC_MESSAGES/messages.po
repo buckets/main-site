@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2018-06-26 11:06-0600\n"
+"POT-Creation-Date: 2019-03-01 15:09-0700\n"
 "PO-Revision-Date: 2018-05-01 21:25-0600\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
@@ -217,3 +217,4 @@ msgstr "Guía"
 #: buckets/web/templates/navbar.html:6
 msgid "Blog"
 msgstr "Blog"
+
