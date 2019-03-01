@@ -1,6 +1,6 @@
 {
-  "name": "BucketsBeta",
-  "productName": "Buckets Beta",
+  "name": "Buckets",
+  "productName": "Buckets",
   "version": "0.55.0-dev",
   "homepage": "https://www.budgetwithbuckets.com",
   "main": "src/mainprocess/main.js",
