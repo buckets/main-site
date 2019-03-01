@@ -201,22 +201,23 @@ def doit(skip_mac, skip_linux, skip_win, resume):
 
         if step("publish"):
             env = os.environ.copy()
-            if skip_win:
-                env['SKIP_WIN'] = 'yes'
-            if skip_mac:
-                env['SKIP_MAC'] = 'yes'
-            if skip_linux:
-                env['SKIP_LINUX'] = 'yes'
+            proj_root = os.path.join(os.path.dirname(__file__), '..')
             print('Building and uploading to GitHub...')
-            subprocess.check_call(['nake', 'publish-desktop-beta-all'], env=env, cwd=os.path.join(os.path.dirname(__file__), '..'))
+            if not skip_win:
+                subprocess.check_call(['nake', 'publish-desktop-windows-beta'], env=env, cwd=proj_root)
+            if not skip_mac:
+                subprocess.check_call(['nake', 'publish-desktop-beta'], env=env, cwd=proj_root)
+            if not skip_linux:
+                subprocess.check_call(['nake', 'publish-desktop-linux-beta'], env=env, cwd=proj_root)
+            
             print('[X] Done uploading to GitHub.')
 
         if step("release notes"):
-            subprocess.check_call(['dev/changelog/publishchangelog.py'])
+            subprocess.check_call(['dev/changelog/publishchangelog.py', 'beta'])
 
         if step("manual tests"):
             print('Opening the app for testing...')
-            subprocess.check_call(['open', 'dist/mac/Buckets.app'], env={})
+            subprocess.check_call(['open', 'dist/mac/Buckets Beta.app'], env={})
 
             if not yesno("Can you submit a bug report? (I'll ask at the end if you received it)"):
                 abort()
