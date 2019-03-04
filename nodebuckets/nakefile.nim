@@ -100,13 +100,17 @@ task "node_modules", "Install node_modules":
 
 task "nodelib", "Build the .node file":
   runTask "staticlib"
-  let target = "lib"/"bucketslib.node"
-  if target.needsRefresh(@[libname, "binding.gyp", "jstonimbinding.cpp"]):
-    when defined(windows):
+  let sources = @[libname, "binding.gyp", "jstonimbinding.cpp"]
+  when defined(windows):
+    if ("lib"/"ia32"/"bucketslib.node").needsRefresh(sources):
       direShell "node-gyp", "clean", "configure", "rebuild", "--arch=ia32", "--verbose"
+    if ("lib"/"x64"/"bucketslib.node").needsRefresh(sources):
       direShell "node-gyp", "clean", "configure", "rebuild", "--arch=x64", "--verbose"
-    else:
+  else:
+    if ("lib"/"bucketslib.node").needsRefresh(sources):
       direShell "node-gyp", "clean", "configure", "rebuild", "--verbose"
+  
+  
 
 task "staticlib", "Build the static lib":
   let nim_src = toSeq(walkDirRec(".."/"ccore"/"src")).filterIt(it.endsWith(".nim"))

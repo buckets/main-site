@@ -1,5 +1,5 @@
 // @ts-ignore
-import * as bucketsinternal from '../lib/bucketslib.node';
+const bucketsinternal:BucketsInternal = require(`../lib/${process.arch}/bucketslib.node`);
 
 interface BucketsInternal {
   // Keep this in sync with jstonimbinding.cpp

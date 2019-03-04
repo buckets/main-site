@@ -102,7 +102,7 @@
       "copies": [
         {
           "files": ["<(PRODUCT_DIR)/bucketslib.node"],
-          "destination": "<(module_root_dir)/lib/",
+          "destination": "<(module_root_dir)/lib/<(target_arch)/",
         }
       ]
     }
