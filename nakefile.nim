@@ -3,6 +3,26 @@ import times
 import sequtils
 import strformat
 
+#------------------------------------------------------
+# nake verbose addition
+#------------------------------------------------------
+var taskstack:seq[string]
+template task(name, description: string; body: untyped): untyped =
+  nake.task(name, description):
+    taskstack.add(name)
+    echo "[nake] " & currentSourcePath() & " START " & taskstack.join(".")
+    body
+    echo "[nake] " & currentSourcePath() & "  END  " & taskstack.join(".")
+    discard taskstack.pop()
+
+template log(x:varargs[untyped]) =
+  stdout.write("[nake] I " & taskstack.join(".") & " - ")
+  echo x
+#------------------------------------------------------
+# end nake verbose addition
+#------------------------------------------------------
+
+
 proc olderThan(targets: seq[string], src: varargs[string]): bool {.raises: [OSError].} =
   ## Returns true if any ``src`` is newer than the oldest ``targets``.
   ##
@@ -60,7 +80,7 @@ task "deepclean", "Delete node_modules too":
   withDir("nodebuckets"):
     removeDir("node_modules")
 
-task "test", "Run all tests":
+task "test-all", "Run all tests":
   runTask "ccore-test"
   runTask "nb-test"
   runTask "core-test"
@@ -76,9 +96,16 @@ task "ccore-test", "Run ccore tests":
 #------------------------------------------------------------
 # nodebuckets/
 #------------------------------------------------------------
-const
-  NB_LIB = "nodebuckets"/"lib"/"bucketslib.node"
-  NB_JS = toSeq(walkDirRec("nodebuckets"/"dist"))
+when defined(windows):
+  const NB_LIBS = @[
+    "nodebuckets"/"lib"/"ia32"/"bucketslib.node",
+    "nodebuckets"/"lib"/"x64"/"bucketslib.node",
+  ]
+else:
+  const NB_LIBS = @[
+    "nodebuckets"/"lib"/"x64"/"bucketslib.node",
+  ]
+const NB_JS = toSeq(walkDirRec("nodebuckets"/"dist"))
 
 task "nb-lib", "Generate nodebuckets/ library":
   # let
@@ -99,11 +126,11 @@ task "nb-test", "Run nodebuckets/ tests":
 # core/
 #------------------------------------------------------------
 const
-  CORE_NB_LIB = "core"/"node_modules"/"bucketslib"/"lib"/"bucketslib.node"
+  CORE_NB_LIB = "core"/"node_modules"/"bucketslib"/"lib"/"x64"/"bucketslib.node"
 
 task "core-lib", "Refresh core/ nodebuckets library":
   runTask "nb-lib"
-  if CORE_NB_LIB.needsRefresh(NB_LIB) or CORE_NB_LIB.needsRefresh(NB_JS):
+  if CORE_NB_LIB.needsRefresh(NB_LIBS) or CORE_NB_LIB.needsRefresh(NB_JS):
     withDir("core"):
       removeDir("node_modules/bucketslib")
       direShell "yarn", "add", "file:../nodebuckets"
@@ -127,7 +154,7 @@ task "core-test", "Run core/ tests":
 # app/
 #------------------------------------------------------------
 const
-  APP_NB_LIB = "app"/"node_modules"/"bucketslib"/"lib"/"bucketslib.node"
+  APP_NB_LIB = "app"/"node_modules"/"bucketslib"/"lib"/"x64"/"bucketslib.node"
 
 task "desktop-lib", "Refresh app/ nodebuckets library":
   runTask "core-js"
@@ -205,7 +232,11 @@ template assertGitHubToken():untyped =
 
 
 task "build-desktop", "Build Buckets for the current OS":
+  if not existsEnv("NO_CLEAN_OR_TEST"):
+    runTask "clean"
   runTask "desktop-js"
+  if not existsEnv("NO_CLEAN_OR_TEST"):
+    runTask "test-all"
   withPackageName:
     withDir(PROJECT_ROOT/"app"):
       when defined(windows):
@@ -225,7 +256,11 @@ task "build-desktop-beta", "Build Buckets Beta for the current OS":
 #-------------------------------------------------------
 task "publish-desktop", "Publish Buckets for the current OS":
   assertGitHubToken()
+  if not existsEnv("NO_CLEAN_OR_TEST"):
+    runTask "clean"
   runTask "desktop-js"
+  if not existsEnv("NO_CLEAN_OR_TEST"):
+    runTask "test-all"
   withPackageName:
     withDir(PROJECT_ROOT/"app"):
       when defined(windows):

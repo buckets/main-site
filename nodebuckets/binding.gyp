@@ -7,7 +7,6 @@
       ],
       "include_dirs": [
           "<!@(node -p \"require('node-addon-api').include\")",
-          # "<(module_root_dir)/csrc",
           "<(module_root_dir)/inc",
       ],
       "conditions": [
@@ -17,6 +16,11 @@
             "sources": [
               "<!@(node -p \"require('fs').readdirSync('./csrc32').map(f=>'csrc32/'+f).join(' ')\")",
             ],
+            # "link_settings": {
+            #   'libraries': [
+            #     "<(module_root_dir)/clib/<(OS)/buckets32.dll"
+            #   ],
+            # },
             "include_dirs": [
               "<(module_root_dir)/csrc32",
             ],
@@ -27,11 +31,25 @@
             "sources": [
               "<!@(node -p \"require('fs').readdirSync('./csrc64').map(f=>'csrc64/'+f).join(' ')\")",
             ],
+            # "link_settings": {
+            #   'libraries': [
+            #     "<(module_root_dir)/clib/<(OS)/buckets64.dll"
+            #   ],
+            # },
             "include_dirs": [
               "<(module_root_dir)/csrc64",
             ],
             'cflags_cc': [ "-fPIC" ],
           },
+          # {
+          #   "sources": [
+          #     "<!@(node -p \"require('fs').readdirSync('./csrc64').map(f=>'csrc64/'+f).join(' ')\")",
+          #   ],
+          #   "include_dirs": [
+          #     "<(module_root_dir)/csrc64",
+          #   ],
+            
+          # },
           # 'OS=="linux"',
           # {
           #   "link_settings": {
@@ -71,6 +89,24 @@
           "ImageHasSafeExceptionHandlers": "false"
         }
       },
+      # 'configurations': {
+      #   'Debug': {
+      #     'defines': [ 'DEBUG', '_DEBUG' ],
+      #     'msvs_settings': {
+      #       'VCCLCompilerTool': {
+      #         'RuntimeLibrary': 1, # static debug
+      #       },
+      #     },
+      #   },
+      #   'Release': {
+      #     'defines': [ 'NDEBUG' ],
+      #     'msvs_settings': {
+      #       'VCCLCompilerTool': {
+      #         'RuntimeLibrary': 0, # static release
+      #       },
+      #     },
+      #   }
+      # },
       # "conditions": [
       #   ['OS=="win"',
       #     {
@@ -80,20 +116,26 @@
       #     },
       #   ]
       # ],
-      'msvs_settings': {
-        'VCCLCompilerTool': {
-          'ExceptionHandling': 1,
-          # 'RuntimeLibrary': 0,
-         },
-        # "VCLinkerTool": {
-        #   "LinkIncremental": 1,
-        #   "AdditionalLibraryDirectories": [
-        #     "<(module_root_dir)\\clib\\<(OS)",
-        #     "<(module_root_dir)\\csrc",
-        #     "<(module_root_dir)\\inc",
-        #   ]
-        # }
-      },
+      # 'msvs_settings': {
+      #   'VCCLCompilerTool': {
+      #     'ExceptionHandling': 1,
+      #     'RuntimeLibrary': 0,
+      #     'AdditionalOptions': [
+      #     #   # '/GR',
+      #       '/MT',
+            
+      #     #   # '/EHsc'
+      #     ]
+      #    },
+      #   # "VCLinkerTool": {
+      #   #   "LinkIncremental": 1,
+      #   #   "AdditionalLibraryDirectories": [
+      #   #     "<(module_root_dir)\\clib\\<(OS)",
+      #   #     "<(module_root_dir)\\csrc",
+      #   #     "<(module_root_dir)\\inc",
+      #   #   ]
+      #   # }
+      # },
     },
     {
       "target_name": "action_after_build",

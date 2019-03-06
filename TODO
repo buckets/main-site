@@ -1,4 +1,5 @@
- ✔ windows code signing @done (19-02-28 10:00)
+ ☐ Windows code signing
+ ☐ Windows 64-bit works
  ✔ linux publish beta @done (19-02-28 20:23)
  ✔ Remove beta preference in Preferences @done (19-02-28 12:13)
  ✔ Update release process to take beta into account @done (19-02-28 20:23)
@@ -8,5 +9,5 @@
    ✔ src/mainprocess/files.ts @done (19-02-28 10:14)
  ✔ Check for misuses of executeMany @done (19-02-28 11:58)
  ✔ Rename it to "Buckets Beta" in the package.json @done (19-02-28 00:58)
- ☐ Verify that each button on the new download page works
- ☐ Verify that each button on the index page works
+ ✔ Verify that each button on the new download page works @done (19-03-04 15:45)
+ ✔ Verify that each button on the index page works @done (19-03-04 15:45)

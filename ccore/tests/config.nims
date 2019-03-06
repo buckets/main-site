@@ -1,4 +1,6 @@
 switch("dynlibOverride", "sqlite3")
+switch("dynlibOverride", "sqlite3_32")
+switch("dynlibOverride", "sqlite3_64")
 switch("path", "$projectDir/../src")
 switch("gc", "regions")
 # switch("d", "useGcAssert")

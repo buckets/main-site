@@ -6,3 +6,5 @@ csrc/
 clib/
 windows/
 dist
+csrc32/
+csrc64/

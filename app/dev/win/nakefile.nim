@@ -54,6 +54,22 @@ var
 when OSTYPE == "win10":
   vm = "win10builder"
 
+#------------------------------------------------------
+# nake verbose addition
+#------------------------------------------------------
+var taskstack:seq[string]
+template task(name, description: string; body: untyped): untyped =
+  nake.task(name, description):
+    taskstack.add(name)
+    echo "[nake] " & currentSourcePath() & " START " & taskstack.join(".")
+    body
+    echo "[nake] " & currentSourcePath() & "  END  " & taskstack.join(".")
+    discard taskstack.pop()
+#------------------------------------------------------
+# end nake verbose addition
+#------------------------------------------------------
+
+
 #--------------------------------------------------------
 # Logging
 #--------------------------------------------------------
@@ -82,6 +98,8 @@ template withSigningCerts(body:untyped):untyped =
       writeFile(project_dir/"csc_link.p12", csc_link.encode())
       writeFile(project_dir/"csc_key_password.txt", csc_key_password)
     body
+  except:
+    log "ERROR: " & getCurrentExceptionMsg()
   finally:
     log "Removing code signing certificate ..."
     removeFile(project_dir/"csc_link.p12")
