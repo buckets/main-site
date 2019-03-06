@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-29 09:11-0700\n"
+"POT-Creation-Date: 2019-03-01 15:10-0700\n"
 "PO-Revision-Date: 2017-11-13 15:09-0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -37,28 +37,26 @@ msgid ""
 "your own computer."
 msgstr ""
 
-#: src/_base.html:117
-msgid ""
-"Buckets is $29 for a limited time.  In March 2019, the price will "
-"increase to $49"
-msgstr ""
-
-#: src/_base.html:126
+#: src/_base.html:125
 msgid ""
 "Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt "
 "Haggard</a>"
 msgstr ""
 
-#: src/_base.html:130
+#: src/_base.html:129
 msgid "Donate"
 msgstr ""
 
-#: src/_base.html:134 src/gettingstarted.html:3 src/gettingstarted.html:9
+#: src/_base.html:133 src/gettingstarted.html:3 src/gettingstarted.html:9
 msgid "Getting Started"
 msgstr ""
 
-#: src/_base.html:135
+#: src/_base.html:134
 msgid "Pricing"
+msgstr ""
+
+#: src/_base.html:135 src/download.html:47
+msgid "Download"
 msgstr ""
 
 #: src/_base.html:136
@@ -103,13 +101,38 @@ msgstr ""
 
 #: src/buy.html:78
 msgid ""
-"For a <em>one-time $29 payment,</em> you will be emailed a Buckets "
+"For a <em>one-time $49 payment,</em> you will be emailed a Buckets "
 "License which may be used on any number of computers belonging to you and"
 " your immediate family members living in your home."
 msgstr ""
 
 #: src/buy.html:81
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
+msgstr ""
+
+#: src/download.html:3
+msgid "Download Buckets"
+msgstr ""
+
+#: src/download.html:73 src/download.html:128 src/index.html:171
+msgid ""
+"After the AppImage file has been downloaded, make it executable then "
+"double-click it to run."
+msgstr ""
+
+#: src/download.html:86 src/download.html:91 src/download.html:141
+#: src/download.html:146
+msgid "coming soon"
+msgstr ""
+
+#: src/download.html:106
+msgid "This version contains the latest features, but it may also contain bugs."
+msgstr ""
+
+#: src/download.html:106
+msgid ""
+"Most users should choose the normal version unless they're comfortable "
+"finding and reporting bugs."
 msgstr ""
 
 #: src/err_general.html:9
@@ -137,138 +160,133 @@ msgid ""
 "<em>private.</em>"
 msgstr ""
 
-#: src/index.html:158
+#: src/index.html:157
 #, python-format
 msgid "Download Buckets v%(latest_version)s for"
 msgstr ""
 
-#: src/index.html:162
+#: src/index.html:161
 msgid "macOS"
 msgstr ""
 
-#: src/index.html:168
+#: src/index.html:167
 msgid "Windows"
 msgstr ""
 
-#: src/index.html:172
-msgid ""
-"After the AppImage file has been downloaded, make it executable then "
-"double-click it to run."
-msgstr ""
-
-#: src/index.html:174
+#: src/index.html:173
 msgid "Linux"
 msgstr ""
 
-#: src/index.html:178
-msgid "Other"
+#: src/index.html:177
+msgid "Beta &amp; other downloads"
 msgstr ""
 
-#: src/index.html:192
-msgid "Buy $29"
+#: src/index.html:191
+msgid "Buy $49"
 msgstr ""
 
-#: src/index.html:196
+#: src/index.html:195
 msgid ""
 "Buckets gives you an <em>untimed, free trial</em> for as long as you need"
 " to decide if it works for you.  Really."
 msgstr ""
 
-#: src/index.html:200
+#: src/index.html:199
 msgid "Buckets is <em>private</em>."
 msgstr ""
 
-#: src/index.html:200
+#: src/index.html:199
 msgid "Your finances stay on your computer.  You control your data again!"
 msgstr ""
 
-#: src/index.html:204
-msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
+#: src/index.html:203
+msgid "Buckets has <em>no monthly fee.</em>  It costs $49.  Once."
 msgstr ""
 
-#: src/index.html:204
+#: src/index.html:203
 msgid "You're saving money, not shackling yourself to another monthly service."
 msgstr ""
 
-#: src/index.html:204
+#: src/index.html:203
 msgid ""
 "A single license may be used on all your computers and all the computers "
 "of family members living in your home."
 msgstr ""
 
-#: src/index.html:208
+#: src/index.html:207
 msgid "Buckets has <em>amazing support.</em>"
 msgstr ""
 
-#: src/index.html:208
+#: src/index.html:207
 msgid "Want to try it?  Click the chat bubble and ask me anything."
 msgstr ""
 
-#: src/index.html:212
+#: src/index.html:211
 msgid ""
 "Buckets includes some free and novel methods to <em>sync with your "
 "bank.</em>"
 msgstr ""
 
-#: src/index.html:212
+#: src/index.html:211
 msgid ""
 "Record completely private macros, import files or sign up with SimpleFIN "
 "Bridge."
 msgstr ""
 
-#: src/index.html:216
+#: src/index.html:215
 msgid ""
 "Buckets includes some terrific <em>extras</em> such as really fast Amazon"
 " why-do-they-split-every-purchase-into-a-hundred-transactions "
 "reconciliation."
 msgstr ""
 
-#: src/index.html:222
+#: src/index.html:221
 #, python-format
 msgid ""
 "Buckets includes <em>helpful videos</em> to teach you how to budget like "
 "a master.  <a href=\"%(href)s\">Check them out!</a>"
 msgstr ""
 
-#: src/index.html:227
+#: src/index.html:226
 msgid "Thanks"
 msgstr ""
 
-#: src/index.html:237
+#: src/index.html:236
 msgid "Buckets is <em>multilingual</em>."
 msgstr ""
 
-#: src/index.html:237
+#: src/index.html:236
 msgid "Want to add your language?"
 msgstr ""
 
-#: src/index.html:252
+#: src/index.html:251
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long "
 "haul."
 msgstr ""
 
-#: src/index.html:252
+#: src/index.html:251
 msgid "Read more."
 msgstr ""
 
-#: src/index.html:256
-msgid "<a href=\"#download\">Download it now</a> for free!"
+#: src/index.html:255
+#, python-format
+msgid "<a href=\"/%(lang)s/download.html\">Download it now</a> for free!"
 msgstr ""
 
-#: src/index.html:301
+#: src/index.html:300
 msgid "Subscribe to the Monthly Newsletter"
 msgstr ""
 
-#: src/index.html:303
+#: src/index.html:302
 msgid "Email Address"
 msgstr ""
 
-#: src/index.html:307
+#: src/index.html:306
 msgid "First Name"
 msgstr ""
 
-#: src/index.html:315
+#: src/index.html:314
 msgid "Subscribe"
 msgstr ""
 
@@ -690,5 +708,32 @@ msgstr ""
 #~ "I'm serious.  Click that chat bubble "
 #~ "and tell me what you ate for "
 #~ "dinner last night."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Buckets is $29 for a limited time."
+#~ "  In March 2019, the price will "
+#~ "increase to $49"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For a <em>one-time $29 payment,</em> "
+#~ "you will be emailed a Buckets "
+#~ "License which may be used on any"
+#~ " number of computers belonging to you"
+#~ " and your immediate family members "
+#~ "living in your home."
+#~ msgstr ""
+
+#~ msgid "Other"
+#~ msgstr ""
+
+#~ msgid "Buy $29"
+#~ msgstr ""
+
+#~ msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
+#~ msgstr ""
+
+#~ msgid "<a href=\"#download\">Download it now</a> for free!"
 #~ msgstr ""
 

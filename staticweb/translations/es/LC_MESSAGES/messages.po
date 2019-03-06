@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: hello@bucketsisbetter.com\n"
-"POT-Creation-Date: 2019-01-29 09:11-0700\n"
-"PO-Revision-Date: 2019-01-29 09:13-0700\n"
+"POT-Creation-Date: 2019-03-01 15:10-0700\n"
+"PO-Revision-Date: 2019-03-01 15:15-0700\n"
 "Last-Translator: Matt Haggard <hello@bucketsisbetter.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -41,31 +41,27 @@ msgstr ""
 "familiares. Haga un seguimiento de los gastos, establezca objetivos de ahorro, "
 "salga de la deuda todo desde la privacidad de su propia computadora."
 
-#: src/_base.html:117
-msgid ""
-"Buckets is $29 for a limited time.  In March 2019, the price will increase to "
-"$49"
-msgstr ""
-"Buckets cuesta $29 por un tiempo limitado.  En marzo de 2019, el precio "
-"aumentará a $49"
-
-#: src/_base.html:126
+#: src/_base.html:125
 msgid ""
 "Made by <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt Haggard</a>"
 msgstr ""
 "Hecho por <a href=\"https://www.iffycan.com\" target=\"_blank\">Matt Haggard</a>"
 
-#: src/_base.html:130
+#: src/_base.html:129
 msgid "Donate"
 msgstr "Donar"
 
-#: src/_base.html:134 src/gettingstarted.html:3 src/gettingstarted.html:9
+#: src/_base.html:133 src/gettingstarted.html:3 src/gettingstarted.html:9
 msgid "Getting Started"
 msgstr "Empezando"
 
-#: src/_base.html:135
+#: src/_base.html:134
 msgid "Pricing"
 msgstr "Precios"
+
+#: src/_base.html:135 src/download.html:47
+msgid "Download"
+msgstr "Descargar"
 
 #: src/_base.html:136
 msgid "Buy"
@@ -109,17 +105,48 @@ msgstr "PayPal"
 
 #: src/buy.html:78
 msgid ""
-"For a <em>one-time $29 payment,</em> you will be emailed a Buckets License "
+"For a <em>one-time $49 payment,</em> you will be emailed a Buckets License "
 "which may be used on any number of computers belonging to you and your "
 "immediate family members living in your home."
 msgstr ""
-"Para <em>un pago único de $29</em>, se le enviará por correo electrónico una "
+"Para <em>un pago único de $49</em>, se le enviará por correo electrónico una "
 "Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que "
 "le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
 #: src/buy.html:81
 msgid "If you've lost your license, email me at hello@budgetwithbuckets.com"
 msgstr "Si perdió su licencia, envíeme a hello@budgetwithbuckets.com"
+
+#: src/download.html:3
+msgid "Download Buckets"
+msgstr "Descargar Buckets"
+
+#: src/download.html:73 src/download.html:128 src/index.html:171
+msgid ""
+"After the AppImage file has been downloaded, make it executable then double-"
+"click it to run."
+msgstr ""
+"Después de descargando el archivo de AppImage, hágalo ejecutable y haga doble "
+"clic para ejecutarlo."
+
+#: src/download.html:86 src/download.html:91 src/download.html:141
+#: src/download.html:146
+msgid "coming soon"
+msgstr "proximamente"
+
+#: src/download.html:106
+msgid "This version contains the latest features, but it may also contain bugs."
+msgstr ""
+"Esta versión contiene las últimas funciones, pero también puede contener "
+"errores."
+
+#: src/download.html:106
+msgid ""
+"Most users should choose the normal version unless they're comfortable finding "
+"and reporting bugs."
+msgstr ""
+"La mayoría de los usuarios deberían elegir la versión normal a menos que se "
+"sientan cómodos encontrando e informando errores."
 
 #: src/err_general.html:9
 msgid ""
@@ -154,40 +181,32 @@ msgstr ""
 "Buckets hace que el presupuesto sea <em>rápido</em>, <em>simple</em> y "
 "<em>privado.</em>"
 
-#: src/index.html:158
+#: src/index.html:157
 #, python-format
 msgid "Download Buckets v%(latest_version)s for"
 msgstr "Descargar Buckets v%(latest_version)s para"
 
-#: src/index.html:162
+#: src/index.html:161
 msgid "macOS"
 msgstr "macOS"
 
-#: src/index.html:168
+#: src/index.html:167
 msgid "Windows"
 msgstr "Windows"
 
-#: src/index.html:172
-msgid ""
-"After the AppImage file has been downloaded, make it executable then double-"
-"click it to run."
-msgstr ""
-"Después de descargando el archivo de AppImage, hágalo ejecutable y haga doble "
-"clic para ejecutarlo."
-
-#: src/index.html:174
+#: src/index.html:173
 msgid "Linux"
 msgstr "Linux"
 
-#: src/index.html:178
-msgid "Other"
-msgstr "Otro"
+#: src/index.html:177
+msgid "Beta &amp; other downloads"
+msgstr "Beta y otras descargas"
 
-#: src/index.html:192
-msgid "Buy $29"
-msgstr "Comprar $29"
+#: src/index.html:191
+msgid "Buy $49"
+msgstr "Comprar $49"
 
-#: src/index.html:196
+#: src/index.html:195
 msgid ""
 "Buckets gives you an <em>untimed, free trial</em> for as long as you need to "
 "decide if it works for you.  Really."
@@ -195,24 +214,24 @@ msgstr ""
 "Buckets le ofrece <em>una prueba gratis, sin tiempo</em>, por el tiempo que "
 "necesite para decidir si le conviene.  En serio."
 
-#: src/index.html:200
+#: src/index.html:199
 msgid "Buckets is <em>private</em>."
 msgstr "Buckets es <em>privada</em>."
 
-#: src/index.html:200
+#: src/index.html:199
 msgid "Your finances stay on your computer.  You control your data again!"
 msgstr ""
 "Sus finanzas permanecen en su computadora.  Usted controla sus datos de nuevo!"
 
-#: src/index.html:204
-msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
-msgstr "Buckets <em>no tiene tarifa mensual.</em>  Cuesta $29.  Una vez."
+#: src/index.html:203
+msgid "Buckets has <em>no monthly fee.</em>  It costs $49.  Once."
+msgstr "Buckets <em>no tiene tarifa mensual.</em>  Cuesta $49.  Una vez."
 
-#: src/index.html:204
+#: src/index.html:203
 msgid "You're saving money, not shackling yourself to another monthly service."
 msgstr "Estás ahorrando dinero, no te estás encarcelando a otro servicio mensual."
 
-#: src/index.html:204
+#: src/index.html:203
 msgid ""
 "A single license may be used on all your computers and all the computers of "
 "family members living in your home."
@@ -220,30 +239,30 @@ msgstr ""
 "Una sola licencia se puede usar en cualquier cantidad de computadoras que le "
 "pertenezcan a usted y a los familiares inmediatos que vivan en su hogar."
 
-#: src/index.html:208
+#: src/index.html:207
 msgid "Buckets has <em>amazing support.</em>"
 msgstr "Buckets tiene <em>apoyo increíble.</em>"
 
-#: src/index.html:208
+#: src/index.html:207
 msgid "Want to try it?  Click the chat bubble and ask me anything."
 msgstr ""
 "¿Quieres probarlo? Haz clic en la burbuja de chat y preguntame cualquier cosa."
 
-#: src/index.html:212
+#: src/index.html:211
 msgid ""
 "Buckets includes some free and novel methods to <em>sync with your bank.</em>"
 msgstr ""
 "Buckets incluye algunos métodos gratuitos y novedosos para <em>sincronizar con "
 "su banco.</em>"
 
-#: src/index.html:212
+#: src/index.html:211
 msgid ""
 "Record completely private macros, import files or sign up with SimpleFIN Bridge."
 msgstr ""
 "Grabe macros completamente privadas, importe archivos o regístrese con "
 "SimpleFIN Bridge."
 
-#: src/index.html:216
+#: src/index.html:215
 msgid ""
 "Buckets includes some terrific <em>extras</em> such as really fast Amazon why-"
 "do-they-split-every-purchase-into-a-hundred-transactions reconciliation."
@@ -251,7 +270,7 @@ msgstr ""
 "Buckets incluye algunos <em>extras</em> fabulosos como rápida reconciliación de "
 "Amazon porqué-ellos-dividen-cada-compra-en-cien-transacciones."
 
-#: src/index.html:222
+#: src/index.html:221
 #, python-format
 msgid ""
 "Buckets includes <em>helpful videos</em> to teach you how to budget like a "
@@ -260,46 +279,47 @@ msgstr ""
 "Buckets incluye <em>videos útiles</em> para enseñarle a presupuestar como un "
 "maestro.  <a href=\"%(href)s\">¡Échales un vistazo!</a>"
 
-#: src/index.html:227
+#: src/index.html:226
 msgid "Thanks"
 msgstr "Gracias"
 
-#: src/index.html:237
+#: src/index.html:236
 msgid "Buckets is <em>multilingual</em>."
 msgstr "Buckets es <em>multilingüe</em>."
 
-#: src/index.html:237
+#: src/index.html:236
 msgid "Want to add your language?"
 msgstr "¿Quiere añadir su idioma?"
 
-#: src/index.html:252
+#: src/index.html:251
 msgid ""
 "Buckets is a <em>keep-going</em>, not a start-up.  I'm here for the long haul."
 msgstr ""
 "Buckets es un proyecto <em>a largo plazo</em>, no una puesta en marcha. Estoy "
 "aquí por mucho tiempo."
 
-#: src/index.html:252
+#: src/index.html:251
 msgid "Read more."
 msgstr "Lee mas."
 
-#: src/index.html:256
-msgid "<a href=\"#download\">Download it now</a> for free!"
-msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
+#: src/index.html:255
+#, python-format
+msgid "<a href=\"/%(lang)s/download.html\">Download it now</a> for free!"
+msgstr "¡<a href=\"/%(lang)s/download.html\">Descárgalo ahora</a> gratis!"
 
-#: src/index.html:301
+#: src/index.html:300
 msgid "Subscribe to the Monthly Newsletter"
 msgstr "Suscríbete al boletín de Buckets"
 
-#: src/index.html:303
+#: src/index.html:302
 msgid "Email Address"
 msgstr "Dirección de correo electrónico"
 
-#: src/index.html:307
+#: src/index.html:306
 msgid "First Name"
 msgstr "Nombre de pila"
 
-#: src/index.html:315
+#: src/index.html:314
 msgid "Subscribe"
 msgstr "Suscribir"
 
@@ -316,3 +336,32 @@ msgstr "Suscribir"
 #~ msgstr ""
 #~ "Lo digo en serio. Haz clic en ese botón de chat y dime qué comiste para la "
 #~ "cena anoche."
+
+#~ msgid ""
+#~ "Buckets is $29 for a limited time.  In March 2019, the price will increase "
+#~ "to $49"
+#~ msgstr ""
+#~ "Buckets cuesta $29 por un tiempo limitado.  En marzo de 2019, el precio "
+#~ "aumentará a $49"
+
+#~ msgid ""
+#~ "For a <em>one-time $29 payment,</em> you will be emailed a Buckets License "
+#~ "which may be used on any number of computers belonging to you and your "
+#~ "immediate family members living in your home."
+#~ msgstr ""
+#~ "Para <em>un pago único de $29</em>, se le enviará por correo electrónico una "
+#~ "Licencia de Buckets que se puede usar en cualquier cantidad de computadoras "
+#~ "que le pertenezcan a usted y a los familiares inmediatos que vivan en su "
+#~ "hogar."
+
+#~ msgid "Other"
+#~ msgstr "Otro"
+
+#~ msgid "Buy $29"
+#~ msgstr "Comprar $29"
+
+#~ msgid "Buckets has <em>no monthly fee.</em>  It costs $29.  Once."
+#~ msgstr "Buckets <em>no tiene tarifa mensual.</em>  Cuesta $29.  Una vez."
+
+#~ msgid "<a href=\"#download\">Download it now</a> for free!"
+#~ msgstr "¡<a href=\"#download\">Descárgalo ahora</a> gratis!"
