@@ -8,6 +8,7 @@ interface BucketsInternal {
   register_logger(proc:(x:string)=>void):void;
   // stringpc(command:Buffer, arg:string):Buffer;
   openfile(filename:Buffer):number;
+  closefile(db:number):void;
   db_all_json(db:number, query:Buffer, params_json_array:Buffer):Buffer;
   db_run_json(db:number, query:Buffer, params_json_array:Buffer):Buffer;
   db_execute_many_json(db:number, queries_json_array:Buffer):Buffer;
@@ -88,6 +89,10 @@ export function openfile(filename:string):number {
     console.error("Attempting to call openfile while there is another function running");
   }
   return bucketsinternal.openfile(Buffer.from(filename));
+}
+
+export function closefile(bf_id:number) {
+  return bucketsinternal.closefile(bf_id);
 }
 
 export function registerLogger(proc:(x:string)=>void) {

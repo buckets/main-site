@@ -12,6 +12,7 @@ type
     DeepCleanBuild,
     Publish,
     PublishBeta,
+    Test,
 
 template loggedDireShell(args:varargs[string, `$`]):untyped =
   echo "Running: ", args
@@ -63,7 +64,7 @@ proc do_build(btype:BuildType) =
   withDir("C:"/"proj"):
     if btype in {DeepCleanBuild, Publish, PublishBeta}:
       loggedDireShell "nake", "deepclean"
-    elif btype in {CleanBuild}:
+    elif btype in {CleanBuild, Test}:
       loggedDireShell "nake", "clean"
     case btype
     of DeepCleanBuild, CleanBuild, Build:
@@ -74,7 +75,9 @@ proc do_build(btype:BuildType) =
       loggedDireShell "nake", "publish-desktop"
     of PublishBeta:
       loggedDireShell "nake", "publish-desktop-beta"
-  echo "done doing build"
+    of Test:
+      direSilentShell("running nake test", [findExe"nake", "test"])
+  echo "done:", btype
 
 
 

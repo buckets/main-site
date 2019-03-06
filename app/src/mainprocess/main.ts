@@ -20,6 +20,7 @@ import { PSTATE, updateState } from './persistent'
 // import { doesPathExist, isPathExecutable, getNiceStat } from '../util'
 import { localNow, setTimezone, getTimezone } from 'buckets-core/dist/time'
 import { registerBucketslibLogger } from 'buckets-core/dist/logging'
+import { coreVersion } from 'buckets-core/dist/util'
 
 //----------------------------------------------------------
 // For deprecated triplesec encryption
@@ -44,6 +45,7 @@ registerBucketslibLogger((msg:string) => {
 setTimezone(PSTATE.timezone || moment.tz.guess())
 
 log.info(`\n\nSTARTING v${app.getVersion()}\n`);
+log.info(`      Core: ${coreVersion()}`)
 log.info(` Log level: ${electron_log.transports.file.level}`);
 log.info(`Local time: ${localNow().format()}`);
 log.info(`  UTC time: ${moment.utc().format()}`);

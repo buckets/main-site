@@ -75,7 +75,13 @@ async function mainFunc() {
     }
   })
 
+  await dotest(`Close file`, async() => {
+    bucketslib.closefile(bf);
+  });
+
   console.log("SUCCESS!");
 }
 
-mainFunc();
+mainFunc().then(r => {
+  console.log("ALL TESTS OK", r);
+});

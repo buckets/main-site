@@ -80,11 +80,23 @@ task "deepclean", "Delete node_modules too":
   withDir("nodebuckets"):
     removeDir("node_modules")
 
-task "test-all", "Run all tests":
+task "test", "Run all tests":
   runTask "ccore-test"
   runTask "nb-test"
   runTask "core-test"
   runTask "desktop-test"
+
+when defined(macosx):
+  task "test-windows", "Run all tests on Windows":
+    withDir("app"/"dev"/"win"):
+      direShell "nake", "test"
+  task "test-linux", "Run all tests on Linux":
+    assert false, "Linux not supported yet"
+  task "test-all", "Run all tests on all operating systems":
+    runTask "test-windows"
+    runTask "test-linux"
+    runTask "test"
+
 
 #------------------------------------------------------------
 # ccore/
@@ -108,14 +120,8 @@ else:
 const NB_JS = toSeq(walkDirRec("nodebuckets"/"dist"))
 
 task "nb-lib", "Generate nodebuckets/ library":
-  # let
-  #   ccore_nim_files = toSeq(walkDirRec("ccore"/"src")).filterIt(it.endsWith(".nim"))
-  # if NB_LIB.needsRefresh(ccore_nim_files):
   withDir("nodebuckets"):
     direShell "nake"
-  # let
-  #   ts_files = toSeq(walkDirRec("nodebuckets"/"src")).filterIt(it.endsWith(".ts"))
-  #   js_files = ts_files.mapIt(it.replace(".ts", ".js").replace("src"/"", "dist"/""))
 
 task "nb-test", "Run nodebuckets/ tests":
   runTask "nb-lib"
@@ -130,7 +136,10 @@ const
 
 task "core-lib", "Refresh core/ nodebuckets library":
   runTask "nb-lib"
-  if CORE_NB_LIB.needsRefresh(NB_LIBS) or CORE_NB_LIB.needsRefresh(NB_JS):
+  var nb_products:seq[string]
+  nb_products.add(NB_LIBS)
+  nb_products.add(NB_JS)
+  if CORE_NB_LIB.needsRefresh(nb_products):
     withDir("core"):
       removeDir("node_modules/bucketslib")
       direShell "yarn", "add", "file:../nodebuckets"
@@ -232,11 +241,7 @@ template assertGitHubToken():untyped =
 
 
 task "build-desktop", "Build Buckets for the current OS":
-  if not existsEnv("NO_CLEAN_OR_TEST"):
-    runTask "clean"
   runTask "desktop-js"
-  if not existsEnv("NO_CLEAN_OR_TEST"):
-    runTask "test-all"
   withPackageName:
     withDir(PROJECT_ROOT/"app"):
       when defined(windows):
@@ -256,11 +261,7 @@ task "build-desktop-beta", "Build Buckets Beta for the current OS":
 #-------------------------------------------------------
 task "publish-desktop", "Publish Buckets for the current OS":
   assertGitHubToken()
-  if not existsEnv("NO_CLEAN_OR_TEST"):
-    runTask "clean"
   runTask "desktop-js"
-  if not existsEnv("NO_CLEAN_OR_TEST"):
-    runTask "test-all"
   withPackageName:
     withDir(PROJECT_ROOT/"app"):
       when defined(windows):

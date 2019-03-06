@@ -627,3 +627,10 @@ task "publish-beta", "Publish electron app":
       ensure_project_mount()
       vm.ensure_signedin(win_user)
       vm.gaCmd({"GH_TOKEN": getEnv("GH_TOKEN","")}.toTable(), r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "PublishBeta")
+
+task "test", "Run tests on Windows":
+  runTask "prep-build"
+  withLogPrefix("[test]"):
+    ensure_project_mount()
+    vm.ensure_signedin(win_user)
+    vm.gaCmd(r"\\\\vboxsrv\\project\\app\\dev\\win\\winbuild.exe", "Test")

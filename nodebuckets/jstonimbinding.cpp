@@ -68,6 +68,13 @@ Number openfile(const CallbackInfo& info) {
   return Number::New(env, retval);
 }
 
+// buckets_closefile
+void closefile(const CallbackInfo& info) {
+  Env env = info.Env();
+  int bf_handle = info[0].As<Number>().Int64Value();
+  buckets_closefile(bf_handle);
+}
+
 // buckets_db_all_json
 Buffer<char> db_all_json(const CallbackInfo& info) {
   Env env = info.Env();
@@ -118,6 +125,7 @@ Object Init(Env env, Object exports) {
   exports["version"] = Function::New(env, version);
   exports["register_logger"] = Function::New(env, register_logger);
   exports["openfile"] = Function::New(env, openfile);
+  exports["closefile"] = Function::New(env, closefile);
   exports["db_all_json"] = Function::New(env, db_all_json);
   exports["db_run_json"] = Function::New(env, db_run_json);
   exports["db_execute_many_json"] = Function::New(env, db_execute_many_json);

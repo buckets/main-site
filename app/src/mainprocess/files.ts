@@ -224,6 +224,8 @@ export class BudgetFile implements IBudgetFile {
     try {
       const db = openSqlite(this.filename);
       this.store = new SQLiteStore(db, new DesktopFunctions(this));
+      const rows = await this.store.query<{v:string}>("SELECT sqlite_version() as v", {});
+      log.info(`SQLite: ${rows[0].v}`);
       await this.store.doSetup({
         addBucketsLicenseBucket: !isRegistered(),
       });

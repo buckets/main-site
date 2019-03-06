@@ -106,6 +106,9 @@ proc buckets_openfile*(filename:cstring, filenameL:cint):cint {.exportc,cdecl.} 
 template buckets_openfile*(filename:cstring):cint =
   buckets_openfile(filename, filename.len.cint)
 
+proc buckets_closefile*(budget_handle:int) {.exportc,cdecl.}=
+  budget_handle.getBudgetFile().close()
+
 template jsonObjToParam(node:JsonNode):Param =
   case node.kind
   of JInt:

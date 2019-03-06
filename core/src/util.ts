@@ -1,5 +1,6 @@
 import * as _ from 'lodash'
 import * as shajs from 'sha.js'
+import * as bucketslib from 'bucketslib'
 
 export function isNil(x:any):boolean {
   return x === null || x === undefined;
@@ -34,4 +35,11 @@ export function debugSleep(milli:number) {
   while (new Date().getTime() < now + milli) {
     // wait
   }
+}
+
+/**
+ *  Return the bucktslib core version
+ */
+export function coreVersion():string {
+  return bucketslib.version();
 }

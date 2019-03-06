@@ -172,8 +172,7 @@ def doit(skip_mac, skip_linux, skip_win, resume):
 
         if step("run tests"):
             if yesno('Run tests?', default=True):
-                subprocess.check_call(['yarn', 'test'], cwd='.')
-                subprocess.check_call(['yarn', 'test'], cwd='../core')
+                subprocess.check_call(['nake', 'test-all'], cwd='..')
         
         if step("confirm changelog"):
             print('=== CHANGELOG ===')
