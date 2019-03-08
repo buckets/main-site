@@ -92,7 +92,7 @@ async function ensureBucketsLicenseBucket(store:IStore) {
   }
   await store.sub.buckets.update(-1, {
     kind: 'goal-deposit',
-    goal: license_bucket.goal <= 100 ? 2900 : license_bucket.goal,
+    goal: license_bucket.goal <= 100 ? 4900 : license_bucket.goal,
     deposit: license_bucket.deposit <= 100 ? 500 : license_bucket.deposit,
     kicked: false,
     name: sss('Buckets License'/* 'Buckets' refers to the application name */),
