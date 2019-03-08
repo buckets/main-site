@@ -52,8 +52,9 @@ proc do_build(btype:BuildType) =
   loggedDireShell "npm", "config", "list"
   loggedDireShell "yarn", "config", "list"
 
-  # section "nake"
-  # loggedDireShell "nimble", "install", "-y", "nake"
+  section "code signing env"
+  putEnv("CSC_LINK", "C:"/"proj"/"csc_link.p12")
+  putEnv("CSC_KEY_PASSWORD", readFile("C:"/"proj"/"csc_key_password.txt"))
 
   section "env"
   loggedDireShell "set"

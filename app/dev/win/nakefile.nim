@@ -95,7 +95,7 @@ template withSigningCerts(body:untyped):untyped =
       csc_key_password = getEnv("WIN_CSC_KEY_PASSWORD", "")
     if csc_link != "" and csc_key_password != "":
       log "Preparing code signing certificate ..."
-      writeFile(project_dir/"csc_link.p12", csc_link.encode())
+      writeFile(project_dir/"csc_link.p12", csc_link.decode())
       writeFile(project_dir/"csc_key_password.txt", csc_key_password)
     body
   except:
