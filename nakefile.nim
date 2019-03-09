@@ -91,7 +91,8 @@ when defined(macosx):
     withDir("app"/"dev"/"win"):
       direShell "nake", "test"
   task "test-linux", "Run all tests on Linux":
-    assert false, "Linux not supported yet"
+    withDir(PROJECT_ROOT/"app"):
+      direShell "dev"/"linux"/"linux_build.sh", "test"
   task "test-all", "Run all tests on all operating systems":
     runTask "test-windows"
     runTask "test-linux"

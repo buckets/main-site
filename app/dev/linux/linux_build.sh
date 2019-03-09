@@ -18,7 +18,7 @@ echo "BUILDING..."
 docker build --file app/dev/linux/linuxbuilder.Dockerfile -t $TAG .
 
 echo
-echo "RUNNING electron build..."
+echo "RUNNING action $CMD ..."
 docker run --rm -i \
     -v "$(pwd)":/proj \
     --env "GH_TOKEN=$GH_TOKEN" \

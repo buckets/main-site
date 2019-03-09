@@ -35,7 +35,6 @@ export PATH="./node_modules/.bin/:${PATH}"
 
 cd /build/
 nake clean
-nake test
 nake $ACTION
 
 rsync -vrut "/build/app/dist/" "/proj/app/dist/"
