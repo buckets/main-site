@@ -12,8 +12,8 @@ from buckets.drm import createLicense, formatLicense
 
 blue = Blueprint('anon', __name__)
 
-PRICE_CENTS = 2900
-PRICE_STRING = '29.00'
+PRICE_CENTS = 4900
+PRICE_STRING = '49.00'
 
 
 @blue.url_defaults
