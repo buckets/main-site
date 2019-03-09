@@ -37,4 +37,6 @@ cd /build/
 nake clean
 nake $ACTION
 
-rsync -vrut "/build/app/dist/" "/proj/app/dist/"
+if [ ! "$ACTION" = "test" ]; then
+    rsync -vrut "/build/app/dist/" "/proj/app/dist/"
+fi
