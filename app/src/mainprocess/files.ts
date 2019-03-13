@@ -408,8 +408,8 @@ export class BudgetFile implements IBudgetFile {
     dialog.showOpenDialog({
       title: sss('Open Transaction File'),
       filters: [
-        {name: 'OFX/QFX', extensions: ['ofx', 'qfx']},
-        {name: 'CSV', extensions: ['csv']},
+        {name: 'CSV/OFX/QFX', extensions: ['csv', 'ofx', 'qfx']},
+        {name: sss('All Files' /* Label for letting users select any file for import regardless of extension */), extensions: ['*']},
       ],
     }, paths => {
       if (paths) {
