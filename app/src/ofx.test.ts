@@ -421,3 +421,93 @@ NEWFILEUID:NONE
   t.equal(account3.transactions.length, 0);
   t.equal(account3.currency, 'USD');
 })
+
+
+test('gnucash', async t => {
+  let data = `<?xml version="1.0" encoding="UTF-8"?><?OFX OFXHEADER="200" VERSION="211" SECURITY="NONE" OLDFILEUID="NONE" NEWFILEUID="NONE"?><OFX>
+  <BANKMSGSRSV1>
+    <STMTTRNRS>
+      <TRNUID>0</TRNUID>
+      <STMTRS>
+        <CURDEF>EUR</CURDEF>
+        <BANKACCTFROM>
+          <BANKID>org.gnucash.android</BANKID>
+          <ACCTID>1111111111</ACCTID>
+          <ACCTTYPE>CHECKING</ACCTTYPE>
+        </BANKACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART>20180710092414[+1:MEZ]</DTSTART>
+          <DTEND>20180710092414[+1:MEZ]</DTEND>
+          <STMTTRN>
+            <TRNTYPE>CREDIT</TRNTYPE>
+            <DTPOSTED>20180709185236[+1:MEZ]</DTPOSTED>
+            <DTUSER>20180709185236[+1:MEZ]</DTUSER>
+            <TRNAMT>50.00</TRNAMT>
+            <FITID>a1</FITID>
+            <NAME>Humbug</NAME>
+            <BANKACCTTO>
+              <BANKID>org.gnucash.android</BANKID>
+              <ACCTID>2222222222</ACCTID>
+              <ACCTTYPE>SAVINGS</ACCTTYPE>
+            </BANKACCTTO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20180709171248[+1:MEZ]</DTPOSTED>
+            <DTUSER>20180709171248[+1:MEZ]</DTUSER>
+            <TRNAMT>-5.00</TRNAMT>
+            <FITID>a2</FITID>
+            <NAME>Humbug</NAME>
+            <BANKACCTTO>
+              <BANKID>org.gnucash.android</BANKID>
+              <ACCTID>2222222222</ACCTID>
+              <ACCTTYPE>SAVINGS</ACCTTYPE>
+            </BANKACCTTO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20180629190428[+1:MEZ]</DTPOSTED>
+            <DTUSER>20180629190428[+1:MEZ]</DTUSER>
+            <TRNAMT>-23.08</TRNAMT>
+            <FITID>a7</FITID>
+            <NAME>Getränke</NAME>
+            <BANKACCTTO>
+              <BANKID>org.gnucash.android</BANKID>
+              <ACCTID>2222222222</ACCTID>
+              <ACCTTYPE>SAVINGS</ACCTTYPE>
+            </BANKACCTTO>
+          </STMTTRN>
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT>178.94</BALAMT>
+          <DTASOF>20180710092414[+1:MEZ]</DTASOF>
+        </LEDGERBAL>
+      </STMTRS>
+    </STMTTRNRS>
+  </BANKMSGSRSV1>
+</OFX>
+`
+  let accountset = await ofx2importable(data);
+  t.equal(accountset.accounts.length, 1, "Only one account");
+
+  let [checking] = accountset.accounts;
+  t.equal(checking.currency, "EUR");
+  t.ok(checking.label.indexOf('1111111111') !== -1, "Should have account number");
+  t.ok(checking.label.indexOf('CHECKING') !== -1, "Should have account name");
+
+  t.equal(checking.transactions.length, 3);
+  let [t0, t1, t2] = checking.transactions;
+
+  t.equal(t0.amount, 5000)
+  t.equal(t0.memo, 'Humbug')
+  t.equal(t0.fi_id, 'a1')
+  t.equal(loadTS(t0.posted).format(), moment.utc({y:2018,M:7-1,d:9,h:17,m:52,s:36}).format()) // 20180709185236
+
+  t.equal(t1.amount, -500)
+  t.equal(t1.memo, 'Humbug')
+  t.equal(t1.fi_id, 'a2')
+
+  t.equal(t2.amount, -2308)
+  t.equal(t2.fi_id, 'a7')
+  t.equal(t2.memo, "Getränke")
+})

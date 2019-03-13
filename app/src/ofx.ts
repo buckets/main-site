@@ -76,12 +76,42 @@ namespace OFX {
 
 
 let formats = [
+  // 'YYYYMMDDHHmmss.SSS[Z]',
   'YYYYMMDDHHmmss.SSS',
+  // 'YYYYMMDDHHmmss[Z]',
   'YYYYMMDDHHmmss',
   'YYYYMMDD',
 ]
 function parseOFXDate(x:string):moment.Moment {
   let ret = moment.utc(x, formats).tz('UTC');
+  // Get goofy timezones
+  let m = /\[([\+|\-]\d+(?::?\d+)?).*?\]/.exec(x);
+  if (m) {
+    let offset = 0;
+    let offset_string = m[1];
+    if (offset_string.indexOf(":") !== -1) {
+      // +HH:MM
+      // +H:MM
+      let [h, m] = offset_string.split(":");
+      offset += Math.abs(Number(h) * 60);
+      offset += Math.abs(Number(m));
+    } else {
+      if (offset_string.length <= 3) {
+        // +H
+        // +HH
+        offset += Math.abs(Number(offset_string) * 60);
+      } else {
+        // +HMM
+        // +HHMM
+        offset += Number(offset_string.substr(-2));
+        offset += Math.abs(Number(offset_string.substr(0, offset_string.length-2)) * 60);
+      }
+    }
+    if (offset_string.startsWith("-")) {
+      offset *= -1;
+    }
+    ret.add(-offset, "minutes");
+  }
   return ret;
 }
 
@@ -102,10 +132,9 @@ function getTransactions(tranlist:OFX.BANKTRANLIST):ImportableTrans[] {
 }
 
 export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
-  // XXX this does not handle the case where there are multiple accounts in a single file.
   log.info('Parsing OFX data', ofx.length);
   let parsed:OFX.File = await parseOFX(ofx);
-  if (parsed.header.OFXHEADER === undefined) {
+  if (parsed.OFX === undefined || Object.keys(parsed.OFX).length === 0) {
     throw new Error('Not a valid OFX file');
   }
   let ret:ImportableAccountSet = {
