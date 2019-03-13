@@ -511,3 +511,188 @@ test('gnucash', async t => {
   t.equal(t2.fi_id, 'a7')
   t.equal(t2.memo, "Getränke")
 })
+
+test('no fitid', async t => {
+  let data = `OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+<OFX>
+<SIGNONMSGSRSV1>
+<SONRS>
+<STATUS>
+<CODE>0
+<SEVERITY>INFO
+</STATUS>
+<DTSERVER>20190103061403
+<LANGUAGE>ENG
+</SONRS>
+</SIGNONMSGSRSV1>
+<BANKMSGSRSV1>
+<STMTTRNRS>
+<TRNUID>1
+<STATUS>
+<CODE>0
+<SEVERITY>INFO
+</STATUS>
+<STMTRS>
+<CURDEF>AUD
+<BANKACCTFROM>
+<BANKID>099099
+<ACCTID>10101010
+<ACCTTYPE>SAVINGS
+</BANKACCTFROM>
+<BANKTRANLIST>
+<DTSTART>20181220000000
+<DTEND>20181221000000
+<STMTTRN>
+<TRNTYPE>CREDIT
+<DTPOSTED>20181220
+<DTUSER>20181220
+<TRNAMT>6275.86
+<FITID>
+<MEMO>Some other text for memo
+</STMTTRN>
+</BANKTRANLIST>
+<LEDGERBAL>
+<BALAMT>270.74
+<DTASOF>20190103061403
+</LEDGERBAL>
+<AVAILBAL>
+<BALAMT>270.74
+<DTASOF>20190103061403
+</AVAILBAL>
+</STMTRS>
+</STMTTRNRS>
+</BANKMSGSRSV1>
+</OFX>
+`
+  let accountset = await ofx2importable(data);
+  t.equal(accountset.accounts.length, 1, "Only one account");
+
+  let [account0] = accountset.accounts;
+  t.equal(account0.currency, "AUD");
+  t.ok(account0.label.indexOf('10101010') !== -1, "Should have account number");
+  t.ok(account0.label.indexOf('SAVINGS') !== -1, "Should have account name");
+
+  t.equal(account0.transactions.length, 1);
+  let [t0] = account0.transactions;
+
+  t.equal(t0.amount, 627586)
+  t.equal(t0.memo, 'Some other text for memo')
+  t.notSame(t0.fi_id, null)
+  t.equal(loadTS(t0.posted).format(), moment.utc({y:2018,M:12-1,d:20}).format())
+})
+
+// Test for Issue #378
+// test('broken_ccstmtrs', async t => {
+//   let data = `OFXHEADER:100
+// DATA:OFXSGML
+// VERSION:102
+// SECURITY:NONE
+// ENCODING:USASCII
+// CHARSET:1252
+// COMPRESSION:NONE
+// OLDFILEUID:NONE
+// NEWFILEUID:NONE
+// <OFX>
+// <SIGNONMSGSRSV1>
+// <SONRS>
+// <STATUS>
+// <CODE>0
+// <SEVERITY>INFO
+// </STATUS>
+// <DTSERVER>20190101091301
+// <LANGUAGE>ENG
+// </SONRS>
+// </SIGNONMSGSRSV1>
+// <BANKMSGSRSV1>
+// <STMTTRNRS>
+// <TRNUID>1
+// <STATUS>
+// <CODE>0
+// <SEVERITY>INFO
+// </STATUS>
+// <CCSTMTRS>
+// <CURDEF>AUD
+// <BANKACCTFROM>
+// <BANKID>111111
+// <ACCTID>888888888
+// <ACCTTYPE>CREDITLINE
+// </BANKACCTFROM>
+// <BANKTRANLIST>
+// <DTSTART>20181225000000
+// <DTEND>20190101000000
+// <STMTTRN>
+// <TRNTYPE>DEBIT
+// <DTPOSTED>20181231
+// <DTUSER>20181231
+// <TRNAMT>-2500.00
+// <FITID>N123189933533
+// <MEMO>MISA Withdrawal NetBank
+// </STMTTRN>
+// <STMTTRN>
+// <TRNTYPE>CREDIT
+// <DTPOSTED>20181227
+// <DTUSER>20181227
+// <TRNAMT>850.00
+// <FITID>N122589078320
+// <MEMO>MISA Deposit NetBank Backdated to 25/12/18
+// </STMTTRN>
+// <STMTTRN>
+// <TRNTYPE>CREDIT
+// <DTPOSTED>20181224
+// <DTUSER>20181224
+// <TRNAMT>800.00
+// <FITID>N122485564391
+// <MEMO>MISA Deposit NetBank
+// </STMTTRN>
+// <STMTTRN>
+// <TRNTYPE>CREDIT
+// <DTPOSTED>20181224
+// <DTUSER>20181224
+// <TRNAMT>430.00
+// <FITID>N122485556633
+// <MEMO>MISA Deposit NetBank
+// </STMTTRN>
+// </BANKTRANLIST>
+// <LEDGERBAL>
+// <BALAMT>323052.00
+// <DTASOF>20190101091301
+// </LEDGERBAL>
+// <AVAILBAL>
+// <BALAMT>323052.00
+// <DTASOF>20190101091301
+// </AVAILBAL>
+// </STMTRS>
+// </STMTTRNRS>
+// </BANKMSGSRSV1>
+// </OFX>
+// `
+//   let accountset = await ofx2importable(data);
+//   t.equal(accountset.accounts.length, 1, "Only one account");
+
+//   let [account0] = accountset.accounts;
+//   t.equal(account0.currency, "AUD");
+//   t.ok(account0.label.indexOf('888888888') !== -1, "Should have account number");
+//   t.ok(account0.label.indexOf('CREDITLINE') !== -1, "Should have account name");
+
+//   t.equal(account0.transactions.length, 4);
+//   let [t0, t1, t2, t3] = account0.transactions;
+
+//   t.equal(t0.amount, -250000)
+//   t.equal(t0.memo, 'MISA Withdrawal NetBank')
+//   t.equal(t0.fi_id, 'N123189933533')
+//   t.equal(loadTS(t0.posted).format(), moment.utc({y:2018,M:12-1,d:31}).format())
+
+//   t.equal(t1.amount, 85000)
+
+//   t.equal(t2.amount, 80000)
+
+//   t.equal(t3.amount, 43000)
+// })

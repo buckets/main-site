@@ -57,7 +57,6 @@ export async function importFile(store:IStore, bf:IBudgetFile, path:string):Prom
         log.info('error guessing encoding', err.toString())
         resolve('utf8');
       } else {
-        console.log('result', result);
         resolve(result.toString());
       }
     })

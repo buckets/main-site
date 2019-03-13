@@ -15,6 +15,7 @@ import { IStore } from 'buckets-core/dist/store'
 import { hashStrings } from 'buckets-core/dist/util'
 import { PrefixLogger } from './logging'
 import { makeToast } from './budget/toast'
+import { TransactionIDGenerator } from './genfiid'
 
 const log = new PrefixLogger('(csv)')
 
@@ -262,7 +263,7 @@ function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<N
     }
   })
   .filter(x=>x);
-  let hashcount = {};
+  let fiGenerator = new TransactionIDGenerator();
   return getDataRows(parsed, mapping).map((orig, idx) => {
     let fields = {};
     Object.keys(orig).forEach(csvheader => {
@@ -284,23 +285,11 @@ function getNormalizedValues<T>(parsed:ParsedCSV<T>, mapping:CSVMapping):Array<N
     })
     if (!row.norm.fi_id) {
       // Generate an id based on transaction details
-      let strings = [
+      row.norm.fi_id = fiGenerator.makeID([
         row.norm.amount ? row.norm.amount.toString() : '',
         row.norm.memo ? row.norm.memo : '',
         row.norm.posted ? row.norm.posted.toISOString() || '' : '',
-      ]
-      let rowhash = hashStrings(strings)
-      
-      // If there are dupes within a CSV, they should have different fi_ids
-      if (!hashcount[rowhash]) {
-        hashcount[rowhash] = 0;
-      }
-      hashcount[rowhash] += 1;
-      let full_row_hash = hashStrings([
-        rowhash,
-        hashcount[rowhash].toString(),
-      ])
-      row.norm.fi_id = `buckets-${full_row_hash}`;
+      ]);
     }
     return row;
   })

@@ -1,9 +1,10 @@
 import * as moment from 'moment-timezone'
 import { parse as parseOFX } from 'ofx-js'
-import { dumpTS } from 'buckets-core/dist/time'
+import { dumpTS, loadTS } from 'buckets-core/dist/time'
 import { decimal2cents } from './money'
 import { ImportableTrans, ImportableAccountSet } from './importing'
 import { PrefixLogger } from './logging'
+import { TransactionIDGenerator } from './genfiid'
 
 const log = new PrefixLogger('(ofx)')
 
@@ -119,22 +120,33 @@ function alwaysArray<T>(x:T|T[]):T[] {
   return [].concat(x);
 }
 
-function getTransactions(tranlist:OFX.BANKTRANLIST):ImportableTrans[] {
+function getTransactions(tranlist:OFX.BANKTRANLIST, fiGenerator:TransactionIDGenerator):ImportableTrans[] {
   const transactions = alwaysArray(tranlist.STMTTRN).filter(x => x);
   return transactions.map((trans):ImportableTrans => {
-    return {
-      amount: decimal2cents(trans.TRNAMT),
-      memo: trans.MEMO || trans.NAME,
-      posted: dumpTS(parseOFXDate(trans.DTPOSTED)),
-      fi_id: trans.FITID,
-    };
+    let amount = decimal2cents(trans.TRNAMT);
+    let memo = trans.MEMO || trans.NAME;
+    let posted = dumpTS(parseOFXDate(trans.DTPOSTED));
+    let fi_id = trans.FITID
+    if (!fi_id) {
+      // Generate an id based on transaction details
+      fi_id = fiGenerator.makeID([
+        amount ? amount.toString() : '',
+        memo ? memo : '',
+        posted ? loadTS(posted).toISOString() || '' : '',
+      ])
+    }
+    return {amount, memo, posted, fi_id};
   })
 }
 
 export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
   log.info('Parsing OFX data', ofx.length);
+  // Some banks only include FITIDs on some transactions.  Hosers.
+  ofx = ofx.replace(/<FITID>\s*</g, "<");
+  let fiGenerator = new TransactionIDGenerator();
+
   let parsed:OFX.File = await parseOFX(ofx);
-  if (parsed.OFX === undefined || Object.keys(parsed.OFX).length === 0) {
+  if (parsed.OFX === undefined || parsed.OFX === 'undefined' || Object.keys(parsed.OFX).length === 0) {
     throw new Error('Not a valid OFX file');
   }
   let ret:ImportableAccountSet = {
@@ -165,7 +177,7 @@ export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
         if (fi_description) {
           account_description += ' ' + fi_description;
         }
-        let transactions = getTransactions(statement.BANKTRANLIST);
+        let transactions = getTransactions(statement.BANKTRANLIST, fiGenerator);
         ret.accounts.push({
           label: account_description,
           transactions,
@@ -200,7 +212,7 @@ export async function ofx2importable(ofx:string):Promise<ImportableAccountSet> {
         if (fi_description) {
           account_description += ' ' + fi_description;
         }
-        let transactions = getTransactions(statement.BANKTRANLIST);
+        let transactions = getTransactions(statement.BANKTRANLIST, fiGenerator);
         ret.accounts.push({
           label: account_description,
           transactions,
