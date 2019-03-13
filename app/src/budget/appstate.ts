@@ -227,7 +227,7 @@ function computeTotals(appstate:AppState):IComputedAppState {
       unkicked_buckets.push(bucket);
     }
     // Set debt payment bucket names
-    if (bucket.debt_account_id) {
+    if (bucket.debt_account_id && appstate.accounts[bucket.debt_account_id]) {
       bucket.name = getDebtBucketName(appstate.accounts[bucket.debt_account_id]);
     }
   })
