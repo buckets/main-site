@@ -173,6 +173,10 @@ export class AppState implements IComputedAppState {
   }
 }
 
+function getDebtBucketName(account:Account):string {
+  return sss('debt-payment-bucket-name', (account_name:string) => `${account_name} Payment`/* A likely account name might be "Credit Card" or "Chase VISA".  This is the name of the bucket that holds the payment for the debt account. */)(account.name);
+}
+
 function computeTotals(appstate:AppState):IComputedAppState {
   let bucket_neg_balance = 0;
   let bucket_pos_balance = 0;
@@ -221,6 +225,10 @@ function computeTotals(appstate:AppState):IComputedAppState {
       kicked_buckets.push(bucket);
     } else {
       unkicked_buckets.push(bucket);
+    }
+    // Set debt payment bucket names
+    if (bucket.debt_account_id) {
+      bucket.name = getDebtBucketName(appstate.accounts[bucket.debt_account_id]);
     }
   })
   let open_accounts_balance = 0;

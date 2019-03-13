@@ -4,7 +4,6 @@ import * as cx from 'classnames'
 import * as moment from 'moment-timezone'
 import * as Color from 'color'
 import { Switch, Route, Link, WithRouting, Redirect } from './routing'
-import { Account } from 'buckets-core/dist/models/account'
 import { Bucket, BucketKind, Group, Transaction, computeBucketData, BucketFlow, BucketFlowMap, emptyFlow } from 'buckets-core/dist/models/bucket'
 import { ts2utcdb, parseUTCTime, localNow, makeLocalDate, parseLocalTime } from 'buckets-core/dist/time'
 import {Balances} from 'buckets-core/dist/models/balances'
@@ -84,10 +83,6 @@ export class KickedBucketsPage extends React.Component<{appstate:AppState},{}> {
       </div>
     </div>
   }
-}
-
-function getDebtBucketName(bucket:Bucket, account:Account):string {
-  return sss('debt-payment-bucket-name', (account_name:string) => `${account_name} Payment`/* A likely account name might be "Credit Card" or "Chase VISA".  This is the name of the bucket that holds the payment for the debt account. */)(account.name);
 }
 
 interface BucketsPageProps {
@@ -246,7 +241,6 @@ export class BucketsPage extends React.Component<BucketsPageProps, {
                   onPendingChanged={this.pendingChanged}
                   pending={pending}
                   posting_date={appstate.defaultPostingDate}
-                  accounts={appstate.accounts}
                   is_self_debt={self_debt_amount !== 0}
                 />
             </div>
@@ -570,7 +564,6 @@ interface BucketRowProps {
   posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: number;
-  debt_account?: Account;
   is_self_debt: boolean;
 }
 class BucketRow extends React.Component<BucketRowProps, {
@@ -603,7 +596,7 @@ class BucketRow extends React.Component<BucketRowProps, {
     return isDifferent(nextState, this.state) || isDifferent(nextProps, this.props);
   }
   render() {
-    let { posting_date, bucket, balance, flow, onPendingChanged, pending, debt_account, is_self_debt } = this.props;
+    let { posting_date, bucket, balance, flow, onPendingChanged, pending, is_self_debt } = this.props;
     
     let balance_warning;
     if (is_self_debt && bucket.debt_account_id !== null) {
@@ -679,7 +672,7 @@ class BucketRow extends React.Component<BucketRowProps, {
       </td>
       <td x-name="name" className="nobr">
         {bucket.debt_account_id
-          ? <span>{getDebtBucketName(bucket, debt_account)} <Help icon={<span className="fa fa-credit-card" />}>{sss('debt-bucket-explanation', 'This is a special debt payment bucket.')}</Help></span>
+          ? <span>{bucket.name} <Help icon={<span className="fa fa-credit-card" />}>{sss('debt-bucket-explanation', 'This is a special debt payment bucket.')}</Help></span>
           : <ClickToEdit
             value={bucket.name}
             placeholder="no name"
@@ -830,7 +823,6 @@ class GroupRow extends React.Component<{
   posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
-  accounts: {[k:number]:Account};
   is_self_debt: boolean;
 }, {
   isDragging: boolean;
@@ -846,7 +838,7 @@ class GroupRow extends React.Component<{
     }
   }
   render() {
-    let { buckets, group, bucket_flow, balances, onPendingChanged, pending, posting_date, accounts, is_self_debt } = this.props;
+    let { buckets, group, bucket_flow, balances, onPendingChanged, pending, posting_date, is_self_debt } = this.props;
     pending = pending || {};
 
     let total_in = 0;
@@ -873,7 +865,6 @@ class GroupRow extends React.Component<{
         onPendingChanged={onPendingChanged}
         pending={pending[bucket.id]}
         posting_date={posting_date}
-        debt_account={bucket.debt_account_id ? accounts[bucket.debt_account_id] : null}
         is_self_debt={is_self_debt}
       />
     })
@@ -1047,7 +1038,7 @@ interface GroupedBucketListProps {
   posting_date: moment.Moment;
   onPendingChanged?: (amounts:PendingAmounts) => any;
   pending?: PendingAmounts;
-  accounts: {[k:number]:Account};
+  // accounts: {[k:number]:Account};
   is_self_debt: boolean;
 }
 export class GroupedBucketList extends React.Component<GroupedBucketListProps, {}> {
@@ -1060,7 +1051,7 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
     }
   }
   render() {
-    let { balances, bucket_flow, pending, posting_date, accounts, is_self_debt} = this.props;
+    let { balances, bucket_flow, pending, posting_date, is_self_debt} = this.props;
     pending = pending || {};
 
     let group_elems = getGroupedBuckets(this.props.buckets, this.props.groups)
@@ -1075,7 +1066,6 @@ export class GroupedBucketList extends React.Component<GroupedBucketListProps, {
           onPendingChanged={this.pendingChanged}
           pending={pending}
           posting_date={posting_date}
-          accounts={accounts}
           is_self_debt={is_self_debt}
         />
       })
@@ -1200,7 +1190,7 @@ export class BucketView extends React.Component<BucketViewProps, {}> {
                 .sub.buckets.update(bucket.id, {color: val})
               }} />
               {bucket.debt_account_id
-                ? <span>{getDebtBucketName(bucket, appstate.accounts[bucket.debt_account_id])}</span>
+                ? <span>{bucket.name}</span>
                 : <ClickToEdit
                   value={bucket.name}
                   placeholder="no name"
