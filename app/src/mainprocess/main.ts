@@ -30,6 +30,10 @@ import { TriplesecCrypter } from 'buckets-core/dist/crypto'
 TriplesecCrypter.setPackage(triplesec)
 //----------------------------------------------------------
 
+if (process.env.PORTABLE_EXECUTABLE_DIR) {
+  electron_log.transports.file.file = Path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'log.log');
+}
+
 autoUpdater.logger = electron_log;
 electron_log.transports.file.level = 'silly';
 electron_log.transports.file.maxSize = 5 * 1024 * 1024;

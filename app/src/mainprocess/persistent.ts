@@ -57,6 +57,9 @@ function loadState():PersistentState {
 loadState();
 
 function stateFilename() {
+  if (process.env.PORTABLE_EXECUTABLE_DIR) {
+    return Path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'state.json');
+  }
   let real_app = remote ? remote.app : app;
   return Path.join(real_app.getPath('userData'), 'state.json');
 }

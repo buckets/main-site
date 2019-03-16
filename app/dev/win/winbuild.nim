@@ -80,6 +80,8 @@ proc do_build(btype:BuildType) =
       direSilentShell("running nake test", [findExe"nake", "test"])
   echo "done:", btype
 
+  section "copy build artifacts back"
+  direShell "xcopy", "C:"/"proj"/"dist", share&"\\dist", "/f", "/I", "/s", "/Y"
 
 
 if isMainModule:

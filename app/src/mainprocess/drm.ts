@@ -61,6 +61,9 @@ export const promptForLicense = onlyRunInMain(() => {
 })
 
 function licenseFilePath() {
+  if (process.env.PORTABLE_EXECUTABLE_DIR) {
+    return Path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'license.jwt');
+  }
   let real_app = remote ? remote.app : app;
   let userdatapath = real_app.getPath('userData');
   return Path.join(userdatapath, 'license.jwt');
