@@ -42,6 +42,21 @@
 {% block header %}
 {% endblock %}
 
+{% macro dllink(filename, beta=False) %}
+{% if beta %}
+  <a class="buttonish download beta" href="{% if beta_version %}https://github.com/buckets/desktop-beta/releases/download/v{{ beta_version }}/{{ filename }}{% else %}https://github.com/buckets/desktop-beta/releases/latest{% endif %}">
+    {{ label }}
+    {{ caller() }}
+  </a>
+{% else %}
+  <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/{{ filename }}{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
+    {{ label }}
+    {{ caller() }}
+  </a>
+{% endif %}
+{% endmacro %}
+
+
 {% block content %}
 <div class="wrap spaced">
   <h1 class="center">{% trans %}Download{% endtrans %}</h1>
@@ -53,31 +68,36 @@
   <table class="download-table">
     <tr>
       <td>
-        <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-Setup-{{ latest_version }}.exe{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
-            <span class="fa fa-windows"></span>
-            Windows
-          </a>
+        <div class="side-by-side-buttons">
+          {% call dllink("Buckets-Setup-" + latest_version + ".exe") %}
+            <span class="fa fa-windows"><span> {% trans %}Windows Installer{% endtrans %}
+          {% endcall %}
+          
+          <!--
+          {% call dllink("Buckets-" + latest_version + ".exe") %}
+            <span class="fa fa-windows"><span> {% trans %}Windows Portable{% endtrans %}
+          {% endcall %}
+        -->
+        </div>
       </td>
     </tr>
     <tr>
       <td>
-        <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}.dmg{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
-            <span class="fa fa-apple"></span>
-            macOS
-          </a>
+        {% call dllink("Buckets-" + latest_version + ".dmg") %}<span class="fa fa-apple"><span> macOS{% endcall %}
       </td>
     </tr>
     <tr>
       <td>
         <div class="side-by-side-buttons">
-          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets-{{ latest_version }}-x86_64.AppImage{% else %}https://github.com/buckets/application/releases/latest{% endif %}" onclick="setTimeout(function() { alert('{% trans %}After the AppImage file has been downloaded, make it executable then double-click it to run.{% endtrans %}')}, 0)">
-              <span class="fa fa-linux"></span>
-              AppImage
-            </a>
-          <a class="buttonish download" href="{% if latest_version %}https://github.com/buckets/application/releases/download/v{{ latest_version }}/Buckets_{{ latest_version }}_amd64.deb{% else %}https://github.com/buckets/application/releases/latest{% endif %}">
-              <span class="fa fa-linux"></span>
-              amd64.deb
-            </a>
+          {% call dllink("Buckets-" + latest_version + "-x86_64.AppImage") %}
+            <span class="fa fa-linux"></span>
+            AppImage
+          {% endcall %}
+
+          {% call dllink("Buckets_" + latest_version + "_amd64.deb") %}
+            <span class="fa fa-linux"></span>
+            amd64.deb
+          {% endcall %}
         </div>
       </td>
     </tr>
@@ -105,34 +125,38 @@
   <p>
     {% trans %}This version contains the latest features, but it may also contain bugs.{% endtrans %}  {% trans %}Most users should choose the normal version unless they're comfortable finding and reporting bugs.{% endtrans %}
   </p>
+
   <table class="download-table">
     <tr>
       <td>
-        <a class="buttonish download beta" href="{% if beta_version %}https://github.com/buckets/desktop-beta/releases/download/v{{ beta_version }}/BucketsBeta-Setup-{{ beta_version }}.exe{% else %}https://github.com/buckets/desktop-beta/releases/latest{% endif %}">
-            <span class="fa fa-windows"></span>
-            Windows
-          </a>
+        <div class="side-by-side-buttons">
+          {% call dllink("BucketsBeta-Setup-" + beta_version + ".exe", beta=True) %}
+            <span class="fa fa-windows"><span> {% trans %}Windows Installer{% endtrans %}
+          {% endcall %}
+          
+          {% call dllink("BucketsBeta-" + beta_version + ".exe", beta=True) %}
+            <span class="fa fa-windows"><span> {% trans %}Windows Portable{% endtrans %}
+          {% endcall %}
+        </div>
       </td>
     </tr>
     <tr>
       <td>
-        <a class="buttonish download beta" href="{% if beta_version %}https://github.com/buckets/desktop-beta/releases/download/v{{ beta_version }}/BucketsBeta-{{ beta_version }}.dmg{% else %}https://github.com/buckets/desktop-beta/releases/latest{% endif %}">
-            <span class="fa fa-apple"></span>
-            macOS
-          </a>
+        {% call dllink("BucketsBeta-" + beta_version + ".dmg", beta=True) %}<span class="fa fa-apple"><span> macOS{% endcall %}
       </td>
     </tr>
     <tr>
       <td>
         <div class="side-by-side-buttons">
-          <a class="buttonish download beta" href="{% if beta_version %}https://github.com/buckets/desktop-beta/releases/download/v{{ beta_version }}/BucketsBeta-{{ beta_version }}-x86_64.AppImage{% else %}https://github.com/buckets/desktop-beta/releases/latest{% endif %}" onclick="setTimeout(function() { alert('{% trans %}After the AppImage file has been downloaded, make it executable then double-click it to run.{% endtrans %}')}, 0)">
-              <span class="fa fa-linux"></span>
-              AppImage
-            </a>
-          <a class="buttonish download beta" href="{% if beta_version %}https://github.com/buckets/desktop-beta/releases/download/v{{ beta_version }}/BucketsBeta_{{ beta_version }}_amd64.deb{% else %}https://github.com/buckets/desktop-beta/releases/latest{% endif %}">
-              <span class="fa fa-linux"></span>
-              amd64.deb
-            </a>
+          {% call dllink("BucketsBeta-" + beta_version + "-x86_64.AppImage", beta=True) %}
+            <span class="fa fa-linux"></span>
+            AppImage
+          {% endcall %}
+
+          {% call dllink("BucketsBeta_" + beta_version + "_amd64.deb", beta=True) %}
+            <span class="fa fa-linux"></span>
+            amd64.deb
+          {% endcall %}
         </div>
       </td>
     </tr>

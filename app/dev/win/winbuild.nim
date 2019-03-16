@@ -81,7 +81,7 @@ proc do_build(btype:BuildType) =
   echo "done:", btype
 
   section "copy build artifacts back"
-  direShell "xcopy", "C:"/"proj"/"dist", share&"\\dist", "/f", "/I", "/s", "/Y"
+  direShell "xcopy", "C:"/"proj"/"app"/"dist\\", share/"app"/"dist", "/f", "/I", "/s", "/Y"
 
 
 if isMainModule:
