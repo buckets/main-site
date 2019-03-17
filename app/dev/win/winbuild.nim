@@ -52,9 +52,10 @@ proc do_build(btype:BuildType) =
   loggedDireShell "npm", "config", "list"
   loggedDireShell "yarn", "config", "list"
 
-  section "code signing env"
-  putEnv("CSC_LINK", "C:"/"proj"/"csc_link.p12")
-  putEnv("CSC_KEY_PASSWORD", readFile("C:"/"proj"/"csc_key_password.txt"))
+  if not (btype in {Test}):
+    section "code signing env"
+    putEnv("CSC_LINK", "C:"/"proj"/"csc_link.p12")
+    putEnv("CSC_KEY_PASSWORD", readFile("C:"/"proj"/"csc_key_password.txt"))
 
   section "env"
   loggedDireShell "set"
@@ -80,8 +81,9 @@ proc do_build(btype:BuildType) =
       direSilentShell("running nake test", [findExe"nake", "test"])
   echo "done:", btype
 
-  section "copy build artifacts back"
-  direShell "xcopy", "C:"/"proj"/"app"/"dist\\", share/"app"/"dist", "/f", "/I", "/s", "/Y"
+  if not (btype in {Test}):
+    section "copy build artifacts back"
+    direShell "xcopy", "C:"/"proj"/"app"/"dist\\", share/"app"/"dist", "/f", "/I", "/s", "/Y"
 
 
 if isMainModule:
