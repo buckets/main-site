@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block navlinks %}{% endblock %}
+
+{% block extrahead %}
+<style>
+input.coupon {
+  font-size: 2rem;
+  border-radius: 2px;
+  border: 1px solid lightgrey;
+  padding: .5rem;
+}
+label {
+  display: block;
+  margin-top: 1rem;
+}
+</style>
+{% endblock extrahead %}
+
+{% block content %}
+<div class="wrap spaced">
+  <h1>{% trans %}Buckets License Coupon{% endtrans %}</h1>
+  <p>{% trans %}Enter your coupon code to receive your Buckets v1 License by email.{% endtrans %}</p>
+
+  <form method="post">
+    <div><label>{% trans %}Coupon Code{% endtrans %}</label></div>
+    <div><input type="text" name="coupon" placeholder="XXXX-XXXX-XXXX-XXXX" size="20"></div>
+    <div><label>{% trans %}Email{% endtrans %}</label></div>
+    <div><input type="text" name="email1"></div>
+    <div><label>{% trans %}Email, again{% endtrans %}</label></div>
+    <div><input type="text" name="email2"></div>
+
+    <p><button type="submit">Register</button></p>
+  </form>
+</div>
+{% endblock content %}

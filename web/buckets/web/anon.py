@@ -171,3 +171,24 @@ def paypal_return():
 
 
 
+
+@blue.route('/coupon', methods=['GET', 'POST'])
+def coupon():
+    if request.method == 'POST':
+        # check input
+        email1 = request.form.get('email1', None)
+        if not email1:
+            flash(gettext('No email address provided.  Each license must be associated with an email address.'), 'error')
+        email2 = request.form.get('email2', None)
+        if email1 != email2:
+            flash(gettext('Email addresses do not match.'), 'error')
+        coupon = request.form.get('coupon', None)
+        if not coupon:
+            flash(gettext("Invalid coupon."), 'error')
+        
+        return render_template('coupon.html')
+    else:
+        # present form
+        return render_template('coupon.html')
+
+

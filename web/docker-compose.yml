@@ -10,6 +10,8 @@ services:
     working_dir: /code
     ports:
     - "80:5000"
+    links:
+    - postgres
     environment:
       DEBUG:
       FLASK_SECRET_KEY:
@@ -20,11 +22,16 @@ services:
       PAYPAL_CLIENT_ID:
       PAYPAL_CLIENT_SECRET:
       STATIC_SITE_URL: http://192.168.99.100:8080
+      DATABASE_URL: "postgres://postgres:postgres@postgres"
   static:
-    image: python:2.7.11
+    image: python:2.7.16
     volumes:
     - ../staticweb/_dev:/code
     command: python -m SimpleHTTPServer 8080
     working_dir: /code
     ports:
     - "8080:8080"
+  postgres:
+    image: postgres:11
+    environment:
+      POSTGRES_PASSWORD: "foobar"
