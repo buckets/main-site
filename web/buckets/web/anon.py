@@ -1,6 +1,7 @@
 import structlog
 import stripe
 import paypalrestsdk
+import time
 logger = structlog.get_logger()
 
 from flask import Blueprint, render_template, request, flash
@@ -8,6 +9,13 @@ from flask import redirect, url_for, g
 from flask import current_app
 from flask_babel import gettext
 
+from buckets.web.datamodel import (
+    upgradeSchema,
+    generateCouponCodes,
+    priceForCode,
+    useCode,
+    NotFound,
+)
 from buckets.drm import createLicense, formatLicense
 
 blue = Blueprint('anon', __name__)
@@ -15,6 +23,11 @@ blue = Blueprint('anon', __name__)
 PRICE_CENTS = 4900
 PRICE_STRING = '49.00'
 
+@blue.before_app_first_request
+def upgrade_db_schema():
+    upgradeSchema()
+    if current_app.config['DEBUG']:
+        generateCouponCodes(total_price=0, count=10)
 
 @blue.url_defaults
 def add_language_code(endpoint, values):
@@ -24,7 +37,6 @@ def add_language_code(endpoint, values):
 def pull_lang_code(endpoint, values):
     logger.debug('lang_code into g', lang_code=values.get('lang_code'))
     g.lang_code = values.pop('lang_code', 'en')
-
 
 #----------------------------------------------------
 # application
@@ -170,23 +182,55 @@ def paypal_return():
     raise Exception("You shouldn't ever get here")
 
 
-
-
 @blue.route('/coupon', methods=['GET', 'POST'])
 def coupon():
     if request.method == 'POST':
         # check input
         email1 = request.form.get('email1', None)
+        email2 = request.form.get('email2', None)
+        coupon = request.form.get('coupon', None)
+        
         if not email1:
             flash(gettext('No email address provided.  Each license must be associated with an email address.'), 'error')
-        email2 = request.form.get('email2', None)
-        if email1 != email2:
+            return render_template('coupon.html', coupon=coupon)
+        elif email1 != email2:
             flash(gettext('Email addresses do not match.'), 'error')
-        coupon = request.form.get('coupon', None)
-        if not coupon:
+            return render_template('coupon.html', coupon=coupon)
+
+        if not current_app.config['DEBUG']:
+            # to hopefully deter brute forcing
+            time.sleep(3)
+
+        try:
+            priceForCode(coupon)
+            logger.debug('VALID CODE', code=coupon)
+        except NotFound:
             flash(gettext("Invalid coupon."), 'error')
-        
-        return render_template('coupon.html')
+            return render_template('coupon.html', email=email1)
+
+        # coupon is valid
+        # generate the license
+        try:
+            license = generateLicense(email1)
+        except Exception:
+            flash(gettext('Error generating license.'), 'error')
+            return render_template('coupon.html', email=email1)
+
+        # consume the code
+        try:
+            useCode(coupon)
+        except:
+            flash(gettext("Invalid coupon."), 'error')
+            return render_template('coupon.html', email=email1)
+
+        # code successfully used
+        flash(gettext('Success!'))
+        emailLicense(email1, license)
+        current_app.mailer.sendPlain('hello@budgetwithbuckets.com',
+            ('Buckets Purchase Notification', 'hello@budgetwithbuckets.com'),
+            subject='Code redeemed by {0}'.format(email1),
+            body='Code redeemed by {0}'.format(email1))
+        return render_template('bought.html', license=license)
     else:
         # present form
         return render_template('coupon.html')

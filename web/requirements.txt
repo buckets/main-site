@@ -9,6 +9,7 @@ itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 paypalrestsdk==1.13.1
+psycopg2==2.8.1
 python-jose==1.2.0
 raven[flask]==5.25.0
 requests==2.10.0
