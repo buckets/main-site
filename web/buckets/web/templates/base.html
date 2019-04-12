@@ -4,12 +4,25 @@
   <title>{% block title %}Buckets - {% trans %}Private Family Budgeting App{% endtrans %}{% endblock %}</title>
 
   <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
-  <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" type="text/css" href="/static/buckets.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
   <meta name="description" content="{% trans %}Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer.{% endtrans %}" />
   {% block extrahead %}{% endblock %}
   <style>
+  @import 'https://fonts.googleapis.com/css?family=Lato';
+  *,
+  input {
+      box-sizing: border-box;
+      font-family: 'Lato', sans-serif;
+  }
+  body, html {
+      padding: 0;
+      margin: 0;
+  }
+  a {
+      color: rgba(41, 128, 185,1.0);
+      cursor: pointer;
+  }
   .hero {
     background-color: #2eaef1;
     text-align: center;
@@ -24,7 +37,8 @@
   .hero.mini img {
     width: 10rem;
   }
-  a.buttonish {
+  a.buttonish,
+  button {
     font-size: 1.25rem;
     text-decoration: none;
     border: 1px solid #2eaef1;
@@ -34,11 +48,17 @@
     display: inline-block;
     padding: .5rem 1rem;
     text-align: center;
+    cursor: pointer;
   }
-  a.buttonish:hover {
+  a.buttonish:hover,
+  button:hover {
     background-color: rgba(241, 196, 15,1.0);
     color: white;
     border-color: rgba(241, 196, 15,1.0);
+  }
+  input[type=text] {
+    font-size: 1.25rem;
+    padding: .5rem;
   }
   .wrap {
     width: 30rem;
