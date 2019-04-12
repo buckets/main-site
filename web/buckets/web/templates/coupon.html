@@ -24,9 +24,9 @@ label {
 
   <form method="post">
     <div><label>{% trans %}Coupon Code{% endtrans %}</label></div>
-    <div><input type="text" name="coupon" placeholder="XXXX-XXXX-XXXX-XXXX" size="20" value="{{coupon}}" autofocus style="font-family: monospace;"></div>
+    <div><input type="text" name="coupon" placeholder="XXXX-XXXX-XXXX-XXXX" size="20" value="{{coupon}}" style="font-family: monospace;" {% if not coupon %}autofocus{% endif %}></div>
     <div><label>{% trans %}Email{% endtrans %}</label></div>
-    <div><input type="text" name="email1" value="{{email}}"></div>
+    <div><input type="text" name="email1" value="{{email}}" {% if coupon and not email %}autofocus{% endif %}></div>
     <div><label>{% trans %}Email, again{% endtrans %}</label></div>
     <div><input type="text" name="email2" value="{{email}}"></div>
 
