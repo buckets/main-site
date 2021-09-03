@@ -2,15 +2,15 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Comprar Buckets</title>
+  <title>Buy Buckets</title>
   
-  <link rel="alternate" hreflang="en" href="/en/buy.html" />
-  <link rel="alternate" hreflang="es" href="/es/buy.html" />
+  <link rel="alternate" hreflang="en" href="/en/buy-error-pre-charge.html" />
+  <link rel="alternate" hreflang="es" href="/es/buy-error-pre-charge.html" />
   <link rel="shortcut icon" href="/static/favicon.png"  type="image/png">
   <link rel="stylesheet" type="text/css" href="/static/style.css">
   <link rel="stylesheet" type="text/css" href="/static/buckets.css">
   <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-  <meta name="description" content="Buckets es una aplicación privada de finanzas personales para presupuestos familiares. Haga un seguimiento de los gastos, establezca objetivos de ahorro, salga de la deuda todo desde la privacidad de su propia computadora." />
+  <meta name="description" content="Buckets is a private, personal finance app for family budgeting.  Track expenses, make savings goals, get out of debt all from the privacy of your own computer." />
   
 <style>
 .security-notice {
@@ -153,10 +153,10 @@ table.payment-options tr:first-child td {
 </head>
 <body>
   <div class="buckets-nav">
-  <a class="logo" href="/es/index.html">
+  <a class="logo" href="/en/index.html">
     <img src="/static/favicon.png" />
   </a>
-  <a href="https://docs.budgetwithbuckets.com">Guía</a>
+  <a href="https://docs.budgetwithbuckets.com">Guide</a>
   <a href="https://blog.budgetwithbuckets.com">Blog</a>
 </div>
   
@@ -166,12 +166,18 @@ table.payment-options tr:first-child td {
   
 <div class="wrap spaced">
   
+<p class="message error">
+  There was an error completing the purchase. Your card was not charged.
+  Try again or send us an email if it continues to happen.
+  <br/>hello@budgetwithbuckets.com
+</p>
+
   <p class="callout" style="text-align: center;">
-    ¿Cómo quieres pagar?
+    How do you want to pay?
   </p>
   <table class="payment-options">
     <tr>
-        <td>Tarjeta de crédito</td>
+        <td>Credit Card</td>
         <td>
           <form action="https://service.budgetwithbuckets.com/payments/stripe" method="POST">
             <script
@@ -180,8 +186,8 @@ table.payment-options tr:first-child td {
               data-key="pk_live_Wnk0BnoZxKPUkW03VR06TEq8"
               data-amount="4900"
               data-name="Buckets"
-              data-label="Comprar ahora"
-              data-description="Aplicación de presupuesto familiar"
+              data-label="Buy Now"
+              data-description="Family budgeting app"
               data-zip-code="true"
               data-billing-address="false"
               data-locale="auto"
@@ -202,10 +208,10 @@ table.payment-options tr:first-child td {
     </tr>
   </table>
   <div class="callout para">
-    Para <em>un pago único de $49</em>, se le enviará por correo electrónico una Licencia de Buckets que se puede usar en cualquier cantidad de computadoras que le pertenezcan a usted y a los familiares inmediatos que vivan en su hogar.
+    For a <em>one-time $49 payment,</em> you will be emailed a Buckets License which may be used on any number of computers belonging to you and your immediate family members living in your home.
   </div>
   <div class="callout para">
-    Si perdió su licencia, envíeme a hello@budgetwithbuckets.com
+    If you've lost your license, email me at hello@budgetwithbuckets.com
   </div>
   <div class="callout para">
     - Matt
@@ -216,30 +222,30 @@ table.payment-options tr:first-child td {
   <div class="wrap">
     <footer>
       <div>
-        <div>Hecho por <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
+        <div>Made by <a href="https://www.iffycan.com" target="_blank">Matt Haggard</a>
         </div>
         <div><a href="mailto:hello@budgetwithbuckets.com">hello@budgetwithbuckets.com</a>
         </div>
-        <div><a href="https://www.patreon.com/iffy" target="_blank">Donar</a></div>
+        <div><a href="https://www.patreon.com/iffy" target="_blank">Donate</a></div>
         <div>&copy; One Part Rain, LLC.</div>
       </div>
       <div>
-        <div><a href="/es/gettingstarted.html">Empezando</a></div>
-        <div><a href="/es/buy.html">Precios</a></div>
-        <div><a href="/es/download.html">Descargar</a></div>
+        <div><a href="/en/gettingstarted.html">Getting Started</a></div>
+        <div><a href="/en/buy.html">Pricing</a></div>
+        <div><a href="/en/download.html">Download</a></div>
         <div><a href="https://github.com/buckets/application/issues">Issues/Bugs</a></div>
         <div><a href="https://github.com/buckets/application/blob/master/CHANGELOG.md">Changelog</a></div>
-        <div><a href="/es/buy.html">Comprar</a></div>
-        <div><a href="https://github.com/buckets/policies/blob/master/privacy-policy.md" target="_blank">Privacidad</a></div>
+        <div><a href="/en/buy.html">Buy</a></div>
+        <div><a href="https://github.com/buckets/policies/blob/master/privacy-policy.md" target="_blank">Privacy</a></div>
         <div>
           <details>
-            <summary>español</summary>
+            <summary>English</summary>
             
             <div>
-              <a href="/en/buy.html">English</a>
+              <a href="/en/buy-error-pre-charge.html">English</a>
             </div>
             <div>
-              <a href="/es/buy.html">español</a>
+              <a href="/es/buy-error-pre-charge.html">español</a>
             </div></details>
         </div>
       </div>

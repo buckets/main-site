@@ -41,6 +41,17 @@ table.payment-options td:last-child {
 table.payment-options tr:first-child td {
   border-top: 0;
 }
+.message {
+  border: 2px solid #2eaef1;
+  color: #2eaef1;
+  border-radius: 3px;
+  padding: .5rem;
+  margin: .5rem 0;
+}
+.message.error {
+  color: red;
+  border-color: red;
+}
 </style>
 
   <style>
@@ -154,6 +165,7 @@ table.payment-options tr:first-child td {
 
   
 <div class="wrap spaced">
+  
   <p class="callout" style="text-align: center;">
     How do you want to pay?
   </p>
@@ -161,7 +173,7 @@ table.payment-options tr:first-child td {
     <tr>
         <td>Credit Card</td>
         <td>
-          <form action="https://server.budgetwithbuckets.com/en/buy" method="POST">
+          <form action="https://service.budgetwithbuckets.com/payments/stripe" method="POST">
             <script
               src="https://checkout.stripe.com/checkout.js" class="stripe-button"
               data-image="/static/img/main_logo.png"
@@ -183,7 +195,7 @@ table.payment-options tr:first-child td {
     <tr>
         <td>PayPal</td>
         <td>
-          <form method="post" action="https://server.budgetwithbuckets.com/en/paypal-create-payment">
+          <form method="post" action="https://service.budgetwithbuckets.com/payments/paypal">
             <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" border="0" alt="Buy now with PayPal" />
           </form>
         </td>
